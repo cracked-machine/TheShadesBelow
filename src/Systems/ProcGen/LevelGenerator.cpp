@@ -120,7 +120,7 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
     if ( tile == scene_data.void_tile_id() )
     {
       Cmp::Position new_pos_cmp( new_pos, Constants::kGridSizePxF );
-      auto entt = Factory::Obstacle::create_void_pos( reg(), new_pos_cmp );
+      auto entt = reg().create();
       m_void_sm->insert( entt, new_pos_cmp );
     }
     else if ( tile == scene_data.open_tile_id() ) { Factory::Obstacle::create_world_pos( reg(), new_pos ); }

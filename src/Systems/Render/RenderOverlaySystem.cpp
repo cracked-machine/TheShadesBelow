@@ -56,7 +56,6 @@
 #include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
 #include <Components/Spring/HealingSpringBuildingSegment.hpp>
 #include <Components/Spring/HealingSpringEntrance.hpp>
-#include <Components/VoidPosition.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <PathFinding/AStar.hpp>
@@ -665,7 +664,6 @@ void RenderOverlaySystem::render_ui_entity_inspect()
         auto sprite_idx = std::to_string( cmp->getFrameIndexOffset() );
         draw_line( " " + cmp->m_sprite_type + " [" + sprite_idx + "]" );
       }
-      if ( reg().all_of<Cmp::VoidPosition>( entity ) ) draw_line( "  Void", sf::Color::White );
       if ( auto reserved_sm = m_reserved_sm.lock(); reserved_sm && not reserved_sm->at( pos_cmp ).empty() )
       {
         draw_line( "  Reserved", sf::Color::Red );

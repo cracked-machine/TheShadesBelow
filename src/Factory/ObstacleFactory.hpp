@@ -22,12 +22,6 @@ namespace Game::Factory::Obstacle
 //! @return The new entity.
 entt::entity create_world_pos( entt::registry &registry, const sf::Vector2f &pos );
 
-//! @brief Create a VoidPosition entity, marking a grid cell as outside the playable world.
-//! @param registry
-//! @param pos
-//! @return The new entity.
-entt::entity create_void_pos( entt::registry &registry, const Cmp::Position &pos );
-
 //! @brief Create an obstacle WITHOUT sprite for procedural generation algorithm.
 //! @param registry
 //! @param entity
@@ -50,7 +44,8 @@ void add_obstacle_cap( entt::registry &registry, entt::entity entity );
 //! @param blocking
 //! @param reserved_sm If provided, skips decoration when the position is already reserved (O(1) check).
 void decorate_obstacle( entt::registry &registry, entt::entity entity, Cmp::Position pos_cmp, const Sprites::SpriteSheet &ms,
-                        std::size_t sprite_tile_idx, float zorder = 0, bool blocking = true, const PathFinding::SpatialHashGrid *reserved_sm = nullptr );
+                        std::size_t sprite_tile_idx, float zorder = 0, bool blocking = true,
+                        const PathFinding::SpatialHashGrid *reserved_sm = nullptr );
 
 //! @brief Whether remove_obstacle() should also destroy the matching cap entity (tied by UUID).
 enum class DeleteExtras : bool {

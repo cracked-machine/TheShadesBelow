@@ -9,7 +9,6 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/UUID.hpp>
-#include <Components/VoidPosition.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <PathFinding/SmartPointers.hpp>
@@ -28,13 +27,6 @@ entt::entity create_world_pos( entt::registry &registry, const sf::Vector2f &pos
   auto entity = registry.create();
   registry.emplace_or_replace<Cmp::Position>( entity, pos, Constants::kGridSizePxF );
   registry.emplace_or_replace<Cmp::Armable>( entity );
-  return entity;
-}
-
-entt::entity create_void_pos( entt::registry &registry, const Cmp::Position &pos )
-{
-  auto entity = registry.create();
-  registry.emplace_or_replace<Cmp::VoidPosition>( entity, pos );
   return entity;
 }
 

@@ -36,8 +36,6 @@
 #include <Components/RectBounds.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/Stats/SpawnAction.hpp>
-
-#include <Components/VoidPosition.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/CryptRoomEvent.hpp>

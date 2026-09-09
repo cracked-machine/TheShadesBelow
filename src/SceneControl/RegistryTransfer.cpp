@@ -37,9 +37,7 @@
 #include <Components/Position.hpp>
 #include <Components/Ruin/ObjectiveType.hpp>
 #include <Components/Stats/PlayerStats.hpp>
-
 #include <Components/UUID.hpp>
-#include <Components/VoidPosition.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SceneControl/RegistryTransfer.hpp>
@@ -122,7 +120,7 @@ RegistryTransfer::RegCopy RegistryTransfer::copy_reg( IScene &scene, Scene::RegC
       // Skip transfer on deny list components
       if ( source_registry.any_of<Cmp::Obstacle, Cmp::Armable, Cmp::Npc::NoPathFinding, Cmp::FootStepTimer, Cmp::FootStepAlpha, Cmp::Crypt::RoomOpen,
                                   Cmp::Crypt::RoomClosed, Cmp::Crypt::RoomStart, Cmp::Crypt::RoomEnd, Cmp::Crypt::PassageBlock, Cmp::Crypt::Lever,
-                                  Cmp::Crypt::ObjectiveMultiBlock, Cmp::VoidPosition>( entity ) )
+                                  Cmp::Crypt::ObjectiveMultiBlock>( entity ) )
       {
         skipped_cmp++;
         continue;
