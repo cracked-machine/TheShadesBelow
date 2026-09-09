@@ -233,7 +233,8 @@ void PersistSystem::save_state()
   nlohmann::json jsonData;
 
   // Use the component instances registered during initialize_component_registry()
-  for ( const auto &[key, ops] : m_components )
+  auto exclude = []( const auto &p ) { return p.first != "PlayerStartPosition"; };
+  for ( const auto &[key, ops] : m_components | std::views::filter( exclude ) )
   {
     try
     {
@@ -255,7 +256,7 @@ void PersistSystem::save_state()
   {
     outputFile << jsonData.dump( 4 );
     outputFile.close();
-    SPDLOG_INFO( "Persistent state saved successfully" );
+    SPDLOG_DEBUG( "Persistent state saved successfully" );
   }
   else { SPDLOG_ERROR( "Failed to open file for saving persistent state" ); }
 }

@@ -39,8 +39,6 @@ void PausedMenuScene::on_exit()
 void PausedMenuScene::do_update( [[maybe_unused]] sf::Time dt )
 {
 
-  // globalFrameClock.stop();
-
   auto &render_menu_sys = m_sys.find<Sys::Store::Type::RenderMenuSystem>();
 
   // check for keyboard/window events to keep window responsive
@@ -56,8 +54,6 @@ void PausedMenuScene::do_update( [[maybe_unused]] sf::Time dt )
   m_sound_bank.update_effects_volume( effects_volume );
   auto &music_volume = Sys::PersistSystem::get<Cmp::Persist::MusicVolume>( m_reg ).get_value();
   m_sound_bank.update_music_volume( music_volume );
-
-  // globalFrameClock.start();
 }
 
 entt::registry &PausedMenuScene::registry() { return m_reg; }
