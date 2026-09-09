@@ -8,6 +8,7 @@
 #include <Components/Persistent/PlayerFootstepAddDelay.hpp>
 #include <Components/Persistent/PlayerFootstepFadeDelay.hpp>
 #include <Components/Persistent/PlayerFootstepSfxStrideLength.hpp>
+#include <Components/Persistent/EffectsVolume.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Player/MovementDelta.hpp>
@@ -166,8 +167,10 @@ void FootstepSystem::play_footsteps_sound()
     if ( m_sound_bank.get_effect( sfx_name ).getStatus() == sf::Sound::Status::Playing ) return;
     m_alternate_footsteps = not m_alternate_footsteps;
     auto &sfx = m_sound_bank.get_effect( sfx_name );
-    // add some variance to the steps to make it sound more natural
-    sfx.setVolume( Cmp::RandomFloat( 50.f, 100.f ).gen() );
+    // add some variance to the steps to make it sound more natural, scaled by the user's effects volume
+    // setting so muting effects (SoundBank::update_effects_volume) actually mutes footsteps too
+    const auto effects_volume = Sys::PersistSystem::get<Cmp::Persist::EffectsVolume>( reg() ).get_value();
+    sfx.setVolume( effects_volume * Cmp::RandomFloat( 0.5f, 1.f ).gen() );
     sfx.play();
   };
 

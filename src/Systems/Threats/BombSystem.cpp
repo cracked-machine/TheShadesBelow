@@ -16,7 +16,6 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/BombDamage.hpp>
-#include <Components/Persistent/EffectsVolume.hpp>
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Mortality.hpp>

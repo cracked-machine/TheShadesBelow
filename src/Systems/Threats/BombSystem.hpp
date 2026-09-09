@@ -1,11 +1,9 @@
 #ifndef SRC_SYSTEMS_THREATS_BOMBSYSTEM_HPP__
 #define SRC_SYSTEMS_THREATS_BOMBSYSTEM_HPP__
 
-#include <Components/Persistent/EffectsVolume.hpp>
-
-#include <Utils/Constants.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Threats/NpcSystem.hpp>
+#include <Utils/Constants.hpp>
 
 #include <entt/entity/fwd.hpp>
 
