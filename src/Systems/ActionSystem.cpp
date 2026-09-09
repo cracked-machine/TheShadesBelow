@@ -155,8 +155,8 @@ void ActionSystem::check_player_dig_obstacle_collision()
       // Reserved obstacles sit under structures and cannot be dug, with one exception:
       // a replanted plant reserves the tiles it lands on, but must not shield the
       // obstacle underneath it from digging.
-      auto reserved_navmesh = m_reserved_navmesh.lock();
-      if ( reserved_navmesh && not reserved_navmesh->at( obstacle_pos_cmp ).empty() )
+      auto reserved_sm = m_reserved_sm.lock();
+      if ( reserved_sm && not reserved_sm->at( obstacle_pos_cmp ).empty() )
       {
         bool reserved_by_plant = false;
         for ( auto [seg_entt, seg_cmp, seg_pos_cmp] : reg().view<Cmp::PlantSegment, Cmp::Position>().each() )
@@ -199,7 +199,7 @@ void ActionSystem::check_player_dig_obstacle_collision()
         m_sound_bank.get_effect( "pickaxe_final" ).play();
 
         // replace the obstacle with a detonated component
-        Factory::Obstacle::remove_obstacle( reg(), obstacle_entt, Factory::Obstacle::DeleteExtras::Yes, reserved_navmesh );
+        Factory::Obstacle::remove_obstacle( reg(), obstacle_entt, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
         for ( auto [ob_crack_entt, ob_crack_cmp, ob_crack_uuid] : reg().view<Cmp::ObstacleCrack, Cmp::UUID>().each() )
         {
           if ( ob_crack_uuid == obstacle_uuid_cmp ) reg().destroy( ob_crack_entt );
@@ -365,7 +365,7 @@ void ActionSystem::check_player_dig_plant_collision()
           Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, planttwigs_particle_uuid,
                                                 plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
           Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
-          Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_navmesh.lock() );
+          Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
           m_sound_bank.get_effect( "chopping_final" ).play();
         }
       }
@@ -427,7 +427,7 @@ void ActionSystem::check_player_smash_pot()
           // Decrease weapons level based on damage dealt
           wear_level.m_level -= Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
         }
-        Factory::Loot::destroy_loot_container( reg(), loot_entity, m_reserved_navmesh.lock() );
+        Factory::Loot::destroy_loot_container( reg(), loot_entity, m_reserved_sm.lock() );
       }
     }
   }
@@ -500,12 +500,12 @@ void ActionSystem::check_player_axe_npc_kill()
       Cmp::RandomInt do_drop( 0, 2 );
       if ( do_drop.gen() == 0 )
       {
-        auto reserved_navmesh = m_reserved_navmesh.lock();
+        auto reserved_sm = m_reserved_sm.lock();
         auto dropped_loot_entt = Factory::Loot::create_loot_drop(
             reg(), Cmp::AnimData( Cmp::AnimData::Config{ .sprite_type = sprite_type, .enabled = false } ),
             Cmp::RectBounds::scaled( npc_pos_cmp.position, npc_pos_cmp.size, 2.f ).getBounds(), Factory::IncludePack<>{},
             Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{},
-            /*zorder_offset=*/-8.f, reserved_navmesh.get() );
+            /*zorder_offset=*/-8.f, reserved_sm.get() );
 
         if ( dropped_loot_entt != entt::null )
         {
@@ -532,11 +532,11 @@ void ActionSystem::select_moveable_obstacle()
   // project one grid position in the direction that the player is currently facing to find the obstacle selection
   auto selected_position = Utils::Player::get_projected_position( reg() );
 
-  auto reserved_navmesh = m_reserved_navmesh.lock();
+  auto reserved_sm = m_reserved_sm.lock();
   auto position_view = reg().view<Cmp::Position, Cmp::Obstacle, Cmp::Moveable>( entt::exclude<Cmp::SelectedPosition> );
   for ( auto [obst_entity, obst_pos_cmp, obst_cmp, move_cmp] : position_view.each() )
   {
-    if ( reserved_navmesh && not reserved_navmesh->at( obst_pos_cmp ).empty() ) continue;
+    if ( reserved_sm && not reserved_sm->at( obst_pos_cmp ).empty() ) continue;
     if ( selected_position.findIntersection( obst_pos_cmp ) )
     {
       SPDLOG_INFO( "Found moveable entity at position: [{}, {}]!", obst_pos_cmp.position.x, obst_pos_cmp.position.y );
@@ -654,7 +654,7 @@ void ActionSystem::update_burning_worlditems( sf::Time dt )
       const sf::Vector2f emitter_pos( plant_cmp.getCenter().x, plant_cmp.position.y + ( plant_cmp.size.y - 7 ) );
       auto burnt_uuid = Cmp::UUID::generate();
       Factory::Particle::add_smoke( reg(), kPlantSmokeTag, burnt_uuid, emitter_pos, plant_cmp.position.y );
-      Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_navmesh.lock() );
+      Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
     }
   }
 }

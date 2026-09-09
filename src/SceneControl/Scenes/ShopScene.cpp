@@ -69,11 +69,11 @@ void ShopScene::on_init()
   sf::Vector2f player_start_position = Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( m_reg );
   auto player_start_area = Cmp::RectBounds::scaled( player_start_position, Constants::kGridSizePxF, 1.f, Cmp::RectBounds::ScaleAxis::XY );
   // Positions reserved from procgen/algorithmic changes. Must exist before generation starts.
-  m_reserved_navmesh = std::make_shared<PathFinding::SpatialHashGrid>();
-  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_navmesh );
+  m_reserved_sm = std::make_shared<PathFinding::SpatialHashGrid>();
+  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm );
 
   auto &random_level_sys = m_sys.find<Sys::Store::Type::LevelGenerator>();
-  random_level_sys.init( m_reserved_navmesh );
+  random_level_sys.init( m_reserved_sm );
   random_level_sys.build_scene_from_data( *m_scene_data );
 
   m_floormap.create( random_level_sys.get_void_sm(), m_scene_data );
@@ -180,7 +180,7 @@ void ShopScene::reinit_navmesh()
 {
   m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
-  m_sys.find<Sys::Store::Type::RenderOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_navmesh );
+  m_sys.find<Sys::Store::Type::RenderOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm );
 }
 
 entt::registry &ShopScene::registry() { return m_reg; }

@@ -35,9 +35,9 @@ void create_loot_container( entt::registry &registry, entt::entity entt, Cmp::Po
 //! @brief Remove the components added by create_loot_container(), without destroying the entity.
 //! @param registry
 //! @param loot_entity
-//! @param reserved_navmesh If provided, un-reserves the container's position.
+//! @param reserved_sm If provided, un-reserves the container's position.
 void destroy_loot_container( entt::registry &registry, entt::entity loot_entity,
-                             const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh = nullptr );
+                             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr );
 
 namespace detail
 {

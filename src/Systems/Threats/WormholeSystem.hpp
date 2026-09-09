@@ -25,11 +25,11 @@ public:
 
   //! @brief init the weak pointer for the pathfinding navmesh
   //! @param npc_navmesh
-  //! @param reserved_navmesh
-  void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh = nullptr )
+  //! @param reserved_sm
+  void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr )
   {
     m_npc_navmesh = npc_navmesh;
-    m_reserved_navmesh = reserved_navmesh;
+    m_reserved_sm = reserved_sm;
   }
 
   //! @brief event handlers for pausing system clocks
@@ -72,7 +72,7 @@ private:
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
-  PathFinding::SpatialHashGridWeakPtr m_reserved_navmesh;
+  PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
 };
 
 } // namespace Game::Sys

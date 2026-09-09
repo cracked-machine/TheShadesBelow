@@ -35,9 +35,9 @@ public:
   ~LevelGenerator() = default;
 
   //! @brief Call this to make sure the level data is reset before regenerating a new scene
-  //! @param reserved_navmesh Scene-owned grid of positions reserved from procgen/algorithmic changes,
+  //! @param reserved_sm Scene-owned grid of positions reserved from procgen/algorithmic changes,
   //!        populated incrementally as this generation pass places entities.
-  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh );
+  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm );
 
   //! @brief Generate game area using data from the SceneData object.
   //! @param scene_data The deserialized scene data to build the game area from
@@ -89,7 +89,7 @@ public:
   //! @param reg
   //! @param sprite_factory Used to pick sprite size/random sprite index for each container.
   //! @param map_grid_size Map size in grid cells; determines how many containers to place.
-  //! @param reserved_navmesh Positions already reserved are skipped.
+  //! @param reserved_sm Positions already reserved are skipped.
   //! @return The entities that were assigned loot containers.
   std::vector<entt::entity> gen_loot_containers( Sprites::SpriteFactory &sprite_factory, sf::Vector2u map_grid_size );
 
@@ -97,7 +97,7 @@ public:
   //! @param reg
   //! @param sprite_factory Used to pick a random container sprite type/index.
   //! @param map_grid_size Map size in grid cells; determines how many containers to place.
-  //! @param reserved_navmesh Positions already reserved are skipped.
+  //! @param reserved_sm Positions already reserved are skipped.
   //! @return The entities that were assigned NPC containers.
   std::vector<entt::entity> gen_npc_containers( Sprites::SpriteFactory &sprite_factory, sf::Vector2u map_grid_size );
 

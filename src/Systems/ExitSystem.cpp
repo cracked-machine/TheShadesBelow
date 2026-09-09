@@ -54,13 +54,13 @@ void ExitSystem::create_exit()
   const auto &kGraveExitSpritesheet = m_sprite_factory.get_spritesheet_by_type( "sprite.graveyard.exit.locked" );
   const int kMaxAttempts = 100;
 
-  auto reserved_navmesh = m_reserved_navmesh.lock();
+  auto reserved_sm = m_reserved_sm.lock();
   bool found_valid_position = false;
   for ( int attempt_count = 0; attempt_count < kMaxAttempts; ++attempt_count )
   {
     auto exclude_list = Utils::Rnd::ExcludePack<Cmp::Wall, Cmp::Exit, Cmp::Player::Character, Cmp::Npc::NPC>{};
     auto [rand_entity, rand_pos_cmp] = Utils::Rnd::get_random_position( reg(), {}, exclude_list, 0 );
-    if ( reserved_navmesh && not reserved_navmesh->at( rand_pos_cmp ).empty() ) continue;
+    if ( reserved_sm && not reserved_sm->at( rand_pos_cmp ).empty() ) continue;
     Cmp::Position multiblock_hitbox( rand_pos_cmp.position, kGraveExitSpritesheet.get_px_size() );
 
     bool collides_with_wall = false;
@@ -83,10 +83,10 @@ void ExitSystem::create_exit()
   if ( not found_valid_position ) { throw std::runtime_error( "Unable to spawn graveyard exit" ); }
 
   // Remove the existing wall obstacle first
-  Factory::Obstacle::remove_obstacle( reg(), selected_entity, Factory::Obstacle::DeleteExtras::Yes, reserved_navmesh );
+  Factory::Obstacle::remove_obstacle( reg(), selected_entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
 
   Factory::Multiblock::add_multiblock_with_segments<Cmp::Grave::ExitMultiBlock, Cmp::Grave::ExitSegment>(
-      reg(), selected_pos_cmp.position, kGraveExitSpritesheet, 0, 0, reserved_navmesh.get() );
+      reg(), selected_pos_cmp.position, kGraveExitSpritesheet, 0, 0, reserved_sm.get() );
   SPDLOG_INFO( "Exit spawned at position ({}, {})", selected_pos_cmp.position.x, selected_pos_cmp.position.y );
 }
 

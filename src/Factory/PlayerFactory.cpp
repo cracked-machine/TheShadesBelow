@@ -55,7 +55,7 @@
 namespace Game::Factory::Player
 {
 
-void create_player( entt::registry &reg, const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh )
+void create_player( entt::registry &reg, const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
 {
   SPDLOG_DEBUG( "Creating player entity" );
   auto entity = reg.create();
@@ -69,7 +69,7 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   reg.emplace_or_replace<Cmp::Position>( entity, player_pos );
   auto &blast_radius = Sys::PersistSystem::get<Cmp::Persist::BlastRadius>( reg );
   reg.emplace_or_replace<Cmp::Player::Character>( entity );
-  if ( reserved_navmesh ) reserved_navmesh->insert( entity, player_pos );
+  if ( reserved_sm ) reserved_sm->insert( entity, player_pos );
   reg.emplace_or_replace<Cmp::Player::BlastRadius>( entity, blast_radius.get_value() );
   reg.emplace_or_replace<Cmp::PlayerStats>( entity, Cmp::Stats::Health{ 100 }, Cmp::Stats::Fear{ 0 }, Cmp::Stats::Despair{ 0 },
                                             Cmp::Stats::Infamy{ 0 }, Cmp::Stats::Toxicity{ 0 }, Cmp::Stats::Luck{ 50 } );

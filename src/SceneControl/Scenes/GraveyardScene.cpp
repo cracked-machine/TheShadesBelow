@@ -118,12 +118,12 @@ void GraveyardScene::on_init()
   // Positions reserved from procgen/algorithmic changes. Must exist before anything below that
   // creates or queries reserved entities (ItemSystem/ExitSystem are wired up now since their
   // events/calls can fire mid-generation, before reinit_system_spatial_maps() runs).
-  m_reserved_navmesh = std::make_shared<PathFinding::SpatialHashGrid>();
-  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_navmesh );
-  m_sys.find<Sys::Store::Type::ExitSystem>().init( m_reserved_navmesh );
+  m_reserved_sm = std::make_shared<PathFinding::SpatialHashGrid>();
+  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm );
+  m_sys.find<Sys::Store::Type::ExitSystem>().init( m_reserved_sm );
 
   // create the player, optionally increment the level counter
-  if ( m_reg.view<Cmp::Player::Character>().size() == 0 ) { Factory::Player::create_player( m_reg, m_reserved_navmesh ); }
+  if ( m_reg.view<Cmp::Player::Character>().size() == 0 ) { Factory::Player::create_player( m_reg, m_reserved_sm ); }
   else { Utils::Player::get_level_depth( m_reg ).increment_count( 1 ); }
 
   auto [map_size_grid, map_size_pixel] = m_scene_data->map_size();
@@ -135,7 +135,7 @@ void GraveyardScene::on_init()
 
   // create the level contents
   auto &level_gen = m_sys.find<Sys::Store::Type::LevelGenerator>();
-  level_gen.init( m_reserved_navmesh );
+  level_gen.init( m_reserved_sm );
   level_gen.build_scene_from_data( *m_scene_data );
   m_sys.find<Sys::Store::Type::ExitSystem>().create_exit();
   level_gen.gen_graveyard_exterior_multiblocks();
@@ -319,17 +319,17 @@ void GraveyardScene::do_update( sf::Time dt )
 
 void GraveyardScene::reinit_system_spatial_maps()
 {
-  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, m_ghost_navmesh, m_reserved_navmesh );
+  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, m_ghost_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::WispSystem>().init( m_open_navmesh );
-  m_sys.find<Sys::Store::Type::BombSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_navmesh );
-  m_sys.find<Sys::Store::Type::ActionSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_navmesh );
-  m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_navmesh );
+  m_sys.find<Sys::Store::Type::BombSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::ActionSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
-  m_sys.find<Sys::Store::Type::WormholeSystem>().init( m_generic_npc_navmesh, m_reserved_navmesh );
-  m_sys.find<Sys::Store::Type::RenderOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_navmesh );
-  m_sys.find<Sys::Store::Type::WatchmanSystem>().init( m_reserved_navmesh );
-  m_sys.find<Sys::Store::Type::SinkHoleHazardSystem>().init( m_reserved_navmesh );
-  m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().init( m_reserved_navmesh );
+  m_sys.find<Sys::Store::Type::WormholeSystem>().init( m_generic_npc_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::RenderOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::WatchmanSystem>().init( m_reserved_sm );
+  m_sys.find<Sys::Store::Type::SinkHoleHazardSystem>().init( m_reserved_sm );
+  m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().init( m_reserved_sm );
 }
 
 entt::registry &GraveyardScene::registry() { return m_reg; }

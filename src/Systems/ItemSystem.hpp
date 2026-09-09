@@ -29,8 +29,8 @@ public:
   ~ItemSystem() {}
 
   //! @brief init the weak pointer for the reserved-positions grid.
-  //! @param reserved_navmesh
-  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh ) { m_reserved_navmesh = reserved_navmesh; }
+  //! @param reserved_sm
+  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm ) { m_reserved_sm = reserved_sm; }
 
   //! @brief Event handler that forwards to create_world_item().
   //! @param ev
@@ -63,7 +63,7 @@ public:
 
 private:
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
-  PathFinding::SpatialHashGridWeakPtr m_reserved_navmesh;
+  PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
 };
 
 } // namespace Game::Sys

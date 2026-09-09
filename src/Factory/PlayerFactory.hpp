@@ -13,8 +13,8 @@ namespace Game::Factory::Player
 
 //! @brief Create the player entity at its start position, with default stats and a starting pickaxe.
 //! @param registry
-//! @param reserved_navmesh If provided, reserves the player's position.
-void create_player( entt::registry &registry, const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh = nullptr );
+//! @param reserved_sm If provided, reserves the player's position.
+void create_player( entt::registry &registry, const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr );
 
 //! @brief Reserve and decorate the player spawn area sprite, without blocking NPC pathfinding into it.
 //! @param registry

@@ -57,8 +57,8 @@ public:
   HazardFieldSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
 
   //! @brief init the weak pointer for the reserved-positions grid.
-  //! @param reserved_navmesh
-  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh ) { m_reserved_navmesh = reserved_navmesh; }
+  //! @param reserved_sm
+  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm ) { m_reserved_sm = reserved_sm; }
 
   //! @brief Spread the hazard field, then check for player and NPC collisions with it.
   //! @return The position of any newly added hazard cell, or an empty vector if none was added.
@@ -102,7 +102,7 @@ private:
   sf::Time m_dmg_timer{ sf::Time::Zero };
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
-  PathFinding::SpatialHashGridWeakPtr m_reserved_navmesh;
+  PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
 };
 
 } // namespace Game::Sys

@@ -27,10 +27,10 @@ namespace Game::Factory::Plant
 //! @param plant_entt
 //! @param npc_navmesh optional NPC navmesh to re-insert the freed tiles into
 //! @param player_navmesh optional player navmesh to remove the destroyed segments from
-//! @param reserved_navmesh optional reserved-positions navmesh to un-reserve the freed tiles from
+//! @param reserved_sm optional reserved-positions navmesh to un-reserve the freed tiles from
 void remove_plant_mb( entt::registry &reg, entt::entity plant_entt, const PathFinding::SpatialHashGridSharedPtr &npc_navmesh = nullptr,
                       const PathFinding::SpatialHashGridSharedPtr &player_navmesh = nullptr,
-                      const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh = nullptr );
+                      const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr );
 
 } // namespace Game::Factory::Plant
 

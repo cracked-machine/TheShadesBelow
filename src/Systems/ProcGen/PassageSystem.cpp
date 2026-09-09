@@ -596,7 +596,7 @@ void PassageSystem::empty_open_passages()
 {
   PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock();
   if ( not pathfinding_navmesh ) return;
-  auto reserved_navmesh = m_reserved_navmesh.lock();
+  auto reserved_sm = m_reserved_sm.lock();
 
   std::vector<std::pair<entt::entity, Cmp::Position>> obstacles_to_remove;
   std::vector<std::pair<entt::entity, Cmp::Position>> chests_to_remove;
@@ -610,7 +610,7 @@ void PassageSystem::empty_open_passages()
 
   for ( auto &[entt, pos_cmp] : obstacles_to_remove )
   {
-    Factory::Obstacle::remove_obstacle( reg(), entt, Factory::Obstacle::DeleteExtras::Yes, reserved_navmesh );
+    Factory::Obstacle::remove_obstacle( reg(), entt, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
     pathfinding_navmesh->insert( entt, pos_cmp );
   }
   for ( auto &[entt, pos_cmp] : chests_to_remove )
@@ -626,7 +626,7 @@ void PassageSystem::fill_all_passages()
   const Sprites::SpriteSheet &ss_main = m_sprite_factory.get_spritesheet_by_type( "sprite.crypt.wall.int.main" );
   const Sprites::SpriteSheet &ss_cap = m_sprite_factory.get_spritesheet_by_type( "sprite.crypt.wall.int.cap" );
   PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock();
-  auto reserved_navmesh = m_reserved_navmesh.lock();
+  auto reserved_sm = m_reserved_sm.lock();
 
   for ( auto [pos_entt, pos_cmp] : reg().view<Cmp::Position>().each() )
   {
@@ -653,7 +653,7 @@ void PassageSystem::fill_all_passages()
     Cmp::Position cap_position( { pos_cmp.x(), pos_cmp.y() - pos_cmp.size.y }, pos_cmp.size );
     reg().emplace_or_replace<Cmp::Position>( cap_entt, cap_position );
     Factory::Obstacle::decorate_obstacle( reg(), cap_entt, cap_position, ss_cap, 0, pos_cmp.y() + ss_cap.get_zorder( 0 ), false );
-    if ( reserved_navmesh ) reserved_navmesh->insert( cap_entt, cap_position );
+    if ( reserved_sm ) reserved_sm->insert( cap_entt, cap_position );
     reg().emplace_or_replace<Cmp::UUID>( cap_entt, uuid );
     Factory::Obstacle::add_obstacle_cap( reg(), cap_entt );
 

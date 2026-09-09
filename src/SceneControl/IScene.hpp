@@ -35,7 +35,7 @@ public:
 
   //! @brief Get the scene's grid of positions reserved from procgen/algorithmic changes.
   //! @return PathFinding::SpatialHashGridSharedPtr
-  virtual PathFinding::SpatialHashGridSharedPtr get_reserved_navmesh() = 0;
+  virtual PathFinding::SpatialHashGridSharedPtr get_reserved_sm() = 0;
 
 protected:
   //! @brief User-overridable update function

@@ -28,15 +28,15 @@ public:
   //! @param npc_navmesh
   //! @param player_navmesh
   //! @param ghost_navmesh
-  //! @param reserved_navmesh
+  //! @param reserved_sm
   void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &player_navmesh,
              const PathFinding::SpatialHashGridSharedPtr &ghost_navmesh = nullptr,
-             const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh = nullptr )
+             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr )
   {
     m_npc_navmesh = npc_navmesh;
     m_player_navmesh = player_navmesh;
     m_ghost_navmesh = ghost_navmesh;
-    m_reserved_navmesh = reserved_navmesh;
+    m_reserved_sm = reserved_sm;
   }
 
   //! @brief frame updates
@@ -88,7 +88,7 @@ private:
   PathFinding::SpatialHashGridWeakPtr m_player_navmesh;
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
-  PathFinding::SpatialHashGridWeakPtr m_reserved_navmesh;
+  PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
 };
 } // namespace Game::Sys
 

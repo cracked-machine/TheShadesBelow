@@ -127,7 +127,7 @@ void NpcSystem::check_npc_container_collision()
 
     if ( player_pos.findIntersection( npc_activate_bounds.getBounds() ) )
     {
-      Factory::Npc::create_npc( reg(), npccontainer_entt, "npc.skeleton", m_reserved_navmesh.lock() );
+      Factory::Npc::create_npc( reg(), npccontainer_entt, "npc.skeleton", m_reserved_sm.lock() );
     }
   }
 }

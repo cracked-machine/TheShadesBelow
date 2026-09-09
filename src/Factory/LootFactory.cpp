@@ -29,12 +29,12 @@ void create_loot_container( entt::registry &reg, entt::entity entt, Cmp::Positio
 }
 
 void destroy_loot_container( entt::registry &registry, entt::entity loot_container_entity,
-                             const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh )
+                             const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
 {
   registry.remove<Cmp::LootContainer>( loot_container_entity );
-  if ( reserved_navmesh )
+  if ( reserved_sm )
   {
-    if ( auto *pos_cmp = registry.try_get<Cmp::Position>( loot_container_entity ) ) reserved_navmesh->remove( loot_container_entity, *pos_cmp );
+    if ( auto *pos_cmp = registry.try_get<Cmp::Position>( loot_container_entity ) ) reserved_sm->remove( loot_container_entity, *pos_cmp );
   }
   registry.remove<Cmp::AnimData>( loot_container_entity );
   registry.remove<Cmp::ZOrderValue>( loot_container_entity );

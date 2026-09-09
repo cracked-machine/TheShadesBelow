@@ -140,7 +140,7 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
     {
       auto [mb_entt, segment_entt_list] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>(
           reg(), plant_pos, m_sprite_factory.get_spritesheet_by_type( inventory_slot_cmp->m_item.sprite_type ), 0, 0,
-          m_reserved_navmesh.lock().get() );
+          m_reserved_sm.lock().get() );
 
       // Preserve the item this plant was grown from, so digging it back up (see the DIG handler in
       // on_player_action_event) can hand it back via the normal pickup_world_item path instead of
@@ -274,12 +274,12 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
   if ( explosive_cmp ) { reg.emplace_or_replace<Cmp::Explosive>( inventory_entity, false ); }
 
   // now destroy the world item entt
-  Factory::Plant::remove_plant_mb( reg, world_item_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_navmesh.lock() );
+  Factory::Plant::remove_plant_mb( reg, world_item_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
   if ( reg.valid( world_item_entt ) )
   {
-    if ( auto reserved_navmesh = m_reserved_navmesh.lock(); reserved_navmesh )
+    if ( auto reserved_sm = m_reserved_sm.lock(); reserved_sm )
     {
-      if ( auto *pos_cmp = reg.try_get<Cmp::Position>( world_item_entt ) ) reserved_navmesh->remove( world_item_entt, *pos_cmp );
+      if ( auto *pos_cmp = reg.try_get<Cmp::Position>( world_item_entt ) ) reserved_sm->remove( world_item_entt, *pos_cmp );
     }
     reg.destroy( world_item_entt );
   }

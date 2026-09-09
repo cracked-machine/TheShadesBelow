@@ -62,11 +62,11 @@ void create_npc_container( entt::registry &reg, entt::entity entt, Cmp::Position
 }
 
 void destroy_npc_container( entt::registry &registry, entt::entity npc_container_entity,
-                            const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh )
+                            const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
 {
-  if ( reserved_navmesh )
+  if ( reserved_sm )
   {
-    if ( auto *pos_cmp = registry.try_get<Cmp::Position>( npc_container_entity ) ) reserved_navmesh->remove( npc_container_entity, *pos_cmp );
+    if ( auto *pos_cmp = registry.try_get<Cmp::Position>( npc_container_entity ) ) reserved_sm->remove( npc_container_entity, *pos_cmp );
   }
   registry.remove<Cmp::Armed>( npc_container_entity );
   registry.remove<Cmp::Npc::Container>( npc_container_entity );
@@ -106,7 +106,7 @@ bool create_shockwave( entt::registry &registry, entt::entity npc_entt )
 }
 
 entt::entity create_npc( entt::registry &reg, entt::entity position_entity, const std::string &npc_type,
-                         const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh )
+                         const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
 {
 
   auto *pos_cmp = reg.try_get<Cmp::Position>( position_entity );
@@ -153,13 +153,13 @@ entt::entity create_npc( entt::registry &reg, entt::entity position_entity, cons
         new_pos_entity,
         Cmp::Npc::WatchmanSearchlight{ .sweep_phase = sweep_phase_rng.gen(),
                                        .idle_direction = Utils::Cardinal( static_cast<Utils::Cardinal::Value>( idle_direction_rng.gen() ) ) } );
-    Factory::Npc::destroy_npc_container( reg, position_entity, reserved_navmesh );
+    Factory::Npc::destroy_npc_container( reg, position_entity, reserved_sm );
   }
   else if ( npc_type == "npc.skeleton" )
   {
     reg.emplace_or_replace<Cmp::Npc::Skeleton>( new_pos_entity );
     reg.emplace_or_replace<Cmp::Npc::LerpSpeed>( new_pos_entity, npc_cmp.m_lerp_speed );
-    Factory::Npc::destroy_npc_container( reg, position_entity, reserved_navmesh );
+    Factory::Npc::destroy_npc_container( reg, position_entity, reserved_sm );
   }
   else if ( npc_type == "npc.priest" )
   {

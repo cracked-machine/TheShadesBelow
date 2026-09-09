@@ -454,7 +454,7 @@ void CryptSystem::check_chest_activation( Events::PlayerActionEvent::GameActions
       m_sound_bank.get_effect( "crypt_chest_open" ).play();
 
       // clang-format off
-      auto reserved_navmesh = m_reserved_navmesh.lock();
+      auto reserved_sm = m_reserved_sm.lock();
       auto loot_entt = Factory::Loot::create_loot_drop(
         reg(),
         Cmp::AnimData( Cmp::AnimData::Config{ .sprite_type = "sprite.crypt.loot.gold", .enabled = true}),
@@ -462,7 +462,7 @@ void CryptSystem::check_chest_activation( Events::PlayerActionEvent::GameActions
         Factory::IncludePack<>{},
         Factory::ExcludePack<Cmp::Player::Character, Cmp::Crypt::Chest, Cmp::Crypt::RoomLavaPitCell, Cmp::Crypt::PassageBlock, Cmp::Wall, Cmp::Obstacle>{} ,
         Factory::ExcludePack<Cmp::Player::Character, Cmp::Crypt::Chest, Cmp::Crypt::RoomLavaPitCell, Cmp::Crypt::PassageBlock, Cmp::Wall, Cmp::Obstacle>{},
-        64.f, reserved_navmesh.get());
+        64.f, reserved_sm.get());
       // clang-format on
 
       if ( loot_entt != entt::null ) m_sound_bank.get_effect( "drop_loot" ).play();
@@ -472,7 +472,7 @@ void CryptSystem::check_chest_activation( Events::PlayerActionEvent::GameActions
 
 void CryptSystem::create_room_borders( const Factory::Obstacle::UUIDEntityMap &uuid_map )
 {
-  auto reserved_navmesh = m_reserved_navmesh.lock();
+  auto reserved_sm = m_reserved_sm.lock();
   auto add_borders_for_room = [&]<typename Component>( Component &room_cmp, RoomWallType room_wall_type )
   {
     for ( auto &[pos_entt, pos_cmp] : room_cmp.m_border_position_list )
@@ -481,7 +481,7 @@ void CryptSystem::create_room_borders( const Factory::Obstacle::UUIDEntityMap &u
       auto *anim_data = reg().try_get<Cmp::AnimData>( pos_entt );
       if ( anim_data and anim_data->m_sprite_type.contains( ".main" ) )
       {
-        Factory::Obstacle::remove_obstacle( reg(), pos_entt, Factory::Obstacle::DeleteExtras::Yes, uuid_map, reserved_navmesh );
+        Factory::Obstacle::remove_obstacle( reg(), pos_entt, Factory::Obstacle::DeleteExtras::Yes, uuid_map, reserved_sm );
         decorate_interior_wall( pos_entt, pos_cmp, room_wall_type );
       }
       if ( PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock() ) pathfinding_navmesh->remove( pos_entt, pos_cmp );
@@ -504,9 +504,9 @@ void CryptSystem::gen_crypt_initial_interior()
   // position for each wall's cap sprite (one tile above the wall), and checking the live grid
   // here would let one wall's cap phantom-reserve an unrelated, still-undecided tile - including
   // genuinely open room floor - leaving it permanently marked reserved despite never being walled.
-  auto reserved_navmesh = m_reserved_navmesh.lock();
+  auto reserved_sm = m_reserved_sm.lock();
   PathFinding::SpatialHashGrid pre_existing_reserved;
-  if ( reserved_navmesh ) pre_existing_reserved = *reserved_navmesh;
+  if ( reserved_sm ) pre_existing_reserved = *reserved_sm;
 
   auto position_view = reg().view<Cmp::Position>( entt::exclude<Cmp::Player::Character> );
   for ( auto [pos_entt, pos_cmp] : position_view.each() )
@@ -540,7 +540,7 @@ void CryptSystem::create_initial_closed_rooms( sf::Vector2u map_grid_size )
   const int max_distance_between_rooms = 2;
   const int max_attempts = 5000;
 
-  auto reserved_navmesh = m_reserved_navmesh.lock();
+  auto reserved_sm = m_reserved_sm.lock();
 
   int room_count = 0;
   int current_attempt = 0;
@@ -573,7 +573,7 @@ void CryptSystem::create_initial_closed_rooms( sf::Vector2u map_grid_size )
     if ( not Utils::is_in_bounds( new_room.position, new_room.size, map_grid_size ) ) { overlaps_existing = true; }
 
     // make sure the room's origin doesn't land on an already-reserved position (walls, markers, etc.)
-    if ( not overlaps_existing && reserved_navmesh && not reserved_navmesh->at( pos ).empty() ) { overlaps_existing = true; }
+    if ( not overlaps_existing && reserved_sm && not reserved_sm->at( pos ).empty() ) { overlaps_existing = true; }
 
     // check for intersection with existing rooms
     if ( not overlaps_existing )
@@ -647,7 +647,7 @@ void CryptSystem::create_initial_closed_rooms( sf::Vector2u map_grid_size )
 
       for ( auto [pos_entt, pos_cmp] : reg().view<Cmp::Position>().each() )
       {
-        if ( reserved_navmesh && not reserved_navmesh->at( pos_cmp ).empty() ) continue;
+        if ( reserved_sm && not reserved_sm->at( pos_cmp ).empty() ) continue;
         if ( reg().any_of<Cmp::FootStepTimer, Cmp::FootStepAlpha, Cmp::Direction>( pos_entt ) ) continue;
         if ( reg().any_of<Cmp::Wall, Cmp::Exit>( pos_entt ) ) continue;
 
@@ -759,7 +759,7 @@ void CryptSystem::decorate_interior_wall( entt::entity main_entt, Cmp::Position 
   Cmp::Position cap_position( { main_pos_cmp.x(), main_pos_cmp.y() - main_pos_cmp.size.y }, main_pos_cmp.size );
   reg().emplace_or_replace<Cmp::Position>( cap_entt, cap_position );
   Factory::Obstacle::decorate_obstacle( reg(), cap_entt, cap_position, ss_cap, tile_idx, main_pos_cmp.y() + ss_cap.get_zorder( tile_idx ), false );
-  if ( auto reserved_navmesh = m_reserved_navmesh.lock() ) reserved_navmesh->insert( cap_entt, cap_position );
+  if ( auto reserved_sm = m_reserved_sm.lock() ) reserved_sm->insert( cap_entt, cap_position );
   reg().emplace_or_replace<Cmp::UUID>( cap_entt, uuid );
   Factory::Obstacle::add_obstacle_cap( reg(), cap_entt );
 }
@@ -785,7 +785,7 @@ void CryptSystem::fill_closed_rooms( const Factory::Obstacle::UUIDEntityMap &uui
 {
   PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock();
   if ( not pathfinding_navmesh ) throw std::runtime_error( "CryptSystem::fill_closed_rooms() - unable to lock pathfinding navmesh" );
-  auto reserved_navmesh = m_reserved_navmesh.lock();
+  auto reserved_sm = m_reserved_sm.lock();
 
   for ( auto [closed_room_entt, closed_room_cmp] : reg().view<Cmp::Crypt::RoomClosed>().each() )
   {
@@ -794,7 +794,7 @@ void CryptSystem::fill_closed_rooms( const Factory::Obstacle::UUIDEntityMap &uui
       if ( reg().all_of<Cmp::Obstacle>( pos_entt ) ) continue;
       if ( reg().any_of<Cmp::FootStepTimer, Cmp::FootStepAlpha, Cmp::Direction>( pos_entt ) ) continue;
 
-      Factory::Obstacle::remove_obstacle( reg(), pos_entt, Factory::Obstacle::DeleteExtras::Yes, uuid_map, reserved_navmesh );
+      Factory::Obstacle::remove_obstacle( reg(), pos_entt, Factory::Obstacle::DeleteExtras::Yes, uuid_map, reserved_sm );
       decorate_interior_wall( pos_entt, pos_cmp, RoomWallType::INTERIOR );
       pathfinding_navmesh->remove( pos_entt, pos_cmp );
       if ( auto player_navmesh = m_player_navmesh.lock() ) { player_navmesh->insert( pos_entt, pos_cmp ); }
@@ -810,7 +810,7 @@ void CryptSystem::fill_closed_rooms( const Factory::Obstacle::UUIDEntityMap &uui
       if ( reg().all_of<Cmp::Obstacle>( pos_entt ) ) continue;
       if ( reg().any_of<Cmp::FootStepTimer, Cmp::FootStepAlpha, Cmp::Direction>( pos_entt ) ) continue;
 
-      Factory::Obstacle::remove_obstacle( reg(), pos_entt, Factory::Obstacle::DeleteExtras::Yes, uuid_map, reserved_navmesh );
+      Factory::Obstacle::remove_obstacle( reg(), pos_entt, Factory::Obstacle::DeleteExtras::Yes, uuid_map, reserved_sm );
       decorate_interior_wall( pos_entt, pos_cmp, RoomWallType::BORDER );
       pathfinding_navmesh->remove( pos_entt, pos_cmp );
       if ( auto player_navmesh = m_player_navmesh.lock() ) { player_navmesh->insert( pos_entt, pos_cmp ); }
@@ -846,7 +846,7 @@ void CryptSystem::open_all_rooms()
 
 void CryptSystem::empty_open_rooms( const Factory::Obstacle::UUIDEntityMap &uuid_map )
 {
-  auto reserved_navmesh = m_reserved_navmesh.lock();
+  auto reserved_sm = m_reserved_sm.lock();
 
   for ( auto [open_room_entt, open_room_cmp] : reg().view<Cmp::Crypt::RoomOpen>().each() )
   {
@@ -856,7 +856,7 @@ void CryptSystem::empty_open_rooms( const Factory::Obstacle::UUIDEntityMap &uuid
       if ( not open_room_cmp.findIntersection( pos_cmp ) ) continue;
       if ( not reg().all_of<Cmp::Obstacle>( pos_entt ) ) continue;
 
-      Factory::Obstacle::remove_obstacle( reg(), pos_entt, Factory::Obstacle::DeleteExtras::Yes, uuid_map, reserved_navmesh );
+      Factory::Obstacle::remove_obstacle( reg(), pos_entt, Factory::Obstacle::DeleteExtras::Yes, uuid_map, reserved_sm );
       if ( PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock() ) { pathfinding_navmesh->insert( pos_entt, pos_cmp ); }
       if ( auto player_navmesh = m_player_navmesh.lock() ) { player_navmesh->remove( pos_entt, pos_cmp ); }
     }
@@ -864,7 +864,7 @@ void CryptSystem::empty_open_rooms( const Factory::Obstacle::UUIDEntityMap &uuid
     for ( auto [pos_entt, pos_cmp] : open_room_cmp.m_border_position_list )
     {
       if ( not reg().all_of<Cmp::Obstacle>( pos_entt ) ) continue;
-      Factory::Obstacle::remove_obstacle( reg(), pos_entt, Factory::Obstacle::DeleteExtras::Yes, uuid_map, reserved_navmesh );
+      Factory::Obstacle::remove_obstacle( reg(), pos_entt, Factory::Obstacle::DeleteExtras::Yes, uuid_map, reserved_sm );
       decorate_interior_wall( pos_entt, pos_cmp, RoomWallType::BORDER );
     }
   }
@@ -1137,7 +1137,7 @@ void CryptSystem::add_chest_to_open_rooms( const Cmp::Position &player_pos_cmp )
 
       float zorder = selected_pos.y() + m_sprite_factory.get_spritesheet_by_type( "sprite.crypt.chest" ).get_zorder( 0 );
 
-      Factory::Obstacle::remove_obstacle( reg(), selected_entt, Factory::Obstacle::DeleteExtras::Yes, m_reserved_navmesh.lock() );
+      Factory::Obstacle::remove_obstacle( reg(), selected_entt, Factory::Obstacle::DeleteExtras::Yes, m_reserved_sm.lock() );
       auto chest_entt = Factory::Crypt::create_crypt_chest( reg(), selected_pos.position, "sprite.crypt.chest", 0, zorder );
       if ( auto player_navmesh = m_player_navmesh.lock() ) { player_navmesh->insert( chest_entt, selected_pos ); }
       SPDLOG_DEBUG( "Added chest to position: {},{}", selected_pos.position.x, selected_pos.position.y );

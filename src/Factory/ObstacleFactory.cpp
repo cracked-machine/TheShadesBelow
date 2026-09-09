@@ -94,7 +94,7 @@ void decorate_obstacle( entt::registry &reg, entt::entity entity, Cmp::Position 
 }
 
 void remove_obstacle( entt::registry &reg, entt::entity search_entt, DeleteExtras delete_extras,
-                      const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh )
+                      const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
 {
   if ( not reg.valid( search_entt ) ) return;
 
@@ -127,9 +127,9 @@ void remove_obstacle( entt::registry &reg, entt::entity search_entt, DeleteExtra
     if ( delete_extras == DeleteExtras::Yes )
     {
       // capture position before destroy - registry::destroy can invalidate component references via swap-and-pop
-      if ( reserved_navmesh )
+      if ( reserved_sm )
       {
-        if ( auto *cap_pos_cmp = reg.try_get<Cmp::Position>( cap_entt ) ) reserved_navmesh->remove( cap_entt, *cap_pos_cmp );
+        if ( auto *cap_pos_cmp = reg.try_get<Cmp::Position>( cap_entt ) ) reserved_sm->remove( cap_entt, *cap_pos_cmp );
       }
       reg.destroy( cap_entt );
     }
@@ -137,7 +137,7 @@ void remove_obstacle( entt::registry &reg, entt::entity search_entt, DeleteExtra
 }
 
 void remove_obstacle( entt::registry &reg, entt::entity search_entt, DeleteExtras delete_extras, const UUIDEntityMap &uuid_map,
-                      const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh )
+                      const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
 {
   if ( not reg.valid( search_entt ) ) return;
 
@@ -162,9 +162,9 @@ void remove_obstacle( entt::registry &reg, entt::entity search_entt, DeleteExtra
   if ( it != uuid_map.end() && reg.valid( it->second ) )
   {
     SPDLOG_DEBUG( "Removing matching cap entity {} - {}", static_cast<uint32_t>( it->second ), search_uuid_cmp.str() );
-    if ( reserved_navmesh )
+    if ( reserved_sm )
     {
-      if ( auto *cap_pos_cmp = reg.try_get<Cmp::Position>( it->second ) ) reserved_navmesh->remove( it->second, *cap_pos_cmp );
+      if ( auto *cap_pos_cmp = reg.try_get<Cmp::Position>( it->second ) ) reserved_sm->remove( it->second, *cap_pos_cmp );
     }
     reg.destroy( it->second );
     return;
@@ -175,9 +175,9 @@ void remove_obstacle( entt::registry &reg, entt::entity search_entt, DeleteExtra
   {
     if ( cap_uuid_cmp != search_uuid_cmp ) continue;
     SPDLOG_DEBUG( "Removing cap entity (fallback scan) {} - {}", static_cast<uint32_t>( cap_entt ), search_uuid_cmp.str() );
-    if ( reserved_navmesh )
+    if ( reserved_sm )
     {
-      if ( auto *cap_pos_cmp = reg.try_get<Cmp::Position>( cap_entt ) ) reserved_navmesh->remove( cap_entt, *cap_pos_cmp );
+      if ( auto *cap_pos_cmp = reg.try_get<Cmp::Position>( cap_entt ) ) reserved_sm->remove( cap_entt, *cap_pos_cmp );
     }
     reg.destroy( cap_entt );
     break;

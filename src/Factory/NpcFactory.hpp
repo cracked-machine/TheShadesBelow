@@ -35,18 +35,18 @@ void create_npc_container( entt::registry &registry, entt::entity entt, Cmp::Pos
 //! @brief Remove the components added by create_npc_container(), without destroying the entity.
 //! @param registry
 //! @param npc_container_entity
-//! @param reserved_navmesh If provided, un-reserves the container's position.
+//! @param reserved_sm If provided, un-reserves the container's position.
 void destroy_npc_container( entt::registry &registry, entt::entity npc_container_entity,
-                            const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh = nullptr );
+                            const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr );
 
 //! @brief Create a new NPC. Creates a new entity at `position_entity`. Returns the new entity.
 //! @param registry
 //! @param position_entity
 //! @param npc_type
-//! @param reserved_navmesh If provided, un-reserves the container's position when hatching from a container (nightwatchman/skeleton).
+//! @param reserved_sm If provided, un-reserves the container's position when hatching from a container (nightwatchman/skeleton).
 //! @return entt::entity
 entt::entity create_npc( entt::registry &registry, entt::entity position_entity, const std::string &npc_type,
-                         const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh = nullptr );
+                         const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr );
 
 //! @brief Remove an NPC's components (applying its DestroyAction stat modifiers to the player first).
 //! @param registry

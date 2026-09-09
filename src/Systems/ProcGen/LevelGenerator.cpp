@@ -604,13 +604,13 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants( sf::Vector2u map_gr
   return assigned_entts;
 }
 
-void LevelGenerator::init( const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh )
+void LevelGenerator::init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
 {
   m_obstacle_sm->clear();
   m_void_sm->clear();
   m_non_obstacle_sm->clear();
 
-  m_reserved_sm = reserved_navmesh;
+  m_reserved_sm = reserved_sm;
   m_reserved_sm->clear();
 }
 

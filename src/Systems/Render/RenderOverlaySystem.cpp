@@ -666,7 +666,7 @@ void RenderOverlaySystem::render_ui_entity_inspect()
         draw_line( " " + cmp->m_sprite_type + " [" + sprite_idx + "]" );
       }
       if ( reg().all_of<Cmp::VoidPosition>( entity ) ) draw_line( "  Void", sf::Color::White );
-      if ( auto reserved_navmesh = m_reserved_navmesh.lock(); reserved_navmesh && not reserved_navmesh->at( pos_cmp ).empty() )
+      if ( auto reserved_sm = m_reserved_sm.lock(); reserved_sm && not reserved_sm->at( pos_cmp ).empty() )
       {
         draw_line( "  Reserved", sf::Color::Red );
       }

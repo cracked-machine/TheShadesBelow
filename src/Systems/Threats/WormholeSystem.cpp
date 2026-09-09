@@ -135,7 +135,7 @@ std::pair<entt::entity, Cmp::Position> WormholeSystem::find_spawn_location( unsi
       // semantics) rather than the whole wormhole footprint - query_rect over the full 3x3
       // block requires all 9 cells to be simultaneously unreserved, which is far stricter than
       // before and can make a valid spawn very hard to find on a densely decorated map.
-      if ( auto reserved_navmesh = m_reserved_navmesh.lock(); reserved_navmesh && not reserved_navmesh->at( random_pos ).empty() )
+      if ( auto reserved_sm = m_reserved_sm.lock(); reserved_sm && not reserved_sm->at( random_pos ).empty() )
       {
         return false;
       }
@@ -181,15 +181,15 @@ void WormholeSystem::spawn_wormhole( SpawnPhase phase )
   Cmp::Wormhole::MultiBlock wormhole_block( random_pos.position, wormhole_ss.get_px_size() );
 
   auto navmesh = m_npc_navmesh.lock();
-  auto reserved_navmesh = m_reserved_navmesh.lock();
+  auto reserved_sm = m_reserved_sm.lock();
   for ( auto [entity, obstacle_pos] : reg().view<Cmp::Position>().each() )
   {
     if ( obstacle_pos.findIntersection( wormhole_block ) )
     {
       bool was_obstacle = reg().all_of<Cmp::Npc::NoPathFinding>( entity );
       Factory::Obstacle::remove_obstacle( reg(), entity );
-      Factory::Loot::destroy_loot_container( reg(), entity, reserved_navmesh );
-      Factory::Npc::destroy_npc_container( reg(), entity, reserved_navmesh );
+      Factory::Loot::destroy_loot_container( reg(), entity, reserved_sm );
+      Factory::Npc::destroy_npc_container( reg(), entity, reserved_sm );
       if ( was_obstacle && navmesh ) navmesh->insert( entity, obstacle_pos );
 
       SPDLOG_DEBUG( "Wormhole spawn: Destroying item at ({}, {})", obstacle_pos.position.x, obstacle_pos.position.y );
@@ -307,7 +307,7 @@ void WormholeSystem::check_player_wormhole_collision()
           reg(), Utils::Rnd::IncludePack<Cmp::Obstacle>{}, Utils::Rnd::ExcludePack<Cmp::Wall, Cmp::Exit, Cmp::Player::Character, Cmp::Npc::NPC>{},
           0 );
 
-      Factory::Obstacle::remove_obstacle( reg(), new_spawn_entity, Factory::Obstacle::DeleteExtras::Yes, m_reserved_navmesh.lock() );
+      Factory::Obstacle::remove_obstacle( reg(), new_spawn_entity, Factory::Obstacle::DeleteExtras::Yes, m_reserved_sm.lock() );
       if ( auto teleport_navmesh = m_npc_navmesh.lock() ) teleport_navmesh->insert( new_spawn_entity, new_spawn_pos_cmp );
       // clang-format off
       reg().emplace_or_replace<Cmp::AnimData>( new_spawn_entity, Cmp::AnimData::Config{

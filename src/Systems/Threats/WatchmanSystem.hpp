@@ -24,8 +24,8 @@ public:
   WatchmanSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
 
   //! @brief init the weak pointer for the reserved-positions grid.
-  //! @param reserved_navmesh
-  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh ) { m_reserved_navmesh = reserved_navmesh; }
+  //! @param reserved_sm
+  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm ) { m_reserved_sm = reserved_sm; }
 
   //! @brief Rate-limit and trigger Watchman NPC spawning in the graveyard scene
   //! @param dt Delta time since last update call
@@ -73,7 +73,7 @@ private:
   void check_gunfire_npc_collision();
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
-  PathFinding::SpatialHashGridWeakPtr m_reserved_navmesh;
+  PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
 };
 
 } // namespace Game::Sys

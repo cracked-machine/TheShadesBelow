@@ -223,11 +223,11 @@ void WatchmanSystem::spawn_watchman()
   if ( watchman_npc_count < Sys::PersistSystem::get<Cmp::Persist::NpcWatchmanSpawnMax>( reg() ).get_value() and
        Utils::Player::get_player_stats( reg() ).infamy() >= Sys::PersistSystem::get<Cmp::Persist::NpcWatchmanSpawnInfamy>( reg() ).get_value() )
   {
-    auto reserved_navmesh = m_reserved_navmesh.lock();
+    auto reserved_sm = m_reserved_sm.lock();
     auto [rnd_entt, rnd_pos_cmp] =
         Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 0 );
-    if ( reserved_navmesh && not reserved_navmesh->at( rnd_pos_cmp ).empty() ) return;
-    Factory::Npc::create_npc( reg(), rnd_entt, "npc.nightwatchman", reserved_navmesh );
+    if ( reserved_sm && not reserved_sm->at( rnd_pos_cmp ).empty() ) return;
+    Factory::Npc::create_npc( reg(), rnd_entt, "npc.nightwatchman", reserved_sm );
     SPDLOG_INFO( "Spawned Watchman at {},{}", rnd_pos_cmp.x(), rnd_pos_cmp.y() );
   }
 }

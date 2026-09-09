@@ -113,7 +113,7 @@ RegistryTransfer::RegCopy RegistryTransfer::copy_reg( IScene &scene, Scene::RegC
   // Copy other entities (for ALL mode only)
   if ( copy_mode == RegCopyMode::ALL )
   {
-    auto reserved_navmesh = scene.get_reserved_navmesh();
+    auto reserved_sm = scene.get_reserved_sm();
     for ( auto entity : source_registry.storage<entt::entity>() )
     {
       // Skip player entity (already copied above)
@@ -129,9 +129,9 @@ RegistryTransfer::RegCopy RegistryTransfer::copy_reg( IScene &scene, Scene::RegC
       }
 
       // Skip transfer of positions reserved from algorithmic changes (structural world entities)
-      if ( reserved_navmesh )
+      if ( reserved_sm )
       {
-        if ( auto *pos_cmp = source_registry.try_get<Cmp::Position>( entity ); pos_cmp && not reserved_navmesh->at( *pos_cmp ).empty() )
+        if ( auto *pos_cmp = source_registry.try_get<Cmp::Position>( entity ); pos_cmp && not reserved_sm->at( *pos_cmp ).empty() )
         {
           skipped_cmp++;
           continue;

@@ -41,7 +41,7 @@ void ItemSystem::create_world_item( Cmp::Position pos, const std::string &item, 
   auto world_item_entt = reg().create();
   Cmp::Position world_item_pos( pos.position, pos.size );
   reg().emplace_or_replace<Cmp::Position>( world_item_entt, world_item_pos );
-  if ( auto reserved_navmesh = m_reserved_navmesh.lock() ) reserved_navmesh->insert( world_item_entt, world_item_pos );
+  if ( auto reserved_sm = m_reserved_sm.lock() ) reserved_sm->insert( world_item_entt, world_item_pos );
   // clang-format off
   reg().emplace_or_replace<Cmp::AnimData>( world_item_entt, Cmp::AnimData::Config{ 
         .sprite_type =  Sys::ItemStore::instance().get_item( item ).sprite_type, 
@@ -81,7 +81,7 @@ void ItemSystem::create_seeing_stone( Cmp::Position pos, const std::string &item
   auto world_carry_item_entt = reg().create();
   Cmp::Position world_carry_item_pos( pos.position, pos.size );
   reg().emplace_or_replace<Cmp::Position>( world_carry_item_entt, world_carry_item_pos );
-  if ( auto reserved_navmesh = m_reserved_navmesh.lock() ) reserved_navmesh->insert( world_carry_item_entt, world_carry_item_pos );
+  if ( auto reserved_sm = m_reserved_sm.lock() ) reserved_sm->insert( world_carry_item_entt, world_carry_item_pos );
   // clang-format off
   reg().emplace_or_replace<Cmp::AnimData>( world_carry_item_entt, Cmp::AnimData::Config{  
         .sprite_type =  Sys::ItemStore::instance().get_item( item ).sprite_type

@@ -70,10 +70,10 @@ sf::Vector2f HazardFieldSystem<HazardType>::init_hazard_field()
   auto [random_entity, random_pos] = Utils::Rnd::get_random_position(
       reg(), Utils::Rnd::IncludePack<Cmp::Obstacle>{}, Utils::Rnd::ExcludePack<Cmp::Wall, Cmp::Exit, Cmp::Player::Character, Cmp::Npc::NPC>(), seed );
   if ( random_entity == entt::null ) { return {}; }
-  auto reserved_navmesh = m_reserved_navmesh.lock();
-  if ( reserved_navmesh && not reserved_navmesh->at( random_pos ).empty() ) { return {}; }
+  auto reserved_sm = m_reserved_sm.lock();
+  if ( reserved_sm && not reserved_sm->at( random_pos ).empty() ) { return {}; }
 
-  Factory::Obstacle::remove_obstacle( reg(), random_entity, Factory::Obstacle::DeleteExtras::Yes, reserved_navmesh );
+  Factory::Obstacle::remove_obstacle( reg(), random_entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
   reg().template emplace<HazardType>( random_entity );
   // clang-format off
   reg().template emplace_or_replace<Cmp::AnimData>( random_entity, Cmp::AnimData::Config{  
@@ -115,7 +115,7 @@ sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field()
   if ( m_spread_update_clock.getElapsedTime() < m_update_period ) return {};
   m_spread_update_clock.restart();
 
-  auto reserved_navmesh = m_reserved_navmesh.lock();
+  auto reserved_sm = m_reserved_sm.lock();
   auto hazard_view = reg().template view<HazardType, Cmp::Position>();
   auto obstacle_view = reg().template view<Cmp::Obstacle, Cmp::Position, Cmp::AnimData>();
 
@@ -136,7 +136,7 @@ sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field()
       // only search for main obstacles, cap obstacles are removed implicitly by Factory::Obstacle::remove_obstacle()
       if ( not obst_anim_cmp.m_sprite_type.contains( ".main" ) ) continue;
       if ( not hazard_hitbox.findIntersection( obst_pos_cmp ) ) continue;
-      if ( reserved_navmesh && not reserved_navmesh->at( obst_pos_cmp ).empty() ) continue;
+      if ( reserved_sm && not reserved_sm->at( obst_pos_cmp ).empty() ) continue;
       SPDLOG_DEBUG( "Hazard intersected with object {}", static_cast<uint32_t>( obstacle_entity ) );
 
       if ( reg().template try_get<HazardType>( obstacle_entity ) ) continue;
@@ -146,7 +146,7 @@ sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field()
       SPDLOG_DEBUG( "hazard_pick:{}", hazard_pick );
       if ( hazard_pick == 0 )
       {
-        Factory::Obstacle::remove_obstacle( reg(), obstacle_entity, Factory::Obstacle::DeleteExtras::Yes, reserved_navmesh );
+        Factory::Obstacle::remove_obstacle( reg(), obstacle_entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
         reg().template emplace_or_replace<HazardType>( obstacle_entity );
         // clang-format off
         reg().template emplace_or_replace<Cmp::AnimData>( obstacle_entity, Cmp::AnimData::Config{  

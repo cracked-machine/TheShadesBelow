@@ -25,8 +25,8 @@ public:
               entt::dispatcher &scenemanager_event_dispatcher );
 
   //! @brief init the weak pointer for the reserved-positions grid, ahead of exit placement.
-  //! @param reserved_navmesh
-  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_navmesh ) { m_reserved_navmesh = reserved_navmesh; }
+  //! @param reserved_sm
+  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm ) { m_reserved_sm = reserved_sm; }
 
   //! @brief event handlers for pausing system clocks
   void on_pause() override {}
@@ -56,7 +56,7 @@ private:
   void unlock_exit();
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
-  PathFinding::SpatialHashGridWeakPtr m_reserved_navmesh;
+  PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
 };
 
 } // namespace Game::Sys
