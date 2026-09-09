@@ -4,6 +4,7 @@
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/ShadowHand.hpp>
+#include <Components/Npc/Spider.hpp>
 #include <Components/Particle/BlockParticle.hpp>
 #include <Components/Persistent/RuinMaxSpiders.hpp>
 #include <Components/Player/Character.hpp>
@@ -57,6 +58,7 @@
 #include <entt/entity/fwd.hpp>
 #include <numbers>
 #include <set>
+#include <spdlog/spdlog.h>
 #include <typeindex>
 
 namespace Game::Sys
@@ -529,7 +531,7 @@ void RuinSystem::create_spiders( sf::FloatRect scene_boundary )
   {
     if ( Utils::Collision::check_cmp<Cmp::Npc::NoPathFinding>( reg(), pos ) ) { return true; }
     if ( Utils::Collision::check_cmp<Cmp::Ruin::StairsSegment>( reg(), pos ) ) { return true; }
-    if ( reserved_sm && not reserved_sm->query_rect( pos.getBounds() ).empty() ) { return true; }
+    if ( reserved_sm && not reserved_sm->at( Cmp::Position( pos.position(), pos.size() ) ).empty() ) { return true; }
 
     // ensure spider is inside scene
     if ( not Cmp::RectBounds::scaled( pos.position(), pos.size(), 1.5f ).findIntersection( scene_boundary ) ) { return true; }
@@ -540,19 +542,16 @@ void RuinSystem::create_spiders( sf::FloatRect scene_boundary )
 
   // keep tryng to add spiders until we hit our target or exceed max attempts.
   int max_attempts = 100;
-  for ( auto _ : std::views::iota( 0, max_attempts ) )
+  for ( auto attempt : std::views::iota( 0, max_attempts ) )
   {
-    size_t spiders_count = 0;
-    for ( auto [npc_entt, npc_cmp, npc_sprite_cmp] : reg().view<Cmp::Npc::NPC, Cmp::AnimData>().each() )
-    {
-      if ( npc_sprite_cmp.m_sprite_type == "sprite.spider" ) { spiders_count++; }
-    }
-    if ( spiders_count >= kMaxSpiderCount ) break;
+    if ( reg().view<Cmp::Npc::Spider>().size() >= kMaxSpiderCount ) break;
 
     for ( auto _ : std::views::iota( uint16_t{ 0 }, kMaxSpiderCount ) )
     {
       auto [rnd_entt, rnd_pos_cmp] = Utils::Rnd::get_random_position( reg(), {}, {} );
+      SPDLOG_INFO( "Trying to spawn spider: {} of {}", attempt, max_attempts );
       if ( has_collision( Cmp::RectBounds::scaled( rnd_pos_cmp.position, rnd_pos_cmp.size, 1 ) ) ) continue;
+      SPDLOG_INFO( "Spawning spider {},{}", rnd_pos_cmp.position.x, rnd_pos_cmp.position.y );
 
       auto new_spider_entity = reg().create();
       Cmp::Position position_cmp = reg().emplace<Cmp::Position>( new_spider_entity, rnd_pos_cmp.position, rnd_pos_cmp.size );

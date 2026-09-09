@@ -104,7 +104,7 @@ void RuinSceneLowerFloor::on_init()
   auto max_iterations = Sys::PersistSystem::get<Cmp::Persist::RuinProcGenMaxIterations>( m_reg );
   auto &dla_sys = m_sys.find<Sys::Store::Type::DiffusionLtdAggrSystem>();
   dla_sys.iterate( sf::FloatRect( { 0.f, 0.f }, map_size_pixel ), sf::Vector2f{ 224.f, 144.f }, max_iterations.get_value(),
-                   level_gen.get_obstacle_sm() );
+                   level_gen.get_obstacle_sm(), *m_reserved_sm );
 
   level_gen.decorate_ruin_interior_obstacles();
   m_sys.find<Sys::Store::Type::RuinSystem>().remove_rune_markings_neighbouring_cobwebs( level_gen.get_non_obstacle_sm() );
@@ -229,10 +229,8 @@ void RuinSceneLowerFloor::do_update( [[maybe_unused]] sf::Time dt )
   bool is_player_cursed = m_sys.find<Sys::Store::Type::RuinSystem>().check_activate_player_curse( map_size_pixel );
   if ( is_player_cursed )
   {
-    // m_sys.find<Store::Type::RuinSystem>().check_create_witch( m_reg, sf::FloatRect( { 0, 0 }, map_size_pixel ) );
     auto scene_dimensions = sf::FloatRect( { 0, 0 }, map_size_pixel );
     m_sys.find<Store::Type::RuinSystem>().create_spiders( scene_dimensions );
-    // Factory::Shader::add_curse( m_sys.find<Sys::Store::Type::ShaderSystem>(), map_size_pixel );
   }
 
   // `check_exit_collision()` may reset the player curse so it must be called after `check_activate_player_curse()`

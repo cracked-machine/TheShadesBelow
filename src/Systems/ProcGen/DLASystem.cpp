@@ -13,14 +13,16 @@ namespace Game::Sys::ProcGen
 {
 
 void DLASystem::iterate( sf::FloatRect scene_size, const sf::Vector2f seed_pos, uint16_t particle_limit,
-                         PathFinding::SpatialHashGrid &levelgen_spatialgrid )
+                         PathFinding::SpatialHashGrid &levelgen_spatialgrid, PathFinding::SpatialHashGrid &reserved_sm )
 {
   // Carve the seed at center
   auto center_entities = levelgen_spatialgrid.at( Cmp::Position( seed_pos, Constants::kGridSizePxF ) );
   for ( auto &entt : center_entities )
   {
     Factory::Obstacle::remove_obstacle( reg(), entt );
-    levelgen_spatialgrid.remove( entt, Cmp::Position( seed_pos, Constants::kGridSizePxF ) );
+    const Cmp::Position remove_pos( seed_pos, Constants::kGridSizePxF );
+    levelgen_spatialgrid.remove( entt, remove_pos );
+    reserved_sm.remove( entt, remove_pos );
   }
   SPDLOG_INFO( "Seed particle position: {},{}", seed_pos.x, seed_pos.y );
 
@@ -71,6 +73,7 @@ void DLASystem::iterate( sf::FloatRect scene_size, const sf::Vector2f seed_pos, 
         {
           Factory::Obstacle::remove_obstacle( reg(), entt );
           levelgen_spatialgrid.remove( entt, particle );
+          reserved_sm.remove( entt, particle );
         }
         stuck = true;
         ++particle_count;

@@ -37,7 +37,8 @@ public:
   //! @param seed_pos World position of the initial carved (seed) cell that particles aggregate onto
   //! @param particle_limit Number of particles to spawn and walk to aggregation
   //! @param levelgen_spatialgrid Spatial grid of level-gen obstacles to read/update
-  void iterate( sf::FloatRect scene_size, const sf::Vector2f seed_pos, uint16_t particle_limit, PathFinding::SpatialHashGrid &levelgen_spatialgrid );
+  void iterate( sf::FloatRect scene_size, const sf::Vector2f seed_pos, uint16_t particle_limit, PathFinding::SpatialHashGrid &levelgen_spatialgrid,
+                PathFinding::SpatialHashGrid &reserved_sm );
 };
 
 } // namespace Game::Sys::ProcGen
