@@ -44,6 +44,7 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Player/NoPath.hpp>
+#include <Components/Player/PendingNoPath.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
@@ -671,6 +672,7 @@ void RenderOverlaySystem::render_ui_entity_inspect()
       }
       if ( reg().all_of<Cmp::Npc::NoPathFinding>( entity ) ) draw_line( "  NpcNoPathFinding", sf::Color::Red );
       if ( reg().all_of<Cmp::Player::NoPath>( entity ) ) draw_line( " NoPath", sf::Color::Red );
+      if ( reg().all_of<Cmp::Player::PendingNoPath>( entity ) ) draw_line( " PendingNoPath", sf::Color::Yellow );
       if ( reg().all_of<Cmp::Moveable>( entity ) ) draw_line( " Moveable", sf::Color::Green );
       if ( reg().all_of<Cmp::SelectedPosition>( entity ) ) draw_line( " Selected", sf::Color::Green );
       if ( reg().all_of<Cmp::Exit>( entity ) ) draw_line( " Exit", sf::Color::Green );
