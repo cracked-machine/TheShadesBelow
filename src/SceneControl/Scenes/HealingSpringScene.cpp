@@ -144,7 +144,7 @@ void HealingSpringScene::do_update( sf::Time dt )
   m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
 
   auto &overlay_sys = m_sys.find<Sys::Store::Type::RenderOverlaySystem>();
-  m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt, overlay_sys, m_generic_npc_navmesh );
+  m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt, overlay_sys, m_reserved_sm );
 }
 
 void HealingSpringScene::reinit_navmesh()

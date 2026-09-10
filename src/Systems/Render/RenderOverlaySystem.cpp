@@ -612,11 +612,12 @@ void RenderOverlaySystem::render_pathfinding_vector( const Cmp::Position &start_
 
 void RenderOverlaySystem::render_navmesh( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh )
 {
+  sf::Text text( m_font, "", 10 );
   for ( auto [pos_entt, pos_cmp] : reg().view<Cmp::Position>().each() )
   {
     if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), pos_cmp ) ) continue;
     auto entt_bucket = npc_navmesh->at( pos_cmp );
-    sf::Text text( m_font, std::to_string( entt_bucket.size() ), 10 );
+    text.setString( std::to_string( entt_bucket.size() ) );
     text.setFillColor( sf::Color::Blue );
     text.setOutlineColor( sf::Color::Black );
     text.setOutlineThickness( 1.f );

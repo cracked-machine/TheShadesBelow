@@ -104,7 +104,7 @@ RenderGameSystem::RenderGameSystem( entt::registry &reg, sf::RenderWindow &windo
 
 RenderGameSystem::~RenderGameSystem() = default;
 
-void RenderGameSystem::render_game( sf::Time dt, RenderOverlaySystem &render_overlay_sys, PathFinding::SpatialHashGridSharedPtr npc_navmesh,
+void RenderGameSystem::render_game( sf::Time dt, RenderOverlaySystem &render_overlay_sys, PathFinding::SpatialHashGridSharedPtr reserved_grid,
                                     PathFinding::SpatialHashGridSharedPtr render_position_grid )
 {
   using namespace Sprites;
@@ -159,7 +159,7 @@ void RenderGameSystem::render_game( sf::Time dt, RenderOverlaySystem &render_ove
   // lava pit outline
   render_overlay_sys.render_square_for_floatrect_cmp<Cmp::Crypt::RoomLavaPit>( sf::Color( 16, 16, 16 ), 0.5f );
 
-  if ( Utils::scene_setting<Cmp::SceneSettings::ShowNavmesh>( reg() ).enabled ) { render_overlay_sys.render_navmesh( npc_navmesh ); }
+  if ( Utils::scene_setting<Cmp::SceneSettings::ShowNavmesh>( reg() ).enabled ) { render_overlay_sys.render_navmesh( reserved_grid ); }
   if ( Utils::scene_setting<Cmp::SceneSettings::ShowPathFinding>( reg() ).enabled )
   {
 
