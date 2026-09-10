@@ -27,17 +27,6 @@ namespace Game::Sys
 class PlayerSystem : public BaseSystem
 {
 public:
-  //! @brief Which footstep sound effect (if any) should accompany the player's footstep sprites.
-  enum class FootStepSfx
-  {
-    //! @brief No footstep sound effect.
-    NONE,
-    //! @brief Gravel/outdoor footstep sound effect.
-    GRAVEL,
-    //! @brief Wooden floorboard footstep sound effect.
-    FLOORBOARDS
-  };
-
   //! @brief Construct a new Player System object
   //! @param reg
   //! @param window
@@ -152,10 +141,8 @@ private:
   //! @param ev
   void on_player_mortality_event( Game::Events::PlayerMortalityEvent ev );
 
-  //! @brief Promotes any Cmp::Player::PendingNoPath entity (e.g. a plant replanted directly under the
-  //! player) to a real Cmp::Player::NoPath + Cmp::Particle::BlockParticle once the player is no longer
-  //! standing on it, and inserts it into m_player_navmesh - nothing else does, since it was never
-  //! indexed while pending.
+  //! @brief Promotes any Cmp::Player::PendingNoPath entity to a real Cmp::Player::NoPath - if the player is no longer
+  //! standing on it - and inserts it into m_player_navmesh.
   void promote_pending_no_path();
 
   //! @brief Use this to send events to the scene manager

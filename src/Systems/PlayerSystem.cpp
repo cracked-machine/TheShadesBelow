@@ -124,9 +124,11 @@ void PlayerSystem::update( sf::Time dt )
   fade_player_on_wormhole_jump();
   blink_player();
 
-  auto *player_post_death_timeout = reg().try_get<Cmp::Player::PostDeathTimeout>( Utils::Player::get_entity( reg() ) );
-  if ( not player_post_death_timeout )
+  auto *post_death_timer = reg().try_get<Cmp::Player::PostDeathTimer>( Utils::Player::get_entity( reg() ) );
+  if ( post_death_timer ) { *post_death_timer += dt; }
+  else
   {
+
     check_player_can_push( dt );
     check_player_can_pull( dt );
     update_player_position( dt );
@@ -477,8 +479,8 @@ void PlayerSystem::check_player_mortality()
   auto player_view = reg().view<Cmp::Player::Character, Cmp::Player::Mortality, Cmp::Position>();
   for ( auto [entity, pc_cmp, mortality_cmp, player_pos_cmp] : player_view.each() )
   {
-    auto *player_post_death_timeout = reg().try_get<Cmp::Player::PostDeathTimeout>( entity );
-    if ( player_post_death_timeout and player_post_death_timeout->getElapsedTime() < sf::seconds( 5.f ) ) continue;
+    auto *post_death_timer = reg().try_get<Cmp::Player::PostDeathTimer>( entity );
+    if ( post_death_timer and *post_death_timer < post_death_timer->get_timeout() ) continue;
     if ( mortality_cmp.state == Cmp::Player::Mortality::State::DEAD )
     {
       if ( Utils::Player::player_has_extra_life( reg() ) )
@@ -489,12 +491,12 @@ void PlayerSystem::check_player_mortality()
         Utils::Player::get_player_stats( reg() ).apply_modifiers( { Cmp::Stats::Health{ 100 }, {}, {}, {}, {}, {}, {}, {} } );
         mortality_cmp.state = Cmp::Player::Mortality::State::ALIVE;
         reg().remove<Cmp::NoRender>( entity );
-        reg().remove<Cmp::Player::PostDeathTimeout>( entity );
+        reg().remove<Cmp::Player::PostDeathTimer>( entity );
       }
       else
       {
         SPDLOG_DEBUG( "Player has progressed to deadness." );
-        reg().remove<Cmp::Player::PostDeathTimeout>( entity );
+        reg().remove<Cmp::Player::PostDeathTimer>( entity );
 
         m_scenemanager_event_dispatcher.enqueue<Events::SceneManagerEvent>( Events::SceneManagerEvent::Type::GAME_OVER );
       }
@@ -858,7 +860,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
   auto common_death_throes = [&]()
   {
     reg().get<Cmp::Player::MovementDelta>( Utils::Player::get_entity( reg() ) ).m_distance = 0; // stop footstep sfx
-    reg().emplace_or_replace<Cmp::Player::PostDeathTimeout>( Utils::Player::get_entity( reg() ) );
+    reg().emplace_or_replace<Cmp::Player::PostDeathTimer>( Utils::Player::get_entity( reg() ) );
     reg().emplace_or_replace<Cmp::NoRender>( Utils::Player::get_entity( reg() ) );
     Utils::Player::get_player_stats( reg() ).apply_modifiers( { Cmp::Stats::Health{ -100 }, {}, {}, {}, {}, {}, {} } );
     SPDLOG_INFO( "Player death code: {}", static_cast<uint8_t>( ev.m_new_state ) );
