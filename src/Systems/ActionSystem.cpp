@@ -152,24 +152,9 @@ void ActionSystem::check_player_dig_obstacle_collision()
 
     if ( mouse_over_obstacle_or_cap )
     {
-      // Reserved obstacles sit under structures and cannot be dug, with one exception:
-      // a replanted plant reserves the tiles it lands on, but must not shield the
-      // obstacle underneath it from digging.
       auto reserved_sm = m_reserved_sm.lock();
-      if ( reserved_sm && not reserved_sm->at( obstacle_pos_cmp ).empty() )
-      {
-        bool reserved_by_plant = false;
-        for ( auto [seg_entt, seg_cmp, seg_pos_cmp] : reg().view<Cmp::PlantSegment, Cmp::Position>().each() )
-        {
-          if ( seg_pos_cmp.findIntersection( obstacle_pos_cmp ) )
-          {
-            reserved_by_plant = true;
-            break;
-          }
-        }
-        if ( not reserved_by_plant ) continue;
-      }
-
+      if ( not reserved_sm ) return;
+      
       // check player is near obstacle that was mouse-selected
       if ( not Utils::Player::is_player_near( reg(), obstacle_pos_cmp ) ) continue;
 
