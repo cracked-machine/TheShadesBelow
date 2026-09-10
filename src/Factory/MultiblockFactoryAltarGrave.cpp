@@ -7,9 +7,9 @@ namespace detail
 {
 
 // clang-format off
-template void create_multiblock<Cmp::Altar::MultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-template void create_multiblock<Cmp::Grave::MultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-template void create_multiblock<Cmp::Grave::ExitMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
+template void create_multiblock<Cmp::Altar::MultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+template void create_multiblock<Cmp::Grave::MultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+template void create_multiblock<Cmp::Grave::ExitMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
 
 template void update_segments<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( entt::registry &, const Sprites::SpriteSheet &, entt::entity, Cmp::Altar::MultiBlock );
 template void update_segments<Cmp::Grave::MultiBlock, Cmp::Grave::Segment>( entt::registry &, const Sprites::SpriteSheet &, entt::entity, Cmp::Grave::MultiBlock );

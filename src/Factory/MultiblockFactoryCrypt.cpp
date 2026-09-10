@@ -7,8 +7,8 @@ namespace detail
 {
 
 // clang-format off
-template void create_multiblock<Cmp::Crypt::BuildingMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-template void create_multiblock<Cmp::Crypt::ObjectiveMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
+template void create_multiblock<Cmp::Crypt::BuildingMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+template void create_multiblock<Cmp::Crypt::ObjectiveMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
 
 template void update_segments<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( entt::registry &, const Sprites::SpriteSheet &, entt::entity, Cmp::Crypt::BuildingMultiBlock );
 template void update_segments<Cmp::Crypt::ObjectiveMultiBlock, Cmp::Crypt::ObjectiveSegment>( entt::registry &, const Sprites::SpriteSheet &, entt::entity, Cmp::Crypt::ObjectiveMultiBlock );

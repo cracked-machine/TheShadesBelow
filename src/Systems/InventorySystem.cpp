@@ -139,9 +139,7 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
     if ( not inventory_slot_cmp->m_item.sprite_type.contains( "drop" ) )
     {
       auto [mb_entt, segment_entt_list] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>(
-          reg(), plant_pos, m_sprite_factory.get_spritesheet_by_type( inventory_slot_cmp->m_item.sprite_type ), 0, 0,
-          m_reserved_sm.lock().get() );
-
+          reg(), plant_pos, m_sprite_factory.get_spritesheet_by_type( inventory_slot_cmp->m_item.sprite_type ), 0, 0, m_reserved_sm.lock().get() );
       // Preserve the item this plant was grown from, so digging it back up (see the DIG handler in
       // on_player_action_event) can hand it back via the normal pickup_world_item path instead of
       // having to re-derive an item id from the multiblock's sprite.

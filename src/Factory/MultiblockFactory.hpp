@@ -78,11 +78,10 @@ namespace detail
 //! @param pos
 //! @param ss
 //! @param ss_index Sprite frame index within `ss`.
-//! @param reserved_sm If provided, reserves the multiblock root's position.
 template <typename MULTIBLOCK>
   requires IsMB<MULTIBLOCK>
 void create_multiblock( entt::registry &reg, entt::entity entity, const Cmp::UUID &uuid, Cmp::Position pos, const Sprites::SpriteSheet &ss,
-                        size_t ss_index = 0, PathFinding::SpatialHashGrid *reserved_sm = nullptr );
+                        size_t ss_index = 0 );
 
 //! @brief Recompute solid mask, z-order and pathfinding-blocking components for every MBSEGMENT inside `mb_cmp`'s bounds.
 //! @tparam MULTIBLOCK Multiblock bounds component type.
@@ -138,20 +137,20 @@ std::pair<entt::entity, std::vector<entt::entity>> add_multiblock_with_segments(
 namespace Game::Factory::Multiblock::detail
 {
 
-extern template void create_multiblock<Cmp::PlantMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-extern template void create_multiblock<Cmp::Grave::ExitMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-extern template void create_multiblock<Cmp::HealingSpringMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-extern template void create_multiblock<Cmp::Crypt::ObjectiveMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-extern template void create_multiblock<Cmp::Ruin::StairsLowerMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-extern template void create_multiblock<Cmp::Ruin::StairsUpperMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-extern template void create_multiblock<Cmp::Ruin::StairsBalustradeMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-extern template void create_multiblock<Cmp::Ruin::StairsGateMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-extern template void create_multiblock<Cmp::Ruin::HexagramMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-extern template void create_multiblock<Cmp::Altar::MultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-extern template void create_multiblock<Cmp::Grave::MultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-extern template void create_multiblock<Cmp::Crypt::BuildingMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-extern template void create_multiblock<Cmp::HealingSpringBuildingMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-extern template void create_multiblock<Cmp::Ruin::BuildingMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
+extern template void create_multiblock<Cmp::PlantMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+extern template void create_multiblock<Cmp::Grave::ExitMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+extern template void create_multiblock<Cmp::HealingSpringMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+extern template void create_multiblock<Cmp::Crypt::ObjectiveMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+extern template void create_multiblock<Cmp::Ruin::StairsLowerMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+extern template void create_multiblock<Cmp::Ruin::StairsUpperMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+extern template void create_multiblock<Cmp::Ruin::StairsBalustradeMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+extern template void create_multiblock<Cmp::Ruin::StairsGateMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+extern template void create_multiblock<Cmp::Ruin::HexagramMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+extern template void create_multiblock<Cmp::Altar::MultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+extern template void create_multiblock<Cmp::Grave::MultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+extern template void create_multiblock<Cmp::Crypt::BuildingMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+extern template void create_multiblock<Cmp::HealingSpringBuildingMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+extern template void create_multiblock<Cmp::Ruin::BuildingMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
 
 extern template void update_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>( entt::registry &, const Sprites::SpriteSheet &, entt::entity, Cmp::PlantMultiBlock );
 extern template void update_segments<Cmp::Grave::ExitMultiBlock, Cmp::Grave::ExitSegment>( entt::registry &, const Sprites::SpriteSheet &, entt::entity, Cmp::Grave::ExitMultiBlock );

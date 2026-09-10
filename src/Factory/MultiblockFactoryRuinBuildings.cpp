@@ -7,8 +7,8 @@ namespace detail
 {
 
 // clang-format off
-template void create_multiblock<Cmp::Ruin::BuildingMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
-template void create_multiblock<Cmp::Ruin::HexagramMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t, PathFinding::SpatialHashGrid * );
+template void create_multiblock<Cmp::Ruin::BuildingMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
+template void create_multiblock<Cmp::Ruin::HexagramMultiBlock>( entt::registry &, entt::entity, const Cmp::UUID &, Cmp::Position, const Sprites::SpriteSheet &, size_t );
 
 template void update_segments<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>( entt::registry &, const Sprites::SpriteSheet &, entt::entity, Cmp::Ruin::BuildingMultiBlock );
 template void update_segments<Cmp::Ruin::HexagramMultiBlock, Cmp::Ruin::HexagramSegment>( entt::registry &, const Sprites::SpriteSheet &, entt::entity, Cmp::Ruin::HexagramMultiBlock );

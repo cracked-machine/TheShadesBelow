@@ -34,7 +34,7 @@ namespace detail
 template <typename MULTIBLOCK>
   requires IsMB<MULTIBLOCK>
 void create_multiblock( entt::registry &reg, entt::entity entity, const Cmp::UUID &uuid, Cmp::Position pos, const Sprites::SpriteSheet &ss,
-                        size_t ss_index, PathFinding::SpatialHashGrid *reserved_sm )
+                        size_t ss_index )
 {
   reg.emplace_or_replace<MULTIBLOCK>( entity, pos.position, ss.get_px_size() );
   // clang-format off
@@ -45,7 +45,10 @@ void create_multiblock( entt::registry &reg, entt::entity entity, const Cmp::UUI
   });
   // clang-format on
   reg.emplace_or_replace<Cmp::ZOrderValue>( entity, pos.position.y );
-  if ( reserved_sm != nullptr ) reserved_sm->insert( entity, pos );
+  // Deliberately not reserved here: reserving the root's own origin cell before
+  // create_multiblock_segments() scans for candidate tiles would make that cell fail its own
+  // reserved_sm check, permanently skipping the segment there (e.g. the top cell of a 1x2 plant).
+  // The origin cell gets reserved along with every other covered cell once its segment is created.
   reg.emplace_or_replace<Cmp::UUID>( entity, uuid );
   reg.emplace_or_replace<Cmp::Position>( entity, pos.position, ss.get_px_size() );
 
@@ -155,7 +158,12 @@ std::vector<entt::entity> create_multiblock_segments( entt::registry &reg, entt:
     if ( not pos_cmp.findIntersection( new_multiblock_bounds ) ) continue;
     if ( not reg.all_of<Cmp::Armable>( pos_entity ) ) continue;
     if ( reg.any_of<MULTIBLOCK, MBSEGMENT, Cmp::Player::Character, Cmp::Npc::NPC, Cmp::WorldItem>( pos_entity ) ) continue;
-    if ( ( reserved_sm != nullptr ) && not reserved_sm->at( pos_cmp ).empty() ) continue;
+    // Plants may be grown over an already-reserved tile (e.g. an obstacle) - every other
+    // multiblock type still needs the tile free to avoid overlapping another structure.
+    if constexpr ( not std::is_same_v<MBSEGMENT, Cmp::PlantSegment> )
+    {
+      if ( ( reserved_sm != nullptr ) && not reserved_sm->at( pos_cmp ).empty() ) continue;
+    }
     world_pos_entt_list.push_back( pos_entity );
   }
 
@@ -233,9 +241,11 @@ std::pair<entt::entity, std::vector<entt::entity>> add_multiblock_with_segments(
 {
   auto mb_entt = reg.create();
   Cmp::Position new_pos_cmp( position, ss.get_sprite_size() );
-  reg.emplace_or_replace<Cmp::Position>( mb_entt, new_pos_cmp.position, ss.get_sprite_size() );
   auto uuid = Cmp::UUID::generate();
-  Multiblock::detail::create_multiblock<MULTIBLOCK>( reg, mb_entt, uuid, new_pos_cmp, ss, ss_index, reserved_sm );
+
+  reg.emplace_or_replace<Cmp::Position>( mb_entt, new_pos_cmp.position, ss.get_sprite_size() );
+
+  Multiblock::detail::create_multiblock<MULTIBLOCK>( reg, mb_entt, uuid, new_pos_cmp, ss, ss_index );
   auto segment_entt_list = Multiblock::detail::create_multiblock_segments<MULTIBLOCK, MBSEGMENT>( reg, mb_entt, uuid, new_pos_cmp, ss, reserved_sm );
 
   for ( auto [mb_entt, mb_cmp, mb_zorder_cmp] : reg.view<MULTIBLOCK, Cmp::ZOrderValue>().each() )
