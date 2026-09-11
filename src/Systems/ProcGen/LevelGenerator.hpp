@@ -117,6 +117,9 @@ public:
   //! @return PathFinding::SpatialHashGrid&
   PathFinding::SpatialHashGrid &get_reserved_sm();
 
+  //! @brief Remove Cmp::Obstacle/Cmp::ObstacleCap entities from the reserved spatial map
+  void cleanup_reserved();
+
   //! @brief event handlers for pausing system clocks
   void on_pause() override {}
   //! @brief event handlers for resuming system clocks

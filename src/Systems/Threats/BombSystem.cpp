@@ -150,7 +150,6 @@ void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_en
 {
   constexpr float kZOrderOffset = 64.f;
 
-  SPDLOG_DEBUG( "Recursive call {}", depth );
   constexpr int kMaxRecursionDepth = 10;
   if ( depth >= kMaxRecursionDepth ) return;
 

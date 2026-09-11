@@ -7,6 +7,7 @@
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Obstacle.hpp>
+#include <Components/ObstacleCap.hpp>
 #include <Components/Particle/Flame.hpp>
 #include <Components/Particle/SpriteBase.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
@@ -150,6 +151,7 @@ void GraveyardScene::on_init()
   cellauto_parser.iterate( level_gen.get_obstacle_sm(), level_gen.get_reserved_sm() );
 
   level_gen.decorate_graveyard_exterior_obstacles();
+  level_gen.cleanup_reserved();
 
   // create navmeshes for pathfinding
   m_generic_npc_navmesh = Factory::Pathfinding::create_npc_navmesh( m_reg );

@@ -17,6 +17,7 @@
 #include <Components/Grave/Segment.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Moveable.hpp>
+#include <Components/ObstacleCap.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/MaxNumAltars.hpp>
 #include <Components/Persistent/MaxNumCrypts.hpp>
@@ -89,6 +90,18 @@ PathFinding::SpatialHashGrid &LevelGenerator::get_obstacle_sm() { return *m_obst
 PathFinding::SpatialHashGrid &LevelGenerator::get_void_sm() { return *m_void_sm; }
 PathFinding::SpatialHashGrid &LevelGenerator::get_non_obstacle_sm() { return *m_non_obstacle_sm; }
 PathFinding::SpatialHashGrid &LevelGenerator::get_reserved_sm() { return *m_reserved_sm; }
+
+void LevelGenerator::cleanup_reserved()
+{
+  for ( auto entt : reg().view<Cmp::Obstacle, Cmp::Position>() )
+  {
+    m_reserved_sm->remove( entt, reg().get<Cmp::Position>( entt ) );
+  }
+  for ( auto entt : reg().view<Cmp::ObstacleCap, Cmp::Position>() )
+  {
+    m_reserved_sm->remove( entt, reg().get<Cmp::Position>( entt ) );
+  }
+}
 
 void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
 {
