@@ -1,5 +1,6 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Npc/Shockwave.hpp>
+#include <Components/Npc/ShockwaveTimer.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
@@ -191,6 +192,7 @@ void ShockwaveSystem::update( sf::Time dt )
     if ( anim_cmp.m_sprite_type == "sprite.priest" )
     {
       // cooldown is handled in Factory function via Cmp::Npc::ShockwaveTimer per NPC
+      if ( auto *shockwave_timer = reg().try_get<Cmp::Npc::ShockwaveTimer>( npc_entt ) ) *shockwave_timer += dt;
       auto created_shockwave = Factory::Npc::create_shockwave( reg(), npc_entt );
       if ( created_shockwave )
       {

@@ -1,5 +1,6 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/AbsoluteAlpha.hpp>
+#include <Components/Altar/AltarActivationTimer.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Altar/Sacrifice.hpp>
 #include <Components/Altar/Segment.hpp>
@@ -14,7 +15,6 @@
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Particle/Flame.hpp>
-#include <Components/Player/AltarActivationCooldown.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -67,8 +67,9 @@ void AltarSystem::on_player_action( Events::PlayerActionEvent ev )
   }
 }
 
-void AltarSystem::update()
+void AltarSystem::update( sf::Time dt )
 {
+  if ( auto *altar_timer = reg().try_get<Cmp::Altar::ActivationTimer>( Utils::Player::get_entity( reg() ) ) ) *altar_timer += dt;
   // tidy up any dead altar sacrifice animations
   auto altar_sacrifice_view = reg().view<Cmp::Altar::Sacrifice, Cmp::AnimData>();
   for ( auto [altar_sacrifice_entt, altar_sacrifice_cmp, altar_sacrifice_anim_cmp] : altar_sacrifice_view.each() )
@@ -82,9 +83,8 @@ void AltarSystem::update()
 
 void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp )
 {
-  static const sf::Time kActivationCooldownSeconds{ sf::seconds( 3.f ) };
-  auto *altar_cooldown = reg().try_get<Cmp::Player::AltarActivationCooldown>( Utils::Player::get_entity( reg() ) );
-  if ( altar_cooldown and altar_cooldown->getElapsedTime() < kActivationCooldownSeconds ) return;
+  auto *altar_timer = reg().try_get<Cmp::Altar::ActivationTimer>( Utils::Player::get_entity( reg() ) );
+  if ( altar_timer and *altar_timer < altar_timer->get_timeout() ) return;
 
   auto *altar_uuid_cmp = reg().try_get<Cmp::UUID>( altar_entity );
   if ( not altar_uuid_cmp ) throw std::runtime_error( "Altar does not have UUID" );
@@ -108,7 +108,7 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
     m_sound_bank.get_effect( "shrine_lighting" ).play();
     Factory::Altar::create_altar_sacrifice_anim( reg(), new_pos, sprite_type );
 
-    reg().emplace_or_replace<Cmp::Player::AltarActivationCooldown>( Utils::Player::get_entity( reg() ) );
+    reg().emplace_or_replace<Cmp::Altar::ActivationTimer>( Utils::Player::get_entity( reg() ) );
   };
 
   // sacrifice jewels at any time

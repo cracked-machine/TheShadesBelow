@@ -61,8 +61,7 @@ void create_npc_container( entt::registry &reg, entt::entity entt, Cmp::Position
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, pos_cmp.position.y - zorder );
 }
 
-void destroy_npc_container( entt::registry &registry, entt::entity npc_container_entity,
-                            const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
+void destroy_npc_container( entt::registry &registry, entt::entity npc_container_entity, const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
 {
   if ( reserved_sm )
   {
@@ -78,15 +77,11 @@ bool create_shockwave( entt::registry &registry, entt::entity npc_entt )
 {
   // get the shockwave timer for the NPC
   auto *shockwave_timer = registry.try_get<Cmp::Npc::ShockwaveTimer>( npc_entt );
-  if ( not shockwave_timer )
-  {
-    SPDLOG_DEBUG( "Unable to get Cmp::Npc::ShockwaveTimer from NPC entity" );
-    return false;
-  }
+  if ( not shockwave_timer ) { return false; }
 
   // check cooldown on this NPC shockwave timer
   sf::Time sw_emit_freq{ sf::milliseconds( Sys::PersistSystem::get<Cmp::Persist::NpcShockwaveFreq>( registry ).get_value() ) };
-  if ( shockwave_timer->getElapsedTime() > sw_emit_freq )
+  if ( *shockwave_timer > sw_emit_freq )
   {
     // create a new entity for adding the shockwave component to the NPC position
     auto *npc_pos = registry.try_get<Cmp::Position>( npc_entt );
@@ -98,8 +93,7 @@ bool create_shockwave( entt::registry &registry, entt::entity npc_entt )
     auto npc_sw_entt = registry.create();
     int circle_resolution = Sys::PersistSystem::get<Cmp::Persist::NpcShockwaveResolution>( registry ).get_value();
     registry.emplace_or_replace<Cmp::Npc::Shockwave>( npc_sw_entt, npc_pos->getCenter(), circle_resolution );
-
-    shockwave_timer->restart(); // make sure we restart the timer
+    registry.emplace_or_replace<Cmp::Npc::ShockwaveTimer>( npc_entt );
     return true;
   }
   return false;

@@ -3,6 +3,7 @@
 #include <Components/AbsoluteOffset.hpp>
 #include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AbsoluteRotation.hpp>
+#include <Components/Altar/AltarActivationTimer.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Crypt/Chest.hpp>
@@ -39,9 +40,10 @@
 #include <Components/Persistent/WeaponDegradePerHit.hpp>
 #include <Components/Plant/BurningTimeAccumulator.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/DiggingTimer.hpp>
 #include <Components/Player/Mortality.hpp>
 #include <Components/Player/MovementDelta.hpp>
-#include <Components/Player/MovementSuppressCooldown.hpp>
+#include <Components/Player/MovementSuppressTimer.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Player/PendingNoPath.hpp>
 #include <Components/Player/PostDeathTimeout.hpp>
@@ -177,11 +179,11 @@ void PlayerSystem::force_expire_damage_cooldown()
 
 bool PlayerSystem::movement_suppressed()
 {
-  auto *suppress_cmp = reg().try_get<Cmp::Player::MovementSuppressCooldown>( Utils::Player::get_entity( reg() ) );
+  auto *suppress_cmp = reg().try_get<Cmp::Player::MovementSuppressTimer>( Utils::Player::get_entity( reg() ) );
   if ( not suppress_cmp ) return false;
 
   auto movement_delay = Sys::PersistSystem::get<Cmp::Persist::PostPullMovementDelay>( reg() );
-  return suppress_cmp->getElapsedTime().asSeconds() < movement_delay.get_value();
+  return suppress_cmp->asSeconds() < movement_delay.get_value();
 }
 
 std::optional<Cmp::Direction> PlayerSystem::compute_step_direction( sf::Time dt, bool apply_speed_penalty )
@@ -306,7 +308,7 @@ void PlayerSystem::move_obstacle( const sf::FloatRect &target_position )
           rune_cmp.active = any_obstacle_on_rune;
         }
       }
-      reg().emplace_or_replace<Cmp::Player::MovementSuppressCooldown>( Utils::Player::get_entity( reg() ) );
+      reg().emplace_or_replace<Cmp::Player::MovementSuppressTimer>( Utils::Player::get_entity( reg() ) );
       break;
     }
   }
@@ -689,6 +691,8 @@ void PlayerSystem::check_timed_action_side_effects( sf::Time dt )
 
 void PlayerSystem::update_timed_action_clocks( sf::Time dt )
 {
+  auto player_entt = Utils::Player::get_entity( reg() );
+  if ( auto *suppress_timer = reg().try_get<Cmp::Player::MovementSuppressTimer>( player_entt ) ) *suppress_timer += dt;
 
   // update PlayerInventorySlot/NPC/DarknessFear clock every frame.
   for ( auto [slot_entt, slot_cmp] : reg().view<Cmp::PlayerInventorySlot>().each() )

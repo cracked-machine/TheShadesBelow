@@ -297,7 +297,7 @@ void GraveyardScene::do_update( sf::Time dt )
   }
 
   PROFILED( m_sys.find<Sys::Store::Type::CryptSystem>().unlock_crypt_door() );
-  PROFILED( m_sys.find<Sys::Store::Type::AltarSystem>().update() );
+  PROFILED( m_sys.find<Sys::Store::Type::AltarSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::HealingSpringSystem>().update_building_zorder() );
   PROFILED( m_sys.find<Sys::Store::Type::HealingSpringSystem>().check_entrance_collision() );
   PROFILED( m_sys.find<Sys::Store::Type::RuinSystem>().update_exit_zorder() );

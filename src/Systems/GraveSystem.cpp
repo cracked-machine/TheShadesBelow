@@ -9,7 +9,7 @@
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
 #include <Components/Persistent/WeaponDegradePerHit.hpp>
 #include <Components/Player/Character.hpp>
-#include <Components/Player/DiggingCooldown.hpp>
+#include <Components/Player/DiggingTimer.hpp>
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
@@ -65,7 +65,7 @@ void GraveSystem::update()
     // We are in proximity to an entity that is a candidate for a new SelectedPosition component.
     // Add a new SelectedPosition component to the entity
     reg().emplace_or_replace<Cmp::SelectedPosition>( grave_entity, grave_pos_cmp.position );
-    reg().emplace_or_replace<Cmp::Player::DiggingCooldown>( Utils::Player::get_entity( reg() ) );
+    reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
     apply_dig_hit( grave_entity, grave_cmp, grave_anim_cmp );
   }
@@ -85,8 +85,8 @@ bool GraveSystem::has_digging_tool_equipped()
 bool GraveSystem::is_dig_on_cooldown()
 {
   auto digging_cooldown_amount = Sys::PersistSystem::get<Cmp::Persist::DiggingCooldownThreshold>( reg() ).get_value();
-  auto *dig_cooldown = reg().try_get<Cmp::Player::DiggingCooldown>( Utils::Player::get_entity( reg() ) );
-  return ( dig_cooldown != nullptr ) and dig_cooldown->getElapsedTime() < sf::seconds( digging_cooldown_amount );
+  auto *dig_cooldown = reg().try_get<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
+  return ( dig_cooldown != nullptr ) and *dig_cooldown < sf::seconds( digging_cooldown_amount );
 }
 
 void GraveSystem::clear_stale_grave_selections()

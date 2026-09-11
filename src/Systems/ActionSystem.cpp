@@ -22,7 +22,7 @@
 #include <Components/Persistent/WeaponDegradePerHit.hpp>
 #include <Components/Plant/BurningTimeAccumulator.hpp>
 #include <Components/Player/Character.hpp>
-#include <Components/Player/DiggingCooldown.hpp>
+#include <Components/Player/DiggingTimer.hpp>
 #include <Components/Random.hpp>
 #include <Components/SelectedPosition.hpp>
 #include <Components/Stats/BurnAction.hpp>
@@ -87,6 +87,7 @@ void ActionSystem::update( [[maybe_unused]] sf::Time dt )
   update_burning_worlditems( dt );
 
   // abort if still in cooldown
+  if ( auto *digging_timer = reg().try_get<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) ) ) *digging_timer += dt;
   if ( is_digging_on_cooldown() ) { return; }
 }
 
@@ -154,7 +155,7 @@ void ActionSystem::check_player_dig_obstacle_collision()
     {
       auto reserved_sm = m_reserved_sm.lock();
       if ( not reserved_sm ) return;
-      
+
       // check player is near obstacle that was mouse-selected
       if ( not Utils::Player::is_player_near( reg(), obstacle_pos_cmp ) ) continue;
 
@@ -165,7 +166,7 @@ void ActionSystem::check_player_dig_obstacle_collision()
       // Add a new SelectedPosition component to the entity
       reg().emplace_or_replace<Cmp::SelectedPosition>( obstacle_entt, obstacle_pos_cmp.position );
 
-      reg().emplace_or_replace<Cmp::Player::DiggingCooldown>( Utils::Player::get_entity( reg() ) );
+      reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
       // calculate new alpha value and apply to the current obstacle and any obstacle with matching UUID (cap sprite obstacles)
       auto damage_per_hit = Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).get_value();
@@ -306,7 +307,7 @@ void ActionSystem::check_player_dig_plant_collision()
       // Add a new SelectedPosition component to the entity
       reg().emplace_or_replace<Cmp::SelectedPosition>( plant_entt, plant_mb_cmp.position );
 
-      reg().emplace_or_replace<Cmp::Player::DiggingCooldown>( Utils::Player::get_entity( reg() ) );
+      reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
       float reduction_amount = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
       Utils::Player::reduce_inventory_wear_level( reg(), reduction_amount );
@@ -386,7 +387,7 @@ void ActionSystem::check_player_smash_pot()
       // check player is facing the obstacle
       if ( not Utils::Player::get_projected_position( reg() ).findIntersection( loot_container_pos ) ) continue;
 
-      reg().emplace_or_replace<Cmp::Player::DiggingCooldown>( Utils::Player::get_entity( reg() ) );
+      reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
       loot_container.hp -= Utils::Maths::to_percent( 100.f, Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).get_value() );
 
       float weapon_dmg_delta = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
@@ -543,8 +544,8 @@ void ActionSystem::reset_all_selected_positions()
 bool ActionSystem::is_digging_on_cooldown()
 {
   auto digging_cooldown_amount = Sys::PersistSystem::get<Cmp::Persist::DiggingCooldownThreshold>( reg() ).get_value();
-  auto *player_dig_cooldown = reg().try_get<Cmp::Player::DiggingCooldown>( Utils::Player::get_entity( reg() ) );
-  return ( player_dig_cooldown != nullptr ) and player_dig_cooldown->getElapsedTime() < sf::seconds( digging_cooldown_amount );
+  auto *player_dig_cooldown = reg().try_get<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
+  return ( player_dig_cooldown != nullptr ) and * player_dig_cooldown < sf::seconds( digging_cooldown_amount );
 }
 
 void ActionSystem::update_burning_worlditems( sf::Time dt )

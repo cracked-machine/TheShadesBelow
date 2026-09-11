@@ -23,7 +23,7 @@ public:
   AltarSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
 
   //! @brief Per-frame tidy up
-  void update();
+  void update( sf::Time dt );
 
   //! @brief event handlers for pausing system clocks
   void on_pause() override {}
