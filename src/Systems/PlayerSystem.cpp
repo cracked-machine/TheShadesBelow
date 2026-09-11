@@ -420,9 +420,9 @@ void PlayerSystem::update_player_position( sf::Time dt )
     }
   };
 
-  // Use the players last direction to decide which axis is favored first for the collision detection.
-  const Cmp::LastDirection &last_dir = Utils::Player::get_last_direction( reg() );
-  if ( std::abs( last_dir.x ) >= std::abs( last_dir.y ) )
+  // Use the axis of the last committed movement to decide which axis is favored first for the
+  // collision detection this frame.
+  if ( std::abs( m_last_committed_axis.x ) >= std::abs( m_last_committed_axis.y ) )
   {
     try_horizontal();
     try_vertical();
@@ -448,15 +448,15 @@ void PlayerSystem::update_player_position( sf::Time dt )
     player_pos.position += resolved_dir_vector;
     movement_delta.m_distance = std::hypot( resolved_dir_vector.x, resolved_dir_vector.y );
 
-    // Record which axis actually carried this frame's movement using the resolved vector (not raw input)
+    // Record which axis actually carried this frame's movement using the resolved vector (not raw
+    // input), purely to bias next frame's axis processing order above - see m_last_committed_axis.
     if ( resolved_dir_vector.x != 0.0f || resolved_dir_vector.y != 0.0f )
     {
-      Cmp::LastDirection &next_last_dir = Utils::Player::get_last_direction( reg() );
       if ( std::abs( resolved_dir_vector.x ) >= std::abs( resolved_dir_vector.y ) )
       {
-        next_last_dir = sf::Vector2f{ resolved_dir_vector.x > 0.f ? 1.f : -1.f, 0.f };
+        m_last_committed_axis = sf::Vector2f{ resolved_dir_vector.x > 0.f ? 1.f : -1.f, 0.f };
       }
-      else { next_last_dir = sf::Vector2f{ 0.f, resolved_dir_vector.y > 0.f ? 1.f : -1.f }; }
+      else { m_last_committed_axis = sf::Vector2f{ 0.f, resolved_dir_vector.y > 0.f ? 1.f : -1.f }; }
     }
   }
 }
@@ -491,6 +491,12 @@ void PlayerSystem::update_player_animation()
     else if ( direction_cmp.x == -1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.west"; }
     else if ( direction_cmp.y == -1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.north"; }
     else if ( direction_cmp.y == 1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.south"; }
+
+    // Store the facing direction from raw input - not resolved movement - so it keeps updating even
+    // when the player is blocked (e.g. turning to face an obstacle to dig it without moving into it).
+    auto &last_dir = Utils::Player::get_last_direction( reg() );
+    if ( std::abs( direction_cmp.x ) >= std::abs( direction_cmp.y ) ) { last_dir = sf::Vector2f{ direction_cmp.x > 0.f ? 1.f : -1.f, 0.f }; }
+    else { last_dir = sf::Vector2f{ 0.f, direction_cmp.y > 0.f ? 1.f : -1.f }; }
   }
 }
 

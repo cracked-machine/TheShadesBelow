@@ -174,6 +174,12 @@ private:
 
   //! @brief True while the bow is being drawn (left mouse button held with bow equipped).
   bool m_bow_drawing{ false };
+
+  //! @brief Axis of the last successfully committed player movement, used only to decide which axis
+  //! `update_player_position` resolves first each frame (see the axis-favoring fix in that function).
+  //! Deliberately separate from Cmp::LastDirection, which tracks facing intent for dig/interact checks
+  //! and must keep updating even when the player is blocked - unlike this, which must not.
+  Cmp::Direction m_last_committed_axis{ sf::Vector2f{ 1.f, 0.f } };
 };
 
 } // namespace Game::Sys
