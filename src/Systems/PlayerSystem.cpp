@@ -30,7 +30,7 @@
 #include <Components/Particle/BlockParticle.hpp>
 #include <Components/Particle/SpriteBase.hpp>
 #include <Components/Persistent/PcDamageDelay.hpp>
-#include <Components/Persistent/PlayerAnimFramerate.hpp>
+#include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
@@ -470,15 +470,15 @@ void PlayerSystem::update_player_animation()
   Cmp::AnimData &anim_cmp = Utils::Player::get_sprite_anim( reg() );
   const auto &movement_delta = reg().get<Cmp::Player::MovementDelta>( Utils::Player::get_entity( reg() ) );
 
-  // PlayerAnimFramerate is tuned assuming the player moves at kAnimBaselineMovementSpeed;
-  // scale it so the walk cycle still matches actual pixel speed when PlayerMovementSpeed
-  // itself is changed (e.g. via the debug slider), not just when SpeedPenalty is active.
-  static constexpr float kAnimBaselineMovementSpeed = 75.f;
-  const float base_framerate = Sys::PersistSystem::get<Cmp::Persist::PlayerAnimFramerate>( reg() ).get_value();
+  // Distance the player must cover between animation frame changes; tying the trigger to
+  // distance rather than time makes the walk cycle cadence scale with actual movement speed
+  // automatically, including any active Cmp::Player::SpeedPenalty (see FootstepSystem for the
+  // same pattern applied to footstep sfx).
+  const float stride_length = Sys::PersistSystem::get<Cmp::Persist::PlayerAnimStrideLength>( reg() ).get_value();
   const float movement_speed = Sys::PersistSystem::get<Cmp::Persist::PlayerMovementSpeed>( reg() ).get_value();
   const float speed_penalty = Utils::Player::get_speed_penalty( reg() );
   const float effective_speed = movement_speed * speed_penalty;
-  anim_cmp.set_framerate( effective_speed > 0.f ? base_framerate * ( kAnimBaselineMovementSpeed / effective_speed ) : base_framerate );
+  anim_cmp.set_framerate( effective_speed > 0.f ? stride_length / effective_speed : stride_length );
 
   // update the animation state based on movement direction
   if ( direction_cmp == sf::Vector2f( 0.0f, 0.0f ) ) { anim_cmp.m_enabled = false; }

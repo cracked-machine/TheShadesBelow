@@ -49,7 +49,7 @@
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
 #include <Components/Persistent/PcDamageDelay.hpp>
 #include <Components/Persistent/PlantBurnDuration.hpp>
-#include <Components/Persistent/PlayerAnimFramerate.hpp>
+#include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerFootstepAddDelay.hpp>
 #include <Components/Persistent/PlayerFootstepFadeDelay.hpp>
@@ -162,7 +162,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::NpcWatchmanIdleDirectionChangeInterval>();
   add_component<Cmp::Persist::PcDamageDelay>();
   add_component<Cmp::Persist::PlantBurnDuration>();
-  add_component<Cmp::Persist::PlayerAnimFramerate>();
+  add_component<Cmp::Persist::PlayerAnimStrideLength>();
   add_component<Cmp::Persist::PlayerDiagonalLerpSpeedModifier>();
   add_component<Cmp::Persist::PlayerFootstepAddDelay>();
   add_component<Cmp::Persist::PlayerFootstepFadeDelay>();
