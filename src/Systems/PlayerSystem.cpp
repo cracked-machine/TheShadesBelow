@@ -7,6 +7,7 @@
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Crypt/Chest.hpp>
+#include <Components/Crypt/RoomLavaPitCell.hpp>
 #include <Components/Direction.hpp>
 #include <Components/Exit.hpp>
 #include <Components/FootStepTimer.hpp>
@@ -633,6 +634,13 @@ void PlayerSystem::check_timed_action_side_effects( sf::Time dt )
           if ( player_distance > torch_radius.value ) continue;
           net_modifier += candle_carry_action;
         }
+      }
+
+      // apply candle item modifiers to the player when standing inside flame radius of lava pit
+      for ( auto [lava_entt, lava_cmp] : reg().view<Cmp::Crypt::RoomLavaPitCell>().each() )
+      {
+        if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), lava_cmp ) ) continue;
+        if ( Utils::Player::is_player_near( reg(), lava_cmp ) ) net_modifier += candle_carry_action;
       }
 
       // apply candle item modifiers to the player when standing inside flame of burning plant
