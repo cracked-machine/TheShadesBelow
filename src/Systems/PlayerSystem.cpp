@@ -366,53 +366,71 @@ void PlayerSystem::update_player_position( sf::Time dt )
 
   bool collision_detect_enabled = Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled;
 
-  if ( not collision_detect_enabled or is_valid_move( next_horizontal_move ) )
+  auto try_horizontal = [&]()
   {
-    can_move = true;
-    resolved_dir_vector.x = direction.x;
-  }
-  else if ( direction.x != 0.0f )
-  {
-
-    const float y_offset = Utils::snap_to_grid( player_pos ).position.y - player_pos.position.y;
-    const float nudge = std::copysign( std::min( std::abs( y_offset ), step ), y_offset );
-    const sf::FloatRect nudged( { player_pos.position.x + direction.x, player_pos.position.y + nudge }, player_pos.size );
-    if ( is_valid_move( nudged ) and not moved_perp )
+    if ( not collision_detect_enabled or is_valid_move( next_horizontal_move ) )
     {
-      moved_perp = true;
       can_move = true;
       resolved_dir_vector.x = direction.x;
-      resolved_dir_vector.y = nudge;
     }
-    else
+    else if ( direction.x != 0.0f )
     {
-      // ensure player moves fully against obstacle edge
-      player_pos.position.x = Utils::snap_to_grid( player_pos ).position.x;
+      const float y_offset = Utils::snap_to_grid( player_pos ).position.y - player_pos.position.y;
+      const float nudge = std::copysign( std::min( std::abs( y_offset ), step ), y_offset );
+      const sf::FloatRect nudged( { player_pos.position.x + direction.x, player_pos.position.y + nudge }, player_pos.size );
+      if ( is_valid_move( nudged ) and not moved_perp )
+      {
+        moved_perp = true;
+        can_move = true;
+        resolved_dir_vector.x = direction.x;
+        resolved_dir_vector.y = nudge;
+      }
+      else
+      {
+        // ensure player moves fully against obstacle edge
+        player_pos.position.x = Utils::snap_to_grid( player_pos ).position.x;
+      }
     }
-  }
+  };
 
-  if ( not collision_detect_enabled or is_valid_move( next_vertical_move ) )
+  auto try_vertical = [&]()
   {
-    can_move = true;
-    resolved_dir_vector.y = direction.y;
-  }
-  else if ( direction.y != 0.0f )
-  {
-    const float x_offset = Utils::snap_to_grid( player_pos ).position.x - player_pos.position.x;
-    const float nudge = std::copysign( std::min( std::abs( x_offset ), step ), x_offset );
-    const sf::FloatRect nudged( { player_pos.position.x + nudge, player_pos.position.y + direction.y }, player_pos.size );
-    if ( is_valid_move( nudged ) and not moved_perp )
+    if ( not collision_detect_enabled or is_valid_move( next_vertical_move ) )
     {
-      moved_perp = true;
       can_move = true;
-      resolved_dir_vector.x = nudge;
       resolved_dir_vector.y = direction.y;
     }
-    else
+    else if ( direction.y != 0.0f )
     {
-      // else ensure player moves fully against obstacle edge
-      player_pos.position.y = Utils::snap_to_grid( player_pos ).position.y;
+      const float x_offset = Utils::snap_to_grid( player_pos ).position.x - player_pos.position.x;
+      const float nudge = std::copysign( std::min( std::abs( x_offset ), step ), x_offset );
+      const sf::FloatRect nudged( { player_pos.position.x + nudge, player_pos.position.y + direction.y }, player_pos.size );
+      if ( is_valid_move( nudged ) and not moved_perp )
+      {
+        moved_perp = true;
+        can_move = true;
+        resolved_dir_vector.x = nudge;
+        resolved_dir_vector.y = direction.y;
+      }
+      else
+      {
+        // else ensure player moves fully against obstacle edge
+        player_pos.position.y = Utils::snap_to_grid( player_pos ).position.y;
+      }
     }
+  };
+
+  // Use the players last direction to decide which axis is favored first for the collision detection.
+  const Cmp::LastDirection &last_dir = Utils::Player::get_last_direction( reg() );
+  if ( std::abs( last_dir.x ) >= std::abs( last_dir.y ) )
+  {
+    try_horizontal();
+    try_vertical();
+  }
+  else
+  {
+    try_vertical();
+    try_horizontal();
   }
 
   if ( can_move and collision_detect_enabled and resolved_dir_vector.x != 0.0f and resolved_dir_vector.y != 0.0f )
@@ -429,6 +447,17 @@ void PlayerSystem::update_player_position( sf::Time dt )
   {
     player_pos.position += resolved_dir_vector;
     movement_delta.m_distance = std::hypot( resolved_dir_vector.x, resolved_dir_vector.y );
+
+    // Record which axis actually carried this frame's movement using the resolved vector (not raw input)
+    if ( resolved_dir_vector.x != 0.0f || resolved_dir_vector.y != 0.0f )
+    {
+      Cmp::LastDirection &next_last_dir = Utils::Player::get_last_direction( reg() );
+      if ( std::abs( resolved_dir_vector.x ) >= std::abs( resolved_dir_vector.y ) )
+      {
+        next_last_dir = sf::Vector2f{ resolved_dir_vector.x > 0.f ? 1.f : -1.f, 0.f };
+      }
+      else { next_last_dir = sf::Vector2f{ 0.f, resolved_dir_vector.y > 0.f ? 1.f : -1.f }; }
+    }
   }
 }
 
@@ -462,14 +491,6 @@ void PlayerSystem::update_player_animation()
     else if ( direction_cmp.x == -1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.west"; }
     else if ( direction_cmp.y == -1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.north"; }
     else if ( direction_cmp.y == 1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.south"; }
-
-    // store the direction
-    if ( direction_cmp.x != 0.f || direction_cmp.y != 0.f )
-    {
-      auto &last_dir = Utils::Player::get_last_direction( reg() );
-      if ( std::abs( direction_cmp.x ) >= std::abs( direction_cmp.y ) ) { last_dir = sf::Vector2f{ direction_cmp.x > 0.f ? 1.f : -1.f, 0.f }; }
-      else { last_dir = sf::Vector2f{ 0.f, direction_cmp.y > 0.f ? 1.f : -1.f }; }
-    }
   }
 }
 
