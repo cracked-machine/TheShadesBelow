@@ -94,6 +94,11 @@ void remove_obstacle( entt::registry &reg, entt::entity search_entt, DeleteExtra
   auto *search_uuid_cmp_ptr = reg.try_get<Cmp::UUID>( search_entt );
   if ( search_uuid_cmp_ptr ) { search_uuid_cmp = *search_uuid_cmp_ptr; }
 
+  if ( reserved_sm )
+  {
+    if ( auto *search_pos_cmp = reg.try_get<Cmp::Position>( search_entt ) ) reserved_sm->remove( search_entt, *search_pos_cmp );
+  }
+
   reg.remove<Cmp::Obstacle>( search_entt );
   reg.remove<Cmp::ZOrderValue>( search_entt );
   reg.remove<Cmp::Npc::NoPathFinding>( search_entt );
@@ -136,6 +141,11 @@ void remove_obstacle( entt::registry &reg, entt::entity search_entt, DeleteExtra
   Cmp::UUID search_uuid_cmp;
   auto *search_uuid_cmp_ptr = reg.try_get<Cmp::UUID>( search_entt );
   if ( search_uuid_cmp_ptr ) { search_uuid_cmp = *search_uuid_cmp_ptr; }
+
+  if ( reserved_sm )
+  {
+    if ( auto *search_pos_cmp = reg.try_get<Cmp::Position>( search_entt ) ) reserved_sm->remove( search_entt, *search_pos_cmp );
+  }
 
   reg.remove<Cmp::Obstacle>( search_entt );
   reg.remove<Cmp::ZOrderValue>( search_entt );
