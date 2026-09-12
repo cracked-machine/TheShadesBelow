@@ -101,4 +101,5 @@ add_subdirectory( ${CMAKE_SOURCE_DIR}/src )
 
 
 # Copy resources to binary dir
-file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${CMAKE_BINARY_DIR}/bin )
+file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${CMAKE_BINARY_DIR}/bin
+     PATTERN "res/shaders/unused" EXCLUDE )
