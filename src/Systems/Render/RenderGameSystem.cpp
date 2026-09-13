@@ -20,6 +20,7 @@
 #include <Components/Crypt/RoomStart.hpp>
 #include <Components/Exit.hpp>
 #include <Components/FractalCurve.hpp>
+#include <Components/Grave/ExitMultiBlock.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Inventory/ScryingBall.hpp>
 #include <Components/Inventory/WearLevel.hpp>
@@ -104,8 +105,8 @@ RenderGameSystem::RenderGameSystem( entt::registry &reg, sf::RenderWindow &windo
 
 RenderGameSystem::~RenderGameSystem() = default;
 
-void RenderGameSystem::render_game( sf::Time dt, RenderOverlaySystem &render_overlay_sys, PathFinding::SpatialHashGridSharedPtr reserved_grid,
-                                    PathFinding::SpatialHashGridSharedPtr render_position_grid )
+void RenderGameSystem::render_game( sf::Time dt, RenderOverlaySystem &render_overlay_sys, const PathFinding::SpatialHashGridSharedPtr &reserved_grid,
+                                    const PathFinding::SpatialHashGridSharedPtr &render_position_grid )
 {
   using namespace Sprites;
 
@@ -333,9 +334,9 @@ void RenderGameSystem::render_zorder_queue( RenderOverlaySystem &render_overlay_
   }
 }
 
-void RenderGameSystem::refresh_z_order_queue( PathFinding::SpatialHashGridSharedPtr render_position_grid )
+void RenderGameSystem::refresh_z_order_queue( const PathFinding::SpatialHashGridSharedPtr &render_position_grid )
 {
-  m_render_position_grid_ = render_position_grid;
+  m_render_position_grid = render_position_grid;
   m_zorder_queue_.clear();
   sf::FloatRect view_bounds = Utils::calculate_view_bounds( s_world_view );
 

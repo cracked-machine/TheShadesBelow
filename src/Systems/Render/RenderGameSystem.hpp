@@ -119,12 +119,12 @@ public:
   //! Cmp::Position-bearing renderable entities - see add_visible_entity_to_z_order_queue()'s
   //! Cmp::Position specialization. Scenes that don't populate/pass one (nullptr, the default) fall
   //! back to the unindexed full-registry scan, so this is safe to omit.
-  void render_game( sf::Time dt, RenderOverlaySystem &render_overlay_sys, PathFinding::SpatialHashGridSharedPtr reserved_grid,
-                    PathFinding::SpatialHashGridSharedPtr render_position_grid = nullptr );
+  void render_game( sf::Time dt, RenderOverlaySystem &render_overlay_sys, const PathFinding::SpatialHashGridSharedPtr &reserved_grid,
+                    const PathFinding::SpatialHashGridSharedPtr &render_position_grid = nullptr );
 
   //! @brief Refreshes the Z-order rendering queue
   //! @param render_position_grid See render_game()'s parameter of the same name.
-  void refresh_z_order_queue( PathFinding::SpatialHashGridSharedPtr render_position_grid = nullptr );
+  void refresh_z_order_queue( const PathFinding::SpatialHashGridSharedPtr &render_position_grid = nullptr );
 
   //! @brief This should be called by scene "on enter" functions.
   void init_world_view();
@@ -203,7 +203,8 @@ private:
     return distance_queue.empty() ? std::nullopt : std::optional<Cmp::Position>{ distance_queue.top().second };
   }
 
-  //! @brief Adds visible entities of a specific component type to the Z-order queue
+  //! @brief Adds component type to the Z-order queue.
+  //! If the component is child of sf::FloatRect the entire geometry is processed, which will prevent "pop-in" glitches.
   //! Optimized (single-type view) query on entt components for visibility check and Z-order queue
   //! addition
   //! @note The Component-owning entity must also have a Cmp::ZOrderValue component to be added to
@@ -214,49 +215,20 @@ private:
   template <typename Component>
   void add_visible_entity_to_z_order_queue( std::vector<ZOrder> &zorder_queue, sf::FloatRect view_bounds )
   {
-    // render_zorder_queue() only ever draws a Cmp::Position entity via its all_of<Position, AnimData>
-    // branch, so anything lacking AnimData (multiblock segment tiles, per-grid-cell pathfinding
-    // placeholder entities, etc.) can never actually be drawn no matter how it sorts here - it's pure
-    // dead weight in the queue. Requiring AnimData and Cmp::ZOrderValue through the view itself (rather
-    // than a try_get after the fact) also means EnTT drives iteration from whichever of these pools is
-    // smallest, instead of visiting every Cmp::Position entity in the entire level - which vastly
-    // outnumbers the ones that can ever be visible - just to discard most of them.
-    //
-    // The 6 multiblock root types below get their own dedicated add_visible_entity_to_z_order_queue
-    // pass just above this one in refresh_z_order_queue() (matched on their own MultiBlock component,
-    // not Cmp::Position) - but each root entity *also* carries a bare Cmp::Position + Cmp::AnimData,
-    // so without this exclude they'd additionally match this pass and get queued (and drawn) a second
-    // time at the same position.
     if constexpr ( std::is_same_v<Component, Cmp::Position> )
     {
-      if ( m_render_position_grid_ )
+      if ( m_render_position_grid )
       {
-        // Fast path: m_render_position_grid_ indexes every *static* (never moved after creation)
-        // Cmp::Position + Cmp::AnimData + Cmp::ZOrderValue entity - see
-        // Factory::Pathfinding::create_render_position_grid() for the exact population/exclude list,
-        // which mirrors the fallback branch below plus the mover exclusions handled separately just
-        // after this block. query_rect() only visits buckets overlapping the camera, instead of every
-        // such entity in the whole level.
-        for ( auto entity : m_render_position_grid_->query_rect( view_bounds ) )
+        for ( auto entity : m_render_position_grid->query_rect( view_bounds ) )
         {
-          // reg().valid() guards against a stale bucket entry outliving its entity - e.g. a missed
-          // remove() call at some destruction site, or an entity handle EnTT has since recycled for
-          // something else entirely. try_get (rather than assuming Position/ZOrderValue are still
-          // present) additionally guards against an entity that's still alive but had one of those
-          // components stripped without a matching grid removal.
           if ( not reg().valid( entity ) ) continue;
           auto *component = reg().try_get<Component>( entity );
           auto *z_order_cmp = reg().try_get<Cmp::ZOrderValue>( entity );
           if ( not component or not z_order_cmp ) continue;
           if ( not Utils::is_visible_in_view( view_bounds, *component ) ) continue;
-          zorder_queue.push_back( ZOrder{ z_order_cmp->getZOrder(), entity } );
+          zorder_queue.push_back( ZOrder{ .z = z_order_cmp->getZOrder(), .e = entity } );
         }
 
-        // The grid above only ever indexes static entities (create_render_position_grid excludes all
-        // of the mover tags below, and nothing ever inserts them into it either) - each mover
-        // population is small (bounded by spawn caps/in-flight counts, not level size) and moves every
-        // frame, so it's cheaper and far less risky to just linear-scan them fresh each time than to
-        // keep a spatial index in sync with something that mutates constantly.
         add_mover_to_z_order_queue<Cmp::Player::Character>( zorder_queue, view_bounds );
         add_mover_to_z_order_queue<Cmp::Npc::NPC>( zorder_queue, view_bounds );
         add_mover_to_z_order_queue<Cmp::Weapons::Projectiles::Arrow>( zorder_queue, view_bounds );
@@ -267,9 +239,9 @@ private:
 
       // No grid was supplied for the current scene (see render_game()'s render_position_grid
       // parameter) - fall back to the unindexed full scan.
-      auto pos_zorder_view = reg().view<Component, Cmp::AnimData, Cmp::ZOrderValue>(
-          entt::exclude<Cmp::NoRender, Cmp::Altar::MultiBlock, Cmp::Crypt::BuildingMultiBlock, Cmp::Grave::MultiBlock,
-                        Cmp::HealingSpringBuildingMultiBlock, Cmp::Crypt::InteriorMultiBlock, Cmp::Ruin::BuildingMultiBlock> );
+      auto exclude_list = entt::exclude<Cmp::NoRender, Cmp::Altar::MultiBlock, Cmp::Crypt::BuildingMultiBlock, Cmp::Grave::MultiBlock,
+                                        Cmp::HealingSpringBuildingMultiBlock, Cmp::Crypt::InteriorMultiBlock, Cmp::Ruin::BuildingMultiBlock>;
+      auto pos_zorder_view = reg().view<Component, Cmp::AnimData, Cmp::ZOrderValue>( exclude_list );
       for ( auto entity : pos_zorder_view )
       {
         auto [component, z_order_cmp] = pos_zorder_view.template get<Component, Cmp::ZOrderValue>( entity );
@@ -289,7 +261,9 @@ private:
         {
           if ( component.sprite && component.sprite->get_view_type() == Cmp::Particle::ViewType::WORLD &&
                not Utils::is_visible_in_view( view_bounds, component.sprite->get_bounds() ) )
+          {
             continue;
+          }
         }
 
         auto z_order_cmp = reg().try_get<Cmp::ZOrderValue>( entity );
@@ -341,7 +315,7 @@ private:
   //! @brief Set for the duration of refresh_z_order_queue() from its render_position_grid parameter;
   //! see add_visible_entity_to_z_order_queue()'s Cmp::Position specialization. nullptr if the current
   //! scene didn't supply one, in which case that specialization falls back to an unindexed full scan.
-  PathFinding::SpatialHashGridSharedPtr m_render_position_grid_;
+  PathFinding::SpatialHashGridSharedPtr m_render_position_grid;
 };
 
 } // namespace Game::Sys
