@@ -142,7 +142,7 @@ void add_skelebones_ps( entt::registry &reg, const std::string &tag, int particl
 //! transform magnifies that trajectory relative to the untransformed inventory UI view, so world-space
 //! flames currently need a smaller scale than the inventory UI flame to read as the same visual size.
 void add_flame( entt::registry &reg, const std::string &tag, Cmp::UUID &uuid_cmp, sf::Vector2f initial_pos, float zorder, float scale,
-                float psize = 1.f, float speed = 40.f, float plifetime = 0.5, size_t pcount = 100 );
+                float psize = 3.f, float speed = 40.f, float plifetime = 0.5, size_t pcount = 220 );
 
 //! @brief Create (or move) a flame particle sprite for a candle currently equipped in the player's inventory,
 //! switching it to render in the UI/inventory view instead of the game world.
