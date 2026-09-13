@@ -2,7 +2,7 @@
 #include <Components/Particle/AshPileParticleSprite.hpp>
 #include <Components/Particle/CryptAltarParticleSprite.hpp>
 #include <Components/Particle/EatingCrumbsParticleSprite.hpp>
-#include <Components/Particle/Flame.hpp>
+#include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Particle/ObstacleDigParticleSprite.hpp>
 #include <Components/Particle/PlantLeavesParticleSprite.hpp>
 #include <Components/Particle/PlantTwigsParticleSprite.hpp>
@@ -41,7 +41,7 @@ void add_crypt_altar_ps( entt::registry &reg, const std::string &tag, float life
 
   auto entt = reg.create();
   reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt,
-                                                    Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::CryptAltarParticleSprite>( ps ) ) );
+                                                      Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::CryptAltarParticleSprite>( ps ) ) );
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
   reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
   SPDLOG_DEBUG( "Created flame ParticleSprite {}", static_cast<uint32_t>( entt ) );
@@ -58,8 +58,8 @@ void add_player_healing_ps( entt::registry &reg, const std::string &tag, float l
   ps.set_angle( std::uniform_real_distribution<float>( 1.f, 360.f ) );
 
   auto entt = reg.create();
-  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt,
-                                                    Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::PlayerHealingParticleSprite>( ps ) ) );
+  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>(
+      entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::PlayerHealingParticleSprite>( ps ) ) );
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
   reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
   SPDLOG_DEBUG( "Created flame ParticleSprite {}", static_cast<uint32_t>( entt ) );
@@ -120,7 +120,8 @@ void add_wormhole_ps( entt::registry &reg, const std::string &tag, float lifetim
   ps.set_angle( std::uniform_real_distribution<float>( 1.f, 360.f ) );
 
   auto entt = reg.create();
-  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::WormholeParticleSprite>( ps ) ) );
+  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt,
+                                                      Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::WormholeParticleSprite>( ps ) ) );
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
   reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
   SPDLOG_DEBUG( "Created wormhole ParticleSprite {}", static_cast<uint32_t>( entt ) );
@@ -139,8 +140,8 @@ void add_obstacledig_ps( entt::registry &reg, const std::string &tag, int partic
   ps.set_angle( std::uniform_real_distribution<float>( 1.f, 360.f ) );
 
   auto entt = reg.create();
-  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt,
-                                                    Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::ObstacleDigParticleSprite>( ps ) ) );
+  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>(
+      entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::ObstacleDigParticleSprite>( ps ) ) );
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
   reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
   SPDLOG_DEBUG( "Created obstacle ParticleSprite {}", static_cast<uint32_t>( entt ) );
@@ -163,8 +164,8 @@ void add_eatingcrumbs_ps( entt::registry &reg, const std::string &tag, int parti
   ps.set_angle( std::uniform_real_distribution<float>( base_angle_degrees - kSpreadDegrees, base_angle_degrees + kSpreadDegrees ) );
 
   auto entt = reg.create();
-  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt,
-                                                    Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::EatingCrumbsParticleSprite>( ps ) ) );
+  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>(
+      entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::EatingCrumbsParticleSprite>( ps ) ) );
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
   reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
   SPDLOG_DEBUG( "Created EatingCrumbsParticleSprite {}", static_cast<uint32_t>( entt ) );
@@ -183,8 +184,8 @@ void add_plantleaves_ps( entt::registry &reg, const std::string &tag, int partic
   ps.set_angle( std::uniform_real_distribution<float>( 1.f, 360.f ) );
 
   auto entt = reg.create();
-  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt,
-                                                    Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::PlantLeavesParticleSprite>( ps ) ) );
+  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>(
+      entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::PlantLeavesParticleSprite>( ps ) ) );
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
   reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
   SPDLOG_DEBUG( "Created obstacle ParticleSprite {}", static_cast<uint32_t>( entt ) );
@@ -204,7 +205,7 @@ void add_planttwigs_ps( entt::registry &reg, const std::string &tag, int particl
 
   auto entt = reg.create();
   reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt,
-                                                    Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::PlantTwigsParticleSprite>( ps ) ) );
+                                                      Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::PlantTwigsParticleSprite>( ps ) ) );
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
   reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
   SPDLOG_DEBUG( "Created obstacle ParticleSprite {}", static_cast<uint32_t>( entt ) );
@@ -224,7 +225,7 @@ void add_skelebones_ps( entt::registry &reg, const std::string &tag, int particl
 
   auto entt = reg.create();
   reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt,
-                                                    Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::SkeleBonesParticleSprite>( ps ) ) );
+                                                      Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::SkeleBonesParticleSprite>( ps ) ) );
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
   reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
   SPDLOG_DEBUG( "Created obstacle ParticleSprite {}", static_cast<uint32_t>( entt ) );
@@ -260,7 +261,7 @@ void add_flame( entt::registry &reg, const std::string &tag, Cmp::UUID &uuid_cmp
                 float pspeed, float plifetime, size_t pcount )
 {
 
-  auto ps = Cmp::Particle::Flame( pcount );
+  auto ps = Cmp::Particle::FlameParticleSprite( pcount );
   ps.set_tag( tag );
   ps.set_emitter_position( initial_pos );
   ps.set_lifetime_ms( std::uniform_int_distribution<int>( 0, sf::seconds( plifetime ).asMilliseconds() ) );
@@ -273,7 +274,8 @@ void add_flame( entt::registry &reg, const std::string &tag, Cmp::UUID &uuid_cmp
   ps.set_particle_size_range( std::uniform_real_distribution<float>( psize, psize ) );
 
   auto entt = reg.create();
-  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::Flame>( ps ) ) );
+  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt,
+                                                      Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::FlameParticleSprite>( ps ) ) );
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
   reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
   SPDLOG_DEBUG( "Created flame ParticleSprite {}", static_cast<uint32_t>( entt ) );
@@ -315,7 +317,8 @@ void add_ashpile( entt::registry &reg, const std::string &tag, Cmp::UUID &uuid_c
   ps.set_particle_size_range( std::uniform_real_distribution<float>( psize, psize ) );
 
   auto entt = reg.create();
-  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::AshPileParticleSprite>( ps ) ) );
+  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt,
+                                                      Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::AshPileParticleSprite>( ps ) ) );
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
   reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
   SPDLOG_DEBUG( "Created ashpile ParticleSprite {}", static_cast<uint32_t>( entt ) );

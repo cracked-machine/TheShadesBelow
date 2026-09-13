@@ -3,7 +3,7 @@
 
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Particle/BlockParticle.hpp>
-#include <Components/Particle/Flame.hpp>
+#include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Position.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
@@ -56,7 +56,8 @@ void ParticleSystem::update( sf::Time dt )
     for ( auto [ps_entt, ps_owner, ps_uuid_cmp] : reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID>().each() )
     {
       if ( ps_uuid_cmp != candle_uuid_cmp ) continue;
-      ps_owner.sprite->set_emitter_position( { candle_pos_cmp.getCenter().x, candle_pos_cmp.getCenter().y - Cmp::Particle::Flame::kVerticalOffset } );
+      ps_owner.sprite->set_emitter_position(
+          { candle_pos_cmp.getCenter().x, candle_pos_cmp.getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset } );
     }
   }
 
@@ -66,8 +67,7 @@ void ParticleSystem::update( sf::Time dt )
   {
     if ( not owner.sprite->is_active() ) continue;
 
-    if ( owner.sprite->get_view_type() == Cmp::Particle::ViewType::WORLD &&
-         not Utils::is_visible_in_view( world_view, owner.sprite->get_bounds() ) )
+    if ( owner.sprite->get_view_type() == Cmp::Particle::ViewType::WORLD && not Utils::is_visible_in_view( world_view, owner.sprite->get_bounds() ) )
       continue;
 
     owner.sprite->simulate( dt );
@@ -101,7 +101,10 @@ void ParticleSystem::check_collsion( const std::vector<std::string> &excl_ps_tag
     if ( excluded ) continue;
 
     SPDLOG_DEBUG( "Simulating" );
-    for ( const auto &pos_cmp : visible_obstacles ) { ps_cmp.sprite->check_particle_collision( pos_cmp ); }
+    for ( const auto &pos_cmp : visible_obstacles )
+    {
+      ps_cmp.sprite->check_particle_collision( pos_cmp );
+    }
   }
 }
 

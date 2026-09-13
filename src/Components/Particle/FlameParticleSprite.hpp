@@ -28,12 +28,12 @@ private:
 
 //! @brief Particle sprite for a flame effect (candle/altar fire): particles rise, sway, and fade
 //!        from white through Flame::m_final_flame_color before a sparse smoke tail finishes them off.
-class Flame : public SpriteBase<detail::FlameParticle>
+class FlameParticleSprite : public SpriteBase<detail::FlameParticle>
 {
 public:
   //! @brief Construct a new Flame object
   //! @param count Number of particles in this sprite
-  Flame( size_t count );
+  FlameParticleSprite( size_t count );
   //! @brief Advances the flame simulation by one frame: sway, colour lerp, and smoke-phase fade.
   //! @param dt Time elapsed since the last frame.
   void simulate( sf::Time dt ) override;

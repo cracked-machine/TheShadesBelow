@@ -3,7 +3,7 @@
 namespace Game::Cmp::Particle
 {
 
-const float kUiScalePreset = 2.f;
-const float kWorldScalePreset = 0.4f;
+const float kUiScalePreset = 2.5f;
+const float kWorldScalePreset = 1.f;
 
 } // namespace Game::Cmp::Particle

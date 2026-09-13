@@ -14,7 +14,7 @@
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
-#include <Components/Particle/Flame.hpp>
+#include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -189,7 +189,7 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
             {
               if ( altar_uuid_cmp != particle_uuid_cmp ) continue;
               if ( not particle_cmp.sprite->get_tag().contains( "candle" ) ) continue;
-              auto *flame_particle = dynamic_cast<Cmp::Particle::Flame *>( particle_cmp.sprite.get() );
+              auto *flame_particle = dynamic_cast<Cmp::Particle::FlameParticleSprite *>( particle_cmp.sprite.get() );
               if ( flame_particle ) { flame_particle->m_final_flame_color = { 0, 0, 255 }; }
             }
           }

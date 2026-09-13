@@ -1,4 +1,4 @@
-#include <Components/Particle/Flame.hpp>
+#include <Components/Particle/FlameParticleSprite.hpp>
 
 #include <numbers>
 #include <random>
@@ -24,12 +24,12 @@ void FlameParticle::emit()
 };
 } // namespace detail
 
-const float Flame::kVerticalOffset = 2.f;
+const float FlameParticleSprite::kVerticalOffset = 2.f;
 
-Flame::Flame( size_t count )
+FlameParticleSprite::FlameParticleSprite( size_t count )
     : SpriteBase( count ) {};
 
-void Flame::simulate( sf::Time dt )
+void FlameParticleSprite::simulate( sf::Time dt )
 {
   const float amplitude = 20.f;
 
@@ -77,7 +77,7 @@ void Flame::simulate( sf::Time dt )
   }
 }
 
-void Flame::draw( sf::RenderTarget &target, sf::RenderStates states ) const
+void FlameParticleSprite::draw( sf::RenderTarget &target, sf::RenderStates states ) const
 {
   states.texture = nullptr;
   states.blendMode = sf::BlendAlpha;

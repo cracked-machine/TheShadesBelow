@@ -3,7 +3,7 @@
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/WorldItem.hpp>
-#include <Components/Particle/Flame.hpp>
+#include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/Character.hpp>
@@ -111,9 +111,10 @@ void CryptScene::on_init()
   for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp, worlditem_uuid_cmp] : m_reg.view<Cmp::WorldItem, Cmp::Position, Cmp::UUID>().each() )
   {
     if ( worlditem_cmp.item_type != "item.candle" ) continue;
-    Factory::Particle::add_flame( m_reg, "crypt.candle.particle.flame", worlditem_uuid_cmp,
-                                  { worlditem_pos_cmp.getCenter().x, worlditem_pos_cmp.getCenter().y - Cmp::Particle::Flame::kVerticalOffset },
-                                  Utils::Player::get_position( m_reg ).y() - 1, Cmp::Particle::kWorldScalePreset );
+    Factory::Particle::add_flame(
+        m_reg, "crypt.candle.particle.flame", worlditem_uuid_cmp,
+        { worlditem_pos_cmp.getCenter().x, worlditem_pos_cmp.getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset },
+        Utils::Player::get_position( m_reg ).y() - 1, Cmp::Particle::kWorldScalePreset );
   }
 }
 

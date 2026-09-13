@@ -8,7 +8,7 @@
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
-#include <Components/Particle/Flame.hpp>
+#include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Particle/SpriteBase.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
@@ -185,9 +185,10 @@ void GraveyardScene::on_init()
   for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp, worlditem_uuid_cmp] : m_reg.view<Cmp::WorldItem, Cmp::Position, Cmp::UUID>().each() )
   {
     if ( worlditem_cmp.item_type != "item.candle" ) continue;
-    Factory::Particle::add_flame( m_reg, "graveyard.candle.particle.flame", worlditem_uuid_cmp,
-                                  { worlditem_pos_cmp.getCenter().x, worlditem_pos_cmp.getCenter().y - Cmp::Particle::Flame::kVerticalOffset },
-                                  Utils::Player::get_position( m_reg ).y() - 1, Cmp::Particle::kWorldScalePreset );
+    Factory::Particle::add_flame(
+        m_reg, "graveyard.candle.particle.flame", worlditem_uuid_cmp,
+        { worlditem_pos_cmp.getCenter().x, worlditem_pos_cmp.getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset },
+        Utils::Player::get_position( m_reg ).y() - 1, Cmp::Particle::kWorldScalePreset );
   }
 }
 
