@@ -144,6 +144,9 @@ void CryptScene::on_enter()
 
   // Set the default footstep SFX for this scene
   m_reg.emplace_or_replace<Cmp::Player::Footstep>( Utils::Player::get_entity( m_reg ), Cmp::Player::Footstep::Type::STONE );
+
+  // Hide the sudden position update/camera pan behind a forced loading screen.
+  std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 }
 
 void CryptScene::on_exit()
