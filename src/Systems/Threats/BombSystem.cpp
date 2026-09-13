@@ -90,31 +90,27 @@ void BombSystem::on_bomb_event( const Events::PlayerActionEvent &event )
 
 void BombSystem::arm_grave_bomb()
 {
-  auto player_entt = Utils::Player::get_entity( reg() );
   m_sound_bank.get_effect( "bomb_fuse" ).play();
   auto new_bomb_entt = reg().create();
   auto realigned_epicenter_pos = Utils::snap_to_grid( Utils::Player::get_position( reg() ) );
   reg().emplace_or_replace<Cmp::Position>( new_bomb_entt, realigned_epicenter_pos.position, realigned_epicenter_pos.size );
-  place_concentric_bomb_pattern( new_bomb_entt, reg().get<Cmp::Player::BlastRadius>( player_entt ).value );
+  place_concentric_bomb_pattern( new_bomb_entt, Utils::Player::get_blast_radius( reg() ).value );
   Utils::Player::get_global_bomb_flash_clk( reg() ).restart();
 }
 
 void BombSystem::arm_entt( entt::entity target_entt )
 {
-  auto player_entt = Utils::Player::get_entity( reg() );
-
   // then use the candidate entity to place the booby trap bomb
   if ( target_entt != entt::null )
   {
     m_sound_bank.get_effect( "bomb_fuse" ).play();
 
-    place_concentric_bomb_pattern( target_entt, reg().get<Cmp::Player::BlastRadius>( player_entt ).value );
+    place_concentric_bomb_pattern( target_entt, Utils::Player::get_blast_radius( reg() ).value );
   }
 }
 
 void BombSystem::arm_player_bomb()
 {
-  auto player_entt = Utils::Player::get_entity( reg() );
   auto player_pos = Utils::Player::get_position( reg() );
 
   auto destructable_view = reg().view<Cmp::Armable, Cmp::Position>();
@@ -139,7 +135,7 @@ void BombSystem::arm_player_bomb()
       auto armed_epicenter_entity = reg().create();
       auto realigned_epicenter_pos = Utils::snap_to_grid( destructable_pos_cmp );
       reg().emplace<Cmp::Position>( armed_epicenter_entity, realigned_epicenter_pos.position, realigned_epicenter_pos.size );
-      place_concentric_bomb_pattern( armed_epicenter_entity, reg().get<Cmp::Player::BlastRadius>( player_entt ).value );
+      place_concentric_bomb_pattern( armed_epicenter_entity, Utils::Player::get_blast_radius( reg() ).value );
       Factory::Player::destroy_inventory( reg(), "item.bomb" );
       Utils::Player::get_global_bomb_flash_clk( reg() ).restart();
     }
