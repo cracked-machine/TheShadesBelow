@@ -85,8 +85,9 @@ void FootstepSystem::update()
   // distance rather than time makes the cadence scale with actual movement speed automatically,
   // including any active Cmp::Player::SpeedPenalty and being blocked by collision.
   const float footstep_sfx_stride_length = Sys::PersistSystem::get<Cmp::Persist::PlayerFootstepSfxStrideLength>( reg() ).get_value();
-  auto &movement_delta = reg().get<Cmp::Player::MovementDelta>( Utils::Player::get_entity( reg() ) );
-  m_footstep_sfx_distance += movement_delta.m_distance;
+  auto *movement_delta = reg().try_get<Cmp::Player::MovementDelta>( Utils::Player::get_entity( reg() ) );
+  if ( not movement_delta ) return;
+  m_footstep_sfx_distance += movement_delta->m_distance;
   if ( m_footstep_sfx_distance >= footstep_sfx_stride_length )
   {
     play_footsteps_sound();

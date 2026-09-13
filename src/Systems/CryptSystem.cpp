@@ -774,7 +774,7 @@ void CryptSystem::close_open_rooms( const Cmp::Position &player_pos_cmp )
     new_closed_room.m_position_list = open_room_cmp.m_position_list;
     new_closed_room.m_border_position_list = open_room_cmp.m_border_position_list;
 
-    reg().emplace<Cmp::Crypt::RoomClosed>( open_room_entt, std::move( new_closed_room ) );
+    reg().emplace_or_replace<Cmp::Crypt::RoomClosed>( open_room_entt, std::move( new_closed_room ) );
     reg().remove<Cmp::Crypt::RoomOpen>( open_room_entt );
   }
 }
@@ -827,7 +827,7 @@ void CryptSystem::open_selected_rooms( const std::set<entt::entity> &selected_ro
     new_open_room.m_position_list = closed_room_cmp.m_position_list;
     new_open_room.m_border_position_list = closed_room_cmp.m_border_position_list;
 
-    reg().emplace<Cmp::Crypt::RoomOpen>( closed_room_entt, std::move( new_open_room ) );
+    reg().emplace_or_replace<Cmp::Crypt::RoomOpen>( closed_room_entt, std::move( new_open_room ) );
     reg().remove<Cmp::Crypt::RoomClosed>( closed_room_entt );
   }
 }
@@ -1153,9 +1153,14 @@ void CryptSystem::add_lever_to_open_rooms()
   // add one lever to one room picked from the pool of candidates room positions
   Cmp::RandomInt room_position_picker( 0, static_cast<int>( internal_room_entts.size() ) - 1 );
   auto selected_entt = internal_room_entts[room_position_picker.gen()];
-  auto room_pos = reg().get<Cmp::Position>( selected_entt );
-  Factory::Crypt::create_crypt_lever( reg(), room_pos.position, lever_sprite_type, disabled_lever_sprite_idx, zorder );
-  SPDLOG_DEBUG( "Added lever to position: {},{}", room_pos.position.x, room_pos.position.y );
+  auto *room_pos = reg().try_get<Cmp::Position>( selected_entt );
+  if ( not room_pos )
+  {
+    SPDLOG_WARN( "Selected room entity has no Cmp::Position - cannot place lever" );
+    return;
+  }
+  Factory::Crypt::create_crypt_lever( reg(), room_pos->position, lever_sprite_type, disabled_lever_sprite_idx, zorder );
+  SPDLOG_DEBUG( "Added lever to position: {},{}", room_pos->position.x, room_pos->position.y );
 }
 
 void CryptSystem::remove_lever_open_rooms( const Cmp::Position &player_pos_cmp )

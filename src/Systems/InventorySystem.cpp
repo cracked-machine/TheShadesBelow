@@ -163,11 +163,12 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
         for ( auto seg_entt : segment_entt_list )
         {
           if ( not reg().any_of<Cmp::Npc::NoPathFinding>( seg_entt ) ) continue;
-          auto seg_pos_cmp = reg().get<Cmp::Position>( seg_entt );
-          for ( auto blocked_entt : npc_navmesh->at( seg_pos_cmp ) )
+          auto *seg_pos_cmp = reg().try_get<Cmp::Position>( seg_entt );
+          if ( not seg_pos_cmp ) continue;
+          for ( auto blocked_entt : npc_navmesh->at( *seg_pos_cmp ) )
           {
             if ( reg().any_of<Cmp::Player::Character>( blocked_entt ) ) continue;
-            npc_navmesh->remove( blocked_entt, seg_pos_cmp );
+            npc_navmesh->remove( blocked_entt, *seg_pos_cmp );
           }
         }
       }
@@ -288,14 +289,15 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
 void InventorySystem::consume_inventory( sf::Time dt )
 {
   auto player_entt = Utils::Player::get_entity( reg() );
-  auto &eating_time = reg().get<Cmp::Player::EatingTimeAccumulator>( player_entt );
+  auto *eating_time = reg().try_get<Cmp::Player::EatingTimeAccumulator>( player_entt );
+  if ( not eating_time ) return;
   static sf::Time eating_timeout = sf::milliseconds( 3000 );
 
-  if ( eating_time < eating_timeout )
+  if ( *eating_time < eating_timeout )
   {
     // stll eating
     if ( m_sound_bank.get_effect( "eating" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "eating" ).play(); }
-    eating_time += dt;
+    *eating_time += dt;
 
     auto uuid = Cmp::UUID::generate();
     auto player_pos = Utils::Player::get_position( reg() ).getCenter();

@@ -346,8 +346,9 @@ void PlayerSystem::check_player_can_pull( sf::Time dt )
 
 void PlayerSystem::update_player_position( sf::Time dt )
 {
-  auto &movement_delta = reg().get<Cmp::Player::MovementDelta>( Utils::Player::get_entity( reg() ) );
-  movement_delta.m_distance = 0.f;
+  auto *movement_delta = reg().try_get<Cmp::Player::MovementDelta>( Utils::Player::get_entity( reg() ) );
+  if ( not movement_delta ) return;
+  movement_delta->m_distance = 0.f;
 
   if ( movement_suppressed() ) return;
 
@@ -449,7 +450,7 @@ void PlayerSystem::update_player_position( sf::Time dt )
   if ( can_move )
   {
     player_pos.position += resolved_dir_vector;
-    movement_delta.m_distance = std::hypot( resolved_dir_vector.x, resolved_dir_vector.y );
+    movement_delta->m_distance = std::hypot( resolved_dir_vector.x, resolved_dir_vector.y );
 
     // Record which axis actually carried this frame's movement using the resolved vector (not raw
     // input), purely to bias next frame's axis processing order above - see m_last_committed_axis.
@@ -471,7 +472,8 @@ void PlayerSystem::update_player_animation()
 
   const Cmp::Direction direction_cmp = Utils::Player::get_direction( reg() );
   Cmp::AnimData &anim_cmp = Utils::Player::get_sprite_anim( reg() );
-  const auto &movement_delta = reg().get<Cmp::Player::MovementDelta>( Utils::Player::get_entity( reg() ) );
+  const auto *movement_delta = reg().try_get<Cmp::Player::MovementDelta>( Utils::Player::get_entity( reg() ) );
+  if ( not movement_delta ) return;
 
   // Distance the player must cover between animation frame changes; tying the trigger to
   // distance rather than time makes the walk cycle cadence scale with actual movement speed
@@ -489,7 +491,7 @@ void PlayerSystem::update_player_animation()
   {
     // Held direction but no real displacement this frame (see PlayerSystem::update_player_position)
     // means collision blocked the move - freeze the walk-cycle instead of animating in place.
-    anim_cmp.m_enabled = movement_delta.m_distance > 0.f;
+    anim_cmp.m_enabled = movement_delta->m_distance > 0.f;
     if ( direction_cmp.x == 1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.east"; }
     else if ( direction_cmp.x == -1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.west"; }
     else if ( direction_cmp.y == -1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.north"; }
@@ -898,7 +900,10 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
 
   auto common_death_throes = [&]()
   {
-    reg().get<Cmp::Player::MovementDelta>( Utils::Player::get_entity( reg() ) ).m_distance = 0; // stop footstep sfx
+    if ( auto *movement_delta = reg().try_get<Cmp::Player::MovementDelta>( Utils::Player::get_entity( reg() ) ) )
+    {
+      movement_delta->m_distance = 0; // stop footstep sfx
+    }
     reg().emplace_or_replace<Cmp::Player::PostDeathTimer>( Utils::Player::get_entity( reg() ) );
     reg().emplace_or_replace<Cmp::NoRender>( Utils::Player::get_entity( reg() ) );
     Utils::Player::get_player_stats( reg() ).apply_modifiers( { Cmp::Stats::Health{ -100 }, {}, {}, {}, {}, {}, {} } );

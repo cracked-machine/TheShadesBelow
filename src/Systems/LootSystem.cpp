@@ -107,8 +107,13 @@ void LootSystem::check_loot_collision()
     }
     else if ( effect.type == "sprite.graveyard.loot.blast" )
     {
-      auto &blast_radius = reg().get<Cmp::Player::BlastRadius>( effect.player_entity );
-      blast_radius.value = std::clamp( blast_radius.value + 1, 0, 5 );
+      auto *blast_radius = reg().try_get<Cmp::Player::BlastRadius>( effect.player_entity );
+      if ( not blast_radius )
+      {
+        SPDLOG_WARN( "Player entt has no component: Cmp::Player::BlastRadius" );
+        continue;
+      }
+      blast_radius->value = std::clamp( blast_radius->value + 1, 0, 5 );
       collect_loot( effect.loot_entity );
 
       // signal UI to flash
@@ -117,8 +122,13 @@ void LootSystem::check_loot_collision()
     }
     else if ( effect.type == "sprite.crypt.loot.cadaver" )
     {
-      auto &pc_cadaver_count = reg().get<Cmp::Player::CadaverCount>( effect.player_entity );
-      pc_cadaver_count.increment_count( 1 );
+      auto *pc_cadaver_count = reg().try_get<Cmp::Player::CadaverCount>( effect.player_entity );
+      if ( not pc_cadaver_count )
+      {
+        SPDLOG_WARN( "Player entt has no component: Cmp::Player::CadaverCount" );
+        continue;
+      }
+      pc_cadaver_count->increment_count( 1 );
       collect_loot( effect.loot_entity );
       m_sound_bank.get_effect( "secret" ).play();
 
@@ -132,8 +142,13 @@ void LootSystem::check_loot_collision()
     }
     else if ( effect.type == "sprite.crypt.loot.gold" )
     {
-      auto &wealth_cmp = reg().get<Cmp::Player::Wealth>( effect.player_entity );
-      wealth_cmp.wealth += 1;
+      auto *wealth_cmp = reg().try_get<Cmp::Player::Wealth>( effect.player_entity );
+      if ( not wealth_cmp )
+      {
+        SPDLOG_WARN( "Player entt has no component: Cmp::Player::Wealth" );
+        continue;
+      }
+      wealth_cmp->wealth += 1;
       collect_loot( effect.loot_entity );
     }
     else { SPDLOG_WARN( "Unknown loot type encountered during pickup: {}", effect.type ); }

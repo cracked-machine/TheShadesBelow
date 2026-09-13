@@ -125,30 +125,30 @@ Cmp::Player::LastGraveyardPosition *get_last_graveyard_pos( entt::registry &reg 
 
 Cmp::Player::LevelDepth &get_level_depth( entt::registry &reg )
 {
-  auto player_view = reg.view<Cmp::Player::LevelDepth>();
-  if ( player_view.empty() ) throw std::runtime_error( "Player entt has no component: Cmp::Player::LevelDepth" );
-  return player_view.get<Cmp::Player::LevelDepth>( get_entity( reg ) );
+  auto *level_depth = reg.try_get<Cmp::Player::LevelDepth>( get_entity( reg ) );
+  if ( not level_depth ) throw std::runtime_error( "Player entt has no component: Cmp::Player::LevelDepth" );
+  return *level_depth;
 }
 
 Cmp::Player::Wealth &get_wealth( entt::registry &reg )
 {
-  auto player_view = reg.view<Cmp::Player::Wealth>();
-  if ( player_view.empty() ) throw std::runtime_error( "Player entt has no component: Cmp::Player::Wealth" );
-  return player_view.get<Cmp::Player::Wealth>( get_entity( reg ) );
+  auto *wealth = reg.try_get<Cmp::Player::Wealth>( get_entity( reg ) );
+  if ( not wealth ) throw std::runtime_error( "Player entt has no component: Cmp::Player::Wealth" );
+  return *wealth;
 }
 
 Cmp::Player::BlastRadius &get_blast_radius( entt::registry &reg )
 {
-  auto player_view = reg.view<Cmp::Player::BlastRadius>();
-  if ( player_view.empty() ) throw std::runtime_error( "Player entt has no component: Cmp::Player::BlastRadius" );
-  return player_view.get<Cmp::Player::BlastRadius>( get_entity( reg ) );
+  auto *blast_radius = reg.try_get<Cmp::Player::BlastRadius>( get_entity( reg ) );
+  if ( not blast_radius ) throw std::runtime_error( "Player entt has no component: Cmp::Player::BlastRadius" );
+  return *blast_radius;
 }
 
 Cmp::Player::Mortality &get_mortality( entt::registry &reg )
 {
-  auto player_view = reg.view<Cmp::Player::Mortality>();
-  if ( player_view.empty() ) throw std::runtime_error( "Player entt has no component: Cmp::Player::Mortality" );
-  return player_view.get<Cmp::Player::Mortality>( get_entity( reg ) );
+  auto *mortality = reg.try_get<Cmp::Player::Mortality>( get_entity( reg ) );
+  if ( not mortality ) throw std::runtime_error( "Player entt has no component: Cmp::Player::Mortality" );
+  return *mortality;
 }
 
 Cmp::ZOrderValue &get_zorder( entt::registry &reg )
@@ -171,21 +171,19 @@ Cmp::AbsoluteAlpha &get_alpha( entt::registry &reg )
 
 Cmp::Player::Curse &get_curse( entt::registry &reg )
 {
-  auto player_view = reg.view<Cmp::Player::Curse>();
-  if ( player_view.empty() ) throw std::runtime_error( "Player entt has no component: Cmp::Player::Curse" );
-  auto &curse = player_view.get<Cmp::Player::Curse>( get_entity( reg ) );
-  SPDLOG_DEBUG( "Cmp::Player::Curse == {}", curse.active );
-  return curse;
+  auto *curse = reg.try_get<Cmp::Player::Curse>( get_entity( reg ) );
+  if ( not curse ) throw std::runtime_error( "Player entt has no component: Cmp::Player::Curse" );
+  SPDLOG_DEBUG( "Cmp::Player::Curse == {}", curse->active );
+  return *curse;
 }
 
 void reset_curse( entt::registry &reg )
 {
-  auto player_view = reg.view<Cmp::Player::Curse>();
-  if ( player_view.empty() ) throw std::runtime_error( "Player entt has no component: Cmp::Player::Curse" );
-  auto &curse = player_view.get<Cmp::Player::Curse>( get_entity( reg ) );
-  curse.active = false;
-  curse.shader_alpha.reset();
-  SPDLOG_DEBUG( "Cmp::Player::Curse == {}", curse.active );
+  auto *curse = reg.try_get<Cmp::Player::Curse>( get_entity( reg ) );
+  if ( not curse ) throw std::runtime_error( "Player entt has no component: Cmp::Player::Curse" );
+  curse->active = false;
+  curse->shader_alpha.reset();
+  SPDLOG_DEBUG( "Cmp::Player::Curse == {}", curse->active );
 }
 
 float get_speed_penalty( entt::registry &reg )
@@ -279,21 +277,19 @@ Cmp::Position get_projected_position( entt::registry &reg )
 Cmp::Player::CadaverCount &get_cadaver_count( entt::registry &reg )
 {
 
-  auto player_view = reg.view<Cmp::Player::CadaverCount>();
-  if ( player_view.empty() ) throw std::runtime_error( "Player entt has no component: Cmp::Player::CadaverCount" );
-  auto &curse = player_view.get<Cmp::Player::CadaverCount>( get_entity( reg ) );
-  SPDLOG_DEBUG( "Cmp::Player::CadaverCount == {}", curse.active );
-  return curse;
+  auto *curse = reg.try_get<Cmp::Player::CadaverCount>( get_entity( reg ) );
+  if ( not curse ) throw std::runtime_error( "Player entt has no component: Cmp::Player::CadaverCount" );
+  SPDLOG_DEBUG( "Cmp::Player::CadaverCount == {}", curse->active );
+  return *curse;
 }
 
 Cmp::TorchRadius &get_torch_radius( entt::registry &reg )
 {
 
-  auto player_view = reg.view<Cmp::TorchRadius>();
-  if ( player_view.empty() ) throw std::runtime_error( "Player entt has no component: Cmp::TorchRadius" );
-  auto &torch_radius = player_view.get<Cmp::TorchRadius>( get_entity( reg ) );
-  SPDLOG_DEBUG( "Cmp::TorchRadius == {}", torch_radius.value );
-  return torch_radius;
+  auto *torch_radius = reg.try_get<Cmp::TorchRadius>( get_entity( reg ) );
+  if ( not torch_radius ) throw std::runtime_error( "Player entt has no component: Cmp::TorchRadius" );
+  SPDLOG_DEBUG( "Cmp::TorchRadius == {}", torch_radius->value );
+  return *torch_radius;
 }
 
 Cmp::PlayerStats &get_player_stats( entt::registry &reg )
