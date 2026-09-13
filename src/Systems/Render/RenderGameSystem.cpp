@@ -346,6 +346,8 @@ void RenderGameSystem::refresh_z_order_queue( PathFinding::SpatialHashGridShared
   PROFILED( add_visible_entity_to_z_order_queue<Cmp::HealingSpringBuildingMultiBlock>( m_zorder_queue_, view_bounds ) );
   PROFILED( add_visible_entity_to_z_order_queue<Cmp::Crypt::InteriorMultiBlock>( m_zorder_queue_, view_bounds ) );
   PROFILED( add_visible_entity_to_z_order_queue<Cmp::Ruin::BuildingMultiBlock>( m_zorder_queue_, view_bounds ) );
+  PROFILED( add_visible_entity_to_z_order_queue<Cmp::Grave::ExitMultiBlock>( m_zorder_queue_, view_bounds ) );
+  PROFILED( add_visible_entity_to_z_order_queue<Cmp::Wormhole::MultiBlock>( m_zorder_queue_, view_bounds ) );
 
   // add any floor tile sets
   PROFILED( add_visible_entity_to_z_order_queue<Sprites::Containers::VertexFloor>( m_zorder_queue_, view_bounds ) );
