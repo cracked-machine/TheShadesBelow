@@ -224,7 +224,7 @@ void HazardFieldSystem<HazardType>::check_player_hazard_field_collision()
           // Set the default footstep SFX for this scene
           reg().template emplace_or_replace<Cmp::Player::Footstep>( Utils::Player::get_entity( m_reg ), Cmp::Player::Footstep::Type::MUD );
           auto corruption_dmg = Sys::PersistSystem::get<Cmp::Persist::CorruptionDamage>( reg() ).get_value();
-          player_stats_cmp.apply_modifiers( { Cmp::Stats::Health{ -corruption_dmg }, {}, {}, {}, {}, {}, {}, {} } );
+          player_stats_cmp.apply( { Cmp::Stats::Health{ -corruption_dmg }, {}, {}, {}, {}, {}, {}, {} } );
           SPDLOG_DEBUG( "Applying corruption damage {}", corruption_dmg );
           // trigger death animation
           if ( player_stats_cmp.health() <= 0 )

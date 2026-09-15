@@ -86,7 +86,7 @@ bool GraveSystem::is_dig_on_cooldown()
 {
   auto digging_cooldown_amount = Sys::PersistSystem::get<Cmp::Persist::DiggingCooldownThreshold>( reg() ).get_value();
   auto *dig_cooldown = reg().try_get<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
-  return ( dig_cooldown != nullptr ) and *dig_cooldown < sf::seconds( digging_cooldown_amount );
+  return ( dig_cooldown != nullptr ) and * dig_cooldown < sf::seconds( digging_cooldown_amount );
 }
 
 void GraveSystem::clear_stale_grave_selections()
@@ -150,7 +150,7 @@ void GraveSystem::trigger_grave_consequence( entt::entity grave_entity )
 {
   // luck is range [0, 100]; higher luck shifts odds from traps (NPC_TRAP/BOMB_TRAP) toward loot (RELIC/JEWELRY).
   // At luck 50 this reduces to a plain 25/25/25/25 split; at luck 0 it's all traps, at luck 100 it's all loot.
-  auto player_luck_stat = Utils::Player::get_player_stats( reg() ).luck();
+  auto player_luck_stat = Utils::Player::get_stats( reg() ).luck();
   const int good_weight = player_luck_stat;
   const int bad_weight = 100 - good_weight;
 

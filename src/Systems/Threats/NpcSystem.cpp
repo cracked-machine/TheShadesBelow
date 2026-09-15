@@ -388,7 +388,7 @@ void NpcSystem::check_once_collision()
 
       if ( not touching_player ) continue;
 
-      Utils::Player::get_player_stats( reg() ).apply_modifiers( action );
+      Utils::Player::get_stats( reg() ).apply( action );
       player_cmp.skip_damage_cooldown_once = false;
 
       m_sound_bank.get_effect( "damage_player" ).play();
@@ -423,7 +423,7 @@ void NpcSystem::check_timed_collision( sf::Time dt )
 
     if ( not player_pos.findIntersection( npc_pos_cmp ) ) continue;
 
-    Utils::Player::get_player_stats( reg() ).apply_modifiers( npc_action );
+    Utils::Player::get_stats( reg() ).apply( npc_action );
     if ( m_sound_bank.get_effect( "damage_player" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "damage_player" ).play(); }
 
     npc_action_timer = sf::Time::Zero;
@@ -434,7 +434,7 @@ void NpcSystem::check_timed_collision( sf::Time dt )
 
 bool NpcSystem::check_player_death( Cmp::Player::Mortality &player_mort )
 {
-  if ( Utils::Player::get_player_stats( reg() ).health() > 0 ) return false;
+  if ( Utils::Player::get_stats( reg() ).health() > 0 ) return false;
 
   player_mort.state = Cmp::Player::Mortality::State::HAUNTED;
   get_systems_event_queue().enqueue( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::HAUNTED, Utils::Player::get_position( reg() ) ) );

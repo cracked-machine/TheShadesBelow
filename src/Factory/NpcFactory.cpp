@@ -202,7 +202,7 @@ entt::entity destroy_npc( entt::registry &reg, entt::entity npc_entity )
   if ( npc_cmp )
   {
     auto action_timer_pair = npc_cmp->actions.at( std::type_index( typeid( Cmp::DestroyAction ) ) );
-    Utils::Player::get_player_stats( reg ).apply_modifiers( action_timer_pair.action );
+    Utils::Player::get_stats( reg ).apply( action_timer_pair.action );
   }
 
   // kill npc once we are done

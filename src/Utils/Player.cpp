@@ -292,7 +292,7 @@ Cmp::TorchRadius &get_torch_radius( entt::registry &reg )
   return *torch_radius;
 }
 
-Cmp::PlayerStats &get_player_stats( entt::registry &reg )
+Cmp::PlayerStats &get_stats( entt::registry &reg )
 {
   auto player_stats_view = reg.view<Cmp::PlayerStats>();
   for ( auto [entity, cmp] : player_stats_view.each() )
@@ -336,7 +336,7 @@ void apply_action_from_world_item( entt::registry &reg, entt::entity world_item_
                               std::to_string( static_cast<uint32_t>( world_item_entt ) ) + ". Entity is " +
                               std::string( reg.valid( world_item_entt ) ? "valid" : "invalid" ) );
   }
-  Utils::Player::get_player_stats( reg ).apply_modifiers( plant_item->actions.at( std::type_index( typeid( ActionT ) ) ).action );
+  Utils::Player::get_stats( reg ).apply( plant_item->actions.at( std::type_index( typeid( ActionT ) ) ).action );
 }
 
 // Explicit instantiations for every Cmp::BaseAction subclass (see src/Components/Stats) - keeps the
@@ -362,8 +362,8 @@ void apply_action_from_inventory_item( entt::registry &reg )
   }
   for ( auto [inventory_entt, inventory_cmp] : inventory_view.each() )
   {
-    auto &player_stats = Utils::Player::get_player_stats( reg );
-    player_stats.apply_modifiers( inventory_cmp.m_item.actions.at( std::type_index( typeid( ActionT ) ) ).action );
+    auto &player_stats = Utils::Player::get_stats( reg );
+    player_stats.apply( inventory_cmp.m_item.actions.at( std::type_index( typeid( ActionT ) ) ).action );
   }
 }
 
@@ -383,7 +383,7 @@ template <typename ActionT>
 void apply_action_from_item_store( entt::registry &reg, const std::string &item_type )
 {
   auto item = Sys::ItemStore::instance().get_item( item_type );
-  Utils::Player::get_player_stats( reg ).apply_modifiers( item.actions.at( std::type_index( typeid( ActionT ) ) ).action );
+  Utils::Player::get_stats( reg ).apply( item.actions.at( std::type_index( typeid( ActionT ) ) ).action );
 }
 
 // Explicit instantiations for every Cmp::BaseAction subclass (see src/Components/Stats) - keeps the
@@ -421,7 +421,7 @@ template <typename ActionT>
 void apply_action_from_npc_store( entt::registry &reg, const std::string &npc_type )
 {
   auto npc = Sys::NpcStore::instance().get_item( npc_type );
-  Utils::Player::get_player_stats( reg ).apply_modifiers( npc.actions.at( std::type_index( typeid( ActionT ) ) ).action );
+  Utils::Player::get_stats( reg ).apply( npc.actions.at( std::type_index( typeid( ActionT ) ) ).action );
 }
 
 // Explicit instantiations for every Cmp::BaseAction subclass (see src/Components/Stats) - keeps the

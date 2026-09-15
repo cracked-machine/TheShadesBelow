@@ -226,7 +226,7 @@
   },
   "MusicVolume": {
     "type": "float",
-    "value": 0.0,
+    "value": 100.0,
     "min_value": 0.0,
     "max_value": 100.0,
     "detail": "Music Volume",

@@ -402,7 +402,7 @@ void ActionSystem::check_player_smash_pot()
       else
       {
         const std::string selected_type = Sys::ItemStore::instance().get_random_item_from_list(
-            Utils::Player::get_player_stats( reg() ).luck(), { "item.cursetablet", "item.seeingstone", "item.bomb" } );
+            Utils::Player::get_stats( reg() ).luck(), { "item.cursetablet", "item.seeingstone", "item.bomb" } );
 
         get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), selected_type, "drop_loot" ) );
 

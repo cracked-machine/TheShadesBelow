@@ -508,9 +508,9 @@ void RuinSystem::check_player_shadow_hand_collision( sf::Time dt )
   if ( Utils::Collision::check_cmp<Cmp::Npc::NPC>( reg(), Cmp::RectBounds::scaled( player_pos.position, Constants::kGridSizePxF, 1.f ) ) )
   {
     // damage player
-    Utils::Player::get_player_stats( reg() ).apply_modifiers( npc_collision_action.action );
+    Utils::Player::get_stats( reg() ).apply( npc_collision_action.action );
   }
-  if ( Utils::Player::get_player_stats( reg() ).health() <= 0 )
+  if ( Utils::Player::get_stats( reg() ).health() <= 0 )
   {
     get_systems_event_queue().enqueue( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::SHADOWCURSED, player_pos ) );
   }

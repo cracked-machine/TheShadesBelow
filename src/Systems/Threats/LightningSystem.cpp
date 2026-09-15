@@ -43,9 +43,9 @@ void LightningSystem::update( sf::Time dt )
 
     int lightning_dmg = Sys::PersistSystem::get<Cmp::Persist::LightningDamage>( reg() ).get_value();
     Cmp::BaseAction lightning_action( Cmp::Stats::Health{ -lightning_dmg }, {}, {}, {}, {}, {}, {} );
-    Utils::Player::get_player_stats( reg() ).apply_modifiers( lightning_action );
+    Utils::Player::get_stats( reg() ).apply( lightning_action );
 
-    if ( Utils::Player::get_player_stats( reg() ).health() <= 0 )
+    if ( Utils::Player::get_stats( reg() ).health() <= 0 )
     {
       get_systems_event_queue().trigger(
           Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::SHOCKED, Utils::Player::get_position( reg() ) ) );

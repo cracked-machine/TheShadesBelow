@@ -148,7 +148,7 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
 
     if ( meter.name == "health_meter" )
     {
-      meter_value = static_cast<float>( Utils::Player::get_player_stats( reg() ).health() );
+      meter_value = static_cast<float>( Utils::Player::get_stats( reg() ).health() );
       meter_inner_color = sf::Color::Red;
       should_render = true;
 
@@ -156,31 +156,31 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
     }
     else if ( meter.name == "fear_meter" )
     {
-      meter_value = static_cast<float>( Utils::Player::get_player_stats( reg() ).fear() );
+      meter_value = static_cast<float>( Utils::Player::get_stats( reg() ).fear() );
       meter_inner_color = sf::Color::Yellow;
       should_render = true;
     }
     else if ( meter.name == "infamy_meter" )
     {
-      meter_value = static_cast<float>( Utils::Player::get_player_stats( reg() ).infamy() );
+      meter_value = static_cast<float>( Utils::Player::get_stats( reg() ).infamy() );
       meter_inner_color = sf::Color::Magenta;
       should_render = true;
     }
     else if ( meter.name == "despair_meter" )
     {
-      meter_value = static_cast<float>( Utils::Player::get_player_stats( reg() ).despair() );
+      meter_value = static_cast<float>( Utils::Player::get_stats( reg() ).despair() );
       meter_inner_color = sf::Color::Blue;
       should_render = true;
     }
     else if ( meter.name == "toxicity_meter" )
     {
-      meter_value = static_cast<float>( Utils::Player::get_player_stats( reg() ).toxicity() );
+      meter_value = static_cast<float>( Utils::Player::get_stats( reg() ).toxicity() );
       meter_inner_color = sf::Color::Green;
       should_render = true;
     }
     else if ( meter.name == "luck_meter" )
     {
-      meter_value = static_cast<float>( Utils::Player::get_player_stats( reg() ).luck() );
+      meter_value = static_cast<float>( Utils::Player::get_stats( reg() ).luck() );
       meter_inner_color = sf::Color::Cyan;
       should_render = true;
     }

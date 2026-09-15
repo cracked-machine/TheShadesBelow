@@ -54,10 +54,10 @@ public:
   [[nodiscard]] Stats::Disease disease() const { return m_disease; }
 
   //! @brief Update the player stats with the BaseAction object.
-  //! @note BaseAction: health, fear, despair, infamy, toxicity, disease. Disease is only overwritten
+  //! @note BaseAction: health, fear, despair, infamy, toxicity, luck, disease. Disease is only overwritten
   //! if the player is already afflicted (i.e. it does not newly infect a healthy player).
   //! @param action The stat modifier to apply.
-  void apply_modifiers( const BaseAction &action )
+  void apply( const BaseAction &action )
   {
     m_health = std::clamp( m_health + action.health(), 0, 100 );
     SPDLOG_DEBUG( "Player health = {}", m_health );

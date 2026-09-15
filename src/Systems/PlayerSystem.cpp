@@ -520,7 +520,7 @@ void PlayerSystem::check_player_mortality()
         player_pos_cmp.position = Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() );
         Factory::Player::remove_player_extra_life( reg() );
         m_sound_bank.get_effect( "player_respawn" ).play();
-        Utils::Player::get_player_stats( reg() ).apply_modifiers( { Cmp::Stats::Health{ 100 }, {}, {}, {}, {}, {}, {}, {} } );
+        Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 100 }, {}, {}, {}, {}, {}, {}, {} } );
         mortality_cmp.state = Cmp::Player::Mortality::State::ALIVE;
         reg().remove<Cmp::NoRender>( entity );
         reg().remove<Cmp::Player::PostDeathTimer>( entity );
@@ -696,7 +696,7 @@ void PlayerSystem::check_timed_action_side_effects( sf::Time dt )
 
     check_player_max_fear_despair();
   }
-  Utils::Player::get_player_stats( reg() ).apply_modifiers( net_modifier );
+  Utils::Player::get_stats( reg() ).apply( net_modifier );
 }
 
 void PlayerSystem::update_timed_action_clocks( sf::Time dt )
@@ -735,16 +735,15 @@ void PlayerSystem::update_timed_action_clocks( sf::Time dt )
 void PlayerSystem::check_player_max_fear_despair()
 {
   // check if player should take health damage/die
-  if ( Utils::Player::get_player_stats( reg() ).fear() == 100 )
+  if ( Utils::Player::get_stats( reg() ).fear() == 100 )
   {
-    Utils::Player::get_player_stats( reg() ).apply_modifiers( Cmp::BaseAction( { -1 }, {}, {}, {}, {}, {}, {} ) );
-    if ( Utils::Player::get_player_stats( reg() ).health() == 0 and
-         Utils::Player::get_mortality( reg() ).state != Cmp::Player::Mortality::State::DEAD )
+    Utils::Player::get_stats( reg() ).apply( Cmp::BaseAction( { -1 }, {}, {}, {}, {}, {}, {} ) );
+    if ( Utils::Player::get_stats( reg() ).health() == 0 and Utils::Player::get_mortality( reg() ).state != Cmp::Player::Mortality::State::DEAD )
     {
       on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::TERRIFIED, Utils::Player::get_position( reg() ) ) );
     }
   }
-  else if ( Utils::Player::get_player_stats( reg() ).despair() == 100 and
+  else if ( Utils::Player::get_stats( reg() ).despair() == 100 and
             Utils::Player::get_mortality( reg() ).state != Cmp::Player::Mortality::State::DEAD )
   {
     on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::SUICIDE, Utils::Player::get_position( reg() ) ) );
@@ -906,7 +905,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
     }
     reg().emplace_or_replace<Cmp::Player::PostDeathTimer>( Utils::Player::get_entity( reg() ) );
     reg().emplace_or_replace<Cmp::NoRender>( Utils::Player::get_entity( reg() ) );
-    Utils::Player::get_player_stats( reg() ).apply_modifiers( { Cmp::Stats::Health{ -100 }, {}, {}, {}, {}, {}, {} } );
+    Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ -100 }, {}, {}, {}, {}, {}, {} } );
     SPDLOG_INFO( "Player death code: {}", static_cast<uint8_t>( ev.m_new_state ) );
     Utils::Player::get_mortality( reg() ).state = Cmp::Player::Mortality::State::DEAD;
     SPDLOG_INFO( "Player died" );

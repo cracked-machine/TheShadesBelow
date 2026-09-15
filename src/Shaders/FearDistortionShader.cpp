@@ -20,7 +20,7 @@ constexpr float kFearSmoothingRate = 3.0f;
 void FearDistortionShader::update( entt::registry &reg )
 {
   auto display_size = sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg ) );
-  float target_fear = static_cast<float>( Utils::Player::get_player_stats( reg ).fear() ) / 100.f;
+  float target_fear = static_cast<float>( Utils::Player::get_stats( reg ).fear() ) / 100.f;
 
   sf::Time now = elapsed();
   float dt = ( now - m_last_fear_update ).asSeconds();

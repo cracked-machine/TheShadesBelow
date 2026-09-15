@@ -188,7 +188,7 @@ Cmp::TorchRadius &get_torch_radius( entt::registry &reg );
 //! @param reg reference to the entt registry
 //! @return Cmp::PlayerStats& Reference to the player's stats.
 //! @throws std::runtime_error if no entity has both Cmp::Player::Character and Cmp::PlayerStats.
-Cmp::PlayerStats &get_player_stats( entt::registry &reg );
+Cmp::PlayerStats &get_stats( entt::registry &reg );
 
 Cmp::Player::Footstep &get_footstep_type( entt::registry &reg );
 
