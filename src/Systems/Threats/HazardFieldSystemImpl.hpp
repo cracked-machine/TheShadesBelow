@@ -30,6 +30,14 @@
 namespace Game::Sys
 {
 
+namespace Detail
+{
+//! @brief Always false, but depends on T so static_assert(dependent_false<T>) only fires when the
+//! enclosing `if constexpr` branch is actually instantiated, not for every instantiation of the template.
+template <typename T>
+inline constexpr bool dependent_false = false;
+} // namespace Detail
+
 //! @copydoc HazardFieldSystem::HazardFieldSystem(entt::registry&,sf::RenderWindow&,Sprites::SpriteFactory&,Audio::SoundBank&)
 template <ValidHazard HazardType>
 HazardFieldSystem<HazardType>::HazardFieldSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory,
@@ -44,12 +52,11 @@ HazardFieldSystem<HazardType>::HazardFieldSystem( entt::registry &reg, sf::Rende
 template <ValidHazard HazardType>
 sf::Vector2f HazardFieldSystem<HazardType>::update( sf::Time dt )
 {
-  sf::Vector2f add_hazard_cell;
-  add_hazard_cell = update_hazard_field();
+  auto add_hazard_cell = update_hazard_field();
   check_npc_hazard_field_collision();
 
   m_dmg_timer += dt;
-  static sf::Time dmg_timeout = sf::seconds( 0.2f );
+  static constexpr sf::Time dmg_timeout = sf::seconds( 0.2f );
   if ( m_dmg_timer > dmg_timeout )
   {
     if ( Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled ) { check_player_hazard_field_collision(); }
@@ -73,28 +80,36 @@ sf::Vector2f HazardFieldSystem<HazardType>::init_hazard_field()
   auto reserved_sm = m_reserved_sm.lock();
   if ( reserved_sm && not reserved_sm->at( random_pos ).empty() ) { return {}; }
 
-  Factory::Obstacle::remove_obstacle( reg(), random_entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
+  promote_to_hazard_cell( random_entity, random_pos, reserved_sm );
+  SPDLOG_INFO( "{} hazard spawned at position [{}, {}].", std::string( Traits::sprite_type ), random_pos.position.x, random_pos.position.y );
+
+  return random_pos.position;
+}
+
+//! @copydoc HazardFieldSystem::promote_to_hazard_cell()
+template <ValidHazard HazardType>
+void HazardFieldSystem<HazardType>::promote_to_hazard_cell( entt::entity entity, const Cmp::Position &pos,
+                                                            const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
+{
+  Factory::Obstacle::remove_obstacle( reg(), entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
   // remove_obstacle() above un-reserves this position; re-reserve it now the entity is a hazard cell,
   // otherwise BombSystem's blast-arming sweep will still find it via its leftover Cmp::Armable
-  if ( reserved_sm ) { reserved_sm->insert( random_entity, random_pos ); }
-  reg().template emplace<HazardType>( random_entity );
+  if ( reserved_sm ) { reserved_sm->insert( entity, pos ); }
   // clang-format off
-  reg().template emplace_or_replace<Cmp::AnimData>( random_entity, Cmp::AnimData::Config{  
+  reg().template emplace_or_replace<HazardType>( entity );
+  reg().template emplace_or_replace<Cmp::AnimData>( entity, Cmp::AnimData::Config{
         .sprite_type =  std::string( Traits::sprite_type ),
         .enabled = true
   });
   // clang-format on
-  reg().template emplace_or_replace<Cmp::ZOrderValue>( random_entity, random_pos.position.y - 1.f );
-  reg().template emplace_or_replace<Cmp::Npc::NoPathFinding>( random_entity );
+  reg().template emplace_or_replace<Cmp::ZOrderValue>( entity, pos.position.y - 1.f );
+  reg().template emplace_or_replace<Cmp::Npc::NoPathFinding>( entity );
   // corruption is a gradual damage field, not an instant kill, so it never gets an initial pushback
   if constexpr ( not std::is_same_v<HazardType, Cmp::CorruptionCell> )
   {
     auto resist_seconds = Sys::PersistSystem::get<Cmp::Persist::HazardPushbackResist>( reg() ).get_value();
-    reg().template emplace_or_replace<Cmp::Hazard::CollisionResist>( random_entity, resist_seconds );
+    reg().template emplace_or_replace<Cmp::Hazard::CollisionResist>( entity, resist_seconds );
   }
-  SPDLOG_INFO( "{} hazard spawned at position [{}, {}].", std::string( Traits::sprite_type ), random_pos.position.x, random_pos.position.y );
-
-  return random_pos.position;
 }
 
 //! @copydoc HazardFieldSystem::on_pause()
@@ -142,33 +157,14 @@ sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field()
       if ( reserved_sm && not reserved_sm->at( obst_pos_cmp ).empty() ) continue;
       SPDLOG_DEBUG( "Hazard intersected with object {}", static_cast<uint32_t>( obstacle_entity ) );
 
-      if ( reg().template try_get<HazardType>( obstacle_entity ) ) continue;
+      if ( reg().template all_of<HazardType>( obstacle_entity ) ) continue;
       SPDLOG_DEBUG( "Hazard not found at entity {}", static_cast<uint32_t>( obstacle_entity ) );
 
       auto hazard_pick = hazard_spread_picker.gen();
       SPDLOG_DEBUG( "hazard_pick:{}", hazard_pick );
       if ( hazard_pick == 0 )
       {
-        Factory::Obstacle::remove_obstacle( reg(), obstacle_entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
-        // remove_obstacle() above un-reserves this position; re-reserve it now the entity is a hazard cell,
-        // otherwise BombSystem's blast-arming sweep will still find it via its leftover Cmp::Armable
-        if ( reserved_sm ) { reserved_sm->insert( obstacle_entity, obst_pos_cmp ); }
-        reg().template emplace_or_replace<HazardType>( obstacle_entity );
-        // clang-format off
-        reg().template emplace_or_replace<Cmp::AnimData>( obstacle_entity, Cmp::AnimData::Config{  
-              .sprite_type =  std::string( Traits::sprite_type ),
-              .enabled = true
-        });
-        // clang-format on
-        reg().template emplace_or_replace<Cmp::ZOrderValue>( obstacle_entity, obst_pos_cmp.position.y - 1.f );
-        reg().template emplace_or_replace<Cmp::Npc::NoPathFinding>( obstacle_entity );
-        // corruption is a gradual damage field, not an instant kill, so it never gets an initial pushback
-        if constexpr ( not std::is_same_v<HazardType, Cmp::CorruptionCell> )
-        {
-          auto resist_seconds = Sys::PersistSystem::get<Cmp::Persist::HazardPushbackResist>( reg() ).get_value();
-          reg().template emplace_or_replace<Cmp::Hazard::CollisionResist>( obstacle_entity, resist_seconds );
-        }
-
+        promote_to_hazard_cell( obstacle_entity, obst_pos_cmp, reserved_sm );
         SPDLOG_DEBUG( "New hazard field created at entity {}", static_cast<uint32_t>( obstacle_entity ) );
         return obst_pos_cmp.position; // only add one hazard cell per update period
       }
@@ -200,12 +196,16 @@ void HazardFieldSystem<HazardType>::check_player_hazard_field_collision()
 
   for ( auto [pc_entt, player_cmp, player_stats_cmp, player_mort_cmp, player_pos_cmp] : player_view.each() )
   {
-    // optimization
-    // if ( player_mort_cmp.state != Cmp::Player::Mortality::State::ALIVE ) return;
     if ( not Utils::is_visible_in_view( view_bounds, player_pos_cmp ) ) continue;
 
     // dont spam death events if the player is already dead
     if ( player_mort_cmp.state == Cmp::Player::Mortality::State::DEAD ) continue;
+
+    if constexpr ( Traits::sprite_type == "sprite.graveyard.hazard.corruption" )
+    {
+      // default to the corruption-field footstep SFX; a hazard hit below overrides it with MUD
+      reg().template emplace_or_replace<Cmp::Player::Footstep>( Utils::Player::get_entity( m_reg ), Cmp::Player::Footstep::Type::GRASS );
+    }
 
     for ( auto [hazard_entt, hazard_cmp, hazard_pos_cmp] : hazard_view.each() )
     {
@@ -215,14 +215,12 @@ void HazardFieldSystem<HazardType>::check_player_hazard_field_collision()
         // full size hitbox - Cmp::Hazard::CollisionResist now guards against accidental entry
         if ( hazard_pos_cmp.findIntersection( player_pos_cmp ) )
         {
-          // make player disappear
-
           // trigger death animation
           get_systems_event_queue().trigger( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::FALLING, player_position ) );
           return;
         }
       }
-      if constexpr ( Traits::sprite_type == "sprite.graveyard.hazard.corruption" )
+      else if constexpr ( Traits::sprite_type == "sprite.graveyard.hazard.corruption" )
       {
         // normal size hitbox for corruption for full area
         if ( hazard_pos_cmp.findIntersection( player_pos_cmp ) )
@@ -239,9 +237,12 @@ void HazardFieldSystem<HazardType>::check_player_hazard_field_collision()
           }
           return;
         }
-
-        // Set the default footstep SFX for this scene
-        reg().template emplace_or_replace<Cmp::Player::Footstep>( Utils::Player::get_entity( m_reg ), Cmp::Player::Footstep::Type::GRASS );
+      }
+      else
+      {
+        // new HazardType added without a matching sprite_type branch here - fails to compile instead of
+        // silently skipping player collision handling for it
+        static_assert( Detail::dependent_false<HazardType>, "check_player_hazard_field_collision: unhandled Traits::sprite_type" );
       }
     }
   }

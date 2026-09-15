@@ -8,6 +8,7 @@
 #include <Components/Persistent/CorruptionSeed.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Player/Mortality.hpp>
+#include <Components/Position.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Utils/Random.hpp>
@@ -90,6 +91,14 @@ private:
   //! @brief Check for NPC collision with hazard fields.
   //! If a collision is detected, trigger NPC death event.
   void check_npc_hazard_field_collision();
+
+  //! @brief Convert an obstacle entity into an active hazard cell: transfers its spatial-hash reservation,
+  //! attaches the hazard/anim/z-order/pathfinding components, and (unless this hazard type only applies
+  //! gradual damage) an initial pushback-collision resist.
+  //! @param entity The obstacle entity to promote.
+  //! @param pos The entity's current position.
+  //! @param reserved_sm The locked reserved-positions grid, or nullptr if it has expired.
+  void promote_to_hazard_cell( entt::entity entity, const Cmp::Position &pos, const PathFinding::SpatialHashGridSharedPtr &reserved_sm );
 
   //! @brief Clock used to track time for hazard field updates.
   //!
