@@ -105,8 +105,9 @@ void NightStaticShader::update( entt::registry &reg )
       .set( "fear", fear_amount )
       .apply( &get_shader() );
 
-  // shader position at the top left of the world
-  set_position( { 0, 0 } );
+  // shader positioned off top-left of the world so the (now doubled) render texture extends
+  // further left/up and further right/down, avoiding gaps at the map edges
+  set_position( { -200, -100 } );
 }
 
 } // namespace Game::Sprites

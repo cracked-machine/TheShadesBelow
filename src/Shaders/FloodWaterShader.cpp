@@ -26,7 +26,7 @@ void FloodWaterShader::update( entt::registry &reg )
       .apply( &get_shader() );
 
   // clang-format on
-  set_position( { -100, -100 } );
+  set_position( { -200, -100 } );
 }
 
 } // namespace Game::Sprites
