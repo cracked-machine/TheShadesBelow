@@ -60,158 +60,6 @@ BombSystem::BombSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::
   SPDLOG_DEBUG( "BombSystem initialized" );
 }
 
-void BombSystem::on_pause()
-{
-  if ( m_sound_bank.get_effect( "bomb_fuse" ).getStatus() == sf::Sound::Status::Playing ) m_sound_bank.get_effect( "bomb_fuse" ).pause();
-  if ( m_sound_bank.get_effect( "bomb_detonate" ).getStatus() == sf::Sound::Status::Playing ) m_sound_bank.get_effect( "bomb_detonate" ).pause();
-  auto armed_view = reg().view<Cmp::Armed>();
-  for ( auto [entt, armed_cmp] : armed_view.each() )
-  {
-    if ( armed_cmp.m_fuse_delay_clock.isRunning() ) armed_cmp.m_fuse_delay_clock.stop();
-    if ( armed_cmp.m_warning_delay_clock.isRunning() ) armed_cmp.m_warning_delay_clock.stop();
-  }
-}
-void BombSystem::on_resume()
-{
-  if ( m_sound_bank.get_effect( "bomb_fuse" ).getStatus() == sf::Sound::Status::Paused ) m_sound_bank.get_effect( "bomb_fuse" ).play();
-  if ( m_sound_bank.get_effect( "bomb_detonate" ).getStatus() == sf::Sound::Status::Paused ) m_sound_bank.get_effect( "bomb_detonate" ).play();
-  auto armed_view = reg().view<Cmp::Armed>();
-  for ( auto [entt, armed_cmp] : armed_view.each() )
-  {
-    if ( not armed_cmp.m_fuse_delay_clock.isRunning() ) armed_cmp.m_fuse_delay_clock.start();
-    if ( not armed_cmp.m_warning_delay_clock.isRunning() ) armed_cmp.m_warning_delay_clock.start();
-  }
-}
-
-void BombSystem::on_bomb_event( const Events::PlayerActionEvent &event )
-{
-  if ( event.action == Events::PlayerActionEvent::GameActions::PLACE_BOMB ) { arm_player_bomb(); }
-  else if ( event.action == Events::PlayerActionEvent::GameActions::TRIGGER_BOMB ) { arm_grave_bomb(); }
-}
-
-void BombSystem::arm_grave_bomb()
-{
-  m_sound_bank.get_effect( "bomb_fuse" ).play();
-  auto new_bomb_entt = reg().create();
-  auto realigned_epicenter_pos = Utils::snap_to_grid( Utils::Player::get_position( reg() ) );
-  reg().emplace_or_replace<Cmp::Position>( new_bomb_entt, realigned_epicenter_pos.position, realigned_epicenter_pos.size );
-  place_concentric_bomb_pattern( new_bomb_entt, Utils::Player::get_blast_radius( reg() ).value );
-  Utils::Player::get_global_bomb_flash_clk( reg() ).restart();
-}
-
-void BombSystem::arm_entt( entt::entity target_entt )
-{
-  // then use the candidate entity to place the booby trap bomb
-  if ( target_entt != entt::null )
-  {
-    m_sound_bank.get_effect( "bomb_fuse" ).play();
-
-    place_concentric_bomb_pattern( target_entt, Utils::Player::get_blast_radius( reg() ).value );
-  }
-}
-
-void BombSystem::arm_player_bomb()
-{
-  auto player_pos = Utils::Player::get_position( reg() );
-
-  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-  if ( inventory_type != "item.bomb" ) return;
-
-  auto destructable_view = reg().view<Cmp::Armable, Cmp::Position>();
-  for ( auto [destructable_entity, destructable_cmp, destructable_pos_cmp] : destructable_view.each() )
-  {
-    // make a copy and reduce/center the player hitbox to avoid arming a neighbouring location
-    auto player_hitbox = sf::FloatRect( player_pos );
-    player_hitbox.size.x /= 2.f;
-    player_hitbox.size.y /= 2.f;
-    player_hitbox.position.x += 4.f;
-    player_hitbox.position.y += 4.f;
-
-    // are we standing on a destructable tile?
-    if ( player_hitbox.findIntersection( destructable_pos_cmp ) )
-    {
-      m_sound_bank.get_effect( "bomb_fuse" ).play();
-
-      auto armed_epicenter_entity = reg().create();
-      auto realigned_epicenter_pos = Utils::snap_to_grid( destructable_pos_cmp );
-      reg().emplace<Cmp::Position>( armed_epicenter_entity, realigned_epicenter_pos.position, realigned_epicenter_pos.size );
-      place_concentric_bomb_pattern( armed_epicenter_entity, Utils::Player::get_blast_radius( reg() ).value );
-      Factory::Player::destroy_inventory( reg(), "item.bomb" );
-      Utils::Player::get_global_bomb_flash_clk( reg() ).restart();
-    }
-  }
-}
-
-void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_entity, const int blast_radius )
-{
-  constexpr float kZOrderOffset = 64.f;
-
-  // Validate epicenter entity
-  if ( not reg().valid( epicenter_entity ) ) return;
-
-  // Skip if this entity is already armed (prevents re-processing)
-  if ( reg().any_of<Cmp::Armed>( epicenter_entity ) ) return;
-
-  auto grid_pos_opt = Utils::get_grid_position<int>( reg(), epicenter_entity );
-  if ( not grid_pos_opt.has_value() ) return;
-  sf::Vector2i centerTile = grid_pos_opt.value();
-
-  // Mark epicenter as armed FIRST before any recursive processing
-  int sequence_counter = 0;
-  Factory::Bomb::create_armed( reg(), epicenter_entity, Cmp::Armed::EpiCenter::YES, sequence_counter++, centerTile.y + kZOrderOffset );
-
-  // We dont detonate reserved positions so dont arm them in the first place
-  // Also exclude NPCs since they're handled separately and may be missing Position component during death animation
-  auto all_obstacle_view = reg().view<Cmp::Armable, Cmp::Position>( exclude<Cmp::Npc::NPC, Cmp::Exit> );
-  auto reserved_sm = m_reserved_sm.lock();
-
-  // Bucket every candidate entity by its layer (Chebyshev distance from the epicenter) in a single pass,
-  // rather than re-scanning and re-computing distances once per layer.
-  std::vector<std::vector<std::pair<entt::entity, sf::Vector2i>>> entities_by_layer( static_cast<std::size_t>( std::max( blast_radius, 0 ) ) + 1 );
-
-  for ( auto [destructable_entity, destructable_cmp, destructable_pos] : all_obstacle_view.each() )
-  {
-    if ( destructable_entity == epicenter_entity || reg().any_of<Cmp::Armed>( destructable_entity ) ) continue;
-    if ( reserved_sm && not reserved_sm->at( destructable_pos ).empty() ) continue;
-
-    sf::Vector2i grid_position = Utils::get_grid_position<int>( reg(), destructable_entity ).value();
-    int distance_from_center = Utils::Maths::getChebyshevDistance( grid_position, centerTile );
-
-    if ( distance_from_center < 1 || distance_from_center > blast_radius ) continue;
-
-    if ( reg().any_of<Cmp::LootContainer>( destructable_entity ) )
-    {
-      SPDLOG_DEBUG( "Arming loot container entity {}", static_cast<int>( destructable_entity ) );
-    }
-    entities_by_layer[static_cast<std::size_t>( distance_from_center )].emplace_back( destructable_entity, grid_position );
-  }
-
-  // For each layer from 1 to BLAST_RADIUS, sort clockwise and arm
-  for ( int layer = 1; layer <= blast_radius; layer++ )
-  {
-    auto &layer_entities = entities_by_layer[static_cast<std::size_t>( layer )];
-    SPDLOG_DEBUG( "Layer {}: Found {} entities to arm", layer, layer_entities.size() );
-
-    // clang-format off
-    // Sort entities in clockwise order
-    std::ranges::sort( layer_entities,
-      [centerTile]( const auto &a, const auto &b )
-      {
-        // Calculate angles from center to points
-        float angleA = std::atan2( a.second.y - centerTile.y, a.second.x - centerTile.x );
-        float angleB = std::atan2( b.second.y - centerTile.y, b.second.x - centerTile.x );
-        return angleA < angleB;
-      } );
-    // clang-format on
-
-    // Arm each entity in the layer in clockwise order
-    for ( const auto &[entity, pos] : layer_entities )
-    {
-      Factory::Bomb::create_armed( reg(), entity, Cmp::Armed::EpiCenter::NO, sequence_counter++, centerTile.y + kZOrderOffset );
-    }
-  }
-}
-
 void BombSystem::update()
 {
 
@@ -237,7 +85,8 @@ void BombSystem::update()
   // entities - both reallocate the pools this view is built from, which would invalidate a live iterator.
   // A plain vector can't be invalidated by any of that.
   std::vector<entt::entity> armed_entities;
-  for ( auto armed_entt : reg().view<Cmp::Armed, Cmp::Position>() ) armed_entities.push_back( armed_entt );
+  for ( auto armed_entt : reg().view<Cmp::Armed, Cmp::Position>() )
+    armed_entities.push_back( armed_entt );
 
   for ( entt::entity armed_entt : armed_entities )
   {
@@ -399,6 +248,158 @@ void BombSystem::update()
 
   auto remaining_armed_view = reg().view<Cmp::Armed>();
   if ( remaining_armed_view->empty() ) { Utils::Player::get_global_bomb_flash_clk( reg() ).reset(); }
+}
+
+void BombSystem::on_pause()
+{
+  if ( m_sound_bank.get_effect( "bomb_fuse" ).getStatus() == sf::Sound::Status::Playing ) m_sound_bank.get_effect( "bomb_fuse" ).pause();
+  if ( m_sound_bank.get_effect( "bomb_detonate" ).getStatus() == sf::Sound::Status::Playing ) m_sound_bank.get_effect( "bomb_detonate" ).pause();
+  auto armed_view = reg().view<Cmp::Armed>();
+  for ( auto [entt, armed_cmp] : armed_view.each() )
+  {
+    if ( armed_cmp.m_fuse_delay_clock.isRunning() ) armed_cmp.m_fuse_delay_clock.stop();
+    if ( armed_cmp.m_warning_delay_clock.isRunning() ) armed_cmp.m_warning_delay_clock.stop();
+  }
+}
+void BombSystem::on_resume()
+{
+  if ( m_sound_bank.get_effect( "bomb_fuse" ).getStatus() == sf::Sound::Status::Paused ) m_sound_bank.get_effect( "bomb_fuse" ).play();
+  if ( m_sound_bank.get_effect( "bomb_detonate" ).getStatus() == sf::Sound::Status::Paused ) m_sound_bank.get_effect( "bomb_detonate" ).play();
+  auto armed_view = reg().view<Cmp::Armed>();
+  for ( auto [entt, armed_cmp] : armed_view.each() )
+  {
+    if ( not armed_cmp.m_fuse_delay_clock.isRunning() ) armed_cmp.m_fuse_delay_clock.start();
+    if ( not armed_cmp.m_warning_delay_clock.isRunning() ) armed_cmp.m_warning_delay_clock.start();
+  }
+}
+
+void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_entity, const int blast_radius )
+{
+  constexpr float kZOrderOffset = 64.f;
+
+  // Validate epicenter entity
+  if ( not reg().valid( epicenter_entity ) ) return;
+
+  // Skip if this entity is already armed (prevents re-processing)
+  if ( reg().any_of<Cmp::Armed>( epicenter_entity ) ) return;
+
+  auto grid_pos_opt = Utils::get_grid_position<int>( reg(), epicenter_entity );
+  if ( not grid_pos_opt.has_value() ) return;
+  sf::Vector2i centerTile = grid_pos_opt.value();
+
+  // Mark epicenter as armed FIRST before any recursive processing
+  int sequence_counter = 0;
+  Factory::Bomb::create_armed( reg(), epicenter_entity, Cmp::Armed::EpiCenter::YES, sequence_counter++, centerTile.y + kZOrderOffset );
+
+  // We dont detonate reserved positions so dont arm them in the first place
+  // Also exclude NPCs since they're handled separately and may be missing Position component during death animation
+  auto all_obstacle_view = reg().view<Cmp::Armable, Cmp::Position>( exclude<Cmp::Npc::NPC, Cmp::Exit> );
+  auto reserved_sm = m_reserved_sm.lock();
+
+  // Bucket every candidate entity by its layer (Chebyshev distance from the epicenter) in a single pass,
+  // rather than re-scanning and re-computing distances once per layer.
+  std::vector<std::vector<std::pair<entt::entity, sf::Vector2i>>> entities_by_layer( static_cast<std::size_t>( std::max( blast_radius, 0 ) ) + 1 );
+
+  for ( auto [destructable_entity, destructable_cmp, destructable_pos] : all_obstacle_view.each() )
+  {
+    if ( destructable_entity == epicenter_entity || reg().any_of<Cmp::Armed>( destructable_entity ) ) continue;
+    if ( reserved_sm && not reserved_sm->at( destructable_pos ).empty() ) continue;
+
+    sf::Vector2i grid_position = Utils::get_grid_position<int>( reg(), destructable_entity ).value();
+    int distance_from_center = Utils::Maths::getChebyshevDistance( grid_position, centerTile );
+
+    if ( distance_from_center < 1 || distance_from_center > blast_radius ) continue;
+
+    if ( reg().any_of<Cmp::LootContainer>( destructable_entity ) )
+    {
+      SPDLOG_DEBUG( "Arming loot container entity {}", static_cast<int>( destructable_entity ) );
+    }
+    entities_by_layer[static_cast<std::size_t>( distance_from_center )].emplace_back( destructable_entity, grid_position );
+  }
+
+  // For each layer from 1 to BLAST_RADIUS, sort clockwise and arm
+  for ( int layer = 1; layer <= blast_radius; layer++ )
+  {
+    auto &layer_entities = entities_by_layer[static_cast<std::size_t>( layer )];
+    SPDLOG_DEBUG( "Layer {}: Found {} entities to arm", layer, layer_entities.size() );
+
+    // clang-format off
+    // Sort entities in clockwise order
+    std::ranges::sort( layer_entities,
+      [centerTile]( const auto &a, const auto &b )
+      {
+        // Calculate angles from center to points
+        float angleA = std::atan2( a.second.y - centerTile.y, a.second.x - centerTile.x );
+        float angleB = std::atan2( b.second.y - centerTile.y, b.second.x - centerTile.x );
+        return angleA < angleB;
+      } );
+    // clang-format on
+
+    // Arm each entity in the layer in clockwise order
+    for ( const auto &[entity, pos] : layer_entities )
+    {
+      Factory::Bomb::create_armed( reg(), entity, Cmp::Armed::EpiCenter::NO, sequence_counter++, centerTile.y + kZOrderOffset );
+    }
+  }
+}
+
+void BombSystem::on_bomb_event( const Events::PlayerActionEvent &event )
+{
+  if ( event.action == Events::PlayerActionEvent::GameActions::PLACE_BOMB ) { arm_player_bomb(); }
+  else if ( event.action == Events::PlayerActionEvent::GameActions::TRIGGER_BOMB ) { arm_grave_bomb(); }
+}
+
+void BombSystem::arm_grave_bomb()
+{
+  m_sound_bank.get_effect( "bomb_fuse" ).play();
+  auto new_bomb_entt = reg().create();
+  auto realigned_epicenter_pos = Utils::snap_to_grid( Utils::Player::get_position( reg() ) );
+  reg().emplace_or_replace<Cmp::Position>( new_bomb_entt, realigned_epicenter_pos.position, realigned_epicenter_pos.size );
+  place_concentric_bomb_pattern( new_bomb_entt, Utils::Player::get_blast_radius( reg() ).value );
+  Utils::Player::get_global_bomb_flash_clk( reg() ).restart();
+}
+
+void BombSystem::arm_player_bomb()
+{
+  auto player_pos = Utils::Player::get_position( reg() );
+
+  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+  if ( inventory_type != "item.bomb" ) return;
+
+  auto destructable_view = reg().view<Cmp::Armable, Cmp::Position>();
+  for ( auto [destructable_entity, destructable_cmp, destructable_pos_cmp] : destructable_view.each() )
+  {
+    // make a copy and reduce/center the player hitbox to avoid arming a neighbouring location
+    auto player_hitbox = sf::FloatRect( player_pos );
+    player_hitbox.size.x /= 2.f;
+    player_hitbox.size.y /= 2.f;
+    player_hitbox.position.x += 4.f;
+    player_hitbox.position.y += 4.f;
+
+    // are we standing on a destructable tile?
+    if ( player_hitbox.findIntersection( destructable_pos_cmp ) )
+    {
+      m_sound_bank.get_effect( "bomb_fuse" ).play();
+
+      auto armed_epicenter_entity = reg().create();
+      auto realigned_epicenter_pos = Utils::snap_to_grid( destructable_pos_cmp );
+      reg().emplace<Cmp::Position>( armed_epicenter_entity, realigned_epicenter_pos.position, realigned_epicenter_pos.size );
+      place_concentric_bomb_pattern( armed_epicenter_entity, Utils::Player::get_blast_radius( reg() ).value );
+      Factory::Player::destroy_inventory( reg(), "item.bomb" );
+      Utils::Player::get_global_bomb_flash_clk( reg() ).restart();
+    }
+  }
+}
+
+void BombSystem::arm_entt( entt::entity target_entt )
+{
+  // then use the candidate entity to place the booby trap bomb
+  if ( target_entt != entt::null )
+  {
+    m_sound_bank.get_effect( "bomb_fuse" ).play();
+
+    place_concentric_bomb_pattern( target_entt, Utils::Player::get_blast_radius( reg() ).value );
+  }
 }
 
 } // namespace Game::Sys

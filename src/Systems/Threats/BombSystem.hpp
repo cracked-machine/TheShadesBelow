@@ -54,31 +54,9 @@ public:
     m_reserved_sm = reserved_sm;
   }
 
-  //! @brief Arm a bomb centered on the player's current position (used for grave bombs).
-  void arm_grave_bomb();
-
-  //! @brief Arm a bomb on the destructable tile the player is currently standing on, consuming a bomb item from the player's inventory.
-  void arm_player_bomb();
-
-  //! @brief Arm a bomb centered on the given target entity (used for chain-reacting nearby explosives).
-  //! @param target_entt
-  void arm_entt( entt::entity target_entt );
-
-  //! @brief Recursively arm all destructable entities in concentric rings out from an epicenter, up to blast_radius layers, in clockwise order per
-  //! layer.
-  //! @param epicenter_entity
-  //! @param blast_radius
-  //! @param depth Current recursion depth; recursion stops once it reaches the internal max recursion depth.
-  void place_concentric_bomb_pattern( const entt::entity &epicenter_entity, int blast_radius );
-
   //! @brief Detonate any armed bombs whose fuse has expired: destroys obstacles, loot containers, npc containers and nearby items, damages the
   //! player and npcs caught in the blast, triggers chain reactions with other explosives, and replaces the bomb with a detonated sprite.
   void update();
-
-  /// EVENTS
-  //! @brief Dispatches DROP_BOMB and GRAVE_BOMB player actions to arm_player_bomb() and arm_grave_bomb() respectively.
-  //! @param event
-  void on_bomb_event( const Events::PlayerActionEvent &event );
 
   //! @brief event handlers for pausing system clocks
   void on_pause() override;
@@ -97,6 +75,27 @@ private:
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
+
+  //! @brief Recursively arm all destructable entities in concentric rings out from an epicenter, up to blast_radius layers, in clockwise order per
+  //! layer.
+  //! @param epicenter_entity
+  //! @param blast_radius
+  //! @param depth Current recursion depth; recursion stops once it reaches the internal max recursion depth.
+  void place_concentric_bomb_pattern( const entt::entity &epicenter_entity, int blast_radius );
+
+  //! @brief Dispatches DROP_BOMB and GRAVE_BOMB player actions to arm_player_bomb() and arm_grave_bomb() respectively.
+  //! @param event
+  void on_bomb_event( const Events::PlayerActionEvent &event );
+
+  //! @brief Arm a bomb centered on the player's current position (used for grave bombs).
+  void arm_grave_bomb();
+
+  //! @brief Arm a bomb on the destructable tile the player is currently standing on, consuming a bomb item from the player's inventory.
+  void arm_player_bomb();
+
+  //! @brief Arm a bomb centered on the given target entity (used for chain-reacting nearby explosives).
+  //! @param target_entt
+  void arm_entt( entt::entity target_entt );
 };
 
 } // namespace Game::Sys
