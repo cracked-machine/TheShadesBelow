@@ -68,6 +68,13 @@ void GraveSystem::update()
     reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
     apply_dig_hit( grave_entity, grave_cmp, grave_anim_cmp );
+
+    // apply_dig_hit() can open the grave and trigger a consequence (spawning loot/NPC/bomb entities via
+    // Events::CreateItemEvent/PlayerActionEvent, dispatched synchronously through .trigger()). Those handlers
+    // emplace Cmp::Position/Cmp::AnimData onto new entities, which can reallocate the pools this view iterates -
+    // continuing to iterate afterward would be undefined behaviour. Only one grave can match the mouse position
+    // at a time anyway, so stop here rather than advancing the now-possibly-invalidated iterator.
+    break;
   }
 }
 

@@ -69,7 +69,7 @@ public:
   //! @param epicenter_entity
   //! @param blast_radius
   //! @param depth Current recursion depth; recursion stops once it reaches the internal max recursion depth.
-  void place_concentric_bomb_pattern( const entt::entity &epicenter_entity, const int blast_radius, int depth = 0 );
+  void place_concentric_bomb_pattern( const entt::entity &epicenter_entity, int blast_radius );
 
   //! @brief Detonate any armed bombs whose fuse has expired: destroys obstacles, loot containers, npc containers and nearby items, damages the
   //! player and npcs caught in the blast, triggers chain reactions with other explosives, and replaces the bomb with a detonated sprite.
@@ -86,9 +86,6 @@ public:
   void on_resume() override;
 
 private:
-  //! @brief Maximum extent of an explosion's effect zone (3x3 grid cells).
-  const sf::Vector2f max_explosion_zone_size{ Constants::kGridSizePx.x * 3.f, Constants::kGridSizePx.y * 3.f };
-
   //! @brief Weak pointer to the NPC pathfinding navmesh, updated when obstacles are destroyed by explosions.
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;
 

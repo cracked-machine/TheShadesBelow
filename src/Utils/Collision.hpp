@@ -25,6 +25,20 @@ bool check_cmp( entt::registry &reg, Cmp::RectBounds pos, std::function<bool( co
   return false;
 };
 
+//! @brief Invoke `fn` for every entity that owns a `Component` (alongside Cmp::Position) whose position intersects `pos`.
+//! @tparam Component The component type an entity must also have (alongside Cmp::Position) to be considered.
+//! @param reg reference to the entt reg
+//! @param pos The bounds to test for intersection against each candidate's Cmp::Position
+//! @param fn Callback invoked as `fn(entt::entity, Component&, Cmp::Position&)` for each intersecting match.
+template <typename Component, typename Fn>
+void for_each_cmp( entt::registry &reg, const sf::FloatRect &pos, Fn &&fn )
+{
+  for ( auto [candidate_entt, candidate_cmp, candidate_pos] : reg.view<Component, Cmp::Position>().each() )
+  {
+    if ( pos.findIntersection( candidate_pos ) ) { fn( candidate_entt, candidate_cmp, candidate_pos ); }
+  }
+}
+
 //! @brief Concept satisfied if `T` inherits from one of the valid position/bounds types.
 //! @tparam T The type to test.
 template <typename T>
