@@ -4,7 +4,6 @@
 #include <Components/Crypt/Chest.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
-#include <Components/Inventory/Explosive.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/ScryingBall.hpp>
 #include <Components/Inventory/WearLevel.hpp>
@@ -200,9 +199,6 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
   auto *inventory_scryingball_cmp = reg().try_get<Cmp::SeeingStone>( inventory_slot_entt );
   if ( inventory_scryingball_cmp ) { reg().emplace_or_replace<Cmp::SeeingStone>( world_item_entt, true, inventory_scryingball_cmp->target ); }
 
-  auto *inventory_explosive_cmp = reg().try_get<Cmp::Explosive>( inventory_slot_entt );
-  if ( inventory_explosive_cmp ) { reg().emplace_or_replace<Cmp::Explosive>( world_item_entt, false ); }
-
   auto *uuid_cmp = reg().try_get<Cmp::UUID>( inventory_slot_entt );
   if ( uuid_cmp )
   {
@@ -268,9 +264,6 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
 
   auto *scryingball_cmp = reg.try_get<Cmp::SeeingStone>( world_item_entt );
   if ( scryingball_cmp ) { reg.emplace_or_replace<Cmp::SeeingStone>( inventory_entity, false, scryingball_cmp->target ); }
-
-  auto *explosive_cmp = reg.try_get<Cmp::Explosive>( world_item_entt );
-  if ( explosive_cmp ) { reg.emplace_or_replace<Cmp::Explosive>( inventory_entity, false ); }
 
   // now destroy the world item entt
   Factory::Plant::remove_plant_mb( reg, world_item_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );

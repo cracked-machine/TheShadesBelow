@@ -96,7 +96,7 @@ void main()
       vec3 layerColor = waveColor( i, NUM_LAYERS );
       float distToCrest = crest - normY;
       float highlight = smoothstep( 0.01, 0.0, distToCrest );
-      layerColor += vec3( 0.14, 0.16, 0.12 ) * highlight; // dull olive highlight
+      layerColor += vec3( 0.3, 0.6, 0.6 ) * highlight; // dull olive highlight
 
       float layerAlpha = 0.4 + rand( fi, 5.7 ) * 0.3;
       finalColor = mix( layerColor, finalColor, layerAlpha );

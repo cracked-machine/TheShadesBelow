@@ -74,6 +74,9 @@ sf::Vector2f HazardFieldSystem<HazardType>::init_hazard_field()
   if ( reserved_sm && not reserved_sm->at( random_pos ).empty() ) { return {}; }
 
   Factory::Obstacle::remove_obstacle( reg(), random_entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
+  // remove_obstacle() above un-reserves this position; re-reserve it now the entity is a hazard cell,
+  // otherwise BombSystem's blast-arming sweep will still find it via its leftover Cmp::Armable
+  if ( reserved_sm ) { reserved_sm->insert( random_entity, random_pos ); }
   reg().template emplace<HazardType>( random_entity );
   // clang-format off
   reg().template emplace_or_replace<Cmp::AnimData>( random_entity, Cmp::AnimData::Config{  
@@ -147,6 +150,9 @@ sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field()
       if ( hazard_pick == 0 )
       {
         Factory::Obstacle::remove_obstacle( reg(), obstacle_entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
+        // remove_obstacle() above un-reserves this position; re-reserve it now the entity is a hazard cell,
+        // otherwise BombSystem's blast-arming sweep will still find it via its leftover Cmp::Armable
+        if ( reserved_sm ) { reserved_sm->insert( obstacle_entity, obst_pos_cmp ); }
         reg().template emplace_or_replace<HazardType>( obstacle_entity );
         // clang-format off
         reg().template emplace_or_replace<Cmp::AnimData>( obstacle_entity, Cmp::AnimData::Config{  

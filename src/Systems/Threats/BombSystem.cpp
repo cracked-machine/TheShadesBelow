@@ -8,7 +8,6 @@
 #include <Components/DestroyedObstacle.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Grave/Segment.hpp>
-#include <Components/Inventory/Explosive.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/Container.hpp>
@@ -132,19 +131,15 @@ void BombSystem::update()
       }
       else if ( item_cmp.item_type == "item.bomb" )
       {
-        // process other explosives lying around - chain reaction!
-        auto *explosive_cmp = reg().try_get<Cmp::Explosive>( item_entt );
-        if ( not explosive_cmp ) return;
-
+        // process other bombs lying around - chain reaction!
         // Skip if this carryitem was already armed (already processed or being processed)
-        if ( explosive_cmp->armed )
+        if ( reg().any_of<Cmp::Armed>( item_entt ) )
         {
           if ( reg().valid( item_entt ) ) { reg().destroy( item_entt ); }
           return;
         }
 
-        // IMMEDIATELY mark as armed to prevent other recursive calls from processing it
-        explosive_cmp->armed = true;
+        // IMMEDIATELY arm it to prevent other recursive calls from processing it
         Factory::Bomb::create_armed( reg(), item_entt, Cmp::Armed::EpiCenter::YES, 0, item_pos_cmp.position.y - 64 );
         arm_entt( item_entt );
         SPDLOG_INFO( "Chain reaction triggered for bomb entity {} ", static_cast<int>( item_entt ) );
@@ -235,8 +230,12 @@ void BombSystem::update()
     // finally delete the armed component
     Factory::Bomb::destroy_armed( reg(), armed_entt );
 
-    // Replace the armed position with a detonated sprite for visual effect - make sure its z-order is furthest back
-    Factory::Bomb::add_detonated( reg(), armed_entt, armed_pos_cmp );
+    // Replace the armed position with a detonated sprite for visual effect - make sure its z-order is furthest back,
+    // but skip if a detonated entity already occupies this position (e.g. overlapping blast patterns)
+    bool already_detonated = false;
+    Utils::Collision::for_each_cmp<Cmp::DestroyedObstacle>( reg(), armed_pos_cmp,
+                                                             [&]( entt::entity, Cmp::DestroyedObstacle &, Cmp::Position & ) { already_detonated = true; } );
+    if ( not already_detonated ) { Factory::Bomb::add_detonated( reg(), armed_entt, armed_pos_cmp ); }
   }
 
   auto remaining_armed_view = reg().view<Cmp::Armed>();

@@ -53,6 +53,7 @@
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Threats/LightningSystem.hpp>
 #include <Systems/Threats/WormholeSystem.hpp>
+#include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
@@ -190,7 +191,11 @@ void ActionSystem::check_player_dig_obstacle_collision()
         {
           if ( ob_crack_uuid == obstacle_uuid_cmp ) reg().destroy( ob_crack_entt );
         }
-        Factory::Bomb::add_detonated( reg(), obstacle_entt, obstacle_pos_cmp );
+        // skip if a detonated entity already occupies this position (e.g. overlapping blast patterns)
+        bool already_detonated = false;
+        Utils::Collision::for_each_cmp<Cmp::DestroyedObstacle>( reg(), obstacle_pos_cmp,
+                                                                 [&]( entt::entity, Cmp::DestroyedObstacle &, Cmp::Position & ) { already_detonated = true; } );
+        if ( not already_detonated ) { Factory::Bomb::add_detonated( reg(), obstacle_entt, obstacle_pos_cmp ); }
 
         // add the position to the spatial grid so it can be used in pathfinding
         if ( PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock() )

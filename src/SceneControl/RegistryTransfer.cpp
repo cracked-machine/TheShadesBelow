@@ -12,7 +12,6 @@
 #include <Components/Direction.hpp>
 #include <Components/FootStepAlpha.hpp>
 #include <Components/FootStepTimer.hpp>
-#include <Components/Inventory/Explosive.hpp>
 #include <Components/Inventory/Grimoire.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/ScryingBall.hpp>
@@ -249,7 +248,6 @@ void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
   registry.storage<Cmp::Inventory::WearLevel>();
   registry.storage<Cmp::ZOrderValue>();
   registry.storage<Cmp::SeeingStone>();
-  registry.storage<Cmp::Explosive>();
   registry.storage<Cmp::Player::LastGraveyardPosition>();
   registry.storage<Cmp::Player::RuinLocation>();
   registry.storage<Cmp::Ruin::ObjectiveType>();

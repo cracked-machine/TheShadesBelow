@@ -219,6 +219,14 @@ void WormholeSystem::spawn_wormhole( SpawnPhase phase )
   Factory::Particle::add_wormhole_ps( reg(), "graveyard.wormhole.particles", 1.f, 25.f, uuid_cmp, sf::Vector2f( center_pos.x + 8, center_pos.y + 8 ),
                                       5000.f );
 
+  // reserve both wormhole entities so BombSystem's blast-arming sweep skips them - they keep Cmp::Armable
+  // (left behind by remove_obstacle() above) since they used to be plain obstacles
+  if ( reserved_sm )
+  {
+    reserved_sm->insert( random_entity, random_pos );
+    reserved_sm->insert( center_entity, reg().get<Cmp::Position>( center_entity ) );
+  }
+
   SPDLOG_INFO( "Wormhole spawned at position ({}, {}) with zorder: {}", random_pos.position.x, random_pos.position.y,
                random_pos.position.y - random_pos.size.y );
 }
@@ -340,17 +348,21 @@ void WormholeSystem::check_player_wormhole_collision()
 
 void WormholeSystem::despawn_wormhole()
 {
+  auto reserved_sm = m_reserved_sm.lock();
+
   // remove the wormhole entity
-  auto wormhole_view = reg().view<Cmp::Wormhole::Singularity>();
-  for ( auto [entity, _] : wormhole_view.each() )
+  auto wormhole_view = reg().view<Cmp::Wormhole::Singularity, Cmp::Position>();
+  for ( auto [entity, _, pos_cmp] : wormhole_view.each() )
   {
+    if ( reserved_sm ) reserved_sm->remove( entity, pos_cmp );
     reg().remove<Cmp::Wormhole::Singularity>( entity );
     SPDLOG_DEBUG( "Wormhole despawned (entity {})", static_cast<uint32_t>( entity ) );
   }
 
-  auto wormhole_mb_view = reg().view<Cmp::Wormhole::MultiBlock>();
-  for ( auto [entity, _] : wormhole_mb_view.each() )
+  auto wormhole_mb_view = reg().view<Cmp::Wormhole::MultiBlock, Cmp::Position>();
+  for ( auto [entity, _, pos_cmp] : wormhole_mb_view.each() )
   {
+    if ( reserved_sm ) reserved_sm->remove( entity, pos_cmp );
     reg().remove<Cmp::Wormhole::MultiBlock>( entity );
     reg().remove<Cmp::AnimData>( entity );
     SPDLOG_DEBUG( "MultiBlock despawned (entity {})", static_cast<uint32_t>( entity ) );

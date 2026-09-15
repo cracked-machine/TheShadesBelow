@@ -5,7 +5,6 @@
 #include <Components/AnimData.hpp>
 #include <Components/DeathPosition.hpp>
 #include <Components/Direction.hpp>
-#include <Components/Inventory/Explosive.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/ScryingBall.hpp>
@@ -151,7 +150,6 @@ void add_inventory( entt::registry &reg, const std::string &item )
     sb.target = Game::Cmp::SeeingStone::random_pick( {} );
     reg.emplace_or_replace<Cmp::SeeingStone>( inventory_entity, sb );
   }
-  if ( item.contains( "explosive" ) ) { reg.emplace_or_replace<Cmp::Explosive>( inventory_entity, false ); }
   if ( item.contains( "candle" ) ) { reg.emplace_or_replace<Cmp::UUID>( inventory_entity, Cmp::UUID::generate() ); }
 
   // clang-format off
