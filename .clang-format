@@ -12,8 +12,9 @@ BraceWrapping:
   AfterStruct: true
   AfterUnion: true
   BeforeElse: true
-  IndentBraces: false
+  IndentBraces: true
 IndentCaseLabels: true
+LambdaBodyIndentation: OuterScope
 
   
 SpacesInAngles: false
