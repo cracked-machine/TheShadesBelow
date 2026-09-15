@@ -16,6 +16,7 @@
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Grave/Segment.hpp>
 #include <Components/Inventory/WorldItem.hpp>
+#include <Components/LootContainer.hpp>
 #include <Components/Moveable.hpp>
 #include <Components/ObstacleCap.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
@@ -98,6 +99,10 @@ void LevelGenerator::cleanup_reserved()
     m_reserved_sm->remove( entt, reg().get<Cmp::Position>( entt ) );
   }
   for ( auto entt : reg().view<Cmp::ObstacleCap, Cmp::Position>() )
+  {
+    m_reserved_sm->remove( entt, reg().get<Cmp::Position>( entt ) );
+  }
+  for ( auto entt : reg().view<Cmp::LootContainer, Cmp::Position>() )
   {
     m_reserved_sm->remove( entt, reg().get<Cmp::Position>( entt ) );
   }
@@ -286,9 +291,9 @@ void LevelGenerator::decorate_graveyard_exterior_obstacles()
   const Sprites::SpriteSheet &ss_main = m_sprite_factory.get_spritesheet_by_type( "sprite.graveyard.wall.int.main" );
   const Sprites::SpriteSheet &ss_cap = m_sprite_factory.get_spritesheet_by_type( "sprite.graveyard.wall.int.cap" );
 
-  decorate_obstacles(
-      ss_main, ss_cap, [this]() { return m_sprite_factory.get_random_type_and_texture_index( { "sprite.graveyard.wall.int.main" } ).second; },
-      /*cap_y_offset=*/1.f, /*moveable=*/false );
+  decorate_obstacles( ss_main, ss_cap,
+                      [this]() { return m_sprite_factory.get_random_type_and_texture_index( { "sprite.graveyard.wall.int.main" } ).second; },
+                      /*cap_y_offset=*/1.f, /*moveable=*/false );
 }
 
 void LevelGenerator::add_ruin_interior_obstacles( float init_chance )
@@ -305,9 +310,8 @@ void LevelGenerator::decorate_ruin_interior_obstacles()
   const Sprites::SpriteSheet &ss_main = m_sprite_factory.get_spritesheet_by_type( "sprite.ruin.wall.int.main" );
   const Sprites::SpriteSheet &ss_cap = m_sprite_factory.get_spritesheet_by_type( "sprite.ruin.wall.int.cap" );
 
-  decorate_obstacles(
-      ss_main, ss_cap, []() -> std::size_t { return 0; },
-      /*cap_y_offset=*/0.f, /*moveable=*/true );
+  decorate_obstacles( ss_main, ss_cap, []() -> std::size_t { return 0; },
+                      /*cap_y_offset=*/0.f, /*moveable=*/true );
 }
 
 void LevelGenerator::add_ruin_rune_markers()
