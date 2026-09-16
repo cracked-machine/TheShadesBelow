@@ -16,6 +16,14 @@ namespace Game::Sys
 class WormholeSystem : public BaseSystem
 {
 public:
+  //! @brief Distinguishes the initial wormhole spawn from later respawns, controlling which position-picking strategy spawn_wormhole() uses.
+  enum class SpawnPhase {
+    //! @brief First spawn of the scene: uses the persisted seeded position.
+    InitialSpawn,
+    //! @brief Subsequent spawn after a despawn: picks a fresh random position.
+    Respawn
+  };
+
   //! @brief Construct a new Wormhole System object
   //! @param reg
   //! @param window
@@ -32,44 +40,36 @@ public:
     m_reserved_sm = reserved_sm;
   }
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override;
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override;
-
-  //! @brief Distinguishes the initial wormhole spawn from later respawns, controlling which position-picking strategy spawn_wormhole() uses.
-  enum class SpawnPhase {
-    //! @brief First spawn of the scene: uses the persisted seeded position.
-    InitialSpawn,
-    //! @brief Subsequent spawn after a despawn: picks a fresh random position.
-    Respawn
-  };
+  //! @brief Track actors colliding with the wormhole via Cmp::Wormhole::Jump, drop the component if
+  //! an actor stops colliding before its jump cooldown completes, and once every jump candidate's
+  //! cooldown has elapsed, teleport them all to new random locations and respawn the wormhole.
+  void check_player_wormhole_collision();
 
   //! @brief Find a valid spawn position, remove any obstacle/loot/NPC container occupying it, and
   //! attach the wormhole's Singularity/MultiBlock/AnimData components there.
   //! @param phase InitialSpawn uses the persisted seeded position; Respawn picks a fresh random one
   void spawn_wormhole( SpawnPhase phase );
 
-  //! @brief Search for a valid, unoccupied position to spawn the wormhole, retrying with an
-  //! incrementing seed until one is found that doesn't collide with walls, graves, altars, crypts,
-  //! the graveyard exit, or hazard cells.
-  //! @param seed Starting seed to search from; 0 means unseeded/random
-  //! @return The chosen entity and its position, or {entt::null, {}} if no valid location was found
-  //!         after the maximum number of attempts
-  std::pair<entt::entity, Cmp::Position> find_spawn_location( unsigned long seed );
-
-  //! @brief Track actors colliding with the wormhole via Cmp::Wormhole::Jump, drop the component if
-  //! an actor stops colliding before its jump cooldown completes, and once every jump candidate's
-  //! cooldown has elapsed, teleport them all to new random locations and respawn the wormhole.
-  void check_player_wormhole_collision();
-
-  //! @brief Remove the wormhole's Singularity and MultiBlock components (and its AnimData), effectively despawning it.
-  void despawn_wormhole();
+  //! @brief event handlers for pausing system clocks
+  void on_pause() override;
+  //! @brief event handlers for resuming system clocks
+  void on_resume() override;
 
 private:
   //! @brief Remove all entities within the `bounds` and replace with new Position/Armable entities.
   //! @param bounds The world-space rect to sweep for occupying entities.
   void clear_footprint( const sf::FloatRect &bounds );
+
+  //! @brief Remove the wormhole's Singularity and MultiBlock components (and its AnimData), effectively despawning it.
+  void despawn_wormhole();
+
+  //! @brief Search for a valid, unoccupied position to spawn the wormhole, retrying with an
+  //! incrementing seed until one is found that doesn't collide with walls, graves, altars, crypts,
+  //! the graveyard exit, or hazard cells.
+  //! @param initial_rng_seed Starting seed to search from; 0 means unseeded/random
+  //! @return The chosen entity and its position, or {entt::null, {}} if no valid location was found
+  //!         after the maximum number of attempts
+  std::pair<entt::entity, Cmp::Position> find_spawn_location( unsigned long initial_rng_seed );
 
   //! @brief Used for teleported entities to be re-inserted into the pathfinding navmesh.
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;
