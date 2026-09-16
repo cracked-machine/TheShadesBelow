@@ -801,6 +801,8 @@ void PlayerSystem::blink_player()
   // damage cooldown blink effect
   for ( auto [player_entt, player_cmp] : reg().view<Cmp::Player::Character>().each() )
   {
+    // fade_player_on_wormhole_jump() owns alpha while a jump is pending - don't clobber its fade
+    if ( reg().all_of<Cmp::Wormhole::Jump>( player_entt ) ) continue;
 
     auto &pc_damage_cooldown = Sys::PersistSystem::get<Cmp::Persist::PcDamageDelay>( reg() );
     bool is_in_damage_cooldown = player_cmp.m_damage_cooldown_timer.getElapsedTime().asSeconds() < pc_damage_cooldown.get_value();
