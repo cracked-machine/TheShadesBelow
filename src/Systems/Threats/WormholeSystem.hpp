@@ -38,8 +38,7 @@ public:
   void on_resume() override;
 
   //! @brief Distinguishes the initial wormhole spawn from later respawns, controlling which position-picking strategy spawn_wormhole() uses.
-  enum class SpawnPhase
-  {
+  enum class SpawnPhase {
     //! @brief First spawn of the scene: uses the persisted seeded position.
     InitialSpawn,
     //! @brief Subsequent spawn after a despawn: picks a fresh random position.
@@ -68,6 +67,10 @@ public:
   void despawn_wormhole();
 
 private:
+  //! @brief Remove all entities within the `bounds` and replace with new Position/Armable entities.
+  //! @param bounds The world-space rect to sweep for occupying entities.
+  void clear_footprint( const sf::FloatRect &bounds );
+
   //! @brief Used for teleported entities to be re-inserted into the pathfinding navmesh.
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;
 
