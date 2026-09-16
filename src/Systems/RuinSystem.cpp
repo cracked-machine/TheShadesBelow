@@ -242,17 +242,17 @@ void RuinSystem::check_movement_slowdowns()
   float slowdown_penalty = 0.0f;
 
   // Check staircase collision
-  if ( Utils::Collision::check_pos<Cmp::Ruin::StairsLowerMultiBlock>( reg(), Cmp::RectBounds::scaled( player_pos, 1.f ) ) )
+  if ( Utils::Collision::pos_intersects<Cmp::Ruin::StairsLowerMultiBlock>( reg(), Cmp::RectBounds::scaled( player_pos, 1.f ) ) )
   {
     slowdown_penalty = std::max( slowdown_penalty, 0.7f );
   }
-  if ( Utils::Collision::check_pos<Cmp::Ruin::StairsUpperMultiBlock>( reg(), Cmp::RectBounds::scaled( player_pos, 1.f ) ) )
+  if ( Utils::Collision::pos_intersects<Cmp::Ruin::StairsUpperMultiBlock>( reg(), Cmp::RectBounds::scaled( player_pos, 1.f ) ) )
   {
     slowdown_penalty = std::max( slowdown_penalty, 0.7f );
   }
 
   // Check cobweb collision
-  if ( Utils::Collision::check_cmp<Cmp::Ruin::Cobweb>( reg(), Cmp::RectBounds::scaled( player_pos, 1 ),
+  if ( Utils::Collision::any_intersects<Cmp::Ruin::Cobweb>( reg(), Cmp::RectBounds::scaled( player_pos, 1 ),
                                                        []( const Cmp::Ruin::Cobweb &cobweb ) { return cobweb.integrity > 0; } ) )
   {
     slowdown_penalty = std::max( slowdown_penalty, 0.5f );
@@ -286,8 +286,8 @@ void RuinSystem::gen_lowerfloor_bookcases( sf::FloatRect scene_dimensions )
   auto reserved_sm = m_reserved_sm.lock();
   auto has_collision = [&]( Cmp::RectBounds pos )
   {
-    if ( Utils::Collision::check_cmp<Cmp::Ruin::Bookcase>( reg(), pos ) ) { return true; }
-    if ( Utils::Collision::check_cmp<Cmp::Npc::NoPathFinding>( reg(), pos ) ) { return true; }
+    if ( Utils::Collision::any_intersects<Cmp::Ruin::Bookcase>( reg(), pos ) ) { return true; }
+    if ( Utils::Collision::any_intersects<Cmp::Npc::NoPathFinding>( reg(), pos ) ) { return true; }
     if ( reserved_sm && not reserved_sm->query_rect( pos.getBounds() ).empty() ) { return true; }
 
     // ensure bookcase is inside scene
@@ -505,7 +505,7 @@ void RuinSystem::check_player_shadow_hand_collision( sf::Time dt )
   if ( Utils::Player::get_mortality( reg() ).state == Cmp::Player::Mortality::State::DEAD ) { return; }
 
   const auto player_pos = Utils::Player::get_position( reg() );
-  if ( Utils::Collision::check_cmp<Cmp::Npc::NPC>( reg(), Cmp::RectBounds::scaled( player_pos.position, Constants::kGridSizePxF, 1.f ) ) )
+  if ( Utils::Collision::any_intersects<Cmp::Npc::NPC>( reg(), Cmp::RectBounds::scaled( player_pos.position, Constants::kGridSizePxF, 1.f ) ) )
   {
     // damage player
     Utils::Player::get_stats( reg() ).apply( npc_collision_action.action );
@@ -529,8 +529,8 @@ void RuinSystem::create_spiders( sf::FloatRect scene_boundary )
   auto reserved_sm = m_reserved_sm.lock();
   auto has_collision = [&]( const Cmp::RectBounds &pos )
   {
-    if ( Utils::Collision::check_cmp<Cmp::Npc::NoPathFinding>( reg(), pos ) ) { return true; }
-    if ( Utils::Collision::check_cmp<Cmp::Ruin::StairsSegment>( reg(), pos ) ) { return true; }
+    if ( Utils::Collision::any_intersects<Cmp::Npc::NoPathFinding>( reg(), pos ) ) { return true; }
+    if ( Utils::Collision::any_intersects<Cmp::Ruin::StairsSegment>( reg(), pos ) ) { return true; }
     if ( reserved_sm && not reserved_sm->at( Cmp::Position( pos.position(), pos.size() ) ).empty() ) { return true; }
 
     // ensure spider is inside scene
@@ -565,9 +565,9 @@ void RuinSystem::check_create_witch( sf::FloatRect scene_boundary )
 {
   auto has_collision = [&]( const Cmp::RectBounds &pos )
   {
-    if ( Utils::Collision::check_cmp<Cmp::Ruin::Bookcase>( reg(), pos ) ) { return true; }
-    if ( Utils::Collision::check_cmp<Cmp::Npc::NoPathFinding>( reg(), pos ) ) { return true; }
-    if ( Utils::Collision::check_cmp<Cmp::Ruin::StairsSegment>( reg(), pos ) ) { return true; }
+    if ( Utils::Collision::any_intersects<Cmp::Ruin::Bookcase>( reg(), pos ) ) { return true; }
+    if ( Utils::Collision::any_intersects<Cmp::Npc::NoPathFinding>( reg(), pos ) ) { return true; }
+    if ( Utils::Collision::any_intersects<Cmp::Ruin::StairsSegment>( reg(), pos ) ) { return true; }
 
     // ensure spider is inside scene
     if ( not Cmp::RectBounds::scaled( pos.position(), pos.size(), 1.5f ).findIntersection( scene_boundary ) ) { return true; }

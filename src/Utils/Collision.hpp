@@ -15,7 +15,7 @@ namespace Game::Utils::Collision
 //! @param filter Optional callback to filter candidates. Return true to consider this entity, false to skip.
 //! @return bool true if `pos` intersects the position of at least one matching, non-filtered-out entity
 template <typename Component>
-bool check_cmp( entt::registry &reg, Cmp::RectBounds pos, std::function<bool( const Component & )> filter = []( const Component & ) { return true; } )
+bool any_intersects( entt::registry &reg, Cmp::RectBounds pos, std::function<bool( const Component & )> filter = []( const Component & ) { return true; } )
 {
   for ( auto [candidate_entt, candidate_cmp, candidate_pos] : reg.view<Component, Cmp::Position>().each() )
   {
@@ -31,7 +31,7 @@ bool check_cmp( entt::registry &reg, Cmp::RectBounds pos, std::function<bool( co
 //! @param pos The bounds to test for intersection against each candidate's Cmp::Position
 //! @param fn Callback invoked as `fn(entt::entity, Component&, Cmp::Position&)` for each intersecting match.
 template <typename Component, typename Fn>
-void for_each_cmp( entt::registry &reg, const sf::FloatRect &pos, Fn &&fn )
+void for_each_intersect( entt::registry &reg, const sf::FloatRect &pos, Fn &&fn )
 {
   for ( auto [candidate_entt, candidate_cmp, candidate_pos] : reg.view<Component, Cmp::Position>().each() )
   {
@@ -52,7 +52,7 @@ concept HasPositionBounds = std::is_base_of_v<Cmp::Position, T> || std::is_base_
 //! @return bool true if `pos` intersects at least one matching, non-filtered-out entity's `Component`
 template <typename Component>
   requires HasPositionBounds<Component>
-bool check_pos( entt::registry &reg, Cmp::RectBounds pos, std::function<bool( const Component & )> filter = []( const Component & ) { return true; } )
+bool pos_intersects( entt::registry &reg, Cmp::RectBounds pos, std::function<bool( const Component & )> filter = []( const Component & ) { return true; } )
 {
   for ( auto [candidate_entt, candidate_cmp] : reg.view<Component>().each() )
   {

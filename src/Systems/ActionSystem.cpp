@@ -193,7 +193,7 @@ void ActionSystem::check_player_dig_obstacle_collision()
         }
         // skip if a detonated entity already occupies this position (e.g. overlapping blast patterns)
         bool already_detonated = false;
-        Utils::Collision::for_each_cmp<Cmp::DestroyedObstacle>( reg(), obstacle_pos_cmp,
+        Utils::Collision::for_each_intersect<Cmp::DestroyedObstacle>( reg(), obstacle_pos_cmp,
                                                                  [&]( entt::entity, Cmp::DestroyedObstacle &, Cmp::Position & ) { already_detonated = true; } );
         if ( not already_detonated ) { Factory::Bomb::add_detonated( reg(), obstacle_entt, obstacle_pos_cmp ); }
 

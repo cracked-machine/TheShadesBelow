@@ -79,7 +79,7 @@ void WormholeSystem::check_player_wormhole_collision()
     for ( auto [wormhole_entity, wormhole_cmp, wh_pos_cmp] : wormhole_view.each() )
     {
       auto wh_hitbox_redux = Cmp::RectBounds::scaled( wh_pos_cmp.position, wh_pos_cmp.size, 1.f );
-      if ( jump_pos_cmp && jump_pos_cmp->findIntersection( wh_hitbox_redux.getBounds() ) )
+      if ( ( jump_pos_cmp != nullptr ) && jump_pos_cmp->findIntersection( wh_hitbox_redux.getBounds() ) )
       {
         still_colliding = true;
         break;
@@ -316,13 +316,13 @@ std::pair<entt::entity, Cmp::Position> WormholeSystem::find_spawn_location( unsi
     auto wormhole_bounds = Cmp::RectBounds::scaled( wormhole_block, 1.f );
 
     // Check collisions with walls, graves, shrines, and positions reserved from algorithmic changes
-    using Utils::Collision::check_cmp;
+    using Utils::Collision::any_intersects;
     auto reserved_sm = m_reserved_sm.lock();
-    bool is_valid = not check_cmp<Cmp::Wall>( reg(), wormhole_bounds ) && not check_cmp<Cmp::Grave::Segment>( reg(), wormhole_bounds ) &&
-                    not check_cmp<Cmp::Altar::Segment>( reg(), wormhole_bounds ) &&
-                    not check_cmp<Cmp::Crypt::BuildingSegment>( reg(), wormhole_bounds ) &&
-                    not check_cmp<Cmp::Grave::ExitSegment>( reg(), wormhole_bounds ) &&
-                    not check_cmp<Cmp::Hazard::FieldCell>( reg(), wormhole_bounds ) && ( not reserved_sm || reserved_sm->at( random_pos ).empty() );
+    bool is_valid = not any_intersects<Cmp::Wall>( reg(), wormhole_bounds ) && not any_intersects<Cmp::Grave::Segment>( reg(), wormhole_bounds ) &&
+                    not any_intersects<Cmp::Altar::Segment>( reg(), wormhole_bounds ) &&
+                    not any_intersects<Cmp::Crypt::BuildingSegment>( reg(), wormhole_bounds ) &&
+                    not any_intersects<Cmp::Grave::ExitSegment>( reg(), wormhole_bounds ) &&
+                    not any_intersects<Cmp::Hazard::FieldCell>( reg(), wormhole_bounds ) && ( not reserved_sm || reserved_sm->at( random_pos ).empty() );
 
     if ( is_valid )
     {

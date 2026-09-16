@@ -218,15 +218,15 @@ void PlayerSystem::move_obstacle( const sf::FloatRect &target_position )
     auto obstacle_dest_position = Cmp::RectBounds::scaled( selected_pos_cmp.position + player_velocity.position(), Constants::kGridSizePxF, 1 );
 
     bool new_position_is_empty = true;
-    new_position_is_empty = not Utils::Collision::check_cmp<Cmp::Obstacle>( reg(), obstacle_dest_position ) and
-                            not Utils::Collision::check_cmp<Cmp::NoMoveDest>( reg(), obstacle_dest_position );
+    new_position_is_empty = not Utils::Collision::any_intersects<Cmp::Obstacle>( reg(), obstacle_dest_position ) and
+                            not Utils::Collision::any_intersects<Cmp::NoMoveDest>( reg(), obstacle_dest_position );
 
     // can we move player in the opposite direction if they are pulling?
-    bool player_in_the_way = Utils::Collision::check_cmp<Cmp::Player::Character>( reg(), obstacle_dest_position );
+    bool player_in_the_way = Utils::Collision::any_intersects<Cmp::Player::Character>( reg(), obstacle_dest_position );
     if ( player_in_the_way )
     {
-      if ( ( Utils::Collision::check_cmp<Cmp::Obstacle>( reg(), player_dest_position ) ) or
-           ( Utils::Collision::check_cmp<Cmp::NoMoveDest>( reg(), player_dest_position ) ) )
+      if ( ( Utils::Collision::any_intersects<Cmp::Obstacle>( reg(), player_dest_position ) ) or
+           ( Utils::Collision::any_intersects<Cmp::NoMoveDest>( reg(), player_dest_position ) ) )
       {
         // if not then cancel the move
         new_position_is_empty = false;

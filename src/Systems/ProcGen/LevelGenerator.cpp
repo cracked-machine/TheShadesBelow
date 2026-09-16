@@ -346,9 +346,9 @@ void LevelGenerator::add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scen
 {
   auto has_collision = [&]( const Cmp::RectBounds &pos )
   {
-    if ( Utils::Collision::check_cmp<Cmp::Ruin::StairsLowerMultiBlock>( reg(), pos ) ) { return true; }
-    if ( Utils::Collision::check_cmp<Cmp::Ruin::Cobweb>( reg(), pos ) ) { return true; }
-    if ( Utils::Collision::check_cmp<Cmp::Exit>( reg(), pos ) ) { return true; }
+    if ( Utils::Collision::any_intersects<Cmp::Ruin::StairsLowerMultiBlock>( reg(), pos ) ) { return true; }
+    if ( Utils::Collision::any_intersects<Cmp::Ruin::Cobweb>( reg(), pos ) ) { return true; }
+    if ( Utils::Collision::any_intersects<Cmp::Exit>( reg(), pos ) ) { return true; }
 
     // ensure is inside scene
     if ( not Cmp::RectBounds::scaled( pos.position(), pos.size(), 1.5f ).findIntersection( scene_dimensions ) ) { return true; }
@@ -470,13 +470,13 @@ std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( cons
     // Check collisions with walls, graves, shrines, and anything else already claiming this position
     auto is_valid = [&]() -> bool
     {
-      using Utils::Collision::check_cmp;
-      return not( check_cmp<Cmp::Wall>( reg(), new_lo_hitbox ) || check_cmp<Cmp::Grave::Segment>( reg(), new_lo_hitbox ) ||
-                  check_cmp<Cmp::Altar::Segment>( reg(), new_lo_hitbox ) || check_cmp<Cmp::Crypt::BuildingSegment>( reg(), new_lo_hitbox ) ||
-                  check_cmp<Cmp::HealingSpringBuildingSegment>( reg(), new_lo_hitbox ) ||
-                  check_cmp<Cmp::Ruin::BuildingSegment>( reg(), new_lo_hitbox ) || check_cmp<Cmp::Crypt::ObjectiveSegment>( reg(), new_lo_hitbox ) ||
-                  not m_reserved_sm->query_rect( new_lo_hitbox.getBounds() ).empty() || check_cmp<Cmp::SpawnArea>( reg(), new_lo_hitbox ) ||
-                  check_cmp<Cmp::Player::Character>( reg(), new_lo_hitbox ) );
+      using Utils::Collision::any_intersects;
+      return not( any_intersects<Cmp::Wall>( reg(), new_lo_hitbox ) || any_intersects<Cmp::Grave::Segment>( reg(), new_lo_hitbox ) ||
+                  any_intersects<Cmp::Altar::Segment>( reg(), new_lo_hitbox ) || any_intersects<Cmp::Crypt::BuildingSegment>( reg(), new_lo_hitbox ) ||
+                  any_intersects<Cmp::HealingSpringBuildingSegment>( reg(), new_lo_hitbox ) ||
+                  any_intersects<Cmp::Ruin::BuildingSegment>( reg(), new_lo_hitbox ) || any_intersects<Cmp::Crypt::ObjectiveSegment>( reg(), new_lo_hitbox ) ||
+                  not m_reserved_sm->query_rect( new_lo_hitbox.getBounds() ).empty() || any_intersects<Cmp::SpawnArea>( reg(), new_lo_hitbox ) ||
+                  any_intersects<Cmp::Player::Character>( reg(), new_lo_hitbox ) );
     };
 
     if ( is_valid() )

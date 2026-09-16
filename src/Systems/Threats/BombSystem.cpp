@@ -100,7 +100,7 @@ void BombSystem::update()
     bool is_epicenter = ( armed_cmp_ptr->m_epicenter == Cmp::Armed::EpiCenter::YES );
 
     // detonate obstacles - remove all traces of obstacle
-    Utils::Collision::for_each_cmp<Cmp::Obstacle>( reg(), armed_pos_cmp, [&]( entt::entity obst_entity, Cmp::Obstacle &, Cmp::Position &obst_pos_cmp )
+    Utils::Collision::for_each_intersect<Cmp::Obstacle>( reg(), armed_pos_cmp, [&]( entt::entity obst_entity, Cmp::Obstacle &, Cmp::Position &obst_pos_cmp )
     {
       if ( reserved_sm && not reserved_sm->at( obst_pos_cmp ).empty() ) return;
       Factory::Obstacle::remove_obstacle( reg(), obst_entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
@@ -110,18 +110,18 @@ void BombSystem::update()
     } );
 
     // detonate loot containers - component removal is handled by LootSystem
-    Utils::Collision::for_each_cmp<Cmp::LootContainer>( reg(), armed_pos_cmp, [&]( entt::entity loot_entt, Cmp::LootContainer &, Cmp::Position & )
+    Utils::Collision::for_each_intersect<Cmp::LootContainer>( reg(), armed_pos_cmp, [&]( entt::entity loot_entt, Cmp::LootContainer &, Cmp::Position & )
     {
       if ( loot_entt != entt::null ) { m_sound_bank.get_effect( "break_pot" ).play(); }
       Factory::Loot::destroy_loot_container( reg(), loot_entt, reserved_sm );
     } );
 
     // detonate npc containers - these are activated by proximity so just destroy them
-    Utils::Collision::for_each_cmp<Cmp::Npc::Container>( reg(), armed_pos_cmp, [&]( entt::entity npc_entity, Cmp::Npc::Container &, Cmp::Position & )
+    Utils::Collision::for_each_intersect<Cmp::Npc::Container>( reg(), armed_pos_cmp, [&]( entt::entity npc_entity, Cmp::Npc::Container &, Cmp::Position & )
     { Factory::Npc::destroy_npc_container( reg(), npc_entity, reserved_sm ); } );
 
     // detonate nearby carryitems - cruel but fair
-    Utils::Collision::for_each_cmp<Cmp::WorldItem>( reg(), armed_pos_cmp,
+    Utils::Collision::for_each_intersect<Cmp::WorldItem>( reg(), armed_pos_cmp,
                                                     [&]( entt::entity item_entt, Cmp::WorldItem &item_cmp, Cmp::Position &item_pos_cmp )
     {
       if ( item_entt == armed_entt ) return;
@@ -233,7 +233,7 @@ void BombSystem::update()
     // Replace the armed position with a detonated sprite for visual effect - make sure its z-order is furthest back,
     // but skip if a detonated entity already occupies this position (e.g. overlapping blast patterns)
     bool already_detonated = false;
-    Utils::Collision::for_each_cmp<Cmp::DestroyedObstacle>( reg(), armed_pos_cmp,
+    Utils::Collision::for_each_intersect<Cmp::DestroyedObstacle>( reg(), armed_pos_cmp,
                                                              [&]( entt::entity, Cmp::DestroyedObstacle &, Cmp::Position & ) { already_detonated = true; } );
     if ( not already_detonated ) { Factory::Bomb::add_detonated( reg(), armed_entt, armed_pos_cmp ); }
   }
