@@ -74,10 +74,10 @@ public:
   //! @return The tick value.
   float tick( const nlohmann::json &item );
 
-  //! @brief Extract the "disease" field (or the entry itself, if it has no nested "disease" object) from a JSON action entry.
+  //! @brief Extract the "toxidrome" field from a JSON action entry.
   //! @param item
   //! @return The extracted Cmp::Stats::Disease value.
-  Cmp::Stats::Disease disease( const nlohmann::json &item );
+  Cmp::Toxicity::Toxidrome toxidrome( const nlohmann::json &item );
 
   //! @brief event handlers for pausing system clocks
   void on_pause() override {}

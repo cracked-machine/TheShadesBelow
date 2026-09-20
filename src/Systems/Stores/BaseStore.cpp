@@ -7,6 +7,12 @@
 #include <Components/Stats/DestroyAction.hpp>
 #include <Components/Stats/SacrificeAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
+#include <Components/Toxicity/Bradycadia.hpp>
+#include <Components/Toxicity/Halucinogen.hpp>
+#include <Components/Toxicity/Hypoxia.hpp>
+#include <Components/Toxicity/Phototoxia.hpp>
+#include <Components/Toxicity/TachyCadia.hpp>
+#include <Factory/ToxicityFactory.hpp>
 #include <Systems/Stores/BaseStore.hpp>
 
 #include <fstream>
@@ -49,18 +55,18 @@ int BaseStore::toxicity( const nlohmann::json &item ) { return item.at( "toxicit
 int BaseStore::luck( const nlohmann::json &item ) { return item.at( "luck" ).get<int>(); }
 float BaseStore::tick( const nlohmann::json &item ) { return item.at( "tick" ).get<float>(); }
 
-Cmp::Stats::Disease BaseStore::disease( const nlohmann::json &item )
+Cmp::Toxicity::Toxidrome BaseStore::toxidrome( const nlohmann::json &item )
 {
-  const auto &disease = item.contains( "disease" ) ? item.at( "disease" ) : item;
+  const auto &toxidrome = item.contains( "toxidrome" ) ? item.at( "toxidrome" ) : item;
 
-  std::string type = disease.at( "type" ).get<std::string>();
-  float tick = item.at( "tick" ).get<float>();
-
-  if ( type == "none" ) return { .type = Cmp::Stats::DiseaseType::NONE, .tick = tick };
-  if ( type == "leprosy" ) return { .type = Cmp::Stats::DiseaseType::LEPROSY, .tick = tick };
-  if ( type == "plague" ) return { .type = Cmp::Stats::DiseaseType::PLAGUE, .tick = tick };
-  if ( type == "rabies" ) return { .type = Cmp::Stats::DiseaseType::RABIES, .tick = tick };
-  return { .type = Cmp::Stats::DiseaseType::NONE, .tick = 0.f };
+  std::string type = toxidrome.at( "type" ).get<std::string>();
+  if ( type == "none" ) return Factory::Toxicity::ToxidromeBuilder<>{}.build();
+  if ( type == "tachycardia" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Tachycardia>().build();
+  if ( type == "bradycardia" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Bradycardia>().build();
+  if ( type == "halucinogen" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Hallucinogen>().build();
+  if ( type == "hypoxia" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Hypoxia>().build();
+  if ( type == "photoxia" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Phototoxia>().build();
+  return Factory::Toxicity::ToxidromeBuilder<>{}.build();
 }
 
 } // namespace Game::Sys

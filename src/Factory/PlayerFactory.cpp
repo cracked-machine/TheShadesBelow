@@ -80,8 +80,7 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   reg.emplace_or_replace<Cmp::LastDirection>( entity, sf::Vector2f{ 0, 0 } );
   reg.emplace_or_replace<Cmp::Player::MovementDelta>( entity );
   reg.emplace_or_replace<Cmp::Player::Footstep>( entity, Cmp::Player::Footstep::Type::GRASS );
-
-  reg.emplace_or_replace<Cmp::Toxicity::Toxidrome>( entity, Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Tachycardia>().build() );
+  reg.emplace_or_replace<Cmp::Toxicity::Toxidrome>( entity, Factory::Toxicity::ToxidromeBuilder<>{}.build() );
 
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( entity, Cmp::AnimData::Config{ 
