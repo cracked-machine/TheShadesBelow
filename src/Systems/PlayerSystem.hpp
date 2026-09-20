@@ -13,7 +13,7 @@
 // clang-format off
 namespace Game::Events { class DropInventoryEvent; class PlayerActionEvent; class PlayerMortalityEvent; }
 namespace Game::Sprites { class SpriteSheet; }
-namespace Game::Cmp { class LerpPosition; class Position; class AnimData; class RectBounds; }
+namespace Game::Cmp { class LerpPosition; class Position; class AnimData; class RectBounds; class BaseAction; }
 namespace Game::Cmp::Npc { class Shockwave; }
 namespace Game::Cmp::Player { class Mortality; }
 namespace Game::Cmp::Peristent { class EffectsVolume; } 
@@ -94,12 +94,32 @@ private:
   //! @param dt
   void check_timed_action_side_effects( sf::Time dt );
 
+  //! @brief Decide when to apply the fear stat (in darkness) or not (candle light, etc...)
+  //! @param net_modifier The net modifications from each light boundary
+  //! @param candle_carry_action Properties used to apply the modifications.
+  //! @return std::stringstream Use .rdbuf() at the callsite (prvalue expression semantics)
+  std::stringstream apply_fear_of_the_dark( Cmp::BaseAction &net_modifier, const Cmp::BaseAction &candle_carry_action );
+
+  //! @brief Apply the stat modifiers for the healing spring
+  //! @param net_modifier The accumulated net modifications
+  void apply_healing_spring_modifiers( Cmp::BaseAction &net_modifier );
+
+  //! @brief Apply the stat modifiers for visible NPCs
+  //! @param net_modifier The accumulated net modifications
+  //! @return std::stringstream Use .rdbuf() at the callsite (prvalue expression semantics)
+  std::stringstream apply_npc_modifiers( Cmp::BaseAction &net_modifier );
+
+  //! @brief Apply the stat modifiers for inventory item
+  //! @param net_modifier The accumulated net modifications
+  //! @return std::stringstream Use .rdbuf() at the callsite (prvalue expression semantics)
+  std::stringstream apply_inventory_modifiers( Cmp::BaseAction &net_modifier );
+
   //! @brief Update the clocks for the timed actions
   //! @param dt
   void update_timed_action_clocks( sf::Time dt );
 
   //! @brief Send mortality event if player fear/despair is 100%
-  void check_player_max_fear_despair();
+  void kill_player_if_max_fear_despair();
 
   //! @brief Add/remove the player healing particle sprite depending on proximity to an active healing spring fountain.
   void create_healing_particles();

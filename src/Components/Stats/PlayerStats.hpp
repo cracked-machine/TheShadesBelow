@@ -60,7 +60,6 @@ public:
   void apply( const BaseAction &action )
   {
     m_health = std::clamp( m_health + action.health(), 0, 100 );
-    SPDLOG_DEBUG( "Player health = {}", m_health );
     m_fear = std::clamp( m_fear + action.fear(), 0, 100 );
     m_despair = std::clamp( m_despair + action.despair(), 0, 100 );
     m_infamy = std::clamp( m_infamy + action.infamy(), 0, 100 );
