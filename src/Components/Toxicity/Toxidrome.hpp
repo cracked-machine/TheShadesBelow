@@ -7,6 +7,8 @@
 #include <Components/Toxicity/Phototoxia.hpp>
 #include <Components/Toxicity/TachyCadia.hpp>
 #include <Components/Toxicity/TraitsBase.hpp>
+#include <Components/Toxicity/Venom.hpp>
+#include <algorithm>
 #include <cassert>
 #include <entt/entt.hpp>
 #include <unordered_map>
@@ -15,7 +17,8 @@
 namespace Game::Cmp::Toxicity
 {
 
-// Holds the set of toxidrome effects currently active on an entity.
+// Holds the set of toxidrome effects currently active on an entity, each with
+// the toxicity value it contributes while active.
 class Toxidrome
 {
 public:
@@ -25,28 +28,30 @@ public:
     return m_active.contains( entt::type_hash<T>::value() );
   }
 
-  // Adds T. Asserts (aborts in debug builds) if T is excluded by a toxidrome
-  // already active, since that can only be a caller bug: unlike a fixed,
-  // compile-time-known sequence (see Factory::Toxicity::ToxidromeBuilder),
-  // an add() reached from gameplay code depends on runtime state the
-  // compiler can't see, so it can't be checked at compile time. When
-  // asserts are compiled out (NDEBUG), the add is still refused so release
-  // builds never end up with two mutually exclusive toxidromes active.
+  // Adds T with the given toxicity contribution. Asserts (aborts in debug
+  // builds) if T is excluded by a toxidrome already active, since that can
+  // only be a caller bug: unlike a fixed, compile-time-known sequence (see
+  // Factory::Toxicity::ToxidromeBuilder), an add() reached from gameplay
+  // code depends on runtime state the compiler can't see, so it can't be
+  // checked at compile time. When asserts are compiled out (NDEBUG), the
+  // add is still refused so release builds never end up with two mutually
+  // exclusive toxidromes active.
   template <typename T>
-  bool add()
+  bool add( int toxicity_delta = 0 )
   {
-    return add( entt::type_hash<T>::value() );
+    return add( entt::type_hash<T>::value(), toxicity_delta );
   }
 
   // Runtime-id counterpart of add<T>(), for merging in a set of toxidromes
   // whose concrete types aren't known until iteration (e.g. copying another
   // Toxidrome's active set element by element). Same exclusion semantics.
-  bool add( entt::id_type id )
+  // Re-adding a type already active refreshes its toxicity contribution.
+  bool add( entt::id_type id, int toxicity_delta = 0 )
   {
     const bool excluded = is_excluded( id );
     assert( !excluded && "Toxidrome::add: type excluded by an already-active toxidrome" );
     if ( excluded ) return false;
-    m_active.insert( id );
+    m_active.insert_or_assign( id, toxicity_delta );
     return true;
   }
 
@@ -54,6 +59,23 @@ public:
   void remove()
   {
     m_active.erase( entt::type_hash<T>::value() );
+  }
+
+  // Reduces every active toxidrome's own toxicity contribution by up to `amount`
+  // (e.g. from healing over time), removing any that reach zero. Returns the total
+  // actually removed, summed across all active toxidromes.
+  int decay( int amount )
+  {
+    int total_removed = 0;
+    for ( auto it = m_active.begin(); it != m_active.end(); )
+    {
+      const int removed = std::min( amount, it->second );
+      it->second -= removed;
+      total_removed += removed;
+      if ( it->second <= 0 ) it = m_active.erase( it );
+      else ++it;
+    }
+    return total_removed;
   }
 
   [[nodiscard]] auto begin() const { return m_active.begin(); }
@@ -65,7 +87,7 @@ private:
   struct type_list
   {
   };
-  using AllToxidromes = type_list<Bradycardia, Tachycardia, Hypoxia, Hallucinogen, Phototoxia>;
+  using AllToxidromes = type_list<Bradycardia, Tachycardia, Hypoxia, Hallucinogen, Phototoxia, Venom>;
 
   template <typename T, typename... Ex>
   static void register_excludes( std::unordered_map<entt::id_type, std::unordered_set<entt::id_type>> &table, entt::exclude_t<Ex...> /*unused*/ )
@@ -100,7 +122,8 @@ private:
     return false;
   }
 
-  std::unordered_set<entt::id_type> m_active;
+  // id -> the toxicity value it contributes while active.
+  std::unordered_map<entt::id_type, int> m_active;
 };
 
 } // namespace Game::Cmp::Toxicity

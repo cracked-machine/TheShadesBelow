@@ -12,6 +12,7 @@
 #include <Components/Toxicity/Hypoxia.hpp>
 #include <Components/Toxicity/Phototoxia.hpp>
 #include <Components/Toxicity/TachyCadia.hpp>
+#include <Components/Toxicity/Venom.hpp>
 #include <Factory/ToxicityFactory.hpp>
 #include <Systems/Stores/BaseStore.hpp>
 
@@ -51,7 +52,6 @@ int BaseStore::health( const nlohmann::json &item ) { return item.at( "health" )
 int BaseStore::fear( const nlohmann::json &item ) { return item.at( "fear" ).get<int>(); }
 int BaseStore::despair( const nlohmann::json &item ) { return item.at( "despair" ).get<int>(); }
 int BaseStore::infamy( const nlohmann::json &item ) { return item.at( "infamy" ).get<int>(); }
-int BaseStore::toxicity( const nlohmann::json &item ) { return item.at( "toxicity" ).get<int>(); }
 int BaseStore::luck( const nlohmann::json &item ) { return item.at( "luck" ).get<int>(); }
 float BaseStore::tick( const nlohmann::json &item ) { return item.at( "tick" ).get<float>(); }
 
@@ -60,12 +60,15 @@ Cmp::Toxicity::Toxidrome BaseStore::toxidrome( const nlohmann::json &item )
   const auto &toxidrome = item.contains( "toxidrome" ) ? item.at( "toxidrome" ) : item;
 
   std::string type = toxidrome.at( "type" ).get<std::string>();
-  if ( type == "none" ) return Factory::Toxicity::ToxidromeBuilder<>{}.build();
-  if ( type == "tachycardia" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Tachycardia>().build();
-  if ( type == "bradycardia" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Bradycardia>().build();
-  if ( type == "halucinogen" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Hallucinogen>().build();
-  if ( type == "hypoxia" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Hypoxia>().build();
-  if ( type == "photoxia" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Phototoxia>().build();
+  int toxicity = toxidrome.at( "toxicity" ).get<int>();
+
+  if ( type == "tachycardia" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Tachycardia>( toxicity ).build();
+  if ( type == "bradycardia" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Bradycardia>( toxicity ).build();
+  if ( type == "halucinogen" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Hallucinogen>( toxicity ).build();
+  if ( type == "hypoxia" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Hypoxia>( toxicity ).build();
+  if ( type == "phototoxia" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Phototoxia>( toxicity ).build();
+  if ( type == "venom" ) return Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Venom>( toxicity ).build();
+  if ( type != "none" ) SPDLOG_WARN( "Unknown toxidrome type: {}", type );
   return Factory::Toxicity::ToxidromeBuilder<>{}.build();
 }
 

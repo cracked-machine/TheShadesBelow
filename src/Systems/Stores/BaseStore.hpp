@@ -16,7 +16,7 @@ namespace Game::Sys
 {
 
 //! @brief Base class for JSON-backed data stores. Loads JSON files from disk and provides shared helpers for
-//! extracting Cmp::Stats::BaseAction fields (health, fear, despair, infamy, toxicity, tick, disease) from JSON entries.
+//! extracting Cmp::Stats::BaseAction fields (health, fear, despair, infamy, luck, tick, toxidrome) from JSON entries.
 class BaseStore : public BaseSystem
 {
 public:
@@ -59,11 +59,6 @@ public:
   //! @return The infamy value.
   int infamy( const nlohmann::json &item );
 
-  //! @brief Extract the "toxicity" field from a JSON action entry.
-  //! @param item
-  //! @return The toxicity value.
-  int toxicity( const nlohmann::json &item );
-
   //! @brief Extract the "luck" field from a JSON action entry.
   //! @param item
   //! @return The toxicity value.
@@ -74,9 +69,10 @@ public:
   //! @return The tick value.
   float tick( const nlohmann::json &item );
 
-  //! @brief Extract the "toxidrome" field from a JSON action entry.
+  //! @brief Extract the "toxidrome" field from a JSON action entry. The toxidrome's own nested
+  //! "toxicity" value (its toxicity contribution while active) travels with it.
   //! @param item
-  //! @return The extracted Cmp::Stats::Disease value.
+  //! @return The extracted Cmp::Toxicity::Toxidrome value.
   Cmp::Toxicity::Toxidrome toxidrome( const nlohmann::json &item );
 
   //! @brief event handlers for pausing system clocks

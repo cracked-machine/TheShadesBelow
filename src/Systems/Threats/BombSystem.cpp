@@ -158,7 +158,7 @@ void BombSystem::update()
       {
         auto &bomb_damage = Sys::PersistSystem::get<Cmp::Persist::BombDamage>( reg() );
         // pc_health_cmp.health -= bomb_damage.get_value();
-        player_stats_cmp.apply( { Cmp::Stats::Health{ -bomb_damage.get_value() }, {}, {}, {}, {}, {}, {} } );
+        player_stats_cmp.apply( { Cmp::Stats::Health{ -bomb_damage.get_value() }, {}, {}, {}, {}, {} } );
         if ( player_stats_cmp.health() <= 0 )
         {
           get_systems_event_queue().enqueue(

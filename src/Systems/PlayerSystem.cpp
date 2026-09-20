@@ -519,7 +519,7 @@ void PlayerSystem::check_player_mortality()
         player_pos_cmp.position = Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() );
         Factory::Player::remove_player_extra_life( reg() );
         m_sound_bank.get_effect( "player_respawn" ).play();
-        Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 100 }, {}, {}, {}, {}, {}, {}, {} } );
+        Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 100 }, {}, {}, {}, {}, {}, {} } );
         mortality_cmp.state = Cmp::Player::Mortality::State::ALIVE;
         reg().remove<Cmp::NoRender>( entity );
         reg().remove<Cmp::Player::PostDeathTimer>( entity );
@@ -666,6 +666,9 @@ void PlayerSystem::apply_healing_spring_modifiers( Cmp::BaseAction &net_modifier
     float player_distance = Utils::Maths::getEuclideanDistance( fountain_mb_cmp.position, Utils::Player::get_position( reg() ).position );
     if ( player_distance > 500 ) continue;
     net_modifier += fountain_effects;
+    // Curing toxidromes isn't expressible as a BaseAction delta (it decays/removes existing active
+    // toxidromes rather than adding a new one), so it's applied directly here rather than via net_modifier.
+    Utils::Player::get_stats( reg() ).decay_toxidrome( 5 );
   }
 }
 
@@ -929,7 +932,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
     }
     reg().emplace_or_replace<Cmp::Player::PostDeathTimer>( Utils::Player::get_entity( reg() ) );
     reg().emplace_or_replace<Cmp::NoRender>( Utils::Player::get_entity( reg() ) );
-    Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ -100 }, {}, {}, {}, {}, {}, {} } );
+    Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ -100 }, {}, {}, {}, {}, {} } );
     SPDLOG_INFO( "Player death code: {}", static_cast<uint8_t>( ev.m_new_state ) );
     Utils::Player::get_mortality( reg() ).state = Cmp::Player::Mortality::State::DEAD;
     SPDLOG_INFO( "Player died" );

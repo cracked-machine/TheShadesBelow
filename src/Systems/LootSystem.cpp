@@ -82,7 +82,7 @@ void LootSystem::check_loot_collision()
     {
       auto &health_bonus = Sys::PersistSystem::get<Cmp::Persist::HealthBonus>( reg() );
 
-      Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ health_bonus.get_value() }, {}, {}, {}, {}, {}, {} } );
+      Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ health_bonus.get_value() }, {}, {}, {}, {}, {} } );
       collect_loot( effect.loot_entity );
     }
     else if ( effect.type == "sprite.graveyard.loot.repair" )
@@ -136,7 +136,7 @@ void LootSystem::check_loot_collision()
       auto flash_entt = reg().create();
       reg().emplace_or_replace<Cmp::FlashUICadaver>( flash_entt );
 
-      Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, Cmp::Stats::Infamy{ 30 }, {}, {}, {} } );
+      Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, Cmp::Stats::Infamy{ 30 }, {}, {} } );
 
       get_systems_event_queue().trigger( Events::CryptRoomEvent( Events::CryptRoomEvent::Type::EXIT_ALL_PASSAGES ) );
     }

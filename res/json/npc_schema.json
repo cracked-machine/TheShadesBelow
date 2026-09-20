@@ -24,8 +24,8 @@
         "actions": {
           "type": "array",
           "description": "List of actions available for this item",
-          "minItems": 8,
-          "maxItems": 8,
+          "minItems": 9,
+          "maxItems": 9,
           "allOf": [
             { "contains": { "required": ["burn_action"] } },
             { "contains": { "required": ["carry_action"] } },
@@ -43,7 +43,7 @@
             "properties": {
               "burn_action": {
                 "description": "Applied repeatedly, at its own tick interval, while the item is burning.",
-                "allOf": [{ "$ref": "#/definitions/burn_effect" }]
+                "allOf": [{ "$ref": "#/definitions/action_effect" }]
               },
               "carry_action": {
                 "description": "Defined for schema uniformity with items.json; not currently applied to NPCs.",
@@ -88,25 +88,24 @@
   "definitions": {
     "action_effect": {
       "type": "object",
-      "required": ["health", "fear", "despair", "infamy", "toxicity", "toxidrome", "luck", "tick"],
+      "required": ["health", "fear", "despair", "infamy", "toxidrome", "luck", "tick"],
       "additionalProperties": false,
       "properties": {
         "health":   { "type": "number" },
         "fear":     { "type": "number" },
         "despair":  { "type": "number" },
         "infamy":   { "type": "number" },
-        "toxicity": { "type": "number" },
         "luck":     { "type": "number" },
         "toxidrome": {
           "type": "object",
-          "required": ["type", "tick"],
+          "required": ["type", "toxicity"],
           "additionalProperties": false,
           "properties": {
             "type": {
               "type": "string",
-               "enum": ["none", "tachycardia", "bradycardia", "halucinogen", "hypoxia", "phototoxia"]
+               "enum": ["none", "tachycardia", "bradycardia", "halucinogen", "hypoxia", "phototoxia", "venom"]
             },
-            "tick": { "type": "number" }
+            "toxicity": { "type": "number" }
           }
         },
         "tick": {

@@ -442,15 +442,15 @@ bool SceneInputRouter::try_handle_debug_key( sf::Keyboard::Scancode scancode )
   else if ( scancode == Scancode::F9 ) { toggle_setting<Cmp::SceneSettings::Shaders>( "Shaders are" ); }
   else if ( scancode == Scancode::F10 ) { toggle_setting<Cmp::SceneSettings::Footsteps>( "Footsteps are" ); }
   else if ( scancode == Scancode::F11 ) { queue_suicide_event(); }
-  else if ( scancode == Scancode::Numpad1 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, Cmp::Stats::Luck{ 10 }, {} } ); }
-  else if ( scancode == Scancode::Numpad2 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, Cmp::Stats::Luck{ -10 }, {} } ); }
-  else if ( scancode == Scancode::Numpad3 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, Cmp::Stats::Infamy{ 10 }, {}, {}, {} } ); }
-  else if ( scancode == Scancode::NumpadPlus ) { Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 10 }, {}, {}, {}, {}, {}, {} } ); }
+  else if ( scancode == Scancode::Numpad1 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Luck{ 10 }, {} } ); }
+  else if ( scancode == Scancode::Numpad2 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Luck{ -10 }, {} } ); }
+  else if ( scancode == Scancode::Numpad3 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, Cmp::Stats::Infamy{ 10 }, {}, {} } ); }
+  else if ( scancode == Scancode::NumpadPlus ) { Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 10 }, {}, {}, {}, {}, {} } ); }
   else if ( scancode == Scancode::Numpad4 ) { Utils::Player::get_wealth( reg() ).wealth += 1; }
   else if ( scancode == Scancode::Numpad5 ) { Utils::Player::get_cadaver_count( reg() ).increment_count( 1 ); }
-  else if ( scancode == Scancode::Numpad7 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Toxicity{ -10 }, {}, {} } ); }
-  else if ( scancode == Scancode::Numpad8 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Toxicity{ 10 }, {}, {} } ); }
-  else if ( scancode == Scancode::Numpad9 ) { Utils::Player::get_stats( reg() ).apply( { {}, Cmp::Stats::Fear{ -10 }, {}, {}, {}, {}, {} } ); }
+  else if ( scancode == Scancode::Numpad7 ) { Utils::Player::get_stats( reg() ).add_toxicity( -10 ); }
+  else if ( scancode == Scancode::Numpad8 ) { Utils::Player::get_stats( reg() ).add_toxicity( 10 ); }
+  else if ( scancode == Scancode::Numpad9 ) { Utils::Player::get_stats( reg() ).apply( { {}, Cmp::Stats::Fear{ -10 }, {}, {}, {}, {} } ); }
   else { return false; }
   return true;
 }

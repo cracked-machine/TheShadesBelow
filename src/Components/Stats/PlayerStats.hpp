@@ -46,18 +46,26 @@ public:
   [[nodiscard]] int infamy() const { return m_infamy; }
   //! @brief Get the player's current toxicity.
   //! @return int Toxicity value, in [0, 100].
-  [[nodiscard]] int toxicity() const { return m_toxicity; }
-  //! @brief Get the player's current luck.
-  //! @return int Luck value, in [0, 100].
   [[nodiscard]] int luck() const { return m_luck; }
   //! @brief Get the player's current toxidrome affliction.
   //! @return Stats::toxidrome The toxidrome type and its tick interval.
   [[nodiscard]] Cmp::Toxicity::Toxidrome toxidrome() const { return m_toxidrome; }
 
+  //! @brief Directly adjust the player's toxicity stat, independent of any toxidrome (e.g. for debug/cheat use).
+  //! @param delta Change applied to the toxicity stat.
+  void add_toxicity( int delta ) { m_toxicity = std::clamp( m_toxicity + delta, 0, 100 ); }
+
+  //! @brief Cures the player's toxidromes over time (e.g. while resting at a healing spring). Reduces
+  //! every active toxidrome's own toxicity contribution by up to `amount`, removing any that reach
+  //! zero, and reduces the toxicity stat by the total actually removed.
+  //! @param amount Maximum reduction applied to each active toxidrome's own toxicity value.
+  void decay_toxidrome( int amount ) { add_toxicity( -m_toxidrome.decay( amount ) ); }
+
   //! @brief Update the player stats with the BaseAction object.
-  //! @note BaseAction: health, fear, despair, infamy, toxicity, luck, toxidrome. Each toxidrome carried by
-  //! the action is merged into the player's existing set individually (excluded ones are dropped), rather
-  //! than replacing the player's whole set outright.
+  //! @note BaseAction: health, fear, despair, infamy, luck, toxidrome. Each toxidrome carried by the
+  //! action is merged into the player's existing set individually (excluded ones are dropped, per
+  //! Cmp::Toxicity::Toxidrome::add), rather than replacing the player's whole set outright. The
+  //! player's toxicity stat is bumped by exactly the toxidromes that were actually added.
   //! @param action The stat modifier to apply.
   void apply( const BaseAction &action )
   {
@@ -65,11 +73,14 @@ public:
     m_fear = std::clamp( m_fear + action.fear(), 0, 100 );
     m_despair = std::clamp( m_despair + action.despair(), 0, 100 );
     m_infamy = std::clamp( m_infamy + action.infamy(), 0, 100 );
-    m_toxicity = std::clamp( m_toxicity + action.toxicity(), 0, 100 );
     m_luck = std::clamp( m_luck + action.luck(), 0, 100 );
-    for ( auto id : action.toxidrome() )
+    for ( const auto &[id, toxicity_delta] : action.toxidrome() )
     {
-      m_toxidrome.add( id );
+      if ( m_toxidrome.add( id, toxicity_delta ) )
+      {
+        SPDLOG_INFO( "Added {} toxicity", toxicity_delta );
+        add_toxicity( toxicity_delta );
+      }
     }
   }
 

@@ -172,12 +172,12 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
       meter_inner_color = sf::Color::Blue;
       should_render = true;
     }
-    else if ( meter.name == "toxicity_meter" )
-    {
-      meter_value = static_cast<float>( Utils::Player::get_stats( reg() ).toxicity() );
-      meter_inner_color = sf::Color::Green;
-      should_render = true;
-    }
+    // else if ( meter.name == "toxicity_meter" )
+    // {
+    //   meter_value = static_cast<float>( Utils::Player::get_stats( reg() ).toxicity() );
+    //   meter_inner_color = sf::Color::Green;
+    //   should_render = true;
+    // }
     else if ( meter.name == "luck_meter" )
     {
       meter_value = static_cast<float>( Utils::Player::get_stats( reg() ).luck() );

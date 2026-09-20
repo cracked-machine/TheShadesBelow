@@ -74,17 +74,16 @@ public:
   //! @param fear Change applied to the fear stat.
   //! @param despair Change applied to the despair stat.
   //! @param infamy Change applied to the infamy stat.
-  //! @param toxicity Change applied to the toxicity stat.
   //! @param luck Change applied to the luck stat.
   //! @param tick How often (seconds) the action re-applies, or 0 for a one-shot.
-  //! @param toxidrome toxidrome affliction applied alongside the stat changes, if any.
-  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Toxicity toxicity, Stats::Luck luck,
-              Stats::Tick tick, Cmp::Toxicity::Toxidrome toxidrome = {} )
+  //! @param toxidrome toxidrome affliction applied alongside the stat changes, if any. Each active
+  //! toxidrome carries its own toxicity contribution (see Cmp::Toxicity::Toxidrome).
+  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Tick tick,
+              Cmp::Toxicity::Toxidrome toxidrome = {} )
       : m_health( health.value ),
         m_fear( fear.value ),
         m_despair( despair.value ),
         m_infamy( infamy.value ),
-        m_toxicity( toxicity.value ),
         m_luck( luck.value ),
         m_toxidrome( std::move( toxidrome ) ),
         m_tick( tick.value )
@@ -105,9 +104,6 @@ public:
   //! @brief Get the infamy delta.
   //! @return int The change applied to the infamy stat.
   [[nodiscard]] int infamy() const { return m_infamy; }
-  //! @brief Get the toxicity delta.
-  //! @return int The change applied to the toxicity stat.
-  [[nodiscard]] int toxicity() const { return m_toxicity; }
   //! @brief Get the luck delta.
   //! @return int The change applied to the toxicity stat.
   [[nodiscard]] int luck() const { return m_luck; }
@@ -119,7 +115,7 @@ public:
   [[nodiscard]] Cmp::Toxicity::Toxidrome toxidrome() const { return m_toxidrome; }
 
   //! @brief Accumulate another action's stat deltas into this one.
-  //! @note Does not accumulate toxicity or toxidrome.
+  //! @note Does not accumulate toxidrome.
   //! @param rhs The action whose deltas are added to this one.
   //! @return BaseAction& Reference to this action, after accumulation.
   BaseAction &operator+=( const BaseAction &rhs )
@@ -128,7 +124,6 @@ public:
     m_fear += rhs.m_fear;
     m_despair += rhs.m_despair;
     m_infamy += rhs.m_infamy;
-    m_toxicity += rhs.m_toxicity;
     m_luck += rhs.m_luck;
     m_tick += rhs.m_tick;
     return *this;
@@ -143,8 +138,6 @@ private:
   int m_despair{ 0 };
   //! @brief The change applied to the infamy stat.
   int m_infamy{ 0 };
-  //! @brief The change applied to the toxicity stat.
-  int m_toxicity{ 0 };
   //! @brief The change applied to the luck stat.
   int m_luck{ 0 };
   //! @brief The toxidrome affliction applied alongside the stat changes, if any.

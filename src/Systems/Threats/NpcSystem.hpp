@@ -13,31 +13,11 @@ namespace Game::Sprites { class SpriteFactory; }
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
 namespace Game::Cmp { class Position; }
-
+namespace Game::Cmp { class Direction; class LerpPosition; } 
+namespace Game::Cmp::Player { class Mortality; } 
+namespace Game::Cmp::Npc { class NPC; class Shockwave; }
+namespace Game::PathFinding { class SpatialHashGrid; }
 // clang-format on
-namespace Game::Cmp
-{
-class Direction;
-class LerpPosition;
-
-} // namespace Game::Cmp
-
-namespace Game::Cmp::Player
-{
-class Mortality;
-} // namespace Game::Cmp::Player
-
-namespace Game::Cmp::Npc
-{
-class NPC;
-class Shockwave;
-} // namespace Game::Cmp::Npc
-
-namespace Game::PathFinding
-{
-class SpatialHashGrid;
-}
-
 namespace Game::Sys
 {
 
