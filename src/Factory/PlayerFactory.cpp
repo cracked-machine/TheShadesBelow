@@ -32,12 +32,15 @@
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/PlayerStats.hpp>
 #include <Components/Stats/SacrificeAction.hpp>
+#include <Components/Toxicity/TachyCadia.hpp>
+#include <Components/Toxicity/Toxidrome.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/PlantFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <Factory/SpriteFactory.hpp>
+#include <Factory/ToxicityFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Sprites/SpriteMetaType.hpp>
 #include <Sprites/SpriteSheet.hpp>
@@ -77,6 +80,8 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   reg.emplace_or_replace<Cmp::LastDirection>( entity, sf::Vector2f{ 0, 0 } );
   reg.emplace_or_replace<Cmp::Player::MovementDelta>( entity );
   reg.emplace_or_replace<Cmp::Player::Footstep>( entity, Cmp::Player::Footstep::Type::GRASS );
+
+  reg.emplace_or_replace<Cmp::Toxicity::Toxidrome>( entity, Factory::Toxicity::ToxidromeBuilder<>{}.add<Cmp::Toxicity::Tachycardia>().build() );
 
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( entity, Cmp::AnimData::Config{ 
