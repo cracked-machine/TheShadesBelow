@@ -2,6 +2,7 @@
 #define SRC_COMPONENTS_STATS_COLLISIONACTION_HPP__
 
 #include <Components/Stats/BaseAction.hpp>
+#include <Components/Toxicity/Toxidrome.hpp>
 #include <utility>
 
 namespace Game::Cmp

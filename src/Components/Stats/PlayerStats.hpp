@@ -2,6 +2,13 @@
 #define SRC_COMPONENTS_STATS_PLAYERSTATS_HPP__
 
 #include <Components/Stats/BaseAction.hpp>
+#include <algorithm>
+#include <memory>
+
+namespace Game::Cmp::Toxicity
+{
+class Toxidrome;
+} // namespace Game::Cmp::Toxicity
 
 namespace Game::Cmp
 {
@@ -11,26 +18,29 @@ namespace Game::Cmp
 class PlayerStats
 {
 public:
+  //! @brief Construct a new Player Stats object with no toxidrome affliction.
+  //! @param health Initial health value, clamped to [0, 100].
+  //! @param fear Initial fear value, clamped to [0, 100].
+  //! @param despair Initial despair value, clamped to [0, 100].
+  //! @param infamy Initial infamy value, clamped to [0, 100].
+  //! @param toxicity Initial toxicity value, clamped to [0, 100].
+  PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Toxicity toxicity, Stats::Luck luck );
   //! @brief Construct a new Player Stats object.
   //! @param health Initial health value, clamped to [0, 100].
   //! @param fear Initial fear value, clamped to [0, 100].
   //! @param despair Initial despair value, clamped to [0, 100].
   //! @param infamy Initial infamy value, clamped to [0, 100].
   //! @param toxicity Initial toxicity value, clamped to [0, 100].
-  //! @param toxidrome Initial toxidrome affliction, if any.
+  //! @param toxidrome Initial toxidrome affliction.
   PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Toxicity toxicity, Stats::Luck luck,
-               Cmp::Toxicity::Toxidrome toxidrome = {} )
-      : m_health( std::clamp( health.value, 0, 100 ) ),
-        m_fear( std::clamp( fear.value, 0, 100 ) ),
-        m_despair( std::clamp( despair.value, 0, 100 ) ),
-        m_infamy( std::clamp( infamy.value, 0, 100 ) ),
-        m_toxicity( std::clamp( toxicity.value, 0, 100 ) ),
-        m_luck( std::clamp( luck.value, 0, 100 ) ),
-        m_toxidrome( std::move( toxidrome ) )
-  {
-  }
+               Cmp::Toxicity::Toxidrome toxidrome );
   //! @brief Destroy the Player Stats object.
-  ~PlayerStats() {}
+  ~PlayerStats();
+
+  PlayerStats( const PlayerStats &other );
+  PlayerStats &operator=( const PlayerStats &other );
+  PlayerStats( PlayerStats &&other ) noexcept;
+  PlayerStats &operator=( PlayerStats &&other ) noexcept;
 
   //! @brief Get the player's current health.
   //! @return int Health value, in [0, 100].
@@ -49,7 +59,7 @@ public:
   [[nodiscard]] int luck() const { return m_luck; }
   //! @brief Get the player's current toxidrome affliction.
   //! @return Stats::toxidrome The toxidrome type and its tick interval.
-  [[nodiscard]] Cmp::Toxicity::Toxidrome toxidrome() const { return m_toxidrome; }
+  [[nodiscard]] const Cmp::Toxicity::Toxidrome &toxidrome() const;
 
   //! @brief Directly adjust the player's toxicity stat, independent of any toxidrome (e.g. for debug/cheat use).
   //! @param delta Change applied to the toxicity stat.
@@ -59,7 +69,7 @@ public:
   //! every active toxidrome's own toxicity contribution by up to `amount`, removing any that reach
   //! zero, and reduces the toxicity stat by the total actually removed.
   //! @param amount Maximum reduction applied to each active toxidrome's own toxicity value.
-  void decay_toxidrome( int amount ) { add_toxicity( -m_toxidrome.decay( amount ) ); }
+  void decay_toxidrome( int amount );
 
   //! @brief Update the player stats with the BaseAction object.
   //! @note BaseAction: health, fear, despair, infamy, luck, toxidrome. Each toxidrome carried by the
@@ -67,22 +77,7 @@ public:
   //! Cmp::Toxicity::Toxidrome::add), rather than replacing the player's whole set outright. The
   //! player's toxicity stat is bumped by exactly the toxidromes that were actually added.
   //! @param action The stat modifier to apply.
-  void apply( const BaseAction &action )
-  {
-    m_health = std::clamp( m_health + action.health(), 0, 100 );
-    m_fear = std::clamp( m_fear + action.fear(), 0, 100 );
-    m_despair = std::clamp( m_despair + action.despair(), 0, 100 );
-    m_infamy = std::clamp( m_infamy + action.infamy(), 0, 100 );
-    m_luck = std::clamp( m_luck + action.luck(), 0, 100 );
-    for ( const auto &[id, toxicity_delta] : action.toxidrome() )
-    {
-      if ( m_toxidrome.add( id, toxicity_delta ) )
-      {
-        SPDLOG_INFO( "Added {} toxicity", toxicity_delta );
-        add_toxicity( toxicity_delta );
-      }
-    }
-  }
+  void apply( const BaseAction &action );
 
 private:
   //! @brief The player's current health, in [0, 100].
@@ -97,8 +92,11 @@ private:
   int m_toxicity{ 0 };
   //! @brief The player's current luck, in [0, 100].
   int m_luck{ 50 };
-  //! @brief The player's current toxidrome affliction, if any.
-  Cmp::Toxicity::Toxidrome m_toxidrome{};
+  //! @brief The player's current toxidrome affliction. Never null; held behind a pointer only so this
+  //! header need not include Toxidrome.hpp. Copy/move are hand-written in the .cpp (deep-copy for
+  //! copy, pointer-steal for move) to keep PlayerStats copy-constructible (RegistryTransfer relies on
+  //! generically copying this component across scene transitions).
+  std::unique_ptr<Cmp::Toxicity::Toxidrome> m_toxidrome;
 };
 
 } // namespace Game::Cmp

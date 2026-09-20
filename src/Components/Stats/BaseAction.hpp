@@ -1,8 +1,13 @@
 #ifndef SRC_COMPONENTS_STATS_BASEACTION_HPP__
 #define SRC_COMPONENTS_STATS_BASEACTION_HPP__
 
-#include <Components/Toxicity/Toxidrome.hpp>
-#include <utility>
+#include <memory>
+
+namespace Game::Cmp::Toxicity
+{
+class Toxidrome;
+} // namespace Game::Cmp::Toxicity
+
 namespace Game::Cmp
 {
 namespace Stats
@@ -69,6 +74,14 @@ struct Tick
 class BaseAction
 {
 public:
+  //! @brief Construct a new Base Action object with no toxidrome affliction.
+  //! @param health Change applied to the health stat.
+  //! @param fear Change applied to the fear stat.
+  //! @param despair Change applied to the despair stat.
+  //! @param infamy Change applied to the infamy stat.
+  //! @param luck Change applied to the luck stat.
+  //! @param tick How often (seconds) the action re-applies, or 0 for a one-shot.
+  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Tick tick );
   //! @brief Construct a new Base Action object.
   //! @param health Change applied to the health stat.
   //! @param fear Change applied to the fear stat.
@@ -79,18 +92,14 @@ public:
   //! @param toxidrome toxidrome affliction applied alongside the stat changes, if any. Each active
   //! toxidrome carries its own toxicity contribution (see Cmp::Toxicity::Toxidrome).
   BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Tick tick,
-              Cmp::Toxicity::Toxidrome toxidrome = {} )
-      : m_health( health.value ),
-        m_fear( fear.value ),
-        m_despair( despair.value ),
-        m_infamy( infamy.value ),
-        m_luck( luck.value ),
-        m_toxidrome( std::move( toxidrome ) ),
-        m_tick( tick.value )
-  {
-  }
+              Cmp::Toxicity::Toxidrome toxidrome );
   //! @brief Destroy the Base Action object.
-  ~BaseAction() {}
+  ~BaseAction();
+
+  BaseAction( const BaseAction &other );
+  BaseAction &operator=( const BaseAction &other );
+  BaseAction( BaseAction &&other ) noexcept;
+  BaseAction &operator=( BaseAction &&other ) noexcept;
 
   //! @brief Get the health delta.
   //! @return int The change applied to the health stat.
@@ -112,7 +121,7 @@ public:
   [[nodiscard]] float interval() const { return m_tick; }
   //! @brief Get the toxidrome affliction associated with this action.
   //! @return Stats::toxidrome The toxidrome type and its own tick interval.
-  [[nodiscard]] Cmp::Toxicity::Toxidrome toxidrome() const { return m_toxidrome; }
+  [[nodiscard]] const Cmp::Toxicity::Toxidrome &toxidrome() const;
 
   //! @brief Accumulate another action's stat deltas into this one.
   //! @note Does not accumulate toxidrome.
@@ -140,8 +149,10 @@ private:
   int m_infamy{ 0 };
   //! @brief The change applied to the luck stat.
   int m_luck{ 0 };
-  //! @brief The toxidrome affliction applied alongside the stat changes, if any.
-  Cmp::Toxicity::Toxidrome m_toxidrome{};
+  //! @brief The toxidrome affliction applied alongside the stat changes, if any. Never null; held behind
+  //! a pointer only so this header need not include Toxidrome.hpp. Copy/move are hand-written in the
+  //! .cpp (deep-copy for copy, pointer-steal for move) to keep BaseAction copy-constructible.
+  std::unique_ptr<Cmp::Toxicity::Toxidrome> m_toxidrome;
   //! @brief How often (seconds) the action re-applies, or 0 for a one-shot.
   float m_tick{ 0 };
 };

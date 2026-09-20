@@ -65,6 +65,7 @@
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
+#include <Components/Toxicity/Toxidrome.hpp>
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
 #include <Components/Wormhole/Jump.hpp>

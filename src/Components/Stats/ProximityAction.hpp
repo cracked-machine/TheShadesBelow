@@ -2,6 +2,7 @@
 #define SRC_COMPONENTS_STATS_PROXIMITYACTION_HPP__
 
 #include <Components/Stats/BaseAction.hpp>
+#include <Components/Toxicity/Toxidrome.hpp>
 #include <utility>
 
 namespace Game::Cmp

@@ -124,6 +124,8 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Components/Font.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Persistent/BasePersistent.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Persistent/PlayerStartPosition.cpp
+    ${CMAKE_SOURCE_DIR}/src/Components/Stats/BaseAction.cpp
+    ${CMAKE_SOURCE_DIR}/src/Components/Stats/PlayerStats.cpp
     ${CMAKE_SOURCE_DIR}/src/PathFinding/SpatialHashGrid.cpp
     ${CMAKE_SOURCE_DIR}/src/PathFinding/AStar.cpp
 )
