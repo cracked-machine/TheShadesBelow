@@ -8,7 +8,7 @@
          "name":"overlay",
          "objects":[
                 {
-                 "height":400,
+                 "height":472,
                  "id":1,
                  "name":"status_outline",
                  "opacity":1,
@@ -33,7 +33,7 @@
                  "visible":true,
                  "width":280,
                  "x":30,
-                 "y":20
+                 "y":18
                 }, 
                 {
                  "height":170,
@@ -61,7 +61,7 @@
                  "visible":true,
                  "width":180,
                  "x":80,
-                 "y":450
+                 "y":520
                 }, 
                 {
                  "height":0,
@@ -114,7 +114,7 @@
                  "visible":true,
                  "width":0,
                  "x":50,
-                 "y":300
+                 "y":370
                 }, 
                 {
                  "height":0,
@@ -143,7 +143,7 @@
                  "visible":true,
                  "width":0,
                  "x":50,
-                 "y":340
+                 "y":410
                 }, 
                 {
                  "height":0,
@@ -172,7 +172,7 @@
                  "visible":true,
                  "width":0,
                  "x":50,
-                 "y":380
+                 "y":450
                 }, 
                 {
                  "height":0,
@@ -196,7 +196,7 @@
                  "visible":true,
                  "width":0,
                  "x":120,
-                 "y":300
+                 "y":370
                 }, 
                 {
                  "height":0,
@@ -220,7 +220,7 @@
                  "visible":true,
                  "width":0,
                  "x":120,
-                 "y":340
+                 "y":410
                 }, 
                 {
                  "height":0,
@@ -244,7 +244,7 @@
                  "visible":true,
                  "width":0,
                  "x":120,
-                 "y":380
+                 "y":450
                 }, 
                 {
                  "height":20,
@@ -255,7 +255,7 @@
                  "type":"ui_meter",
                  "visible":true,
                  "width":150,
-                 "x":140,
+                 "x":150,
                  "y":40
                 }, 
                 {
@@ -285,7 +285,7 @@
                  "visible":true,
                  "width":0,
                  "x":130,
-                 "y":480
+                 "y":550
                 }, 
                 {
                  "height":10,
@@ -297,7 +297,7 @@
                  "visible":true,
                  "width":130,
                  "x":100,
-                 "y":590
+                 "y":660
                 }, 
                 {
                  "height":20,
@@ -308,7 +308,7 @@
                  "type":"ui_meter",
                  "visible":true,
                  "width":150,
-                 "x":140,
+                 "x":150,
                  "y":80
                 }, 
                 {
@@ -320,7 +320,7 @@
                  "type":"ui_meter",
                  "visible":true,
                  "width":150,
-                 "x":140,
+                 "x":150,
                  "y":160
                 }, 
                 {
@@ -345,7 +345,7 @@
                  "visible":true,
                  "width":0,
                  "x":170,
-                 "y":630
+                 "y":700
                 }, 
                 {
                  "height":0,
@@ -404,7 +404,7 @@
                  "type":"ui_meter",
                  "visible":true,
                  "width":150,
-                 "x":140,
+                 "x":150,
                  "y":120
                 }, 
                 {
@@ -433,42 +433,6 @@
                 }, 
                 {
                  "height":20,
-                 "id":32,
-                 "name":"toxicity_meter",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"ui_meter",
-                 "visible":true,
-                 "width":150,
-                 "x":140,
-                 "y":200
-                }, 
-                {
-                 "height":0,
-                 "id":33,
-                 "name":"toxicity_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":30
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"toxicity"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":40,
-                 "y":190
-                }, 
-                {
-                 "height":20,
                  "id":34,
                  "name":"luck_meter",
                  "opacity":1,
@@ -476,8 +440,8 @@
                  "type":"ui_meter",
                  "visible":true,
                  "width":150,
-                 "x":140,
-                 "y":240
+                 "x":150,
+                 "y":200
                 }, 
                 {
                  "height":0,
@@ -501,7 +465,223 @@
                  "visible":true,
                  "width":0,
                  "x":40,
-                 "y":230
+                 "y":190
+                }, 
+                {
+                 "height":20,
+                 "id":36,
+                 "name":"bradycardia_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":120,
+                 "x":40,
+                 "y":240
+                }, 
+                {
+                 "height":20,
+                 "id":38,
+                 "name":"tachycardia_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":120,
+                 "x":180,
+                 "y":240
+                }, 
+                {
+                 "height":20,
+                 "id":42,
+                 "name":"hallucinogen_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":120,
+                 "x":40,
+                 "y":280
+                }, 
+                {
+                 "height":20,
+                 "id":43,
+                 "name":"hypoxia_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":120,
+                 "x":180,
+                 "y":280
+                }, 
+                {
+                 "height":20,
+                 "id":44,
+                 "name":"phototoxia_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":120,
+                 "x":40,
+                 "y":320
+                }, 
+                {
+                 "height":20,
+                 "id":45,
+                 "name":"venom_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":120,
+                 "x":180,
+                 "y":320
+                }, 
+                {
+                 "height":0,
+                 "id":46,
+                 "name":"bradycardia_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"bradycardia"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":50,
+                 "y":238
+                }, 
+                {
+                 "height":0,
+                 "id":47,
+                 "name":"tachycardia_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"tachycardia"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":190,
+                 "y":238
+                }, 
+                {
+                 "height":0,
+                 "id":48,
+                 "name":"hypoxia_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"hypoxia"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":210,
+                 "y":278
+                }, 
+                {
+                 "height":0,
+                 "id":49,
+                 "name":"hallucinogen_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"hallucinogen"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":50,
+                 "y":278
+                }, 
+                {
+                 "height":0,
+                 "id":50,
+                 "name":"phototoxia_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"phototoxia"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":60,
+                 "y":318
+                }, 
+                {
+                 "height":0,
+                 "id":51,
+                 "name":"venom_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"venom"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":210,
+                 "y":318
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -510,7 +690,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":36,
+ "nextobjectid":52,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

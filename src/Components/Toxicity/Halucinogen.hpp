@@ -11,13 +11,10 @@ struct Hallucinogen
 {
 };
 
-struct Hypoxia;
-struct Bradycardia;
-
 template <>
 struct toxidrome_traits<Hallucinogen>
 {
-  using excludes = make_excludes<Hallucinogen, Hypoxia, Bradycardia>::type;
+  using excludes = make_excludes<Hallucinogen>::type;
 };
 
 }; // namespace Game::Cmp::Toxicity

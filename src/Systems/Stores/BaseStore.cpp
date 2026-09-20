@@ -11,7 +11,7 @@
 #include <Components/Toxicity/Halucinogen.hpp>
 #include <Components/Toxicity/Hypoxia.hpp>
 #include <Components/Toxicity/Phototoxia.hpp>
-#include <Components/Toxicity/TachyCadia.hpp>
+#include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Venom.hpp>
 #include <Factory/ToxicityFactory.hpp>
 #include <Systems/Stores/BaseStore.hpp>

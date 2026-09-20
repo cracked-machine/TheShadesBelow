@@ -32,7 +32,7 @@
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/PlayerStats.hpp>
 #include <Components/Stats/SacrificeAction.hpp>
-#include <Components/Toxicity/TachyCadia.hpp>
+#include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>

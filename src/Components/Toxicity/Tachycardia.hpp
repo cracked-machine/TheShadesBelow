@@ -16,7 +16,7 @@ struct Bradycardia;
 //! @brief Exclusion rules
 //! @tparam
 template <>
-struct toxidrome_traits<Tachycardia> : make_excludes<Tachycardia, Bradycardia>
+struct toxidrome_traits<Tachycardia>
 {
   using excludes = make_excludes<Tachycardia, Bradycardia>::type;
 };

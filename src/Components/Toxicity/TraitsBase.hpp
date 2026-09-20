@@ -31,8 +31,9 @@ template <typename X, typename ExcludeList>
 struct excludes_type;
 
 template <typename X, typename... Ex>
-struct excludes_type<X, entt::exclude_t<Ex...>> : std::disjunction<std::is_same<X, Ex>...>
+struct excludes_type<X, entt::exclude_t<Ex...>>
 {
+  static constexpr bool value = ( std::is_same_v<X, Ex> || ... );
 };
 
 template <typename X, typename ExcludeList>
@@ -45,14 +46,18 @@ inline constexpr bool are_mutually_exclusive_v = excludes_type_v<B, typename tox
 
 // Rejects, at compile time, any pack containing two mutually exclusive toxidromes.
 template <typename... Ts>
-struct no_conflicting_toxidromes : std::true_type
+struct no_conflicting_toxidromes
 {
+  static constexpr bool value = true;
 };
 
 template <typename T, typename... Rest>
 struct no_conflicting_toxidromes<T, Rest...>
-    : std::conjunction<std::negation<std::disjunction<std::bool_constant<are_mutually_exclusive_v<T, Rest>>...>>, no_conflicting_toxidromes<Rest...>>
 {
+  // T must not conflict with anything still left in the pack, and the rest of
+  // the pack must be conflict-free among themselves.
+  static constexpr bool value =
+      ( not are_mutually_exclusive_v<T, Rest> && ... ) && no_conflicting_toxidromes<Rest...>::value;
 };
 
 template <typename... Ts>

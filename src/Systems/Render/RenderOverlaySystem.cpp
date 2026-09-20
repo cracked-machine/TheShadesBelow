@@ -60,7 +60,7 @@
 #include <Components/Toxicity/Bradycadia.hpp>
 #include <Components/Toxicity/Halucinogen.hpp>
 #include <Components/Toxicity/Phototoxia.hpp>
-#include <Components/Toxicity/TachyCadia.hpp>
+#include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <Components/Toxicity/Venom.hpp>
 #include <Components/Wall.hpp>
@@ -187,62 +187,50 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
     else if ( meter.name == "tachycardia_meter" )
     {
       auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Tachycardia>();
-      if ( opt_meter.has_value() )
-      {
-        meter_value = static_cast<float>( opt_meter.value() );
-        meter_inner_color = sf::Color::Green;
-        should_render = true;
-      }
+      meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
+      meter_inner_color = sf::Color::Green;
+      meter_outer_color = sf::Color( 64, 64, 64, 255 );
+      should_render = true;
     }
     else if ( meter.name == "bradycardia_meter" )
     {
       auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Bradycardia>();
-      if ( opt_meter.has_value() )
-      {
-        meter_value = static_cast<float>( opt_meter.value() );
-        meter_inner_color = sf::Color::Green;
-        should_render = true;
-      }
+      meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
+      meter_inner_color = sf::Color::Green;
+      meter_outer_color = sf::Color( 64, 64, 64, 255 );
+      should_render = true;
     }
     else if ( meter.name == "hallucinogen_meter" )
     {
       auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Hallucinogen>();
-      if ( opt_meter.has_value() )
-      {
-        meter_value = static_cast<float>( opt_meter.value() );
-        meter_inner_color = sf::Color::Green;
-        should_render = true;
-      }
+      meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
+      meter_inner_color = sf::Color::Green;
+      meter_outer_color = sf::Color( 64, 64, 64, 255 );
+      should_render = true;
     }
     else if ( meter.name == "hypoxia_meter" )
     {
-      auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Hallucinogen>();
-      if ( opt_meter.has_value() )
-      {
-        meter_value = static_cast<float>( opt_meter.value() );
-        meter_inner_color = sf::Color::Green;
-        should_render = true;
-      }
+      auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Hypoxia>();
+      meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
+      meter_inner_color = sf::Color::Green;
+      meter_outer_color = sf::Color( 64, 64, 64, 255 );
+      should_render = true;
     }
     else if ( meter.name == "phototoxia_meter" )
     {
       auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Phototoxia>();
-      if ( opt_meter.has_value() )
-      {
-        meter_value = static_cast<float>( opt_meter.value() );
-        meter_inner_color = sf::Color::Green;
-        should_render = true;
-      }
+      meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
+      meter_inner_color = sf::Color::Green;
+      meter_outer_color = sf::Color( 64, 64, 64, 255 );
+      should_render = true;
     }
     else if ( meter.name == "venom_meter" )
     {
       auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Venom>();
-      if ( opt_meter.has_value() )
-      {
-        meter_value = static_cast<float>( opt_meter.value() );
-        meter_inner_color = sf::Color::Green;
-        should_render = true;
-      }
+      meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
+      meter_inner_color = sf::Color::Green;
+      meter_outer_color = sf::Color( 64, 64, 64, 255 );
+      should_render = true;
     }
     else if ( meter.name == "inventory_meter" )
     {

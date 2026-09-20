@@ -5,11 +5,10 @@
 #include <Components/Toxicity/Halucinogen.hpp>
 #include <Components/Toxicity/Hypoxia.hpp>
 #include <Components/Toxicity/Phototoxia.hpp>
-#include <Components/Toxicity/TachyCadia.hpp>
+#include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/TraitsBase.hpp>
 #include <Components/Toxicity/Venom.hpp>
 #include <algorithm>
-#include <cassert>
 #include <entt/core/type_info.hpp>
 #include <entt/fwd.hpp>
 #include <optional>
@@ -30,14 +29,7 @@ public:
     return m_active.contains( entt::type_hash<T>::value() );
   }
 
-  //! @brief Adds T with the given toxicity contribution. Asserts (aborts in debug
-  //! builds) if T is excluded by a toxidrome already active, since that can
-  //! only be a caller bug: unlike a fixed, compile-time-known sequence (see
-  //! Factory::Toxicity::ToxidromeBuilder), an add() reached from gameplay
-  //! code depends on runtime state the compiler can't see, so it can't be
-  //! checked at compile time. When asserts are compiled out (NDEBUG), the
-  //! add is still refused so release builds never end up with two mutually
-  //! exclusive toxidromes active.
+  //! @brief Adds T with the given toxicity contribution.
   //! @tparam T
   //! @param toxicity_delta
   //! @return true
@@ -50,19 +42,29 @@ public:
 
   //! @brief Runtime-id counterpart of add<T>(), for merging in a set of toxidromes
   //! whose concrete types aren't known until iteration (e.g. copying another
-  //! Toxidrome's active set element by element). Same exclusion semantics.
-  //! Re-adding a type already active accumulates onto its existing toxicity
-  //! contribution (e.g. repeated venom exposure keeps raising the venom
-  //! meter), clamped to [0, 100] to match every other player stat.
+  //! Toxidrome's active set element by element). Re-adding a type already active
+  //! accumulates onto its existing toxicity contribution (e.g. repeated venom
+  //! exposure keeps raising the venom meter), clamped to [0, 100] to match every
+  //! other player stat.
+  //!
+  //! If T is excluded by an already-active toxidrome, toxicity_delta is instead
+  //! spent fighting the excluding toxidrome(s) down towards zero (e.g. repeated
+  //! tachycardia exposure wears down an active bradycardia). Once they're driven
+  //! to zero and removed, the clash resolves and T takes over completely with
+  //! whatever toxicity_delta remains; while any excluding toxidrome is still
+  //! active, T stays out and this returns false.
   //! @param id
   //! @param toxicity_delta
   //! @return true
   //! @return false
   bool add( entt::id_type id, int toxicity_delta = 0 )
   {
-    const bool excluded = is_excluded( id );
-    assert( !excluded && "Toxidrome::add: type excluded by an already-active toxidrome" );
-    if ( excluded ) return false;
+    if ( is_excluded( id ) )
+    {
+      if ( toxicity_delta <= 0 ) return false;
+      toxicity_delta = fight_exclusion( id, toxicity_delta );
+      if ( is_excluded( id ) ) return false;
+    }
     auto it = m_active.find( id );
     if ( it == m_active.end() )
       m_active.emplace( id, std::clamp( toxicity_delta, 0, 100 ) );
@@ -142,6 +144,59 @@ private:
   [[nodiscard]] bool is_excluded( entt::id_type id ) const
   {
     return is_excluded_by<Bradycardia, Tachycardia, Hypoxia, Hallucinogen, Phototoxia, Venom>( id );
+  }
+
+  //! @brief Spends up to `delta` reducing T's own active toxicity value towards zero,
+  //! removing T once it reaches zero. Returns whatever of `delta` wasn't needed for that
+  //! (0 if T is still active afterwards, or wasn't active at all).
+  //! @tparam T
+  //! @param delta
+  //! @return int
+  template <typename T>
+  int fight_one( int delta )
+  {
+    const auto it = m_active.find( entt::type_hash<T>::value() );
+    if ( it == m_active.end() ) return 0;
+    const int damage = std::min( delta, it->second );
+    it->second -= damage;
+    if ( it->second <= 0 ) m_active.erase( it );
+    return delta - damage;
+  }
+
+  //! @brief Spends `delta` fighting down every active toxidrome in Ex, in order, carrying
+  //! any leftover from one on to the next.
+  //! @tparam Ex
+  //! @param delta
+  //! @return int
+  template <typename... Ex>
+  int fight_active( entt::exclude_t<Ex...> /*unused*/, int delta )
+  {
+    ( ( delta = fight_one<Ex>( delta ) ), ... );
+    return delta;
+  }
+
+  //! @brief Finds the known toxidrome type Ts matching id and fights down whichever active
+  //! toxidromes it excludes, given explicitly by fight_exclusion() below.
+  //! @tparam Ts
+  //! @param id
+  //! @param delta
+  //! @return int
+  template <typename... Ts>
+  int fight_exclusion_by( entt::id_type id, int delta )
+  {
+    ( ( entt::type_hash<Ts>::value() == id ? delta = fight_active( excluded_by<Ts>, delta ) : 0 ), ... );
+    return delta;
+  }
+
+  //! @brief Spends `delta` fighting down whichever already-active toxidromes exclude id,
+  //! removing any that are driven to zero. Returns whatever of `delta` is left over once
+  //! they're all gone (0 if any excluding toxidrome is still active).
+  //! @param id
+  //! @param delta
+  //! @return int
+  int fight_exclusion( entt::id_type id, int delta )
+  {
+    return fight_exclusion_by<Bradycardia, Tachycardia, Hypoxia, Hallucinogen, Phototoxia, Venom>( id, delta );
   }
 
   // id -> the toxicity value it contributes while active.

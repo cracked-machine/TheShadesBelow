@@ -11,6 +11,12 @@ struct Phototoxia
 {
 };
 
+template <>
+struct toxidrome_traits<Phototoxia>
+{
+  using excludes = make_excludes<Phototoxia>::type;
+};
+
 }; // namespace Game::Cmp::Toxicity
 
 #endif // SRC_CMPS_TOXIDROME_PHOTTOXIA_HPP__
