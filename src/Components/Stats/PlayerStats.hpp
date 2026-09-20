@@ -55,8 +55,9 @@ public:
   [[nodiscard]] Cmp::Toxicity::Toxidrome toxidrome() const { return m_toxidrome; }
 
   //! @brief Update the player stats with the BaseAction object.
-  //! @note BaseAction: health, fear, despair, infamy, toxicity, luck, toxidrome. toxidrome is only overwritten
-  //! if the player is already afflicted (i.e. it does not newly infect a healthy player).
+  //! @note BaseAction: health, fear, despair, infamy, toxicity, luck, toxidrome. Each toxidrome carried by
+  //! the action is merged into the player's existing set individually (excluded ones are dropped), rather
+  //! than replacing the player's whole set outright.
   //! @param action The stat modifier to apply.
   void apply( const BaseAction &action )
   {
@@ -66,7 +67,10 @@ public:
     m_infamy = std::clamp( m_infamy + action.infamy(), 0, 100 );
     m_toxicity = std::clamp( m_toxicity + action.toxicity(), 0, 100 );
     m_luck = std::clamp( m_luck + action.luck(), 0, 100 );
-    m_toxidrome = action.toxidrome();
+    for ( auto id : action.toxidrome() )
+    {
+      m_toxidrome.add( id );
+    }
   }
 
 private:
