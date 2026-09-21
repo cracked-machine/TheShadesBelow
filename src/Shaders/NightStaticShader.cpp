@@ -85,7 +85,8 @@ void NightStaticShader::update( entt::registry &reg )
     npc_cone_colors.push_back( COOL_WHITE );
   }
 
-  float fear_amount = static_cast<float>( Utils::Player::get_stats( reg ).fear() ) / 100.f;
+  // float fear_amount = static_cast<float>( Utils::Player::get_stats( reg ).fear() ) / 100.f;
+  float fear_amount = 0.f;
 
   Sprites::UniformBuilder{}
       .set( "resolution", sf::Vector2f{ display_size } )
