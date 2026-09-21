@@ -105,8 +105,9 @@ private:
   //! @param target_pos
   //! @param npc_entity
   //! @param target_in_spawn
+  //! @param target_illuminated
   void update_pathfinding_for( PathFinding::SpatialHashGrid &navmesh, const Cmp::Position &target_pos, entt::entity npc_entity,
-                               bool target_in_spawn );
+                               bool target_in_spawn, bool target_illuminated );
 
   //! @brief Update NPC animation
   void update_animation();

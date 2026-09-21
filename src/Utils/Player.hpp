@@ -161,6 +161,8 @@ void reduce_inventory_wear_level( entt::registry &reg, float amount );
 //! @return bool true if `player_pos_cmp` intersects any Cmp::SpawnArea.
 bool is_in_spawn( entt::registry &reg, const Cmp::Position &player_pos_cmp );
 
+bool is_illuminated( entt::registry &reg );
+
 //! @brief True if the player's hitbox (scaled 1.5x the grid size) intersects the given bounds
 //! @param reg reference to the entt registry
 //! @param bounds The bounds to test against the player's hitbox.

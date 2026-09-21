@@ -42,6 +42,7 @@
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/Illuminated.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Player/PendingNoPath.hpp>
@@ -751,6 +752,7 @@ void RenderOverlaySystem::render_ui_entity_inspect()
       if ( reg().all_of<Cmp::Ruin::Entrance>( entity ) ) draw_line( " Entrance", sf::Color::Cyan );
       if ( reg().all_of<Cmp::HealingSpringEntrance>( entity ) ) draw_line( " HealingSpringEntrance", sf::Color::Cyan );
       if ( reg().all_of<Cmp::WorldItem>( entity ) ) draw_line( " WorldItem", sf::Color::Green );
+      if ( reg().all_of<Cmp::Player::Illuminated>( entity ) ) draw_line( " Illuminated", sf::Color::Yellow );
 
       if ( auto *cmp = reg().try_get<Cmp::UUID>( entity ) ) draw_line( " " + cmp->str(), sf::Color::White );
 

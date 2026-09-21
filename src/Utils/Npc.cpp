@@ -10,6 +10,7 @@
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Sprites/SpriteMetaType.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Npc.hpp>
 #include <Utils/Optimizations.hpp>
@@ -52,12 +53,13 @@ Sprites::SpriteMetaType get_sprite_type( entt::registry &reg, entt::entity npc_e
 {
   auto loc_data = std::string( loc.file_name() ) + ":" + std::to_string( loc.line() ) + " - ";
   auto *anim_cmp = reg.try_get<Cmp::AnimData>( npc_entt );
-  if ( not anim_cmp ) throw std::runtime_error( loc_data + "Could not get AnimData component from " + std::to_string( static_cast<uint32_t>( npc_entt ) ) );
+  if ( not anim_cmp )
+    throw std::runtime_error( loc_data + "Could not get AnimData component from " + std::to_string( static_cast<uint32_t>( npc_entt ) ) );
   return anim_cmp->m_sprite_type;
 }
 
 PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGrid &navmesh, const Cmp::Position &target_pos, entt::entity npc_entity,
-                                bool target_in_spawn, bool always_pathfind )
+                                bool target_in_spawn, bool target_illuminated, bool always_pathfind )
 {
   auto *npc_anim_cmp = reg.try_get<Cmp::AnimData>( npc_entity );
   if ( not npc_anim_cmp ) return PathfindResult::Blocked;
@@ -97,6 +99,15 @@ PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGri
   // If player is in spawn, only stop when the very next step would cross into spawn.
   // This lets the NPC walk the full path to the boundary before stopping.
   if ( target_in_spawn and Utils::Player::is_in_spawn( reg, next_npc_pos ) )
+  {
+    reg.emplace_or_replace<Cmp::Direction>( npc_entity, Cmp::Direction( { 0.0f, 0.0f } ) );
+    return PathfindResult::Blocked;
+  }
+
+  // If the player is illuminated, only stop when the very next step would cross into the radius of
+  // whichever light source is currently illuminating them. This lets the NPC walk the full path to
+  // that light's boundary before stopping, mirroring the spawn-boundary check above.
+  if ( target_illuminated and Utils::Collision::is_position_illuminated( reg, next_npc_pos ) )
   {
     reg.emplace_or_replace<Cmp::Direction>( npc_entity, Cmp::Direction( { 0.0f, 0.0f } ) );
     return PathfindResult::Blocked;

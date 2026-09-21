@@ -34,7 +34,7 @@ void WispSystem::update( sf::Time dt )
       {
         if ( not reg().valid( npc_target_cmp.id ) ) continue;
         bool target_in_spawn = Utils::Player::is_in_spawn( reg(), npc_target_pos_cmp );
-        auto result = Utils::Npc::pathfind_toward( reg(), *navmesh, npc_target_pos_cmp, npc_target_cmp.id, target_in_spawn, true );
+        auto result = Utils::Npc::pathfind_toward( reg(), *navmesh, npc_target_pos_cmp, npc_target_cmp.id, target_in_spawn, false, true );
         if ( result == Utils::Npc::PathfindResult::NoPath )
         {
           if ( not m_wisp_target_reset_clock.isRunning() ) { m_wisp_target_reset_clock.restart(); }

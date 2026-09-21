@@ -225,6 +225,9 @@ void RenderGameSystem::render_game( sf::Time dt, RenderOverlaySystem &render_ove
       dot.setOutlineColor( sf::Color::Cyan );
       draw_world( dot );
     }
+
+    auto half_view = Cmp::RectBounds::scaled( Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() ), 0.5f );
+    render_overlay_sys.render_square( half_view.getBounds().position, half_view.getBounds().size, sf::Color::Red );
   }
 
   if ( show_debug_stats ) render_overlay_sys.draw_debug_overlay( m_window );

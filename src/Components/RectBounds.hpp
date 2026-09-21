@@ -34,19 +34,19 @@ public:
   //! @brief Create a scaled hitbox centered on a grid-aligned entity
   static RectBounds scaled( sf::Vector2f pos, sf::Vector2f size, float scale_factor, ScaleAxis scale_axis = ScaleAxis::XY )
   {
-    return RectBounds( pos, size, scale_factor, scale_axis );
+    return { pos, size, scale_factor, scale_axis };
   }
 
   //! @brief Create a scaled hitbox centered on a grid-aligned entity
   static RectBounds scaled( const Cmp::Position &pos, float scale_factor, ScaleAxis scale_axis = ScaleAxis::XY )
   {
-    return RectBounds( pos.position, pos.size, scale_factor, scale_axis );
+    return { pos.position, pos.size, scale_factor, scale_axis };
   }
 
   //! @brief Create a scaled hitbox centered on a grid-aligned entity
   static RectBounds scaled( const sf::FloatRect &pos, float scale_factor, ScaleAxis scale_axis = ScaleAxis::XY )
   {
-    return RectBounds( pos.position, pos.size, scale_factor, scale_axis );
+    return { pos.position, pos.size, scale_factor, scale_axis };
   }
 
   //! @brief Create bounds expanded outward by N tiles in all directions
@@ -74,19 +74,19 @@ public:
       case ScaleAxis::X:
         m_bounds.size.x = size.x * m_scale_factor;
         m_bounds.size.y = size.y * 1;
-        m_bounds.position.x = pos.x - Constants::kGridSizePxF.x * kPositionOffsetFactor;
+        m_bounds.position.x = pos.x - size.x * kPositionOffsetFactor;
         m_bounds.position.y = pos.y;
         break;
       case ScaleAxis::Y:
         m_bounds.size.y = size.y * m_scale_factor;
         m_bounds.size.x = size.x * 1;
-        m_bounds.position.y = pos.y - Constants::kGridSizePxF.y * kPositionOffsetFactor;
+        m_bounds.position.y = pos.y - size.y * kPositionOffsetFactor;
         m_bounds.position.x = pos.x;
         break;
       case ScaleAxis::XY:
       default:
         m_bounds.size = size * m_scale_factor;
-        m_bounds.position = pos - Constants::kGridSizePxF * kPositionOffsetFactor;
+        m_bounds.position = pos - size * kPositionOffsetFactor;
         break;
     }
   }
@@ -102,7 +102,7 @@ public:
   {
     float dx = Constants::kGridSizePxF.x * static_cast<float>( expand_tiles );
     float dy = Constants::kGridSizePxF.y * static_cast<float>( expand_tiles );
-    m_bounds = sf::FloatRect( sf::Vector2f{ pos.x - dx, pos.y - dy }, sf::Vector2f{ size.x + dx * 2.f, size.y + dy * 2.f } );
+    m_bounds = sf::FloatRect( sf::Vector2f{ pos.x - dx, pos.y - dy }, sf::Vector2f{ size.x + ( dx * 2.f ), size.y + ( dy * 2.f ) } );
   }
 
   //! @brief Polymorphic destructor for derived classes

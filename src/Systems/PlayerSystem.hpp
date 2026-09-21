@@ -100,6 +100,8 @@ private:
   //! @return std::stringstream Use .rdbuf() at the callsite (prvalue expression semantics)
   std::stringstream apply_fear_of_the_dark( Cmp::BaseAction &net_modifier, const Cmp::BaseAction &candle_carry_action );
 
+  bool is_player_in_light();
+
   //! @brief Apply the stat modifiers for the healing spring
   //! @param net_modifier The accumulated net modifications
   void apply_healing_spring_modifiers( Cmp::BaseAction &net_modifier );

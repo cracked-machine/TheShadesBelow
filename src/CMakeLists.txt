@@ -119,6 +119,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Utils/Maths.cpp
     ${CMAKE_SOURCE_DIR}/src/Utils/Player.cpp
     ${CMAKE_SOURCE_DIR}/src/Utils/Npc.cpp
+    ${CMAKE_SOURCE_DIR}/src/Utils/Collision.cpp
     ${CMAKE_SOURCE_DIR}/src/Utils/Crypt.cpp
     ${CMAKE_SOURCE_DIR}/src/Utils/JsonDeserializer.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Font.cpp

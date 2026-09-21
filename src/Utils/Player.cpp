@@ -1,17 +1,25 @@
 #include <Components/AbsoluteAlpha.hpp>
+#include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
+#include <Components/Crypt/RoomLavaPitCell.hpp>
 #include <Components/Direction.hpp>
+#include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/LerpPosition.hpp>
+#include <Components/Npc/Npc.hpp>
+#include <Components/Npc/Wisp.hpp>
+#include <Components/Particle/SpriteOwner.hpp>
+#include <Components/Plant/BurningTimeAccumulator.hpp>
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Curse.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/FootstepType.hpp>
+#include <Components/Player/Illuminated.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Player/Mortality.hpp>
@@ -32,11 +40,15 @@
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/SacrificeAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
+#include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/NpcStore.hpp>
 #include <Utils/Constants.hpp>
+#include <Utils/Maths.hpp>
+#include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 
 #include <stdexcept>
@@ -252,6 +264,8 @@ bool is_in_spawn( entt::registry &reg, const Cmp::Position &player_pos_cmp )
   }
   return result;
 }
+
+bool is_illuminated( entt::registry &reg ) { return reg.all_of<Cmp::Player::Illuminated>( get_entity( reg ) ); }
 
 //! @brief True if the player's hitbox (scaled 1.5x the grid size) intersects the given bounds
 bool is_player_near( entt::registry &reg, const sf::FloatRect &bounds )

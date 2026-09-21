@@ -41,6 +41,7 @@
 #include <Components/Plant/BurningTimeAccumulator.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
+#include <Components/Player/Illuminated.hpp>
 #include <Components/Player/Mortality.hpp>
 #include <Components/Player/MovementDelta.hpp>
 #include <Components/Player/MovementSuppressTimer.hpp>
@@ -143,6 +144,9 @@ void PlayerSystem::update( sf::Time dt )
   check_player_mortality();
   check_timed_action_side_effects( dt );
   create_healing_particles();
+
+  if ( is_player_in_light() ) { reg().emplace_or_replace<Cmp::Player::Illuminated>( Utils::Player::get_entity( reg() ) ); }
+  else { reg().remove<Cmp::Player::Illuminated>( Utils::Player::get_entity( reg() ) ); }
 
   if ( PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock() )
   {
@@ -553,6 +557,7 @@ void PlayerSystem::check_timed_action_side_effects( sf::Time dt )
   m_timed_action_sync_clock += dt;
   if ( m_timed_action_sync_clock.asSeconds() >= kTimedActionSyncClockMax )
   {
+
     modifier_log_msg << apply_npc_modifiers( net_modifier ).rdbuf();
     modifier_log_msg << apply_inventory_modifiers( net_modifier ).rdbuf();
 
@@ -566,6 +571,8 @@ void PlayerSystem::check_timed_action_side_effects( sf::Time dt )
   }
   Utils::Player::get_stats( reg() ).apply( net_modifier );
 }
+
+bool PlayerSystem::is_player_in_light() { return Utils::Collision::is_position_illuminated( reg(), Utils::Player::get_position( reg() ) ); }
 
 std::stringstream PlayerSystem::apply_fear_of_the_dark( Cmp::BaseAction &net_modifier, const Cmp::BaseAction &candle_carry_action )
 {
@@ -676,30 +683,30 @@ void PlayerSystem::apply_healing_spring_modifiers( Cmp::BaseAction &net_modifier
 std::stringstream PlayerSystem::apply_npc_modifiers( Cmp::BaseAction &net_modifier )
 {
   std::stringstream mod_log;
+  auto half_view = Cmp::RectBounds::scaled( Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() ), 0.5f );
   // add the NPC modifiers to the `net_modifier` every kTimedActionSyncClockMax.
   for ( auto [npc_entt, npc_cmp, npc_pos_cmp, npc_anim_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::AnimData>().each() )
   {
     mod_log << " " << npc_anim_cmp.m_sprite_type << "(actions";
     for ( auto &[action_type, npc_action_pair] : npc_cmp.actions )
     {
+      if ( not Utils::is_visible_in_view( half_view.getBounds(), npc_pos_cmp ) ) continue;
+
       // These are handled as one time modifiers handled by specific systems/factories. Note the tick action field is ignored.
       if ( action_type == std::type_index( typeid( Cmp::CollisionAction ) ) ) { continue; }  // See NpcSystem
       if ( action_type == std::type_index( typeid( Cmp::ProjectileAction ) ) ) { continue; } // See ShockwaveSystem
       if ( action_type == std::type_index( typeid( Cmp::SpawnAction ) ) ) { continue; }      // See NpcFactory/GraveSystem
       if ( action_type == std::type_index( typeid( Cmp::DestroyAction ) ) ) { continue; }    // See NpcFactory
 
-      // special case: Only apply ProximityAction when the NPC is in the current screen view.
-      if ( action_type == std::type_index( typeid( Cmp::ProximityAction ) ) and
-           not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), npc_pos_cmp ) )
+      if ( action_type == std::type_index( typeid( Cmp::ProximityAction ) ) )
       {
-        continue;
-      }
-      auto &[npc_action, npc_action_timer] = npc_action_pair;
+        auto &[npc_action, npc_action_timer] = npc_action_pair;
 
-      if ( npc_action_timer.asSeconds() < npc_action.interval() ) continue;
-      net_modifier += npc_action;
-      mod_log << "[" << npc_action.health() << "," << npc_action.fear() << "," << npc_action.despair() << "," << npc_action.infamy() << "]";
-      npc_action_timer = sf::Time::Zero;
+        if ( npc_action_timer.asSeconds() < npc_action.interval() ) continue;
+        net_modifier += npc_action;
+        mod_log << "[" << npc_action.health() << "," << npc_action.fear() << "," << npc_action.despair() << "," << npc_action.infamy() << "]";
+        npc_action_timer = sf::Time::Zero;
+      }
     }
     mod_log << ")";
   }

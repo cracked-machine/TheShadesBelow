@@ -16,7 +16,8 @@ namespace Game::Utils
 //! @return sf::FloatRect The rectangle representing the view's bounds in world coordinates.
 constexpr inline sf::FloatRect calculate_view_bounds( const sf::View &view )
 {
-  return sf::FloatRect( view.getCenter() - view.getSize() / 2.f, view.getSize() );
+  //
+  return { view.getCenter() - view.getSize() / 2.f, view.getSize() };
 }
 
 //! @brief Determines if a given position rectangle is visible within the specified view bounds.
