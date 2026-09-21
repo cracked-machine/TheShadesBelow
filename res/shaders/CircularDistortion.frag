@@ -7,52 +7,52 @@ uniform sampler2D texture;
 uniform float time;
 // screen dimensions
 uniform vec2 resolution;
-// normalised player fear (0..1), drives how large/frequent/intense the hallucination patches are
-uniform float fear;
+// normalised player toxicity (0..1), drives how large/frequent/intense the hallucination patches are
+uniform float toxicity;
 // player position in the same normalised [0,1] screen space as gl_FragCoord.xy/resolution, set by
-// FearDistortionShader::update from the current world view. Every arc curves around this point.
+// CircularDistortionShader::update from the current world view. Every arc curves around this point.
 uniform vec2 player_uv;
 
 out vec4 out_color;
 
-// Sibling of FearDistortion.frag: that version warps the *entire* frame, which reads as a general
+// Sibling of CircularDistortion.frag: that version warps the *entire* frame, which reads as a general
 // "queasy" wobble rather than a hallucination. This variant instead warps a handful of wavy arcs
 // curving around the player at random distances - like rings of heat-haze radiating outward - while
 // the rest of the frame stays sharp. Both take the same uniforms, so switching between them is just
-// the .frag path passed to Factory::Shader::add_fear_distortion.
+// the .frag path passed to Factory::Shader::add_circular_distortion.
 
-// How many haze patches are active at fear=0: zero, so there's no hallucination at all until fear
+// How many haze patches are active at toxicity=0: zero, so there's no hallucination at all until toxicity
 // rises (see MAX_EXTRA_HAZE_REGIONS).
 const int BASE_HAZE_REGIONS = 0;
-// One additional patch slot becomes eligible for every 10% of fear (fear=10% -> 1 slot, fear=20% -> 2,
-// ... fear=100% -> all 10), via region_existence below. An eligible slot cycles through its own
-// spawn/despawn rhythm (see PATCH_LIFETIME) the whole time fear holds it eligible; once fear drops
+// One additional patch slot becomes eligible for every 10% of toxicity (toxicity=10% -> 1 slot, toxicity=20% -> 2,
+// ... toxicity=100% -> all 10), via region_existence below. An eligible slot cycles through its own
+// spawn/despawn rhythm (see PATCH_LIFETIME) the whole time toxicity holds it eligible; once toxicity drops
 // back below its threshold that slot (and only it) stops appearing, mid-life or not.
 const int MAX_EXTRA_HAZE_REGIONS = 10;
 const int MAX_HAZE_REGIONS = BASE_HAZE_REGIONS + MAX_EXTRA_HAZE_REGIONS;
 // Slot i's base bearing around the player is i * GOLDEN_ANGLE (see sector_base in main()), not
-// i * (360/MAX_HAZE_REGIONS): slots also activate in index order as fear rises (region_existence
+// i * (360/MAX_HAZE_REGIONS): slots also activate in index order as toxicity rises (region_existence
 // below gates slot 0 first, then 1, then 2...), so a plain even division would mean the active
-// subset at low/mid fear is always one contiguous wedge of the circle rather than spread around the
+// subset at low/mid toxicity is always one contiguous wedge of the circle rather than spread around the
 // player. The golden angle (~137.5 degrees) is the classic phyllotaxis trick for exactly this: ANY
 // prefix of points placed at multiples of it - not just the full set - stays well-spread around the
 // circle, so however many slots happen to be active, they cover the player's surroundings evenly.
 const float GOLDEN_ANGLE = 2.399963;
 
-// UV displacement (as a fraction of screen size) inside a patch. Bigger than FearDistortion.frag's
-// MAX_AMPLITUDE since only a small area carries it, not the whole screen. Fixed regardless of fear:
-// amplitude is a multiplier on the ripple's sine wave, so scaling it with fear would scale the wave's
+// UV displacement (as a fraction of screen size) inside a patch. Bigger than CircularDistortion.frag's
+// MAX_AMPLITUDE since only a small area carries it, not the whole screen. Fixed regardless of toxicity:
+// amplitude is a multiplier on the ripple's sine wave, so scaling it with toxicity would scale the wave's
 // on-screen velocity too (d(offset)/dt is proportional to amplitude) - i.e. it would visibly speed
 // the ripple up even though WAVE_FREQUENCY/WAVE_SPEED never changed. Only patch count and duration
-// carry the fear signal now.
+// carry the toxicity signal now.
 const float AMPLITUDE = 0.018;
-// Ripple frequency across a patch. Fixed regardless of fear - only how many patches appear, how
-// strongly they displace, and how long each one lingers scale with fear, not the ripple itself.
+// Ripple frequency across a patch. Fixed regardless of toxicity - only how many patches appear, how
+// strongly they displace, and how long each one lingers scale with toxicity, not the ripple itself.
 const float WAVE_FREQUENCY = 8.0;
-// Fixed animation rate. This must NOT depend on `fear`, for the same reason as FearDistortion.frag's
-// WAVE_SPEED: fear changes in discrete steps mid-game, and `speed` scales the ever-growing `time`
-// rather than an independently accumulated phase, so any fear-dependent multiplier would retroactively
-// snap the whole ripple to a different point in its cycle. Fear only scales amplitude/size/timing below.
+// Fixed animation rate. This must NOT depend on `toxicity`, for the same reason as CircularDistortion.frag's
+// WAVE_SPEED: toxicity changes in discrete steps mid-game, and `speed` scales the ever-growing `time`
+// rather than an independently accumulated phase, so any toxicity-dependent multiplier would retroactively
+// snap the whole ripple to a different point in its cycle. toxicity only scales amplitude/size/timing below.
 const float WAVE_SPEED = 3.4;
 
 // Each patch is a partial ring - an arc of a circle centered on player_uv - rather than a straight
@@ -82,21 +82,21 @@ const float REGION_FEATHER = 0.85;
 // units as MIN_ARC_RADIUS/MAX_ARC_RADIUS respectively.
 const float ANGLE_DRIFT = 0.05;
 const float RADIUS_DRIFT = 0.02;
-// Fixed rate (radians/sec) of that wander. This must NOT depend on `fear`, for the same reason as
+// Fixed rate (radians/sec) of that wander. This must NOT depend on `toxicity`, for the same reason as
 // WAVE_SPEED above: it's a multiplier on the ever-growing wrapped_time, not a divisor, so unlike the
 // old per-window cycle length this is safe to compute continuously - but it still shouldn't track
-// fear, since patches are now persistent and their drift should just look like idle life, not
-// another dial that visibly speeds up or slows down as fear moves.
+// toxicity, since patches are now persistent and their drift should just look like idle life, not
+// another dial that visibly speeds up or slows down as toxicity moves.
 const float DRIFT_SPEED = 1.57;
 // Fixed lifetime each individual spawn of a patch lives before despawning and respawning fresh (new
 // angle/radius within the same angular sector, new waviness). This is a *slot's* rhythm, independent
 // of whether the slot is even active - `region_existence` above still separately gates that. It must
-// NOT depend on `fear`, for the same reason WAVE_SPEED mustn't: (wrapped_time + seed) / PATCH_LIFETIME
+// NOT depend on `toxicity`, for the same reason WAVE_SPEED mustn't: (wrapped_time + seed) / PATCH_LIFETIME
 // is used below to derive both which life we're in and how far through it we are, and wrapped_time
-// keeps growing - a fear-dependent divisor there would retroactively reinterpret all of elapsed time
-// whenever fear moved, not just time going forward, causing a visible jump (this bit the old
-// fear-scaled HAZE_CYCLE_LENGTH design; see FearDistortionShader::update's fear smoothing for the
-// same principle applied to the fear value itself).
+// keeps growing - a toxicity-dependent divisor there would retroactively reinterpret all of elapsed time
+// whenever toxicity moved, not just time going forward, causing a visible jump (this bit the old
+// toxicity-scaled HAZE_CYCLE_LENGTH design; see CircularDistortionShader::update's toxicity smoothing for the
+// same principle applied to the toxicity value itself).
 const float PATCH_LIFETIME = 5.0;
 // Fraction of PATCH_LIFETIME spent easing a patch's strength in, and again easing it out, around each
 // spawn/despawn.
@@ -105,14 +105,14 @@ const float PATCH_FADE_FRACTION = 0.25;
 // Sickly violet tint blended into each patch's own shape (see total_tint in main()), distinct from
 // the vignette's reddish dread below - reads as "something here is wrong" rather than just dark.
 const vec3 HAZE_TINT_COLOR = vec3( 0.45, 0.1, 0.55 );
-// Strength of that tint at a patch's peak strength (fully faded in, mid-life, fear well past its
+// Strength of that tint at a patch's peak strength (fully faded in, mid-life, toxicity well past its
 // threshold). Overlapping patches take the strongest single patch at that pixel (see total_tint)
 // rather than stacking, so this is also the effective ceiling with any number of patches overlapping.
 const float MAX_HAZE_TINT = 0.1;
 
-// Strength of the darkened, reddish vignette at full fear
+// Strength of the darkened, reddish vignette at full toxicity
 const float MAX_VIGNETTE = 0.75;
-// Curve steepness for the fear -> vignette ramp (see vignette_curve in main()): higher means more
+// Curve steepness for the toxicity -> vignette ramp (see vignette_curve in main()): higher means more
 // of the range is reached early, i.e. a faster rise that then tapers off (logarithmic, not linear)
 const float VIGNETTE_LOG_K = 9.0;
 const float TWO_PI = 6.28318530718;
@@ -120,7 +120,7 @@ const float TWO_PI = 6.28318530718;
 // m_clock) and feeds directly into `speed` below - scaled again by up to 1.3x for the y term. Left
 // unbounded, float32 precision degrades as `time` grows: the per-frame phase step gets coarser,
 // which over a long enough session makes the ripple look increasingly jerky/faster, independent of
-// `fear`. Wrapping it into an hour-long window keeps that precision effectively perfect for any
+// `toxicity`. Wrapping it into an hour-long window keeps that precision effectively perfect for any
 // realistic session; the single-frame seam this introduces once an hour is imperceptible against the
 // already-continuous drift/ripple motion.
 const float TIME_WRAP_PERIOD = 3600.0;
@@ -137,12 +137,12 @@ void main()
   float aspect = resolution.x / resolution.y;
   float wrapped_time = mod( time, TIME_WRAP_PERIOD );
 
-  // How many patches are active at the current fear level, as a continuous (not stepped) value: each
-  // patch beyond BASE_HAZE_REGIONS ramps in/out smoothly across its own 10%-of-fear band via
+  // How many patches are active at the current toxicity level, as a continuous (not stepped) value: each
+  // patch beyond BASE_HAZE_REGIONS ramps in/out smoothly across its own 10%-of-toxicity band via
   // `region_existence` below, rather than snapping into/out of existence the instant its threshold is
-  // crossed - the same reason FearDistortionShader::update smooths `fear` itself before it reaches
+  // crossed - the same reason CircularDistortionShader::update smooths `toxicity` itself before it reaches
   // this uniform.
-  float active_regions = float( BASE_HAZE_REGIONS ) + fear * float( MAX_EXTRA_HAZE_REGIONS );
+  float active_regions = float( BASE_HAZE_REGIONS ) + toxicity * float( MAX_EXTRA_HAZE_REGIONS );
 
   // Pixel's position relative to the player, in polar form: pixel_radius is its aspect-corrected
   // distance from the player, pixel_angle its bearing. Every arc below is compared against these.
@@ -166,7 +166,7 @@ void main()
 
     // Which fixed-length life of this slot we're currently in, and how far through it we are. This
     // cycles regardless of region_existence - a slot that isn't active right now still keeps its own
-    // rhythm running in the background, so when fear brings it back on it starts mid-life rather than
+    // rhythm running in the background, so when toxicity brings it back on it starts mid-life rather than
     // always popping in at the start of a fresh one.
     float life_index = floor( ( wrapped_time + seed ) / PATCH_LIFETIME );
     float local_t = fract( ( wrapped_time + seed ) / PATCH_LIFETIME );
@@ -219,7 +219,7 @@ void main()
     total_tint = max( total_tint, patch_tint );
 
     // Wrap each trig call's full argument (after its own scaling) into [0, 2*PI) independently, for
-    // the same reason as FearDistortion.frag: sin(x) == sin(mod(x, 2*PI)) exactly, so this introduces
+    // the same reason as CircularDistortion.frag: sin(x) == sin(mod(x, 2*PI)) exactly, so this introduces
     // no seam, but only because the wrap is applied after the term-specific multiplier.
     float speed = ( wrapped_time + seed ) * WAVE_SPEED;
     total_offset.x += sin( mod( uv.y * WAVE_FREQUENCY + speed, TWO_PI ) ) * strength;
@@ -236,10 +236,10 @@ void main()
   // darkening still lands on top of it like everything else on screen.
   color.rgb = mix( color.rgb, HAZE_TINT_COLOR, total_tint * MAX_HAZE_TINT );
 
-  // subtle reddish vignette that intensifies with fear: logarithmic ease-out from 0 at fear=0 to 1
-  // at fear=1, rising quickly at first then tapering off as fear approaches its max
+  // subtle reddish vignette that intensifies with toxicity: logarithmic ease-out from 0 at toxicity=0 to 1
+  // at toxicity=1, rising quickly at first then tapering off as toxicity approaches its max
   float dist_from_center = length( uv - 0.5 );
-  float vignette_curve = log( 1.0 + VIGNETTE_LOG_K * fear ) / log( 1.0 + VIGNETTE_LOG_K );
+  float vignette_curve = log( 1.0 + VIGNETTE_LOG_K * toxicity ) / log( 1.0 + VIGNETTE_LOG_K );
   float vignette = smoothstep( 0.2, 0.9, dist_from_center ) * vignette_curve * MAX_VIGNETTE;
   color.rgb = mix( color.rgb, vec3( 0.2, 0.0, 0.0 ), vignette );
 

@@ -31,7 +31,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Shaders/FloodWaterShader.cpp
     ${CMAKE_SOURCE_DIR}/src/Shaders/NightStaticShader.cpp
     ${CMAKE_SOURCE_DIR}/src/Shaders/MistShader.cpp
-    ${CMAKE_SOURCE_DIR}/src/Shaders/FearDistortionShader.cpp
+    ${CMAKE_SOURCE_DIR}/src/Shaders/CircularDistortionShader.cpp
     ${CMAKE_SOURCE_DIR}/src/Sprites/SpriteSheet.cpp
     ${CMAKE_SOURCE_DIR}/src/Sprites/VertexFloor.cpp
     ${CMAKE_SOURCE_DIR}/src/Sprites/Shockwave.cpp

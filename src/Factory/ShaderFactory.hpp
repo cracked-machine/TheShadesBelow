@@ -3,8 +3,8 @@
 
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Shaders/CircularDistortionShader.hpp>
 #include <Shaders/DarkModeShader.hpp>
-#include <Shaders/FearDistortionShader.hpp>
 #include <Shaders/FloodWaterShader.hpp>
 #include <Shaders/MistShader.hpp>
 #include <Shaders/NightStaticShader.hpp>
@@ -43,13 +43,13 @@ void add_dark( Sys::ShaderSystem &shader_sys, sf::Vector2f map_size_pixel );
 //! @param map_size_pixel
 void add_curse( Sys::ShaderSystem &shader_sys, sf::Vector2f map_size_pixel );
 
-//! @brief Register the fear distortion full-screen post-process shader, sized to the display
-//! resolution. Its intensity is driven each frame by the player's fear stat; see
-//! Sprites::FearDistortionShader::update. Registered via ShaderSystem::add_post_process so it is
+//! @brief Register the circular distortion full-screen post-process shader, sized to the display
+//! resolution. Its intensity is driven each frame by the player's hallucinogen toxicity stat; see
+//! Sprites::CircluarDistortionShader::update. Registered via ShaderSystem::add_post_process so it is
 //! composited as a final pass rather than drawn inline in the world z-order queue.
 //! @param shader_sys
 //! @param display_res
-void add_fear_distortion( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res );
+void add_circular_distortion( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res );
 
 } // namespace Game::Factory::Shader
 

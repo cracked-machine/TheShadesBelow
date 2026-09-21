@@ -131,8 +131,8 @@ void GraveyardScene::on_init()
 
   Factory::Shader::add_water( m_sys.find<Sys::Store::Type::ShaderSystem>(), map_size_pixel );
   Factory::Shader::add_night_static( m_sys.find<Sys::Store::Type::ShaderSystem>(), map_size_pixel );
-  Factory::Shader::add_fear_distortion( m_sys.find<Sys::Store::Type::ShaderSystem>(),
-                                        Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
+  Factory::Shader::add_circular_distortion( m_sys.find<Sys::Store::Type::ShaderSystem>(),
+                                            Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
 
   // create the level contents
   auto &level_gen = m_sys.find<Sys::Store::Type::LevelGenerator>();

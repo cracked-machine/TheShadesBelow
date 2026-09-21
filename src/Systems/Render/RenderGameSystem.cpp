@@ -129,7 +129,7 @@ void RenderGameSystem::render_game( sf::Time dt, RenderOverlaySystem &render_ove
   // shader's own Cmp::ZOrderValue: render_zorder_queue() below finalizes the capture and composites
   // it back onto the window at the point it reaches that shader's entity, like any normal z-ordered
   // draw, rather than at a hand-picked point in this function.
-  auto *post_process_shader = ShaderSystem::find( reg(), "FearDistortion" );
+  auto *post_process_shader = ShaderSystem::find( reg(), "CircularDistortion" );
   bool distortion_active = post_process_shader != nullptr && post_process_shader->active() &&
                            Utils::scene_setting<Cmp::SceneSettings::Shaders>( reg() ).enabled;
 
@@ -451,10 +451,10 @@ void RenderGameSystem::render_arrow_compass()
     auto nearest = find_nearest_target(
         reg().view<Cmp::Crypt::Entrance, Cmp::Position>(), Utils::Player::get_position( reg() ).position,
         []( entt::entity, const Cmp::Crypt::Entrance &crypt_cmp, const Cmp::Position &crypt_pos_cmp ) -> std::optional<Cmp::Position>
-        {
-          if ( crypt_cmp.is_open() ) return std::nullopt;
-          return crypt_pos_cmp;
-        } );
+    {
+      if ( crypt_cmp.is_open() ) return std::nullopt;
+      return crypt_pos_cmp;
+    } );
     if ( not nearest ) return; // there are no suitable crypts so give up
     arrow_target = *nearest;
   }
@@ -464,10 +464,10 @@ void RenderGameSystem::render_arrow_compass()
   {
     auto nearest = find_nearest_target( reg().view<Cmp::Altar::MultiBlock>(), Utils::Player::get_position( reg() ).position,
                                         []( entt::entity, const Cmp::Altar::MultiBlock &altar_cmp ) -> std::optional<Cmp::Position>
-                                        {
-                                          if ( altar_cmp.is_exitkey_lockout() ) return std::nullopt;
-                                          return Cmp::Position( altar_cmp.position, altar_cmp.size );
-                                        } );
+    {
+      if ( altar_cmp.is_exitkey_lockout() ) return std::nullopt;
+      return Cmp::Position( altar_cmp.position, altar_cmp.size );
+    } );
     if ( not nearest ) return; // there are no suitable altars so give up
     arrow_target = *nearest;
   }

@@ -1,11 +1,13 @@
 #include <Components/Persistent/DisplayResolution.hpp>
+#include <Components/Toxicity/Halucinogen.hpp>
+#include <Components/Toxicity/Toxidrome.hpp>
 #include <Shaders/UniformBuilder.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Player.hpp>
 
-#include <Shaders/FearDistortionShader.hpp>
+#include <Shaders/CircularDistortionShader.hpp>
 
 namespace Game::Sprites
 {
@@ -13,22 +15,23 @@ namespace Game::Sprites
 namespace
 {
 // How many "e-foldings" per second the displayed fear closes the gap to the real stat by; see
-// m_smoothed_fear in FearDistortionShader.hpp for why this exists.
-constexpr float kFearSmoothingRate = 3.0f;
+// m_smoothed_toxicity in CircularDistortionShader.hpp for why this exists.
+constexpr float kToxicitySmoothingRate = 3.0f;
 } // namespace
 
-void FearDistortionShader::update( entt::registry &reg )
+void CircularDistortionShader::update( entt::registry &reg )
 {
   auto display_size = sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg ) );
-  float target_fear = static_cast<float>( Utils::Player::get_stats( reg ).fear() ) / 100.f;
+  auto opt_toxicity = Utils::Player::get_stats( reg ).toxidrome().at<Cmp::Toxicity::Hallucinogen>();
+  float toxicity = static_cast<float>( opt_toxicity.value_or( 0 ) ) / 100.f;
 
   sf::Time now = elapsed();
-  float dt = ( now - m_last_fear_update ).asSeconds();
-  m_last_fear_update = now;
-  m_smoothed_fear = Utils::Maths::exp_decay( m_smoothed_fear, target_fear, kFearSmoothingRate, dt );
+  float dt = ( now - m_last_toxicity_update ).asSeconds();
+  m_last_toxicity_update = now;
+  m_smoothed_toxicity = Utils::Maths::exp_decay( m_smoothed_toxicity, toxicity, kToxicitySmoothingRate, dt );
 
   // Player's position in the same normalised [0,1] screen space as gl_FragCoord.xy/resolution, so a
-  // frag shader (e.g. FearRandomHaze.frag) can place effects relative to the player without knowing
+  // frag shader (e.g. CircularDistortion.frag) can place effects relative to the player without knowing
   // anything about the world/camera itself. Mirrors how NightStaticShader reconstructs world
   // positions from view_top_left/view_size, just inverted.
   sf::Vector2f view_center = Sys::RenderSystem::get_world_view().getCenter();
@@ -40,7 +43,7 @@ void FearDistortionShader::update( entt::registry &reg )
   Sprites::UniformBuilder{}
       .set( "resolution", display_size )
       .set( "time", now.asSeconds() )
-      .set( "fear", m_smoothed_fear )
+      .set( "toxicity", m_smoothed_toxicity )
       .set( "player_uv", player_uv )
       .apply( &get_shader() );
 

@@ -325,7 +325,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     for ( auto [entt, shader] : shader_view.each() )
     {
       if ( not shader.sprite ) continue;
-      if ( shader.sprite->get_tag() == "TitleShader" || shader.sprite->get_tag() == "FearDistortion" )
+      if ( shader.sprite->get_tag() == "TitleShader" || shader.sprite->get_tag() == "CircularDistortion" )
       {
         shader.sprite->resize_texture( display_resolution );
         SPDLOG_DEBUG( "Selected resolution: {}x{}", display_resolution.x, display_resolution.y );
