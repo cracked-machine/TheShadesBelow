@@ -472,9 +472,11 @@ std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( cons
     {
       using Utils::Collision::any_intersects;
       return not( any_intersects<Cmp::Wall>( reg(), new_lo_hitbox ) || any_intersects<Cmp::Grave::Segment>( reg(), new_lo_hitbox ) ||
-                  any_intersects<Cmp::Altar::Segment>( reg(), new_lo_hitbox ) || any_intersects<Cmp::Crypt::BuildingSegment>( reg(), new_lo_hitbox ) ||
+                  any_intersects<Cmp::Altar::Segment>( reg(), new_lo_hitbox ) ||
+                  any_intersects<Cmp::Crypt::BuildingSegment>( reg(), new_lo_hitbox ) ||
                   any_intersects<Cmp::HealingSpringBuildingSegment>( reg(), new_lo_hitbox ) ||
-                  any_intersects<Cmp::Ruin::BuildingSegment>( reg(), new_lo_hitbox ) || any_intersects<Cmp::Crypt::ObjectiveSegment>( reg(), new_lo_hitbox ) ||
+                  any_intersects<Cmp::Ruin::BuildingSegment>( reg(), new_lo_hitbox ) ||
+                  any_intersects<Cmp::Crypt::ObjectiveSegment>( reg(), new_lo_hitbox ) ||
                   not m_reserved_sm->query_rect( new_lo_hitbox.getBounds() ).empty() || any_intersects<Cmp::SpawnArea>( reg(), new_lo_hitbox ) ||
                   any_intersects<Cmp::Player::Character>( reg(), new_lo_hitbox ) );
     };
@@ -606,16 +608,21 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants( sf::Vector2u map_gr
 
   auto num_plants = map_grid_size.x * map_grid_size.y / 200;
 
-  static const std::vector<std::string> plant_item_type_list{ "item.plant1", "item.plant2",  "item.plant3",  "item.plant4",
-                                                              "item.plant5", "item.plant6",  "item.plant7",  "item.plant8",
-                                                              "item.plant9", "item.plant10", "item.plant11", "item.plant12" };
+  // Find all "sprite.item.plant.*" (the growable world plants) but exclude their
+  // "sprite.graveyard.plant.*.drop" pickup-icon counterparts, which live under a different prefix.
+  const auto plant_sprite_types = m_sprite_factory.get_all_sprite_types_by_pattern( R"(sprite\.item\.plant\.(?!.*\.drop$).*)" );
+
+  // gen_plant() re-adds the "sprite." prefix itself (to match the bare "item.plant.*" markers
+  // used elsewhere), so strip it back off here.
+  static const std::string kSpritePrefix = "sprite.";
 
   for ( std::size_t i = 0; i < num_plants; ++i )
   {
     auto [random_entity, random_pos] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{},
                                                                         0 );
 
-    auto chosen_plant_item_type = plant_item_type_list.at( Cmp::RandomInt( 0, static_cast<int>( plant_item_type_list.size() - 1 ) ).gen() );
+    auto chosen_plant_sprite_type = plant_sprite_types.at( Cmp::RandomInt( 0, static_cast<int>( plant_sprite_types.size() - 1 ) ).gen() );
+    auto chosen_plant_item_type = chosen_plant_sprite_type.substr( kSpritePrefix.size() );
     if ( gen_plant( chosen_plant_item_type, random_pos.position ) ) { assigned_entts.push_back( random_entity ); }
   }
   return assigned_entts;

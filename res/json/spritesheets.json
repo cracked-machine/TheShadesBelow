@@ -179,9 +179,9 @@
         }
       }
     },
-    "sprite.graveyard.plant1.drop": {
+    "sprite.graveyard.plant.rowan.drop": {
       "spritesheet": {
-        "displayname": "plant1 berry",
+        "displayname": "Rowan Berry",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
         "sprite_indices": [0],
@@ -193,12 +193,12 @@
         }
       }
     },
-    "sprite.graveyard.plant2.drop": {
+    "sprite.graveyard.plant.elder.drop": {
       "spritesheet": {
-        "displayname": "plant2 berry",
+        "displayname": "Elder Berry",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [1],
+        "sprite_indices": [0],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -207,12 +207,138 @@
         }
       }
     },
-    "sprite.graveyard.plant3.drop": {
+    "sprite.graveyard.plant.yew.drop": {
       "spritesheet": {
-        "displayname": "plant3 berry",
+        "displayname": "Yew Berry",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [3],
+        "sprite_indices": [0],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.plant.hawthorn.drop": {
+      "spritesheet": {
+        "displayname": "Hawthorn Berry",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [0],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.plant.foxglove.drop": {
+      "spritesheet": {
+        "displayname": "Foxglove Berry",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [0],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.plant.nightshade.drop": {
+      "spritesheet": {
+        "displayname": "Nightshade Berry",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [0],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.plant.hogweed.drop": {
+      "spritesheet": {
+        "displayname": "Hogweed Berry",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [0],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.plant.stjohnswort.drop": {
+      "spritesheet": {
+        "displayname": "StJohnsWort Berry",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [0],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.plant.nettle.drop": {
+      "spritesheet": {
+        "displayname": "Nettle Berry",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [0],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.plant.burdock.drop": {
+      "spritesheet": {
+        "displayname": "Burdock Berry",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [0],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.plant.redcampion.drop": {
+      "spritesheet": {
+        "displayname": "RedCampion Berry",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [0],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.plant.henbane.drop": {
+      "spritesheet": {
+        "displayname": "Henbane Berry",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [0],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -1261,9 +1387,9 @@
         }
       }
     },
-    "sprite.item.plant1": {
+    "sprite.item.plant.rowan": {
       "spritesheet": {
-        "displayname": "Plant1",
+        "displayname": "Plant: Rowan",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
         "sprite_indices": [0,1],
@@ -1276,9 +1402,9 @@
         "solid_mask": [false, true]
       }
     },
-    "sprite.item.plant2": {
+    "sprite.item.plant.elder": {
       "spritesheet": {
-        "displayname": "Plant2",
+        "displayname": "Plant: Elder",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
         "sprite_indices": [2,3],
@@ -1291,9 +1417,9 @@
         "solid_mask": [false, true]
       }
     },
-    "sprite.item.plant3": {
+    "sprite.item.plant.yew": {
       "spritesheet": {
-        "displayname": "Plant3",
+        "displayname": "Plant: Yew",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
         "sprite_indices": [4,5],
@@ -1306,9 +1432,9 @@
         "solid_mask": [false, true]
       }
     },
-    "sprite.item.plant4": {
+    "sprite.item.plant.hawthorn": {
       "spritesheet": {
-        "displayname": "Plant4",
+        "displayname": "Plant: Hawthorn",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
         "sprite_indices": [6,7],
@@ -1321,9 +1447,9 @@
         "solid_mask": [false, true]
       }
     },
-    "sprite.item.plant5": {
+    "sprite.item.plant.foxglove": {
       "spritesheet": {
-        "displayname": "Plant5",
+        "displayname": "Plant: Foxglove",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
         "sprite_indices": [8,9],
@@ -1336,9 +1462,9 @@
         "solid_mask": [false, true]
       }
     },
-    "sprite.item.plant6": {
+    "sprite.item.plant.nightshade": {
       "spritesheet": {
-        "displayname": "Plant6",
+        "displayname": "Plant: Nightshade",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
         "sprite_indices": [10,11],
@@ -1351,9 +1477,9 @@
         "solid_mask": [false, true]
       }
     },
-    "sprite.item.plant7": {
+    "sprite.item.plant.hogweed": {
       "spritesheet": {
-        "displayname": "Plant7",
+        "displayname": "Plant: Hogweed",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
         "sprite_indices": [12,13],
@@ -1366,9 +1492,9 @@
         "solid_mask": [false, true]
       }
     },
-    "sprite.item.plant8": {
+    "sprite.item.plant.stjohnswort": {
       "spritesheet": {
-        "displayname": "Plant8",
+        "displayname": "Plant: StJohnsWort",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
         "sprite_indices": [14,15],
@@ -1381,9 +1507,9 @@
         "solid_mask": [false, true]
       }
     },
-    "sprite.item.plant9": {
+    "sprite.item.plant.nettle": {
       "spritesheet": {
-        "displayname": "Plant9",
+        "displayname": "Plant: Nettle",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
         "sprite_indices": [16,17],
@@ -1396,9 +1522,9 @@
         "solid_mask": [false, true]
       }
     },
-    "sprite.item.plant10": {
+    "sprite.item.plant.burdock": {
       "spritesheet": {
-        "displayname": "Plant10",
+        "displayname": "Plant: Burdock",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
         "sprite_indices": [18,19],
@@ -1411,9 +1537,9 @@
         "solid_mask": [false, true]
       }
     },
-    "sprite.item.plant11": {
+    "sprite.item.plant.redcampion": {
       "spritesheet": {
-        "displayname": "Plant11",
+        "displayname": "Plant: RedCampion",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
         "sprite_indices": [20,21],
@@ -1426,9 +1552,9 @@
         "solid_mask": [false, true]
       }
     },
-    "sprite.item.plant12": {
+    "sprite.item.plant.henbane": {
       "spritesheet": {
-        "displayname": "Plant12",
+        "displayname": "Plant: Henbane",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
         "sprite_indices": [22,23],
