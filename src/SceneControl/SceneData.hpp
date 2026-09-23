@@ -59,7 +59,7 @@ public:
     //! @brief The offset for the tile indexes within this tileset relative to the other tilesets.
     //! @note  This value is created and managed by Tiled application.
     int first_gid;
-    //! @brief The SpriteSheet name. This must use a SpriteSheet defined in res/json/spritesheet_metadata.json.
+    //! @brief The SpriteSheet name. This must use a SpriteSheet defined in res/json/spritesheets.json.
     std::string name;
     //! @brief Should be 16x16 pixels
     sf::Vector2u tile_size;

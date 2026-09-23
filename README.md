@@ -125,7 +125,7 @@ This tells the base template class `Scene` to call the ProcessCryptSceneInputEve
 
 ## Sprite Factory
 
-Sprite sheets are loaded using the [SpriteFactory](src/Factory/SpriteFactory.cpp) from [spritesheet_metadata.json](res/json/spritesheet_metadata.json). This supports both single block (16x16) and multi-block sprites (some multiple of 16x16). Each entry in the JSON file must have a unique name. This is used by the SpriteFactory to create the sprite and serves as a key to retrieve the sprite later on. 
+Sprite sheets are loaded using the [SpriteFactory](src/Factory/SpriteFactory.cpp) from [spritesheets.json](res/json/spritesheets.json). This supports both single block (16x16) and multi-block sprites (some multiple of 16x16). Each entry in the JSON file must have a unique name. This is used by the SpriteFactory to create the sprite and serves as a key to retrieve the sprite later on. 
 
 | property | description |
 |:-|:-|

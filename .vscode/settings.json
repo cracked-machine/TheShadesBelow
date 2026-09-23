@@ -80,9 +80,9 @@
     "json.schemas": [
         {
             "fileMatch": [
-                "**/spritesheet_metadata.json"
+                "**/spritesheets.json"
             ],
-            "url": "./res/json/spritesheet_metadata_schema.json"
+            "url": "./res/json/spritesheets_schema.json"
         },
         {
             "fileMatch": [

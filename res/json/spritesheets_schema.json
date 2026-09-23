@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "SpriteMetaData Schema",
-  "description": "Schema for sprite metadata configuration using enum names as keys",
+  "title": "Spritesheets Schema",
+  "description": "Schema for spritesheets using enum names as keys",
   "type": "object",
   "properties": {
     "sprites": {

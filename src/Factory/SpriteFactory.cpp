@@ -18,7 +18,7 @@ namespace Game::Sprites
 {
 void SpriteFactory::init()
 {
-  std::filesystem::path json_path( "res/json/spritesheet_metadata.json" );
+  std::filesystem::path json_path( "res/json/spritesheets.json" );
   auto j = Utils::JsonDeserializer::load_json_file( json_path );
 
   if ( not j.contains( "sprites" ) ) throw std::runtime_error( "Missing 'sprites' from " + json_path.string() );
