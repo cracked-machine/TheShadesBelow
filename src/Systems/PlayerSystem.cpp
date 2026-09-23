@@ -663,7 +663,8 @@ std::stringstream PlayerSystem::apply_fear_of_the_dark( Cmp::BaseAction &net_mod
 void PlayerSystem::apply_healing_spring_modifiers( Cmp::BaseAction &net_modifier )
 {
   // healing spring
-  Cmp::BaseAction fountain_effects( { +5 }, { -5 }, { -5 }, { -5 }, { -5 }, {}, {} );
+  Cmp::BaseAction fountain_effects( Cmp::Stats::Health{ +5 }, Cmp::Stats::Fear{ -5 }, Cmp::Stats::Despair{ -5 }, Cmp::Stats::Infamy{ -5 }, {}, {},
+                                    {} );
   for ( auto [fountain_entt, fountain_mb_cmp, fountain_uuid_cmp] : reg().view<Cmp::HealingSpringMultiBlock, Cmp::UUID>().each() )
   {
 
@@ -674,6 +675,7 @@ void PlayerSystem::apply_healing_spring_modifiers( Cmp::BaseAction &net_modifier
     float player_distance = Utils::Maths::getEuclideanDistance( fountain_mb_cmp.position, Utils::Player::get_position( reg() ).position );
     if ( player_distance > 500 ) continue;
     net_modifier += fountain_effects;
+
     // Curing toxidromes isn't expressible as a BaseAction delta (it decays/removes existing active
     // toxidromes rather than adding a new one), so it's applied directly here rather than via net_modifier.
     Utils::Player::get_stats( reg() ).decay_toxidrome( 5 );

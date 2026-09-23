@@ -155,23 +155,26 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
 
 void GraveSystem::trigger_grave_consequence( entt::entity grave_entity )
 {
-  // luck is range [0, 100]; higher luck shifts odds from traps (NPC_TRAP/BOMB_TRAP) toward loot (RELIC/JEWELRY).
-  // At luck 50 this reduces to a plain 25/25/25/25 split; at luck 0 it's all traps, at luck 100 it's all loot.
+  // Roulette wheel. We take the inverse of player luck and use both numbers to gate the spawn probablities.
+  // For example, if player luck is 50, then the badluck is also 50
   auto player_luck_stat = Utils::Player::get_stats( reg() ).luck();
   const int good_weight = player_luck_stat;
   const int bad_weight = 100 - good_weight;
 
-  const int tier1_threshold = bad_weight / 2;
-  const int tier2_threshold = bad_weight;
-  const int tier3_threshold = bad_weight + ( good_weight / 2 );
-
   auto grave_activation_rng = Cmp::RandomInt( 0, 99 );
   const int roll = grave_activation_rng.gen();
 
+  const int tier1_threshold = bad_weight / 2;                   // Tier1 is a roll below 25
+  const int tier2_threshold = ( bad_weight / 2 ) + 5;           // Tier2 is a roll between 25 and 30
+  const int tier3_threshold = bad_weight;                       // Tier3 is a roll between 30 and 50
+  const int tier4_threshold = bad_weight + ( good_weight / 2 ); // Tier4 is a roll between 50 and 75
+                                                                // Remaining rolls between 75 and 100
+
   GraveConsequence consequence;
   if ( roll < tier1_threshold ) { consequence = GraveConsequence::BOMB_TRAP; }
-  else if ( roll < tier2_threshold ) { consequence = GraveConsequence::NPC_TRAP; }
-  else if ( roll < tier3_threshold ) { consequence = GraveConsequence::RELIC; }
+  else if ( roll < tier2_threshold ) { consequence = GraveConsequence::CURSE_TABLET; }
+  else if ( roll < tier3_threshold ) { consequence = GraveConsequence::NPC_TRAP; }
+  else if ( roll < tier4_threshold ) { consequence = GraveConsequence::RELIC; }
   else { consequence = GraveConsequence::JEWELRY; }
 
   switch ( consequence )
@@ -197,6 +200,9 @@ void GraveSystem::trigger_grave_consequence( entt::entity grave_entity )
                           "item.jewelry_amephyst_gemstone" } );
       break;
     }
+    case GraveConsequence::CURSE_TABLET:
+      spawn_grave_loot( { "item.cursetablet" } );
+      break;
   }
 }
 

@@ -41,8 +41,7 @@ private:
   void update();
 
   //! @brief Random consequence rolled when a grave is fully dug open
-  enum class GraveConsequence
-  {
+  enum class GraveConsequence {
     //! @brief Spawns a hostile NPC from the grave.
     NPC_TRAP = 1,
     //! @brief Spawns a bomb trap from the grave.
@@ -50,7 +49,9 @@ private:
     //! @brief Drops a relic item.
     RELIC,
     //! @brief Drops jewelry loot.
-    JEWELRY
+    JEWELRY,
+    //! @brief Drops a curse tablet
+    CURSE_TABLET
   };
 
   //! @brief True if the player has a digging tool equipped with remaining wear

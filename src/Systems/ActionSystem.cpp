@@ -193,8 +193,8 @@ void ActionSystem::check_player_dig_obstacle_collision()
         }
         // skip if a detonated entity already occupies this position (e.g. overlapping blast patterns)
         bool already_detonated = false;
-        Utils::Collision::for_each_intersect<Cmp::DestroyedObstacle>( reg(), obstacle_pos_cmp,
-                                                                 [&]( entt::entity, Cmp::DestroyedObstacle &, Cmp::Position & ) { already_detonated = true; } );
+        Utils::Collision::for_each_intersect<Cmp::DestroyedObstacle>(
+            reg(), obstacle_pos_cmp, [&]( entt::entity, Cmp::DestroyedObstacle &, Cmp::Position & ) { already_detonated = true; } );
         if ( not already_detonated ) { Factory::Bomb::add_detonated( reg(), obstacle_entt, obstacle_pos_cmp ); }
 
         // add the position to the spatial grid so it can be used in pathfinding
@@ -261,7 +261,7 @@ void ActionSystem::check_player_dig_obstacle_collision()
           {
             float candidate_deg = std::fmod( base_angle_deg + ( static_cast<float>( slot ) * kCrackAngleStepDeg ), 360.f );
             bool too_close = std::ranges::any_of( used_angles_deg, [&]( float used_deg )
-                                                  { return circular_angle_diff_deg( candidate_deg, used_deg ) < kCrackAngleStepDeg; } );
+            { return circular_angle_diff_deg( candidate_deg, used_deg ) < kCrackAngleStepDeg; } );
             if ( not too_close ) free_slots.push_back( slot );
           }
           // every slot on this obstacle is already taken - fall back to a plain random pick
@@ -380,11 +380,14 @@ void ActionSystem::check_player_smash_pot()
 
   auto mouse_position_bounds = Utils::get_mouse_bounds_in_gameview( m_window, RenderSystem::get_world_view() );
   auto loot_container_view = reg().view<Cmp::LootContainer, Cmp::Position, Cmp::AnimData>();
+
+  sf::Vector2f cached_loot_container_pos;
+
   for ( auto [loot_entity, loot_container, loot_container_pos, loot_container_anim] : loot_container_view.each() )
   {
     if ( mouse_position_bounds.findIntersection( loot_container_pos ) )
     {
-      SPDLOG_INFO( "Found lootable entity at position: [{}, {}]!", loot_container_pos.position.x, loot_container_pos.position.y );
+      SPDLOG_DEBUG( "Found lootable entity at position: [{}, {}]!", loot_container_pos.position.x, loot_container_pos.position.y );
 
       // check player is near obstacle that was mouse-selected
       if ( not Utils::Player::is_player_near( reg(), loot_container_pos ) ) continue;
@@ -406,10 +409,8 @@ void ActionSystem::check_player_smash_pot()
       }
       else
       {
-        const std::string selected_type = Sys::ItemStore::instance().get_random_item_from_list(
-            Utils::Player::get_stats( reg() ).luck(), { "item.cursetablet", "item.seeingstone", "item.bomb" } );
-
-        get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), selected_type, "drop_loot" ) );
+        // wait until we're outside of the view loop to spawn the loot
+        cached_loot_container_pos = loot_container_pos.position;
 
         m_sound_bank.get_effect( "break_pot" ).play();
         auto inventory_wear_view = reg().view<Cmp::PlayerInventorySlot, Cmp::Inventory::WearLevel>();
@@ -419,7 +420,29 @@ void ActionSystem::check_player_smash_pot()
           wear_level.m_level -= Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
         }
         Factory::Loot::destroy_loot_container( reg(), loot_entity, m_reserved_sm.lock() );
+
+        break;
       }
+    }
+  }
+
+  // drop loot - 1 in 3 chance
+  auto [sprite_type, sprite_index] = m_sprite_factory.get_random_type_and_texture_index(
+      std::vector<std::string>{ "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" } );
+  Cmp::RandomInt do_drop( 0, 2 );
+  if ( do_drop.gen() == 0 )
+  {
+    auto reserved_sm = m_reserved_sm.lock();
+    auto dropped_loot_entt = Factory::Loot::create_loot_drop(
+        reg(), Cmp::AnimData( Cmp::AnimData::Config{ .sprite_type = sprite_type, .enabled = false } ),
+        sf::FloatRect( Utils::snap_to_grid( cached_loot_container_pos ), Constants::kGridSizePxF ), Factory::IncludePack<>{},
+        Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{},
+        /*zorder_offset=*/-8.f, reserved_sm.get() );
+
+    if ( dropped_loot_entt != entt::null )
+    {
+      SPDLOG_INFO( "Loot was dropped at {},{}", cached_loot_container_pos.x, cached_loot_container_pos.y );
+      m_sound_bank.get_effect( "drop_loot" ).play();
     }
   }
 }
@@ -484,27 +507,6 @@ void ActionSystem::check_player_axe_npc_kill()
       auto skelebones_particle_uuid = Cmp::UUID::generate();
       Factory::Particle::add_skelebones_ps( reg(), "graveyard.skele.particle.bones", 50, 2.f, 50.f, 14.f, skelebones_particle_uuid,
                                             npc_pos_cmp.getCenter(), npc_pos_cmp.position.y );
-      // drop loot - 1 in 3 chance
-      auto [sprite_type, sprite_index] = m_sprite_factory.get_random_type_and_texture_index(
-          std::vector<std::string>{ "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" } );
-
-      Cmp::RandomInt do_drop( 0, 2 );
-      if ( do_drop.gen() == 0 )
-      {
-        auto reserved_sm = m_reserved_sm.lock();
-        auto dropped_loot_entt = Factory::Loot::create_loot_drop(
-            reg(), Cmp::AnimData( Cmp::AnimData::Config{ .sprite_type = sprite_type, .enabled = false } ),
-            Cmp::RectBounds::scaled( npc_pos_cmp.position, npc_pos_cmp.size, 2.f ).getBounds(), Factory::IncludePack<>{},
-            Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{},
-            /*zorder_offset=*/-8.f, reserved_sm.get() );
-
-        if ( dropped_loot_entt != entt::null )
-        {
-          auto player_pos = Utils::Player::get_position( reg() );
-          SPDLOG_INFO( "Player position was at {},{} when loot was dropped", player_pos.position.x, player_pos.position.y );
-          m_sound_bank.get_effect( "drop_loot" ).play();
-        }
-      }
 
       // now destroy the NPC
       if ( reg().valid( npc_entity ) )
