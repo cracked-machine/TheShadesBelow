@@ -7,8 +7,10 @@
 #include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Npc.hpp>
+#include <Utils/Utils.hpp>
 
 #include <algorithm>
+#include <optional>
 #include <unordered_map>
 
 namespace Game::PathFinding
@@ -54,8 +56,20 @@ std::vector<PathNode> astar( entt::registry &reg, const PathFinding::SpatialHash
 
     for ( auto neighbour_entt : neighbours_list )
     {
-      auto *neighbour_pos = reg.try_get<Cmp::Position>( neighbour_entt );
-      if ( not neighbour_pos ) continue;
+      auto *neighbour_entity_pos = reg.try_get<Cmp::Position>( neighbour_entt );
+      if ( not neighbour_entity_pos ) continue;
+
+      // The player moves sub-grid, so their entity sits at an off-grid position. When they stand on a cell that
+      // has no other entity (e.g. where a moveable block used to be) their entity is the only node for that cell,
+      // and the exact goal comparison below would never match. Snap it to its grid cell.
+      std::optional<Cmp::Position> snapped_player_pos;
+      const bool is_player = reg.any_of<Cmp::Player::Character>( neighbour_entt );
+      if ( is_player )
+      {
+        snapped_player_pos.emplace( Utils::snap_to_grid( neighbour_entity_pos->position, Utils::Rounding::TOWARDS_ZERO ),
+                                            neighbour_entity_pos->size );
+      }
+      const Cmp::Position *neighbour_pos = is_player ? &*snapped_player_pos : neighbour_entity_pos;
 
       // Skip other NPCs so they don't block each other's pathfinding
       if ( reg.any_of<Cmp::Npc::NPC>( neighbour_entt ) ) continue;

@@ -246,7 +246,18 @@ void PlayerSystem::move_obstacle( const sf::FloatRect &target_position )
       m_sound_bank.get_effect( "crypt_open" ).play();
 
       // move the obstacle
+      const Cmp::Position vacated_pos = selected_pos_cmp;
       selected_pos_cmp.position += player_velocity.position();
+
+      // keep the NPC navmesh in sync: the cell the block was placed on lost its whole bucket when the navmesh was
+      // built (NoPathFinding), so give the vacated cell a floor entity again, and close off the destination cell.
+      if ( PathFinding::SpatialHashGridSharedPtr npc_navmesh = m_npc_navmesh.lock() )
+      {
+        auto vacated_entt = reg().create();
+        reg().emplace<Cmp::Position>( vacated_entt, vacated_pos.position, vacated_pos.size );
+        npc_navmesh->insert( vacated_entt, vacated_pos );
+        npc_navmesh->remove_all( selected_pos_cmp );
+      }
       reg().remove<Cmp::SelectedPosition>( selected_entt );
 
       // find the matching cap to this obstacle and move it too

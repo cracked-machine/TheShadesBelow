@@ -170,7 +170,7 @@ public:
 
   //! @brief Debug-draw the spatial hash grid navmesh: the neighbour bucket size and cell edges at every position in view.
   //! @param npc_navmesh
-  void render_navmesh( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh );
+  void render_navmesh();
 
   //! @brief Render the debug "inspect_list" panel: a breakdown of the components and stats of the entity currently under the mouse
   //! cursor.

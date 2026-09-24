@@ -80,6 +80,7 @@
 #include <Utils/Crypt.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
+#include <Utils/Utils.hpp>
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
@@ -644,7 +645,10 @@ void RenderOverlaySystem::render_pathfinding_vector( const Cmp::Position &start_
 
   if ( PathFinding::SpatialHashGridSharedPtr spatialgrid_ptr = m_npc_navmesh.lock() )
   {
-    std::vector<PathFinding::PathNode> path = PathFinding::astar( reg(), *spatialgrid_ptr, start_pos_cmp, end_pos_cmp, query_compass );
+    // Mirror Utils::Npc::pathfind_toward: A* needs a grid-aligned goal, but the player (and an NPC mid-lerp) sit off-grid.
+    const Cmp::Position grid_start( Utils::snap_to_grid( start_pos_cmp.position, Utils::Rounding::TOWARDS_ZERO ), start_pos_cmp.size );
+    const Cmp::Position grid_goal( Utils::snap_to_grid( end_pos_cmp.position, Utils::Rounding::TOWARDS_ZERO ), end_pos_cmp.size );
+    std::vector<PathFinding::PathNode> path = PathFinding::astar( reg(), *spatialgrid_ptr, grid_start, grid_goal, query_compass );
 
     for ( auto pathnode : path )
     {
@@ -660,8 +664,11 @@ void RenderOverlaySystem::render_pathfinding_vector( const Cmp::Position &start_
   }
 }
 
-void RenderOverlaySystem::render_navmesh( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh )
+void RenderOverlaySystem::render_navmesh()
 {
+  const auto npc_navmesh = m_npc_navmesh.lock();
+  if ( not npc_navmesh ) return;
+
   sf::Text text( m_font, "", 10 );
   for ( auto [pos_entt, pos_cmp] : reg().view<Cmp::Position>().each() )
   {
@@ -672,6 +679,7 @@ void RenderOverlaySystem::render_navmesh( const PathFinding::SpatialHashGridShar
     text.setOutlineColor( sf::Color::Black );
     text.setOutlineThickness( 1.f );
     text.setPosition( { pos_cmp.position.x + 4.f, pos_cmp.position.y + 4.f } );
+
     draw_world( text );
 
     sf::RectangleShape bottom_edge( { 8.f, 1.f } );

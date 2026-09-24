@@ -20,7 +20,6 @@
 #include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/SceneSettings/ShowNavmesh.hpp>
 #include <Components/SceneSettings/ShowPathFinding.hpp>
-
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PathfindingFactory.hpp>
@@ -240,7 +239,7 @@ void RuinSceneLowerFloor::do_update( [[maybe_unused]] sf::Time dt )
 
   m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
   auto &overlay_sys = m_sys.find<Store::Type::RenderOverlaySystem>();
-  m_sys.find<Store::Type::RenderGameSystem>().render_game( dt, overlay_sys, m_reserved_sm );
+  m_sys.find<Store::Type::RenderGameSystem>().render_game( dt, overlay_sys );
 }
 
 void RuinSceneLowerFloor::reinit_navmesh()

@@ -153,7 +153,7 @@ void ShopScene::do_update( [[maybe_unused]] sf::Time dt )
   m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt );
 
   auto &overlay_sys = m_sys.find<Sys::Store::Type::RenderOverlaySystem>();
-  m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt, overlay_sys, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt, overlay_sys );
 }
 
 void ShopScene::open_overlay()

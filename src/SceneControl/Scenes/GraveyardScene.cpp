@@ -317,7 +317,7 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt ) );
 
   auto &overlay_sys = m_sys.find<Sys::Store::Type::RenderOverlaySystem>();
-  PROFILED( m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt, overlay_sys, m_reserved_sm, m_render_position_sm ) );
+  PROFILED( m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt, overlay_sys ) );
 }
 
 void GraveyardScene::reinit_system_spatial_maps()

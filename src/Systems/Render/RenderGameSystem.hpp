@@ -119,7 +119,7 @@ public:
   //! Cmp::Position-bearing renderable entities - see add_visible_entity_to_z_order_queue()'s
   //! Cmp::Position specialization. Scenes that don't populate/pass one (nullptr, the default) fall
   //! back to the unindexed full-registry scan, so this is safe to omit.
-  void render_game( sf::Time dt, RenderOverlaySystem &render_overlay_sys, const PathFinding::SpatialHashGridSharedPtr &reserved_grid,
+  void render_game( sf::Time dt, RenderOverlaySystem &render_overlay_sys,
                     const PathFinding::SpatialHashGridSharedPtr &render_position_grid = nullptr );
 
   //! @brief Refreshes the Z-order rendering queue
