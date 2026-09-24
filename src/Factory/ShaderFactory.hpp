@@ -8,6 +8,7 @@
 #include <Shaders/FloodWaterShader.hpp>
 #include <Shaders/MistShader.hpp>
 #include <Shaders/NightStaticShader.hpp>
+#include <Shaders/RedVignetteShader.hpp>
 #include <Systems/ShaderSystem.hpp>
 
 namespace Game::Factory::Shader
@@ -50,6 +51,14 @@ void add_curse( Sys::ShaderSystem &shader_sys, sf::Vector2f map_size_pixel );
 //! @param shader_sys
 //! @param display_res
 void add_circular_distortion( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res );
+
+//! @brief Register the red vignette full-screen post-process shader, sized to the display resolution. Its z-order
+//! sits just above add_circular_distortion's, so RenderGameSystem chains it after the distortion pass.
+//! Its intensity is driven each frame by the player's hallucinogen toxicity stat; see
+//! Sprites::RedVignetteShader::update.
+//! @param shader_sys
+//! @param display_res
+void add_red_vignette( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res );
 
 } // namespace Game::Factory::Shader
 

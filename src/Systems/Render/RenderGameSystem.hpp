@@ -17,6 +17,7 @@
 #include <optional>
 #include <queue>
 #include <tuple>
+#include <vector>
 
 namespace Game::Sprites
 {
@@ -28,6 +29,7 @@ class NightStaticShader;
 class MistShader;
 class DarkModeShader;
 class DrippingBloodShader;
+class IShaderSprite;
 } // namespace Game::Sprites
 
 namespace Game::Sprites::Containers
@@ -142,9 +144,10 @@ private:
 
   //! @brief Draws every entity in `m_zorder_queue_` (sprites, particles, shaders, floor tiles), lowest z-order first
   //! @param render_overlay_sys anything that is not part of the game world itself. i.e. UI, debug info, etc..
-  //! @param distortion_active Whether this frame's drawing has been redirected into the FearDistortion shader's render
-  //! texture; passed through so the post-process shader entry point in the queue knows whether to composite it back
-  void render_zorder_queue( RenderOverlaySystem &render_overlay_sys, bool distortion_active );
+  //! @param post_process_chain The active post-process shaders for this frame, in the order they are applied. The
+  //! frame is captured into the first one's render texture; each reached in the queue is composited into the next
+  //! one's texture, and the last onto the window. Empty if nothing was redirected.
+  void render_zorder_queue( RenderOverlaySystem &render_overlay_sys, const std::vector<Sprites::IShaderSprite *> &post_process_chain );
 
   //! @brief Used by CryptScene for Priest NPC weapon
   //! @param floormap

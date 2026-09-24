@@ -63,4 +63,11 @@ void add_circular_distortion( Sys::ShaderSystem &shader_sys, const Cmp::Persist:
   circular_distortion_shader->set_tag( "CircularDistortion" );
   shader_sys.add( std::move( circular_distortion_shader ), Cmp::ZOrderValue( 999999.f ) );
 }
+
+void add_red_vignette( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res )
+{
+  auto red_vignette_shader = std::make_unique<Sprites::RedVignetteShader>( "res/shaders/Generic.vert", "res/shaders/RedVignette.frag", display_res );
+  red_vignette_shader->set_tag( "RedVignette" );
+  shader_sys.add( std::move( red_vignette_shader ), Cmp::ZOrderValue( 1000000.f ) );
+}
 } // namespace Game::Factory::Shader

@@ -102,19 +102,13 @@ const float PATCH_LIFETIME = 5.0;
 // spawn/despawn.
 const float PATCH_FADE_FRACTION = 0.25;
 
-// Sickly violet tint blended into each patch's own shape (see total_tint in main()), distinct from
-// the vignette's reddish dread below - reads as "something here is wrong" rather than just dark.
+// Sickly violet tint blended into each patch's own shape (see total_tint in main()); reads as "something here is wrong" rather than just dark.
 const vec3 HAZE_TINT_COLOR = vec3( 0.45, 0.1, 0.55 );
 // Strength of that tint at a patch's peak strength (fully faded in, mid-life, toxicity well past its
 // threshold). Overlapping patches take the strongest single patch at that pixel (see total_tint)
 // rather than stacking, so this is also the effective ceiling with any number of patches overlapping.
 const float MAX_HAZE_TINT = 0.1;
 
-// Strength of the darkened, reddish vignette at full toxicity
-const float MAX_VIGNETTE = 0.75;
-// Curve steepness for the toxicity -> vignette ramp (see vignette_curve in main()): higher means more
-// of the range is reached early, i.e. a faster rise that then tapers off (logarithmic, not linear)
-const float VIGNETTE_LOG_K = 9.0;
 const float TWO_PI = 6.28318530718;
 // `time` grows unbounded for as long as this shader instance stays alive (see BaseShaderSprite's
 // m_clock) and feeds directly into `speed` below - scaled again by up to 1.3x for the y term. Left
@@ -232,16 +226,8 @@ void main()
   if ( sample_uv.x >= 0.0 && sample_uv.x <= 1.0 && sample_uv.y >= 0.0 && sample_uv.y <= 1.0 ) { color = texture2D( texture, sample_uv ); }
   else { color = texture2D( texture, uv ); }
 
-  // Sickly violet tint over each patch's own shape, applied before the vignette so the vignette's
-  // darkening still lands on top of it like everything else on screen.
+  // Sickly violet tint over each patch's own shape.
   color.rgb = mix( color.rgb, HAZE_TINT_COLOR, total_tint * MAX_HAZE_TINT );
-
-  // subtle reddish vignette that intensifies with toxicity: logarithmic ease-out from 0 at toxicity=0 to 1
-  // at toxicity=1, rising quickly at first then tapering off as toxicity approaches its max
-  float dist_from_center = length( uv - 0.5 );
-  float vignette_curve = log( 1.0 + VIGNETTE_LOG_K * toxicity ) / log( 1.0 + VIGNETTE_LOG_K );
-  float vignette = smoothstep( 0.2, 0.9, dist_from_center ) * vignette_curve * MAX_VIGNETTE;
-  color.rgb = mix( color.rgb, vec3( 0.2, 0.0, 0.0 ), vignette );
 
   out_color = color;
 }
