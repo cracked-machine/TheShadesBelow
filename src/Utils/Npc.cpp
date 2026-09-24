@@ -4,6 +4,7 @@
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/LerpSpeed.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Npc/Spider.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Position.hpp>
 #include <PathFinding/AStar.hpp>
@@ -124,6 +125,20 @@ PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGri
   const bool too_far = std::abs( distance_to_target.x ) >= Constants::kGridSizePxF.x * 1.5f ||
                        std::abs( distance_to_target.y ) >= Constants::kGridSizePxF.y * 1.5f;
   if ( too_far ) return PathfindResult::Blocked;
+
+  // spiders wait until the next cell is free of other spiders, otherwise they stack into one visual blob
+  if ( reg.all_of<Cmp::Npc::Spider>( npc_entity ) )
+  {
+    const auto next_cell = Utils::snap_to_grid( next_npc_pos.position, Utils::Rounding::TOWARDS_ZERO );
+    for ( auto other_entt : reg.view<Cmp::Npc::Spider, Cmp::Position>() )
+    {
+      if ( other_entt == npc_entity ) continue;
+      // a mid-lerp spider occupies the cell it is heading to, not the one it is leaving
+      auto *other_lerp_cmp = reg.try_get<Cmp::LerpPosition>( other_entt );
+      const auto &other_pos = other_lerp_cmp ? other_lerp_cmp->m_target : reg.get<Cmp::Position>( other_entt ).position;
+      if ( Utils::snap_to_grid( other_pos, Utils::Rounding::TOWARDS_ZERO ) == next_cell ) return PathfindResult::Blocked;
+    }
+  }
 
   auto norm_direction = Cmp::Direction( distance_to_target.normalized() );
 
