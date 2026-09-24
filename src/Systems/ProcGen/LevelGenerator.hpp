@@ -78,11 +78,14 @@ public:
   std::pair<entt::entity, Cmp::Position> find_spawn_location( const Sprites::SpriteSheet &ms, unsigned long seed );
 
   //! @brief Generate a number of plant world items in the new game area.
-  //! @param map_grid_size Size of the game area, in grid cells
-  //! @param reserved_sm Positions excluded from plant placement
   //! @return std::vector<entt::entity>
-  std::vector<entt::entity> gen_random_plants( sf::Vector2u map_grid_size );
+  std::vector<entt::entity> gen_random_plants();
 
+  //! @brief Generate the given plant type in the game area. Called by `gen_random_plants()` and `build_scene_from_data()`.
+  //! @param plant_type SpriteMetaType
+  //! @param pos Position to place the plant
+  //! @return true
+  //! @return false
   bool gen_plant( const std::string &plant_type, sf::Vector2f pos );
 
   //! @brief Scatter loot containers across the map at random unreserved positions.

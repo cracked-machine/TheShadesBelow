@@ -56,6 +56,7 @@
 #include <Factory/WallFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SceneControl/SceneData.hpp>
+#include <Sprites/SpriteMetaType.hpp>
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/PersistSystem.hpp>
@@ -70,9 +71,11 @@
 #include <Utils/Utils.hpp>
 
 #include <SFML/System/Vector2.hpp>
+#include <algorithm>
 #include <functional>
 #include <optional>
 #include <ranges>
+#include <spdlog/fmt/ranges.h>
 #include <spdlog/spdlog.h>
 #include <unordered_map>
 
@@ -602,29 +605,57 @@ std::vector<entt::entity> LevelGenerator::gen_npc_containers( Sprites::SpriteFac
   return assigned_entts;
 }
 
-std::vector<entt::entity> LevelGenerator::gen_random_plants( sf::Vector2u map_grid_size )
+std::vector<entt::entity> LevelGenerator::gen_random_plants()
 {
   std::vector<entt::entity> assigned_entts;
 
-  auto num_plants = map_grid_size.x * map_grid_size.y / 200;
+  constexpr int kMinCountPerPlantType = 10;
 
-  // Find all "sprite.item.plant.*" (the growable world plants) but exclude their
-  // "sprite.graveyard.plant.*.drop" pickup-icon counterparts, which live under a different prefix.
-  const auto plant_sprite_types = m_sprite_factory.get_all_sprite_types_by_pattern( R"(sprite\.item\.plant\.(?!.*\.drop$).*)" );
+  // Find all plant sprites but exclude any ".drop" sprites. The map value will track count of each plant type added.
+  std::unordered_map<Sprites::SpriteMetaType, int> plant_tracker;
+  plant_tracker = m_sprite_factory.get_all_sprite_types_by_pattern( R"(sprite\.item\.plant\.(?!.*\.drop$).*)" ) |
+                  std::views::transform( []( const auto &type ) { return std::pair{ type, 0 }; } ) |
+                  std::ranges::to<std::unordered_map<Sprites::SpriteMetaType, int>>();
 
-  // gen_plant() re-adds the "sprite." prefix itself (to match the bare "item.plant.*" markers
-  // used elsewhere), so strip it back off here.
-  static const std::string kSpritePrefix = "sprite.";
+  // helpers
+  const auto below_quota = [&]( const auto &kv ) { return kv.second < kMinCountPerPlantType; };
+  const auto quota_reached = [&] { return std::ranges::none_of( plant_tracker, below_quota ); };
 
-  for ( std::size_t i = 0; i < num_plants; ++i )
+  // guard against endless failure (e.g. no free tiles left)
+  std::size_t attempts = 0;
+  const std::size_t max_attempts = plant_tracker.size() * kMinCountPerPlantType * 10;
+
+  while ( not quota_reached() and attempts++ < max_attempts )
   {
     auto [random_entity, random_pos] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{},
                                                                         0 );
 
-    auto chosen_plant_sprite_type = plant_sprite_types.at( Cmp::RandomInt( 0, static_cast<int>( plant_sprite_types.size() - 1 ) ).gen() );
-    auto chosen_plant_item_type = chosen_plant_sprite_type.substr( kSpritePrefix.size() );
-    if ( gen_plant( chosen_plant_item_type, random_pos.position ) ) { assigned_entts.push_back( random_entity ); }
+    // Build a list of plant type that are still short of the quota and pick one by random
+    std::vector<decltype( plant_tracker )::iterator> candidates;
+    for ( auto it = plant_tracker.begin(); it != plant_tracker.end(); ++it )
+    {
+      if ( below_quota( *it ) ) candidates.push_back( it );
+    }
+    auto selected_plant_iter = candidates.at( Cmp::RandomInt( 0, static_cast<int>( candidates.size() - 1 ) ).gen() );
+
+    // gen_plant() re-adds the "sprite." prefix itself (to match the bare "item.plant.*" markers used elsewhere), so strip it back off here.
+    const std::string kSpritePrefix = "sprite.";
+    auto chosen_plant_item_type = selected_plant_iter->first.substr( kSpritePrefix.size() );
+
+    // Create the plant in the game area and increment the tracker counter
+    if ( gen_plant( chosen_plant_item_type, random_pos.position ) )
+    {
+      assigned_entts.push_back( random_entity );
+      ++selected_plant_iter->second;
+    }
   }
+
+  if ( not quota_reached() )
+  {
+    SPDLOG_WARN( "gen_random_plants: hit attempt cap ({}) before every plant type reached its minimum count", max_attempts );
+  }
+
+  SPDLOG_INFO( "plant_tracker: {}", plant_tracker );
   return assigned_entts;
 }
 
