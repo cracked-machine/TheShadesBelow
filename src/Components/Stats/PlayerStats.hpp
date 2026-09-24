@@ -23,16 +23,14 @@ public:
   //! @param fear Initial fear value, clamped to [0, 100].
   //! @param despair Initial despair value, clamped to [0, 100].
   //! @param infamy Initial infamy value, clamped to [0, 100].
-  //! @param toxicity Initial toxicity value, clamped to [0, 100].
-  PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Toxicity toxicity, Stats::Luck luck );
+  PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck );
   //! @brief Construct a new Player Stats object.
   //! @param health Initial health value, clamped to [0, 100].
   //! @param fear Initial fear value, clamped to [0, 100].
   //! @param despair Initial despair value, clamped to [0, 100].
   //! @param infamy Initial infamy value, clamped to [0, 100].
-  //! @param toxicity Initial toxicity value, clamped to [0, 100].
   //! @param toxidrome Initial toxidrome affliction.
-  PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Toxicity toxicity, Stats::Luck luck,
+  PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck,
                Cmp::Toxicity::Toxidrome toxidrome );
   //! @brief Destroy the Player Stats object.
   ~PlayerStats();
@@ -61,10 +59,6 @@ public:
   //! @return Stats::toxidrome The toxidrome type and its tick interval.
   [[nodiscard]] const Cmp::Toxicity::Toxidrome &toxidrome() const;
 
-  //! @brief Directly adjust the player's toxicity stat, independent of any toxidrome (e.g. for debug/cheat use).
-  //! @param delta Change applied to the toxicity stat.
-  void add_toxicity( int delta ) { m_toxicity = std::clamp( m_toxicity + delta, 0, 100 ); }
-
   //! @brief Cures the player's toxidromes over time (e.g. while resting at a healing spring). Reduces
   //! every active toxidrome's own toxicity contribution by up to `amount`, removing any that reach
   //! zero, and reduces the toxicity stat by the total actually removed.
@@ -89,8 +83,6 @@ private:
   int m_despair{ 0 };
   //! @brief The player's current infamy, in [0, 100].
   int m_infamy{ 0 };
-  //! @brief The player's current toxicity, in [0, 100].
-  int m_toxicity{ 0 };
   //! @brief The player's current luck, in [0, 100].
   int m_luck{ 50 };
   //! @brief The player's current toxidrome affliction. Never null; held behind a pointer only so this

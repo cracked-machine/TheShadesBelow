@@ -11,7 +11,7 @@ uniform float toxicity;
 out vec4 out_color;
 
 // Strength of the darkened, reddish vignette at full toxicity
-const float MAX_VIGNETTE = 0.75;
+const float MAX_VIGNETTE = 0.80;
 // Curve steepness for the toxicity -> vignette ramp (see vignette_curve in main()): higher means more
 // of the range is reached early, i.e. a faster rise that then tapers off (logarithmic, not linear)
 const float VIGNETTE_LOG_K = 9.0;

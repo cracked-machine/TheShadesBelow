@@ -74,7 +74,7 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   if ( reserved_sm ) reserved_sm->insert( entity, player_pos );
   reg.emplace_or_replace<Cmp::Player::BlastRadius>( entity, blast_radius.get_value() );
   reg.emplace_or_replace<Cmp::PlayerStats>( entity, Cmp::Stats::Health{ 100 }, Cmp::Stats::Fear{ 0 }, Cmp::Stats::Despair{ 0 },
-                                            Cmp::Stats::Infamy{ 0 }, Cmp::Stats::Toxicity{ 0 }, Cmp::Stats::Luck{ 50 } );
+                                            Cmp::Stats::Infamy{ 0 }, Cmp::Stats::Luck{ 50 } );
 
   reg.emplace_or_replace<Cmp::Direction>( entity, sf::Vector2f{ 0, 0 } );
   reg.emplace_or_replace<Cmp::LastDirection>( entity, sf::Vector2f{ 0, 0 } );
