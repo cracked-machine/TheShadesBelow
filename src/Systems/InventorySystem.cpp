@@ -131,12 +131,13 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
     // multiblocks are top-left anchored, so offset the y-axis so that plant base is at players feet
     auto plant_pos = Utils::snap_to_grid( { pos.x, pos.y - Constants::kGridSizePxF.y } );
 
-    // don't allow plants to be dropped at all in the player spawn area
-    if ( Utils::Player::is_in_spawn( reg(), Cmp::Position{ plant_pos, Constants::kGridSizePxF } ) ) return;
-
     // for plant drops fall through to the rest of the function that creates normal world items
     if ( not inventory_slot_cmp->m_item.sprite_type.contains( "drop" ) )
     {
+
+      // don't allow plants to be dropped at all in the player spawn area
+      if ( Utils::Player::is_in_spawn( reg(), Cmp::Position{ plant_pos, Constants::kGridSizePxF } ) ) return;
+
       auto [mb_entt, segment_entt_list] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>(
           reg(), plant_pos, m_sprite_factory.get_spritesheet_by_type( inventory_slot_cmp->m_item.sprite_type ), 0, 0, m_reserved_sm.lock().get() );
       // Preserve the item this plant was grown from, so digging it back up (see the DIG handler in
