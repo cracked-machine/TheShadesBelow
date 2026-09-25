@@ -386,7 +386,7 @@ void NpcSystem::check_once_collision()
            player_cmp.m_damage_cooldown_timer.getElapsedTime().asSeconds() < player_dmg_cooldown.get_value() )
         continue;
 
-      auto npc_collision_action = npc_cmp.actions.at( std::type_index( typeid( Cmp::CollisionAction ) ) );
+      auto npc_collision_action = npc_cmp.at<Cmp::CollisionAction>();
       auto &[action, timer] = npc_collision_action;
       if ( action.interval() > 0.f ) continue;
 
@@ -418,7 +418,7 @@ void NpcSystem::check_timed_collision( sf::Time dt )
   for ( auto [npc_entity, npc_cmp, npc_pos_cmp] : npc_collision_view.each() )
   {
     if ( not Utils::is_visible_in_view( view_bounds, npc_pos_cmp ) ) continue;
-    auto &npc_collision_action = npc_cmp.actions.at( std::type_index( typeid( Cmp::CollisionAction ) ) );
+    auto &npc_collision_action = npc_cmp.at<Cmp::CollisionAction>();
 
     auto &[npc_action, npc_action_timer] = npc_collision_action;
     if ( npc_action.interval() == 0.f ) continue;

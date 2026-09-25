@@ -42,14 +42,30 @@ public:
     sf::Time time;
   };
 
-  //! @brief The action and its effects that can be applied to the player
-  std::unordered_map<std::type_index, ActionTimePair> actions;
+  template <typename ActionT>
+  auto &at()
+  {
+    return actions.at( std::type_index( typeid( ActionT ) ) );
+  }
+  //! @brief Add an action keyed by its concrete type. Must be a template: taking BaseAction by value would slice
+  //! the argument and key every action under typeid(BaseAction).
+  template <typename ActionT>
+  void emplace( ActionT action )
+  {
+    actions.emplace( std::type_index( typeid( ActionT ) ), ActionTimePair{ action, sf::Time::Zero } );
+  }
+  auto begin() { return actions.begin(); }
+  auto end() { return actions.end(); }
 
   template <typename ActionT>
   BaseAction get_action()
   {
     return actions.at( std::type_index( typeid( ActionT ) ) ).action;
   }
+
+private:
+  //! @brief The action and its effects that can be applied to the player
+  std::unordered_map<std::type_index, ActionTimePair> actions;
 };
 
 } // namespace Game::Cmp

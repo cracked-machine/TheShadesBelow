@@ -43,6 +43,11 @@ public:
   //! @brief The associated sprite. Supports multiple sprites for animation. See res/json/npc.json.
   std::vector<Sprites::SpriteMetaType> sprite_type_list;
 
+  //! @brief Interpolation speed used when smoothing this NPC's movement.
+  float m_lerp_speed{ 0 };
+  //! @brief Animation frame rate for the sprite(s) in sprite_type_list.
+  float m_frame_rate{ 0 };
+
   //! @brief Object holding a list of action modifiers and time object
   struct ActionTimePair
   {
@@ -52,13 +57,22 @@ public:
     sf::Time time;
   };
 
+  template <typename ActionT>
+  auto &at()
+  {
+    return actions.at( std::type_index( typeid( ActionT ) ) );
+  }
+  template <typename ActionT>
+  void emplace( ActionT action )
+  {
+    actions.emplace( std::type_index( typeid( ActionT ) ), ActionTimePair{ action, sf::Time::Zero } );
+  }
+  auto begin() { return actions.begin(); }
+  auto end() { return actions.end(); }
+
+private:
   //! @brief The list of action modifiers and their current elapsed time
   std::unordered_map<std::type_index, ActionTimePair> actions;
-
-  //! @brief Interpolation speed used when smoothing this NPC's movement.
-  float m_lerp_speed{0};
-  //! @brief Animation frame rate for the sprite(s) in sprite_type_list.
-  float m_frame_rate{0};
 };
 } // namespace Game::Cmp::Npc
 

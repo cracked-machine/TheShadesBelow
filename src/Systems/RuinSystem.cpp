@@ -253,7 +253,7 @@ void RuinSystem::check_movement_slowdowns()
 
   // Check cobweb collision
   if ( Utils::Collision::any_intersects<Cmp::Ruin::Cobweb>( reg(), Cmp::RectBounds::scaled( player_pos, 1 ),
-                                                       []( const Cmp::Ruin::Cobweb &cobweb ) { return cobweb.integrity > 0; } ) )
+                                                            []( const Cmp::Ruin::Cobweb &cobweb ) { return cobweb.integrity > 0; } ) )
   {
     slowdown_penalty = std::max( slowdown_penalty, 0.5f );
   }
@@ -499,7 +499,7 @@ void RuinSystem::check_player_shadow_hand_collision( sf::Time dt )
   if ( m_shadowhand_action_effects_time.asSeconds() < kActionEffectInterval ) { return; }
 
   auto npc_shadowhand_cmp = Sys::NpcStore::instance().get_item( "npc.shadowhand" );
-  auto npc_collision_action = npc_shadowhand_cmp.actions.at( std::type_index( typeid( Cmp::CollisionAction ) ) );
+  auto npc_collision_action = npc_shadowhand_cmp.at<Cmp::CollisionAction>();
 
   // only trigger PlayerMortalityEvents if player is alive
   if ( Utils::Player::get_mortality( reg() ).state == Cmp::Player::Mortality::State::DEAD ) { return; }

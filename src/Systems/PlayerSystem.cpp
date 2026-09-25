@@ -66,7 +66,10 @@
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
+#include <Components/Toxicity/Bradycadia.hpp>
+#include <Components/Toxicity/Hypoxia.hpp>
 #include <Components/Toxicity/Phototoxia.hpp>
+#include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
@@ -103,6 +106,7 @@
 #include <cmath>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <typeindex>
 
 namespace Game::Sys
 {
@@ -143,7 +147,7 @@ void PlayerSystem::update( sf::Time dt )
   }
 
   check_player_mortality();
-  check_timed_action_side_effects( dt );
+  apply_timed_action_side_effects( dt );
   create_healing_particles();
 
   if ( is_player_in_light() ) { reg().emplace_or_replace<Cmp::Player::Illuminated>( Utils::Player::get_entity( reg() ) ); }
@@ -552,129 +556,44 @@ void PlayerSystem::check_player_mortality()
   }
 }
 
-void PlayerSystem::check_timed_action_side_effects( sf::Time dt )
+void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
 {
-  // To prevent the individual modifiers from fighting with each other, we need to sum them first, then apply that sum at the end of this function.
-  // Therefore the summing of each modifier should be done in sync with a 1 second tick (kTimedActionSyncThreshold).
-  // Because PlayerInventorySlot/NPC components have independent timers from the light/dark timer, we need to update their timers every frame.
 
-  Cmp::BaseAction net_modifier( {}, {}, {}, {}, {}, {}, {} );
-  std::stringstream modifier_log_msg;
-  const auto candle_carry_action = Utils::Player::get_action_from_item_store<Cmp::CarryAction>( "item.candle" );
+  auto &player_stats = Utils::Player::get_stats( reg() );
+
+  const Cmp::BaseAction max_fear_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
+  const Cmp::BaseAction max_hypoxia_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
+  const Cmp::BaseAction max_tachycardia_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
+  const Cmp::BaseAction max_bradycardia_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
+  const Cmp::BaseAction max_venom_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
+  const Cmp::BaseAction player_onfire_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {} );
 
   update_timed_action_clocks( dt );
 
-  // Now accumulate the PlayerInventorySlot/NPC/DarknessFear values if their clocks are expired.
+  // Now apply the various stat modifiers if their conditions are met
   static constexpr float kTimedActionSyncClockMax = 1.0;
   m_timed_action_sync_clock += dt;
   if ( m_timed_action_sync_clock.asSeconds() >= kTimedActionSyncClockMax )
   {
-    auto &player_stats = Utils::Player::get_stats( reg() );
-    if ( player_stats.fear() == 100 ) { player_stats.apply( Cmp::BaseAction( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} ) ); }
-    if ( m_player_is_on_fire ) { player_stats.apply( Cmp::BaseAction( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {} ) ); }
-    modifier_log_msg << apply_npc_modifiers( net_modifier ).rdbuf();
-    modifier_log_msg << apply_inventory_modifiers( net_modifier ).rdbuf();
-
-    // modifier_log_msg << apply_fear_of_the_dark( net_modifier, candle_carry_action ).rdbuf();
-    apply_healing_spring_modifiers( net_modifier );
+    if ( player_stats.toxidrome().at<Cmp::Toxicity::Hypoxia>() == 100 ) { player_stats.apply( max_hypoxia_modifier ); }
+    if ( player_stats.toxidrome().at<Cmp::Toxicity::Tachycardia>() == 100 ) { player_stats.apply( max_tachycardia_modifier ); }
+    if ( player_stats.toxidrome().at<Cmp::Toxicity::Bradycardia>() == 100 ) { player_stats.apply( max_bradycardia_modifier ); }
+    if ( player_stats.toxidrome().at<Cmp::Toxicity::Venom>() == 100 ) { player_stats.apply( max_venom_modifier ); }
+    if ( player_stats.fear() == 100 ) { player_stats.apply( max_fear_modifier ); }
+    if ( m_player_is_on_fire ) { player_stats.apply( player_onfire_modifier ); }
+    apply_npc_modifiers();
+    apply_inventory_modifiers();
+    apply_healing_spring_modifiers();
 
     m_timed_action_sync_clock = sf::Time::Zero;
-    SPDLOG_DEBUG( "modifiers: {}, total: {}", modifier_log_msg.str(), net_modifier.fear() );
 
     kill_player_if_max_fear_despair();
   }
-  Utils::Player::get_stats( reg() ).apply( net_modifier );
 }
 
 bool PlayerSystem::is_player_in_light() { return Utils::Collision::is_position_illuminated( reg(), Utils::Player::get_position( reg() ) ); }
 
-std::stringstream PlayerSystem::apply_fear_of_the_dark( Cmp::BaseAction &net_modifier, const Cmp::BaseAction &candle_carry_action )
-{
-  std::stringstream mod_log;
-  // get the DarknessFear tick interval from the candle item in res/json/items.json
-  const static float kDarknessFearClockMax = candle_carry_action.interval();
-  if ( m_darkness_fear_clock.asSeconds() >= kDarknessFearClockMax )
-  {
-    Cmp::BaseAction fear_of_the_dark( {}, { +1 }, {}, {}, {}, {}, {} );
-    net_modifier += fear_of_the_dark;
-    mod_log << " dark[" << fear_of_the_dark.fear() << "]";
-
-    auto torch_radius = Utils::Player::get_torch_radius( reg() );
-    for ( auto [candle_entt, candle_cmp, candle_pos] : reg().view<Cmp::WorldItem, Cmp::Position>().each() )
-    {
-      if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), candle_pos ) ) continue;
-      if ( not candle_cmp.sprite_type.contains( "candle" ) ) continue;
-      float player_distance = Utils::Maths::getEuclideanDistance( candle_pos.getCenter(), Utils::Player::get_position( reg() ).position );
-      if ( player_distance > torch_radius.value ) continue;
-
-      for ( auto &[action_type, item_action_pair] : candle_cmp.actions )
-      {
-        if ( action_type == std::type_index( typeid( Cmp::CarryAction ) ) )
-        {
-          auto &[item_action, item_action_timer] = item_action_pair;
-          net_modifier += item_action;
-          mod_log << " light[" << item_action.fear() << "]";
-          item_action_timer = sf::Time::Zero;
-        }
-      }
-    }
-
-    // apply candle item modifiers to the player when standing inside flame radius of altar
-    for ( auto [altar_entt, altar_cmp, altar_uuid_cmp] : reg().view<Cmp::Altar::MultiBlock, Cmp::UUID>().each() )
-    {
-      if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), altar_cmp ) ) continue;
-      for ( auto [particle_entt, particle_cmp, particle_uuid_cmp] : reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID>().each() )
-      {
-        if ( altar_uuid_cmp != particle_uuid_cmp ) continue;
-
-        float player_distance = Utils::Maths::getEuclideanDistance( particle_cmp.sprite->get_emitter_position(),
-                                                                    Utils::Player::get_position( reg() ).position );
-        if ( player_distance > torch_radius.value ) continue;
-        net_modifier += candle_carry_action;
-      }
-    }
-
-    // apply candle item modifiers to the player when standing inside flame radius of lava pit
-    for ( auto [lava_entt, lava_cmp] : reg().view<Cmp::Crypt::RoomLavaPitCell>().each() )
-    {
-      if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), lava_cmp ) ) continue;
-      if ( Utils::Player::is_player_near( reg(), lava_cmp ) ) net_modifier += candle_carry_action;
-    }
-
-    // apply candle item modifiers to the player when standing inside flame of burning plant
-    auto burning_plant_view = reg().view<Cmp::PlantMultiBlock, Cmp::Plant::BurningTimeAccumulator, Cmp::UUID>();
-    for ( auto [plant_entt, plant_cmp, plant_burn_cmp, plant_uuid_cmp] : burning_plant_view.each() )
-    {
-      if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), plant_cmp ) ) continue;
-      for ( auto [particle_entt, particle_cmp, particle_uuid_cmp] : reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID>().each() )
-      {
-        if ( plant_uuid_cmp != particle_uuid_cmp ) continue;
-
-        float player_distance = Utils::Maths::getEuclideanDistance( particle_cmp.sprite->get_emitter_position(),
-                                                                    Utils::Player::get_position( reg() ).position );
-        if ( player_distance > torch_radius.value ) continue;
-        net_modifier += candle_carry_action;
-      }
-    }
-
-    // apply candle item modifiers to the player when standing inside radius of wisp NPC
-    for ( auto [altar_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position>().each() )
-    {
-      if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), npc_pos_cmp ) ) continue;
-      if ( not reg().any_of<Cmp::Npc::Wisp>( altar_entt ) ) continue;
-
-      float player_distance = Utils::Maths::getEuclideanDistance( npc_pos_cmp.getCenter(), Utils::Player::get_position( reg() ).position );
-      if ( player_distance > torch_radius.value ) continue;
-      net_modifier += candle_carry_action;
-    }
-
-    m_darkness_fear_clock = sf::Time::Zero;
-  }
-
-  return mod_log;
-}
-
-void PlayerSystem::apply_healing_spring_modifiers( Cmp::BaseAction &net_modifier )
+void PlayerSystem::apply_healing_spring_modifiers()
 {
   // healing spring
   Cmp::BaseAction fountain_effects( Cmp::Stats::Health{ +5 }, Cmp::Stats::Fear{ -5 }, Cmp::Stats::Despair{ -5 }, Cmp::Stats::Infamy{ -5 }, {}, {},
@@ -688,7 +607,7 @@ void PlayerSystem::apply_healing_spring_modifiers( Cmp::BaseAction &net_modifier
 
     float player_distance = Utils::Maths::getEuclideanDistance( fountain_mb_cmp.position, Utils::Player::get_position( reg() ).position );
     if ( player_distance > 500 ) continue;
-    net_modifier += fountain_effects;
+    Utils::Player::get_stats( reg() ).apply( fountain_effects );
 
     // Curing toxidromes isn't expressible as a BaseAction delta (it decays/removes existing active
     // toxidromes rather than adding a new one), so it's applied directly here rather than via net_modifier.
@@ -696,56 +615,32 @@ void PlayerSystem::apply_healing_spring_modifiers( Cmp::BaseAction &net_modifier
   }
 }
 
-std::stringstream PlayerSystem::apply_npc_modifiers( Cmp::BaseAction &net_modifier )
+void PlayerSystem::apply_npc_modifiers()
 {
-  std::stringstream mod_log;
+  // NPC proximity modifiers are only applied when they are within this rectangle
   auto half_view = Cmp::RectBounds::scaled( Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() ), 0.5f );
-  // add the NPC modifiers to the `net_modifier` every kTimedActionSyncClockMax.
+
   for ( auto [npc_entt, npc_cmp, npc_pos_cmp, npc_anim_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::AnimData>().each() )
   {
-    mod_log << " " << npc_anim_cmp.m_sprite_type << "(actions";
-    for ( auto &[action_type, npc_action_pair] : npc_cmp.actions )
-    {
-      if ( not Utils::is_visible_in_view( half_view.getBounds(), npc_pos_cmp ) ) continue;
+    if ( not Utils::is_visible_in_view( half_view.getBounds(), npc_pos_cmp ) ) continue;
+    auto [proximity_action, proximity_timer] = npc_cmp.at<Cmp::ProximityAction>();
 
-      // These are handled as one time modifiers handled by specific systems/factories. Note the tick action field is ignored.
-      if ( action_type == std::type_index( typeid( Cmp::CollisionAction ) ) ) { continue; }  // See NpcSystem
-      if ( action_type == std::type_index( typeid( Cmp::ProjectileAction ) ) ) { continue; } // See ShockwaveSystem
-      if ( action_type == std::type_index( typeid( Cmp::SpawnAction ) ) ) { continue; }      // See NpcFactory/GraveSystem
-      if ( action_type == std::type_index( typeid( Cmp::DestroyAction ) ) ) { continue; }    // See NpcFactory
-
-      if ( action_type == std::type_index( typeid( Cmp::ProximityAction ) ) )
-      {
-        auto &[npc_action, npc_action_timer] = npc_action_pair;
-
-        if ( npc_action_timer.asSeconds() < npc_action.interval() ) continue;
-        net_modifier += npc_action;
-        mod_log << "[" << npc_action.health() << "," << npc_action.fear() << "," << npc_action.despair() << "," << npc_action.infamy() << "]";
-        npc_action_timer = sf::Time::Zero;
-      }
-    }
-    mod_log << ")";
+    if ( proximity_timer.asSeconds() < proximity_action.interval() ) continue;
+    Utils::Player::get_stats( reg() ).apply( proximity_action );
+    proximity_timer = sf::Time::Zero;
   }
-  return mod_log;
 }
 
-std::stringstream PlayerSystem::apply_inventory_modifiers( Cmp::BaseAction &net_modifier )
+void PlayerSystem::apply_inventory_modifiers()
 {
-  std::stringstream mod_log;
-  // add the item modifiers to the `net_modifier`, each item ticking at its own `tick` interval from res/json/items.json.
+  // We need the inventory component not the types
   for ( auto [slot_entt, slot_cmp] : reg().view<Cmp::PlayerInventorySlot>().each() )
   {
-    for ( auto &[action_type, item_action_pair] : slot_cmp.m_item.actions )
-    {
-      if ( action_type != std::type_index( typeid( Cmp::CarryAction ) ) ) continue;
-      auto &[item_action, item_action_timer] = item_action_pair;
-      if ( item_action_timer.asSeconds() < item_action.interval() ) continue;
-      net_modifier += item_action;
-      mod_log << " inv_carry[" << item_action.fear() << "," << item_action.luck() << "]";
-      item_action_timer = sf::Time::Zero;
-    }
+    auto [carry_action, carry_timer] = slot_cmp.m_item.at<Cmp::CarryAction>();
+    if ( carry_timer.asSeconds() < carry_action.interval() ) continue;
+    Utils::Player::get_stats( reg() ).apply( carry_action );
+    carry_timer = sf::Time::Zero;
   }
-  return mod_log;
 }
 
 void PlayerSystem::set_player_on_fire()
@@ -803,7 +698,7 @@ void PlayerSystem::update_timed_action_clocks( sf::Time dt )
   // update PlayerInventorySlot/NPC/DarknessFear clock every frame.
   for ( auto [slot_entt, slot_cmp] : reg().view<Cmp::PlayerInventorySlot>().each() )
   {
-    for ( auto &[action_type, item_action_pair] : slot_cmp.m_item.actions )
+    for ( auto &[action_type, item_action_pair] : slot_cmp.m_item )
     {
       if ( action_type == std::type_index( typeid( Cmp::CollisionAction ) ) ) continue;
       if ( action_type == std::type_index( typeid( Cmp::ProjectileAction ) ) ) continue;
@@ -815,7 +710,7 @@ void PlayerSystem::update_timed_action_clocks( sf::Time dt )
   }
   for ( auto [npc_entt, npc_cmp] : reg().view<Cmp::Npc::NPC>().each() )
   {
-    for ( auto &[action_type, npc_action_pair] : npc_cmp.actions )
+    for ( auto &[action_type, npc_action_pair] : npc_cmp )
     {
       if ( action_type == std::type_index( typeid( Cmp::CollisionAction ) ) ) continue;
       if ( action_type == std::type_index( typeid( Cmp::ProjectileAction ) ) ) continue;

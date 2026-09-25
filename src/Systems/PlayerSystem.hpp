@@ -92,30 +92,20 @@ private:
   //! @brief Update InventoryItem/NPC action effects on player for Tick::SLOW.
   //! @note Cmp::CollisionAction and Cmp::ProjectileAction are excluded. See NpcSystem.
   //! @param dt
-  void check_timed_action_side_effects( sf::Time dt );
-
-  //! @brief Decide when to apply the fear stat (in darkness) or not (candle light, etc...)
-  //! @param net_modifier The net modifications from each light boundary
-  //! @param candle_carry_action Properties used to apply the modifications.
-  //! @return std::stringstream Use .rdbuf() at the callsite (prvalue expression semantics)
-  std::stringstream apply_fear_of_the_dark( Cmp::BaseAction &net_modifier, const Cmp::BaseAction &candle_carry_action );
+  void apply_timed_action_side_effects( sf::Time dt );
 
   bool is_player_in_light();
 
   //! @brief Apply the stat modifiers for the healing spring
-  //! @param net_modifier The accumulated net modifications
-  void apply_healing_spring_modifiers( Cmp::BaseAction &net_modifier );
+  void apply_healing_spring_modifiers();
 
   //! @brief Apply the stat modifiers for visible NPCs
-  //! @param net_modifier The accumulated net modifications
-  //! @return std::stringstream Use .rdbuf() at the callsite (prvalue expression semantics)
-  std::stringstream apply_npc_modifiers( Cmp::BaseAction &net_modifier );
+  void apply_npc_modifiers();
 
   //! @brief Apply the stat modifiers for inventory item
-  //! @param net_modifier The accumulated net modifications
-  //! @return std::stringstream Use .rdbuf() at the callsite (prvalue expression semantics)
-  std::stringstream apply_inventory_modifiers( Cmp::BaseAction &net_modifier );
+  void apply_inventory_modifiers();
 
+  //! @brief Set the player on fire if Cmp::Toxicity::Phototoxia is 100%
   void set_player_on_fire();
 
   //! @brief Update the clocks for the timed actions

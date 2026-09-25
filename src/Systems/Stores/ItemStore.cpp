@@ -35,52 +35,45 @@ void ItemStore::init_store()
       {
         if ( action_key == "burn_action" )
         {
-          worlditem.actions.emplace( typeid( Cmp::BurnAction ),
-                                     Cmp::BurnAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
-                                                      { infamy( action_value ) }, { luck( action_value ) },
-                                                      { tick( action_value ) }, toxidrome( action_value ) ) );
+          worlditem.emplace( Cmp::BurnAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
+                                              { infamy( action_value ) }, { luck( action_value ) }, { tick( action_value ) },
+                                              toxidrome( action_value ) ) );
         }
         else if ( action_key == "carry_action" )
         {
-          worlditem.actions.emplace( typeid( Cmp::CarryAction ),
-                                     Cmp::CarryAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
-                                                       { infamy( action_value ) }, { luck( action_value ) },
-                                                       { tick( action_value ) }, toxidrome( action_value ) ) );
+          worlditem.emplace( Cmp::CarryAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
+                                               { infamy( action_value ) }, { luck( action_value ) }, { tick( action_value ) },
+                                               toxidrome( action_value ) ) );
         }
         else if ( action_key == "consume_action" )
         {
-          worlditem.actions.emplace( typeid( Cmp::ConsumeAction ),
-                                     Cmp::ConsumeAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
-                                                         { infamy( action_value ) }, { luck( action_value ) },
-                                                         { tick( action_value ) }, toxidrome( action_value ) ) );
+          worlditem.emplace( Cmp::ConsumeAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
+                                                 { infamy( action_value ) }, { luck( action_value ) }, { tick( action_value ) },
+                                                 toxidrome( action_value ) ) );
         }
         else if ( action_key == "destroy_action" )
         {
-          worlditem.actions.emplace( typeid( Cmp::DestroyAction ),
-                                     Cmp::DestroyAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
-                                                         { infamy( action_value ) }, { luck( action_value ) },
-                                                         { tick( action_value ) }, toxidrome( action_value ) ) );
+          worlditem.emplace( Cmp::DestroyAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
+                                                 { infamy( action_value ) }, { luck( action_value ) }, { tick( action_value ) },
+                                                 toxidrome( action_value ) ) );
         }
         else if ( action_key == "spawn_action" )
         {
-          worlditem.actions.emplace( typeid( Cmp::SpawnAction ),
-                                     Cmp::SpawnAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
-                                                       { infamy( action_value ) }, { luck( action_value ) },
-                                                       { tick( action_value ) }, toxidrome( action_value ) ) );
+          worlditem.emplace( Cmp::SpawnAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
+                                               { infamy( action_value ) }, { luck( action_value ) }, { tick( action_value ) },
+                                               toxidrome( action_value ) ) );
         }
         else if ( action_key == "proximity_action" )
         {
-          worlditem.actions.emplace( typeid( Cmp::ProximityAction ),
-                                     Cmp::ProximityAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
-                                                           { infamy( action_value ) }, { luck( action_value ) },
-                                                           { tick( action_value ) }, toxidrome( action_value ) ) );
+          worlditem.emplace( Cmp::ProximityAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
+                                                   { infamy( action_value ) }, { luck( action_value ) }, { tick( action_value ) },
+                                                   toxidrome( action_value ) ) );
         }
         else if ( action_key == "sacrifice_action" )
         {
-          worlditem.actions.emplace( typeid( Cmp::SacrificeAction ),
-                                     Cmp::SacrificeAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
-                                                           { infamy( action_value ) }, { luck( action_value ) },
-                                                           { tick( action_value ) }, toxidrome( action_value ) ) );
+          worlditem.emplace( Cmp::SacrificeAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
+                                                   { infamy( action_value ) }, { luck( action_value ) }, { tick( action_value ) },
+                                                   toxidrome( action_value ) ) );
         }
         else { SPDLOG_WARN( "Unknown action key: {}", action_key ); }
       }
