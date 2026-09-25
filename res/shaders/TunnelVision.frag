@@ -16,9 +16,9 @@ out vec4 out_color;
 // the whole screen is visible even when the player is at the edge of the view.
 const float APERTURE_RADIUS_MAX = 1.5;
 // Aperture radius at full toxicity
-const float APERTURE_RADIUS_MIN = 0.08;
+const float APERTURE_RADIUS_MIN = 0.8;
 // Width of the soft transition band at the aperture edge, as a fraction of the current radius
-const float APERTURE_EDGE_SOFTNESS = 0.35;
+const float APERTURE_EDGE_SOFTNESS = 0.75;
 // Curve steepness for the toxicity -> constriction ramp (see constrict_curve in main()): higher means more
 // of the range is reached early, i.e. a faster rise that then tapers off (logarithmic, not linear)
 const float APERTURE_LOG_K = 4.0;
