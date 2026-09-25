@@ -57,21 +57,7 @@ public:
   //! @param toxicity_delta
   //! @return true
   //! @return false
-  bool add( entt::id_type id, int toxicity_delta = 0 )
-  {
-    if ( is_excluded( id ) )
-    {
-      if ( toxicity_delta <= 0 ) return false;
-      toxicity_delta = fight_exclusion( id, toxicity_delta );
-      if ( is_excluded( id ) ) return false;
-    }
-    auto it = m_active.find( id );
-    if ( it == m_active.end() )
-      m_active.emplace( id, std::clamp( toxicity_delta, 0, 100 ) );
-    else
-      it->second = std::clamp( it->second + toxicity_delta, 0, 100 );
-    return true;
-  }
+  bool add( entt::id_type id, int toxicity_delta = 0 );
 
   //! @brief Remove the toxidrome effect from the list
   //! @tparam T
@@ -86,21 +72,7 @@ public:
   //!        actually removed, summed across all active toxidromes.
   //! @param amount
   //! @return int
-  int decay( int amount )
-  {
-    int total_removed = 0;
-    for ( auto it = m_active.begin(); it != m_active.end(); )
-    {
-      const int removed = std::min( amount, it->second );
-      it->second -= removed;
-      total_removed += removed;
-      if ( it->second <= 0 )
-        it = m_active.erase( it );
-      else
-        ++it;
-    }
-    return total_removed;
-  }
+  int decay( int amount );
 
   [[nodiscard]] auto begin() const { return m_active.begin(); }
   [[nodiscard]] auto end() const { return m_active.end(); }
@@ -120,10 +92,7 @@ private:
   //! @brief True if any currently active toxidrome excludes Ex.
   //! @tparam Ex
   template <typename... Ex>
-  [[nodiscard]] bool excludes_active( entt::exclude_t<Ex...> /*unused*/ ) const
-  {
-    return ( m_active.contains( entt::type_hash<Ex>::value() ) || ... );
-  }
+  [[nodiscard]] bool excludes_active( entt::exclude_t<Ex...> /*unused*/ ) const;
 
   //! @brief Checks id against every known toxidrome tag type Ts, given explicitly by
   //! is_excluded() below, and tests the matching type's own excludes against m_active.
@@ -132,19 +101,13 @@ private:
   //! @return true
   //! @return false
   template <typename... Ts>
-  [[nodiscard]] bool is_excluded_by( entt::id_type id ) const
-  {
-    return ( ( entt::type_hash<Ts>::value() == id && excludes_active( excluded_by<Ts> ) ) || ... );
-  }
+  [[nodiscard]] bool is_excluded_by( entt::id_type id ) const;
 
   //! @brief Checks if the given toxidrome type id is excluded by an already-active toxidrome.
   //! @param id The hashed type id to check
   //! @return true
   //! @return false
-  [[nodiscard]] bool is_excluded( entt::id_type id ) const
-  {
-    return is_excluded_by<Bradycardia, Tachycardia, Hypoxia, Hallucinogen, Phototoxia, Venom>( id );
-  }
+  [[nodiscard]] bool is_excluded( entt::id_type id ) const;
 
   //! @brief Spends up to `delta` reducing T's own active toxicity value towards zero,
   //! removing T once it reaches zero. Returns whatever of `delta` wasn't needed for that
@@ -153,15 +116,7 @@ private:
   //! @param delta
   //! @return int
   template <typename T>
-  int fight_one( int delta )
-  {
-    const auto it = m_active.find( entt::type_hash<T>::value() );
-    if ( it == m_active.end() ) return 0;
-    const int damage = std::min( delta, it->second );
-    it->second -= damage;
-    if ( it->second <= 0 ) m_active.erase( it );
-    return delta - damage;
-  }
+  int fight_one( int delta );
 
   //! @brief Spends `delta` fighting down every active toxidrome in Ex, in order, carrying
   //! any leftover from one on to the next.
@@ -169,11 +124,7 @@ private:
   //! @param delta
   //! @return int
   template <typename... Ex>
-  int fight_active( entt::exclude_t<Ex...> /*unused*/, int delta )
-  {
-    ( ( delta = fight_one<Ex>( delta ) ), ... );
-    return delta;
-  }
+  int fight_active( entt::exclude_t<Ex...> /*unused*/, int delta );
 
   //! @brief Finds the known toxidrome type Ts matching id and fights down whichever active
   //! toxidromes it excludes, given explicitly by fight_exclusion() below.
@@ -182,11 +133,7 @@ private:
   //! @param delta
   //! @return int
   template <typename... Ts>
-  int fight_exclusion_by( entt::id_type id, int delta )
-  {
-    ( ( entt::type_hash<Ts>::value() == id ? delta = fight_active( excluded_by<Ts>, delta ) : 0 ), ... );
-    return delta;
-  }
+  int fight_exclusion_by( entt::id_type id, int delta );
 
   //! @brief Spends `delta` fighting down whichever already-active toxidromes exclude id,
   //! removing any that are driven to zero. Returns whatever of `delta` is left over once
@@ -194,10 +141,7 @@ private:
   //! @param id
   //! @param delta
   //! @return int
-  int fight_exclusion( entt::id_type id, int delta )
-  {
-    return fight_exclusion_by<Bradycardia, Tachycardia, Hypoxia, Hallucinogen, Phototoxia, Venom>( id, delta );
-  }
+  int fight_exclusion( entt::id_type id, int delta );
 
   // id -> the toxicity value it contributes while active.
   std::unordered_map<entt::id_type, int> m_active;

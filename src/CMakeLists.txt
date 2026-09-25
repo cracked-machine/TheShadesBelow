@@ -130,6 +130,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Components/Stats/PlayerStats.cpp
     ${CMAKE_SOURCE_DIR}/src/PathFinding/SpatialHashGrid.cpp
     ${CMAKE_SOURCE_DIR}/src/PathFinding/AStar.cpp
+    ${CMAKE_SOURCE_DIR}/src/Components/Toxicity/Toxidrome.cpp
 )
 
 target_precompile_headers(TheShadesBelow PRIVATE
