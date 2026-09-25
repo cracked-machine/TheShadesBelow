@@ -70,4 +70,11 @@ void add_red_vignette( Sys::ShaderSystem &shader_sys, const Cmp::Persist::Displa
   red_vignette_shader->set_tag( "RedVignette" );
   shader_sys.add( std::move( red_vignette_shader ), Cmp::ZOrderValue( 1000000.f ) );
 }
+
+void add_tunnel_vision( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res )
+{
+  auto tunnel_vision_shader = std::make_unique<Sprites::TunnelVisionShader>( "res/shaders/Generic.vert", "res/shaders/TunnelVision.frag", display_res );
+  tunnel_vision_shader->set_tag( "TunnelVision" );
+  shader_sys.add( std::move( tunnel_vision_shader ), Cmp::ZOrderValue( 1000001.f ) );
+}
 } // namespace Game::Factory::Shader

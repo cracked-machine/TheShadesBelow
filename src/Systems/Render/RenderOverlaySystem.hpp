@@ -70,17 +70,6 @@ public:
     if ( m_debug_overlay_ready ) window.draw( sf::Sprite( m_debug_overlay_tex.getTexture() ) );
   }
 
-  //! @brief Redirect this system's draw_world()/draw_screen() calls to an external target (e.g. a
-  //! post-process shader's capture texture) instead of the window. RenderOverlaySystem is a
-  //! separate instance from RenderGameSystem with its own render target, so RenderGameSystem must
-  //! redirect both when capturing a whole frame for a full-screen shader such as FearDistortionShader.
-  //! Call restore_external_render_target() afterwards.
-  //! @param target
-  void redirect_render_target( sf::RenderTarget &target ) { set_render_target( target ); }
-
-  //! @brief Restore rendering back to the window after redirect_render_target().
-  void restore_external_render_target() { restore_render_target(); }
-
   //! @brief init the weak pointer for the pathfinding navmesh
   //! @param spatial_grid_ptr
   //! @param reserved_sm

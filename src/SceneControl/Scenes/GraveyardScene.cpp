@@ -135,6 +135,8 @@ void GraveyardScene::on_init()
                                      Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
   Factory::Shader::add_circular_distortion( m_sys.find<Sys::Store::Type::ShaderSystem>(),
                                             Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
+  Factory::Shader::add_tunnel_vision( m_sys.find<Sys::Store::Type::ShaderSystem>(),
+                                      Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
 
   // create the level contents
   auto &level_gen = m_sys.find<Sys::Store::Type::LevelGenerator>();

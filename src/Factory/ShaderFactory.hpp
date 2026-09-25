@@ -9,6 +9,7 @@
 #include <Shaders/MistShader.hpp>
 #include <Shaders/NightStaticShader.hpp>
 #include <Shaders/RedVignetteShader.hpp>
+#include <Shaders/TunnelVisionShader.hpp>
 #include <Systems/ShaderSystem.hpp>
 
 namespace Game::Factory::Shader
@@ -59,6 +60,13 @@ void add_circular_distortion( Sys::ShaderSystem &shader_sys, const Cmp::Persist:
 //! @param shader_sys
 //! @param display_res
 void add_red_vignette( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res );
+
+//! @brief Register the tunnel vision full-screen post-process shader, sized to the display resolution. Its z-order
+//! sits just above add_red_vignette's, so RenderGameSystem chains it last. The aperture around the player
+//! constricts with the player's tachycardia/bradycardia toxicity stat; see Sprites::TunnelVisionShader::update.
+//! @param shader_sys
+//! @param display_res
+void add_tunnel_vision( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res );
 
 } // namespace Game::Factory::Shader
 

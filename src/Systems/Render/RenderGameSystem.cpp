@@ -121,42 +121,8 @@ void RenderGameSystem::render_game( sf::Time dt, RenderOverlaySystem &render_ove
 
   const bool show_debug_stats = Utils::scene_setting<Cmp::SceneSettings::ShowDebugStats>( reg() ).enabled;
 
-  // A post-process shader (e.g. FearDistortionShader, see Factory::Shader::add_fear_distortion)
-  // samples everything drawn so far rather than blending its own texture onto the scene, so this
-  // frame's drawing has to start out redirected into its render texture instead of the window —
-  // there's no way to discover that lazily mid-frame, since the first thing drawn has to land
-  // somewhere. Exactly how much of the frame ends up distorted is then driven entirely by that
-  // shader's own Cmp::ZOrderValue: render_zorder_queue() below finalizes the capture and composites
-  // it back onto the window at the point it reaches that shader's entity, like any normal z-ordered
-  // draw, rather than at a hand-picked point in this function.
-  // Several post-process shaders are chained in this fixed order (matching their ZOrderValue order): the frame is
-  // captured into the first one's render texture, and each pass is composited into the next one's texture, with the
-  // last one composited onto the window.
-  std::vector<Sprites::IShaderSprite *> post_process_chain;
-  if ( Utils::scene_setting<Cmp::SceneSettings::Shaders>( reg() ).enabled )
-  {
-    for ( const auto *tag : { "CircularDistortion", "RedVignette" } )
-    {
-      auto *shader = ShaderSystem::find( reg(), tag );
-      if ( shader != nullptr && shader->active() ) post_process_chain.push_back( shader );
-    }
-  }
-
-  // main render begin
-  if ( not post_process_chain.empty() )
-  {
-    auto *post_process_shader = post_process_chain.front();
-    // RenderOverlaySystem is a separate RenderSystem instance with its own render target, and
-    // render_wear_level() below is called from within the z-order loop as a world-anchored element
-    // (a bar above an item), not UI chrome, so it must be redirected along with `this`.
-    set_render_target( post_process_shader->get_render_texture() );
-    render_overlay_sys.redirect_render_target( post_process_shader->get_render_texture() );
-    active_render_target().clear();
-  }
-  else { m_window.clear(); }
-
   // render the zorder queue, anything after this is treated as an "overlay" to the main render pipeline
-  PROFILED( render_zorder_queue( render_overlay_sys, post_process_chain ) );
+  PROFILED( render_zorder_queue( render_overlay_sys ) );
 
   PROFILED( render_shockwaves() );
   PROFILED( render_arrow_compass() );
@@ -245,9 +211,10 @@ void RenderGameSystem::render_game( sf::Time dt, RenderOverlaySystem &render_ove
   m_window.display();
 }
 
-void RenderGameSystem::render_zorder_queue( RenderOverlaySystem &render_overlay_sys, const std::vector<Sprites::IShaderSprite *> &post_process_chain )
+void RenderGameSystem::render_zorder_queue( RenderOverlaySystem &render_overlay_sys )
 {
-  size_t next_post_process = 0;
+  m_window.clear();
+
   // render anything with a ZOrderValue component in lowest value first order
   for ( const auto &zorder_entry : m_zorder_queue_ )
   {
@@ -298,26 +265,16 @@ void RenderGameSystem::render_zorder_queue( RenderOverlaySystem &render_overlay_
 
       if ( shader_sprite_owner.sprite->is_post_process() )
       {
-        // Reached this shader's ZOrderValue-driven position in the queue: everything up to here has
-        // been redirected into its render texture (see the bootstrap above), so finalize that
-        // capture and composite the result now, before continuing. If it isn't the next shader in
-        // the chain, nothing was redirected into it this frame, so there's nothing to composite.
-        if ( next_post_process >= post_process_chain.size() || post_process_chain[next_post_process] != shader_sprite_owner.sprite.get() ) continue;
-        shader_sprite_owner.sprite->get_render_texture().display();
+        // Reached this shader's ZOrderValue-driven position in the queue: capture everything drawn so far (including
+        // any earlier post-process pass) into its render texture, then composite the shaded result back over the window.
+        if ( not shader_sprite_owner.sprite->active() ) continue;
+        if ( m_frame_capture.getSize() != m_window.getSize() ) { (void)m_frame_capture.resize( m_window.getSize() ); }
+        m_frame_capture.update( m_window );
 
-        if ( ++next_post_process < post_process_chain.size() )
-        {
-          // hand the result on to the next pass's render texture instead of the window
-          auto &next_texture = post_process_chain[next_post_process]->get_render_texture();
-          next_texture.clear();
-          set_render_target( next_texture );
-          render_overlay_sys.redirect_render_target( next_texture );
-        }
-        else
-        {
-          restore_render_target();
-          render_overlay_sys.restore_external_render_target();
-        }
+        auto &render_texture = shader_sprite_owner.sprite->get_render_texture();
+        render_texture.clear();
+        render_texture.draw( sf::Sprite( m_frame_capture ) );
+        render_texture.display();
         draw_screen( *shader_sprite_owner.sprite );
       }
       else { draw_world( *shader_sprite_owner.sprite ); }

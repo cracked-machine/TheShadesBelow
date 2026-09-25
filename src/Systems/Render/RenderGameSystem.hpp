@@ -11,6 +11,7 @@
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
 
+#include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <entt/entity/fwd.hpp>
@@ -144,10 +145,7 @@ private:
 
   //! @brief Draws every entity in `m_zorder_queue_` (sprites, particles, shaders, floor tiles), lowest z-order first
   //! @param render_overlay_sys anything that is not part of the game world itself. i.e. UI, debug info, etc..
-  //! @param post_process_chain The active post-process shaders for this frame, in the order they are applied. The
-  //! frame is captured into the first one's render texture; each reached in the queue is composited into the next
-  //! one's texture, and the last onto the window. Empty if nothing was redirected.
-  void render_zorder_queue( RenderOverlaySystem &render_overlay_sys, const std::vector<Sprites::IShaderSprite *> &post_process_chain );
+  void render_zorder_queue( RenderOverlaySystem &render_overlay_sys );
 
   //! @brief Used by CryptScene for Priest NPC weapon
   //! @param floormap
@@ -319,6 +317,10 @@ private:
   //! see add_visible_entity_to_z_order_queue()'s Cmp::Position specialization. nullptr if the current
   //! scene didn't supply one, in which case that specialization falls back to an unindexed full scan.
   PathFinding::SpatialHashGridSharedPtr m_render_position_grid;
+
+  //! @brief Copy of the window contents taken when the z-order loop reaches a post-process shader, which is then
+  //! drawn into that shader's render texture. Reused across passes and frames.
+  sf::Texture m_frame_capture;
 };
 
 } // namespace Game::Sys
