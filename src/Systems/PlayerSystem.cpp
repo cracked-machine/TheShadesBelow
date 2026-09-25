@@ -66,6 +66,7 @@
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
+#include <Components/Toxicity/Phototoxia.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
@@ -132,7 +133,7 @@ void PlayerSystem::update( sf::Time dt )
   if ( post_death_timer ) { *post_death_timer += dt; }
   else
   {
-
+    set_player_on_fire();
     check_player_can_push( dt );
     check_player_can_pull( dt );
     update_player_position( dt );
@@ -568,7 +569,9 @@ void PlayerSystem::check_timed_action_side_effects( sf::Time dt )
   m_timed_action_sync_clock += dt;
   if ( m_timed_action_sync_clock.asSeconds() >= kTimedActionSyncClockMax )
   {
-
+    auto &player_stats = Utils::Player::get_stats( reg() );
+    if ( player_stats.fear() == 100 ) { player_stats.apply( Cmp::BaseAction( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} ) ); }
+    if ( m_player_is_on_fire ) { player_stats.apply( Cmp::BaseAction( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {} ) ); }
     modifier_log_msg << apply_npc_modifiers( net_modifier ).rdbuf();
     modifier_log_msg << apply_inventory_modifiers( net_modifier ).rdbuf();
 
@@ -689,7 +692,7 @@ void PlayerSystem::apply_healing_spring_modifiers( Cmp::BaseAction &net_modifier
 
     // Curing toxidromes isn't expressible as a BaseAction delta (it decays/removes existing active
     // toxidromes rather than adding a new one), so it's applied directly here rather than via net_modifier.
-    Utils::Player::get_stats( reg() ).decay_toxidrome( 5 );
+    Utils::Player::get_stats( reg() ).decay_all_toxidrome( 5 );
   }
 }
 
@@ -745,6 +748,53 @@ std::stringstream PlayerSystem::apply_inventory_modifiers( Cmp::BaseAction &net_
   return mod_log;
 }
 
+void PlayerSystem::set_player_on_fire()
+{
+  if ( not Utils::Player::get_stats( reg() ).toxidrome().has<Cmp::Toxicity::Phototoxia>() ) return;
+
+  auto player_pos = Utils::Player::get_position( reg() );
+  const sf::Vector2f flame_emitter_pos( player_pos.getCenter().x, player_pos.position.y + player_pos.size.y );
+
+  auto toxicity = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Phototoxia>();
+  if ( toxicity >= 100 )
+  {
+    for ( auto [ps_owner_entt, ps_owner_cmp] : reg().view<Cmp::Particle::SpriteOwner>().each() )
+    {
+      if ( ps_owner_cmp.sprite->get_tag() == kPlayerFireTag )
+      {
+        m_player_is_on_fire = true;
+        break;
+      }
+    }
+    if ( not m_player_is_on_fire )
+    {
+      // set the player on fire
+      constexpr auto ps_scale = 0.5f;
+      constexpr auto particle_size = 3.f;
+      constexpr auto particle_speed = 60.f;
+      constexpr auto particle_lifetime = 2.f;
+      constexpr auto particle_count = 600;
+      auto uuid = Cmp::UUID::generate();
+      Factory::Particle::add_flame( reg(), kPlayerFireTag, uuid, flame_emitter_pos, player_pos.position.y + Constants::kGridSizePxF.y, ps_scale,
+                                    particle_size, particle_speed, particle_lifetime, particle_count );
+    }
+    // stll burning
+    Factory::Particle::update_position( reg(), kPlayerFireTag, flame_emitter_pos );
+    if ( m_sound_bank.get_effect( "burning" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "burning" ).play(); }
+    m_sound_bank.get_effect( "burning" ).setLooping( false );
+  }
+  else
+  {
+    // put the player fire out
+    for ( auto [ps_owner_entt, ps_owner_cmp] : reg().view<Cmp::Particle::SpriteOwner>().each() )
+    {
+      if ( ps_owner_cmp.sprite->get_tag() == kPlayerFireTag ) { reg().destroy( ps_owner_entt ); }
+    }
+    m_sound_bank.get_effect( "burning" ).stop();
+    m_player_is_on_fire = false;
+  }
+}
+
 void PlayerSystem::update_timed_action_clocks( sf::Time dt )
 {
   auto player_entt = Utils::Player::get_entity( reg() );
@@ -780,19 +830,22 @@ void PlayerSystem::update_timed_action_clocks( sf::Time dt )
 
 void PlayerSystem::kill_player_if_max_fear_despair()
 {
-  // check if player should take health damage/die
-  if ( Utils::Player::get_stats( reg() ).fear() == 100 )
+  // dont send mortality event twice during death animation
+  if ( Utils::Player::get_mortality( reg() ).state == Cmp::Player::Mortality::State::DEAD ) return;
+
+  // Now, are we dead and if so, what type of death animation should be triggered?
+  if ( Utils::Player::get_stats( reg() ).health() == 0 and Utils::Player::get_stats( reg() ).fear() == 100 )
   {
-    Utils::Player::get_stats( reg() ).apply( Cmp::BaseAction( { -1 }, {}, {}, {}, {}, {}, {} ) );
-    if ( Utils::Player::get_stats( reg() ).health() == 0 and Utils::Player::get_mortality( reg() ).state != Cmp::Player::Mortality::State::DEAD )
-    {
-      on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::TERRIFIED, Utils::Player::get_position( reg() ) ) );
-    }
+    on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::TERRIFIED, Utils::Player::get_position( reg() ) ) );
   }
-  else if ( Utils::Player::get_stats( reg() ).despair() == 100 and
-            Utils::Player::get_mortality( reg() ).state != Cmp::Player::Mortality::State::DEAD )
+  else if ( Utils::Player::get_stats( reg() ).health() == 0 and Utils::Player::get_stats( reg() ).despair() == 100 )
   {
     on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::SUICIDE, Utils::Player::get_position( reg() ) ) );
+  }
+  else if ( Utils::Player::get_stats( reg() ).health() == 0 and Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Phototoxia>() == 100 )
+  {
+    m_player_is_on_fire = false;
+    on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::IGNITED, Utils::Player::get_position( reg() ) ) );
   }
 }
 

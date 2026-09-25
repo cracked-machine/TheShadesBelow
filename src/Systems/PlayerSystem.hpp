@@ -116,6 +116,8 @@ private:
   //! @return std::stringstream Use .rdbuf() at the callsite (prvalue expression semantics)
   std::stringstream apply_inventory_modifiers( Cmp::BaseAction &net_modifier );
 
+  void set_player_on_fire();
+
   //! @brief Update the clocks for the timed actions
   //! @param dt
   void update_timed_action_clocks( sf::Time dt );
@@ -202,6 +204,9 @@ private:
   //! Deliberately separate from Cmp::LastDirection, which tracks facing intent for dig/interact checks
   //! and must keep updating even when the player is blocked - unlike this, which must not.
   Cmp::Direction m_last_committed_axis{ sf::Vector2f{ 1.f, 0.f } };
+
+  const std::string kPlayerFireTag = "graveyard.player.particle.flame";
+  bool m_player_is_on_fire = false;
 };
 
 } // namespace Game::Sys

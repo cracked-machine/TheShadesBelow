@@ -19,6 +19,7 @@
 #include <Components/SceneSettings/ShowNavmesh.hpp>
 #include <Components/SceneSettings/ShowPathFinding.hpp>
 #include <Components/Stats/BaseAction.hpp>
+#include <Components/Toxicity/Toxidrome.hpp>
 #include <Events/BuyShopItemEvent.hpp>
 #include <Events/CryptRoomEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
@@ -445,6 +446,7 @@ bool SceneInputRouter::try_handle_debug_key( sf::Keyboard::Scancode scancode )
   else if ( scancode == Scancode::Numpad3 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, Cmp::Stats::Infamy{ 10 }, {}, {} } ); }
   else if ( scancode == Scancode::Numpad2 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, Cmp::Stats::Despair{ 10 }, {}, {}, {} } ); }
   else if ( scancode == Scancode::NumpadPlus ) { Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 10 }, {}, {}, {}, {}, {} } ); }
+  else if ( scancode == Scancode::NumpadMinus ) { Utils::Player::get_stats( reg() ).decay_all_toxidrome( 10 ); }
   else if ( scancode == Scancode::NumpadMultiply ) { Utils::Player::get_wealth( reg() ).wealth += 1; }
   else if ( scancode == Scancode::Numpad7 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Luck{ 10 }, {} } ); }
   else if ( scancode == Scancode::Numpad4 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Luck{ -10 }, {} } ); }

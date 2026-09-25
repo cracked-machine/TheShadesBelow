@@ -106,9 +106,6 @@ void InventorySystem::swap_inventory()
     if ( world_item_cmp.sprite_type == existing_player_inventory_type ) continue; // dont pick up the one we just dropped
     if ( inventory_view.size() > 0 ) { break; }                                   // don't pickup another if we already have one
 
-    // ok pick it up
-    SPDLOG_DEBUG( "GameActions::SWAP_INVENTORY calling 'pickup_world_item' with entt id {} ", static_cast<uint32_t>( carryitem_entt ) );
-    Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg(), world_item_entt );
     pickup_world_item( reg(), world_item_entt );
   }
   m_inventory_cooldown_timer.restart();
@@ -224,6 +221,8 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
 void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world_item_entt )
 {
 
+  Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg, world_item_entt );
+
   auto *anim_data_cmp = reg.try_get<Cmp::AnimData>( world_item_entt );
   if ( not anim_data_cmp ) return;
 
@@ -235,31 +234,24 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
   // create the basic inventory slot entt
   auto inventory_entity = reg.create();
   reg.emplace_or_replace<Cmp::PlayerInventorySlot>( inventory_entity, *world_item_cmp );
-  // clang-format off
-  reg.emplace_or_replace<Cmp::AnimData>( inventory_entity, Cmp::AnimData::Config{
-        .sprite_type =  world_item_cmp->sprite_type,
-        .enabled = false
-  });
-  // clang-format on
+  reg.emplace_or_replace<Cmp::AnimData>( inventory_entity, Cmp::AnimData::Config{ .sprite_type = world_item_cmp->sprite_type, .enabled = false } );
 
-  // transfer any component properties from the world item that we want to retain before it is destroyed
+  // If the worlditem has a particle sprite set the scale, zorder and view type.
   auto *uuid_cmp = reg.try_get<Cmp::UUID>( world_item_entt );
   if ( uuid_cmp )
   {
     for ( auto [ps_entt, ps_owner, ps_uuid_cmp] : reg.view<Cmp::Particle::SpriteOwner, Cmp::UUID>().each() )
     {
-      if ( ps_uuid_cmp == *uuid_cmp )
-      {
-        // Move the ParticleSprite to the UI view. Reset the scale, zorder and view type.
-        ps_owner.sprite->clear();
-        ps_owner.sprite->set_scale( Cmp::Particle::kUiScalePreset );
-        ps_owner.sprite->set_view_type( Cmp::Particle::ViewType::SCREEN );
-        reg.emplace_or_replace<Cmp::ZOrderValue>( ps_entt, 50000 );
-      }
+      if ( ps_uuid_cmp != *uuid_cmp ) continue;
+      ps_owner.sprite->clear();
+      ps_owner.sprite->set_scale( Cmp::Particle::kUiScalePreset );
+      ps_owner.sprite->set_view_type( Cmp::Particle::ViewType::SCREEN );
+      reg.emplace_or_replace<Cmp::ZOrderValue>( ps_entt, 50000 );
     }
     reg.emplace_or_replace<Cmp::UUID>( inventory_entity, uuid_cmp->data );
   }
 
+  // transfer the wear level from the worlditem to the new player inventory item
   auto *wear_level_cmp = reg.try_get<Cmp::Inventory::WearLevel>( world_item_entt );
   if ( wear_level_cmp ) { reg.emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, wear_level_cmp->m_level ); }
 

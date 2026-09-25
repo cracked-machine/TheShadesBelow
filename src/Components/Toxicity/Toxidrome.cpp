@@ -25,7 +25,7 @@ bool Toxidrome::add( entt::id_type id, int toxicity_delta )
   return true;
 }
 
-int Toxidrome::decay( int amount )
+int Toxidrome::decay_all( int amount )
 {
   int total_removed = 0;
   for ( auto it = m_active.begin(); it != m_active.end(); )

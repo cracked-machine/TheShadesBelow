@@ -63,7 +63,7 @@ public:
   //! every active toxidrome's own toxicity contribution by up to `amount`, removing any that reach
   //! zero, and reduces the toxicity stat by the total actually removed.
   //! @param amount Maximum reduction applied to each active toxidrome's own toxicity value.
-  void decay_toxidrome( int amount );
+  void decay_all_toxidrome( int amount );
 
   //! @brief Update the player stats with the BaseAction object.
   //! @note BaseAction: health, fear, despair, infamy, luck, toxidrome. Each toxidrome carried by the

@@ -72,7 +72,7 @@ public:
   //!        actually removed, summed across all active toxidromes.
   //! @param amount
   //! @return int
-  int decay( int amount );
+  int decay_all( int amount );
 
   [[nodiscard]] auto begin() const { return m_active.begin(); }
   [[nodiscard]] auto end() const { return m_active.end(); }

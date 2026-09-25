@@ -51,7 +51,7 @@ PlayerStats &PlayerStats::operator=( PlayerStats &&other ) noexcept = default;
 
 const Cmp::Toxicity::Toxidrome &PlayerStats::toxidrome() const { return *m_toxidrome; }
 
-void PlayerStats::decay_toxidrome( int amount ) { m_toxidrome->decay( amount ); }
+void PlayerStats::decay_all_toxidrome( int amount ) { m_toxidrome->decay_all( amount ); }
 
 void PlayerStats::apply( const BaseAction &action )
 {
