@@ -136,7 +136,7 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
     {
 
       // don't allow plants to be dropped at all in the player spawn area
-      if ( Utils::Player::is_in_spawn( reg(), Cmp::Position{ plant_pos, Constants::kGridSizePxF } ) ) return;
+      if ( Utils::Player::is_in_spawn( reg(), Utils::Player::get_position( reg() ) ) ) return;
 
       auto [mb_entt, segment_entt_list] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>(
           reg(), plant_pos, m_sprite_factory.get_spritesheet_by_type( inventory_slot_cmp->m_item.sprite_type ), 0, 0, m_reserved_sm.lock().get() );
