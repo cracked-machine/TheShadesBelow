@@ -9,7 +9,6 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Player/EatingTimeAccumulator.hpp>
 #include <Components/Player/KeysCount.hpp>
-#include <Components/Player/Mortality.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>

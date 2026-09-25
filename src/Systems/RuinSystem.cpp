@@ -9,7 +9,6 @@
 #include <Components/Persistent/RuinMaxSpiders.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Curse.hpp>
-#include <Components/Player/Mortality.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Player/RuinLocation.hpp>
 #include <Components/Player/SpeedPenalty.hpp>

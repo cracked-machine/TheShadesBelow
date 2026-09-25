@@ -1,6 +1,5 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
-#include <Components/Player/Mortality.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
 #include <Components/Stats/BaseAction.hpp>

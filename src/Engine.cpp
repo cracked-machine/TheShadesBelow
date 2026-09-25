@@ -2,7 +2,6 @@
 #include <Components/Hazard/SinkholeCell.hpp>
 #include <Components/Persistent/EffectsVolume.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
-#include <Components/Player/Mortality.hpp>
 #include <Engine.hpp>
 #include <Events/PauseClocksEvent.hpp>
 #include <Events/ResumeClocksEvent.hpp>

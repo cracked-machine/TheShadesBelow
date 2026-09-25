@@ -1,9 +1,3 @@
-// #include <Systems/BaseSystem.hpp>
-
-#include <Sprites/SpriteSheet.hpp>
-#include <Utils/Constants.hpp>
-#include <Utils/Utils.hpp>
-
 #include <Components/Exit.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
@@ -11,15 +5,17 @@
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
-#include <Components/Player/Mortality.hpp>
 #include <Components/Player/RuinLocation.hpp>
 #include <Components/Player/SpeedPenalty.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
-
 #include <Components/ZOrderValue.hpp>
+#include <Sprites/SpriteSheet.hpp>
+#include <Utils/Constants.hpp>
+#include <Utils/Utils.hpp>
+
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/View.hpp>
 #include <SFML/Window/Mouse.hpp>

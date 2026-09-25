@@ -38,6 +38,12 @@ public:
     SHADOWCURSED = 11,
     //! @brief When player Fear stat == 100
     TERRIFIED = 12,
+    //! @brief When player health == 0 and hypoxia == 100
+    SUFFOCATED = 13,
+    //! @brief When player health == 0 and tacycardia/bradycardia == 100
+    CARDIACARREST = 14,
+    //! @brief When player health == 0 and venom == 100
+    POISONED = 15,
 
     //! @brief Player is dead. final state. end the game.
     DEAD = 255

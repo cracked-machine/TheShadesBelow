@@ -71,6 +71,7 @@
 #include <Components/Toxicity/Phototoxia.hpp>
 #include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
+#include <Components/Toxicity/Venom.hpp>
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
 #include <Components/Wormhole/Jump.hpp>
@@ -587,7 +588,7 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
 
     m_timed_action_sync_clock = sf::Time::Zero;
 
-    kill_player_if_max_fear_despair();
+    kill_player_if_stats_are_max();
   }
 }
 
@@ -723,21 +724,34 @@ void PlayerSystem::update_timed_action_clocks( sf::Time dt )
   m_darkness_fear_clock += dt;
 }
 
-void PlayerSystem::kill_player_if_max_fear_despair()
+void PlayerSystem::kill_player_if_stats_are_max()
 {
   // dont send mortality event twice during death animation
   if ( Utils::Player::get_mortality( reg() ).state == Cmp::Player::Mortality::State::DEAD ) return;
-
+  if ( Utils::Player::get_stats( reg() ).health() > 0 ) return;
   // Now, are we dead and if so, what type of death animation should be triggered?
-  if ( Utils::Player::get_stats( reg() ).health() == 0 and Utils::Player::get_stats( reg() ).fear() == 100 )
+  if ( Utils::Player::get_stats( reg() ).fear() == 100 )
   {
     on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::TERRIFIED, Utils::Player::get_position( reg() ) ) );
   }
-  else if ( Utils::Player::get_stats( reg() ).health() == 0 and Utils::Player::get_stats( reg() ).despair() == 100 )
+  else if ( Utils::Player::get_stats( reg() ).despair() == 100 )
   {
     on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::SUICIDE, Utils::Player::get_position( reg() ) ) );
   }
-  else if ( Utils::Player::get_stats( reg() ).health() == 0 and Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Phototoxia>() == 100 )
+  else if ( Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Hypoxia>() == 100 )
+  {
+    on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::SUFFOCATED, Utils::Player::get_position( reg() ) ) );
+  }
+  else if ( Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Tachycardia>() == 100 or
+            Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Bradycardia>() == 100 )
+  {
+    on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::CARDIACARREST, Utils::Player::get_position( reg() ) ) );
+  }
+  else if ( Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Venom>() == 100 )
+  {
+    on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::POISONED, Utils::Player::get_position( reg() ) ) );
+  }
+  else if ( Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Phototoxia>() == 100 )
   {
     m_player_is_on_fire = false;
     on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::IGNITED, Utils::Player::get_position( reg() ) ) );
@@ -989,12 +1003,35 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
     case Cmp::Player::Mortality::State::DEAD: {
       break;
     }
-    case Cmp::Player::Mortality::State::SHADOWCURSED:
+    case Cmp::Player::Mortality::State::SHADOWCURSED: {
       const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
       common_death_throes();
       break;
+    }
+    case Cmp::Player::Mortality::State::SUFFOCATED: {
+      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
+      m_sound_bank.get_effect( "player_blood_splat" ).play();
+      common_death_throes();
+      break;
+    }
+    case Cmp::Player::Mortality::State::CARDIACARREST: {
+      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
+      m_sound_bank.get_effect( "player_blood_splat" ).play();
+      common_death_throes();
+      break;
+    }
+    case Cmp::Player::Mortality::State::POISONED: {
+      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
+      m_sound_bank.get_effect( "player_blood_splat" ).play();
+      common_death_throes();
+      break;
+    }
+    break;
   }
 }
 

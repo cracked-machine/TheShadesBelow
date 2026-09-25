@@ -10,7 +10,6 @@
 #include <Components/FootStepTimer.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Player/Mortality.hpp>
 #include <Components/Random.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SpawnArea.hpp>

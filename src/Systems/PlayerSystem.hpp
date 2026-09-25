@@ -113,7 +113,7 @@ private:
   void update_timed_action_clocks( sf::Time dt );
 
   //! @brief Send mortality event if player fear/despair is 100%
-  void kill_player_if_max_fear_despair();
+  void kill_player_if_stats_are_max();
 
   //! @brief Add/remove the player healing particle sprite depending on proximity to an active healing spring fountain.
   void create_healing_particles();
