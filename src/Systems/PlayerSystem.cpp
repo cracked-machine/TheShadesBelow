@@ -572,7 +572,6 @@ void PlayerSystem::update_heartbeat( sf::Time dt )
 
   auto &heartbeat_sfx = m_sound_bank.get_effect( "heartbeat" );
   if ( hb.update( dt, severity ) ) { heartbeat_sfx.play(); }
-  // else if ( hb.is_resting() ) { heartbeat_sfx.stop(); } // cut off any beat still playing
 }
 
 void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
