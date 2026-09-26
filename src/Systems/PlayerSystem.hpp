@@ -93,6 +93,7 @@ private:
   //! @note Cmp::CollisionAction and Cmp::ProjectileAction are excluded. See NpcSystem.
   //! @param dt
   void apply_timed_action_side_effects( sf::Time dt );
+  void update_heartbeat( sf::Time dt );
 
   bool is_player_in_light();
 

@@ -48,6 +48,7 @@ void SoundBank::init()
   sounds.emplace( "burning", EffectsData{ "res/audio/burning.mp3" } );
   sounds.emplace( "equip_inventory", EffectsData{ "res/audio/equip_inventory.mp3" } );
   sounds.emplace( "drop_inventory", EffectsData{ "res/audio/drop_inventory.mp3" } );
+  sounds.emplace( "heartbeat", EffectsData{ "res/audio/heartbeat.mp3" } );
 
   sounds.emplace( "draw_bow", EffectsData{ "res/audio/draw_bow.mp3" } );
   sounds.emplace( "release_bow", EffectsData{ "res/audio/release_bow.mp3" } );

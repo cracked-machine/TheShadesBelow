@@ -41,6 +41,7 @@
 #include <Components/Plant/BurningTimeAccumulator.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
+#include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/Illuminated.hpp>
 #include <Components/Player/Mortality.hpp>
 #include <Components/Player/MovementDelta.hpp>
@@ -150,6 +151,8 @@ void PlayerSystem::update( sf::Time dt )
   check_player_mortality();
   apply_timed_action_side_effects( dt );
   create_healing_particles();
+
+  update_heartbeat( dt );
 
   if ( is_player_in_light() ) { reg().emplace_or_replace<Cmp::Player::Illuminated>( Utils::Player::get_entity( reg() ) ); }
   else { reg().remove<Cmp::Player::Illuminated>( Utils::Player::get_entity( reg() ) ); }
@@ -555,6 +558,21 @@ void PlayerSystem::check_player_mortality()
       }
     }
   }
+}
+
+void PlayerSystem::update_heartbeat( sf::Time dt )
+{
+  auto &hb = Utils::Player::get_heartbeat( reg() );
+  const auto &toxidrome = Utils::Player::get_stats( reg() ).toxidrome();
+
+  // Tachycardia/Bradycardia are mutually exclusive, normalise within -1.0 to 1.0
+  const float tachycardia = static_cast<float>( toxidrome.at<Cmp::Toxicity::Tachycardia>().value_or( 0 ) );
+  const float bradycardia = static_cast<float>( toxidrome.at<Cmp::Toxicity::Bradycardia>().value_or( 0 ) );
+  const float severity = ( tachycardia - bradycardia ) / 100.f;
+
+  auto &heartbeat_sfx = m_sound_bank.get_effect( "heartbeat" );
+  if ( hb.update( dt, severity ) ) { heartbeat_sfx.play(); }
+  // else if ( hb.is_resting() ) { heartbeat_sfx.stop(); } // cut off any beat still playing
 }
 
 void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )

@@ -31,6 +31,7 @@ class LastGraveyardPosition;
 class Curse;
 class CadaverCount;
 class LevelDepth;
+class HeartBeat;
 } // namespace Game::Cmp::Player
 
 namespace std
@@ -251,6 +252,8 @@ Cmp::BaseAction get_action_from_item_store( const std::string &item_type );
 //! @throws std::runtime_error if the key is not present in the store.
 template <typename ActionT>
 void apply_action_from_npc_store( entt::registry &reg, const std::string &npc_type );
+
+Cmp::Player::HeartBeat &get_heartbeat( entt::registry &reg );
 
 } // namespace Game::Utils::Player
 

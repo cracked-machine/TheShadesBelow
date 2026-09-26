@@ -19,6 +19,7 @@
 #include <Components/Player/Curse.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/FootstepType.hpp>
+#include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/Illuminated.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
 #include <Components/Player/LevelDepth.hpp>
@@ -449,5 +450,13 @@ template void apply_action_from_npc_store<Cmp::ProjectileAction>( entt::registry
 template void apply_action_from_npc_store<Cmp::ProximityAction>( entt::registry &, const std::string & );
 template void apply_action_from_npc_store<Cmp::SacrificeAction>( entt::registry &, const std::string & );
 template void apply_action_from_npc_store<Cmp::SpawnAction>( entt::registry &, const std::string & );
+
+Cmp::Player::HeartBeat &get_heartbeat( entt::registry &reg )
+{
+  auto player_entt = get_entity( reg );
+  auto *heartbeat_cmp = reg.try_get<Cmp::Player::HeartBeat>( player_entt );
+  if ( not heartbeat_cmp ) throw std::runtime_error( "Player has no Cmp::Player::HeartBeat component." );
+  return *heartbeat_cmp;
+}
 
 } // namespace Game::Utils::Player

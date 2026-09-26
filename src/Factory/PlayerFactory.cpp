@@ -20,6 +20,7 @@
 #include <Components/Player/Curse.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/FootstepType.hpp>
+#include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
 #include <Components/Player/LevelDepth.hpp>
@@ -100,6 +101,7 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   reg.emplace_or_replace<Cmp::ZOrderValue>( entity, start_pos.y ); // z-order based on y-position
   reg.emplace_or_replace<Cmp::AbsoluteAlpha>( entity, 255 );       // fully opaque
   reg.emplace_or_replace<Cmp::AbsoluteRotation>( entity, 0 );
+  reg.emplace_or_replace<Cmp::Player::HeartBeat>( entity );
   add_inventory( reg, "item.pickaxe" );
 }
 
