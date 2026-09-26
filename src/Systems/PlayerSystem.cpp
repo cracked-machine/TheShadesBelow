@@ -49,6 +49,7 @@
 #include <Components/Player/NoPath.hpp>
 #include <Components/Player/PendingNoPath.hpp>
 #include <Components/Player/PostDeathTimeout.hpp>
+#include <Components/Player/TookDamage.hpp>
 #include <Components/Player/TorchRadius.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
@@ -580,10 +581,10 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
   auto &player_stats = Utils::Player::get_stats( reg() );
 
   const Cmp::BaseAction max_fear_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
-  const Cmp::BaseAction max_hypoxia_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
-  const Cmp::BaseAction max_tachycardia_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
-  const Cmp::BaseAction max_bradycardia_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
-  const Cmp::BaseAction max_venom_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
+  const Cmp::BaseAction max_hypoxia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
+  const Cmp::BaseAction max_tachycardia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
+  const Cmp::BaseAction max_bradycardia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
+  const Cmp::BaseAction max_venom_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
   const Cmp::BaseAction player_onfire_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {} );
 
   update_timed_action_clocks( dt );
@@ -593,12 +594,36 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
   m_timed_action_sync_clock += dt;
   if ( m_timed_action_sync_clock.asSeconds() >= kTimedActionSyncClockMax )
   {
-    if ( player_stats.toxidrome().at<Cmp::Toxicity::Hypoxia>() == 100 ) { player_stats.apply( max_hypoxia_modifier ); }
-    if ( player_stats.toxidrome().at<Cmp::Toxicity::Tachycardia>() == 100 ) { player_stats.apply( max_tachycardia_modifier ); }
-    if ( player_stats.toxidrome().at<Cmp::Toxicity::Bradycardia>() == 100 ) { player_stats.apply( max_bradycardia_modifier ); }
-    if ( player_stats.toxidrome().at<Cmp::Toxicity::Venom>() == 100 ) { player_stats.apply( max_venom_modifier ); }
-    if ( player_stats.fear() == 100 ) { player_stats.apply( max_fear_modifier ); }
-    if ( m_player_is_on_fire ) { player_stats.apply( player_onfire_modifier ); }
+    if ( player_stats.toxidrome().at<Cmp::Toxicity::Hypoxia>() == 100 )
+    {
+      player_stats.apply( max_hypoxia_modifier );
+      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+    }
+    if ( player_stats.toxidrome().at<Cmp::Toxicity::Tachycardia>() == 100 )
+    {
+      player_stats.apply( max_tachycardia_modifier );
+      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+    }
+    if ( player_stats.toxidrome().at<Cmp::Toxicity::Bradycardia>() == 100 )
+    {
+      player_stats.apply( max_bradycardia_modifier );
+      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+    }
+    if ( player_stats.toxidrome().at<Cmp::Toxicity::Venom>() == 100 )
+    {
+      player_stats.apply( max_venom_modifier );
+      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+    }
+    if ( player_stats.fear() == 100 )
+    {
+      player_stats.apply( max_fear_modifier );
+      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+    }
+    if ( m_player_is_on_fire )
+    {
+      player_stats.apply( player_onfire_modifier );
+      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+    }
     apply_npc_modifiers();
     apply_inventory_modifiers();
     apply_healing_spring_modifiers();
@@ -635,6 +660,7 @@ void PlayerSystem::apply_healing_spring_modifiers()
 
 void PlayerSystem::apply_npc_modifiers()
 {
+  // See NpcSystem for collision health damage
   // NPC proximity modifiers are only applied when they are within this rectangle
   auto half_view = Cmp::RectBounds::scaled( Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() ), 0.5f );
 

@@ -49,6 +49,7 @@
 #include <Systems/RuinSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 #include <Systems/Threats/NpcSystem.hpp>
+#include <Systems/ShaderSystem.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -222,6 +223,7 @@ void RuinSceneLowerFloor::do_update( [[maybe_unused]] sf::Time dt )
   m_sys.find<Store::Type::ActionSystem>().update( dt );
 
   m_sys.find<Store::Type::PlayerSystem>().update( dt );
+  m_sys.find<Store::Type::ShaderSystem>().update( dt );
 
   auto [_, map_size_pixel] = m_scene_data->map_size();
 

@@ -10,6 +10,9 @@ uniform vec2 player_uv;
 // normalised player tachycardia/bradycardia toxicity (0..1), drives how far the aperture constricts
 uniform float toxicity;
 
+// heartbeat pulse (0..1): 1 at the instant a beat fires, decaying to 0; always 0 at resting heart rate
+uniform float heartbeat_pulse;
+
 out vec4 out_color;
 
 // Aperture radius at zero toxicity, in height-normalised units (1.0 == screen height). Large enough that
@@ -22,6 +25,8 @@ const float APERTURE_EDGE_SOFTNESS = 0.75;
 // Curve steepness for the toxicity -> constriction ramp (see constrict_curve in main()): higher means more
 // of the range is reached early, i.e. a faster rise that then tapers off (logarithmic, not linear)
 const float APERTURE_LOG_K = 4.0;
+// Fraction of the aperture radius lost at the peak of a heartbeat pulse
+const float HEARTBEAT_PULSE_STRENGTH = 0.15;
 
 void main()
 {
@@ -36,6 +41,8 @@ void main()
   // logarithmic ease-out from 0 at toxicity=0 to 1 at toxicity=1
   float constrict_curve = log( 1.0 + APERTURE_LOG_K * toxicity ) / log( 1.0 + APERTURE_LOG_K );
   float radius = mix( APERTURE_RADIUS_MAX, APERTURE_RADIUS_MIN, constrict_curve );
+  // each heartbeat squeezes the aperture momentarily, then it relaxes back
+  radius *= 1.0 - HEARTBEAT_PULSE_STRENGTH * heartbeat_pulse;
 
   // 1.0 inside the aperture, fading to 0.0 (black) at its edge
   float visibility = 1.0 - smoothstep( radius * ( 1.0 - APERTURE_EDGE_SOFTNESS ), radius, dist_from_player );

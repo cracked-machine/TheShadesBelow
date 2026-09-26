@@ -44,6 +44,7 @@
 #include <Systems/RuinSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 #include <Systems/Threats/NpcSystem.hpp>
+#include <Systems/ShaderSystem.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -174,6 +175,7 @@ void RuinSceneUpperFloor::do_update( sf::Time dt )
   m_sys.find<Store::Type::RuinSystem>().check_movement_slowdowns();
 
   m_sys.find<Store::Type::PlayerSystem>().update( dt );
+  m_sys.find<Store::Type::ShaderSystem>().update( dt );
   m_sys.find<Store::Type::PlayerSystem>().disable_damage_cooldown();
 
   auto [_, map_size_pixel] = m_scene_data->map_size();

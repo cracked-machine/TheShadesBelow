@@ -25,6 +25,7 @@
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
 #include <Components/Persistent/PcDamageDelay.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/TookDamage.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
@@ -391,6 +392,7 @@ void NpcSystem::check_once_collision()
       if ( not touching_player ) continue;
 
       Utils::Player::get_stats( reg() ).apply( action );
+      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
       player_cmp.skip_damage_cooldown_once = false;
 
       m_sound_bank.get_effect( "damage_player" ).play();
@@ -426,6 +428,7 @@ void NpcSystem::check_timed_collision( sf::Time dt )
     if ( not player_pos.findIntersection( npc_pos_cmp ) ) continue;
 
     Utils::Player::get_stats( reg() ).apply( npc_action );
+    reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     if ( m_sound_bank.get_effect( "damage_player" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "damage_player" ).play(); }
 
     npc_action_timer = sf::Time::Zero;

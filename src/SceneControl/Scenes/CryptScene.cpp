@@ -40,6 +40,7 @@
 #include <Systems/Stores/SystemStore.hpp>
 #include <Systems/Threats/NpcSystem.hpp>
 #include <Systems/Threats/ShockwaveSystem.hpp>
+#include <Systems/ShaderSystem.hpp>
 #include <Utils/Player.hpp>
 
 namespace Game::Scene
@@ -173,6 +174,7 @@ void CryptScene::do_update( sf::Time dt )
   m_sys.find<Sys::Store::Type::CryptSystem>().update( dt );
   m_sys.find<Sys::Store::Type::ShockwaveSystem>().update( dt );
   m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt );
+  m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt );
   m_sys.find<Sys::Store::Type::PassageSystem>().update( dt );
 
   m_sys.find<Sys::Store::Type::ParticleSystem>().check_collsion();

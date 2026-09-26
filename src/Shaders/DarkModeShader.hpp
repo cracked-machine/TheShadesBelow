@@ -42,7 +42,7 @@ public:
 
   //! @brief Refresh the darkness/aperture uniforms and center the sprite on the player each frame.
   //! @param reg The entt registry, used to source the player's position and the current world view.
-  void update( entt::registry &reg ) override;
+  void update( entt::registry &reg, sf::Time dt ) override;
 };
 
 } // namespace Game::Sprites

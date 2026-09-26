@@ -39,20 +39,20 @@ public:
 
   //! @brief Refresh the smoothed hallucinogen toxicity level uniform each frame.
   //! @param reg The entt registry, used to source the player's hallucinogen toxicity stat.
-  void update( entt::registry &reg ) override;
+  void update( entt::registry &reg, sf::Time dt ) override;
 
   //! @brief This shader samples the already-rendered frame rather than blending a self-contained texture.
   //! @return Always true; see IShaderSprite::is_post_process() for how this changes composite behaviour.
   [[nodiscard]] bool is_post_process() const override { return true; }
 
 private:
-  //! @brief Frame-rate independent exponential smoothing (Utils::Maths::exp_decay) of the raw hallucinogen
-  //! toxicity stat, which only changes in coarse discrete steps; VIGNETTE_LOG_K in RedVignette.frag curves
-  //! steeply at low toxicity, so the raw step would otherwise visibly snap.
-  float m_smoothed_toxicity{ 0.f };
+  //! @brief
+  float m_severity{ 0.f };
 
-  //! @brief elapsed() timestamp of the last update() call, used to compute the per-frame dt.
-  sf::Time m_last_toxicity_update;
+  //! @brief time since the player last took damage; starts large so no flash plays until the first hit.
+  sf::Time m_update_timer{ sf::seconds( 1000.f ) };
+
+  int m_player_last_health{ 100 };
 };
 
 } // namespace Game::Sprites

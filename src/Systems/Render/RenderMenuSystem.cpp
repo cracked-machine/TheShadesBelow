@@ -104,7 +104,6 @@ void RenderMenuSystem::render_title()
     for ( auto [entt, shader] : shader_view.each() )
     {
       if ( not shader.sprite ) continue;
-      shader.sprite->update( reg() );
       m_window.draw( *shader.sprite );
     }
 

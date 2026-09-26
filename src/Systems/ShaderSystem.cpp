@@ -22,11 +22,11 @@ std::vector<entt::entity> ShaderSystem::add_to_registry( Cmp::Shader::SpriteOwne
   return entt_list;
 }
 
-void ShaderSystem::update()
+void ShaderSystem::update( sf::Time dt )
 {
   for ( auto [entt, owner] : reg().view<Cmp::Shader::SpriteOwner>().each() )
   {
-    owner.sprite->update( reg() );
+    owner.sprite->update( reg(), dt );
   }
 }
 

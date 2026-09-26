@@ -61,20 +61,21 @@ void add_circular_distortion( Sys::ShaderSystem &shader_sys, const Cmp::Persist:
   auto circular_distortion_shader = std::make_unique<Sprites::CircularDistortionShader>( "res/shaders/Generic.vert",
                                                                                          "res/shaders/CircularDistortion.frag", display_res );
   circular_distortion_shader->set_tag( "CircularDistortion" );
-  shader_sys.add( std::move( circular_distortion_shader ), Cmp::ZOrderValue( 999999.f ) );
+  shader_sys.add( std::move( circular_distortion_shader ), Cmp::ZOrderValue( 1000000.f ) );
 }
 
 void add_red_vignette( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res )
 {
   auto red_vignette_shader = std::make_unique<Sprites::RedVignetteShader>( "res/shaders/Generic.vert", "res/shaders/RedVignette.frag", display_res );
   red_vignette_shader->set_tag( "RedVignette" );
-  shader_sys.add( std::move( red_vignette_shader ), Cmp::ZOrderValue( 1000000.f ) );
+  shader_sys.add( std::move( red_vignette_shader ), Cmp::ZOrderValue( 3000000.f ) );
 }
 
 void add_tunnel_vision( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res )
 {
-  auto tunnel_vision_shader = std::make_unique<Sprites::TunnelVisionShader>( "res/shaders/Generic.vert", "res/shaders/TunnelVision.frag", display_res );
+  auto tunnel_vision_shader = std::make_unique<Sprites::TunnelVisionShader>( "res/shaders/Generic.vert", "res/shaders/TunnelVision.frag",
+                                                                             display_res );
   tunnel_vision_shader->set_tag( "TunnelVision" );
-  shader_sys.add( std::move( tunnel_vision_shader ), Cmp::ZOrderValue( 1000001.f ) );
+  shader_sys.add( std::move( tunnel_vision_shader ), Cmp::ZOrderValue( 2000000.f ) );
 }
 } // namespace Game::Factory::Shader

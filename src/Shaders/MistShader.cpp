@@ -8,8 +8,9 @@
 namespace Game::Sprites
 {
 
-void MistShader::update( entt::registry &reg )
+void MistShader::update( entt::registry &reg, sf::Time dt )
 {
+  m_timer += dt;
   sf::Vector2u display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg );
   sf::Vector2f view_center = Sys::RenderSystem::get_world_view().getCenter();
   sf::Vector2f view_size = Sys::RenderSystem::get_world_view().getSize();
@@ -20,7 +21,7 @@ void MistShader::update( entt::registry &reg )
       .set( "resolution", sf::Vector2f{ display_size } )
       .set( "viewTopLeft", view_top_left )
       .set( "viewSize", view_size )
-      .set( "time", elapsed().asSeconds() )
+      .set( "time", m_timer.asSeconds() )
       .apply( &get_shader() );
 
   set_position( { -100, -100 } );

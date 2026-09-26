@@ -31,6 +31,7 @@
 #include <Systems/Render/RenderOverlaySystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 #include <Systems/Threats/NpcSystem.hpp>
+#include <Systems/ShaderSystem.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -141,6 +142,7 @@ void HealingSpringScene::do_update( sf::Time dt )
   // m_sys.find<Sys::Store::Type::HealingSpringSystem>().check_inventory_deposit( dt );
 
   m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt );
+  m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt );
   m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
 
   auto &overlay_sys = m_sys.find<Sys::Store::Type::RenderOverlaySystem>();

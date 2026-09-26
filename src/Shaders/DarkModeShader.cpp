@@ -13,8 +13,9 @@
 namespace Game::Sprites
 {
 
-void DarkModeShader::update( entt::registry &reg )
+void DarkModeShader::update( entt::registry &reg, sf::Time dt )
 {
+  m_timer += dt;
   auto display_res = sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg ) );
   sf::Vector2f aperture_half_size( Constants::kGridSizePxF * 4.f );
 
@@ -22,7 +23,7 @@ void DarkModeShader::update( entt::registry &reg )
       .set( "local_resolution", Sys::RenderSystem::get_world_view().getSize() )
       .set( "display_resolution", display_res )
       .set( "aperture_half_size", aperture_half_size )
-      .set( "time", elapsed().asSeconds() )
+      .set( "time", m_timer.asSeconds() )
       .apply( &get_shader() );
 
   set_center_at_position( Utils::Player::get_position( reg ).position );

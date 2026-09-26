@@ -39,7 +39,7 @@ public:
   //! @brief Refresh the torch positions, Watchman searchlight cones, view bounds and fear-level
   //! uniforms each frame.
   //! @param reg The entt registry, used to source torch/candle particles, Watchman searchlights and player state.
-  void update( entt::registry &reg ) override;
+  void update( entt::registry &reg, sf::Time dt ) override;
 };
 
 } // namespace Game::Sprites

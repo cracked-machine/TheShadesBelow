@@ -38,7 +38,7 @@ public:
 
   //! @brief Refresh the smoothed hallucinogen toxicity level and player-position uniforms each frame.
   //! @param reg The entt registry, used to source the player's hallucinogen toxicity stat and position.
-  void update( entt::registry &reg ) override;
+  void update( entt::registry &reg, sf::Time dt ) override;
 
   //! @brief This shader samples the already-rendered frame rather than blending a self-contained texture.
   //! @return Always true; see IShaderSprite::is_post_process() for how this changes composite behaviour.
@@ -54,9 +54,6 @@ private:
   //! a visible snap in the wave whenever hallucinogen toxicity dropped. These smooth it into a continuous ramp instead.
   float m_smoothed_toxicity{ 0.f };
 
-  //! @brief elapsed() timestamp of the last update() call, used to compute the per-frame dt fed into
-  //! the m_smoothed_toxicity exponential decay.
-  sf::Time m_last_toxicity_update;
 };
 
 } // namespace Game::Sprites

@@ -310,6 +310,7 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::RuinSystem>().update_exit_zorder() );
   PROFILED( m_sys.find<Sys::Store::Type::RuinSystem>().check_entrance_collision() );
   PROFILED( m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt ) );
+  PROFILED( m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::LightningSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::GrimoireSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::ExitSystem>().update_exit_zorder() );

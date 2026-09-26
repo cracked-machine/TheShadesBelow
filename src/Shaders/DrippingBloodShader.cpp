@@ -11,15 +11,16 @@
 namespace Game::Sprites
 {
 
-void DrippingBloodShader::update( entt::registry &reg )
+void DrippingBloodShader::update( entt::registry &reg, sf::Time dt )
 {
+  m_timer += dt;
   auto &player_curse = Utils::Player::get_curse( reg );
   auto display_res = sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg ) );
 
   Sprites::UniformBuilder{}
       .set( "alpha", player_curse.shader_alpha.add( 0.01f ) )
       .set( "resolution", display_res )
-      .set( "time", elapsed().asSeconds() )
+      .set( "time", m_timer.asSeconds() )
       .apply( &get_shader() );
 
   set_center_at_position( Utils::Player::get_position( reg ).position );

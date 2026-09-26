@@ -19,16 +19,14 @@ namespace
 constexpr float kToxicitySmoothingRate = 3.0f;
 } // namespace
 
-void CircularDistortionShader::update( entt::registry &reg )
+void CircularDistortionShader::update( entt::registry &reg, sf::Time dt )
 {
+  m_timer += dt;
   auto display_size = sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg ) );
   auto opt_toxicity = Utils::Player::get_stats( reg ).toxidrome().at<Cmp::Toxicity::Hallucinogen>();
   float toxicity = static_cast<float>( opt_toxicity.value_or( 0 ) ) / 100.f;
 
-  sf::Time now = elapsed();
-  float dt = ( now - m_last_toxicity_update ).asSeconds();
-  m_last_toxicity_update = now;
-  m_smoothed_toxicity = Utils::Maths::exp_decay( m_smoothed_toxicity, toxicity, kToxicitySmoothingRate, dt );
+  m_smoothed_toxicity = Utils::Maths::exp_decay( m_smoothed_toxicity, toxicity, kToxicitySmoothingRate, dt.asSeconds() );
 
   // Player's position in the same normalised [0,1] screen space as gl_FragCoord.xy/resolution, so a
   // frag shader (e.g. CircularDistortion.frag) can place effects relative to the player without knowing
@@ -42,7 +40,7 @@ void CircularDistortionShader::update( entt::registry &reg )
 
   Sprites::UniformBuilder{}
       .set( "resolution", display_size )
-      .set( "time", now.asSeconds() )
+      .set( "time", m_timer.asSeconds() )
       .set( "toxicity", m_smoothed_toxicity )
       .set( "player_uv", player_uv )
       .apply( &get_shader() );

@@ -260,7 +260,6 @@ void RenderGameSystem::render_zorder_queue( RenderOverlaySystem &render_overlay_
     {
       auto &shader_sprite_owner = reg().get<Cmp::Shader::SpriteOwner>( entity );
       if ( not shader_sprite_owner.sprite ) continue;
-      shader_sprite_owner.sprite->update( reg() );
       if ( not Utils::scene_setting<Cmp::SceneSettings::Shaders>( reg() ).enabled ) continue;
 
       if ( shader_sprite_owner.sprite->is_post_process() )

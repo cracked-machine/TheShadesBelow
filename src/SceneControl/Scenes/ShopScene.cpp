@@ -35,6 +35,7 @@
 #include <Systems/ShopSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 #include <Systems/Threats/NpcSystem.hpp>
+#include <Systems/ShaderSystem.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -151,6 +152,7 @@ void ShopScene::do_update( [[maybe_unused]] sf::Time dt )
   else { SPDLOG_WARN( "m_scene_map_data is not initialised" ); }
 
   m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt );
+  m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt );
 
   auto &overlay_sys = m_sys.find<Sys::Store::Type::RenderOverlaySystem>();
   m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt, overlay_sys );

@@ -30,8 +30,9 @@ const sf::Glsl::Vec4 EERIE_BLUE{ 0.1f, 0.15f, 1.0f, 1.0f };
 const sf::Glsl::Vec4 COOL_WHITE{ 0.8f, 0.85f, 1.0f, 1.0f };
 } // namespace
 
-void NightStaticShader::update( entt::registry &reg )
+void NightStaticShader::update( entt::registry &reg, sf::Time dt )
 {
+  m_timer += dt;
   sf::Vector2u display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg );
   sf::Vector2f view_center = Sys::RenderSystem::get_world_view().getCenter();
   sf::Vector2f view_size = Sys::RenderSystem::get_world_view().getSize();
@@ -90,7 +91,7 @@ void NightStaticShader::update( entt::registry &reg )
 
   Sprites::UniformBuilder{}
       .set( "resolution", sf::Vector2f{ display_size } )
-      .set( "time", elapsed().asSeconds() )
+      .set( "time", m_timer.asSeconds() )
       .set( "view_top_left", view_top_left )
       .set( "view_size", view_size )
       .set( "torch_count", static_cast<int>( torch_positions.size() ) )

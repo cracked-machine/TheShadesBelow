@@ -9,16 +9,17 @@
 namespace Game::Sprites
 {
 
-void TitleScreenShader::update( entt::registry &reg )
+void TitleScreenShader::update( entt::registry &reg, sf::Time dt )
 {
+  m_timer += dt;
   auto display_size = sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg ) );
   const auto mouse_pos = sf::Vector2f( Constants::kFallbackDisplaySize );
   Sprites::UniformBuilder{}
-      .set( "time", elapsed().asSeconds() )
+      .set( "time", m_timer.asSeconds() )
       .set( "pixel_threshold", ( mouse_pos.x + mouse_pos.y ) / 30 )
       .set( "mouse_cursor", mouse_pos )
       .set( "resolution", display_size )
-      .set( "time", elapsed().asSeconds() )
+      .set( "time", m_timer.asSeconds() )
       .apply( &get_shader() );
 
   set_position( { 0, 0 } );

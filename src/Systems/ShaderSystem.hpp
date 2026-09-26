@@ -28,13 +28,19 @@ public:
   }
 
   //! @brief Calls IShaderSprite::update() function within all added ShaderSpriteBase<T>
-  void update();
+  void update( sf::Time dt );
 
   //! @brief Find a ShaderSpriteOwner by tag and return a pointer to ShaderSpriteBase, or nullptr if not found
   //! @param reg
   //! @param tag
   //! @return Sprites::IShaderSprite*
   [[nodiscard]] static Sprites::IShaderSprite *find( entt::registry &reg, const std::string &tag );
+
+  //! @brief Collect every active post-process shader (IShaderSprite::is_post_process()), ordered by ascending
+  //! ZOrderValue so the result is the order in which the passes are chained.
+  //! @param reg
+  //! @return std::vector<Sprites::IShaderSprite *>
+  [[nodiscard]] static std::vector<Sprites::IShaderSprite *> find_post_process_chain( entt::registry &reg );
 
   //! @brief event handlers for pausing system clocks
   void on_pause() override {};

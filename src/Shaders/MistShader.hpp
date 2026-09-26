@@ -35,7 +35,7 @@ public:
 
   //! @brief Refresh the view-bounds/alpha/time uniforms each frame.
   //! @param reg The entt registry, used to source the display resolution.
-  void update( entt::registry &reg ) override;
+  void update( entt::registry &reg, sf::Time dt ) override;
 };
 
 } // namespace Game::Sprites

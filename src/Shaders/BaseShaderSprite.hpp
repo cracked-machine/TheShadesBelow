@@ -91,10 +91,6 @@ public:
   //! @param new_size The new render texture size, in pixels.
   void resize_texture( sf::Vector2u new_size ) override;
 
-  //! @brief Time elapsed since this shader sprite was constructed, used to drive time-based uniforms.
-  //! @return Elapsed time.
-  sf::Time elapsed() { return m_clock.getElapsedTime(); }
-
   //! @brief Set an identifying tag for this shader instance.
   //! @param tag The tag to assign.
   void set_tag( const std::string &tag ) override { m_tag = tag; }
@@ -126,8 +122,8 @@ protected:
   sf::Sprite m_sprite{ m_render_texture.getTexture() };
   //! @brief The vertex/fragment shader to be applied to the sprite.
   sf::Shader m_shader;
-  //! @brief Clock for timing shader effects, sampled via elapsed().
-  sf::Clock m_clock{};
+  //! @brief Time accumulated by derived classes from the dt passed to update() (`m_timer += dt;`), used to drive time-based uniforms.
+  sf::Time m_timer{ sf::Time::Zero };
 
 private:
   //! @brief Filesystem path to the vertex shader source, used by load_shader_files().

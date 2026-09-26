@@ -8,7 +8,7 @@ class IShaderSprite;
 
 //! @brief Common interface for SFML fragment-shader-based drawable overlays/post-process effects
 //! (e.g. DarkModeShader, MistShader, FearDistortionShader). Implementations own a render texture,
-//! sprite and shader, and are driven once per frame by RenderGameSystem via update().
+//! sprite and shader, and are driven once per frame by ShaderSystem::update( dt ), called from each scene's do_update().
 class IShaderSprite : public sf::Drawable, public sf::Transformable
 {
 public:
@@ -22,7 +22,7 @@ public:
 
   //! @brief Called once per frame to refresh the shader's dynamic uniforms and reposition the sprite.
   //! @param reg The entt registry, used to source gameplay state (player position, stats, etc.) for uniforms.
-  virtual void update( entt::registry &reg ) = 0;
+  virtual void update( entt::registry &reg, sf::Time dt ) = 0;
 
   //! @brief Set an identifying tag for this shader instance (e.g. for lookup/debugging).
   //! @param tag The tag to assign.

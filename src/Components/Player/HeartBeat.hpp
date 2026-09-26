@@ -13,7 +13,7 @@ public:
   //! @brief The heartbeat freqeuncy for max tachcardia (excessively fast heartbeat)
   static constexpr float kMaxFreq{ 2.5f };
   //! @brief The heartbeat freqeuncy for max bradycardia (excessively slow heartbeat)
-  static constexpr float kMinFreq{ 0.5f };
+  static constexpr float kMinFreq{ 0.2f };
   //! @brief The heartbeat freqeuncy for normal resting state
   static constexpr float kRestingFreq{ 1.f };
 
@@ -31,7 +31,6 @@ public:
     {
       m_beat_timer = sf::Time::Zero;
       return false;
-      
     }
 
     m_beat_timer += dt;
@@ -43,6 +42,11 @@ public:
   //! @brief Get the current heartbeat frequency.
   //! @return float
   [[nodiscard]] float freq() const { return m_freq; }
+
+  //! @brief Progress through the current beat interval: 0 at the moment a beat fires, approaching 1 just before the next.
+  //! Always 0 at resting rate (no beat is being tracked); check is_resting() to tell that apart from a beat just firing.
+  //! @return float
+  [[nodiscard]] float phase() const { return std::clamp( m_beat_timer.asSeconds() * m_freq, 0.f, 1.f ); }
 
   //! @brief True if heartbeat frequency is at normal resting state.
   //! @return true

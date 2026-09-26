@@ -12,6 +12,7 @@
 #include <Components/Player/NoPath.hpp>
 #include <Components/Player/RuinLocation.hpp>
 #include <Components/Player/SpeedPenalty.hpp>
+#include <Components/Player/TookDamage.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/Ruin/Bookcase.hpp>
@@ -508,6 +509,7 @@ void RuinSystem::check_player_shadow_hand_collision( sf::Time dt )
   {
     // damage player
     Utils::Player::get_stats( reg() ).apply( npc_collision_action.action );
+    reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
   }
   if ( Utils::Player::get_stats( reg() ).health() <= 0 )
   {

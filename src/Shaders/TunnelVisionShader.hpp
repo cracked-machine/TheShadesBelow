@@ -39,7 +39,7 @@ public:
 
   //! @brief Refresh the smoothed toxicity and player screen position uniforms each frame.
   //! @param reg The entt registry, used to source the player's tachycardia/bradycardia toxicity stat and position.
-  void update( entt::registry &reg ) override;
+  void update( entt::registry &reg, sf::Time dt ) override;
 
   //! @brief This shader samples the already-rendered frame rather than blending a self-contained texture.
   //! @return Always true; see IShaderSprite::is_post_process() for how this changes composite behaviour.
@@ -49,9 +49,6 @@ private:
   //! @brief Frame-rate independent exponential smoothing (Utils::Maths::exp_decay) of the raw toxicity stat,
   //! which only changes in coarse discrete steps and would otherwise make the aperture visibly snap.
   float m_smoothed_toxicity{ 0.f };
-
-  //! @brief elapsed() timestamp of the last update() call, used to compute the per-frame dt.
-  sf::Time m_last_toxicity_update;
 };
 
 } // namespace Game::Sprites

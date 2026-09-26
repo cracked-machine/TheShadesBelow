@@ -9,6 +9,7 @@
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderMenuSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
+#include <Systems/ShaderSystem.hpp>
 
 namespace Game::Scene
 {
@@ -54,8 +55,9 @@ void TitleScene::on_exit()
   SPDLOG_DEBUG( "Exiting {}", get_name() );
 }
 
-void TitleScene::do_update( [[maybe_unused]] sf::Time dt )
+void TitleScene::do_update( sf::Time dt )
 {
+  m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt );
   auto &render_menu_sys = m_sys.find<Sys::Store::Type::RenderMenuSystem>();
   render_menu_sys.render_title();
 }

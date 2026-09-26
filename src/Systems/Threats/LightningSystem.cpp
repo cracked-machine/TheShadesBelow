@@ -1,5 +1,6 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
+#include <Components/Player/TookDamage.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
 #include <Components/Stats/BaseAction.hpp>
@@ -43,6 +44,7 @@ void LightningSystem::update( sf::Time dt )
     int lightning_dmg = Sys::PersistSystem::get<Cmp::Persist::LightningDamage>( reg() ).get_value();
     Cmp::BaseAction lightning_action( Cmp::Stats::Health{ -lightning_dmg }, {}, {}, {}, {}, {} );
     Utils::Player::get_stats( reg() ).apply( lightning_action );
+    reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
 
     if ( Utils::Player::get_stats( reg() ).health() <= 0 )
     {
