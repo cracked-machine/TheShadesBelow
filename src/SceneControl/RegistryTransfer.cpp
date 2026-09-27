@@ -25,6 +25,7 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Curse.hpp>
 #include <Components/Player/FootstepType.hpp>
+#include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
 #include <Components/Player/LevelDepth.hpp>
@@ -240,6 +241,7 @@ void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
   registry.storage<Cmp::Player::Footstep>();
   registry.storage<Cmp::Player::BlastRadius>();
   registry.storage<Cmp::Player::Mortality>();
+  registry.storage<Cmp::Player::HeartBeat>();
   registry.storage<Cmp::Player::CadaverCount>();
   registry.storage<Cmp::AnimData>();
   registry.storage<Cmp::PlayerInventorySlot>();
