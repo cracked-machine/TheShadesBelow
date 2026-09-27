@@ -3,8 +3,6 @@
 
 You play a victorian grave digger who has become lost in a limbo dimension... a city of the dead. You must dig your way through obstacles to find the exit. The exit must be unlocked using items found in the surrounding graves. To survive in this world you can find plants that be used or consumed. Some may help you, others may not. You can sell your ill-gotten wares to surgeons of dubious ethics once you exit the level. 
 
-Here is a (very) short [demo](https://youtu.be/ckoGOSE4Rc4).
-
 # Game Engine
 
 This uses a custom game engine using OpenGL/SFML3. The engine is managed using an [Entity Component System](https://en.wikipedia.org/wiki/Entity_component_system) architecture via the [Entt](https://github.com/skypjack/entt) library. 
