@@ -179,7 +179,7 @@
         }
       }
     },
-    "sprite.graveyard.plant.rowan.drop": {
+    "sprite.plant.rowan.forage": {
       "spritesheet": {
         "displayname": "Rowan Berry",
         "zorder": [0],
@@ -193,12 +193,12 @@
         }
       }
     },
-    "sprite.graveyard.plant.elder.drop": {
+    "sprite.plant.elder.forage": {
       "spritesheet": {
         "displayname": "Elder Berry",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [0],
+        "sprite_indices": [1],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -207,12 +207,12 @@
         }
       }
     },
-    "sprite.graveyard.plant.yew.drop": {
+    "sprite.plant.yew.forage": {
       "spritesheet": {
         "displayname": "Yew Berry",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [0],
+        "sprite_indices": [2],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -221,12 +221,12 @@
         }
       }
     },
-    "sprite.graveyard.plant.hawthorn.drop": {
+    "sprite.plant.hawthorn.forage": {
       "spritesheet": {
-        "displayname": "Hawthorn Berry",
+        "displayname": "Hawthorn Flower",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [0],
+        "sprite_indices": [3],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -235,12 +235,12 @@
         }
       }
     },
-    "sprite.graveyard.plant.foxglove.drop": {
+    "sprite.plant.foxglove.forage": {
       "spritesheet": {
-        "displayname": "Foxglove Berry",
+        "displayname": "Foxglove Flower",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [0],
+        "sprite_indices": [4],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -249,12 +249,12 @@
         }
       }
     },
-    "sprite.graveyard.plant.nightshade.drop": {
+    "sprite.plant.nightshade.forage": {
       "spritesheet": {
-        "displayname": "Nightshade Berry",
+        "displayname": "Nightshade Flower",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [0],
+        "sprite_indices": [5],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -263,12 +263,12 @@
         }
       }
     },
-    "sprite.graveyard.plant.hogweed.drop": {
+    "sprite.plant.hogweed.forage": {
       "spritesheet": {
-        "displayname": "Hogweed Berry",
+        "displayname": "Hogweed Seeds",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [0],
+        "sprite_indices": [6],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -277,12 +277,12 @@
         }
       }
     },
-    "sprite.graveyard.plant.stjohnswort.drop": {
+    "sprite.plant.stjohnswort.forage": {
       "spritesheet": {
-        "displayname": "StJohnsWort Berry",
+        "displayname": "StJohnsWort Flower",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [0],
+        "sprite_indices": [7],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -291,12 +291,12 @@
         }
       }
     },
-    "sprite.graveyard.plant.nettle.drop": {
+    "sprite.plant.nettle.forage": {
       "spritesheet": {
-        "displayname": "Nettle Berry",
+        "displayname": "Nettle Fiber",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [0],
+        "sprite_indices": [8],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -305,12 +305,12 @@
         }
       }
     },
-    "sprite.graveyard.plant.burdock.drop": {
+    "sprite.plant.burdock.forage": {
       "spritesheet": {
-        "displayname": "Burdock Berry",
+        "displayname": "Burdock thistle",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [0],
+        "sprite_indices": [9],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -319,26 +319,12 @@
         }
       }
     },
-    "sprite.graveyard.plant.redcampion.drop": {
+    "sprite.plant.henbane.forage": {
       "spritesheet": {
-        "displayname": "RedCampion Berry",
+        "displayname": "Henbane Seed",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [0],
-        "sprites_per_sequence": 1,
-        "sprites_per_frame": 1,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.graveyard.plant.henbane.drop": {
-      "spritesheet": {
-        "displayname": "Henbane Berry",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [0],
+        "sprite_indices": [11],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {

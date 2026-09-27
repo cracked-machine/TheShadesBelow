@@ -98,7 +98,7 @@ void ActionSystem::on_player_action( const Events::PlayerActionEvent &event )
   {
     // Check for collisions with diggable obstacles
     check_player_dig_obstacle_collision();
-    check_player_dig_plant_collision();
+    player_plant_interact();
     check_player_smash_pot();
   }
   else if ( event.action == Game::Events::PlayerActionEvent::GameActions::ATTACK )
@@ -286,7 +286,7 @@ void ActionSystem::check_player_dig_obstacle_collision()
   }
 }
 
-void ActionSystem::check_player_dig_plant_collision()
+void ActionSystem::player_plant_interact()
 {
 
   // abort if still in cooldown
@@ -322,12 +322,15 @@ void ActionSystem::check_player_dig_plant_collision()
       {
         auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
         if ( not plant_item ) continue;
-        auto plantleaves_particle_uuid = Cmp::UUID::generate();
-        Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
-                                               plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
-        Factory::Player::add_inventory( reg(), plant_item->item_type + ".drop" );
-        Utils::Player::apply_action_from_inventory_item<Cmp::SpawnAction>( reg() );
-        m_sound_bank.get_effect( "chopping_final" ).play();
+        if ( not plant_item->item_type.contains( "redcampion" ) )
+        {
+          auto plantleaves_particle_uuid = Cmp::UUID::generate();
+          Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
+                                                 plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
+          Factory::Player::add_inventory( reg(), plant_item->item_type + ".forage" );
+          Utils::Player::apply_action_from_inventory_item<Cmp::SpawnAction>( reg() );
+          m_sound_bank.get_effect( "chopping_final" ).play();
+        }
       }
       else
       {
@@ -426,10 +429,10 @@ void ActionSystem::check_player_smash_pot()
     }
   }
 
-  // drop loot - 1 in 3 chance
+  // drop loot - 50% chance
   auto [sprite_type, sprite_index] = m_sprite_factory.get_random_type_and_texture_index(
       std::vector<std::string>{ "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" } );
-  Cmp::RandomInt do_drop( 0, 2 );
+  Cmp::RandomInt do_drop( 0, 1 );
   if ( do_drop.gen() == 0 )
   {
     auto reserved_sm = m_reserved_sm.lock();

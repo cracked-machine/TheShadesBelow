@@ -611,9 +611,9 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants()
 
   constexpr int kMinCountPerPlantType = 10;
 
-  // Find all plant sprites but exclude any ".drop" sprites. The map value will track count of each plant type added.
+  // Find all plant sprites but exclude any ".forage" sprites. The map value will track count of each plant type added.
   std::unordered_map<Sprites::SpriteMetaType, int> plant_tracker;
-  plant_tracker = m_sprite_factory.get_all_sprite_types_by_pattern( R"(sprite\.item\.plant\.(?!.*\.drop$).*)" ) |
+  plant_tracker = m_sprite_factory.get_all_sprite_types_by_pattern( R"(sprite\.item\.plant\.(?!.*\.forage$).*)" ) |
                   std::views::transform( []( const auto &type ) { return std::pair{ type, 0 }; } ) |
                   std::ranges::to<std::unordered_map<Sprites::SpriteMetaType, int>>();
 

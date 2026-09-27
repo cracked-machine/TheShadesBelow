@@ -57,7 +57,7 @@ private:
   void check_player_dig_obstacle_collision();
 
   //! @brief Uses Cmp::SelectedPosition to mark the targetted Cmp::PlantMultiBlock then applies digging damage until the obstacle is destroyed.
-  void check_player_dig_plant_collision();
+  void player_plant_interact();
 
   //! @brief Replace the targetted Cmp::LootContainer with loot item via Events::CreateItemEvent (see ItemSystem::on_create_item_event)
   void check_player_smash_pot();

@@ -4,7 +4,7 @@
 namespace Game::Factory::Action
 {
 
-//! @brief Add a Cmp::Player::EatingTimeAccumulator to the player if they have ".drop" inventory item
+//! @brief Add a Cmp::Player::EatingTimeAccumulator to the player if they have ".forage" inventory item
 //! @note Processed by InventorySystem::update()
 //! @param reg
 void try_eat_inventory( entt::registry &reg );

@@ -55,7 +55,7 @@ InventorySystem::InventorySystem( entt::registry &reg, sf::RenderWindow &window,
 
 void InventorySystem::update( sf::Time dt )
 {
-  Factory::Particle::delete_expired_particle_sprites( reg(), "player.drop.particle.eating" );
+  Factory::Particle::delete_expired_particle_sprites( reg(), "player.forage.particle.eating" );
 
   auto player_entt = Utils::Player::get_entity( reg() );
   if ( reg().any_of<Cmp::Player::EatingTimeAccumulator>( player_entt ) ) { consume_inventory( dt ); }
@@ -129,7 +129,7 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
     auto plant_pos = Utils::snap_to_grid( { pos.x, pos.y - Constants::kGridSizePxF.y } );
 
     // for plant drops fall through to the rest of the function that creates normal world items
-    if ( not inventory_slot_cmp->m_item.sprite_type.contains( "drop" ) )
+    if ( not inventory_slot_cmp->m_item.sprite_type.contains( ".forage" ) )
     {
 
       // don't allow plants to be dropped at all in the player spawn area
@@ -296,22 +296,22 @@ void InventorySystem::consume_inventory( sf::Time dt )
     auto last_direction = Utils::Player::get_last_direction( reg() );
     if ( last_direction == Utils::Cardinal( Utils::Cardinal::North ).vector() )
     {
-      Factory::Particle::add_eatingcrumbs_ps( reg(), "player.drop.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
+      Factory::Particle::add_eatingcrumbs_ps( reg(), "player.forage.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
                                               adj_player_pos, last_direction, player_zorder_pos - 1.f );
     }
     else if ( last_direction == Utils::Cardinal( Utils::Cardinal::East ).vector() )
     {
-      Factory::Particle::add_eatingcrumbs_ps( reg(), "player.drop.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
+      Factory::Particle::add_eatingcrumbs_ps( reg(), "player.forage.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
                                               { adj_player_pos.x + 2, adj_player_pos.y }, last_direction, player_zorder_pos + 1.f );
     }
     else if ( last_direction == Utils::Cardinal( Utils::Cardinal::West ).vector() )
     {
-      Factory::Particle::add_eatingcrumbs_ps( reg(), "player.drop.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
+      Factory::Particle::add_eatingcrumbs_ps( reg(), "player.forage.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
                                               { adj_player_pos.x - 2, adj_player_pos.y }, last_direction, player_zorder_pos + 1.f );
     }
     else if ( last_direction == Utils::Cardinal( Utils::Cardinal::South ).vector() )
     {
-      Factory::Particle::add_eatingcrumbs_ps( reg(), "player.drop.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
+      Factory::Particle::add_eatingcrumbs_ps( reg(), "player.forage.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
                                               adj_player_pos, last_direction, player_zorder_pos + 1.f );
     }
   }

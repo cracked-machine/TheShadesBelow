@@ -72,7 +72,7 @@ private:
   //! @param world_item_entt
   void pickup_world_item( entt::registry &reg, entt::entity world_item_entt );
 
-  //! @brief Eat the inventory item if its a ".drop" item.
+  //! @brief Eat the inventory item if its a ".forage" item.
   //! @param dt Update the EatingTimeAccumulator with the delta time.
   void consume_inventory( sf::Time dt );
 
