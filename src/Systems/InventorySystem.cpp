@@ -129,7 +129,8 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
     auto plant_pos = Utils::snap_to_grid( { pos.x, pos.y - Constants::kGridSizePxF.y } );
 
     // for plant drops fall through to the rest of the function that creates normal world items
-    if ( not inventory_slot_cmp->m_item.sprite_type.contains( ".forage" ) )
+    auto inventory_item_type = inventory_slot_cmp->m_item.sprite_type;
+    if ( not inventory_item_type.contains( ".forage" ) and not inventory_item_type.contains( ".drop" ) )
     {
 
       // don't allow plants to be dropped at all in the player spawn area

@@ -293,7 +293,7 @@
     },
     "sprite.plant.nettle.forage": {
       "spritesheet": {
-        "displayname": "Nettle Fiber",
+        "displayname": "Nettle Leaves",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
         "sprite_indices": [8],
@@ -333,6 +333,134 @@
         }
       }
     },
+  
+    "sprite.plant.rowan.drop": {
+      "spritesheet": {
+        "displayname": "Rowan Stick",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [12],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.elder.drop": {
+      "spritesheet": {
+        "displayname": "Elder Stick",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [13],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.yew.drop": {
+      "spritesheet": {
+        "displayname": "Yew Stick",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [14],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.hawthorn.drop": {
+      "spritesheet": {
+        "displayname": "Hawthorn Stick",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [15],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.stjohnswort.drop": {
+      "spritesheet": {
+        "displayname": "Blood Oil",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [19],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.nettle.drop": {
+      "spritesheet": {
+        "displayname": "Nettle Fiber",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [20],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.burdock.drop": {
+      "spritesheet": {
+        "displayname": "Burdock thistle",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [21],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.redcampion.drop": {
+      "spritesheet": {
+        "displayname": "AntiVenom",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [22],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.henbane.drop": {
+      "spritesheet": {
+        "displayname": "Henbane Stick",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [23],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+
     "sprite.graveyard.hazard.sinkhole": {
       "spritesheet": {
         "displayname": "sprite.graveyard.hazard.sinkhole",

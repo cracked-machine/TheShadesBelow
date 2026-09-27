@@ -358,6 +358,15 @@ void ActionSystem::player_plant_interact()
           auto planttwigs_particle_uuid = Cmp::UUID::generate();
           Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, planttwigs_particle_uuid,
                                                 plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
+
+          auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
+          if ( not plant_item->item_type.contains( "nightshade" ) and not plant_item->item_type.contains( "foxglove" ) and
+               not plant_item->item_type.contains( "hogweed" ) )
+          {
+            if ( not plant_item ) continue;
+            get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( plant_mb_cmp.position, Constants::kGridSizePxF ),
+                                                                        plant_item->item_type + ".drop", "drop_loot" ) );
+          }
           Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
           Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
           m_sound_bank.get_effect( "chopping_final" ).play();
