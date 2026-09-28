@@ -19,7 +19,7 @@ namespace Game::PathFinding
 using ClosedList = std::unordered_map<Cmp::Position, PathNode, PathNode::PosHash>;
 
 std::vector<PathNode> astar( entt::registry &reg, const PathFinding::SpatialHashGrid &spatial_grid, Cmp::Position start, Cmp::Position goal,
-                             PathFinding::QueryCompass offset )
+                             PathFinding::QueryCompass offset, const std::function<bool( const Cmp::Position & )> &is_blocked )
 {
 
   std::vector<PathNode> openList;
@@ -73,6 +73,8 @@ std::vector<PathNode> astar( entt::registry &reg, const PathFinding::SpatialHash
 
       // Skip other NPCs so they don't block each other's pathfinding
       if ( reg.any_of<Cmp::Npc::NPC>( neighbour_entt ) ) continue;
+
+      if ( is_blocked && is_blocked( *neighbour_pos ) ) continue;
 
       auto heuristic = Utils::Maths::getManhattanDistance( neighbour_pos->position, goal.position );
 

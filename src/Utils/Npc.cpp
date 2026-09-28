@@ -19,6 +19,7 @@
 #include <Utils/Utils.hpp>
 
 #include <entt/entity/fwd.hpp>
+#include <span>
 #include <source_location>
 #include <spdlog/spdlog.h>
 #include <stdexcept>
@@ -60,7 +61,8 @@ Sprites::SpriteMetaType get_sprite_type( entt::registry &reg, entt::entity npc_e
 }
 
 PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGrid &navmesh, const Cmp::Position &target_pos, entt::entity npc_entity,
-                                bool target_in_spawn, bool target_illuminated, bool always_pathfind )
+                                bool target_in_spawn, bool target_illuminated, bool always_pathfind,
+                                const Utils::Collision::LightSources *lights )
 {
   auto *npc_anim_cmp = reg.try_get<Cmp::AnimData>( npc_entity );
   if ( not npc_anim_cmp ) return PathfindResult::Blocked;
@@ -90,7 +92,18 @@ PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGri
   Cmp::Position grid_target( Utils::snap_to_grid( target_pos.position, Utils::Rounding::TOWARDS_ZERO ), target_pos.size );
 
   std::vector<PathFinding::PathNode> path;
-  path = PathFinding::astar( reg, navmesh, *npc_pos_cmp, grid_target, query_compass );
+  if ( lights )
+  {
+    // Every light is a wall, except the one(s) illuminating the target: those stay passable so the
+    // boundary stop below can halt the NPC at their edge. Test the target's real (unsnapped) position so
+    // this agrees with `target_illuminated`. A* never tests the start cell, so an NPC caught inside a
+    // light can still step out to an unlit neighbour, but it can't walk deeper through it.
+    auto is_lit = [&]( const Cmp::Position &pos ) {
+      return lights->blocks( pos, target_illuminated ? std::span( &target_pos, 1 ) : std::span<const Cmp::Position>() );
+    };
+    path = PathFinding::astar( reg, navmesh, *npc_pos_cmp, grid_target, query_compass, is_lit );
+  }
+  else { path = PathFinding::astar( reg, navmesh, *npc_pos_cmp, grid_target, query_compass ); }
 
   SPDLOG_DEBUG( "{} pathsize: {}", static_cast<uint32_t>( npc_entity ), path.size() );
   if ( path.size() <= 1 ) return PathfindResult::NoPath;
@@ -108,7 +121,8 @@ PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGri
   // If the player is illuminated, only stop when the very next step would cross into the radius of
   // whichever light source is currently illuminating them. This lets the NPC walk the full path to
   // that light's boundary before stopping, mirroring the spawn-boundary check above.
-  if ( target_illuminated and Utils::Collision::is_position_illuminated( reg, next_npc_pos ) )
+  const bool next_step_lit = lights ? lights->illuminates( next_npc_pos ) : Utils::Collision::is_position_illuminated( reg, next_npc_pos );
+  if ( target_illuminated and next_step_lit )
   {
     reg.emplace_or_replace<Cmp::Direction>( npc_entity, Cmp::Direction( { 0.0f, 0.0f } ) );
     return PathfindResult::Blocked;

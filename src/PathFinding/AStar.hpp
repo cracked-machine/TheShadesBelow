@@ -5,6 +5,8 @@
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <entt/entity/entity.hpp>
 
+#include <functional>
+
 /// Main class
 namespace Game::PathFinding
 {
@@ -84,9 +86,11 @@ struct PathNode
 //! @param start Starting position.
 //! @param goal Target position.
 //! @param query_compass Which neighbour offsets to consider when expanding a node.
+//! @param is_blocked Optional extra obstacle test; neighbour positions for which it returns true are never expanded.
 //! @return The path from start to goal as an ordered list of PathNode, or an empty vector if no path was found.
 std::vector<PathNode> astar( entt::registry &reg, const PathFinding::SpatialHashGrid &grid, Cmp::Position start, Cmp::Position goal,
-                             PathFinding::QueryCompass query_compass = PathFinding::QueryCompass::CARDINAL );
+                             PathFinding::QueryCompass query_compass = PathFinding::QueryCompass::CARDINAL,
+                             const std::function<bool( const Cmp::Position & )> &is_blocked = {} );
 
 } // namespace Game::PathFinding
 

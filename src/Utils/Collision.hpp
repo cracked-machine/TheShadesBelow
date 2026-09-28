@@ -5,6 +5,9 @@
 #include <Components/RectBounds.hpp>
 #include <entt/entity/registry.hpp>
 
+#include <span>
+#include <vector>
+
 namespace Game::Utils::Collision
 {
 
@@ -64,8 +67,42 @@ bool pos_intersects( entt::registry &reg, Cmp::RectBounds pos,
   return false;
 }
 
+//! @brief Snapshot of every active light source, gathered once so that repeated illumination
+//! queries (e.g. per A* neighbour) don't re-walk the registry.
+struct LightSources
+{
+  //! @brief Centres of circular light sources; all share the player's torch radius.
+  std::vector<sf::Vector2f> circles;
+  //! @brief Radius applied to every entry in `circles`.
+  float radius{ 0.f };
+  //! @brief Lava pit cells; these light anything whose 1.5x grid hitbox overlaps them.
+  std::vector<Cmp::Position> lava;
+
+  //! @brief Check whether `pos` is lit by any light source.
+  //! @param pos The position to test.
+  //! @return bool true if any source lights `pos`.
+  bool illuminates( const Cmp::Position &pos ) const;
+
+  //! @brief Check whether `pos` is lit by a light source that lights none of the `exempt` positions.
+  //! Used by NPC pathfinding: lights covering the target or the NPC itself are passable, all others are walls.
+  //! @param pos The position to test.
+  //! @param exempt Positions whose own light sources should be ignored.
+  //! @return bool true if `pos` should be treated as blocked.
+  bool blocks( const Cmp::Position &pos, std::span<const Cmp::Position> exempt ) const;
+
+private:
+  bool circle_lights( const sf::Vector2f &centre, const Cmp::Position &pos ) const;
+  static bool lava_lights( const Cmp::Position &lava_cell, const Cmp::Position &pos );
+};
+
+//! @brief Gather all currently visible light sources
+//! (inventory candle, visible candle, altar flame, lava pit, burning plant, or wisp).
+//! @param reg reference to the entt registry
+//! @return LightSources the snapshot
+LightSources collect_light_sources( entt::registry &reg );
+
 //! @brief Check whether the given position is within torch radius of any active light source
-//! (visible candle, altar flame, lava pit, burning plant, or wisp).
+//! (visible candle, altar flame, lava pit, burning plant, or wisp), including sources just off-screen whose light reaches on-screen.
 //! @param reg reference to the entt registry
 //! @param pos_cmp The position to test.
 //! @return bool true if `pos_cmp` is within range of any light source.

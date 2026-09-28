@@ -13,6 +13,11 @@ namespace Game::PathFinding
 class SpatialHashGrid;
 }
 
+namespace Game::Utils::Collision
+{
+struct LightSources;
+}
+
 namespace Game::Utils::Npc
 {
 
@@ -57,9 +62,12 @@ enum class PathfindResult {
 //! @param target_illuminated true if the target (the player) is currently lit by a light source, used to stop
 //! the NPC at the boundary of whichever light source it's about to step into
 //! @param always_pathfind skip the "only pathfind when on-screen" check — wisps must always pathfind
+//! @param lights Optional light snapshot. When given, lit cells are treated as obstacles (except lights illuminating
+//! the target), so a light placed across a passage cuts the NPC off from the player.
 //! @return PathfindResult Whether the NPC moved, was blocked, or no path was found.
 PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGrid &navmesh, const Cmp::Position &target_pos, entt::entity npc_entity,
-                                bool target_in_spawn, bool target_illuminated, bool always_pathfind = false );
+                                bool target_in_spawn, bool target_illuminated, bool always_pathfind = false,
+                                const Utils::Collision::LightSources *lights = nullptr );
 
 } // namespace Game::Utils::Npc
 

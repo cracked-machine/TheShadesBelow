@@ -17,6 +17,7 @@ namespace Game::Cmp { class Direction; class LerpPosition; }
 namespace Game::Cmp::Player { class Mortality; } 
 namespace Game::Cmp::Npc { class NPC; class Shockwave; }
 namespace Game::PathFinding { class SpatialHashGrid; }
+namespace Game::Utils::Collision { struct LightSources; }
 // clang-format on
 namespace Game::Sys
 {
@@ -104,10 +105,10 @@ private:
   //! @param navmesh
   //! @param target_pos
   //! @param npc_entity
-  //! @param target_in_spawn
   //! @param target_illuminated
+  //! @param lights light snapshot for this tick; lights not covering the target or NPC block the path
   void update_pathfinding_for( PathFinding::SpatialHashGrid &navmesh, const Cmp::Position &target_pos, entt::entity npc_entity,
-                               bool target_in_spawn, bool target_illuminated );
+                               bool target_illuminated, const Utils::Collision::LightSources &lights );
 
   //! @brief Update NPC animation
   void update_animation();

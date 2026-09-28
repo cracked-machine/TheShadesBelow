@@ -226,10 +226,10 @@ void NpcSystem::update_pathfinding( sf::Time dt )
   m_pathfinding_timer += dt;
   if ( m_pathfinding_timer.asSeconds() >= kPathfindingInterval )
   {
-    // NPCs — target is always the player; compute spawn check once for all
+    // NPCs — target is always the player
     const Cmp::Position player_pos = Utils::Player::get_position( reg() );
-    const bool player_in_spawn = Utils::Player::is_in_spawn( reg(), player_pos );
     const bool player_is_illuminated = Utils::Player::is_illuminated( reg() );
+    const auto lights = Utils::Collision::collect_light_sources( reg() );
     for ( auto [npc_entt, npc_cmp] : reg().view<Cmp::Npc::NPC>().each() )
     {
       if ( reg().any_of<Cmp::Npc::Wisp>( npc_entt ) ) continue;
@@ -243,31 +243,19 @@ void NpcSystem::update_pathfinding( sf::Time dt )
         continue;
       }
 
-      // Skip NPCs already stopped at the spawn boundary — A* result won't change, since spawn areas
-      // are static geometry. Watchmen are exempt: they may still be sitting at Direction {0,0} from
-      // sentry mode the instant they lock onto the player, and must always re-path rather than being
-      // mistaken for an NPC that already settled on "no path needed".
-      // Illumination is deliberately NOT included here: the light boundary can move (the player's own
-      // inventory candle tracks their position, wisps move) so a halted NPC must keep re-checking the
-      // boundary every tick rather than being trusted to stay correctly parked.
-      if ( player_in_spawn and not searchlight_cmp )
-      {
-        auto *npc_dir = reg().try_get<Cmp::Direction>( npc_entt );
-        auto *npc_lerp = reg().try_get<Cmp::LerpPosition>( npc_entt );
-        if ( npc_dir && npc_dir->x == 0.0f && npc_dir->y == 0.0f && !npc_lerp ) continue;
-      }
       auto navmesh = navmesh_for( npc_entt );
       if ( not navmesh ) continue;
-      update_pathfinding_for( *navmesh, player_pos, npc_entt, player_in_spawn, player_is_illuminated );
+      update_pathfinding_for( *navmesh, player_pos, npc_entt, player_is_illuminated, lights );
     }
 
     m_pathfinding_timer = sf::Time::Zero;
   }
 }
 void NpcSystem::update_pathfinding_for( PathFinding::SpatialHashGrid &navmesh, const Cmp::Position &target_pos, entt::entity npc_entity,
-                                        bool target_in_spawn, bool target_illuminated )
+                                        bool target_illuminated, const Utils::Collision::LightSources &lights )
 {
-  auto result = Utils::Npc::pathfind_toward( reg(), navmesh, target_pos, npc_entity, target_in_spawn, target_illuminated );
+  // No spawn-boundary stop for player-chasing NPCs: light sources now provide the player's protection.
+  auto result = Utils::Npc::pathfind_toward( reg(), navmesh, target_pos, npc_entity, false, target_illuminated, false, &lights );
   if ( result == Utils::Npc::PathfindResult::NoPath ) { reg().emplace_or_replace<Cmp::Direction>( npc_entity, Cmp::Direction( { 0.0, 0.0 } ) ); }
 }
 
