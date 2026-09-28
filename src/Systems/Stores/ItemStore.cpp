@@ -5,6 +5,7 @@
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/SacrificeAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
+#include <SFML/System/Time.hpp>
 #include <Systems/Stores/BaseStore.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 
@@ -28,7 +29,8 @@ void ItemStore::init_store()
   for ( const auto &[item_key, item_value] : json.items() )
   {
     Sprites::SpriteMetaType sprite_mtype = item_value.at( "sprite" ).get<std::string>();
-    Cmp::WorldItem worlditem( item_key, sprite_mtype );
+    auto expiry = item_value.at( "expiry" ).get<float>();
+    Cmp::WorldItem worlditem( item_key, sprite_mtype, sf::seconds( expiry ) );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )

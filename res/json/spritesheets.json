@@ -1501,6 +1501,20 @@
         }
       }
     },
+    "sprite.item.rottenfood": {
+      "spritesheet": {
+        "displayname": "Rotten Substance",
+        "zorder": [0],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [60],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
     "sprite.item.plant.rowan": {
       "spritesheet": {
         "displayname": "Plant: Rowan",

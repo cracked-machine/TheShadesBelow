@@ -2,6 +2,7 @@
 #define SRC_COMPONENTS_INVENTORY_WORLDITEM_HPP__
 
 #include <Components/Stats/BaseAction.hpp>
+#include <SFML/System/Time.hpp>
 #include <Sprites/SpriteMetaType.hpp>
 
 #include <typeindex>
@@ -21,16 +22,17 @@ public:
   //! @brief Construct a new World Item object.
   //! @param item_type Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
   //! @param sprite_type The sprite used to render this item.
-  WorldItem( std::string item_type, Sprites::SpriteMetaType sprite_type )
+  WorldItem( std::string item_type, Sprites::SpriteMetaType sprite_type, sf::Time expiry = sf::Time::Zero )
       : item_type( std::move( item_type ) ),
-        sprite_type( std::move( sprite_type ) )
+        sprite_type( std::move( sprite_type ) ),
+        m_expiry( expiry )
   {
   }
 
   //! @brief Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
   std::string item_type;
 
-  //! @brief The associated sprite
+  //! @brief The associated sprite. Imported from items.json.
   Sprites::SpriteMetaType sprite_type;
 
   //! @brief Pairs a stat-modifier action with the timestamp/duration used to schedule its re-application.
@@ -63,9 +65,14 @@ public:
     return actions.at( std::type_index( typeid( ActionT ) ) ).action;
   }
 
+  sf::Time expiry() { return m_expiry; }
+
 private:
-  //! @brief The action and its effects that can be applied to the player
+  //! @brief The action and its effects that can be applied to the player. Imported from items.json.
   std::unordered_map<std::type_index, ActionTimePair> actions;
+
+  //! @brief Expiry for the item. Zero means this item does not exire. Imported from items.json.
+  sf::Time m_expiry;
 };
 
 } // namespace Game::Cmp

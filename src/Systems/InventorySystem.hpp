@@ -5,6 +5,7 @@
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <PathFinding/SmartPointers.hpp>
+#include <SFML/System/Time.hpp>
 #include <Systems/BaseSystem.hpp>
 
 #include <SFML/System/Clock.hpp>
@@ -67,6 +68,10 @@ private:
   //! @param inventory_slot_entt the player inventory slot entt
   void drop_inventory_item( sf::Vector2f pos, entt::entity inventory_slot_entt );
 
+  //! @brief Update wear level of both inventory and world items using their built-in expiry date
+  //! @param dt
+  void update_item_expiry_damage( sf::Time dt );
+
   //! @brief Add the world item to the player's inventory and destroy the world entity.
   //! @param reg
   //! @param world_item_entt
@@ -86,7 +91,10 @@ private:
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
 
   //! @brief Prevent player from spamming the drop inventory action.
-  sf::Clock m_inventory_cooldown_timer;
+  sf::Clock m_swap_item_cooldown_timer;
+
+  //! @brief fixed step for updating the item damage for expiry.
+  sf::Time m_expiry_update_timer;
 };
 
 } // namespace Game::Sys

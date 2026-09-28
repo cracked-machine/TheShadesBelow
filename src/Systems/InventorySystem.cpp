@@ -30,12 +30,14 @@
 #include <SFML/Audio/SoundChannel.hpp>
 #include <Systems/InventorySystem.hpp>
 #include <Systems/ParticleSystem.hpp>
+#include <Systems/Stores/ItemStore.hpp>
 #include <Utils/Cardinal.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 
 #include <SFML/System/Time.hpp>
+#include <cmath>
 #include <spdlog/spdlog.h>
 
 namespace Game::Sys
@@ -59,6 +61,8 @@ void InventorySystem::update( sf::Time dt )
 
   auto player_entt = Utils::Player::get_entity( reg() );
   if ( reg().any_of<Cmp::Player::EatingTimeAccumulator>( player_entt ) ) { consume_inventory( dt ); }
+
+  update_item_expiry_damage( dt );
 }
 
 void InventorySystem::on_player_action( const Events::PlayerActionEvent &event )
@@ -85,7 +89,7 @@ void InventorySystem::swap_inventory()
     return;
   }
 
-  if ( m_inventory_cooldown_timer.getElapsedTime() < sf::milliseconds( 750.f ) ) return;
+  if ( m_swap_item_cooldown_timer.getElapsedTime() < sf::milliseconds( 750.f ) ) return;
 
   auto player_pos = Cmp::RectBounds::scaled( Utils::Player::get_position( reg() ), 0.5 );
   Sprites::SpriteMetaType existing_player_inventory_type;
@@ -108,7 +112,7 @@ void InventorySystem::swap_inventory()
 
     pickup_world_item( reg(), world_item_entt );
   }
-  m_inventory_cooldown_timer.restart();
+  m_swap_item_cooldown_timer.restart();
   SPDLOG_DEBUG( "inventory_view: {} ", inventory_view.size() );
 }
 
@@ -219,6 +223,53 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
   if ( world_item_entt != entt::null ) { m_sound_bank.get_effect( "drop_inventory" ).play(); }
 }
 
+void InventorySystem::update_item_expiry_damage( sf::Time dt )
+{
+  static constexpr sf::Time expiry_update_timeout = sf::seconds( 1.f );
+  m_expiry_update_timer += dt;
+  if ( m_expiry_update_timer < expiry_update_timeout ) return;
+  m_expiry_update_timer = sf::Time::Zero;
+
+  // Returns true once the item has fully spoiled. Non-perishable items are left untouched.
+  auto apply_spoilage = []( Cmp::WorldItem &item, Cmp::Inventory::WearLevel &wearlevel_cmp ) -> bool
+  {
+    if ( not item.item_type.contains( ".forage" ) ) return false;
+    if ( item.expiry() == sf::Time::Zero ) return false;
+
+    float dmg_delta = 100.f / ( item.expiry().asSeconds() / expiry_update_timeout.asSeconds() );
+    wearlevel_cmp.m_level = std::clamp( wearlevel_cmp.m_level - dmg_delta, 0.f, 100.f );
+    return wearlevel_cmp.m_level <= 0.f;
+  };
+
+  // Collect spoiled entities first - don't modify the registry while iterating its views
+  std::vector<entt::entity> spoiled_world_items;
+  for ( auto [worlditem_entt, worlditem_cmp, wearlevel_cmp] : reg().view<Cmp::WorldItem, Cmp::Inventory::WearLevel>().each() )
+  {
+    if ( apply_spoilage( worlditem_cmp, wearlevel_cmp ) ) spoiled_world_items.push_back( worlditem_entt );
+  }
+
+  std::vector<entt::entity> spoiled_inventory_items;
+  for ( auto [inventory_entt, inventory_cmp, wearlevel_cmp] : reg().view<Cmp::PlayerInventorySlot, Cmp::Inventory::WearLevel>().each() )
+  {
+    if ( apply_spoilage( inventory_cmp.m_item, wearlevel_cmp ) ) spoiled_inventory_items.push_back( inventory_entt );
+  }
+
+  // swap spoiled world items to rotten food in-place so position/zorder/spatial-grid entries are preserved
+  for ( auto worlditem_entt : spoiled_world_items )
+  {
+    const auto &rotten_item = Sys::ItemStore::instance().get_item( "item.rottenfood" );
+    reg().emplace_or_replace<Cmp::WorldItem>( worlditem_entt, rotten_item );
+    reg().emplace_or_replace<Cmp::AnimData>( worlditem_entt, Cmp::AnimData::Config{ .sprite_type = rotten_item.sprite_type, .enabled = false } );
+    reg().remove<Cmp::Inventory::WearLevel>( worlditem_entt );
+  }
+
+  for ( auto inventory_entt : spoiled_inventory_items )
+  {
+    reg().destroy( inventory_entt );
+    Factory::Player::add_inventory( reg(), "item.rottenfood" );
+  }
+}
+
 void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world_item_entt )
 {
 
@@ -275,6 +326,7 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
 
 void InventorySystem::consume_inventory( sf::Time dt )
 {
+
   auto player_entt = Utils::Player::get_entity( reg() );
   auto *eating_time = reg().try_get<Cmp::Player::EatingTimeAccumulator>( player_entt );
   if ( not eating_time ) return;

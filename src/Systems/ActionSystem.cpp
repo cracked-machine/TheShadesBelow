@@ -322,6 +322,7 @@ void ActionSystem::player_plant_interact()
       {
         auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
         if ( not plant_item ) continue;
+        // no drop from foraging this plant
         if ( not plant_item->item_type.contains( "redcampion" ) )
         {
           auto plantleaves_particle_uuid = Cmp::UUID::generate();
@@ -359,6 +360,7 @@ void ActionSystem::player_plant_interact()
           Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, planttwigs_particle_uuid,
                                                 plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
 
+          // no drops from chopping these plants
           auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
           if ( not plant_item->item_type.contains( "nightshade" ) and not plant_item->item_type.contains( "foxglove" ) and
                not plant_item->item_type.contains( "hogweed" ) )

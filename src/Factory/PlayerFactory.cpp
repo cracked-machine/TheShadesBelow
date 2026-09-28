@@ -149,7 +149,10 @@ void add_inventory( entt::registry &reg, const std::string &item )
 {
   auto inventory_entity = reg.create();
   reg.emplace_or_replace<Cmp::PlayerInventorySlot>( inventory_entity, Sys::ItemStore::instance().get_item( item ) );
-  if ( item.contains( "axe" ) or item.contains( "shovel" ) ) { reg.emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, 100.f ); }
+  if ( item.contains( "axe" ) or item.contains( "shovel" ) or item.contains( ".forage" ) )
+  {
+    reg.emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, 100.f );
+  }
   if ( item.contains( "scryingball" ) )
   {
     Cmp::SeeingStone sb;

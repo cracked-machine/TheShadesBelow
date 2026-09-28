@@ -5,12 +5,16 @@
   "patternProperties": {
     "^(item\\..+|ERROR_SPRITE)$": {
       "type": "object",
-      "required": ["sprite", "actions"],
+      "required": ["sprite", "expiry", "actions"],
       "additionalProperties": false,
       "properties": {
         "sprite": {
           "type": "string",
           "description": "The sprite identifier for the item"
+        },
+        "expiry": {
+          "type": "number",
+          "description": "The expiry for this item in seconds. Zero if no expiry."
         },
         "actions": {
           "type": "array",

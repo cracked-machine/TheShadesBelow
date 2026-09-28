@@ -26,6 +26,7 @@
 #include <Components/Player/Mortality.hpp>
 #include <Components/Player/RuinLocation.hpp>
 #include <Components/Player/SpeedPenalty.hpp>
+#include <Components/Player/TookDamage.hpp>
 #include <Components/Player/TorchRadius.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
@@ -378,7 +379,9 @@ void apply_action_from_inventory_item( entt::registry &reg )
   for ( auto [inventory_entt, inventory_cmp] : inventory_view.each() )
   {
     auto &player_stats = Utils::Player::get_stats( reg );
-    player_stats.apply( inventory_cmp.m_item.at<ActionT>().action );
+    auto action = inventory_cmp.m_item.at<ActionT>().action;
+    player_stats.apply( action );
+    if ( action.health() < 0 ) reg.emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg ) );
   }
 }
 

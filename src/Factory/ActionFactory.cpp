@@ -12,7 +12,7 @@ namespace Game::Factory::Action
 void try_eat_inventory( entt::registry &reg )
 {
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg );
-  if ( inventory_type.contains( ".forage" ) )
+  if ( ( inventory_type.contains( ".forage" ) and Utils::Player::get_inventory_wear_level( reg ) > 0 ) or inventory_type.contains( ".rottenfood" ) )
   {
     auto player_entt = Utils::Player::get_entity( reg );
     if ( not reg.any_of<Cmp::Player::EatingTimeAccumulator>( player_entt ) )
