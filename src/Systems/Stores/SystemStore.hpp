@@ -42,6 +42,7 @@ class ParticleSystem;
 class PassageSystem;
 class PersistSystem;
 class PlayerSystem;
+class RenderDebugSystem;
 class RenderGameSystem;
 class RenderMenuSystem;
 class RenderOverlaySystem;
@@ -117,6 +118,8 @@ public:
     PlayerSystem,
     //! @brief Key for ProcGen::LevelGenerator.
     LevelGenerator,
+    //! @brief Key for RenderDebugSystem.
+    RenderDebugSystem,
     //! @brief Key for RenderGameSystem.
     RenderGameSystem,
     //! @brief Key for RenderMenuSystem.
@@ -230,6 +233,7 @@ template<> struct Store::SystemTraits<Store::Type::PassageSystem>          { usi
 template<> struct Store::SystemTraits<Store::Type::PersistSystem>          { using type = PersistSystem; };
 template<> struct Store::SystemTraits<Store::Type::PlayerSystem>           { using type = PlayerSystem; };
 template<> struct Store::SystemTraits<Store::Type::LevelGenerator>         { using type = ProcGen::LevelGenerator; };
+template<> struct Store::SystemTraits<Store::Type::RenderDebugSystem>      { using type = RenderDebugSystem; };
 template<> struct Store::SystemTraits<Store::Type::RenderGameSystem>       { using type = RenderGameSystem; };
 template<> struct Store::SystemTraits<Store::Type::RenderOverlaySystem>    { using type = RenderOverlaySystem; };
 template<> struct Store::SystemTraits<Store::Type::RenderMenuSystem>       { using type = RenderMenuSystem; };

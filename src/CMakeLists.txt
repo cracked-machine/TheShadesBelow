@@ -45,6 +45,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/ProcGen/PassageSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ProcGen/PassageAlgorithms.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderSystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderDebugSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderGameSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderMenuSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderOverlaySystem.cpp

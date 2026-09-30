@@ -27,6 +27,7 @@
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/PlayerSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
+#include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderOverlaySystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
@@ -145,15 +146,18 @@ void HealingSpringScene::do_update( sf::Time dt )
   m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt );
   m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
 
-  auto &overlay_sys = m_sys.find<Sys::Store::Type::RenderOverlaySystem>();
-  m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt, overlay_sys );
+  auto &game_sys = m_sys.find<Sys::Store::Type::RenderGameSystem>();
+  game_sys.render_game( dt );
+  m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_overlay( dt );
+  m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug( game_sys.zorder_queue() );
+  game_sys.display();
 }
 
 void HealingSpringScene::reinit_navmesh()
 {
   m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
-  m_sys.find<Sys::Store::Type::RenderOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::RenderDebugSystem>().init( m_generic_npc_navmesh, m_reserved_sm );
 }
 
 entt::registry &HealingSpringScene::registry() { return m_reg; }

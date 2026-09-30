@@ -20,6 +20,7 @@
 #include <Systems/ProcGen/DLASystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/ProcGen/PassageSystem.hpp>
+#include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderMenuSystem.hpp>
 #include <Systems/Render/RenderOverlaySystem.hpp>
@@ -72,6 +73,7 @@ Store::Store( sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, 
   emplace<Type::PlayerSystem>( m_initial_reg, window, sprite_factory, sound_bank, scenemanager_event_dispatcher );
   emplace<Type::PersistSystem>( m_initial_reg, window, sprite_factory, sound_bank );
   emplace<Type::LevelGenerator>( m_initial_reg, window, sprite_factory, sound_bank );
+  emplace<Type::RenderDebugSystem>( m_initial_reg, window, sprite_factory, sound_bank );
   emplace<Type::RenderGameSystem>( m_initial_reg, window, sprite_factory, sound_bank );
   emplace<Type::RenderMenuSystem>( m_initial_reg, window, sprite_factory, sound_bank );
   emplace<Type::RenderOverlaySystem>( m_initial_reg, window, sprite_factory, sound_bank );

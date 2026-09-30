@@ -42,15 +42,15 @@ class Armed;
 struct FractalCurve;
 } // namespace Game::Cmp
 
-namespace Game::Cmp::Particle { class IParticleSprite; }
+namespace Game::Cmp::Particle { class IParticleSprite; struct SpriteOwner; }
+namespace Game::Cmp::Shader { struct SpriteOwner; }
 // clang-format on
 namespace Game::Sys
 {
-class RenderOverlaySystem;
 
 //! @brief Renders everything that exists in the game world: the z-ordered entity queue (sprites, particles, shaders, floor tiles),
-//! player-adjacent effects (shockwaves, lightning, compass arrow), and the camera. Delegates all UI and debug overlay rendering to
-//! RenderOverlaySystem.
+//! player-adjacent effects (shockwaves, lightning, compass arrow), and the camera. UI and debug rendering are done
+//! separately by RenderOverlaySystem and RenderDebugSystem.
 class RenderGameSystem : public RenderSystem
 {
 public:
@@ -60,18 +60,20 @@ public:
   //! @brief Destroy the Render Game System object
   ~RenderGameSystem();
 
-  //! @brief Entrypoint for rendering the game
-  //! @param deltaTime
-  //! @param render_overlay_sys anything that is not part of the game world itself. i.e. UI, debug
-  //! info, etc..
-  //! @param render_player_sys anything that walks about in the game world, i.e. player, NPCs, etc..
-  //! as well as death animations/effects
+  //! @brief Entrypoint for rendering the game world. Does not present the frame; call display() once the overlay and debug
+  //! rendering (see RenderOverlaySystem::render_overlay and RenderDebugSystem::render_debug) is done.
+  //! @param dt
   //! @param render_position_grid Optional spatial index of static (never moved after creation)
   //! Cmp::Position-bearing renderable entities - see queue_positioned(). Scenes that don't
   //! populate/pass one (nullptr, the default) fall
   //! back to the unindexed full-registry scan, so this is safe to omit.
-  void render_game( sf::Time dt, RenderOverlaySystem &render_overlay_sys,
-                    const PathFinding::SpatialHashGridSharedPtr &render_position_grid = nullptr );
+  void render_game( sf::Time dt, const PathFinding::SpatialHashGridSharedPtr &render_position_grid = nullptr );
+
+  //! @brief Present the frame rendered by render_game() (and any debug rendering after it) to the window.
+  void display();
+
+  //! @brief The z-order queue rendered by the last render_game() call.
+  const std::vector<ZOrder> &zorder_queue() const { return m_zorder_queue_; }
 
   //! @brief Refreshes the Z-order rendering queue
   //! @param render_position_grid See render_game()'s parameter of the same name.
@@ -92,8 +94,20 @@ private:
   bool m_camera_initialized{ false };
 
   //! @brief Draws every entity in `m_zorder_queue_` (sprites, particles, shaders, floor tiles), lowest z-order first
-  //! @param render_overlay_sys anything that is not part of the game world itself. i.e. UI, debug info, etc..
-  void render_zorder_queue( RenderOverlaySystem &render_overlay_sys );
+  void render_zorder_queue();
+
+  //! @brief Draws a Cmp::Position + Cmp::AnimData sprite, applying any Absolute* overrides, then its decorations
+  //! (seeing stone doglegs, wear level, armed indicator)
+  void draw_animated_sprite( entt::entity entity );
+
+  //! @brief Draws a shader sprite. Post-process shaders composite everything drawn before them in the queue.
+  void draw_shader_sprite( Cmp::Shader::SpriteOwner &shader_owner );
+
+  //! @brief Draws a world-space particle sprite. Screen-space particles are drawn by RenderOverlaySystem.
+  void draw_particle_sprite( Cmp::Particle::SpriteOwner &particle_owner );
+
+  //! @brief Draws a floor tile set at its world grid offset
+  void draw_vertex_floor( Sprites::Containers::VertexFloor &floor_tiles );
 
   //! @brief Used by CryptScene for Priest NPC weapon
   //! @param floormap
@@ -104,6 +118,11 @@ private:
 
   //! @brief Used by GraveyardScene when player places a seeing stone
   void render_seeingstone_doglegs( const Cmp::SeeingStone &stone_cmp, const Cmp::Position &pos_cmp );
+
+  //! @brief Draw a small wear-level bar above an item, filled proportionally to `wearlevel`.
+  //! @param wearlevel
+  //! @param pos
+  void render_wear_level( float wearlevel, const Cmp::Position &pos );
 
   //! @brief Renders the flashing warning square over an armed obstacle in the game world
   void render_armed_indicator( const Cmp::Armed &armed_cmp, const Cmp::Position &pos_cmp );

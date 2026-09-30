@@ -250,7 +250,7 @@ void add_flame_for_player_inventory_slot( entt::registry &reg )
 
       // Move the ParticleSprite to the UI view. Any particle sprites should be fully cleared
       // otherwise we get particle effects in strange places during the transition frame.
-      // The emitter position is set by RenderGameSystem using the UiData object.
+      // The emitter position is set by RenderOverlaySystem using the UiData object.
       ps_owner.sprite->clear();
       ps_owner.sprite->set_view_type( Cmp::Particle::ViewType::SCREEN );
     }

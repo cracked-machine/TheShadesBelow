@@ -6,9 +6,12 @@
 #include <Factory/SpriteFactory.hpp>
 #include <Shaders/TitleScreenShader.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Utils/Constants.hpp>
+#include <Utils/Optimizations.hpp>
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
@@ -17,6 +20,9 @@
 #include <entt/entity/fwd.hpp>
 #include <functional>
 #include <imgui.h>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace Game::Cmp
 {
@@ -26,7 +32,8 @@ class RectBounds;
 namespace Game::Sys
 {
 
-//! @brief Base class for the game's render systems (RenderGameSystem, RenderMenuSystem, RenderOverlaySystem). Owns the shared world view
+//! @brief Base class for the game's render systems (RenderGameSystem, RenderMenuSystem, RenderOverlaySystem,
+//! RenderDebugSystem). Owns the shared world view
 //! and font, and provides common rendering primitives such as safe sprite rendering with fallback squares, text rendering, and
 //! world/screen coordinate conversion.
 class RenderSystem : public BaseSystem
@@ -179,6 +186,91 @@ protected:
   //! @param bounds
   //! @param color
   void render_rectbounds( Cmp::RectBounds &bounds, sf::Color color );
+
+  //! @brief Draw an outlined square for every entity that has the given Component (used as a bounds rect), if visible in the world view.
+  //! @tparam Component
+  //! @param square_color
+  //! @param square_thickness
+  template <typename Component>
+  void render_square_for_floatrect_cmp( sf::Color square_color = sf::Color::Red, float square_thickness = 1.f )
+  {
+    const auto view_bounds = Utils::calculate_view_bounds( RenderSystem::get_world_view() );
+    for ( auto [entity, requested_cmp] : reg().view<Component>().each() )
+    {
+      if ( not Utils::is_visible_in_view( view_bounds, requested_cmp ) ) continue;
+      sf::RectangleShape rectangle;
+      rectangle.setSize( requested_cmp.size );
+      rectangle.setPosition( requested_cmp.position );
+      rectangle.setFillColor( sf::Color::Transparent );
+      rectangle.setOutlineColor( square_color );
+      rectangle.setOutlineThickness( square_thickness );
+      draw_world( rectangle );
+    }
+  }
+
+  //! @brief Draw a column of text lines, top to bottom, at a fixed origin, advancing by `line_height` after each call.
+  //! Backed by a per-`cache_key` pool of persistent sf::Text objects (see m_text_column_cache) so that, across frames, each
+  //! line reuses the same sf::Text instead of being reconstructed (and having its outline re-generated) from scratch -
+  //! these panels can otherwise update every frame at a real cost to frame time.
+  struct TextColumn
+  {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members) - TextColumn is a short-lived,
+    // per-panel-call local (never stored, copy-assigned, or passed around), so the usual dangling-reference
+    // risk this check guards against doesn't apply here.
+    //! @brief The render system used to draw each text line.
+    RenderSystem &self;
+
+    //! @brief Identifies this column's slot in self.m_text_column_cache. Stable across frames for a given panel (e.g.
+    //! "npc_list") so the same sf::Text objects are reused call after call.
+    std::string cache_key;
+
+    //! @brief Screen position of the first line in the column.
+    sf::Vector2f origin;
+
+    //! @brief Font size, in pixels, of each line.
+    unsigned int font_size;
+
+    //! @brief Vertical spacing, in pixels, added after each line is drawn.
+    float line_height;
+
+    //! @brief Running vertical offset from `origin`, advanced by `line_height` after each call.
+    float y_offset{ 0.f };
+
+    //! @brief Index into this column's cache pool of the next line to draw, advanced after each call.
+    std::size_t line_index{ 0 };
+
+    //! @brief Draw one line of text at the current column offset, then advance the offset by `line_height`.
+    //! @param str The text to draw.
+    //! @param color Fill colour of the text.
+    void operator()( const std::string &str, sf::Color color = sf::Color::White )
+    {
+      auto &pool = self.m_text_column_cache[cache_key];
+      if ( line_index >= pool.size() )
+      {
+        // Outline colour/thickness are the same for every line ever drawn through this struct, so they only need
+        // setting once per pooled sf::Text - re-applying them every frame is what forces SFML to regenerate the
+        // outline geometry for every visible line, every frame.
+        sf::Text text( self.m_font, str, font_size );
+        text.setOutlineColor( sf::Color::Black );
+        text.setOutlineThickness( 1.f );
+        pool.push_back( std::move( text ) );
+      }
+
+      sf::Text &text = pool[line_index];
+      text.setString( str );
+      text.setFillColor( color );
+      text.setPosition( { origin.x, origin.y + y_offset } );
+      self.draw_screen( text );
+
+      y_offset += line_height;
+      ++line_index;
+    }
+  };
+
+  //! @brief Per-panel pool of persistent sf::Text objects backing TextColumn, keyed by TextColumn::cache_key.
+  //! Keeps line count from one frame able to shrink/grow freely - unused trailing entries from a previous, longer frame
+  //! are simply left undrawn rather than erased.
+  std::unordered_map<std::string, std::vector<sf::Text>> m_text_column_cache;
 
   //! @brief Common window options for ImGui windows
   const int kImGuiWindowOptions = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;

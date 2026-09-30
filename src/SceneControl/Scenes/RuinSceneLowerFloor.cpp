@@ -44,6 +44,7 @@
 #include <Systems/ProcGen/CellAutomataSystem.hpp>
 #include <Systems/ProcGen/DLASystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
+#include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderOverlaySystem.hpp>
 #include <Systems/RuinSystem.hpp>
@@ -240,15 +241,18 @@ void RuinSceneLowerFloor::do_update( [[maybe_unused]] sf::Time dt )
   m_sys.find<Store::Type::RuinSystem>().check_exit_collision();
 
   m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
-  auto &overlay_sys = m_sys.find<Store::Type::RenderOverlaySystem>();
-  m_sys.find<Store::Type::RenderGameSystem>().render_game( dt, overlay_sys );
+  auto &game_sys = m_sys.find<Store::Type::RenderGameSystem>();
+  game_sys.render_game( dt );
+  m_sys.find<Store::Type::RenderOverlaySystem>().render_overlay( dt );
+  m_sys.find<Store::Type::RenderDebugSystem>().render_debug( game_sys.zorder_queue() );
+  game_sys.display();
 }
 
 void RuinSceneLowerFloor::reinit_navmesh()
 {
   m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
-  m_sys.find<Sys::Store::Type::RenderOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::RenderDebugSystem>().init( m_generic_npc_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::RuinSystem>().init( m_generic_npc_navmesh, m_reserved_sm );
 }
 
