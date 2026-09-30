@@ -14,9 +14,8 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <entt/core/type_traits.hpp>
 #include <entt/entity/fwd.hpp>
-#include <optional>
-#include <tuple>
 #include <vector>
 
 // clang-format off
@@ -41,18 +40,8 @@ class ZOrderValue;
 class Position;
 class Armed;
 struct FractalCurve;
-class HealingSpringBuildingMultiBlock;
-struct Moveable;
-struct ObstacleCap;
 } // namespace Game::Cmp
 
-namespace Game::Cmp::Player { class Character; }
-namespace Game::Cmp::Npc { class NPC; } 
-namespace Game::Cmp::Weapons::Projectiles { class Arrow; } 
-namespace Game::Cmp::Altar { class MultiBlock; } 
-namespace Game::Cmp::Crypt { class BuildingMultiBlock; class InteriorMultiBlock; } 
-namespace Game::Cmp::Grave { class MultiBlock; } 
-namespace Game::Cmp::Ruin { class BuildingMultiBlock; } 
 namespace Game::Cmp::Particle { class IParticleSprite; }
 // clang-format on
 namespace Game::Sys
@@ -78,8 +67,8 @@ public:
   //! @param render_player_sys anything that walks about in the game world, i.e. player, NPCs, etc..
   //! as well as death animations/effects
   //! @param render_position_grid Optional spatial index of static (never moved after creation)
-  //! Cmp::Position-bearing renderable entities - see add_visible_entity_to_z_order_queue()'s
-  //! Cmp::Position specialization. Scenes that don't populate/pass one (nullptr, the default) fall
+  //! Cmp::Position-bearing renderable entities - see queue_positioned(). Scenes that don't
+  //! populate/pass one (nullptr, the default) fall
   //! back to the unindexed full-registry scan, so this is safe to omit.
   void render_game( sf::Time dt, RenderOverlaySystem &render_overlay_sys,
                     const PathFinding::SpatialHashGridSharedPtr &render_position_grid = nullptr );
@@ -138,93 +127,30 @@ private:
   //! @param color
   void render_screen_flash( sf::Color color );
 
-  //! @brief Adds component type to the Z-order queue.
-  //! If the component is child of sf::FloatRect the entire geometry is processed, which will prevent "pop-in" glitches.
-  //! Optimized (single-type view) query on entt components for visibility check and Z-order queue
-  //! addition
-  //! @note The Component-owning entity must also have a Cmp::ZOrderValue component to be added to
-  //! the queue
-  //! @tparam Component The component type to check for visibility
-  //! @param zorder_queue The Z-order queue to add visible entities to
-  //! @param view_bounds The view bounds to check against
-  template <typename Component>
-  void add_visible_entity_to_z_order_queue( std::vector<ZOrder> &zorder_queue, sf::FloatRect view_bounds )
-  {
-    if constexpr ( std::is_same_v<Component, Cmp::Position> )
-    {
-      if ( m_render_position_grid )
-      {
-        for ( auto entity : m_render_position_grid->query_rect( view_bounds ) )
-        {
-          if ( not reg().valid( entity ) ) continue;
-          auto *component = reg().try_get<Component>( entity );
-          auto *z_order_cmp = reg().try_get<Cmp::ZOrderValue>( entity );
-          if ( not component or not z_order_cmp ) continue;
-          if ( not Utils::is_visible_in_view( view_bounds, *component ) ) continue;
-          zorder_queue.push_back( ZOrder{ .z = z_order_cmp->getZOrder(), .e = entity } );
-        }
+  //! @brief Queues every visible multiblock root in the list. The whole multiblock rect is visibility-tested,
+  //! preventing pop-in when only part of it is inside the view.
+  template <typename... MultiBlock>
+  void queue_multiblocks( sf::FloatRect view_bounds, entt::type_list<MultiBlock...> );
 
-        add_mover_to_z_order_queue<Cmp::Player::Character>( zorder_queue, view_bounds );
-        add_mover_to_z_order_queue<Cmp::Npc::NPC>( zorder_queue, view_bounds );
-        add_mover_to_z_order_queue<Cmp::Weapons::Projectiles::Arrow>( zorder_queue, view_bounds );
-        add_mover_to_z_order_queue<Cmp::Moveable>( zorder_queue, view_bounds );
-        add_mover_to_z_order_queue<Cmp::ObstacleCap>( zorder_queue, view_bounds );
-        return;
-      }
+  //! @brief Queues every entity with CmpT, without a visibility test. For components with no world bounds.
+  template <typename CmpT>
+  void queue_all();
 
-      // No grid was supplied for the current scene (see render_game()'s render_position_grid
-      // parameter) - fall back to the unindexed full scan.
-      auto exclude_list = entt::exclude<Cmp::NoRender, Cmp::Altar::MultiBlock, Cmp::Crypt::BuildingMultiBlock, Cmp::Grave::MultiBlock,
-                                        Cmp::HealingSpringBuildingMultiBlock, Cmp::Crypt::InteriorMultiBlock, Cmp::Ruin::BuildingMultiBlock>;
-      auto pos_zorder_view = reg().view<Component, Cmp::AnimData, Cmp::ZOrderValue>( exclude_list );
-      for ( auto entity : pos_zorder_view )
-      {
-        auto [component, z_order_cmp] = pos_zorder_view.template get<Component, Cmp::ZOrderValue>( entity );
-        if ( not Utils::is_visible_in_view( view_bounds, component ) ) continue;
-        zorder_queue.push_back( ZOrder{ z_order_cmp.getZOrder(), entity } );
-      }
-    }
-    else
-    {
-      for ( auto [entity, component] : reg().view<Component>( entt::exclude<Cmp::NoRender> ).each() )
-      {
-        if constexpr ( std::is_base_of_v<sf::FloatRect, Component> )
-        {
-          if ( not Utils::is_visible_in_view( view_bounds, component ) ) continue;
-        }
-        if constexpr ( std::is_same_v<Cmp::Particle::SpriteOwner, Component> )
-        {
-          if ( component.sprite && component.sprite->get_view_type() == Cmp::Particle::ViewType::WORLD &&
-               not Utils::is_visible_in_view( view_bounds, component.sprite->get_bounds() ) )
-          {
-            continue;
-          }
-        }
+  //! @brief Queues world-space particle sprites whose bounds are in view, and all screen-space ones.
+  void queue_particles( sf::FloatRect view_bounds );
 
-        auto z_order_cmp = reg().try_get<Cmp::ZOrderValue>( entity );
-        if ( z_order_cmp ) { zorder_queue.push_back( ZOrder{ z_order_cmp->getZOrder(), entity } ); }
-      }
-    }
-  }
+  //! @brief Queues every visible Cmp::Position entity, other than multiblock roots.
+  //! @param render_position_grid Spatial index of static entities, queried instead of scanning the registry;
+  //! movers are then scanned separately. nullptr falls back to a full registry scan.
+  void queue_positioned( sf::FloatRect view_bounds, const PathFinding::SpatialHashGridSharedPtr &render_position_grid );
 
-  //! @brief Linear-scans every visible entity tagged with MoverTag (in addition to Position, AnimData
-  //! and ZOrderValue) and adds it to the Z-order queue. Used by add_visible_entity_to_z_order_queue()'s
-  //! Cmp::Position fast path for the small, bounded-count categories (player, NPCs, arrows, moveable
-  //! obstacles/caps) that are deliberately never inserted into m_render_position_grid_, since they move
-  //! every frame and keeping a spatial index in sync with that is unnecessary risk for populations this
-  //! small.
-  //! @tparam MoverTag Marker/filter component identifying the mover category; its value isn't read.
-  template <typename MoverTag>
-  void add_mover_to_z_order_queue( std::vector<ZOrder> &zorder_queue, sf::FloatRect view_bounds )
-  {
-    auto mover_view = reg().view<Cmp::Position, Cmp::AnimData, Cmp::ZOrderValue, MoverTag>( entt::exclude<Cmp::NoRender> );
-    for ( auto entity : mover_view )
-    {
-      auto [pos_cmp, z_order_cmp] = mover_view.template get<Cmp::Position, Cmp::ZOrderValue>( entity );
-      if ( not Utils::is_visible_in_view( view_bounds, pos_cmp ) ) continue;
-      zorder_queue.push_back( ZOrder{ z_order_cmp.getZOrder(), entity } );
-    }
-  }
+  //! @brief Queues visible Cmp::Position entities that also have every component in Filter.
+  //! An empty Filter scans every positioned entity.
+  template <typename... Filter>
+  void queue_positioned_view( sf::FloatRect view_bounds );
+
+  //! @brief Appends an entity to the z-order queue
+  void push( entt::entity entity, const Cmp::ZOrderValue &z_order_cmp );
 
   //! @brief event handlers for pausing system clocks
   void on_pause() override {}
@@ -234,11 +160,6 @@ private:
   //! @brief The z-order queue for rendering
   //! Each frame, this queue is refreshed to ensure correct rendering order
   std::vector<ZOrder> m_zorder_queue_;
-
-  //! @brief Set for the duration of refresh_z_order_queue() from its render_position_grid parameter;
-  //! see add_visible_entity_to_z_order_queue()'s Cmp::Position specialization. nullptr if the current
-  //! scene didn't supply one, in which case that specialization falls back to an unindexed full scan.
-  PathFinding::SpatialHashGridSharedPtr m_render_position_grid;
 
   //! @brief Copy of the window contents taken when the z-order loop reaches a post-process shader, which is then
   //! drawn into that shader's render texture. Reused across passes and frames.

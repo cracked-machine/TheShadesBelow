@@ -36,7 +36,7 @@ PathFinding::SpatialHashGridSharedPtr create_player_navmesh( entt::registry &reg
 PathFinding::SpatialHashGridSharedPtr create_open_navmesh( entt::registry &reg );
 
 //! @brief Clears and repopulates an existing grid in place with every entity eligible for
-//! RenderGameSystem::add_visible_entity_to_z_order_queue()'s Cmp::Position fast path - see
+//! RenderGameSystem::queue_positioned()'s grid fast path - see
 //! create_render_position_grid()'s docs for exactly which entities and why.
 //! @note Reuses the same PathFinding::SpatialHashGrid object rather than replacing it, specifically so
 //! a periodic re-populate (e.g. GraveyardScene's kRenderPositionGridRebuildInterval) doesn't invalidate
@@ -45,17 +45,15 @@ PathFinding::SpatialHashGridSharedPtr create_open_navmesh( entt::registry &reg )
 //! @param render_position_grid The grid to clear and repopulate.
 void populate_render_position_grid( entt::registry &reg, PathFinding::SpatialHashGrid &render_position_grid );
 
-//! @brief Build the spatial index RenderGameSystem::add_visible_entity_to_z_order_queue() queries for
-//! its Cmp::Position pass: every entity with Cmp::Position + Cmp::AnimData + Cmp::ZOrderValue that is
-//! static once created (obstacles, plants, loot, multiblock roots/segments, etc.), excluding both the
-//! movers (player, NPCs, arrows, moveable obstacles + their caps - see
-//! RenderGameSystem::add_mover_to_z_order_queue(), which handles these separately via a plain scan) and
-//! the 6 multiblock root types that already get their own dedicated pass.
+//! @brief Build the spatial index RenderGameSystem::queue_positioned() queries: every entity with
+//! Cmp::Position + Cmp::AnimData + Cmp::ZOrderValue that is static once created (obstacles, plants, loot,
+//! multiblock segments, etc.), excluding Sys::RenderPass::Movers (scanned separately every frame) and
+//! Sys::RenderPass::MultiBlockRoots (which get their own dedicated pass).
 //! @note Call this once, after level generation has finished creating all static content (mirroring
 //! create_npc_navmesh() et al.) - it only captures what already exists in `reg` at the time it runs.
 //! Anything created afterwards at runtime (loot drops, bombs, footstep decals, dug/replanted
 //! obstacles/plants, ...) needs its own insert()/remove() calls at the relevant factory/system code
-//! wherever it's created or destroyed, matching this same exclude list - or gets picked up eventually by
+//! wherever it's created or destroyed, matching the same exclude lists - or gets picked up eventually by
 //! a periodic populate_render_position_grid() call.
 //! @param reg
 //! @return The new grid.

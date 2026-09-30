@@ -71,6 +71,7 @@
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderOverlaySystem.hpp>
+#include <Systems/Render/RenderPassTypes.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
 #include <Systems/Threats/HazardFieldSystemImpl.hpp>
@@ -92,7 +93,6 @@
 #include <algorithm>
 #include <memory>
 #include <optional>
-#include <ranges>
 #include <tracy/Tracy.hpp>
 
 namespace Game::Sys
@@ -319,31 +319,91 @@ void RenderGameSystem::render_zorder_queue( RenderOverlaySystem &render_overlay_
 
 void RenderGameSystem::refresh_z_order_queue( const PathFinding::SpatialHashGridSharedPtr &render_position_grid )
 {
-  m_render_position_grid = render_position_grid;
   m_zorder_queue_.clear();
   sf::FloatRect view_bounds = Utils::calculate_view_bounds( s_world_view );
 
-  // prevent pop-in/pop-outs when multiblock entities are near the edge of the view
-  PROFILED( add_visible_entity_to_z_order_queue<Cmp::Altar::MultiBlock>( m_zorder_queue_, view_bounds ) );
-  PROFILED( add_visible_entity_to_z_order_queue<Cmp::Crypt::BuildingMultiBlock>( m_zorder_queue_, view_bounds ) );
-  PROFILED( add_visible_entity_to_z_order_queue<Cmp::Grave::MultiBlock>( m_zorder_queue_, view_bounds ) );
-  PROFILED( add_visible_entity_to_z_order_queue<Cmp::HealingSpringBuildingMultiBlock>( m_zorder_queue_, view_bounds ) );
-  PROFILED( add_visible_entity_to_z_order_queue<Cmp::Crypt::InteriorMultiBlock>( m_zorder_queue_, view_bounds ) );
-  PROFILED( add_visible_entity_to_z_order_queue<Cmp::Ruin::BuildingMultiBlock>( m_zorder_queue_, view_bounds ) );
-  PROFILED( add_visible_entity_to_z_order_queue<Cmp::Grave::ExitMultiBlock>( m_zorder_queue_, view_bounds ) );
-  PROFILED( add_visible_entity_to_z_order_queue<Cmp::Wormhole::MultiBlock>( m_zorder_queue_, view_bounds ) );
+  PROFILED( queue_multiblocks( view_bounds, RenderPass::MultiBlockRoots{} ) );
+  PROFILED( queue_all<Sprites::Containers::VertexFloor>() );
+  PROFILED( queue_particles( view_bounds ) );
+  PROFILED( queue_all<Cmp::Shader::SpriteOwner>() );
+  PROFILED( queue_positioned( view_bounds, render_position_grid ) );
 
-  // add any floor tile sets
-  PROFILED( add_visible_entity_to_z_order_queue<Sprites::Containers::VertexFloor>( m_zorder_queue_, view_bounds ) );
+  PROFILED( std::ranges::sort( m_zorder_queue_, {}, &ZOrder::z ) );
+}
 
-  // add the wrapper types for all particle and shader sprites so they can be rendered with the other entities
-  PROFILED( add_visible_entity_to_z_order_queue<Cmp::Particle::SpriteOwner>( m_zorder_queue_, view_bounds ) );
-  PROFILED( add_visible_entity_to_z_order_queue<Cmp::Shader::SpriteOwner>( m_zorder_queue_, view_bounds ) );
+template <typename... MultiBlock>
+void RenderGameSystem::queue_multiblocks( sf::FloatRect view_bounds, entt::type_list<MultiBlock...> )
+{
+  auto queue_visible = [&]<typename CmpT>()
+  {
+    auto view = reg().view<CmpT, Cmp::ZOrderValue>( entt::exclude<Cmp::NoRender> );
+    for ( auto [entity, multiblock_cmp, z_order_cmp] : view.each() )
+    {
+      if ( Utils::is_visible_in_view( view_bounds, multiblock_cmp ) ) push( entity, z_order_cmp );
+    }
+  };
+  ( queue_visible.template operator()<MultiBlock>(), ... );
+}
 
-  // add other components as normal
-  PROFILED( add_visible_entity_to_z_order_queue<Cmp::Position>( m_zorder_queue_, view_bounds ) );
+template <typename CmpT>
+void RenderGameSystem::queue_all()
+{
+  auto view = reg().view<CmpT, Cmp::ZOrderValue>( entt::exclude<Cmp::NoRender> );
+  for ( auto [entity, cmp, z_order_cmp] : view.each() )
+  {
+    push( entity, z_order_cmp );
+  }
+}
 
-  PROFILED( std::ranges::sort( m_zorder_queue_, []( const ZOrder &a, const ZOrder &b ) { return a.z < b.z; } ) );
+void RenderGameSystem::queue_particles( sf::FloatRect view_bounds )
+{
+  auto view = reg().view<Cmp::Particle::SpriteOwner, Cmp::ZOrderValue>( entt::exclude<Cmp::NoRender> );
+  for ( auto [entity, owner_cmp, z_order_cmp] : view.each() )
+  {
+    if ( owner_cmp.sprite && owner_cmp.sprite->get_view_type() == Cmp::Particle::ViewType::WORLD &&
+         not Utils::is_visible_in_view( view_bounds, owner_cmp.sprite->get_bounds() ) )
+    {
+      continue;
+    }
+    push( entity, z_order_cmp );
+  }
+}
+
+void RenderGameSystem::queue_positioned( sf::FloatRect view_bounds, const PathFinding::SpatialHashGridSharedPtr &render_position_grid )
+{
+  if ( not render_position_grid )
+  {
+    queue_positioned_view( view_bounds );
+    return;
+  }
+
+  // The grid is only rebuilt periodically, so its entities may have been destroyed or changed since
+  for ( auto entity : render_position_grid->query_rect( view_bounds ) )
+  {
+    if ( not reg().valid( entity ) or reg().all_of<Cmp::NoRender>( entity ) ) continue;
+    auto *pos_cmp = reg().try_get<Cmp::Position>( entity );
+    auto *z_order_cmp = reg().try_get<Cmp::ZOrderValue>( entity );
+    if ( not pos_cmp or not z_order_cmp ) continue;
+    if ( Utils::is_visible_in_view( view_bounds, *pos_cmp ) ) push( entity, *z_order_cmp );
+  }
+
+  [&]<typename... Mover>( entt::type_list<Mover...> ) { ( queue_positioned_view<Mover>( view_bounds ), ... ); }( RenderPass::Movers{} );
+}
+
+template <typename... Filter>
+void RenderGameSystem::queue_positioned_view( sf::FloatRect view_bounds )
+{
+  auto view = reg().view<Cmp::Position, Cmp::AnimData, Cmp::ZOrderValue, Filter...>( RenderPass::exclude<RenderPass::MultiBlockRoots> );
+  for ( auto entity : view )
+  {
+    auto [pos_cmp, z_order_cmp] = view.template get<Cmp::Position, Cmp::ZOrderValue>( entity );
+    if ( Utils::is_visible_in_view( view_bounds, pos_cmp ) ) push( entity, z_order_cmp );
+  }
+}
+
+void RenderGameSystem::push( entt::entity entity, const Cmp::ZOrderValue &z_order_cmp )
+{
+  m_zorder_queue_.push_back( ZOrder{ .z = z_order_cmp.getZOrder(), .e = entity } );
 }
 
 void RenderGameSystem::init_world_view()

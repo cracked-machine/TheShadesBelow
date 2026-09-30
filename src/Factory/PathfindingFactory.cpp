@@ -19,6 +19,7 @@
 #include <Factory/PathfindingFactory.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
+#include <Systems/Render/RenderPassTypes.hpp>
 
 namespace Game::Factory::Pathfinding
 {
@@ -83,14 +84,10 @@ void populate_render_position_grid( entt::registry &reg, PathFinding::SpatialHas
 {
   render_position_grid.clear();
 
-  // Mirrors RenderGameSystem::add_visible_entity_to_z_order_queue()'s Cmp::Position fallback-path
-  // exclude list exactly: movers are excluded here (and never inserted anywhere else) because
-  // RenderGameSystem's add_mover_to_z_order_queue() scans them separately every frame instead; the 6
-  // multiblock root types are excluded because they already get their own dedicated Z-order pass.
+  // Movers are excluded because RenderGameSystem::queue_positioned() scans them separately every frame;
+  // multiblock roots are excluded because they already get their own dedicated z-order pass.
   auto static_render_view = reg.view<Cmp::Position, Cmp::AnimData, Cmp::ZOrderValue>(
-      entt::exclude<Cmp::NoRender, Cmp::Player::Character, Cmp::Npc::NPC, Cmp::Weapons::Projectiles::Arrow, Cmp::Moveable, Cmp::ObstacleCap,
-                    Cmp::Altar::MultiBlock, Cmp::Crypt::BuildingMultiBlock, Cmp::Grave::MultiBlock, Cmp::HealingSpringBuildingMultiBlock,
-                    Cmp::Crypt::InteriorMultiBlock, Cmp::Ruin::BuildingMultiBlock> );
+      Sys::RenderPass::exclude<Sys::RenderPass::Movers, Sys::RenderPass::MultiBlockRoots> );
   for ( auto entity : static_render_view )
   {
     const auto &pos_cmp = static_render_view.get<Cmp::Position>( entity );
