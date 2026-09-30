@@ -20,6 +20,7 @@
 #include <Components/LastDirection.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Obstacle.hpp>
+#include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
@@ -46,6 +47,12 @@
 
 namespace Game::Scene
 {
+
+namespace
+{
+//! @brief Player components that are scene-local caches and must never be copied/transferred between scenes
+bool is_player_deny_listed( entt::id_type type_hash ) { return type_hash == entt::type_hash<Cmp::Player::ArrowCompass>::value(); }
+} // namespace
 
 //! @brief Creates a deep copy of selected entities from a scene's ECS registry into a new standalone registry. The function supports different copy
 //! modes to control what gets transferred during scene transitions — either just the player entity's state, all non-blacklisted entities, or nothing
@@ -94,6 +101,7 @@ RegistryTransfer::RegCopy RegistryTransfer::copy_reg( IScene &scene, Scene::RegC
         if ( auto &source_storage = curr.second; source_storage.contains( player_entity ) )
         {
           auto type_hash = curr.first;
+          if ( is_player_deny_listed( type_hash ) ) continue;
           if ( auto *target_storage = registry_copy->storage( type_hash ) )
           {
             target_storage->push( new_entity, source_storage.value( player_entity ) );
@@ -120,7 +128,7 @@ RegistryTransfer::RegCopy RegistryTransfer::copy_reg( IScene &scene, Scene::RegC
       // Skip transfer on deny list components
       if ( source_registry.any_of<Cmp::Obstacle, Cmp::Armable, Cmp::Npc::NoPathFinding, Cmp::FootStepTimer, Cmp::FootStepAlpha, Cmp::Crypt::RoomOpen,
                                   Cmp::Crypt::RoomClosed, Cmp::Crypt::RoomStart, Cmp::Crypt::RoomEnd, Cmp::Crypt::PassageBlock, Cmp::Crypt::Lever,
-                                  Cmp::Crypt::ObjectiveMultiBlock>( entity ) )
+                                  Cmp::Crypt::ObjectiveMultiBlock, Cmp::Player::ArrowCompass>( entity ) )
       {
         skipped_cmp++;
         continue;
@@ -199,9 +207,10 @@ void RegistryTransfer::xfer_player_entt( entt::registry &source_registry, entt::
   {
     if ( auto &source_storage = curr.second; source_storage.contains( source_entity ) )
     {
-      SPDLOG_DEBUG( "Transferring component: {}", source_storage.type().name() );
-
       auto type_hash = curr.first;
+      if ( is_player_deny_listed( type_hash ) ) continue;
+
+      SPDLOG_DEBUG( "Transferring component: {}", source_storage.type().name() );
 
       if ( auto *target_storage = target_registry.storage( type_hash ) )
       {

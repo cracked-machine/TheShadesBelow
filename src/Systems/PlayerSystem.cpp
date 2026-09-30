@@ -48,6 +48,7 @@
 #include <Components/Player/MovementSuppressTimer.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Player/PendingNoPath.hpp>
+#include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/PostDeathTimeout.hpp>
 #include <Components/Player/TookDamage.hpp>
 #include <Components/Player/TorchRadius.hpp>
@@ -154,6 +155,8 @@ void PlayerSystem::update( sf::Time dt )
   create_healing_particles();
 
   update_heartbeat( dt );
+
+  if ( auto *compass_cmp = reg().try_get<Cmp::Player::ArrowCompass>( Utils::Player::get_entity( reg() ) ) ) { compass_cmp->m_retarget_timer += dt; }
 
   if ( is_player_in_light() ) { reg().emplace_or_replace<Cmp::Player::Illuminated>( Utils::Player::get_entity( reg() ) ); }
   else { reg().remove<Cmp::Player::Illuminated>( Utils::Player::get_entity( reg() ) ); }

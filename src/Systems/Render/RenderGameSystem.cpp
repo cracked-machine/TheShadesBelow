@@ -22,6 +22,7 @@
 #include <Components/FractalCurve.hpp>
 #include <Components/Grave/ExitMultiBlock.hpp>
 #include <Components/Grave/MultiBlock.hpp>
+#include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/ScryingBall.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/LastDirection.hpp>
@@ -34,6 +35,7 @@
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
+#include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
@@ -409,109 +411,25 @@ void RenderGameSystem::render_shockwaves()
 
 void RenderGameSystem::render_arrow_compass()
 {
-  auto player_view = reg().view<Cmp::Player::Character, Cmp::Position>();
+  static const std::string kNoItem;
 
-  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-
-  if ( not inventory_type.contains( "exitkey" ) and not inventory_type.contains( "cryptkey" ) and not inventory_type.contains( "relic" ) ) return;
-
-  // if holding an exitkey then target the exit pos
-  Cmp::Position arrow_target( { 0.f, 0.f }, { 0.f, 0.f } );
-  if ( inventory_type.contains( "exitkey" ) )
+  for ( auto [player_entt, pc_cmp, pc_pos_cmp] : reg().view<Cmp::Player::Character, Cmp::Position>().each() )
   {
-    auto exit_view = reg().view<Cmp::Exit, Cmp::Position>();
-    for ( auto [exit_entity, exit_cmp, exit_pos_cmp] : exit_view.each() )
-    {
-      arrow_target = exit_pos_cmp;
-    }
-  }
+    auto &compass = reg().get_or_emplace<Cmp::Player::ArrowCompass>( player_entt );
 
-  // if holding a cryptkey then target the nearest inactive crypt
-  if ( inventory_type.contains( "cryptkey" ) )
-  {
-    auto nearest = find_nearest_target(
-        reg().view<Cmp::Crypt::Entrance, Cmp::Position>(), Utils::Player::get_position( reg() ).position,
-        []( entt::entity, const Cmp::Crypt::Entrance &crypt_cmp, const Cmp::Position &crypt_pos_cmp ) -> std::optional<Cmp::Position>
-    {
-      if ( crypt_cmp.is_open() ) return std::nullopt;
-      return crypt_pos_cmp;
-    } );
-    if ( not nearest ) return; // there are no suitable crypts so give up
-    arrow_target = *nearest;
-  }
+    // single slot inventory; read the item type by reference to avoid a per-frame string copy
+    auto inv_view = reg().view<Cmp::PlayerInventorySlot>();
+    const auto *inv_slot = inv_view.empty() ? nullptr : &inv_view.get<Cmp::PlayerInventorySlot>( inv_view.front() );
+    compass.update_mode( inv_slot ? inv_slot->m_item.item_type : kNoItem );
+    if ( compass.mode() == Cmp::Player::ArrowCompass::Mode::NONE ) return;
 
-  // if holding a relic then target the nearest inactive altar
-  if ( inventory_type.contains( "relic" ) )
-  {
-    auto nearest = find_nearest_target( reg().view<Cmp::Altar::MultiBlock>(), Utils::Player::get_position( reg() ).position,
-                                        []( entt::entity, const Cmp::Altar::MultiBlock &altar_cmp ) -> std::optional<Cmp::Position>
-    {
-      if ( altar_cmp.is_exitkey_lockout() ) return std::nullopt;
-      return Cmp::Position( altar_cmp.position, altar_cmp.size );
-    } );
-    if ( not nearest ) return; // there are no suitable altars so give up
-    arrow_target = *nearest;
-  }
+    const sf::Vector2f player_center = pc_pos_cmp.getCenter();
+    compass.refresh_target( reg(), player_center );
 
-  for ( auto [player_entity, pc_cmp, pc_pos_cmp] : player_view.each() )
-  {
-
-    // dont show the compass arrow pointing to the exit if the exit is on-screen....we can see it
-    if ( Utils::is_visible_in_view( get_world_view(), arrow_target ) ) return;
-
-    auto player_pos_center = pc_pos_cmp.getCenter();
-    sf::Vector2f exit_pos_center = arrow_target.getCenter();
-    sf::Vector2f direction = ( exit_pos_center - player_pos_center ).normalized();
-
-    // Get view bounds in world coordinates
-    sf::Vector2f view_center = s_world_view.getCenter();
-    sf::Vector2f view_size = s_world_view.getSize();
-    sf::FloatRect view_bounds{ { view_center.x - ( view_size.x / 2.0f ), view_center.y - ( view_size.y / 2.0f ) }, view_size };
-
-    // Add margin from edge
-    float margin = 32.0f;
-    view_bounds.position.x += margin;
-    view_bounds.position.y += margin;
-    view_bounds.size.x -= margin * 2.0f;
-    view_bounds.size.y -= margin * 2.0f;
-
-    // Calculate intersection with screen bounds
-    sf::Vector2f arrow_position = player_pos_center;
-
-    // Calculate distances to each edge
-    float t_left = ( view_bounds.position.x - player_pos_center.x ) / direction.x;
-    float t_right = ( view_bounds.position.x + view_bounds.size.x - player_pos_center.x ) / direction.x;
-    float t_top = ( view_bounds.position.y - player_pos_center.y ) / direction.y;
-    float t_bottom = ( view_bounds.position.y + view_bounds.size.y - player_pos_center.y ) / direction.y;
-
-    // Find the smallest positive t (closest intersection)
-    float t = std::numeric_limits<float>::max();
-    if ( t_left > 0 ) t = std::min( t, t_left );
-    if ( t_right > 0 ) t = std::min( t, t_right );
-    if ( t_top > 0 ) t = std::min( t, t_top );
-    if ( t_bottom > 0 ) t = std::min( t, t_bottom );
-
-    // Calculate final arrow position at screen edge
-    if ( t < std::numeric_limits<float>::max() ) { arrow_position = player_pos_center + direction * t; }
-
-    auto angle_radians = Utils::Maths::angle( direction ).value_or( sf::Angle::Zero );
-
-    // Center the arrow sprite at the calculated position
-    sf::FloatRect arrow_rect{ arrow_position - sf::Vector2f{ Constants::kGridSizePxF.x / 2.0f, Constants::kGridSizePxF.y / 2.0f },
-                              Constants::kGridSizePxF };
-
-    // Map sin(time) from [-1, 1] to [0.2, 1.0]
-    // Formula: min + (max - min) * (sin(freq * time) + 1) / 2
-    auto time = m_compass_osc_clock.getElapsedTime().asSeconds();
-    auto sine = std::sin( m_compass_freq * time );
-    float oscillating_scale = m_compass_min_scale + ( ( m_compass_max_scale - m_compass_min_scale ) * ( sine + 1.0f ) / 2.0f );
-    auto scale = sf::Vector2f{ oscillating_scale, oscillating_scale };
-
-    auto sprite_index = 0;
-    auto alpha = 255;
-    auto origin = sf::Vector2f{ Constants::kGridSizePxF.x / 2.0f, Constants::kGridSizePxF.y / 2.0f };
-
-    safe_render_sprite_world( "sprite.graveyard.arrow", arrow_rect, sprite_index, scale, alpha, origin, angle_radians );
+    auto placement = compass.placement( player_center, s_world_view );
+    if ( not placement ) return;
+    safe_render_sprite_world( Cmp::Player::ArrowCompass::kSpriteType, placement->rect, 0, placement->scale, 255, placement->origin,
+                              placement->angle );
   }
 }
 

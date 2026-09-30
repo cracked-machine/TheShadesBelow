@@ -16,7 +16,6 @@
 #include <SFML/System/Vector2.hpp>
 #include <entt/entity/fwd.hpp>
 #include <optional>
-#include <queue>
 #include <tuple>
 #include <vector>
 
@@ -139,31 +138,6 @@ private:
   //! @param color
   void render_screen_flash( sf::Color color );
 
-  //! @brief Finds the nearest position among a view of entities to a source point, skipping entities the
-  //! predicate rejects.
-  //! @tparam View An entt view already filtered to the desired component types
-  //! @tparam ToPositionFn Callable taking (entt::entity, const Components&...) matching `view`, returning
-  //! std::optional<Cmp::Position> — std::nullopt skips that entity
-  //! @param view The entt view to search
-  //! @param from The point to measure distance from
-  //! @param to_position Projects a matched entity's components to its Cmp::Position, or skips it
-  //! @return The nearest matched Cmp::Position, or std::nullopt if no entity in the view qualified
-  template <typename View, typename ToPositionFn>
-  std::optional<Cmp::Position> find_nearest_target( View &&view, sf::Vector2f from, ToPositionFn &&to_position )
-  {
-    using DistanceQueue = std::priority_queue<std::pair<float, Cmp::Position>, std::vector<std::pair<float, Cmp::Position>>,
-                                              Utils::Maths::DistancePositionComparator>;
-    DistanceQueue distance_queue;
-    for ( auto &&row : view.each() )
-    {
-      std::optional<Cmp::Position> maybe_pos = std::apply( to_position, row );
-      if ( not maybe_pos ) continue;
-      auto float_distance = Utils::Maths::getEuclideanDistance( maybe_pos->position, from );
-      distance_queue.emplace( float_distance, *maybe_pos );
-    }
-    return distance_queue.empty() ? std::nullopt : std::optional<Cmp::Position>{ distance_queue.top().second };
-  }
-
   //! @brief Adds component type to the Z-order queue.
   //! If the component is child of sf::FloatRect the entire geometry is processed, which will prevent "pop-in" glitches.
   //! Optimized (single-type view) query on entt components for visibility check and Z-order queue
@@ -256,18 +230,6 @@ private:
   void on_pause() override {}
   //! @brief event handlers for resuming system clocks
   void on_resume() override {}
-
-  //! @brief Time component of the sine wave for the compass arrow bouncing movement
-  sf::Clock m_compass_osc_clock;
-
-  //! @brief Frequency component of the sine wave for the compass arrow bouncing movement
-  float m_compass_freq{ 4.0f };
-
-  //! @brief Min range for the compass arrow dynamic resize
-  float m_compass_min_scale{ 0.5f };
-
-  //! @brief Max range for the compass arrow dynamic resize
-  float m_compass_max_scale{ 1.5f };
 
   //! @brief The z-order queue for rendering
   //! Each frame, this queue is refreshed to ensure correct rendering order
