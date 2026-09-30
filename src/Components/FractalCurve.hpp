@@ -5,6 +5,8 @@
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/System/Time.hpp>
 
+#include <vector>
+
 namespace Game::Cmp
 {
 
@@ -47,6 +49,52 @@ struct FractalCurve
 
   //! @brief Tracks elapsed time since the curve was created, checked against `duration`
   sf::Clock timer;
+
+  //! @brief A single world-space line between two vertices of `sequence`
+  struct Segment
+  {
+    sf::Vector2f start;
+    sf::Vector2f end;
+    //! @brief True if this segment is part of the main line (zero-index), false for aux/branch lines
+    bool is_main;
+  };
+
+  //! @brief Flatten `sequence` into world-space line segments by connecting each row to the next.
+  //!        Main line is index zero. Aux lines converge back to / diverge out from the main line.
+  [[nodiscard]] std::vector<Segment> segments() const
+  {
+    std::vector<Segment> result;
+    for ( std::size_t row = 0; row + 1 < sequence.size(); ++row )
+    {
+      const auto &curr_row = sequence[row];
+      const auto &next_row = sequence[row + 1];
+
+      // next row's convergence point - all vertices in the current row connect to this
+      const sf::Vector2f converge_pos = next_row.at( 0 ).position;
+      const sf::Vector2f main_pos = curr_row.at( 0 ).position;
+
+      // always draw main line on zero-index
+      result.push_back( { main_pos, converge_pos, true } );
+
+      // always converge non-zero index vertex back to the main line (zero-index)
+      for ( std::size_t idx = 1; idx < curr_row.size(); ++idx )
+      {
+        result.push_back( { curr_row[idx].position, converge_pos, false } );
+      }
+
+      // always diverge zero-index vertex out to available non-zero index vertex on next row
+      for ( std::size_t idx = 1; idx < next_row.size(); ++idx )
+      {
+        result.push_back( { main_pos, next_row[idx].position, false } );
+      }
+    }
+    return result;
+  }
+
+  sf::Color m_main_strike_line_color = sf::Color( 0, 255, 255, 255 );
+  sf::Color m_aux_strike_line_color = sf::Color( 255, 255, 255, 255 );
+  float m_main_line_thickness = 10.f;
+  float m_aux_line_thickness = 3.f;
 };
 
 //! @brief Type of FractalCurve used for LightningStrikes
@@ -60,6 +108,10 @@ struct LightningStrike : public FractalCurve
   LightningStrike( sf::Vector2f start, sf::Vector2f end, AngleDeviations deviations, sf::Time duration )
       : FractalCurve( start, end, deviations, duration )
   {
+    m_main_strike_line_color = sf::Color( 0, 255, 255, 255 );
+    m_aux_strike_line_color = sf::Color( 255, 255, 255, 255 );
+    m_main_line_thickness = 10.f;
+    m_aux_line_thickness = 3.f;
   }
 };
 
@@ -74,6 +126,10 @@ struct ObstacleCrack : public FractalCurve
   ObstacleCrack( sf::Vector2f start, sf::Vector2f end, AngleDeviations deviations, sf::Time duration )
       : FractalCurve( start, end, deviations, duration )
   {
+    m_aux_strike_line_color = sf::Color( 0, 0, 0, 255 );
+    m_main_strike_line_color = sf::Color( 0, 0, 0, 255 );
+    m_main_line_thickness = 3.f;
+    m_aux_line_thickness = 2.f;
   }
 };
 

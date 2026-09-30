@@ -20,6 +20,7 @@
 #include <tuple>
 #include <vector>
 
+// clang-format off
 namespace Game::Sprites
 {
 class SpriteSheet;
@@ -33,17 +34,9 @@ class DrippingBloodShader;
 class IShaderSprite;
 } // namespace Game::Sprites
 
-namespace Game::Sprites::Containers
-{
-class VertexFloor;
-} // namespace Game::Sprites::Containers
-
-namespace Game::PathFinding
-{
-class SpatialHashGrid;
-} // namespace Game::PathFinding
-
-namespace Game::Cmp
+namespace Game::Sprites::Containers { class VertexFloor; }
+namespace Game::PathFinding { class SpatialHashGrid; }
+namespace Game::Cmp 
 {
 class ZOrderValue;
 class Position;
@@ -54,50 +47,17 @@ struct Moveable;
 struct ObstacleCap;
 } // namespace Game::Cmp
 
-namespace Game::Cmp::Player
-{
-class Character;
-} // namespace Game::Cmp::Player
-
-namespace Game::Cmp::Npc
-{
-class NPC;
-} // namespace Game::Cmp::Npc
-
-namespace Game::Cmp::Weapons::Projectiles
-{
-class Arrow;
-} // namespace Game::Cmp::Weapons::Projectiles
-
-namespace Game::Cmp::Altar
-{
-class MultiBlock;
-} // namespace Game::Cmp::Altar
-
-namespace Game::Cmp::Crypt
-{
-class BuildingMultiBlock;
-class InteriorMultiBlock;
-} // namespace Game::Cmp::Crypt
-
-namespace Game::Cmp::Grave
-{
-class MultiBlock;
-} // namespace Game::Cmp::Grave
-
-namespace Game::Cmp::Ruin
-{
-class BuildingMultiBlock;
-} // namespace Game::Cmp::Ruin
-
-namespace Game::Cmp::Particle
-{
-class IParticleSprite;
-}
-
+namespace Game::Cmp::Player { class Character; }
+namespace Game::Cmp::Npc { class NPC; } 
+namespace Game::Cmp::Weapons::Projectiles { class Arrow; } 
+namespace Game::Cmp::Altar { class MultiBlock; } 
+namespace Game::Cmp::Crypt { class BuildingMultiBlock; class InteriorMultiBlock; } 
+namespace Game::Cmp::Grave { class MultiBlock; } 
+namespace Game::Cmp::Ruin { class BuildingMultiBlock; } 
+namespace Game::Cmp::Particle { class IParticleSprite; }
+// clang-format on
 namespace Game::Sys
 {
-
 class RenderOverlaySystem;
 
 //! @brief Renders everything that exists in the game world: the z-ordered entity queue (sprites, particles, shaders, floor tiles),
@@ -167,7 +127,7 @@ private:
   //! @param aux_color Colour of the non-zero-index (branch) lines
   //! @param main_thickness Thickness of the main line
   //! @param aux_thickness Thickness of the branch lines
-  void render_fractal_curve( const Cmp::FractalCurve &curve, sf::Color main_color, sf::Color aux_color, float main_thickness, float aux_thickness );
+  void render_fractal_curve( const Cmp::FractalCurve &curve );
 
   //! @brief Used by GraveyardScene when player is struck by lightning
   void render_lightning_strike();

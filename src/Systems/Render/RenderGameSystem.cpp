@@ -584,87 +584,36 @@ void RenderGameSystem::render_armed_indicator( const Cmp::Armed &armed_cmp, cons
   draw_world( temp_square );
 }
 
-void RenderGameSystem::render_fractal_curve( const Cmp::FractalCurve &curve, sf::Color main_color, sf::Color aux_color, float main_thickness,
-                                             float aux_thickness )
+void RenderGameSystem::render_fractal_curve( const Cmp::FractalCurve &curve )
 {
-  // Draw the sequence of vertices by iterating pairs of vertices from the current and next row.
-  // Main strike line is index zero (thick). Aux strike lines are other indices (thin).
-  const auto &seq_rows = curve.sequence;
-  for ( auto curr_row_iter = seq_rows.begin(); curr_row_iter < seq_rows.end(); curr_row_iter++ )
+  // Segments are in world-space; convert to screen-space so line thickness is constant regardless of zoom.
+  for ( const auto &seg : curve.segments() )
   {
-    auto next_row_iter = std::next( curr_row_iter );
-    if ( next_row_iter == seq_rows.end() ) { break; }
-
-    // next row's convergence point - all vertices in the current row connect to this
-    sf::Vector2f converge_pos = world_to_screen( next_row_iter->at( 0 ).position );
-
-    for ( auto [curr_row_idx, current_vertex] : std::views::enumerate( *curr_row_iter ) )
-    {
-      sf::Vector2f first_pos = world_to_screen( current_vertex.position );
-
-      // always converge non-zero index vertex back to the main line (zero-index)
-      if ( curr_row_idx > 0 ) { draw_screen( Utils::Maths::thick_line_rect( first_pos, converge_pos, aux_color, aux_thickness ) ); }
-      else if ( curr_row_idx == 0 )
-      {
-        // always draw main line on zero-index
-        draw_screen( Utils::Maths::thick_line_rect( first_pos, converge_pos, main_color, main_thickness ) );
-
-        for ( auto [next_row_idx, next_vertex] : std::views::enumerate( *next_row_iter ) )
-        {
-          // always diverge zero-index vertex out to available non-zero index vertex on next row
-          if ( next_row_idx > 0 )
-          {
-            sf::Vector2f diverge_pos = world_to_screen( next_vertex.position );
-            draw_screen( Utils::Maths::thick_line_rect( first_pos, diverge_pos, aux_color, aux_thickness ) );
-          }
-        }
-      }
-    }
+    const auto color = seg.is_main ? curve.m_main_strike_line_color : curve.m_aux_strike_line_color;
+    const auto thickness = seg.is_main ? curve.m_main_line_thickness : curve.m_aux_line_thickness;
+    draw_screen( Utils::Maths::thick_line_rect( world_to_screen( seg.start ), world_to_screen( seg.end ), color, thickness ) );
   }
 }
 
 void RenderGameSystem::render_lightning_strike()
 {
-  const auto kAuxStrikeLineColor = sf::Color( 255, 255, 255, 255 );
-  const auto kMainStrikeLineColor = sf::Color( 0, 255, 255, 255 );
 
-  const float kMainLineThickness = 10.f;
-  const float kAuxLineThickness = 3.f;
-
-  // Get the first LightningStrike only. Once it expires the next LightningStrike will be at the front.
-  auto view = reg().view<Cmp::LightningStrike>();
-  if ( view.size() == 0 ) return;
-  auto &cmp = reg().get<Cmp::LightningStrike>( view.front() );
-  cmp.timer.start();
-
-  if ( cmp.sequence.size() < 2 )
+  for ( auto [entt, cmp] : reg().view<Cmp::LightningStrike>().each() )
   {
-    SPDLOG_WARN( "Lightning component has empty sequence. Skipping rendering step." );
-    return;
+    cmp.timer.start();
+    if ( cmp.sequence.size() < 2 ) return;
+    render_screen_flash( sf::Color( 255, 255, 255, 180 ) );
+    render_fractal_curve( cmp );
+    return; // multiple strikes are cued up per event so only render one per frame
   }
-
-  render_screen_flash( sf::Color( 255, 255, 255, 180 ) );
-
-  render_fractal_curve( cmp, kMainStrikeLineColor, kAuxStrikeLineColor, kMainLineThickness, kAuxLineThickness );
 }
 
 void RenderGameSystem::render_obstacle_cracks()
 {
-  const auto kAuxStrikeLineColor = sf::Color( 0, 0, 0, 255 );
-  const auto kMainStrikeLineColor = sf::Color( 0, 0, 0, 255 );
-
-  const float kMainLineThickness = 3.f;
-  const float kAuxLineThickness = 2.f;
-
   for ( auto [ob_crack_entt, ob_crack_cmp] : reg().view<Cmp::ObstacleCrack>().each() )
   {
-    if ( ob_crack_cmp.sequence.size() < 2 )
-    {
-      SPDLOG_WARN( "Lightning component has empty sequence. Skipping rendering step." );
-      return;
-    }
-
-    render_fractal_curve( ob_crack_cmp, kMainStrikeLineColor, kAuxStrikeLineColor, kMainLineThickness, kAuxLineThickness );
+    if ( ob_crack_cmp.sequence.size() < 2 ) return;
+    render_fractal_curve( ob_crack_cmp );
   }
 }
 
