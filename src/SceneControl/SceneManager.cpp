@@ -41,8 +41,10 @@ void SceneManager::update( sf::Time dt )
 
   if ( m_scene_stack.empty() ) return;
 
-  // now draw the current scene on top
+  // the manager begins and presents the frame; the current scene draws into it
+  m_window.clear();
   m_scene_stack.current().update( dt );
+  m_window.display();
 
   // Now safely consume any deferred events outside of Scene::update()
   if ( m_nav_event_dispatcher.size() > 0 ) { m_nav_event_dispatcher.update(); }

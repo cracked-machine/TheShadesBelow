@@ -83,7 +83,7 @@ private:
   void reinit_system_spatial_maps();
 
   //! @brief Spatial index of static (never moved after creation) renderable entities, queried by
-  //! RenderGameSystem::refresh_z_order_queue() instead of a full-registry scan. First built after level
+  //! ZOrderQueue::refresh() instead of a full-registry scan. First built after level
   //! generation finishes in on_init(), then periodically rebuilt from scratch in do_update() (see
   //! m_render_position_grid_rebuild_clock) so runtime-created static entities - dropped items,
   //! replanted trees, placed bombs, footstep decals - eventually get indexed too, without needing

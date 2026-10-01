@@ -6,6 +6,7 @@
 #include <Factory/SpriteFactory.hpp>
 #include <Shaders/TitleScreenShader.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Systems/Render/ZOrderQueue.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Optimizations.hpp>
 
@@ -63,15 +64,6 @@ public:
   const sf::View &get_screen_view() { return m_window.getDefaultView(); }
 
 protected:
-  //! @brief Z-order entry for rendering queue
-  struct ZOrder
-  {
-    //! @brief Z-order value; lower values are drawn first.
-    float z;
-    //! @brief The entity being ordered.
-    entt::entity e;
-  };
-
   //! @brief Text alignment options
   enum class Alignment {
     //! @brief Left align text (respects position.x)
@@ -95,6 +87,10 @@ protected:
 
   //! @brief Current view of the game world.
   static sf::View s_world_view;
+
+  //! @brief The z-order queue shared by the render systems. Refreshed each frame by RenderGameSystem::render_game(),
+  //! so it is only valid to read after that call.
+  static ZOrderQueue s_zorder_queue;
 
   //! @brief Dimension for `s_world_view`.
   constexpr static sf::Vector2u kWorldViewSize{ 300u, 200u };

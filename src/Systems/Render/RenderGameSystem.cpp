@@ -71,14 +71,6 @@
 #include <Utils/Profiling.hpp>
 #include <Utils/Utils.hpp>
 
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/PrimitiveType.hpp>
-#include <SFML/Graphics/Rect.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/RenderStates.hpp>
-#include <SFML/System/Angle.hpp>
-#include <SFML/System/Time.hpp>
-#include <SFML/System/Vector2.hpp>
 #include <algorithm>
 #include <memory>
 #include <optional>
@@ -103,7 +95,7 @@ void RenderGameSystem::render_game( sf::Time dt, const PathFinding::SpatialHashG
   PROFILED( update_camera( dt ) );
 
   // re-populate the z-order queue with the latest entity/component data
-  PROFILED( refresh_z_order_queue( render_position_grid ) );
+  PROFILED( s_zorder_queue.refresh( reg(), Utils::calculate_view_bounds( s_world_view ), render_position_grid ) );
 
   // render the zorder queue, anything after this is treated as an "overlay" to the main render pipeline
   PROFILED( render_zorder_queue() );
@@ -118,26 +110,19 @@ void RenderGameSystem::render_game( sf::Time dt, const PathFinding::SpatialHashG
   render_square_for_floatrect_cmp<Cmp::Crypt::RoomLavaPit>( sf::Color( 16, 16, 16 ), 0.5f );
 }
 
-void RenderGameSystem::display() { m_window.display(); }
-
 void RenderGameSystem::render_zorder_queue()
 {
-  m_window.clear();
-
   const bool shaders_enabled = Utils::scene_setting<Cmp::SceneSettings::Shaders>( reg() ).enabled;
 
   // render anything with a ZOrderValue component in lowest value first order
-  for ( const auto &[z, entity] : m_zorder_queue_ )
+  for ( const auto &[z, entity] : s_zorder_queue )
   {
     if ( reg().all_of<Cmp::Position, Cmp::AnimData>( entity ) ) { draw_animated_sprite( entity ); }
     else if ( auto *shader_owner = reg().try_get<Cmp::Shader::SpriteOwner>( entity ) )
     {
       if ( shaders_enabled ) draw_shader_sprite( *shader_owner );
     }
-    else if ( auto *particle_owner = reg().try_get<Cmp::Particle::SpriteOwner>( entity ) )
-    {
-      draw_particle_sprite( *particle_owner );
-    }
+    else if ( auto *particle_owner = reg().try_get<Cmp::Particle::SpriteOwner>( entity ) ) { draw_particle_sprite( *particle_owner ); }
     else if ( auto *floor_tiles = reg().try_get<Sprites::Containers::VertexFloor>( entity ) ) { draw_vertex_floor( *floor_tiles ); }
   }
 }
@@ -205,95 +190,6 @@ void RenderGameSystem::draw_vertex_floor( Sprites::Containers::VertexFloor &floo
   floor_tiles.setPosition( { static_cast<float>( floor_tiles.world_grid_offset.x ) * Constants::kGridSizePxF.x,
                              static_cast<float>( floor_tiles.world_grid_offset.y ) * Constants::kGridSizePxF.y } );
   draw_world( floor_tiles );
-}
-
-void RenderGameSystem::refresh_z_order_queue( const PathFinding::SpatialHashGridSharedPtr &render_position_grid )
-{
-  m_zorder_queue_.clear();
-  sf::FloatRect view_bounds = Utils::calculate_view_bounds( s_world_view );
-
-  PROFILED( queue_multiblocks( view_bounds, RenderPass::MultiBlockRoots{} ) );
-  PROFILED( queue_all<Sprites::Containers::VertexFloor>() );
-  PROFILED( queue_particles( view_bounds ) );
-  PROFILED( queue_all<Cmp::Shader::SpriteOwner>() );
-  PROFILED( queue_positioned( view_bounds, render_position_grid ) );
-
-  PROFILED( std::ranges::sort( m_zorder_queue_, {}, &ZOrder::z ) );
-}
-
-template <typename... MultiBlock>
-void RenderGameSystem::queue_multiblocks( sf::FloatRect view_bounds, entt::type_list<MultiBlock...> )
-{
-  auto queue_visible = [&]<typename CmpT>()
-  {
-    auto view = reg().view<CmpT, Cmp::ZOrderValue>( entt::exclude<Cmp::NoRender> );
-    for ( auto [entity, multiblock_cmp, z_order_cmp] : view.each() )
-    {
-      if ( Utils::is_visible_in_view( view_bounds, multiblock_cmp ) ) push( entity, z_order_cmp );
-    }
-  };
-  ( queue_visible.template operator()<MultiBlock>(), ... );
-}
-
-template <typename CmpT>
-void RenderGameSystem::queue_all()
-{
-  auto view = reg().view<CmpT, Cmp::ZOrderValue>( entt::exclude<Cmp::NoRender> );
-  for ( auto [entity, cmp, z_order_cmp] : view.each() )
-  {
-    push( entity, z_order_cmp );
-  }
-}
-
-void RenderGameSystem::queue_particles( sf::FloatRect view_bounds )
-{
-  auto view = reg().view<Cmp::Particle::SpriteOwner, Cmp::ZOrderValue>( entt::exclude<Cmp::NoRender> );
-  for ( auto [entity, owner_cmp, z_order_cmp] : view.each() )
-  {
-    if ( owner_cmp.sprite && owner_cmp.sprite->get_view_type() == Cmp::Particle::ViewType::WORLD &&
-         not Utils::is_visible_in_view( view_bounds, owner_cmp.sprite->get_bounds() ) )
-    {
-      continue;
-    }
-    push( entity, z_order_cmp );
-  }
-}
-
-void RenderGameSystem::queue_positioned( sf::FloatRect view_bounds, const PathFinding::SpatialHashGridSharedPtr &render_position_grid )
-{
-  if ( not render_position_grid )
-  {
-    queue_positioned_view( view_bounds );
-    return;
-  }
-
-  // The grid is only rebuilt periodically, so its entities may have been destroyed or changed since
-  for ( auto entity : render_position_grid->query_rect( view_bounds ) )
-  {
-    if ( not reg().valid( entity ) or reg().all_of<Cmp::NoRender>( entity ) ) continue;
-    auto *pos_cmp = reg().try_get<Cmp::Position>( entity );
-    auto *z_order_cmp = reg().try_get<Cmp::ZOrderValue>( entity );
-    if ( not pos_cmp or not z_order_cmp ) continue;
-    if ( Utils::is_visible_in_view( view_bounds, *pos_cmp ) ) push( entity, *z_order_cmp );
-  }
-
-  [&]<typename... Mover>( entt::type_list<Mover...> ) { ( queue_positioned_view<Mover>( view_bounds ), ... ); }( RenderPass::Movers{} );
-}
-
-template <typename... Filter>
-void RenderGameSystem::queue_positioned_view( sf::FloatRect view_bounds )
-{
-  auto view = reg().view<Cmp::Position, Cmp::AnimData, Cmp::ZOrderValue, Filter...>( RenderPass::exclude<RenderPass::MultiBlockRoots> );
-  for ( auto entity : view )
-  {
-    auto [pos_cmp, z_order_cmp] = view.template get<Cmp::Position, Cmp::ZOrderValue>( entity );
-    if ( Utils::is_visible_in_view( view_bounds, pos_cmp ) ) push( entity, z_order_cmp );
-  }
-}
-
-void RenderGameSystem::push( entt::entity entity, const Cmp::ZOrderValue &z_order_cmp )
-{
-  m_zorder_queue_.push_back( ZOrder{ .z = z_order_cmp.getZOrder(), .e = entity } );
 }
 
 void RenderGameSystem::init_world_view()

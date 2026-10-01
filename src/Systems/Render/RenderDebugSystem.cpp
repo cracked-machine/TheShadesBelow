@@ -82,11 +82,11 @@ RenderDebugSystem::RenderDebugSystem( entt::registry &reg, sf::RenderWindow &win
   SPDLOG_DEBUG( "RenderDebugSystem initialized" );
 }
 
-void RenderDebugSystem::render_debug( const std::vector<ZOrder> &zorder_queue )
+void RenderDebugSystem::render_debug()
 {
   if ( Utils::scene_setting<Cmp::SceneSettings::ShowNavmesh>( reg() ).enabled ) { PROFILED( render_navmesh() ); }
   if ( Utils::scene_setting<Cmp::SceneSettings::ShowPathFinding>( reg() ).enabled ) { PROFILED( render_pathfinding() ); }
-  if ( Utils::scene_setting<Cmp::SceneSettings::ShowDebugStats>( reg() ).enabled ) { PROFILED( render_debug_stats( zorder_queue ) ); }
+  if ( Utils::scene_setting<Cmp::SceneSettings::ShowDebugStats>( reg() ).enabled ) { PROFILED( render_debug_stats() ); }
 }
 
 void RenderDebugSystem::render_pathfinding()
@@ -108,7 +108,7 @@ void RenderDebugSystem::render_pathfinding()
   }
 }
 
-void RenderDebugSystem::render_debug_stats( const std::vector<ZOrder> &zorder_queue )
+void RenderDebugSystem::render_debug_stats()
 {
   // these debug shapes are only drawn within the current view to prevent FPS drops
   ZoneScopedN( "RenderDebugUI" );
@@ -122,7 +122,7 @@ void RenderDebugSystem::render_debug_stats( const std::vector<ZOrder> &zorder_qu
 
   PROFILED( begin_debug_overlay( m_window.getSize() ) );
   PROFILED( render_ui_misc_stats() );
-  PROFILED( render_ui_zorder_list( zorder_queue ) );
+  PROFILED( render_ui_zorder_list() );
   PROFILED( render_ui_npc_list() );
   PROFILED( render_ui_entity_inspect() );
   for ( auto [selected_entt, selected_cmp, pos_cmp] : reg().view<Cmp::SelectedPosition, Cmp::Position>().each() )
@@ -181,7 +181,7 @@ void RenderDebugSystem::render_ui_misc_stats()
   }
 }
 
-void RenderDebugSystem::render_ui_zorder_list( const std::vector<ZOrder> &zorder_queue )
+void RenderDebugSystem::render_ui_zorder_list()
 {
 
   if ( not m_dbg_ui_data )
@@ -222,7 +222,7 @@ void RenderDebugSystem::render_ui_zorder_list( const std::vector<ZOrder> &zorder
     draw_line( "--- Z Order List ---", sf::Color::Yellow );
 
     // float count = 0;
-    for ( const auto &zorder_entry : zorder_queue )
+    for ( const auto &zorder_entry : s_zorder_queue )
     {
 
       std::string name;

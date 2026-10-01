@@ -181,11 +181,9 @@ void CryptScene::do_update( sf::Time dt )
   m_sys.find<Sys::Store::Type::ParticleSystem>().check_collsion();
   m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
 
-  auto &game_sys = m_sys.find<Sys::Store::Type::RenderGameSystem>();
-  game_sys.render_game( dt );
+  m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt );
   m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_overlay( dt );
-  m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug( game_sys.zorder_queue() );
-  game_sys.display();
+  m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug();
 }
 
 void CryptScene::reinit_navmesh()

@@ -94,8 +94,6 @@ RenderMenuSystem::~RenderMenuSystem() = default;
 
 void RenderMenuSystem::render_title()
 {
-  // main render begin
-  m_window.clear();
   {
     auto display_size = sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() ) );
 
@@ -123,14 +121,10 @@ void RenderMenuSystem::render_title()
     render_text( "Press <S> key for settings", static_cast<int>( display_size.x / 40 ), { display_size.x * 0.25f, ( display_size.y * 0.5f ) + 200.f },
                  Alignment::CENTER, 3.f, txt_color );
   }
-
-  m_window.display();
-  // main render end
 }
 
 void RenderMenuSystem::render_settings( sf::Time dt )
 {
-  m_window.clear();
   sf::Vector2u display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
   sf::Text title_text( m_font, "Settings", display_size.x / 20 );
   title_text.setFillColor( sf::Color::White );
@@ -149,10 +143,8 @@ void RenderMenuSystem::render_settings( sf::Time dt )
   exit_text.setPosition( { exit_right_align_px, 80.f } );
   m_window.draw( exit_text );
 
-  // ImGUI should be rendered before window.display() or SFML wipes the display buffer prematurely
+  // ImGUI should be rendered last, on top of the SFML draws above
   render_settings_widgets( dt, title_text.getLocalBounds() );
-
-  m_window.display();
 }
 
 const std::vector<sf::Vector2u> RenderMenuSystem::DisplaySettings::resolutions = { { 1920, 1080 }, { 1680, 1050 }, { 1600, 900 }, { 1440, 900 },
@@ -335,9 +327,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
 
 void RenderMenuSystem::render_paused( sf::Time dt )
 {
-  // main render begin
-  m_window.clear();
-
   ImGui::SFML::Update( m_window, dt );
   ImGui::Begin( "PausedMenu", nullptr, kImGuiWindowOptions );
 
@@ -361,15 +350,10 @@ void RenderMenuSystem::render_paused( sf::Time dt )
 
   ImGui::End();
   ImGui::SFML::Render( m_window );
-
-  m_window.display();
-  // main render end
 }
 
 void RenderMenuSystem::render_defeat_screen()
 {
-  // main render begin
-  m_window.clear();
   {
 
     sf::Vector2u display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
@@ -384,16 +368,10 @@ void RenderMenuSystem::render_defeat_screen()
     start_text.setPosition( { static_cast<float>( display_size.x ) / 4.f, 200.f } );
     m_window.draw( start_text );
   }
-
-  m_window.display();
-  // main render end
 }
 
 void RenderMenuSystem::render_victory_screen( bool allow_continue )
 {
-  // main render begin
-  m_window.clear();
-
   sf::Vector2u display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
 
   sf::Text title_text( m_font, "Level Complete!", 96 );
@@ -421,9 +399,6 @@ void RenderMenuSystem::render_victory_screen( bool allow_continue )
   wealth_txt.setFillColor( sf::Color::White );
   wealth_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, 600.f } );
   m_window.draw( wealth_txt );
-
-  m_window.display();
-  // main render end
 }
 
 } // namespace Game::Sys

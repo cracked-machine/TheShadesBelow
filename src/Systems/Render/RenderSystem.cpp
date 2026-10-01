@@ -168,5 +168,6 @@ void RenderSystem::draw_world( const sf::Drawable &drawable )
 }
 
 sf::View RenderSystem::s_world_view{};
+ZOrderQueue RenderSystem::s_zorder_queue{};
 
 } // namespace Game::Sys

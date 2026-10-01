@@ -26,7 +26,7 @@ namespace Game::Sys
 
 //! @brief Renders the debug visualisations toggled by the Cmp::SceneSettings::ShowNavmesh, ShowPathFinding and ShowDebugStats scene
 //! settings: the navmesh, NPC pathfinding, and the debug overlay (misc stats, Z-order list, NPC list, entity inspector).
-//! Scenes call render_debug() after RenderGameSystem::render_game() and before RenderGameSystem::display().
+//! Scenes call render_debug() after RenderGameSystem::render_game().
 class RenderDebugSystem : public RenderSystem
 {
 public:
@@ -43,8 +43,9 @@ public:
   }
 
   //! @brief Entrypoint for rendering whichever debug visualisations are enabled in the current scene settings.
-  //! @param zorder_queue The z-order queue RenderGameSystem rendered this frame, listed by the debug stats overlay.
-  void render_debug( const std::vector<ZOrder> &zorder_queue );
+  //! Must be called after RenderGameSystem::render_game() in the same frame, as the debug stats overlay lists
+  //! the z-order queue (`s_zorder_queue`) that call refreshes.
+  void render_debug();
 
   //! @brief event handlers for pausing system clocks
   void on_pause() override {}
@@ -60,8 +61,7 @@ private:
 
   //! @brief Draw the crypt room outlines and the debug overlay panels (misc stats, Z-order list, NPC list, entity inspector),
   //! plus selected positions, particle emitter positions and the half-view bounds.
-  //! @param zorder_queue
-  void render_debug_stats( const std::vector<ZOrder> &zorder_queue );
+  void render_debug_stats();
 
   //! @brief Initialise the debug texture and use it to override the render target
   //!        Call this before using draw_screen()/draw_world()
@@ -94,8 +94,7 @@ private:
 
   //! @brief Render the debug "zorder_list" panel: the Z-order and entity id of each queued render entry, excluding a fixed set of
   //! noisy sprite types.
-  //! @param zorder_queue
-  void render_ui_zorder_list( const std::vector<ZOrder> &zorder_queue );
+  void render_ui_zorder_list();
 
   //! @brief Render the debug "npc_list" panel listing each NPC's entity id, position and sprite type.
   void render_ui_npc_list();

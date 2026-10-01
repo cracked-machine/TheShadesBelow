@@ -323,11 +323,9 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::ParticleSystem>().check_collsion( { "graveyard.plant.particle.flame" } ) );
   PROFILED( m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt ) );
 
-  auto &game_sys = m_sys.find<Sys::Store::Type::RenderGameSystem>();
-  PROFILED( game_sys.render_game( dt ) );
+  PROFILED( m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_overlay( dt ) );
-  PROFILED( m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug( game_sys.zorder_queue() ) );
-  game_sys.display();
+  PROFILED( m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug() );
 }
 
 void GraveyardScene::reinit_system_spatial_maps()

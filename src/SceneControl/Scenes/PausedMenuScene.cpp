@@ -41,9 +41,9 @@ void PausedMenuScene::do_update( [[maybe_unused]] sf::Time dt )
 
   auto &render_menu_sys = m_sys.find<Sys::Store::Type::RenderMenuSystem>();
 
-  // check for keyboard/window events to keep window responsive
-  render_menu_sys.render_paused( dt );
+  // throttle before drawing, so the frame is presented by SceneManager as soon as this update returns
   std::this_thread::sleep_for( std::chrono::milliseconds( 200 ) );
+  render_menu_sys.render_paused( dt );
 
   // save persistent settings
   auto &persistent_sys = m_sys.find<Sys::Store::Type::PersistSystem>();

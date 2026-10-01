@@ -155,11 +155,9 @@ void ShopScene::do_update( [[maybe_unused]] sf::Time dt )
   m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt );
   m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt );
 
-  auto &game_sys = m_sys.find<Sys::Store::Type::RenderGameSystem>();
-  game_sys.render_game( dt );
+  m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt );
   m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_overlay( dt );
-  m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug( game_sys.zorder_queue() );
-  game_sys.display();
+  m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug();
 }
 
 void ShopScene::open_overlay()
