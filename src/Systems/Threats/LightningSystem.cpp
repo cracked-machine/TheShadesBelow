@@ -22,9 +22,8 @@
 namespace Game::Sys
 {
 
-LightningSystem::LightningSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory,
-                                  Audio::SoundBank &sound_bank )
-    : BaseSystem( reg, window, sprite_factory, sound_bank )
+LightningSystem::LightningSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseSystem( reg, window, sound_bank )
 {
   // retrieve a sink handle for the event, register the member function as an event listener and keep the connection alive (ignore returned object)
   std::ignore = get_systems_event_queue().sink<Events::LightningEvent>().connect<&Sys::LightningSystem::on_lightning_event>( this );

@@ -5,11 +5,11 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Position.hpp>
 #include <Components/ZOrderValue.hpp>
-#include <Factory/SpriteFactory.hpp>
 #include <Systems/AnimSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 
@@ -31,7 +31,7 @@ void AnimSystem::update( sf::Time dt )
     if ( anim_cmp.m_sprite_type.contains( "sprite.player" ) and ( Utils::Player::get_direction( reg() ) == sf::Vector2f( 0, 0 ) ) ) continue;
     if ( anim_cmp.m_enabled )
     {
-      const auto &ms = m_sprite_factory.get_spritesheet_by_type( anim_cmp.m_sprite_type );
+      const auto &ms = Sys::SpriteStore::instance().get_spritesheet_by_type( anim_cmp.m_sprite_type );
       update_sequence_frame( anim_cmp, dt, ms, sf::seconds( anim_cmp.get_framerate() ) );
 
       // disable oneshot animations at the end of their sequence
@@ -54,7 +54,7 @@ void AnimSystem::update( sf::Time dt )
     if ( direction_cmp == sf::Vector2f( 0.f, 0.f ) ) continue;
 
     SPDLOG_DEBUG( "NPC {} framerate is {}", anim_cmp.m_sprite_type, anim_cmp.get_framerate() );
-    const auto &npc_walk_sequence = m_sprite_factory.get_spritesheet_by_type( anim_cmp.m_sprite_type );
+    const auto &npc_walk_sequence = Sys::SpriteStore::instance().get_spritesheet_by_type( anim_cmp.m_sprite_type );
     update_sequence_frame( anim_cmp, dt, npc_walk_sequence, sf::seconds( anim_cmp.get_framerate() ) );
   }
 }

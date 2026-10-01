@@ -9,7 +9,6 @@
 #include <entt/entity/fwd.hpp>
 
 // clang-format off
-namespace Game::Sprites { class SpriteFactory; }
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
 namespace Game::Cmp { class Position; }
@@ -30,9 +29,8 @@ public:
   //! @brief Construct a new Npc System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
-  NpcSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  NpcSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief init the weak pointer for the pathfinding navmesh
   //! @param npc_navmesh

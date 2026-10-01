@@ -71,8 +71,6 @@
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/RuinSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
-#include <Systems/Stores/ItemStore.hpp>
-#include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 #include <Systems/Threats/BombSystem.hpp>
 #include <Systems/Threats/HazardFieldSystemImpl.hpp>
@@ -105,9 +103,6 @@ void GraveyardScene::on_init()
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowDebugStats>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::Shaders>( scene_settings_entt, true );
   m_reg.emplace_or_replace<Cmp::SceneSettings::Footsteps>( scene_settings_entt, true );
-
-  m_sys.find<Sys::Store::Type::ItemStore>().init_store();
-  m_sys.find<Sys::Store::Type::NpcStore>().init_store();
 
   auto grimoire_entt = m_reg.create();
   m_reg.emplace_or_replace<Cmp::Grimoire>( grimoire_entt );
@@ -146,8 +141,8 @@ void GraveyardScene::on_init()
   level_gen.build_scene_from_data( *m_scene_data );
   m_sys.find<Sys::Store::Type::ExitSystem>().create_exit();
   level_gen.gen_graveyard_exterior_multiblocks();
-  level_gen.gen_loot_containers( m_sprite_factory, map_size_grid );
-  level_gen.gen_npc_containers( m_sprite_factory, map_size_grid );
+  level_gen.gen_loot_containers( map_size_grid );
+  level_gen.gen_npc_containers( map_size_grid );
   level_gen.gen_random_plants();
 
   auto init_chance = Sys::PersistSystem::get<Cmp::Persist::GraveyardProcGenInitChance>( m_reg );

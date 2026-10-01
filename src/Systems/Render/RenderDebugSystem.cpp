@@ -73,9 +73,8 @@
 namespace Game::Sys
 {
 
-RenderDebugSystem::RenderDebugSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory,
-                                      Audio::SoundBank &sound_bank )
-    : RenderSystem( reg, window, sprite_factory, sound_bank ),
+RenderDebugSystem::RenderDebugSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : RenderSystem( reg, window, sound_bank ),
       m_dbg_ui_data( std::make_unique<Render::UiData>( "res/ui/dbg.json" ) ),
       m_debug_overlay_tex( { 1, 1 } )
 {

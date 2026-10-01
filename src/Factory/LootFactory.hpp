@@ -13,12 +13,6 @@
 
 #include <entt/entity/registry.hpp>
 
-namespace Game::Sprites
-{
-class SpriteFactory;
-
-} // namespace Game::Sprites
-
 namespace Game::Factory::Loot
 {
 

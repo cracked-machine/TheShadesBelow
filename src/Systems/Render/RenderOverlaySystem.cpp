@@ -35,6 +35,7 @@
 #include <Systems/Render/RenderOverlaySystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Crypt.hpp>
 #include <Utils/Optimizations.hpp>
@@ -299,7 +300,7 @@ void RenderOverlaySystem::render_ui_labels( sf::Time dt )
     {
       auto [_, _, inventory_sprite_type] = Utils::Player::get_inventory( reg() );
       if ( inventory_sprite_type == "" ) { text_str = ""; }
-      else { text_str = m_sprite_factory.get_spritesheet_by_type( inventory_sprite_type ).get_display_name(); }
+      else { text_str = Sys::SpriteStore::instance().get_spritesheet_by_type( inventory_sprite_type ).get_display_name(); }
     }
     text.setCharacterSize( ui_label.font_size );
     text.setString( text_str );
@@ -414,7 +415,7 @@ void RenderOverlaySystem::render_shop_inventory_overlay()
     slot_idx_txt.setFillColor( sf::Color::Black );
 
     Sprites::SpriteMetaType sprite_mtype = Sys::ItemStore::instance().get_item( item ).sprite_type;
-    sf::Text slot_desc_txt( m_font, m_sprite_factory.get_display_name_by_type( sprite_mtype ), 30 );
+    sf::Text slot_desc_txt( m_font, Sys::SpriteStore::instance().get_display_name_by_type( sprite_mtype ), 30 );
     slot_desc_txt.setFillColor( sf::Color::Black );
 
     sf::Text slot_price_txt( m_font, std::to_string( price ), 30 );

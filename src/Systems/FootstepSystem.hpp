@@ -20,10 +20,9 @@ public:
   //! @brief Construct a new Footstep System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
-  FootstepSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-      : BaseSystem( reg, window, sprite_factory, sound_bank )
+  FootstepSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+      : BaseSystem( reg, window, sound_bank )
   {
   }
 

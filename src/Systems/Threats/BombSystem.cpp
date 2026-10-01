@@ -29,10 +29,10 @@
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
-#include <Factory/SpriteFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <Systems/PersistSystem.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Threats/BombSystem.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Maths.hpp>
@@ -48,8 +48,8 @@ namespace Game::Sys
 {
 using entt::exclude;
 
-BombSystem::BombSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-    : BaseSystem( reg, window, sprite_factory, sound_bank )
+BombSystem::BombSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseSystem( reg, window, sound_bank )
 {
   // The entt::dispatcher is independent of the registry, so it is safe to bind event handlers in
   // the constructor
@@ -188,7 +188,7 @@ void BombSystem::update()
       SPDLOG_INFO( "NPC entity {} exploded at {},{}", static_cast<int>( npc_entt ), npc_pos.position.x, npc_pos.position.y );
       Factory::Npc::destroy_npc( reg(), npc_entt );
 
-      auto [sprite_type, sprite_index] = m_sprite_factory.get_random_type_and_texture_index(
+      auto [sprite_type, sprite_index] = Sys::SpriteStore::instance().get_random_type_and_texture_index(
           std::vector<std::string>{ "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" } );
 
       Cmp::RandomInt do_drop( 0, 2 ); // 1 in 3 chance of no drop

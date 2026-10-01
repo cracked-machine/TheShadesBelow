@@ -9,13 +9,6 @@
 namespace Game::Sprites
 {
 class SpriteSheet;
-class SpriteFactory;
-} // namespace Game::Sprites
-
-namespace Game::Sprites
-{
-class SpriteFactory;
-
 } // namespace Game::Sprites
 
 namespace Game::Factory::Plant

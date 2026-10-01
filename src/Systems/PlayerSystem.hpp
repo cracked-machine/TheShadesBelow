@@ -30,11 +30,9 @@ public:
   //! @brief Construct a new Player System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
   //! @param scenemanager_event_dispatcher
-  PlayerSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank,
-                entt::dispatcher &scenemanager_event_dispatcher );
+  PlayerSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::dispatcher &scenemanager_event_dispatcher );
 
   //! @brief init the weak pointer for the pathfinding navmesh
   //! @param npc_navmesh

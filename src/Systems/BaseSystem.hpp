@@ -9,7 +9,6 @@
 #include <spdlog/fwd.h>
 
 // clang-format off
-namespace Game::Sprites { class SpriteFactory; }
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
 namespace Game::PathFinding{ class SpatialHashGrid; }
@@ -19,18 +18,18 @@ namespace Game::Sys
 {
 
 //! @brief Base class for all game systems. Provides shared access to the entity registry, render
-//! window, sprite factory, sound bank, and the systems-wide event dispatcher.
+//! window, sound bank, and the systems-wide event dispatcher.
 class BaseSystem
 {
 public:
   //! @brief Construct a new Base System object
-  BaseSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  BaseSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief polymorphic destructor for derived classes
   virtual ~BaseSystem() { SPDLOG_INFO( "BaseSystem destructor called for system at {}", static_cast<void *>( this ) ); };
 
   //! @brief Systems are non-copyable and non-movable: they hold references to shared engine
-  //! resources (registry, window, sprite factory, sound bank) that must not be duplicated or rebound.
+  //! resources (registry, window, sound bank) that must not be duplicated or rebound.
   BaseSystem( const BaseSystem & ) = delete;
   BaseSystem( BaseSystem && ) = delete;
   BaseSystem &operator=( const BaseSystem & ) = delete;
@@ -74,9 +73,6 @@ protected:
 
   //! @brief Non-owning reference to the OpenGL window
   sf::RenderWindow &m_window;
-
-  //! @brief Non-owning reference to the shared sprite factory
-  Sprites::SpriteFactory &m_sprite_factory;
 
   //! @brief Non-owning reference to the shared sound effects system
   Audio::SoundBank &m_sound_bank;

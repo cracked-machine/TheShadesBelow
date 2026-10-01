@@ -20,8 +20,8 @@
 namespace Game::Sys
 {
 
-ArrowSystem::ArrowSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-    : BaseSystem( reg, window, sprite_factory, sound_bank )
+ArrowSystem::ArrowSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseSystem( reg, window, sound_bank )
 {
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&ArrowSystem::on_player_action_event>( this );
 }

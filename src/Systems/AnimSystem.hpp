@@ -21,10 +21,9 @@ public:
   //! @brief Construct a new Anim System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
-  AnimSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-      : BaseSystem( reg, window, sprite_factory, sound_bank )
+  AnimSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+      : BaseSystem( reg, window, sound_bank )
   {
     // The entt::dispatcher is independent of the registry, so it is safe to bind event handlers in the constructor
     std::ignore = get_systems_event_queue().sink<Events::PauseClocksEvent>().connect<&Sys::AnimSystem::on_pause>( this );

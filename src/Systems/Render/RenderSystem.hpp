@@ -3,8 +3,8 @@
 
 #include <Components/Font.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
-#include <Factory/SpriteFactory.hpp>
 #include <Shaders/TitleScreenShader.hpp>
+#include <Sprites/SpriteSheet.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Render/ZOrderQueue.hpp>
 #include <Utils/Constants.hpp>
@@ -43,9 +43,8 @@ public:
   //! @brief Construct a new Render System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
-  RenderSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  RenderSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief polymorphic destructor for derived classes
   virtual ~RenderSystem();

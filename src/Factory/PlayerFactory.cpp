@@ -40,7 +40,6 @@
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/PlantFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
-#include <Factory/SpriteFactory.hpp>
 #include <Factory/ToxicityFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Sprites/SpriteMetaType.hpp>
@@ -48,6 +47,7 @@
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 
@@ -105,12 +105,12 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   add_inventory( reg, "item.pickaxe" );
 }
 
-entt::entity add_spawn_area( entt::registry &reg, entt::entity entity, Sprites::SpriteFactory &sfactory, float zorder )
+entt::entity add_spawn_area( entt::registry &reg, entt::entity entity, float zorder )
 {
   // We need to reserve these positions for the player start area, dont add NpcNoPathFinding.
   // We want NPCs to pathfind player within spawn. We block NPCs from entering spawn directly in NpcSystem::update_pathfinding.
   reg.emplace_or_replace<Cmp::SpawnArea>( entity, false );
-  auto [_, idx] = sfactory.get_random_type_and_texture_index( { "sprite.graveyard.playerspawn" } );
+  auto [_, idx] = Sys::SpriteStore::instance().get_random_type_and_texture_index( { "sprite.graveyard.playerspawn" } );
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( entity, Cmp::AnimData::Config{ 
         .sprite_type = "sprite.graveyard.playerspawn", 

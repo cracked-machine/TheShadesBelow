@@ -29,7 +29,7 @@ class PassageSystem : public Game::Sys::BaseSystem
 {
 public:
   //! @brief Construct a new Passage System object
-  PassageSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  PassageSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief Store the crypt scene data used to look up map size for passage carving.
   //! @param crypt_scene_data Weak-owning pointer to the crypt scene's deserialized scene data

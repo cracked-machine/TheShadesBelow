@@ -13,7 +13,6 @@
 
 #include <Audio/SoundBank.hpp>
 #include <Components/Font.hpp>
-#include <Factory/SpriteFactory.hpp>
 #include <SceneControl/SceneManager.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 
@@ -117,8 +116,6 @@ private:
   std::unique_ptr<sf::RenderWindow> m_window = std::make_unique<sf::RenderWindow>( sf::VideoMode( Constants::kFallbackDisplaySize ), "TheShadesBelow",
                                                                                    sf::State::Fullscreen );
 
-  //! @brief Factory for creating and caching sprites/animation data; created in init_systems().
-  std::unique_ptr<Sprites::SpriteFactory> m_sprite_factory;
   //! @brief Central sound effect/music playback manager.
   std::unique_ptr<Audio::SoundBank> m_sound_bank = std::make_unique<Audio::SoundBank>();
 

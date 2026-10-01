@@ -38,12 +38,10 @@ public:
   //! @brief Construct a new Crypt System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
   //! @param scenemanager_event_dispatcher
-  CryptSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank,
-               entt::dispatcher &scenemanager_event_dispatcher )
-      : Game::Sys::BaseSystem( reg, window, sprite_factory, sound_bank ),
+  CryptSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::dispatcher &scenemanager_event_dispatcher )
+      : Game::Sys::BaseSystem( reg, window, sound_bank ),
         m_scenemanager_event_dispatcher( scenemanager_event_dispatcher )
   {
     // The entt::dispatcher is independent of the registry, so it is safe to bind event handlers in the constructor

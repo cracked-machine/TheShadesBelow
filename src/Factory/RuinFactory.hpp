@@ -7,7 +7,7 @@
 #include <Sprites/SpriteMetaType.hpp>
 
 // clang-format off
-namespace Game::Sprites { class SpriteSheet; class SpriteFactory; }
+namespace Game::Sprites { class SpriteSheet; }
 namespace Cmp { class Position; }
 namespace Game::PathFinding { class SpatialHashGrid; }
 // clang-format on

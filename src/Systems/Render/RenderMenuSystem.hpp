@@ -41,8 +41,8 @@ public:
   };
 
   //! @brief Construct a new Render Menu System object
-  RenderMenuSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-      : RenderSystem( reg, window, sprite_factory, sound_bank )
+  RenderMenuSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+      : RenderSystem( reg, window, sound_bank )
   {
   }
 

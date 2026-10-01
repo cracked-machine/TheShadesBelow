@@ -38,11 +38,10 @@ template <typename T>
 inline constexpr bool dependent_false = false;
 } // namespace Detail
 
-//! @copydoc HazardFieldSystem::HazardFieldSystem(entt::registry&,sf::RenderWindow&,Sprites::SpriteFactory&,Audio::SoundBank&)
+//! @copydoc HazardFieldSystem::HazardFieldSystem(entt::registry&,sf::RenderWindow&,Audio::SoundBank&)
 template <ValidHazard HazardType>
-HazardFieldSystem<HazardType>::HazardFieldSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory,
-                                                  Audio::SoundBank &sound_bank )
-    : Sys::BaseSystem( reg, window, sprite_factory, sound_bank )
+HazardFieldSystem<HazardType>::HazardFieldSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : Sys::BaseSystem( reg, window, sound_bank )
 {
   get_systems_event_queue().sink<Events::PauseClocksEvent>().connect<&Sys::HazardFieldSystem<HazardType>::on_pause>( this );
   get_systems_event_queue().sink<Events::ResumeClocksEvent>().connect<&Sys::HazardFieldSystem<HazardType>::on_resume>( this );

@@ -15,7 +15,7 @@
 namespace Game::Cmp { class Position; class RectBounds; }
 namespace sf { class RenderWindow; }
 namespace Game::PathFinding { class SpatialHashGrid; } 
-namespace Game::Sprites { class SpriteSheet; class SpriteFactory; }
+namespace Game::Sprites { class SpriteSheet; }
 namespace Game::Scene { class SceneData; }
 // clang-format on
 
@@ -29,7 +29,7 @@ class LevelGenerator : public BaseSystem
 {
 public:
   //! @brief Construct a new Level Generator object
-  LevelGenerator( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  LevelGenerator( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief Destroy the Level Generator object
   ~LevelGenerator() = default;
@@ -90,19 +90,17 @@ public:
 
   //! @brief Scatter loot containers across the map at random unreserved positions.
   //! @param reg
-  //! @param sprite_factory Used to pick sprite size/random sprite index for each container.
   //! @param map_grid_size Map size in grid cells; determines how many containers to place.
   //! @param reserved_sm Positions already reserved are skipped.
   //! @return The entities that were assigned loot containers.
-  std::vector<entt::entity> gen_loot_containers( Sprites::SpriteFactory &sprite_factory, sf::Vector2u map_grid_size );
+  std::vector<entt::entity> gen_loot_containers( sf::Vector2u map_grid_size );
 
   //! @brief Scatter NPC spawn containers across the map at random unreserved positions.
   //! @param reg
-  //! @param sprite_factory Used to pick a random container sprite type/index.
   //! @param map_grid_size Map size in grid cells; determines how many containers to place.
   //! @param reserved_sm Positions already reserved are skipped.
   //! @return The entities that were assigned NPC containers.
-  std::vector<entt::entity> gen_npc_containers( Sprites::SpriteFactory &sprite_factory, sf::Vector2u map_grid_size );
+  std::vector<entt::entity> gen_npc_containers( sf::Vector2u map_grid_size );
 
   //! @brief Get the obstacle sm object
   //! @return PathFinding::SpatialHashGrid&

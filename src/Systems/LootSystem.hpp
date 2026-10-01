@@ -16,9 +16,8 @@ public:
   //! @brief Construct a new Loot System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
-  LootSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  LootSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief event handlers for pausing system clocks
   void on_pause() override {}

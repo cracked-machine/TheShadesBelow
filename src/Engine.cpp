@@ -117,12 +117,10 @@ bool Engine::run()
 
 void Engine::init_systems()
 {
-  m_sprite_factory = std::make_unique<Sprites::SpriteFactory>();
-  m_sprite_factory->init();
   m_sound_bank->init();
-  m_system_store = std::make_unique<Sys::Store>( *m_window, *m_sprite_factory, *m_sound_bank, m_nav_event_dispatcher, m_scenemanager_event_queue );
+  m_system_store = std::make_unique<Sys::Store>( *m_window, *m_sound_bank, m_nav_event_dispatcher, m_scenemanager_event_queue );
   m_scene_manager = std::make_unique<Scene::SceneManager>( *m_window, *m_sound_bank, *m_system_store, m_nav_event_dispatcher,
-                                                           m_scenemanager_event_queue, *m_sprite_factory );
+                                                           m_scenemanager_event_queue );
 
   SPDLOG_DEBUG( "Lazy initialization of systems complete" );
 }

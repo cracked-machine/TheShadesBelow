@@ -21,7 +21,6 @@
 namespace Game::Sprites
 {
 class SpriteSheet;
-class SpriteFactory;
 class FloodWaterShader;
 class ViewFragmentShader;
 class NightStaticShader;
@@ -54,7 +53,7 @@ class RenderGameSystem : public RenderSystem
 {
 public:
   //! @brief Construct a new Render Game System object
-  RenderGameSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  RenderGameSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief Destroy the Render Game System object
   ~RenderGameSystem();

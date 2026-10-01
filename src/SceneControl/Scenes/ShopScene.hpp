@@ -2,9 +2,9 @@
 #define SRC_SCENECONTROL_SCENES_SHOPSCENE_HPP__
 
 #include <Components/Shop/Inventory.hpp>
-#include <Factory/SpriteFactory.hpp>
 #include <SceneControl/Events/ProcessShopSceneInputEvent.hpp>
 #include <SceneControl/Scene.hpp>
+#include <Sprites/SpriteSheet.hpp>
 #include <Sprites/VertexFloor.hpp>
 
 #include <SFML/System/Vector2.hpp>
@@ -26,12 +26,10 @@ public:
   //! @param sound_bank Shared sound bank used to play/stop shop-related audio
   //! @param system_store Store of game systems the scene drives each update
   //! @param nav_event_dispatcher Used to notify the SceneInputRouter when new input events are available
-  //! @param sprite_Factory Factory used to create sprites for entities spawned in this scene
-  ShopScene( Audio::SoundBank &sound_bank, Sys::Store &system_store, entt::dispatcher &nav_event_dispatcher, Sprites::SpriteFactory &sprite_Factory )
+  ShopScene( Audio::SoundBank &sound_bank, Sys::Store &system_store, entt::dispatcher &nav_event_dispatcher )
       : Scene( nav_event_dispatcher ),
         m_sound_bank( sound_bank ),
-        m_sys( system_store ),
-        m_sprite_factory( sprite_Factory )
+        m_sys( system_store )
   {
   }
 
@@ -72,9 +70,6 @@ private:
 
   //! @brief Store of game systems the scene drives each update
   Sys::Store &m_sys;
-
-  //! @brief Factory used to create sprites for entities spawned in this scene
-  Sprites::SpriteFactory &m_sprite_factory;
 
   //! @brief Vertex-based floor tile mesh for the shop level
   Sprites::Containers::VertexFloor m_floormap;

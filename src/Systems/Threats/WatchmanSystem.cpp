@@ -47,8 +47,8 @@
 namespace Game::Sys
 {
 
-WatchmanSystem::WatchmanSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-    : BaseSystem( reg, window, sprite_factory, sound_bank )
+WatchmanSystem::WatchmanSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseSystem( reg, window, sound_bank )
 {
   SPDLOG_DEBUG( "WatchmanSystem initialized" );
   m_watchman_spawn_timer = sf::Time::Zero;

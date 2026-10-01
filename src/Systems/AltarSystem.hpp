@@ -18,9 +18,8 @@ public:
   //! @brief Construct a new Altar System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
-  AltarSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  AltarSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief Per-frame tidy up
   void update( sf::Time dt );

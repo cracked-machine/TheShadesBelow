@@ -39,6 +39,7 @@
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -48,8 +49,8 @@
 namespace Game::Sys
 {
 
-AltarSystem::AltarSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-    : BaseSystem( reg, window, sprite_factory, sound_bank )
+AltarSystem::AltarSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseSystem( reg, window, sound_bank )
 {
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&AltarSystem::on_player_action>( this );
 }
@@ -101,7 +102,7 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
     Utils::Player::apply_action_from_inventory_item<Cmp::SacrificeAction>( reg() );
     Factory::Player::destroy_inventory( reg(), sacrifice_type );
 
-    float altar_sacrifice_anim_height = m_sprite_factory.get_spritesheet_by_type( sprite_type ).get_sprite_size().y;
+    float altar_sacrifice_anim_height = Sys::SpriteStore::instance().get_spritesheet_by_type( sprite_type ).get_sprite_size().y;
     // get the center (topleft coord), then adjust to center the altar_sacrifice_anim, then adjust for altar_sacrifice_anim height
     Cmp::Position new_pos( altar_cmp.getCenter() - sf::Vector2{ 8.f, 4.f } - sf::Vector2{ 0.f, altar_sacrifice_anim_height },
                            Constants::kGridSizePxF );

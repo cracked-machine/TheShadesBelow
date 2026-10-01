@@ -85,8 +85,8 @@
 namespace Game::Sys
 {
 
-PersistSystem::PersistSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-    : BaseSystem( reg, window, sprite_factory, sound_bank )
+PersistSystem::PersistSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseSystem( reg, window, sound_bank )
 {
   std::ignore = get_systems_event_queue().sink<Events::SaveSettingsEvent>().connect<&Sys::PersistSystem::on_save_settings_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::LoadSettingsEvent>().connect<&Sys::PersistSystem::on_load_settings_event>( this );

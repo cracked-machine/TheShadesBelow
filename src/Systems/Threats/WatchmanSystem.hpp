@@ -19,9 +19,8 @@ public:
   //! @brief Construct a new Watchman System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
-  WatchmanSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  WatchmanSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief init the weak pointer for the reserved-positions grid.
   //! @param reserved_sm

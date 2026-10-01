@@ -9,6 +9,7 @@
 #include <Sprites/VertexSprite.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Optimizations.hpp>
 
@@ -20,8 +21,8 @@
 namespace Game::Sys
 {
 
-RenderSystem::RenderSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-    : BaseSystem( reg, window, sprite_factory, sound_bank )
+RenderSystem::RenderSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseSystem( reg, window, sound_bank )
 {
   SPDLOG_DEBUG( "RenderSystem constructor called" );
 }
@@ -85,7 +86,7 @@ void RenderSystem::safe_render_sprite_to_target( sf::RenderTarget &target, const
 
   try
   {
-    const auto &sprite = m_sprite_factory.get_spritesheet_by_type( sprite_type );
+    const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( sprite_type );
 
     if ( sprite_index < sprite.get_sprite_count() )
     {

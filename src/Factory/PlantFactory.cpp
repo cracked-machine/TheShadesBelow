@@ -12,8 +12,8 @@
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/PlantFactory.hpp>
-#include <Factory/SpriteFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Random.hpp>
 #include <Utils/Utils.hpp>
 #include <entt/entity/registry.hpp>

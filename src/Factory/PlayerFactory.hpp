@@ -3,8 +3,8 @@
 
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
-#include <Factory/SpriteFactory.hpp>
 #include <PathFinding/SmartPointers.hpp>
+#include <Sprites/SpriteSheet.hpp>
 #include <entt/entity/fwd.hpp>
 #include <entt/fwd.hpp>
 
@@ -19,10 +19,9 @@ void create_player( entt::registry &registry, const PathFinding::SpatialHashGrid
 //! @brief Reserve and decorate the player spawn area sprite, without blocking NPC pathfinding into it.
 //! @param registry
 //! @param entity
-//! @param sfactory Used to pick a random spawn-area sprite index.
 //! @param zorder
 //! @return entt::entity
-entt::entity add_spawn_area( entt::registry &registry, entt::entity entity, Sprites::SpriteFactory &sfactory, float zorder );
+entt::entity add_spawn_area( entt::registry &registry, entt::entity entity, float zorder );
 
 //! @brief Create the blood splat entity played when the player dies.
 //! @param registry

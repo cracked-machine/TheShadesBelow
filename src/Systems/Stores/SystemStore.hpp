@@ -9,7 +9,6 @@
 
 // Forward declarations only
 // clang-format off
-namespace Game::Sprites { class SpriteFactory; }
 namespace Game::Audio { class SoundBank; }
 namespace sf { class RenderWindow; }
 namespace Game::Sys::ProcGen { class CellAutomataSystem; class DLASystem; class LevelGenerator; }
@@ -34,6 +33,7 @@ class GrimoireSystem;
 class HealingSpringSystem;
 class InventorySystem;
 class ItemStore;
+class SpriteStore;
 class ItemSystem;
 class NpcStore;
 class LootSystem;
@@ -94,12 +94,8 @@ public:
     HealingSpringSystem,
     //! @brief Key for InventorySystem.
     InventorySystem,
-    //! @brief Key for ItemStore.
-    ItemStore,
     //! @brief Key for ItemSystem.
     ItemSystem,
-    //! @brief Key for NpcStore.
-    NpcStore,
     //! @brief Key for RuinSystem.
     RuinSystem,
     //! @brief Key for LightningSystem.
@@ -151,12 +147,14 @@ public:
 
   //! @brief Construct a new Store object
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
   //! @param nav_event_dispatcher
   //! @param scenemanager_event_dispatcher
-  Store( sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank, entt::dispatcher &nav_event_dispatcher,
+  Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::dispatcher &nav_event_dispatcher,
          entt::dispatcher &scenemanager_event_dispatcher );
+
+  //! @brief Destroy the Store object. Defined out of line so the data store types can stay forward declared here.
+  ~Store();
 
   //! @brief Find the concrete class using the Sys::Store::Type enum
   //! @tparam T
@@ -186,6 +184,12 @@ public:
   [[nodiscard]] auto size() const { return m_sysmap.size(); }
 
 private:
+  //! @brief Data stores, loaded once at startup. Declared before m_sysmap so they are constructed before, and
+  //! outlive, all systems.
+  std::unique_ptr<SpriteStore> m_sprite_store;
+  std::unique_ptr<ItemStore> m_item_store;
+  std::unique_ptr<NpcStore> m_npc_store;
+
   //! @brief The SystemStore container keyed by Type enum
   std::map<Type, std::unique_ptr<BaseSystem>> m_sysmap;
 
@@ -221,9 +225,7 @@ template<> struct Store::SystemTraits<Store::Type::GraveSystem>            { usi
 template<> struct Store::SystemTraits<Store::Type::GrimoireSystem>         { using type = GrimoireSystem; };
 template<> struct Store::SystemTraits<Store::Type::HealingSpringSystem>    { using type = HealingSpringSystem; };
 template<> struct Store::SystemTraits<Store::Type::InventorySystem>        { using type = InventorySystem; };
-template<> struct Store::SystemTraits<Store::Type::ItemStore>              { using type = ItemStore; };
 template<> struct Store::SystemTraits<Store::Type::ItemSystem>             { using type = ItemSystem; };
-template<> struct Store::SystemTraits<Store::Type::NpcStore>               { using type = NpcStore; };
 template<> struct Store::SystemTraits<Store::Type::RuinSystem>             { using type = RuinSystem; };
 template<> struct Store::SystemTraits<Store::Type::LootSystem>             { using type = LootSystem; };
 template<> struct Store::SystemTraits<Store::Type::LightningSystem>        { using type = LightningSystem; };

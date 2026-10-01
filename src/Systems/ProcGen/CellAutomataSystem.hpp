@@ -22,8 +22,8 @@ class CellAutomataSystem : public BaseSystem
 {
 public:
   //! @brief Construct a new Cell Automata System object
-  CellAutomataSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-      : BaseSystem( reg, window, sprite_factory, sound_bank )
+  CellAutomataSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+      : BaseSystem( reg, window, sound_bank )
   {
   }
 

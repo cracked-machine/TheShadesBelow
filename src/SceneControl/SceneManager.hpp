@@ -34,9 +34,8 @@ public:
   //! @param system_store Store of all game systems; the active scene's registry is injected into it on transition
   //! @param nav_event_dispatcher Dispatcher used to route per-scene input-processing events
   //! @param scenemanager_event_dispatcher Dispatcher used to receive scene transition requests
-  //! @param sprite_factory Used by scenes to construct sprite-owning entities
   explicit SceneManager( sf::RenderWindow &w, Audio::SoundBank &sound_bank, Sys::Store &system_store, entt::dispatcher &nav_event_dispatcher,
-                         entt::dispatcher &scenemanager_event_dispatcher, Sprites::SpriteFactory &sprite_factory );
+                         entt::dispatcher &scenemanager_event_dispatcher );
 
   // Prevent copy/move of SceneManager object. Use unique ptr.
   SceneManager( const SceneManager &other ) = delete;
@@ -160,9 +159,6 @@ private:
 
   //! @brief Used to transfer components from outgoing scene registry to an incoming scene registry
   RegistryTransfer m_reg_xfer;
-
-  //! @brief Non-owning reference to the sprite factory used to construct scene entities
-  Sprites::SpriteFactory &m_sprite_factory;
 };
 
 } // namespace Game::Scene

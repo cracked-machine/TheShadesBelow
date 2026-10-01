@@ -34,9 +34,8 @@ public:
   //! @brief Construct a new Particle System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
-  ParticleSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  ParticleSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief Add one or more particle sprites, each wrapped and stored under its own entity.
   //! @tparam PARTICLESPRITES

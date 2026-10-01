@@ -15,7 +15,7 @@
 #include <string>
 
 // clang-format off
-namespace Game::Sprites { class SpriteSheet; class SpriteFactory; } 
+namespace Game::Sprites { class SpriteSheet; }
 // clang-format on
 
 namespace Game::Sys
@@ -27,8 +27,8 @@ class RenderOverlaySystem : public RenderSystem
 {
 public:
   //! @brief Construct a new Render Overlay System object. Loads the main and shop UI layout data from their JSON files.
-  RenderOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-      : RenderSystem( reg, window, sprite_factory, sound_bank )
+  RenderOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+      : RenderSystem( reg, window, sound_bank )
   {
     m_main_ui_data = std::make_unique<Render::UiData>( "res/ui/ui.json" );
     m_shop_ui_data = std::make_unique<Render::UiData>( "res/ui/shop.json" );

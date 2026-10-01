@@ -18,7 +18,6 @@
 
 // clang-format off
 namespace Game::PathFinding { enum class QueryCompass; }
-namespace Game::Sprites { class SpriteFactory; }
 // clang-format on
 
 namespace Game::Sys
@@ -31,7 +30,7 @@ class RenderDebugSystem : public RenderSystem
 {
 public:
   //! @brief Construct a new Render Debug System object. Loads the debug UI layout data from its JSON file.
-  RenderDebugSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  RenderDebugSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief init the weak pointer for the pathfinding navmesh
   //! @param spatial_grid_ptr

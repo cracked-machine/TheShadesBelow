@@ -2,17 +2,16 @@
 #define SRC_SCENECONTROL_SCENES_RUINSCENELOWERFLOOR_HPP__
 
 #include <Audio/SoundBank.hpp>
-#include <Factory/SpriteFactory.hpp>
 #include <SceneControl/Events/ProcessRuinSceneLowerInputEvent.hpp>
 #include <SceneControl/Scene.hpp>
 #include <Sprites/SpriteMetaType.hpp>
+#include <Sprites/SpriteSheet.hpp>
 #include <Sprites/VertexFloor.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 
 namespace Game::Sprites
 {
 class SpriteSheet;
-class SpriteFactory;
 } // namespace Game::Sprites
 
 namespace Game::Scene
@@ -35,13 +34,10 @@ public:
   //! @param sound_bank Shared sound bank used to play/stop ruin-related audio
   //! @param system_store Store of game systems the scene drives each update
   //! @param nav_event_dispatcher Used to notify the SceneInputRouter when new input events are available
-  //! @param sprite_Factory Factory used to create sprites for entities spawned in this scene
-  RuinSceneLowerFloor( Audio::SoundBank &sound_bank, Sys::Store &system_store, entt::dispatcher &nav_event_dispatcher,
-                       Sprites::SpriteFactory &sprite_Factory )
+  RuinSceneLowerFloor( Audio::SoundBank &sound_bank, Sys::Store &system_store, entt::dispatcher &nav_event_dispatcher )
       : Scene( nav_event_dispatcher ),
         m_sound_bank( sound_bank ),
-        m_sys( system_store ),
-        m_sprite_factory( sprite_Factory )
+        m_sys( system_store )
   {
   }
 
@@ -83,9 +79,6 @@ private:
 
   //! @brief Store of game systems the scene drives each update
   Sys::Store &m_sys;
-
-  //! @brief Factory used to create sprites for entities spawned in this scene
-  Sprites::SpriteFactory &m_sprite_factory;
 
   //! @brief How the player is currently entering the scene; set via set_entry_mode() before the scene is switched to
   EntryMode m_entry_mode;

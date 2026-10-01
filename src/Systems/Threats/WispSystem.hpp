@@ -20,9 +20,8 @@ public:
   //! @brief Construct a new Wisp System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
-  WispSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  WispSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief init the weak pointer for the pathfinding navmesh
   //! @param open_navmesh Wisps roam freely, so pathfind on the open navmesh rather than the obstacle-aware one

@@ -10,7 +10,6 @@
 namespace Game::Sprites
 {
 class SpriteSheet;
-class SpriteFactory;
 } // namespace Game::Sprites
 
 namespace Game::Cmp::Ruin
@@ -36,11 +35,9 @@ public:
   //! @brief Construct a new Ruin System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
   //! @param scenemanager_event_dispatcher
-  RuinSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank,
-              entt::dispatcher &scenemanager_event_dispatcher );
+  RuinSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::dispatcher &scenemanager_event_dispatcher );
 
   //! @brief init the weak pointer for the spatial grid
   //! @param pathfinding_navmesh

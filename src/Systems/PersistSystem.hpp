@@ -24,9 +24,8 @@ public:
   //! @brief Construct a new Persist System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
-  PersistSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  PersistSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief Initializes the component registry for the persistent system.
   //! @note  You must call this function before calling `load_state()` or `save_state()`.

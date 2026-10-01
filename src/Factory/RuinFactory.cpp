@@ -15,9 +15,9 @@
 #include <Components/ZOrderValue.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/RuinFactory.hpp>
-#include <Factory/SpriteFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/Stores/NpcStore.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Random.hpp>

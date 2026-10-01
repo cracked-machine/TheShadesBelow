@@ -1,7 +1,7 @@
 #ifndef SRC_COMPONENTS_LOOT_HPP__
 #define SRC_COMPONENTS_LOOT_HPP__
 
-#include <Factory/SpriteFactory.hpp>
+#include <Sprites/SpriteSheet.hpp>
 
 namespace Game::Cmp
 {

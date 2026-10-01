@@ -31,6 +31,7 @@
 #include <Systems/InventorySystem.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Cardinal.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Player.hpp>
@@ -43,9 +44,8 @@
 namespace Game::Sys
 {
 
-InventorySystem::InventorySystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory,
-                                  Audio::SoundBank &sound_bank )
-    : BaseSystem( reg, window, sprite_factory, sound_bank )
+InventorySystem::InventorySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseSystem( reg, window, sound_bank )
 {
   // The entt::dispatcher is independent of the registry, so it is safe to bind event handlers in
   // the constructor
@@ -141,7 +141,8 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
       if ( Utils::Player::is_in_spawn( reg(), Utils::Player::get_position( reg() ) ) ) return;
 
       auto [mb_entt, segment_entt_list] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>(
-          reg(), plant_pos, m_sprite_factory.get_spritesheet_by_type( inventory_slot_cmp->m_item.sprite_type ), 0, 0, m_reserved_sm.lock().get() );
+          reg(), plant_pos, Sys::SpriteStore::instance().get_spritesheet_by_type( inventory_slot_cmp->m_item.sprite_type ), 0, 0,
+          m_reserved_sm.lock().get() );
       // Preserve the item this plant was grown from, so digging it back up (see the DIG handler in
       // on_player_action_event) can hand it back via the normal pickup_world_item path instead of
       // having to re-derive an item id from the multiblock's sprite.

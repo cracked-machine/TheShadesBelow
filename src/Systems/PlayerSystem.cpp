@@ -39,6 +39,7 @@
 #include <Components/Persistent/PostPullMovementDelay.hpp>
 #include <Components/Persistent/WeaponDegradePerHit.hpp>
 #include <Components/Plant/BurningTimeAccumulator.hpp>
+#include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
 #include <Components/Player/HeartBeat.hpp>
@@ -48,7 +49,6 @@
 #include <Components/Player/MovementSuppressTimer.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Player/PendingNoPath.hpp>
-#include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/PostDeathTimeout.hpp>
 #include <Components/Player/TookDamage.hpp>
 #include <Components/Player/TorchRadius.hpp>
@@ -87,13 +87,13 @@
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlantFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
-#include <Factory/SpriteFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PlayerSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
@@ -115,9 +115,9 @@
 namespace Game::Sys
 {
 
-PlayerSystem::PlayerSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank,
+PlayerSystem::PlayerSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank,
                             entt::dispatcher &scenemanager_event_dispatcher )
-    : BaseSystem( reg, window, sprite_factory, sound_bank ),
+    : BaseSystem( reg, window, sound_bank ),
       m_scenemanager_event_dispatcher( scenemanager_event_dispatcher ),
       m_hazard_pushback_target( entt::null )
 {
@@ -331,7 +331,7 @@ void PlayerSystem::move_obstacle( const sf::FloatRect &target_position )
           if ( any_obstacle_on_rune ) { rune_pos_cmp.position.y -= 8.f; }
           else { rune_pos_cmp.position.y += 8.f; }
 
-          float zorder = m_sprite_factory.get_spritesheet_by_type( sprite_type ).get_zorder( 0 );
+          float zorder = Sys::SpriteStore::instance().get_spritesheet_by_type( sprite_type ).get_zorder( 0 );
           rune_zorder_cmp.setZOrder( zorder );
           rune_anim_cmp.m_sprite_type = sprite_type;
           rune_cmp.active = any_obstacle_on_rune;
@@ -974,28 +974,28 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
 
     case Cmp::Player::Mortality::State::FALLING: {
       SPDLOG_INFO( "Player is falling" );
-      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
       common_death_throes();
       break;
     }
     case Cmp::Player::Mortality::State::DECAYING: {
-      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
       common_death_throes();
       break;
     }
     case Cmp::Player::Mortality::State::HAUNTED: {
-      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
       common_death_throes();
       break;
     }
     case Cmp::Player::Mortality::State::EXPLODING: {
-      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
       common_death_throes();
@@ -1005,42 +1005,42 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::SQUISHED: {
-      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
       common_death_throes();
       break;
     }
     case Cmp::Player::Mortality::State::SUICIDE: {
-      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
       common_death_throes();
       break;
     }
     case Cmp::Player::Mortality::State::IGNITED: {
-      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.flames" );
+      const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.death.anim.flames" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "shrine_lighting" ).play();
       common_death_throes();
       break;
     }
     case Cmp::Player::Mortality::State::SKEWERED: {
-      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
       common_death_throes();
       break;
     }
     case Cmp::Player::Mortality::State::SHOCKED: {
-      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
       common_death_throes();
       break;
     }
     case Cmp::Player::Mortality::State::TERRIFIED: {
-      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
       common_death_throes();
@@ -1050,28 +1050,28 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::SHADOWCURSED: {
-      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
       common_death_throes();
       break;
     }
     case Cmp::Player::Mortality::State::SUFFOCATED: {
-      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
       common_death_throes();
       break;
     }
     case Cmp::Player::Mortality::State::CARDIACARREST: {
-      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
       common_death_throes();
       break;
     }
     case Cmp::Player::Mortality::State::POISONED: {
-      const auto &sprite = m_sprite_factory.get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
+      const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
       common_death_throes();

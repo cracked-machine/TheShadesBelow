@@ -18,11 +18,9 @@ public:
   //! @brief Construct a new Exit System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
   //! @param scenemanager_event_dispatcher
-  ExitSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank,
-              entt::dispatcher &scenemanager_event_dispatcher );
+  ExitSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::dispatcher &scenemanager_event_dispatcher );
 
   //! @brief init the weak pointer for the reserved-positions grid, ahead of exit placement.
   //! @param reserved_sm

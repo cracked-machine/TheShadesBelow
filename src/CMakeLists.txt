@@ -75,9 +75,9 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/ShopSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ItemSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/GrimoireSystem.cpp
-    ${CMAKE_SOURCE_DIR}/src/Systems/Stores/BaseStore.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Stores/ItemStore.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Stores/NpcStore.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Stores/SpriteStore.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Stores/SystemStore.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ParticleSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ShaderSystem.cpp
@@ -98,7 +98,6 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/SceneControl/SceneData.cpp
     ${CMAKE_SOURCE_DIR}/src/SceneControl/RegistryTransfer.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/ActionFactory.cpp
-    ${CMAKE_SOURCE_DIR}/src/Factory/SpriteFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/PlayerFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/NpcFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/LootFactory.cpp
@@ -116,6 +115,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Factory/MultiblockFactorySpring.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/MultiblockFactoryPlant.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/ShaderFactory.cpp
+    ${CMAKE_SOURCE_DIR}/src/Factory/ToxicityFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/ParticleFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/PathfindingFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/Utils/Utils.cpp

@@ -12,9 +12,8 @@ public:
   //! @brief Construct a new ToxicitySystem System object
   //! @param reg
   //! @param window
-  //! @param sprite_factory
   //! @param sound_bank
-  ToxicitySystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  ToxicitySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief Update Priest NPC shockwave
   //! @param dt

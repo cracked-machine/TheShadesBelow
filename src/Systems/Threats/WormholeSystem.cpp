@@ -34,6 +34,7 @@
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Threats/WormholeSystem.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
@@ -46,8 +47,8 @@
 namespace Game::Sys
 {
 
-WormholeSystem::WormholeSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-    : BaseSystem( reg, window, sprite_factory, sound_bank )
+WormholeSystem::WormholeSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseSystem( reg, window, sound_bank )
 {
 
   // The entt::dispatcher is independent of the registry, so it is safe to bind event handlers in the constructor
@@ -182,7 +183,7 @@ void WormholeSystem::spawn_wormhole( SpawnPhase phase )
   }
 
   // 3. Create the sprite
-  const auto &wormhole_ss = m_sprite_factory.get_spritesheet_by_type( "sprite.graveyard.hazard.wormhole" );
+  const auto &wormhole_ss = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.graveyard.hazard.wormhole" );
   Cmp::Wormhole::MultiBlock wormhole_block( multiblock_pos.position, wormhole_ss.get_px_size() );
 
   // clear_footprint destroys every entity occupying the footprint, including spawn_entity itself -
@@ -311,7 +312,7 @@ std::pair<entt::entity, Cmp::Position> WormholeSystem::find_spawn_location( unsi
         reg(), Utils::Rnd::IncludePack<Cmp::Obstacle>{}, Utils::Rnd::ExcludePack<Cmp::Wall, Cmp::Exit, Cmp::Player::Character, Cmp::Npc::NPC>{},
         new_rng_seed );
 
-    const auto &wormhole_ms = m_sprite_factory.get_spritesheet_by_type( "sprite.graveyard.hazard.wormhole" );
+    const auto &wormhole_ms = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.graveyard.hazard.wormhole" );
     Cmp::Wormhole::MultiBlock wormhole_block( random_pos.position, wormhole_ms.get_px_size() );
     auto wormhole_bounds = Cmp::RectBounds::scaled( wormhole_block, 1.f );
 

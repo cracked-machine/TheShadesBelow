@@ -3,7 +3,6 @@
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Ruin/ObjectiveType.hpp>
 #include <Factory/CryptFactory.hpp>
-#include <Factory/SpriteFactory.hpp>
 #include <SceneControl/IScene.hpp>
 #include <SceneControl/RegistryTransfer.hpp>
 #include <SceneControl/Scene.hpp>
@@ -20,18 +19,18 @@
 #include <SceneControl/Scenes/ShopScene.hpp>
 #include <SceneControl/Scenes/TitleScene.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 
 namespace Game::Scene
 {
 
 SceneManager::SceneManager( sf::RenderWindow &w, Audio::SoundBank &sound_bank, Sys::Store &system_store, entt::dispatcher &nav_event_dispatcher,
-                            entt::dispatcher &scenemanager_event_dispatcher, Sprites::SpriteFactory &sprite_factory )
+                            entt::dispatcher &scenemanager_event_dispatcher )
     : m_window( w ),
       m_sound_bank( sound_bank ),
       m_system_store( system_store ),
       m_nav_event_dispatcher( nav_event_dispatcher ),
-      m_scenemanager_event_dispatcher( scenemanager_event_dispatcher ),
-      m_sprite_factory( sprite_factory )
+      m_scenemanager_event_dispatcher( scenemanager_event_dispatcher )
 {
   m_scenemanager_event_dispatcher.sink<Events::SceneManagerEvent>().connect<&SceneManager::handle_events>( this );
 }
@@ -204,13 +203,13 @@ void SceneManager::handle_events( const Events::SceneManagerEvent &event )
   {
     case Events::SceneManagerEvent::Type::START_GAME: {
       SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::START_GAME requested" );
-      auto graveyard_scene = std::make_unique<GraveyardScene>( m_sound_bank, m_system_store, m_nav_event_dispatcher, m_sprite_factory );
+      auto graveyard_scene = std::make_unique<GraveyardScene>( m_sound_bank, m_system_store, m_nav_event_dispatcher );
       push( std::move( graveyard_scene ) );
       break;
     }
     case Events::SceneManagerEvent::Type::ENTER_CRYPT: {
       SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::ENTER_CRYPT requested" );
-      auto crypt_scene = std::make_unique<CryptScene>( m_sound_bank, m_system_store, m_nav_event_dispatcher, m_sprite_factory );
+      auto crypt_scene = std::make_unique<CryptScene>( m_sound_bank, m_system_store, m_nav_event_dispatcher );
       push_no_exit( std::move( crypt_scene ), RegCopyMode::ALL );
       break;
     }
@@ -221,7 +220,7 @@ void SceneManager::handle_events( const Events::SceneManagerEvent &event )
     }
     case Events::SceneManagerEvent::Type::ENTER_SACREDSPRING: {
       SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::ENTER_SACREDSPRING requested" );
-      auto healing_spring_scene = std::make_unique<HealingSpringScene>( m_sound_bank, m_system_store, m_nav_event_dispatcher, m_sprite_factory );
+      auto healing_spring_scene = std::make_unique<HealingSpringScene>( m_sound_bank, m_system_store, m_nav_event_dispatcher );
       push_no_exit( std::move( healing_spring_scene ), RegCopyMode::ALL );
       break;
     }
@@ -232,19 +231,19 @@ void SceneManager::handle_events( const Events::SceneManagerEvent &event )
     }
     case Events::SceneManagerEvent::Type::ENTER_SHOP: {
       SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::ENTER_SHOP requested" );
-      auto shop_scene = std::make_unique<ShopScene>( m_sound_bank, m_system_store, m_nav_event_dispatcher, m_sprite_factory );
+      auto shop_scene = std::make_unique<ShopScene>( m_sound_bank, m_system_store, m_nav_event_dispatcher );
       replace( std::move( shop_scene ), RegCopyMode::ALL );
       break;
     }
     case Events::SceneManagerEvent::Type::EXIT_SHOP: {
       SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::EXIT_SHOP requested" );
-      auto graveyard_scene = std::make_unique<GraveyardScene>( m_sound_bank, m_system_store, m_nav_event_dispatcher, m_sprite_factory );
+      auto graveyard_scene = std::make_unique<GraveyardScene>( m_sound_bank, m_system_store, m_nav_event_dispatcher );
       replace( std::move( graveyard_scene ), RegCopyMode::ALL );
       break;
     }
     case Events::SceneManagerEvent::Type::ENTER_RUIN_LOWER: {
       SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::ENTER_RUIN_LOWER requested" );
-      auto ruin_scene = std::make_unique<RuinSceneLowerFloor>( m_sound_bank, m_system_store, m_nav_event_dispatcher, m_sprite_factory );
+      auto ruin_scene = std::make_unique<RuinSceneLowerFloor>( m_sound_bank, m_system_store, m_nav_event_dispatcher );
       ruin_scene->set_entry_mode( RuinSceneLowerFloor::EntryMode::FROM_DOOR );
       push_no_exit( std::move( ruin_scene ), RegCopyMode::ALL );
       break;
@@ -256,7 +255,7 @@ void SceneManager::handle_events( const Events::SceneManagerEvent &event )
         break;
       }
       SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::ENTER_RUIN_UPPER requested" );
-      auto ruin_scene = std::make_unique<RuinSceneUpperFloor>( m_sound_bank, m_system_store, m_nav_event_dispatcher, m_sprite_factory );
+      auto ruin_scene = std::make_unique<RuinSceneUpperFloor>( m_sound_bank, m_system_store, m_nav_event_dispatcher );
       push_no_exit( std::move( ruin_scene ), RegCopyMode::ALL );
       break;
     }

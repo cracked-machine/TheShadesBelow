@@ -4,6 +4,7 @@
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <Components/Toxicity/TraitsBase.hpp>
 #include <cstddef>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -24,13 +25,15 @@ class ToxidromeBuilder
 {
 public:
   ToxidromeBuilder() = default;
-  explicit ToxidromeBuilder( std::vector<int> deltas ) : m_deltas( std::move( deltas ) ) {}
+  explicit ToxidromeBuilder( std::vector<int> deltas )
+      : m_deltas( std::move( deltas ) )
+  {
+  }
 
   template <typename T>
   [[nodiscard]] auto add( int toxicity_delta = 0 ) const
   {
-    static_assert( Cmp::Toxicity::no_conflicting_toxidromes_v<Added..., T>,
-                   "ToxidromeBuilder: two of the given toxidromes are mutually exclusive" );
+    static_assert( Cmp::Toxicity::no_conflicting_toxidromes_v<Added..., T>, "ToxidromeBuilder: two of the given toxidromes are mutually exclusive" );
     std::vector<int> next = m_deltas;
     next.push_back( toxicity_delta );
     return ToxidromeBuilder<Added..., T>( std::move( next ) );
@@ -47,6 +50,12 @@ public:
 private:
   std::vector<int> m_deltas;
 };
+
+//! @brief Build a single-affliction Toxidrome from a data-driven type name (e.g. loaded from JSON).
+//! @param type Toxidrome type name; "none" yields an empty Toxidrome, unknown names are logged and treated as "none".
+//! @param toxicity The toxidrome's toxicity contribution while active.
+//! @return The constructed Cmp::Toxicity::Toxidrome.
+Cmp::Toxicity::Toxidrome create_toxidrome( const std::string &type, int toxicity );
 
 } // namespace Game::Factory::Toxicity
 

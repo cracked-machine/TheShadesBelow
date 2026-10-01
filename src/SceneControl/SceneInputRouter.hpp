@@ -13,7 +13,6 @@
 #include <Systems/BaseSystem.hpp>
 
 // clang-format off
-namespace Game::Sprites { class SpriteFactory; }
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
 // clang-format on
@@ -50,12 +49,11 @@ public:
   //! @brief Construct a new Scene Input Router object
   //! @param reg Entity-component registry for the current scene
   //! @param window The render window to poll input events from
-  //! @param sprite_factory Used to construct sprite-owning entities in response to input
   //! @param sound_bank Used to play sounds in response to input
   //! @param nav_event_dispatcher Dispatcher used to route the per-scene "process input" events to the matching handler
   //! @param scenemanager_event_dispatcher Dispatcher used to request scene transitions from SceneManager
-  SceneInputRouter( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank,
-                    entt::dispatcher &nav_event_dispatcher, entt::dispatcher &scenemanager_event_dispatcher );
+  SceneInputRouter( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::dispatcher &nav_event_dispatcher,
+                    entt::dispatcher &scenemanager_event_dispatcher );
 
   //! @brief event handlers for pausing system clocks
   void on_pause() override {}

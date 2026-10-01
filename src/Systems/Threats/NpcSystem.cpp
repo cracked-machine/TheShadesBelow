@@ -41,11 +41,11 @@
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
-#include <Factory/SpriteFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Threats/NpcSystem.hpp>
 #include <Systems/Threats/ShockwaveSystem.hpp>
 #include <Utils/Cardinal.hpp>
@@ -66,8 +66,8 @@
 namespace Game::Sys
 {
 
-NpcSystem::NpcSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-    : BaseSystem( reg, window, sprite_factory, sound_bank )
+NpcSystem::NpcSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseSystem( reg, window, sound_bank )
 {
   SPDLOG_DEBUG( "NpcSystem initialized" );
 }
@@ -324,7 +324,7 @@ void NpcSystem::update_movement_for( PathFinding::SpatialHashGrid &navmesh, entt
   float zorder_augment = 0.f;
   if ( Utils::Npc::get_sprite_type( reg(), npc_entity ).contains( "wisp" ) )
   {
-    const auto &spritesheet = m_sprite_factory.get_spritesheet_by_type( "sprite.wisp.east" );
+    const auto &spritesheet = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.wisp.east" );
     zorder_augment = spritesheet.get_zorder( 0 );
   }
   reg().patch<Cmp::ZOrderValue>( npc_entity, [&]( auto &zorder_cmp ) { zorder_cmp.setZOrder( pos_cmp->position.y + zorder_augment ); } );

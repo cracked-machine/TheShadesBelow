@@ -41,7 +41,6 @@
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlantFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
-#include <Factory/SpriteFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <Sprites/SpriteSheet.hpp>
@@ -51,6 +50,7 @@
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Threats/LightningSystem.hpp>
 #include <Systems/Threats/WormholeSystem.hpp>
 #include <Utils/Collision.hpp>
@@ -69,8 +69,8 @@
 namespace Game::Sys
 {
 
-ActionSystem::ActionSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-    : BaseSystem( reg, window, sprite_factory, sound_bank )
+ActionSystem::ActionSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseSystem( reg, window, sound_bank )
 {
   // The entt::dispatcher is independent of the registry, so it is safe to bind event handlers in
   // the constructor
@@ -441,7 +441,7 @@ void ActionSystem::check_player_smash_pot()
   }
 
   // drop loot - 50% chance
-  auto [sprite_type, sprite_index] = m_sprite_factory.get_random_type_and_texture_index(
+  auto [sprite_type, sprite_index] = Sys::SpriteStore::instance().get_random_type_and_texture_index(
       std::vector<std::string>{ "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" } );
   Cmp::RandomInt do_drop( 0, 1 );
   if ( do_drop.gen() == 0 )

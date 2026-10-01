@@ -1,9 +1,9 @@
 #ifndef SRC_SYSTEMS_STORES_ITEMSTORE_HPP__
 #define SRC_SYSTEMS_STORES_ITEMSTORE_HPP__
 
+#include <Components/Inventory/WorldItem.hpp>
 #include <Sprites/SpriteMetaType.hpp>
-#include <Systems/BaseSystem.hpp>
-#include <Systems/Stores/BaseStore.hpp>
+#include <Systems/Stores/StoreSingleton.hpp>
 
 namespace Game::Sys
 {
@@ -13,15 +13,12 @@ class ItemStore : public StoreSingleton<ItemStore, Cmp::WorldItem>
 {
 public:
   //! @brief Construct a new Item Store object
-  //! @param reg
-  //! @param window
-  //! @param sprite_factory
-  //! @param sound_bank
-  ItemStore( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank );
+  ItemStore();
 
   //! @brief Destroy the Item Store object
   ~ItemStore() {}
 
+private:
   //! @brief Populates m_store with InventoryItem components
   void init_store();
 };

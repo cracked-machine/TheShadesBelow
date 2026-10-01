@@ -24,6 +24,7 @@
 #include <Systems/ExitSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Random.hpp>
@@ -36,9 +37,8 @@
 namespace Game::Sys
 
 {
-ExitSystem::ExitSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank,
-                        entt::dispatcher &scenemanager_event_dispatcher )
-    : BaseSystem( reg, window, sprite_factory, sound_bank ),
+ExitSystem::ExitSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::dispatcher &scenemanager_event_dispatcher )
+    : BaseSystem( reg, window, sound_bank ),
       m_scenemanager_event_dispatcher( scenemanager_event_dispatcher )
 {
   SPDLOG_DEBUG( "ExitSystem initialized" );
@@ -51,7 +51,7 @@ void ExitSystem::create_exit()
 
   entt::entity selected_entity = entt::null;
   Cmp::Position selected_pos_cmp( { 0, 0 }, { 0, 0 } );
-  const auto &kGraveExitSpritesheet = m_sprite_factory.get_spritesheet_by_type( "sprite.graveyard.exit.locked" );
+  const auto &kGraveExitSpritesheet = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.graveyard.exit.locked" );
   const int kMaxAttempts = 100;
 
   auto reserved_sm = m_reserved_sm.lock();
@@ -115,7 +115,7 @@ void ExitSystem::unlock_exit()
       if ( not exit_pos_cmp.findIntersection( exit_mb_cmp ) ) continue;
       anim_cmp.m_sprite_type = "sprite.graveyard.exit.unlocked";
       Factory::Multiblock::detail::update_segments<Cmp::Grave::ExitMultiBlock, Cmp::Grave::ExitSegment>(
-          reg(), m_sprite_factory.get_spritesheet_by_type( "sprite.graveyard.exit.unlocked" ), exit_mb_entt, exit_mb_cmp );
+          reg(), Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.graveyard.exit.unlocked" ), exit_mb_entt, exit_mb_cmp );
       break;
     }
 

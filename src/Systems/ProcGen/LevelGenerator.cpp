@@ -63,6 +63,7 @@
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Optimizations.hpp>
@@ -82,8 +83,8 @@
 namespace Game::Sys::ProcGen
 {
 
-LevelGenerator::LevelGenerator( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-    : BaseSystem( reg, window, sprite_factory, sound_bank ),
+LevelGenerator::LevelGenerator( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseSystem( reg, window, sound_bank ),
       m_obstacle_sm( std::make_unique<PathFinding::SpatialHashGrid>() ),
       m_void_sm( std::make_unique<PathFinding::SpatialHashGrid>() ),
       m_non_obstacle_sm( std::make_unique<PathFinding::SpatialHashGrid>() )
@@ -118,7 +119,7 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
   auto w = map_size_grid.x;
 
   // Walls
-  const Sprites::SpriteSheet &wall_ms = m_sprite_factory.get_spritesheet_by_type( scene_data.wall_tileset().name );
+  const Sprites::SpriteSheet &wall_ms = Sys::SpriteStore::instance().get_spritesheet_by_type( scene_data.wall_tileset().name );
   for ( const auto [i, tile] : std::views::enumerate( scene_data.wall_tilelayer() ) )
   {
     auto row = i / w; // increments every 'w' tiles
@@ -148,7 +149,7 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
     else if ( tile == scene_data.spawn_tile_id() )
     {
       auto entity = Factory::Obstacle::create_world_pos( reg(), new_pos );
-      Factory::Player::add_spawn_area( reg(), entity, m_sprite_factory, new_pos.y - 16.0f );
+      Factory::Player::add_spawn_area( reg(), entity, new_pos.y - 16.0f );
       m_reserved_sm->insert( entity, Cmp::Position( new_pos, Constants::kGridSizePxF ) );
     }
     else if ( tile == scene_data.exit_tile_id() )
@@ -209,7 +210,7 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
     // itself a valid sprite key - resolve the item's actual sprite type before lookup.
     const Sprites::SpriteMetaType sprite_lookup_type = ms_type.contains( "item." ) ? Sys::ItemStore::instance().get_item( ms_type ).sprite_type
                                                                                    : ms_type;
-    const auto &ms = m_sprite_factory.get_spritesheet_by_type( sprite_lookup_type );
+    const auto &ms = Sys::SpriteStore::instance().get_spritesheet_by_type( sprite_lookup_type );
 
     if ( auto it = kMultiblockFactories.find( ms_type ); it != kMultiblockFactories.end() )
     {
@@ -291,11 +292,11 @@ void LevelGenerator::decorate_obstacles( const Sprites::SpriteSheet &ss_main, co
 
 void LevelGenerator::decorate_graveyard_exterior_obstacles()
 {
-  const Sprites::SpriteSheet &ss_main = m_sprite_factory.get_spritesheet_by_type( "sprite.graveyard.wall.int.main" );
-  const Sprites::SpriteSheet &ss_cap = m_sprite_factory.get_spritesheet_by_type( "sprite.graveyard.wall.int.cap" );
+  const Sprites::SpriteSheet &ss_main = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.graveyard.wall.int.main" );
+  const Sprites::SpriteSheet &ss_cap = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.graveyard.wall.int.cap" );
 
   decorate_obstacles( ss_main, ss_cap,
-                      [this]() { return m_sprite_factory.get_random_type_and_texture_index( { "sprite.graveyard.wall.int.main" } ).second; },
+                      []() { return Sys::SpriteStore::instance().get_random_type_and_texture_index( { "sprite.graveyard.wall.int.main" } ).second; },
                       /*cap_y_offset=*/1.f, /*moveable=*/false );
 }
 
@@ -310,8 +311,8 @@ void LevelGenerator::add_ruin_interior_obstacles( float init_chance )
 
 void LevelGenerator::decorate_ruin_interior_obstacles()
 {
-  const Sprites::SpriteSheet &ss_main = m_sprite_factory.get_spritesheet_by_type( "sprite.ruin.wall.int.main" );
-  const Sprites::SpriteSheet &ss_cap = m_sprite_factory.get_spritesheet_by_type( "sprite.ruin.wall.int.cap" );
+  const Sprites::SpriteSheet &ss_main = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.ruin.wall.int.main" );
+  const Sprites::SpriteSheet &ss_cap = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.ruin.wall.int.cap" );
 
   decorate_obstacles( ss_main, ss_cap, []() -> std::size_t { return 0; },
                       /*cap_y_offset=*/0.f, /*moveable=*/true );
@@ -332,8 +333,8 @@ void LevelGenerator::add_ruin_rune_markers()
     // giving up on this rune marker, otherwise unlucky rolls silently place fewer than intended.
     if ( not m_reserved_sm->at( rnd_pos ).empty() ) continue;
     m_reserved_sm->insert( rnd_entt, rnd_pos );
-    auto [_, idx] = m_sprite_factory.get_random_type_and_texture_index( { "sprite.ruin.runemarking.inactive" } );
-    float zorder = m_sprite_factory.get_spritesheet_by_type( "sprite.ruin.runemarking.inactive" ).get_zorder( 0 );
+    auto [_, idx] = Sys::SpriteStore::instance().get_random_type_and_texture_index( { "sprite.ruin.runemarking.inactive" } );
+    float zorder = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.ruin.runemarking.inactive" ).get_zorder( 0 );
     auto rune_entt = Factory::Ruin::create_rune_marker( reg(), rnd_pos, zorder, idx, *m_reserved_sm );
 
     SPDLOG_DEBUG( "Added rune to {},{}", rnd_pos.x(), rnd_pos.y() );
@@ -372,8 +373,9 @@ void LevelGenerator::add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scen
     if ( not m_reserved_sm->at( rnd_pos ).empty() ) continue;
 
     if ( has_collision( Cmp::RectBounds::scaled( { rnd_pos.position }, gridsize, 1 ) ) ) continue;
-    auto [ms, idx] = m_sprite_factory.get_random_type_and_texture_index( { "sprite.ruin.cobweb" } );
-    Factory::Ruin::create_cobweb( reg(), rnd_entt, rnd_pos.position, m_sprite_factory.get_spritesheet_by_type( ms ), idx, *m_reserved_sm );
+    auto [ms, idx] = Sys::SpriteStore::instance().get_random_type_and_texture_index( { "sprite.ruin.cobweb" } );
+    Factory::Ruin::create_cobweb( reg(), rnd_entt, rnd_pos.position, Sys::SpriteStore::instance().get_spritesheet_by_type( ms ), idx,
+                                  *m_reserved_sm );
     m_non_obstacle_sm->insert( rnd_entt, rnd_pos );
     placed++;
   }
@@ -400,17 +402,17 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
   };
 
   // GRAVES
-  auto grave_meta_types = m_sprite_factory.get_all_sprite_types_by_pattern( R"(graves\.\w+\.closed$)" );
-  if ( grave_meta_types.size() < 2 ) { SPDLOG_WARN( "No GRAVE spritesheets found in SpriteFactory" ); }
+  auto grave_meta_types = Sys::SpriteStore::instance().get_all_sprite_types_by_pattern( R"(graves\.\w+\.closed$)" );
+  if ( grave_meta_types.size() < 2 ) { SPDLOG_WARN( "No GRAVE spritesheets found in SpriteStore" ); }
   else
   {
     SPDLOG_DEBUG( "Found {}, {}", grave_meta_types[0], grave_meta_types[1] );
     auto max_num_graves = static_cast<size_t>( max_num_altars.get_value() * grave_num_multiplier.get_value() );
     for ( std::size_t i = 0; i < max_num_graves; ++i )
     {
-      auto [sprite_metatype, index] = m_sprite_factory.get_random_type_and_texture_index( grave_meta_types );
+      auto [sprite_metatype, index] = Sys::SpriteStore::instance().get_random_type_and_texture_index( grave_meta_types );
       SPDLOG_DEBUG( "Selected {}, {}", sprite_metatype, index );
-      const auto &spritesheet = m_sprite_factory.get_spritesheet_by_type( sprite_metatype );
+      const auto &spritesheet = Sys::SpriteStore::instance().get_spritesheet_by_type( sprite_metatype );
       if ( auto pos = find_spawn_pos( spritesheet ) )
       {
         auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<Cmp::Grave::MultiBlock, Cmp::Grave::Segment>(
@@ -421,19 +423,19 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
   }
 
   // ALTARS
-  const auto &altar_spritesheet = m_sprite_factory.get_spritesheet_by_type( "sprite.graveyard.altar.inactive" );
+  const auto &altar_spritesheet = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.graveyard.altar.inactive" );
   spawn_multiblocks<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( static_cast<std::size_t>( max_num_altars.get_value() ), altar_spritesheet );
 
   // CRYPTS - note: we use keys from altars to open crypts so the number should be equal
-  const auto &crypt_spritesheet = m_sprite_factory.get_spritesheet_by_type( "sprite.graveyard.crypt.closed" );
+  const auto &crypt_spritesheet = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.graveyard.crypt.closed" );
   spawn_multiblocks<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( static_cast<std::size_t>( max_num_crypts.get_value() ),
                                                                                   crypt_spritesheet, /*log=*/true );
 
-  const auto &healingspring_spritesheet = m_sprite_factory.get_spritesheet_by_type( "sprite.graveyard.building.healingspring" );
+  const auto &healingspring_spritesheet = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.graveyard.building.healingspring" );
   spawn_multiblocks<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>( max_number_healing_springs, healingspring_spritesheet,
                                                                                               /*log=*/true );
 
-  const auto &ruin_spritesheet = m_sprite_factory.get_spritesheet_by_type( "sprite.graveyard.ruin" );
+  const auto &ruin_spritesheet = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.graveyard.ruin" );
   spawn_multiblocks<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>( max_number_ruins, ruin_spritesheet, /*log=*/true );
 }
 
@@ -467,7 +469,7 @@ std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( cons
     auto [random_entity, random_pos] = Utils::Rnd::get_random_position( reg(), Utils::Rnd::IncludePack<>{},
                                                                         Utils::Rnd::ExcludePack<Cmp::Wall, Cmp::Player::Character>{}, current_seed );
 
-    auto lo_sprite_size = m_sprite_factory.get_sprite_size_by_type( ms.get_sprite_type() );
+    auto lo_sprite_size = Sys::SpriteStore::instance().get_sprite_size_by_type( ms.get_sprite_type() );
     auto new_lo_hitbox = Cmp::RectBounds::scaled( random_pos.position, lo_sprite_size, 1.f );
 
     // Check collisions with walls, graves, shrines, and anything else already claiming this position
@@ -505,7 +507,7 @@ std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( cons
 
 bool LevelGenerator::gen_plant( const std::string &plant_type, sf::Vector2f pos )
 {
-  const auto &plant_ss = m_sprite_factory.get_spritesheet_by_type( "sprite." + plant_type );
+  const auto &plant_ss = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite." + plant_type );
 
   // Plants can span more than one grid row (e.g. 1x2), so every cell in the footprint - not
   // just the origin - must be a real, unreserved world tile. Otherwise a plant can overlap a
@@ -551,7 +553,7 @@ bool LevelGenerator::gen_plant( const std::string &plant_type, sf::Vector2f pos 
   return false;
 }
 
-std::vector<entt::entity> LevelGenerator::gen_loot_containers( Sprites::SpriteFactory &sprite_factory, sf::Vector2u map_grid_size )
+std::vector<entt::entity> LevelGenerator::gen_loot_containers( sf::Vector2u map_grid_size )
 {
   std::vector<entt::entity> assigned_entts;
 
@@ -564,7 +566,7 @@ std::vector<entt::entity> LevelGenerator::gen_loot_containers( Sprites::SpriteFa
 
     if ( m_reserved_sm->at( random_origin_position ).empty() )
     {
-      float zorder = sprite_factory.get_sprite_size_by_type( "sprite.graveyard.pots" ).y;
+      float zorder = Sys::SpriteStore::instance().get_sprite_size_by_type( "sprite.graveyard.pots" ).y;
 
       Cmp::RandomInt pot_picker( 0, 2 );
       Factory::Loot::create_loot_container( reg(), random_entity, random_origin_position, "sprite.graveyard.pots", pot_picker.gen(), zorder );
@@ -576,7 +578,7 @@ std::vector<entt::entity> LevelGenerator::gen_loot_containers( Sprites::SpriteFa
   return assigned_entts;
 }
 
-std::vector<entt::entity> LevelGenerator::gen_npc_containers( Sprites::SpriteFactory &sprite_factory, sf::Vector2u map_grid_size )
+std::vector<entt::entity> LevelGenerator::gen_npc_containers( sf::Vector2u map_grid_size )
 {
   std::vector<entt::entity> assigned_entts;
 
@@ -592,7 +594,7 @@ std::vector<entt::entity> LevelGenerator::gen_npc_containers( Sprites::SpriteFac
       // pick a random loot container type and texture index
       // clang-format off
       auto [npc_type, rand_npc_tex_idx] =
-        sprite_factory.get_random_type_and_texture_index( {
+        Sys::SpriteStore::instance().get_random_type_and_texture_index( {
           "sprite.graveyard.bones"
         } );
       // clang-format on
@@ -613,7 +615,7 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants()
 
   // Find all plant sprites but exclude any ".forage" sprites. The map value will track count of each plant type added.
   std::unordered_map<Sprites::SpriteMetaType, int> plant_tracker;
-  plant_tracker = m_sprite_factory.get_all_sprite_types_by_pattern( R"(sprite\.item\.plant\.(?!.*\.forage$).*)" ) |
+  plant_tracker = Sys::SpriteStore::instance().get_all_sprite_types_by_pattern( R"(sprite\.item\.plant\.(?!.*\.forage$).*)" ) |
                   std::views::transform( []( const auto &type ) { return std::pair{ type, 0 }; } ) |
                   std::ranges::to<std::unordered_map<Sprites::SpriteMetaType, int>>();
 

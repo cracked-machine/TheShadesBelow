@@ -10,7 +10,7 @@
 #include <unordered_map>
 
 // clang-format off
-namespace Game::Sprites { class SpriteSheet; class SpriteFactory; }
+namespace Game::Sprites { class SpriteSheet; }
 // clang-format on
 
 namespace Game::Factory::Obstacle

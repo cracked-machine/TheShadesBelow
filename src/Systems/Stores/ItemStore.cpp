@@ -5,27 +5,45 @@
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/SacrificeAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
+#include <Factory/ToxicityFactory.hpp>
 #include <SFML/System/Time.hpp>
-#include <Systems/Stores/BaseStore.hpp>
 #include <Systems/Stores/ItemStore.hpp>
+#include <Utils/JsonDeserializer.hpp>
 
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
+
+namespace
+{
+
+//! @brief Build a stat-modifier action of the given kind from a JSON action entry.
+template <typename Action>
+Action make_action( const nlohmann::json &j )
+{
+  using Game::Utils::JsonDeserializer;
+  // toxidrome fields may be nested under "toxidrome" or sit directly on the action entry
+  const auto &tox = j.contains( "toxidrome" ) ? j.at( "toxidrome" ) : j;
+  return Action(
+      { JsonDeserializer::get_int( j, "health" ) }, { JsonDeserializer::get_int( j, "fear" ) }, { JsonDeserializer::get_int( j, "despair" ) },
+      { JsonDeserializer::get_int( j, "infamy" ) }, { JsonDeserializer::get_int( j, "luck" ) }, { JsonDeserializer::get_float( j, "tick" ) },
+      Game::Factory::Toxicity::create_toxidrome( JsonDeserializer::get_string( tox, "type" ), JsonDeserializer::get_int( tox, "toxicity" ) ) );
+}
+
+} // namespace
 
 namespace Game::Sys
 {
 
-ItemStore::ItemStore( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-    : StoreSingleton<ItemStore, Cmp::WorldItem>( reg, window, sprite_factory, sound_bank )
+ItemStore::ItemStore()
+    : StoreSingleton<ItemStore, Cmp::WorldItem>( "res/json/items.json" )
 {
-  s_instance = this;
-  m_json_file_path = "res/json/items.json";
   init_store();
   SPDLOG_DEBUG( "ItemStore initialized" );
 }
 
 void ItemStore::init_store()
 {
-  nlohmann::json json = load_json_file( m_json_file_path );
+  nlohmann::json json = Utils::JsonDeserializer::load_json_file( m_json_file_path );
   for ( const auto &[item_key, item_value] : json.items() )
   {
     Sprites::SpriteMetaType sprite_mtype = item_value.at( "sprite" ).get<std::string>();
@@ -35,48 +53,13 @@ void ItemStore::init_store()
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )
       {
-        if ( action_key == "burn_action" )
-        {
-          worlditem.emplace( Cmp::BurnAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
-                                              { infamy( action_value ) }, { luck( action_value ) }, { tick( action_value ) },
-                                              toxidrome( action_value ) ) );
-        }
-        else if ( action_key == "carry_action" )
-        {
-          worlditem.emplace( Cmp::CarryAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
-                                               { infamy( action_value ) }, { luck( action_value ) }, { tick( action_value ) },
-                                               toxidrome( action_value ) ) );
-        }
-        else if ( action_key == "consume_action" )
-        {
-          worlditem.emplace( Cmp::ConsumeAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
-                                                 { infamy( action_value ) }, { luck( action_value ) }, { tick( action_value ) },
-                                                 toxidrome( action_value ) ) );
-        }
-        else if ( action_key == "destroy_action" )
-        {
-          worlditem.emplace( Cmp::DestroyAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
-                                                 { infamy( action_value ) }, { luck( action_value ) }, { tick( action_value ) },
-                                                 toxidrome( action_value ) ) );
-        }
-        else if ( action_key == "spawn_action" )
-        {
-          worlditem.emplace( Cmp::SpawnAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
-                                               { infamy( action_value ) }, { luck( action_value ) }, { tick( action_value ) },
-                                               toxidrome( action_value ) ) );
-        }
-        else if ( action_key == "proximity_action" )
-        {
-          worlditem.emplace( Cmp::ProximityAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
-                                                   { infamy( action_value ) }, { luck( action_value ) }, { tick( action_value ) },
-                                                   toxidrome( action_value ) ) );
-        }
-        else if ( action_key == "sacrifice_action" )
-        {
-          worlditem.emplace( Cmp::SacrificeAction( { health( action_value ) }, { fear( action_value ) }, { despair( action_value ) },
-                                                   { infamy( action_value ) }, { luck( action_value ) }, { tick( action_value ) },
-                                                   toxidrome( action_value ) ) );
-        }
+        if ( action_key == "burn_action" ) { worlditem.emplace( make_action<Cmp::BurnAction>( action_value ) ); }
+        else if ( action_key == "carry_action" ) { worlditem.emplace( make_action<Cmp::CarryAction>( action_value ) ); }
+        else if ( action_key == "consume_action" ) { worlditem.emplace( make_action<Cmp::ConsumeAction>( action_value ) ); }
+        else if ( action_key == "destroy_action" ) { worlditem.emplace( make_action<Cmp::DestroyAction>( action_value ) ); }
+        else if ( action_key == "spawn_action" ) { worlditem.emplace( make_action<Cmp::SpawnAction>( action_value ) ); }
+        else if ( action_key == "proximity_action" ) { worlditem.emplace( make_action<Cmp::ProximityAction>( action_value ) ); }
+        else if ( action_key == "sacrifice_action" ) { worlditem.emplace( make_action<Cmp::SacrificeAction>( action_value ) ); }
         else { SPDLOG_WARN( "Unknown action key: {}", action_key ); }
       }
     }

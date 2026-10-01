@@ -25,13 +25,10 @@ public:
   //! @param sound_bank Shared sound bank used to play/stop graveyard-related audio
   //! @param system_store Store of game systems the scene drives each update
   //! @param nav_event_dispatcher Used to notify the SceneInputRouter when new input events are available
-  //! @param sprite_Factory Factory used to create sprites for entities spawned in this scene
-  GraveyardScene( Audio::SoundBank &sound_bank, Sys::Store &system_store, entt::dispatcher &nav_event_dispatcher,
-                  Sprites::SpriteFactory &sprite_Factory )
+  GraveyardScene( Audio::SoundBank &sound_bank, Sys::Store &system_store, entt::dispatcher &nav_event_dispatcher )
       : Scene( nav_event_dispatcher ),
         m_sound_bank( sound_bank ),
-        m_sys( system_store ),
-        m_sprite_factory( sprite_Factory )
+        m_sys( system_store )
   {
   }
 
@@ -66,9 +63,6 @@ private:
 
   //! @brief Store of game systems the scene drives each update
   Sys::Store &m_sys;
-
-  //! @brief Factory used to create sprites for entities spawned in this scene
-  Sprites::SpriteFactory &m_sprite_factory;
 
   //! @brief Clock measuring elapsed time since the scene was last entered, used to gate exit collision checks
   sf::Clock m_scene_exit_cooldown{};

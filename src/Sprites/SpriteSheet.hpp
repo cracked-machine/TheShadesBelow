@@ -18,7 +18,7 @@ namespace Game::Sprites
 class SpriteSheet
 {
 public:
-  //! @brief Used by SpriteFactory::SpriteMetaData struct declaration
+  //! @brief Used by SpriteStore::SpriteMetaData struct declaration
   SpriteSheet() = default;
 
   //! @brief Construct a new Multi Sprite object using path to texture file

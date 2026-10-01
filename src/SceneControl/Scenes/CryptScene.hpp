@@ -12,7 +12,6 @@
 // clang-format off
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
-namespace Game::Sprites { class SpriteFactory; }
 // clang-format on
 
 namespace Game::Scene
@@ -27,12 +26,10 @@ public:
   //! @param sound_bank Shared sound bank used to play/stop crypt-related audio
   //! @param system_store Store of game systems the scene drives each update
   //! @param nav_event_dispatcher Used to notify the SceneInputRouter when new input events are available
-  //! @param sprite_Factory Factory used to create sprites for entities spawned in this scene
-  CryptScene( Audio::SoundBank &sound_bank, Sys::Store &system_store, entt::dispatcher &nav_event_dispatcher, Sprites::SpriteFactory &sprite_Factory )
+  CryptScene( Audio::SoundBank &sound_bank, Sys::Store &system_store, entt::dispatcher &nav_event_dispatcher )
       : Scene( nav_event_dispatcher ),
         m_sound_bank( sound_bank ),
-        m_sys( system_store ),
-        m_sprite_factory( sprite_Factory )
+        m_sys( system_store )
   {
   }
 
@@ -68,9 +65,6 @@ private:
 
   //! @brief Store of game systems the scene drives each update
   Sys::Store &m_sys;
-
-  //! @brief Factory used to create sprites for entities spawned in this scene
-  Sprites::SpriteFactory &m_sprite_factory;
 };
 
 } // namespace Game::Scene

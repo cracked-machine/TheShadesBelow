@@ -56,10 +56,9 @@
 namespace Game::Sys
 {
 
-SceneInputRouter::SceneInputRouter( entt::registry &reg, sf::RenderWindow &m_window, Sprites::SpriteFactory &sprite_factory,
-                                    Audio::SoundBank &sound_bank, entt::dispatcher &nav_event_dispatcher,
-                                    entt::dispatcher &scenemanager_event_dispatcher )
-    : Sys::BaseSystem( reg, m_window, sprite_factory, sound_bank ),
+SceneInputRouter::SceneInputRouter( entt::registry &reg, sf::RenderWindow &m_window, Audio::SoundBank &sound_bank,
+                                    entt::dispatcher &nav_event_dispatcher, entt::dispatcher &scenemanager_event_dispatcher )
+    : Sys::BaseSystem( reg, m_window, sound_bank ),
       m_nav_event_dispatcher( nav_event_dispatcher ),
       m_scenemanager_event_dispatcher( scenemanager_event_dispatcher )
 {

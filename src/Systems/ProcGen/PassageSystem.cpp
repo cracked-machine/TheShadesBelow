@@ -23,6 +23,7 @@
 #include <Systems/BaseSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/ProcGen/PassageSystem.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Player.hpp>
@@ -35,8 +36,8 @@
 namespace Game::Sys
 {
 
-PassageSystem::PassageSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank )
-    : Game::Sys::BaseSystem( reg, window, sprite_factory, sound_bank )
+PassageSystem::PassageSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : Game::Sys::BaseSystem( reg, window, sound_bank )
 
 {
   std::ignore = get_systems_event_queue().sink<Events::PassageEvent>().connect<&PassageSystem::on_passage_event>( this );
@@ -622,8 +623,8 @@ void PassageSystem::empty_open_passages()
 void PassageSystem::fill_all_passages()
 {
   // Position view iteration is fully complete
-  const Sprites::SpriteSheet &ss_main = m_sprite_factory.get_spritesheet_by_type( "sprite.crypt.wall.int.main" );
-  const Sprites::SpriteSheet &ss_cap = m_sprite_factory.get_spritesheet_by_type( "sprite.crypt.wall.int.cap" );
+  const Sprites::SpriteSheet &ss_main = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.crypt.wall.int.main" );
+  const Sprites::SpriteSheet &ss_cap = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.crypt.wall.int.cap" );
   PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock();
   auto reserved_sm = m_reserved_sm.lock();
 

@@ -46,6 +46,7 @@
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/RuinSystem.hpp>
 #include <Systems/Stores/NpcStore.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Player.hpp>
@@ -64,9 +65,8 @@
 namespace Game::Sys
 {
 
-RuinSystem::RuinSystem( entt::registry &reg, sf::RenderWindow &window, Sprites::SpriteFactory &sprite_factory, Audio::SoundBank &sound_bank,
-                        entt::dispatcher &scenemanager_event_dispatcher )
-    : BaseSystem( reg, window, sprite_factory, sound_bank ),
+RuinSystem::RuinSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::dispatcher &scenemanager_event_dispatcher )
+    : BaseSystem( reg, window, sound_bank ),
       m_scenemanager_event_dispatcher( scenemanager_event_dispatcher )
 {
   SPDLOG_DEBUG( "PlayerSystem initialized" );
@@ -176,7 +176,7 @@ void RuinSystem::check_puzzle_status()
     // enable the gate
     for ( auto [gate_entt, gate_cmp, gate_zorder_cmp] : reg().view<Cmp::Ruin::StairsGateMultiBlock, Cmp::ZOrderValue>().each() )
     {
-      const auto &gate_sprite_sheet = m_sprite_factory.get_spritesheet_by_type( "sprite.ruin.stairs.gate" );
+      const auto &gate_sprite_sheet = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.ruin.stairs.gate" );
       gate_zorder_cmp.setZOrder( gate_sprite_sheet.get_zorder( 0 ) );
       reg().emplace_or_replace<Cmp::Npc::NoPathFinding>( gate_entt );
       reg().emplace_or_replace<Cmp::Player::NoPath>( gate_entt );
@@ -366,8 +366,8 @@ void RuinSystem::gen_lowerfloor_bookcases( sf::FloatRect scene_dimensions )
       SPDLOG_DEBUG( "bookcase candidate of length: {}", bookshelf_row_candidate.size() );
       for ( auto [point, type] : bookshelf_row_candidate )
       {
-        auto [ms, idx] = m_sprite_factory.get_random_type_and_texture_index( { type } );
-        Factory::Ruin::create_bookcase( reg(), point.position(), m_sprite_factory.get_spritesheet_by_type( ms ), idx );
+        auto [ms, idx] = Sys::SpriteStore::instance().get_random_type_and_texture_index( { type } );
+        Factory::Ruin::create_bookcase( reg(), point.position(), Sys::SpriteStore::instance().get_spritesheet_by_type( ms ), idx );
       }
 
       // ensure we have one horizontal gap inbetween bookcases
@@ -386,8 +386,8 @@ void RuinSystem::gen_lowerfloor_bookcases( sf::FloatRect scene_dimensions )
       int colpick = column_pick.gen();
       auto point = Cmp::RectBounds::scaled( { colpick * gridsize.x, row * gridsize.y }, gridsize, 1 );
       if ( has_collision( point ) or used_cols.contains( colpick ) ) continue;
-      auto [ms, idx] = m_sprite_factory.get_random_type_and_texture_index( { "sprite.ruin.bookcase.mid" } );
-      Factory::Ruin::create_bookcase( reg(), point.position(), m_sprite_factory.get_spritesheet_by_type( ms ), idx );
+      auto [ms, idx] = Sys::SpriteStore::instance().get_random_type_and_texture_index( { "sprite.ruin.bookcase.mid" } );
+      Factory::Ruin::create_bookcase( reg(), point.position(), Sys::SpriteStore::instance().get_spritesheet_by_type( ms ), idx );
       used_cols.insert( colpick );
       break;
     }
@@ -396,8 +396,8 @@ void RuinSystem::gen_lowerfloor_bookcases( sf::FloatRect scene_dimensions )
   // always block this col on the bottom row
   int colpick = 8;
   auto point = Cmp::RectBounds::scaled( { colpick * gridsize.x, scene_dimensions.size.y - gridsize.y }, gridsize, 1 );
-  auto [ms, idx] = m_sprite_factory.get_random_type_and_texture_index( { "sprite.ruin.bookcase.mid" } );
-  Factory::Ruin::create_bookcase( reg(), point.position(), m_sprite_factory.get_spritesheet_by_type( ms ), idx );
+  auto [ms, idx] = Sys::SpriteStore::instance().get_random_type_and_texture_index( { "sprite.ruin.bookcase.mid" } );
+  Factory::Ruin::create_bookcase( reg(), point.position(), Sys::SpriteStore::instance().get_spritesheet_by_type( ms ), idx );
   used_cols.insert( colpick );
 }
 
@@ -442,7 +442,7 @@ bool RuinSystem::check_activate_player_curse( sf::Vector2f scene_dimensions )
   Cmp::Player::Curse &player_curse = Utils::Player::get_curse( reg() );
 
   auto npc_shadowhand_cmp = Sys::NpcStore::instance().get_item( "npc.shadowhand" );
-  const auto &hand_ms = m_sprite_factory.get_spritesheet_by_type( npc_shadowhand_cmp.sprite_type_list.front() );
+  const auto &hand_ms = Sys::SpriteStore::instance().get_spritesheet_by_type( npc_shadowhand_cmp.sprite_type_list.front() );
 
   auto [_, inventory_type, _] = Utils::Player::get_inventory( m_reg );
   if ( not player_curse.active && inventory_type == "item.witchesjar" )
@@ -478,7 +478,7 @@ void RuinSystem::update_shadow_hand_pos( sf::Vector2f scene_dimensions )
   if ( not Utils::Player::get_curse( reg() ).active ) return;
   auto npc_shadowhand_cmp = Sys::NpcStore::instance().get_item( "npc.shadowhand" );
 
-  const auto &hand_ms = m_sprite_factory.get_spritesheet_by_type( npc_shadowhand_cmp.sprite_type_list.front() );
+  const auto &hand_ms = Sys::SpriteStore::instance().get_spritesheet_by_type( npc_shadowhand_cmp.sprite_type_list.front() );
   const auto hand_ms_size = hand_ms.get_sprite_size();
   float max_shadow_hand_xpos = scene_dimensions.x - hand_ms_size.x;
 
