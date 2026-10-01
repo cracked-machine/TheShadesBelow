@@ -28,6 +28,24 @@ RenderSystem::RenderSystem( entt::registry &reg, sf::RenderWindow &window, Sprit
 
 RenderSystem::~RenderSystem() = default;
 
+void RenderSystem::draw_screen( const sf::Drawable &drawable )
+{
+  auto &target = active_render_target();
+  const sf::View previous_view = target.getView();
+  target.setView( m_window.getDefaultView() );
+  target.draw( drawable );
+  target.setView( previous_view );
+}
+
+void RenderSystem::draw_world( const sf::Drawable &drawable )
+{
+  auto &target = active_render_target();
+  const sf::View previous_view = target.getView();
+  target.setView( s_world_view );
+  target.draw( drawable );
+  target.setView( previous_view );
+}
+
 void RenderSystem::render_text( std::string text, unsigned int size, sf::Vector2f position, Alignment align, float letter_spacing,
                                 sf::Color fill_color, sf::Color outline_color )
 {
@@ -107,6 +125,16 @@ void RenderSystem::render_fallback_square_to_target( sf::RenderTarget &target, c
   target.draw( fallback_square ); // Draw to specified target
 }
 
+void RenderSystem::safe_render_sprite_screen( const std::string &sprite_type, const sf::FloatRect &pos_cmp, std::size_t sprite_index,
+                                              sf::Vector2f scale, uint8_t alpha, sf::Vector2f origin, sf::Angle angle )
+{
+  auto &target = active_render_target();
+  const sf::View previous_view = target.getView();
+  target.setView( get_screen_view() );
+  safe_render_sprite_to_target( target, sprite_type, pos_cmp, sprite_index, scale, alpha, origin, angle );
+  target.setView( previous_view );
+}
+
 // Keep the original for backwards compatibility
 void RenderSystem::safe_render_sprite_world( const std::string &sprite_type, const sf::FloatRect &pos_cmp, std::size_t sprite_index,
                                              sf::Vector2f scale, uint8_t alpha, sf::Vector2f origin, sf::Angle angle )
@@ -114,16 +142,6 @@ void RenderSystem::safe_render_sprite_world( const std::string &sprite_type, con
   auto &target = active_render_target();
   const sf::View previous_view = target.getView();
   target.setView( get_world_view() );
-  safe_render_sprite_to_target( target, sprite_type, pos_cmp, sprite_index, scale, alpha, origin, angle );
-  target.setView( previous_view );
-}
-
-void RenderSystem::safe_render_sprite_screen( const std::string &sprite_type, const sf::FloatRect &pos_cmp, std::size_t sprite_index,
-                                              sf::Vector2f scale, uint8_t alpha, sf::Vector2f origin, sf::Angle angle )
-{
-  auto &target = active_render_target();
-  const sf::View previous_view = target.getView();
-  target.setView( get_screen_view() );
   safe_render_sprite_to_target( target, sprite_type, pos_cmp, sprite_index, scale, alpha, origin, angle );
   target.setView( previous_view );
 }
@@ -147,24 +165,6 @@ void RenderSystem::render_rectbounds( Cmp::RectBounds &bounds, sf::Color color )
   rect.setOutlineColor( color );
   rect.setOutlineThickness( 1.f );
   draw_world( rect );
-}
-
-void RenderSystem::draw_screen( const sf::Drawable &drawable )
-{
-  auto &target = active_render_target();
-  const sf::View previous_view = target.getView();
-  target.setView( m_window.getDefaultView() );
-  target.draw( drawable );
-  target.setView( previous_view );
-}
-
-void RenderSystem::draw_world( const sf::Drawable &drawable )
-{
-  auto &target = active_render_target();
-  const sf::View previous_view = target.getView();
-  target.setView( s_world_view );
-  target.draw( drawable );
-  target.setView( previous_view );
 }
 
 sf::View RenderSystem::s_world_view{};

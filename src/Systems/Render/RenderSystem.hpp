@@ -72,6 +72,71 @@ protected:
     CENTER
   };
 
+  //! @brief Draw a column of text lines, top to bottom, at a fixed origin, advancing by `line_height` after each call.
+  //! Backed by a per-`cache_key` pool of persistent sf::Text objects (see m_text_column_cache) so that, across frames, each
+  //! line reuses the same sf::Text instead of being reconstructed (and having its outline re-generated) from scratch -
+  //! these panels can otherwise update every frame at a real cost to frame time.
+  struct TextColumn
+  {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members) - TextColumn is a short-lived,
+    // per-panel-call local (never stored, copy-assigned, or passed around), so the usual dangling-reference
+    // risk this check guards against doesn't apply here.
+    //! @brief The render system used to draw each text line.
+    RenderSystem &self;
+
+    //! @brief Identifies this column's slot in self.m_text_column_cache. Stable across frames for a given panel (e.g.
+    //! "npc_list") so the same sf::Text objects are reused call after call.
+    std::string cache_key;
+
+    //! @brief Screen position of the first line in the column.
+    sf::Vector2f origin;
+
+    //! @brief Font size, in pixels, of each line.
+    unsigned int font_size;
+
+    //! @brief Vertical spacing, in pixels, added after each line is drawn.
+    float line_height;
+
+    //! @brief Running vertical offset from `origin`, advanced by `line_height` after each call.
+    float y_offset{ 0.f };
+
+    //! @brief Index into this column's cache pool of the next line to draw, advanced after each call.
+    std::size_t line_index{ 0 };
+
+    //! @brief Draw one line of text at the current column offset, then advance the offset by `line_height`.
+    //! @param str The text to draw.
+    //! @param color Fill colour of the text.
+    void operator()( const std::string &str, sf::Color color = sf::Color::White )
+    {
+      auto &pool = self.m_text_column_cache[cache_key];
+      if ( line_index >= pool.size() )
+      {
+        // Outline colour/thickness are the same for every line ever drawn through this struct, so they only need
+        // setting once per pooled sf::Text - re-applying them every frame is what forces SFML to regenerate the
+        // outline geometry for every visible line, every frame.
+        sf::Text text( self.m_font, str, font_size );
+        text.setOutlineColor( sf::Color::Black );
+        text.setOutlineThickness( 1.f );
+        pool.push_back( std::move( text ) );
+      }
+
+      sf::Text &text = pool[line_index];
+      text.setString( str );
+      text.setFillColor( color );
+      text.setPosition( { origin.x, origin.y + y_offset } );
+      self.draw_screen( text );
+
+      y_offset += line_height;
+      ++line_index;
+    }
+  };
+
+  //! @brief Dimension for `s_world_view`.
+  constexpr static sf::Vector2u kWorldViewSize{ 300u, 200u };
+
+  //! @brief `kWorldViewSize` as a float vector, for use in float-based calculations.
+  constexpr static sf::Vector2f kWorldViewSizeF{ static_cast<float>( kWorldViewSize.x ), static_cast<float>( kWorldViewSize.y ) };
+
   //! @brief Convert the world position to the equivalent position in the screen view
   //! @param world_pos
   //! @return sf::Vector2f
@@ -84,25 +149,6 @@ protected:
   //! @brief Draw in world view coordinates. This restores the view afterwards.
   //! @param drawable
   void draw_world( const sf::Drawable &drawable );
-
-  //! @brief Current view of the game world.
-  static sf::View s_world_view;
-
-  //! @brief The z-order queue shared by the render systems. Refreshed each frame by RenderGameSystem::render_game(),
-  //! so it is only valid to read after that call.
-  static ZOrderQueue s_zorder_queue;
-
-  //! @brief Dimension for `s_world_view`.
-  constexpr static sf::Vector2u kWorldViewSize{ 300u, 200u };
-
-  //! @brief `kWorldViewSize` as a float vector, for use in float-based calculations.
-  constexpr static sf::Vector2f kWorldViewSizeF{ static_cast<float>( kWorldViewSize.x ), static_cast<float>( kWorldViewSize.y ) };
-
-  //! @brief Default font for rendering text
-  Cmp::Font m_font = Cmp::Font( "res/fonts/tuffy.ttf" );
-
-  //! @brief The render target reference. Initialised to the sf::RenderWindow.
-  std::reference_wrapper<sf::RenderTarget> m_current_target{ m_window };
 
   //! @brief getter for `m_current_target`
   //! @return sf::RenderTarget&
@@ -204,64 +250,18 @@ protected:
     }
   }
 
-  //! @brief Draw a column of text lines, top to bottom, at a fixed origin, advancing by `line_height` after each call.
-  //! Backed by a per-`cache_key` pool of persistent sf::Text objects (see m_text_column_cache) so that, across frames, each
-  //! line reuses the same sf::Text instead of being reconstructed (and having its outline re-generated) from scratch -
-  //! these panels can otherwise update every frame at a real cost to frame time.
-  struct TextColumn
-  {
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members) - TextColumn is a short-lived,
-    // per-panel-call local (never stored, copy-assigned, or passed around), so the usual dangling-reference
-    // risk this check guards against doesn't apply here.
-    //! @brief The render system used to draw each text line.
-    RenderSystem &self;
+  //! @brief Current view of the game world.
+  static sf::View s_world_view;
 
-    //! @brief Identifies this column's slot in self.m_text_column_cache. Stable across frames for a given panel (e.g.
-    //! "npc_list") so the same sf::Text objects are reused call after call.
-    std::string cache_key;
+  //! @brief The z-order queue shared by the render systems. Refreshed each frame by RenderGameSystem::render_game(),
+  //! so it is only valid to read after that call.
+  static ZOrderQueue s_zorder_queue;
 
-    //! @brief Screen position of the first line in the column.
-    sf::Vector2f origin;
+  //! @brief Default font for rendering text
+  Cmp::Font m_font = Cmp::Font( "res/fonts/tuffy.ttf" );
 
-    //! @brief Font size, in pixels, of each line.
-    unsigned int font_size;
-
-    //! @brief Vertical spacing, in pixels, added after each line is drawn.
-    float line_height;
-
-    //! @brief Running vertical offset from `origin`, advanced by `line_height` after each call.
-    float y_offset{ 0.f };
-
-    //! @brief Index into this column's cache pool of the next line to draw, advanced after each call.
-    std::size_t line_index{ 0 };
-
-    //! @brief Draw one line of text at the current column offset, then advance the offset by `line_height`.
-    //! @param str The text to draw.
-    //! @param color Fill colour of the text.
-    void operator()( const std::string &str, sf::Color color = sf::Color::White )
-    {
-      auto &pool = self.m_text_column_cache[cache_key];
-      if ( line_index >= pool.size() )
-      {
-        // Outline colour/thickness are the same for every line ever drawn through this struct, so they only need
-        // setting once per pooled sf::Text - re-applying them every frame is what forces SFML to regenerate the
-        // outline geometry for every visible line, every frame.
-        sf::Text text( self.m_font, str, font_size );
-        text.setOutlineColor( sf::Color::Black );
-        text.setOutlineThickness( 1.f );
-        pool.push_back( std::move( text ) );
-      }
-
-      sf::Text &text = pool[line_index];
-      text.setString( str );
-      text.setFillColor( color );
-      text.setPosition( { origin.x, origin.y + y_offset } );
-      self.draw_screen( text );
-
-      y_offset += line_height;
-      ++line_index;
-    }
-  };
+  //! @brief The render target reference. Initialised to the sf::RenderWindow.
+  std::reference_wrapper<sf::RenderTarget> m_current_target{ m_window };
 
   //! @brief Per-panel pool of persistent sf::Text objects backing TextColumn, keyed by TextColumn::cache_key.
   //! Keeps line count from one frame able to shrink/grow freely - unused trailing entries from a previous, longer frame

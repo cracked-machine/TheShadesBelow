@@ -16,7 +16,6 @@
 #include <SFML/System/Vector2.hpp>
 #include <entt/core/type_traits.hpp>
 #include <entt/entity/fwd.hpp>
-#include <vector>
 
 // clang-format off
 namespace Game::Sprites

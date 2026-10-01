@@ -89,6 +89,38 @@ void RenderDebugSystem::render_debug()
   if ( Utils::scene_setting<Cmp::SceneSettings::ShowDebugStats>( reg() ).enabled ) { PROFILED( render_debug_stats() ); }
 }
 
+void RenderDebugSystem::render_navmesh()
+{
+  const auto npc_navmesh = m_npc_navmesh.lock();
+  if ( not npc_navmesh ) return;
+
+  sf::Text text( m_font, "", 10 );
+  for ( auto [pos_entt, pos_cmp] : reg().view<Cmp::Position>().each() )
+  {
+    if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), pos_cmp ) ) continue;
+    auto entt_bucket = npc_navmesh->at( pos_cmp );
+    text.setString( std::to_string( entt_bucket.size() ) );
+    text.setFillColor( sf::Color::Blue );
+    text.setOutlineColor( sf::Color::Black );
+    text.setOutlineThickness( 1.f );
+    text.setPosition( { pos_cmp.position.x + 4.f, pos_cmp.position.y + 4.f } );
+
+    draw_world( text );
+
+    sf::RectangleShape bottom_edge( { 8.f, 1.f } );
+    bottom_edge.setFillColor( sf::Color::Blue );
+    bottom_edge.setOutlineThickness( 0.f );
+    bottom_edge.setPosition( { pos_cmp.position.x + ( pos_cmp.size.x / 2 ), pos_cmp.position.y + pos_cmp.size.y } );
+    draw_world( bottom_edge );
+
+    sf::RectangleShape right_edge( { 1.f, 8.f } );
+    right_edge.setFillColor( sf::Color::Blue );
+    right_edge.setOutlineThickness( 0.f );
+    right_edge.setPosition( { pos_cmp.position.x + pos_cmp.size.x, pos_cmp.position.y + ( pos_cmp.size.y / 2 ) } );
+    draw_world( right_edge );
+  }
+}
+
 void RenderDebugSystem::render_pathfinding()
 {
   const Cmp::Position player_pos_cmp = Utils::Player::get_position( reg() );
@@ -279,117 +311,6 @@ void RenderDebugSystem::render_ui_npc_list()
   }
 }
 
-void RenderDebugSystem::render_lerp_positions()
-{
-  auto lerp_view = reg().view<Cmp::LerpPosition, Cmp::Direction, Cmp::Npc::NPC, Cmp::Position>();
-  for ( auto [entity, lerp_pos_cmp, dir_cmp, npc_cmp, npc_pos_cmp] : lerp_view.each() )
-  {
-    sf::RectangleShape lerp_start_pos_rect( Constants::kGridSizePxF );
-    lerp_start_pos_rect.setPosition( lerp_pos_cmp.m_start );
-    lerp_start_pos_rect.setFillColor( sf::Color::Transparent );
-    lerp_start_pos_rect.setOutlineColor( sf::Color::Yellow );
-    lerp_start_pos_rect.setOutlineThickness( 1.f );
-    draw_world( lerp_start_pos_rect );
-
-    sf::RectangleShape lerp_stop_pos_rect( Constants::kGridSizePxF );
-    lerp_stop_pos_rect.setPosition( lerp_pos_cmp.m_target );
-    lerp_stop_pos_rect.setFillColor( sf::Color::Transparent );
-    lerp_stop_pos_rect.setOutlineColor( sf::Color::Cyan );
-    lerp_stop_pos_rect.setOutlineThickness( 1.f );
-    draw_world( lerp_stop_pos_rect );
-  }
-}
-
-void RenderDebugSystem::render_square( sf::Vector2f pos, sf::Vector2f size, sf::Color color )
-{
-  sf::RectangleShape rect( size );
-  rect.setPosition( pos );
-  rect.setFillColor( sf::Color::Transparent );
-  rect.setOutlineColor( color );
-  rect.setOutlineThickness( 1.f );
-  draw_world( rect );
-}
-
-void RenderDebugSystem::render_spatial_grid_neighbours( const Cmp::Position &query_pos, sf::Color color, PathFinding::QueryCompass query_compass )
-{
-  if ( PathFinding::SpatialHashGridSharedPtr spatialgrid_ptr = m_npc_navmesh.lock() )
-  {
-    std::vector<entt::entity> neighbours_list = spatialgrid_ptr->neighbours( Cmp::Position( query_pos.position, query_pos.size ), query_compass );
-    for ( auto neighbour_entt : neighbours_list )
-    {
-      auto *neighbour_pos = reg().try_get<Cmp::Position>( neighbour_entt );
-      if ( not neighbour_pos ) continue;
-      if ( reg().any_of<Cmp::Player::Character, Cmp::Npc::NPC>( neighbour_entt ) ) continue;
-
-      sf::RectangleShape rectangle;
-      rectangle.setSize( neighbour_pos->size );
-      rectangle.setPosition( neighbour_pos->position );
-      rectangle.setFillColor( sf::Color::Transparent );
-      rectangle.setOutlineThickness( 1.f );
-      rectangle.setOutlineColor( color );
-      draw_world( rectangle );
-    }
-  }
-}
-
-void RenderDebugSystem::render_pathfinding_vector( const Cmp::Position &start_pos_cmp, const Cmp::Position &end_pos_cmp, sf::Color color,
-                                                     PathFinding::QueryCompass query_compass )
-{
-  if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), start_pos_cmp ) ) return;
-
-  if ( PathFinding::SpatialHashGridSharedPtr spatialgrid_ptr = m_npc_navmesh.lock() )
-  {
-    // Mirror Utils::Npc::pathfind_toward: A* needs a grid-aligned goal, but the player (and an NPC mid-lerp) sit off-grid.
-    const Cmp::Position grid_start( Utils::snap_to_grid( start_pos_cmp.position, Utils::Rounding::TOWARDS_ZERO ), start_pos_cmp.size );
-    const Cmp::Position grid_goal( Utils::snap_to_grid( end_pos_cmp.position, Utils::Rounding::TOWARDS_ZERO ), end_pos_cmp.size );
-    std::vector<PathFinding::PathNode> path = PathFinding::astar( reg(), *spatialgrid_ptr, grid_start, grid_goal, query_compass );
-
-    for ( auto pathnode : path )
-    {
-      auto expand_lever_pos_hitbox = Cmp::RectBounds::scaled( pathnode.pos.position, pathnode.pos.size, 0.2f );
-      sf::RectangleShape rectangle;
-      rectangle.setSize( expand_lever_pos_hitbox.size() );
-      rectangle.setPosition( expand_lever_pos_hitbox.position() );
-      rectangle.setFillColor( sf::Color::Transparent );
-      rectangle.setOutlineColor( color );
-      rectangle.setOutlineThickness( 1.f );
-      draw_world( rectangle );
-    }
-  }
-}
-
-void RenderDebugSystem::render_navmesh()
-{
-  const auto npc_navmesh = m_npc_navmesh.lock();
-  if ( not npc_navmesh ) return;
-
-  sf::Text text( m_font, "", 10 );
-  for ( auto [pos_entt, pos_cmp] : reg().view<Cmp::Position>().each() )
-  {
-    if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), pos_cmp ) ) continue;
-    auto entt_bucket = npc_navmesh->at( pos_cmp );
-    text.setString( std::to_string( entt_bucket.size() ) );
-    text.setFillColor( sf::Color::Blue );
-    text.setOutlineColor( sf::Color::Black );
-    text.setOutlineThickness( 1.f );
-    text.setPosition( { pos_cmp.position.x + 4.f, pos_cmp.position.y + 4.f } );
-
-    draw_world( text );
-
-    sf::RectangleShape bottom_edge( { 8.f, 1.f } );
-    bottom_edge.setFillColor( sf::Color::Blue );
-    bottom_edge.setOutlineThickness( 0.f );
-    bottom_edge.setPosition( { pos_cmp.position.x + ( pos_cmp.size.x / 2 ), pos_cmp.position.y + pos_cmp.size.y } );
-    draw_world( bottom_edge );
-
-    sf::RectangleShape right_edge( { 1.f, 8.f } );
-    right_edge.setFillColor( sf::Color::Blue );
-    right_edge.setOutlineThickness( 0.f );
-    right_edge.setPosition( { pos_cmp.position.x + pos_cmp.size.x, pos_cmp.position.y + ( pos_cmp.size.y / 2 ) } );
-    draw_world( right_edge );
-  }
-}
-
 void RenderDebugSystem::render_ui_entity_inspect()
 {
   if ( not m_dbg_ui_data ) { return; }
@@ -477,6 +398,85 @@ void RenderDebugSystem::render_ui_entity_inspect()
         auto zorder = std::to_string( cmp->getZOrder() );
         draw_line( "  ZOrder: " + zorder );
       }
+    }
+  }
+}
+
+void RenderDebugSystem::render_lerp_positions()
+{
+  auto lerp_view = reg().view<Cmp::LerpPosition, Cmp::Direction, Cmp::Npc::NPC, Cmp::Position>();
+  for ( auto [entity, lerp_pos_cmp, dir_cmp, npc_cmp, npc_pos_cmp] : lerp_view.each() )
+  {
+    sf::RectangleShape lerp_start_pos_rect( Constants::kGridSizePxF );
+    lerp_start_pos_rect.setPosition( lerp_pos_cmp.m_start );
+    lerp_start_pos_rect.setFillColor( sf::Color::Transparent );
+    lerp_start_pos_rect.setOutlineColor( sf::Color::Yellow );
+    lerp_start_pos_rect.setOutlineThickness( 1.f );
+    draw_world( lerp_start_pos_rect );
+
+    sf::RectangleShape lerp_stop_pos_rect( Constants::kGridSizePxF );
+    lerp_stop_pos_rect.setPosition( lerp_pos_cmp.m_target );
+    lerp_stop_pos_rect.setFillColor( sf::Color::Transparent );
+    lerp_stop_pos_rect.setOutlineColor( sf::Color::Cyan );
+    lerp_stop_pos_rect.setOutlineThickness( 1.f );
+    draw_world( lerp_stop_pos_rect );
+  }
+}
+
+void RenderDebugSystem::render_square( sf::Vector2f pos, sf::Vector2f size, sf::Color color )
+{
+  sf::RectangleShape rect( size );
+  rect.setPosition( pos );
+  rect.setFillColor( sf::Color::Transparent );
+  rect.setOutlineColor( color );
+  rect.setOutlineThickness( 1.f );
+  draw_world( rect );
+}
+
+void RenderDebugSystem::render_spatial_grid_neighbours( const Cmp::Position &query_pos, sf::Color color, PathFinding::QueryCompass query_compass )
+{
+  if ( PathFinding::SpatialHashGridSharedPtr spatialgrid_ptr = m_npc_navmesh.lock() )
+  {
+    std::vector<entt::entity> neighbours_list = spatialgrid_ptr->neighbours( Cmp::Position( query_pos.position, query_pos.size ), query_compass );
+    for ( auto neighbour_entt : neighbours_list )
+    {
+      auto *neighbour_pos = reg().try_get<Cmp::Position>( neighbour_entt );
+      if ( not neighbour_pos ) continue;
+      if ( reg().any_of<Cmp::Player::Character, Cmp::Npc::NPC>( neighbour_entt ) ) continue;
+
+      sf::RectangleShape rectangle;
+      rectangle.setSize( neighbour_pos->size );
+      rectangle.setPosition( neighbour_pos->position );
+      rectangle.setFillColor( sf::Color::Transparent );
+      rectangle.setOutlineThickness( 1.f );
+      rectangle.setOutlineColor( color );
+      draw_world( rectangle );
+    }
+  }
+}
+
+void RenderDebugSystem::render_pathfinding_vector( const Cmp::Position &start_pos_cmp, const Cmp::Position &end_pos_cmp, sf::Color color,
+                                                     PathFinding::QueryCompass query_compass )
+{
+  if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), start_pos_cmp ) ) return;
+
+  if ( PathFinding::SpatialHashGridSharedPtr spatialgrid_ptr = m_npc_navmesh.lock() )
+  {
+    // Mirror Utils::Npc::pathfind_toward: A* needs a grid-aligned goal, but the player (and an NPC mid-lerp) sit off-grid.
+    const Cmp::Position grid_start( Utils::snap_to_grid( start_pos_cmp.position, Utils::Rounding::TOWARDS_ZERO ), start_pos_cmp.size );
+    const Cmp::Position grid_goal( Utils::snap_to_grid( end_pos_cmp.position, Utils::Rounding::TOWARDS_ZERO ), end_pos_cmp.size );
+    std::vector<PathFinding::PathNode> path = PathFinding::astar( reg(), *spatialgrid_ptr, grid_start, grid_goal, query_compass );
+
+    for ( auto pathnode : path )
+    {
+      auto expand_lever_pos_hitbox = Cmp::RectBounds::scaled( pathnode.pos.position, pathnode.pos.size, 0.2f );
+      sf::RectangleShape rectangle;
+      rectangle.setSize( expand_lever_pos_hitbox.size() );
+      rectangle.setPosition( expand_lever_pos_hitbox.position() );
+      rectangle.setFillColor( sf::Color::Transparent );
+      rectangle.setOutlineColor( color );
+      rectangle.setOutlineThickness( 1.f );
+      draw_world( rectangle );
     }
   }
 }

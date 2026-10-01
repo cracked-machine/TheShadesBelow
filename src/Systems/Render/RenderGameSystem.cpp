@@ -71,7 +71,6 @@
 #include <Utils/Profiling.hpp>
 #include <Utils/Utils.hpp>
 
-#include <algorithm>
 #include <memory>
 #include <optional>
 #include <tracy/Tracy.hpp>
@@ -110,6 +109,16 @@ void RenderGameSystem::render_game( sf::Time dt, const PathFinding::SpatialHashG
   render_square_for_floatrect_cmp<Cmp::Crypt::RoomLavaPit>( sf::Color( 16, 16, 16 ), 0.5f );
 }
 
+void RenderGameSystem::init_world_view()
+{
+  // init world view dimensions
+  s_world_view = sf::View( { kWorldViewSizeF.x * 0.5f, kWorldViewSizeF.y * 0.5f }, kWorldViewSizeF );
+  s_world_view.setViewport( sf::FloatRect( { 0.f, 0.f }, { 1.f, 1.f } ) );
+
+  auto start_pos = Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() );
+  s_world_view.setCenter( start_pos );
+}
+
 void RenderGameSystem::render_zorder_queue()
 {
   const bool shaders_enabled = Utils::scene_setting<Cmp::SceneSettings::Shaders>( reg() ).enabled;
@@ -125,6 +134,40 @@ void RenderGameSystem::render_zorder_queue()
     else if ( auto *particle_owner = reg().try_get<Cmp::Particle::SpriteOwner>( entity ) ) { draw_particle_sprite( *particle_owner ); }
     else if ( auto *floor_tiles = reg().try_get<Sprites::Containers::VertexFloor>( entity ) ) { draw_vertex_floor( *floor_tiles ); }
   }
+}
+
+void RenderGameSystem::update_camera( sf::Time deltaTime )
+{
+
+  // Use the player's current position as the target
+  auto target_pos = Utils::Player::get_position( reg() );
+
+  // Initialize camera position on first frame to avoid lerping from origin
+  if ( !m_camera_initialized )
+  {
+    m_camera_position = target_pos.position;
+    m_camera_initialized = true;
+  }
+
+  // Smooth lerp toward target position
+  float dt = deltaTime.asSeconds();
+  auto camera_smooth_speed = Sys::PersistSystem::get<Cmp::Persist::CameraSmoothSpeed>( reg() ).get_value();
+  float t = 1.0f - std::exp( -camera_smooth_speed * dt ); // Exponential smoothing
+
+  m_camera_position.x += ( target_pos.position.x - m_camera_position.x ) * t;
+  m_camera_position.y += ( target_pos.position.y - m_camera_position.y ) * t;
+
+  // Snap to target if very close (prevents endless micro-adjustments)
+  constexpr float kSnapThreshold = 0.1f;
+  if ( std::abs( target_pos.position.x - m_camera_position.x ) < kSnapThreshold &&
+       std::abs( target_pos.position.y - m_camera_position.y ) < kSnapThreshold )
+  {
+    m_camera_position = target_pos.position;
+  }
+
+  // Update the view center
+  sf::Vector2f view_center = m_camera_position + ( target_pos.size / 2.f );
+  s_world_view.setCenter( view_center );
 }
 
 void RenderGameSystem::draw_animated_sprite( entt::entity entity )
@@ -190,50 +233,6 @@ void RenderGameSystem::draw_vertex_floor( Sprites::Containers::VertexFloor &floo
   floor_tiles.setPosition( { static_cast<float>( floor_tiles.world_grid_offset.x ) * Constants::kGridSizePxF.x,
                              static_cast<float>( floor_tiles.world_grid_offset.y ) * Constants::kGridSizePxF.y } );
   draw_world( floor_tiles );
-}
-
-void RenderGameSystem::init_world_view()
-{
-  // init world view dimensions
-  s_world_view = sf::View( { kWorldViewSizeF.x * 0.5f, kWorldViewSizeF.y * 0.5f }, kWorldViewSizeF );
-  s_world_view.setViewport( sf::FloatRect( { 0.f, 0.f }, { 1.f, 1.f } ) );
-
-  auto start_pos = Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() );
-  s_world_view.setCenter( start_pos );
-}
-
-void RenderGameSystem::update_camera( sf::Time deltaTime )
-{
-
-  // Use the player's current position as the target
-  auto target_pos = Utils::Player::get_position( reg() );
-
-  // Initialize camera position on first frame to avoid lerping from origin
-  if ( !m_camera_initialized )
-  {
-    m_camera_position = target_pos.position;
-    m_camera_initialized = true;
-  }
-
-  // Smooth lerp toward target position
-  float dt = deltaTime.asSeconds();
-  auto camera_smooth_speed = Sys::PersistSystem::get<Cmp::Persist::CameraSmoothSpeed>( reg() ).get_value();
-  float t = 1.0f - std::exp( -camera_smooth_speed * dt ); // Exponential smoothing
-
-  m_camera_position.x += ( target_pos.position.x - m_camera_position.x ) * t;
-  m_camera_position.y += ( target_pos.position.y - m_camera_position.y ) * t;
-
-  // Snap to target if very close (prevents endless micro-adjustments)
-  constexpr float kSnapThreshold = 0.1f;
-  if ( std::abs( target_pos.position.x - m_camera_position.x ) < kSnapThreshold &&
-       std::abs( target_pos.position.y - m_camera_position.y ) < kSnapThreshold )
-  {
-    m_camera_position = target_pos.position;
-  }
-
-  // Update the view center
-  sf::Vector2f view_center = m_camera_position + ( target_pos.size / 2.f );
-  s_world_view.setCenter( view_center );
 }
 
 void RenderGameSystem::render_shockwaves()
@@ -327,6 +326,24 @@ void RenderGameSystem::render_seeingstone_doglegs( const Cmp::SeeingStone &stone
   }
 }
 
+void RenderGameSystem::render_wear_level( float wearlevel, const Cmp::Position &pos )
+{
+
+  float icon_border = 0.f;
+  float padding = 1.f;
+  float icon_height = 2.f;
+  float icon_width = Constants::kGridSizePxF.x - ( padding * 2 );
+
+  sf::RectangleShape icon( { ( icon_width / 100.f ) * wearlevel, icon_height } );
+  icon.setOutlineColor( sf::Color::Black );
+  icon.setOutlineThickness( icon_border );
+  icon.setFillColor( sf::Color( 255, 0, 0, 224 ) );
+
+  icon.setPosition( { pos.position.x + ( padding ), pos.position.y + Constants::kGridSizePxF.y - icon_height - ( padding ) } );
+
+  draw_world( icon );
+}
+
 void RenderGameSystem::render_armed_indicator( const Cmp::Armed &armed_cmp, const Cmp::Position &pos_cmp )
 {
   sf::RectangleShape temp_square( Constants::kGridSizePxF );
@@ -346,24 +363,6 @@ void RenderGameSystem::render_armed_indicator( const Cmp::Armed &armed_cmp, cons
   }
   temp_square.setOutlineThickness( 1.f );
   draw_world( temp_square );
-}
-
-void RenderGameSystem::render_wear_level( float wearlevel, const Cmp::Position &pos )
-{
-
-  float icon_border = 0.f;
-  float padding = 1.f;
-  float icon_height = 2.f;
-  float icon_width = Constants::kGridSizePxF.x - ( padding * 2 );
-
-  sf::RectangleShape icon( { ( icon_width / 100.f ) * wearlevel, icon_height } );
-  icon.setOutlineColor( sf::Color::Black );
-  icon.setOutlineThickness( icon_border );
-  icon.setFillColor( sf::Color( 255, 0, 0, 224 ) );
-
-  icon.setPosition( { pos.position.x + ( padding ), pos.position.y + Constants::kGridSizePxF.y - icon_height - ( padding ) } );
-
-  draw_world( icon );
 }
 
 void RenderGameSystem::render_fractal_curve( const Cmp::FractalCurve &curve )
