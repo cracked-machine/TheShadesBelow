@@ -42,7 +42,7 @@ void LootSystem::check_loot_collision()
   struct LootEffect
   {
     entt::entity loot_entity;
-    Sprites::SpriteMetaType type;
+    Sys::SpriteKey type;
     entt::entity player_entity;
   };
 

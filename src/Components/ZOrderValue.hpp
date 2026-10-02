@@ -14,11 +14,11 @@ public:
       : zOrder( z ) {};
 
   //! @brief Returns the current z-order value.
-  float getZOrder() const { return zOrder; }
+  [[nodiscard]] float get() const { return zOrder; }
 
   //! @brief Sets the z-order value.
   //! @param z The new z-order value.
-  void setZOrder( float z ) { zOrder = z; }
+  void set( float z ) { zOrder = z; }
 
 private:
   //! @brief The z-order value used to determine draw order relative to other entities.

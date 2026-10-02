@@ -10,8 +10,8 @@
 namespace Game::Factory::Loot
 {
 
-void create_loot_container( entt::registry &reg, entt::entity entt, Cmp::Position pos_cmp, Sprites::SpriteMetaType sprite_type,
-                            std::size_t sprite_tile_idx, float zorder )
+void create_loot_container( entt::registry &reg, entt::entity entt, Cmp::Position pos_cmp, Sys::SpriteKey sprite_type, std::size_t sprite_tile_idx,
+                            float zorder )
 {
 
   reg.emplace_or_replace<Cmp::Armable>( entt );

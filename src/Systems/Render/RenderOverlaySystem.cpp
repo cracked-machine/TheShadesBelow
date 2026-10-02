@@ -300,7 +300,7 @@ void RenderOverlaySystem::render_ui_labels( sf::Time dt )
     {
       auto [_, _, inventory_sprite_type] = Utils::Player::get_inventory( reg() );
       if ( inventory_sprite_type == "" ) { text_str = ""; }
-      else { text_str = Sys::SpriteStore::instance().get_spritesheet_by_type( inventory_sprite_type ).get_display_name(); }
+      else { text_str = Sys::SpriteStore::instance().get( inventory_sprite_type ).display_name(); }
     }
     text.setCharacterSize( ui_label.font_size );
     text.setString( text_str );
@@ -383,7 +383,7 @@ void RenderOverlaySystem::render_shop_inventory_overlay()
   for ( auto [icon, slot] : std::views::zip( m_shop_ui_data->m_icons, inventory_cmp.m_slots ) )
   {
     auto &[item, price] = slot;
-    auto sprite_type = Sys::ItemStore::instance().get_item( item ).sprite_type;
+    auto sprite_type = Sys::ItemStore::instance().get( item ).sprite_type;
     // Use the default scale/size unless its a plant then its need to be resized/repositioned to fit in the UI box
     auto sprite_scale = sf::Vector2f{ static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) };
     auto sprite_pos = Cmp::Position( icon.rect.position, Constants::kGridSizePxF );
@@ -414,8 +414,8 @@ void RenderOverlaySystem::render_shop_inventory_overlay()
     sf::Text slot_idx_txt( m_font, std::to_string( i + 1 ), 30 );
     slot_idx_txt.setFillColor( sf::Color::Black );
 
-    Sprites::SpriteMetaType sprite_mtype = Sys::ItemStore::instance().get_item( item ).sprite_type;
-    sf::Text slot_desc_txt( m_font, Sys::SpriteStore::instance().get_display_name_by_type( sprite_mtype ), 30 );
+    Sys::SpriteKey sprite_mtype = Sys::ItemStore::instance().get( item ).sprite_type;
+    sf::Text slot_desc_txt( m_font, Sys::SpriteStore::instance().get( sprite_mtype ).display_name(), 30 );
     slot_desc_txt.setFillColor( sf::Color::Black );
 
     sf::Text slot_price_txt( m_font, std::to_string( price ), 30 );
@@ -454,7 +454,7 @@ void RenderOverlaySystem::render_grimoire_inventory_overlay()
   // Draw all UI outlines
   for ( const auto &[item, is_enabled] : grimoire_cmp.contents )
   {
-    draw_line( item + " - " + ( is_enabled ? "Shown" : "Hidden" ) );
+    draw_line( item.str() + " - " + ( is_enabled ? "Shown" : "Hidden" ) );
   }
 }
 

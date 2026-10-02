@@ -36,10 +36,10 @@ template <typename MULTIBLOCK>
 void create_multiblock( entt::registry &reg, entt::entity entity, const Cmp::UUID &uuid, Cmp::Position pos, const Sprites::SpriteSheet &ss,
                         size_t ss_index )
 {
-  reg.emplace_or_replace<MULTIBLOCK>( entity, pos.position, ss.get_px_size() );
+  reg.emplace_or_replace<MULTIBLOCK>( entity, pos.position, ss.sprite_size() );
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( entity, Cmp::AnimData::Config{
-        .sprite_type = ss.get_sprite_type(),
+        .sprite_type = ss.type(),
         .frame_index_offset = ss_index,
         .enabled = true
   });
@@ -50,7 +50,7 @@ void create_multiblock( entt::registry &reg, entt::entity entity, const Cmp::UUI
   // reserved_sm check, permanently skipping the segment there (e.g. the top cell of a 1x2 plant).
   // The origin cell gets reserved along with every other covered cell once its segment is created.
   reg.emplace_or_replace<Cmp::UUID>( entity, uuid );
-  reg.emplace_or_replace<Cmp::Position>( entity, pos.position, ss.get_px_size() );
+  reg.emplace_or_replace<Cmp::Position>( entity, pos.position, ss.sprite_size() );
 
   [[maybe_unused]] auto zorder_cmp = reg.get<Cmp::ZOrderValue>( entity );
   // clang-format off
@@ -60,7 +60,7 @@ void create_multiblock( entt::registry &reg, entt::entity entity, const Cmp::UUI
     pos.position.y,
     ss.get_grid_size().x,
     ss.get_grid_size().y,
-    zorder_cmp.getZOrder(),
+    zorder_cmp.get(),
     uuid.str()
   );
   // clang-format on
@@ -77,7 +77,7 @@ template <typename MULTIBLOCK, typename MBSEGMENT>
   requires IsMB<MULTIBLOCK> && IsMBSegment<MBSEGMENT>
 void update_segments( entt::registry &reg, const Sprites::SpriteSheet &ss, [[maybe_unused]] entt::entity mb_entt, MULTIBLOCK mb_cmp )
 {
-  auto solid_masks = ss.get_solid_mask();
+  auto solid_masks = ss.solid_mask();
 
   for ( auto [entity, segment_cmp, pos_cmp] : reg.view<MBSEGMENT, Cmp::Position>().each() )
   {
@@ -95,7 +95,7 @@ void update_segments( entt::registry &reg, const Sprites::SpriteSheet &ss, [[may
     if ( not solid_masks.empty() && solid_masks.size() > calculated_grid_index ) { new_solid_mask = solid_masks.at( calculated_grid_index ); }
 
     segment_cmp.set_solid_mask( new_solid_mask );
-    reg.emplace_or_replace<Cmp::ZOrderValue>( entity, pos_cmp.position.y + ss.get_zorder( calculated_grid_index ) );
+    reg.emplace_or_replace<Cmp::ZOrderValue>( entity, pos_cmp.position.y + ss.zorder( calculated_grid_index ) );
     SPDLOG_DEBUG( "{} {} Zorder is set {} for y {}", static_cast<uint32_t>( entity ), ss.get_sprite_type(),
                   pos_cmp.position.y + ss.get_zorder( calculated_grid_index ), pos_cmp.position.y );
 
@@ -143,7 +143,7 @@ std::vector<entt::entity> create_multiblock_segments( entt::registry &reg, entt:
 {
 
   MULTIBLOCK new_multiblock_bounds = reg.get<MULTIBLOCK>( multiblock_entity );
-  std::size_t door_grid_index = static_cast<std::size_t>( ( ss.get_door_position().y * ss.get_grid_size().x ) + ss.get_door_position().x );
+  std::size_t door_grid_index = static_cast<std::size_t>( ( ss.door_position().y * ss.get_grid_size().x ) + ss.door_position().x );
 
   // track which grid positions are already assigned segments
   PathFinding::SpatialHashGrid segment_map;
@@ -240,10 +240,10 @@ std::pair<entt::entity, std::vector<entt::entity>> add_multiblock_with_segments(
                                                                                  PathFinding::SpatialHashGrid *reserved_sm )
 {
   auto mb_entt = reg.create();
-  Cmp::Position new_pos_cmp( position, ss.get_sprite_size() );
+  Cmp::Position new_pos_cmp( position, ss.sprite_size() );
   auto uuid = Cmp::UUID::generate();
 
-  reg.emplace_or_replace<Cmp::Position>( mb_entt, new_pos_cmp.position, ss.get_sprite_size() );
+  reg.emplace_or_replace<Cmp::Position>( mb_entt, new_pos_cmp.position, ss.sprite_size() );
 
   Multiblock::detail::create_multiblock<MULTIBLOCK>( reg, mb_entt, uuid, new_pos_cmp, ss, ss_index );
   auto segment_entt_list = Multiblock::detail::create_multiblock_segments<MULTIBLOCK, MBSEGMENT>( reg, mb_entt, uuid, new_pos_cmp, ss, reserved_sm );
@@ -253,17 +253,17 @@ std::pair<entt::entity, std::vector<entt::entity>> add_multiblock_with_segments(
     if ( zorder != 0 )
     {
       // Use the function param if explicitly set
-      mb_zorder_cmp.setZOrder( zorder );
+      mb_zorder_cmp.set( zorder );
     }
-    else if ( ss.get_zorder( ss_index ) != 0 )
+    else if ( ss.zorder( ss_index ) != 0 )
     {
       // Use the y-axis position plus the json zorder value
-      mb_zorder_cmp.setZOrder( static_cast<sf::FloatRect>( mb_cmp ).position.y + ss.get_zorder( ss_index ) );
+      mb_zorder_cmp.set( static_cast<sf::FloatRect>( mb_cmp ).position.y + ss.zorder( ss_index ) );
     }
     else
     {
       // fallback to the y-axis position only
-      mb_zorder_cmp.setZOrder( static_cast<sf::FloatRect>( mb_cmp ).position.y );
+      mb_zorder_cmp.set( static_cast<sf::FloatRect>( mb_cmp ).position.y );
     }
   }
   return { mb_entt, segment_entt_list };

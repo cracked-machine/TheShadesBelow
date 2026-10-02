@@ -44,10 +44,10 @@
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
-#include <Sprites/SpriteMetaType.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/NpcStore.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
@@ -218,11 +218,11 @@ void remove_lerp_cmp( entt::registry &reg )
   }
 }
 
-std::tuple<entt::entity, std::string, Sprites::SpriteMetaType> get_inventory( entt::registry &reg )
+std::tuple<entt::entity, Sys::ItemKey, Sys::SpriteKey> get_inventory( entt::registry &reg )
 {
   auto inv_view = reg.view<Cmp::PlayerInventorySlot>();
-  Sprites::SpriteMetaType found_sprite_type;
-  std::string found_inv_type;
+  Sys::SpriteKey found_sprite_type;
+  Sys::ItemKey found_inv_type;
   entt::entity found_entt = entt::null;
   // this assumes there is only one slot in the inventory, so warn if there is a bug somewhere
   if ( inv_view.size() > 1 ) throw std::runtime_error( "Found multiple slots in single slot inventory" );
@@ -398,61 +398,61 @@ template void apply_action_from_inventory_item<Cmp::SacrificeAction>( entt::regi
 template void apply_action_from_inventory_item<Cmp::SpawnAction>( entt::registry & );
 
 template <typename ActionT>
-void apply_action_from_item_store( entt::registry &reg, const std::string &item_type )
+void apply_action_from_item_store( entt::registry &reg, const Sys::ItemKey &item_type )
 {
-  auto item = Sys::ItemStore::instance().get_item( item_type );
+  auto item = Sys::ItemStore::instance().get( item_type );
   Utils::Player::get_stats( reg ).apply( item.at<ActionT>().action );
 }
 
 // Explicit instantiations for every Cmp::BaseAction subclass (see src/Components/Stats) - keeps the
 // template body out of Player.hpp while still allowing all known action kinds to be applied.
-template void apply_action_from_item_store<Cmp::BurnAction>( entt::registry &, const std::string & );
-template void apply_action_from_item_store<Cmp::CarryAction>( entt::registry &, const std::string & );
-template void apply_action_from_item_store<Cmp::CollisionAction>( entt::registry &, const std::string & );
-template void apply_action_from_item_store<Cmp::ConsumeAction>( entt::registry &, const std::string & );
-template void apply_action_from_item_store<Cmp::DestroyAction>( entt::registry &, const std::string & );
-template void apply_action_from_item_store<Cmp::ProjectileAction>( entt::registry &, const std::string & );
-template void apply_action_from_item_store<Cmp::ProximityAction>( entt::registry &, const std::string & );
-template void apply_action_from_item_store<Cmp::SacrificeAction>( entt::registry &, const std::string & );
-template void apply_action_from_item_store<Cmp::SpawnAction>( entt::registry &, const std::string & );
+template void apply_action_from_item_store<Cmp::BurnAction>( entt::registry &, const Sys::ItemKey & );
+template void apply_action_from_item_store<Cmp::CarryAction>( entt::registry &, const Sys::ItemKey & );
+template void apply_action_from_item_store<Cmp::CollisionAction>( entt::registry &, const Sys::ItemKey & );
+template void apply_action_from_item_store<Cmp::ConsumeAction>( entt::registry &, const Sys::ItemKey & );
+template void apply_action_from_item_store<Cmp::DestroyAction>( entt::registry &, const Sys::ItemKey & );
+template void apply_action_from_item_store<Cmp::ProjectileAction>( entt::registry &, const Sys::ItemKey & );
+template void apply_action_from_item_store<Cmp::ProximityAction>( entt::registry &, const Sys::ItemKey & );
+template void apply_action_from_item_store<Cmp::SacrificeAction>( entt::registry &, const Sys::ItemKey & );
+template void apply_action_from_item_store<Cmp::SpawnAction>( entt::registry &, const Sys::ItemKey & );
 
 template <typename ActionT>
-Cmp::BaseAction get_action_from_item_store( const std::string &item_type )
+Cmp::BaseAction get_action_from_item_store( const Sys::ItemKey &item_type )
 {
-  auto item = Sys::ItemStore::instance().get_item( item_type );
+  auto item = Sys::ItemStore::instance().get( item_type );
   return item.at<ActionT>().action;
 }
 
 // Explicit instantiations for every Cmp::BaseAction subclass (see src/Components/Stats) - keeps the
 // template body out of Player.hpp while still allowing all known action kinds to be applied.
-template Cmp::BaseAction get_action_from_item_store<Cmp::BurnAction>( const std::string & );
-template Cmp::BaseAction get_action_from_item_store<Cmp::CarryAction>( const std::string & );
-template Cmp::BaseAction get_action_from_item_store<Cmp::CollisionAction>( const std::string & );
-template Cmp::BaseAction get_action_from_item_store<Cmp::ConsumeAction>( const std::string & );
-template Cmp::BaseAction get_action_from_item_store<Cmp::DestroyAction>( const std::string & );
-template Cmp::BaseAction get_action_from_item_store<Cmp::ProjectileAction>( const std::string & );
-template Cmp::BaseAction get_action_from_item_store<Cmp::ProximityAction>( const std::string & );
-template Cmp::BaseAction get_action_from_item_store<Cmp::SacrificeAction>( const std::string & );
-template Cmp::BaseAction get_action_from_item_store<Cmp::SpawnAction>( const std::string & );
+template Cmp::BaseAction get_action_from_item_store<Cmp::BurnAction>( const Sys::ItemKey & );
+template Cmp::BaseAction get_action_from_item_store<Cmp::CarryAction>( const Sys::ItemKey & );
+template Cmp::BaseAction get_action_from_item_store<Cmp::CollisionAction>( const Sys::ItemKey & );
+template Cmp::BaseAction get_action_from_item_store<Cmp::ConsumeAction>( const Sys::ItemKey & );
+template Cmp::BaseAction get_action_from_item_store<Cmp::DestroyAction>( const Sys::ItemKey & );
+template Cmp::BaseAction get_action_from_item_store<Cmp::ProjectileAction>( const Sys::ItemKey & );
+template Cmp::BaseAction get_action_from_item_store<Cmp::ProximityAction>( const Sys::ItemKey & );
+template Cmp::BaseAction get_action_from_item_store<Cmp::SacrificeAction>( const Sys::ItemKey & );
+template Cmp::BaseAction get_action_from_item_store<Cmp::SpawnAction>( const Sys::ItemKey & );
 
 template <typename ActionT>
-void apply_action_from_npc_store( entt::registry &reg, const std::string &npc_type )
+void apply_action_from_npc_store( entt::registry &reg, const Sys::NpcKey &npc_type )
 {
-  auto npc = Sys::NpcStore::instance().get_item( npc_type );
+  auto npc = Sys::NpcStore::instance().get( npc_type );
   Utils::Player::get_stats( reg ).apply( npc.at<ActionT>().action );
 }
 
 // Explicit instantiations for every Cmp::BaseAction subclass (see src/Components/Stats) - keeps the
 // template body out of Player.hpp while still allowing all known action kinds to be applied.
-template void apply_action_from_npc_store<Cmp::BurnAction>( entt::registry &, const std::string & );
-template void apply_action_from_npc_store<Cmp::CarryAction>( entt::registry &, const std::string & );
-template void apply_action_from_npc_store<Cmp::CollisionAction>( entt::registry &, const std::string & );
-template void apply_action_from_npc_store<Cmp::ConsumeAction>( entt::registry &, const std::string & );
-template void apply_action_from_npc_store<Cmp::DestroyAction>( entt::registry &, const std::string & );
-template void apply_action_from_npc_store<Cmp::ProjectileAction>( entt::registry &, const std::string & );
-template void apply_action_from_npc_store<Cmp::ProximityAction>( entt::registry &, const std::string & );
-template void apply_action_from_npc_store<Cmp::SacrificeAction>( entt::registry &, const std::string & );
-template void apply_action_from_npc_store<Cmp::SpawnAction>( entt::registry &, const std::string & );
+template void apply_action_from_npc_store<Cmp::BurnAction>( entt::registry &, const Sys::NpcKey & );
+template void apply_action_from_npc_store<Cmp::CarryAction>( entt::registry &, const Sys::NpcKey & );
+template void apply_action_from_npc_store<Cmp::CollisionAction>( entt::registry &, const Sys::NpcKey & );
+template void apply_action_from_npc_store<Cmp::ConsumeAction>( entt::registry &, const Sys::NpcKey & );
+template void apply_action_from_npc_store<Cmp::DestroyAction>( entt::registry &, const Sys::NpcKey & );
+template void apply_action_from_npc_store<Cmp::ProjectileAction>( entt::registry &, const Sys::NpcKey & );
+template void apply_action_from_npc_store<Cmp::ProximityAction>( entt::registry &, const Sys::NpcKey & );
+template void apply_action_from_npc_store<Cmp::SacrificeAction>( entt::registry &, const Sys::NpcKey & );
+template void apply_action_from_npc_store<Cmp::SpawnAction>( entt::registry &, const Sys::NpcKey & );
 
 Cmp::Player::HeartBeat &get_heartbeat( entt::registry &reg )
 {

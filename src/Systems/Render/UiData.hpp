@@ -1,7 +1,7 @@
 #ifndef SRC_SYSTEMS_RENDER_UIDATA_HPP__
 #define SRC_SYSTEMS_RENDER_UIDATA_HPP__
 
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Utils/JsonDeserializer.hpp>
 #include <nlohmann/json_fwd.hpp>
 
@@ -35,7 +35,7 @@ public:
     //! @brief Identifying name of this icon, as given in the UI layout file.
     std::string name;
     //! @brief Sprite meta-type used to look up the icon's texture.
-    Sprites::SpriteMetaType type;
+    Sys::SpriteKey type;
     //! @brief Sprite index within the sprite sheet.
     int index;
     //! @brief Scale factor applied to the icon.

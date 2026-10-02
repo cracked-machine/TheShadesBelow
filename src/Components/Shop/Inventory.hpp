@@ -1,7 +1,7 @@
 #ifndef SRC_COMPONENTS_SHOP_INVENTORY_HPP__
 #define SRC_COMPONENTS_SHOP_INVENTORY_HPP__
 
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>
 
 namespace Game::Cmp::Shop
@@ -26,7 +26,7 @@ public:
   Inventory() = default;
 
   //! @brief Item slots currently in the shop: (item type, price) pairs.
-  std::vector<std::pair<Sprites::SpriteMetaType, int32_t>> m_slots;
+  std::vector<std::pair<Sys::ItemKey, int32_t>> m_slots;
 
   //! @brief Generation parameters used to populate m_slots.
   Config m_config;

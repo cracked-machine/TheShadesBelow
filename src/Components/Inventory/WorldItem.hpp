@@ -3,7 +3,7 @@
 
 #include <Components/Stats/BaseAction.hpp>
 #include <SFML/System/Time.hpp>
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 #include <typeindex>
 #include <unordered_map>
@@ -22,7 +22,7 @@ public:
   //! @brief Construct a new World Item object.
   //! @param item_type Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
   //! @param sprite_type The sprite used to render this item.
-  WorldItem( std::string item_type, Sprites::SpriteMetaType sprite_type, sf::Time expiry = sf::Time::Zero )
+  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, sf::Time expiry = sf::Time::Zero )
       : item_type( std::move( item_type ) ),
         sprite_type( std::move( sprite_type ) ),
         m_expiry( expiry )
@@ -30,10 +30,10 @@ public:
   }
 
   //! @brief Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
-  std::string item_type;
+  Sys::ItemKey item_type;
 
   //! @brief The associated sprite. Imported from items.json.
-  Sprites::SpriteMetaType sprite_type;
+  Sys::SpriteKey sprite_type;
 
   //! @brief Pairs a stat-modifier action with the timestamp/duration used to schedule its re-application.
   struct ActionTimePair

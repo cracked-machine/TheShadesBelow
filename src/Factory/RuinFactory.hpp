@@ -4,7 +4,7 @@
 #include <SFML/System/Vector2.hpp>
 #include <entt/entity/fwd.hpp>
 
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 // clang-format off
 namespace Game::Sprites { class SpriteSheet; }

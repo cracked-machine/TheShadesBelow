@@ -2,7 +2,7 @@
 #define SRC_COMPONENTS_ANIMDATA_HPP__
 
 #include <SFML/System/Time.hpp>
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 namespace Game::Cmp
 {
@@ -26,7 +26,7 @@ struct AnimData
   struct Config
   {
     //! @brief The SpriteSheet object type (string) that will be animated.
-    Sprites::SpriteMetaType sprite_type;
+    Sys::SpriteKey sprite_type;
     //! @brief Initial frame position in the animation sequence.
     unsigned int current_frame = 0;
     //! @brief Frame the sequence starts at, and resets to for ONESHOTRESET animations.
@@ -74,7 +74,7 @@ struct AnimData
   bool m_enabled;
 
   //! @brief The SpriteSheet object type (string) that we are animating
-  Sprites::SpriteMetaType m_sprite_type;
+  Sys::SpriteKey m_sprite_type;
 
   //! @brief Get the frame index offset for multi-block sprites
   //! @return unsigned int

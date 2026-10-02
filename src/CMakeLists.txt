@@ -78,6 +78,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/Stores/ItemStore.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Stores/NpcStore.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Stores/SpriteStore.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Stores/StoreSingleton.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Stores/SystemStore.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ParticleSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ShaderSystem.cpp

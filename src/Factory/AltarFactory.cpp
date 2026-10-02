@@ -2,13 +2,13 @@
 #include <Components/AnimData.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/AltarFactory.hpp>
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <entt/entity/registry.hpp>
 
 namespace Game::Factory::Altar
 {
 
-void create_altar_sacrifice_anim( entt::registry &reg, Cmp::Position pos, Sprites::SpriteMetaType anim_type )
+void create_altar_sacrifice_anim( entt::registry &reg, Cmp::Position pos, Sys::SpriteKey anim_type )
 {
   entt::entity entt = reg.create();
   reg.emplace_or_replace<Cmp::Altar::Sacrifice>( entt );

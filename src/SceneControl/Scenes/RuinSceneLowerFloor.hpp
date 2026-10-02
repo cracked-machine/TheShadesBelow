@@ -4,9 +4,9 @@
 #include <Audio/SoundBank.hpp>
 #include <SceneControl/Events/ProcessRuinSceneLowerInputEvent.hpp>
 #include <SceneControl/Scene.hpp>
-#include <Sprites/SpriteMetaType.hpp>
 #include <Sprites/SpriteSheet.hpp>
 #include <Sprites/VertexFloor.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 
 namespace Game::Sprites

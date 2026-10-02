@@ -222,8 +222,8 @@ void CryptSystem::update_exit_zorder()
     for ( auto [segment_entt, segment_cmp, segment_pos_cmp, segment_z_cmp] : segment_view.each() )
     {
       if ( not player_pos.findIntersection( segment_pos_cmp ) ) continue;
-      mb_z_cmp.setZOrder( segment_z_cmp.getZOrder() );
-      SPDLOG_DEBUG( "Updated zorder to {}", segment_z_cmp.getZOrder() );
+      mb_z_cmp.set( segment_z_cmp.get() );
+      SPDLOG_DEBUG( "Updated zorder to {}", segment_z_cmp.get() );
     }
   }
 }
@@ -376,10 +376,10 @@ void CryptSystem::check_objective_activation( Events::PlayerActionEvent::GameAct
         objective_cmp.increment_activation_count();
         SPDLOG_DEBUG( "Player activated crypt objective." );
 
-        const auto &ms = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.crypt.objective.opened" );
+        const auto &ms = Sys::SpriteStore::instance().get( "sprite.crypt.objective.opened" );
         // clang-format off
           reg().emplace_or_replace<Cmp::AnimData>( objective_entity, Cmp::AnimData::Config{ 
-                .sprite_type = ms.get_sprite_type(),
+                .sprite_type = ms.type(),
                 .enabled = true
           });
         // clang-format on
@@ -709,10 +709,10 @@ void CryptSystem::create_end_room( sf::Vector2u map_grid_size )
                                       static_cast<float>( map_grid_size.y ) * Constants::kGridSizePxF.y );
   auto kGridSizePxF = Constants::kGridSizePxF;
   // target position for the objective: always center top of the map
-  const auto &ms = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.crypt.objective.closed" );
+  const auto &ms = Sys::SpriteStore::instance().get( "sprite.crypt.objective.closed" );
 
-  float centered_x = ( map_grid_sizef.x / 2.f ) - ( ms.get_sprite_size().x / 2.f );
-  Cmp::Position objective_position( { centered_x, kGridSizePxF.y * 2.f }, ms.get_sprite_size() );
+  float centered_x = ( map_grid_sizef.x / 2.f ) - ( ms.sprite_size().x / 2.f );
+  Cmp::Position objective_position( { centered_x, kGridSizePxF.y * 2.f }, ms.sprite_size() );
 
   auto end_room_entity = reg().create();
   reg().emplace_or_replace<Cmp::Crypt::RoomEnd>( end_room_entity,
@@ -741,13 +741,13 @@ entt::entity CryptSystem::find_intersecting_multiblock( const Cmp::Position &pos
 
 void CryptSystem::decorate_interior_wall( entt::entity main_entt, Cmp::Position &main_pos_cmp, RoomWallType room_wall_type )
 {
-  const Sprites::SpriteSheet &ss_main = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.crypt.wall.int.main" );
-  const Sprites::SpriteSheet &ss_cap = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.crypt.wall.int.cap" );
+  const Sprites::SpriteSheet &ss_main = Sys::SpriteStore::instance().get( "sprite.crypt.wall.int.main" );
+  const Sprites::SpriteSheet &ss_cap = Sys::SpriteStore::instance().get( "sprite.crypt.wall.int.cap" );
   auto uuid = Cmp::UUID::generate();
 
   int tile_idx = static_cast<int>( room_wall_type );
   Factory::Obstacle::add_obstacle( reg(), main_entt );
-  Factory::Obstacle::decorate_obstacle( reg(), main_entt, main_pos_cmp, ss_main, tile_idx, main_pos_cmp.y() + ss_main.get_zorder( tile_idx ) );
+  Factory::Obstacle::decorate_obstacle( reg(), main_entt, main_pos_cmp, ss_main, tile_idx, main_pos_cmp.y() + ss_main.zorder( tile_idx ) );
   reg().emplace_or_replace<Cmp::UUID>( main_entt, uuid );
 
   // We place the room borders on top of the regular interior wall block so to prevent z-fighting,
@@ -755,7 +755,7 @@ void CryptSystem::decorate_interior_wall( entt::entity main_entt, Cmp::Position 
   auto cap_entt = reg().create();
   Cmp::Position cap_position( { main_pos_cmp.x(), main_pos_cmp.y() - main_pos_cmp.size.y }, main_pos_cmp.size );
   reg().emplace_or_replace<Cmp::Position>( cap_entt, cap_position );
-  Factory::Obstacle::decorate_obstacle( reg(), cap_entt, cap_position, ss_cap, tile_idx, main_pos_cmp.y() + ss_cap.get_zorder( tile_idx ), false );
+  Factory::Obstacle::decorate_obstacle( reg(), cap_entt, cap_position, ss_cap, tile_idx, main_pos_cmp.y() + ss_cap.zorder( tile_idx ), false );
   if ( auto reserved_sm = m_reserved_sm.lock() ) reserved_sm->insert( cap_entt, cap_position );
   reg().emplace_or_replace<Cmp::UUID>( cap_entt, uuid );
   Factory::Obstacle::add_obstacle_cap( reg(), cap_entt );
@@ -1132,7 +1132,7 @@ void CryptSystem::add_chest_to_open_rooms( const Cmp::Position &player_pos_cmp )
       iterations++;
       if ( invalid_pos_found ) { continue; }
 
-      float zorder = selected_pos.y() + Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.crypt.chest" ).get_zorder( 0 );
+      float zorder = selected_pos.y() + Sys::SpriteStore::instance().get( "sprite.crypt.chest" ).zorder( 0 );
 
       Factory::Obstacle::remove_obstacle( reg(), selected_entt, Factory::Obstacle::DeleteExtras::Yes, m_reserved_sm.lock() );
       auto chest_entt = Factory::Crypt::create_crypt_chest( reg(), selected_pos.position, "sprite.crypt.chest", 0, zorder );
@@ -1145,9 +1145,9 @@ void CryptSystem::add_chest_to_open_rooms( const Cmp::Position &player_pos_cmp )
 void CryptSystem::add_lever_to_open_rooms()
 {
   auto internal_room_entts = get_available_room_positions();
-  Sprites::SpriteMetaType lever_sprite_type = "sprite.crypt.switch";
+  Sys::SpriteKey lever_sprite_type = "sprite.crypt.switch";
   unsigned int disabled_lever_sprite_idx = 0;
-  float zorder = Sys::SpriteStore::instance().get_sprite_size_by_type( lever_sprite_type ).y;
+  float zorder = Sys::SpriteStore::instance().get( lever_sprite_type ).sprite_size().y;
 
   // add one lever to one room picked from the pool of candidates room positions
   Cmp::RandomInt room_position_picker( 0, static_cast<int>( internal_room_entts.size() ) - 1 );

@@ -1,5 +1,5 @@
-#include <Sprites/SpriteMetaType.hpp>
 #include <Systems/Render/UiData.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 #include <filesystem>
 #include <nlohmann/json.hpp>
@@ -53,7 +53,7 @@ void UiData::deserialize( const std::filesystem::path &scene_tiledata_path )
       }
       if ( get_string( object, "type" ) == "ui_icon" )
       {
-        m_icons.emplace_back( get_float_rect( object ), get_string( object, "name" ), get_string_property( object, "sprite_type" ),
+        m_icons.emplace_back( get_float_rect( object ), get_string( object, "name" ), Sys::SpriteKey( get_string_property( object, "sprite_type" ) ),
                               get_int_property( object, "sprite_index" ), get_int_property( object, "sprite_scale" ) );
       }
     }

@@ -2,9 +2,9 @@
 #define SRC_SYSTEMS_RENDER_RENDEROVERLAYSYSTEM_HPP__
 
 #include <Components/Position.hpp>
-#include <Sprites/SpriteMetaType.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Render/UiData.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Optimizations.hpp>
 

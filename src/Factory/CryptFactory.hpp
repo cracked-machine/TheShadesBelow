@@ -9,7 +9,7 @@
 #include <Components/Wall.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 namespace Game::Sprites
 {
@@ -35,7 +35,7 @@ entt::entity create_crypt_exit( entt::registry &reg, sf::Vector2f spawn_pos_px )
 //! @param sprite_idx
 //! @param zorder
 //! @return The new lever entity.
-entt::entity create_crypt_lever( entt::registry &reg, sf::Vector2f pos, Sprites::SpriteMetaType sprite_type, unsigned int sprite_idx, float zorder );
+entt::entity create_crypt_lever( entt::registry &reg, sf::Vector2f pos, Sys::SpriteKey sprite_type, unsigned int sprite_idx, float zorder );
 
 //! @brief Remove a crypt lever's components and destroy its entity.
 //! @param reg
@@ -68,7 +68,7 @@ void add_spike_trap( entt::registry &reg, const entt::entity entt, const int pas
 //! @param sprite_idx
 //! @param zorder
 //! @return The new chest entity.
-entt::entity create_crypt_chest( entt::registry &reg, sf::Vector2f pos, Sprites::SpriteMetaType sprite_type, unsigned int sprite_idx, float zorder );
+entt::entity create_crypt_chest( entt::registry &reg, sf::Vector2f pos, Sys::SpriteKey sprite_type, unsigned int sprite_idx, float zorder );
 
 //! @brief Remove a crypt chest's components and destroy its entity.
 //! @param reg

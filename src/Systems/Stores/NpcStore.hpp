@@ -2,7 +2,7 @@
 #define SRC_SYSTEMS_STORES_NPCSTORE_HPP__
 
 #include <Components/Npc/Npc.hpp>
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Systems/Stores/StoreSingleton.hpp>
 
 namespace Game::Sys

@@ -149,7 +149,7 @@ void SceneData::deserialize_tilelayers( const nlohmann::json &json )
   };
 
   //! @brief Multiblock layer
-  auto get_multiblock_list = [&]( const nlohmann::json &j, std::multimap<Game::Sprites::SpriteMetaType, sf::Vector2f> &out )
+  auto get_multiblock_list = [&]( const nlohmann::json &j, std::multimap<std::string, sf::Vector2f> &out )
   {
     if ( not j.contains( "objects" ) ) throw std::runtime_error( "Missing JSON property 'objects' in multiblock layer" );
     try
@@ -157,7 +157,7 @@ void SceneData::deserialize_tilelayers( const nlohmann::json &json )
       for ( const auto &object : j.at( "objects" ) )
       {
         if ( not object.contains( "name" ) ) throw std::runtime_error( "Missing JSON property 'name' in multiblock object layer" );
-        Game::Sprites::SpriteMetaType type( object.at( "name" ).get<std::string>() );
+        std::string type = object.at( "name" ).get<std::string>();
         sf::Vector2f pos( get_float( object, "x" ), get_float( object, "y" ) );
         out.insert( { type, pos } );
       }

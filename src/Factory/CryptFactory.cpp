@@ -49,7 +49,7 @@ entt::entity create_crypt_exit( entt::registry &reg, sf::Vector2f spawn_pos_px )
   return entity;
 }
 
-entt::entity create_crypt_lever( entt::registry &reg, sf::Vector2f pos, Sprites::SpriteMetaType sprite_type, unsigned int sprite_idx, float zorder )
+entt::entity create_crypt_lever( entt::registry &reg, sf::Vector2f pos, Sys::SpriteKey sprite_type, unsigned int sprite_idx, float zorder )
 {
   auto entt = reg.create();
   reg.emplace_or_replace<Cmp::Position>( entt, pos, Constants::kGridSizePxF );
@@ -68,7 +68,7 @@ void destroy_crypt_lever( entt::registry &reg, entt::entity entt )
   if ( reg.valid( entt ) ) { reg.destroy( entt ); }
 }
 
-entt::entity create_crypt_chest( entt::registry &reg, sf::Vector2f pos, Sprites::SpriteMetaType sprite_type, unsigned int sprite_idx, float zorder )
+entt::entity create_crypt_chest( entt::registry &reg, sf::Vector2f pos, Sys::SpriteKey sprite_type, unsigned int sprite_idx, float zorder )
 {
   auto entt = reg.create();
   reg.emplace_or_replace<Cmp::Position>( entt, pos, Constants::kGridSizePxF );

@@ -328,7 +328,7 @@ void ActionSystem::player_plant_interact()
           auto plantleaves_particle_uuid = Cmp::UUID::generate();
           Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
                                                  plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
-          Factory::Player::add_inventory( reg(), plant_item->item_type + ".forage" );
+          Factory::Player::add_inventory( reg(), Sys::ItemKey( plant_item->item_type.str() + ".forage" ) );
           Utils::Player::apply_action_from_inventory_item<Cmp::SpawnAction>( reg() );
           m_sound_bank.get_effect( "chopping_final" ).play();
         }
@@ -367,7 +367,7 @@ void ActionSystem::player_plant_interact()
           {
             if ( not plant_item ) continue;
             get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( plant_mb_cmp.position, Constants::kGridSizePxF ),
-                                                                        plant_item->item_type + ".drop", "drop_loot" ) );
+                                                                        Sys::ItemKey( plant_item->item_type.str() + ".drop" ), "drop_loot" ) );
           }
           Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
           Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
@@ -441,14 +441,16 @@ void ActionSystem::check_player_smash_pot()
   }
 
   // drop loot - 50% chance
-  auto [sprite_type, sprite_index] = Sys::SpriteStore::instance().get_random_type_and_texture_index(
-      std::vector<std::string>{ "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" } );
+  const auto &loot_ss = Sys::SpriteStore::instance().get_random(
+      { "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" } );
   Cmp::RandomInt do_drop( 0, 1 );
   if ( do_drop.gen() == 0 )
   {
     auto reserved_sm = m_reserved_sm.lock();
     auto dropped_loot_entt = Factory::Loot::create_loot_drop(
-        reg(), Cmp::AnimData( Cmp::AnimData::Config{ .sprite_type = sprite_type, .enabled = false } ),
+        reg(),
+        Cmp::AnimData(
+            Cmp::AnimData::Config{ .sprite_type = loot_ss.type(), .frame_index_offset = loot_ss.get_random_texture_index(), .enabled = false } ),
         sf::FloatRect( Utils::snap_to_grid( cached_loot_container_pos ), Constants::kGridSizePxF ), Factory::IncludePack<>{},
         Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{},
         /*zorder_offset=*/-8.f, reserved_sm.get() );

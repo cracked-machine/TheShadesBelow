@@ -24,7 +24,7 @@ public:
   }
 
   //! @brief Item identifier key for a grimoire entry, e.g. "item.plant1".
-  using ItemKey = std::string;
+  using ItemKey = Sys::ItemKey;
   //! @brief Whether a grimoire entry has been discovered/enabled.
   using Enabled = bool;
   //! @brief The grimoire's spell entries and whether each has been discovered/enabled.

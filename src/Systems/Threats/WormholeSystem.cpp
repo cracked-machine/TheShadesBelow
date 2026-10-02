@@ -183,8 +183,8 @@ void WormholeSystem::spawn_wormhole( SpawnPhase phase )
   }
 
   // 3. Create the sprite
-  const auto &wormhole_ss = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.graveyard.hazard.wormhole" );
-  Cmp::Wormhole::MultiBlock wormhole_block( multiblock_pos.position, wormhole_ss.get_px_size() );
+  const auto &wormhole_ss = Sys::SpriteStore::instance().get( "sprite.graveyard.hazard.wormhole" );
+  Cmp::Wormhole::MultiBlock wormhole_block( multiblock_pos.position, wormhole_ss.sprite_size() );
 
   // clear_footprint destroys every entity occupying the footprint, including spawn_entity itself -
   // its handle is stale from this point on, so the wormhole's MultiBlock entity must be created fresh below.
@@ -200,8 +200,8 @@ void WormholeSystem::spawn_wormhole( SpawnPhase phase )
   reg().emplace<Cmp::Wormhole::Singularity>( center_entity );
 
   auto multiblock_entity = reg().create();
-  reg().emplace<Cmp::Position>( multiblock_entity, multiblock_pos.position, wormhole_ss.get_px_size() );
-  reg().emplace<Cmp::Wormhole::MultiBlock>( multiblock_entity, multiblock_pos.position, wormhole_ss.get_px_size() );
+  reg().emplace<Cmp::Position>( multiblock_entity, multiblock_pos.position, wormhole_ss.sprite_size() );
+  reg().emplace<Cmp::Wormhole::MultiBlock>( multiblock_entity, multiblock_pos.position, wormhole_ss.sprite_size() );
   reg().emplace<Cmp::AnimData>( multiblock_entity, Cmp::AnimData::Config{ .sprite_type = "sprite.graveyard.hazard.wormhole", .enabled = true } );
   reg().emplace<Cmp::UUID>( multiblock_entity, uuid_cmp.data );
   reg().emplace<Cmp::ZOrderValue>( multiblock_entity, multiblock_pos.position.y - 16 );
@@ -312,8 +312,8 @@ std::pair<entt::entity, Cmp::Position> WormholeSystem::find_spawn_location( unsi
         reg(), Utils::Rnd::IncludePack<Cmp::Obstacle>{}, Utils::Rnd::ExcludePack<Cmp::Wall, Cmp::Exit, Cmp::Player::Character, Cmp::Npc::NPC>{},
         new_rng_seed );
 
-    const auto &wormhole_ms = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.graveyard.hazard.wormhole" );
-    Cmp::Wormhole::MultiBlock wormhole_block( random_pos.position, wormhole_ms.get_px_size() );
+    const auto &wormhole_ms = Sys::SpriteStore::instance().get( "sprite.graveyard.hazard.wormhole" );
+    Cmp::Wormhole::MultiBlock wormhole_block( random_pos.position, wormhole_ms.sprite_size() );
     auto wormhole_bounds = Cmp::RectBounds::scaled( wormhole_block, 1.f );
 
     // Check collisions with walls, graves, shrines, and positions reserved from algorithmic changes
@@ -323,7 +323,8 @@ std::pair<entt::entity, Cmp::Position> WormholeSystem::find_spawn_location( unsi
                     not any_intersects<Cmp::Altar::Segment>( reg(), wormhole_bounds ) &&
                     not any_intersects<Cmp::Crypt::BuildingSegment>( reg(), wormhole_bounds ) &&
                     not any_intersects<Cmp::Grave::ExitSegment>( reg(), wormhole_bounds ) &&
-                    not any_intersects<Cmp::Hazard::FieldCell>( reg(), wormhole_bounds ) && ( not reserved_sm || reserved_sm->at( random_pos ).empty() );
+                    not any_intersects<Cmp::Hazard::FieldCell>( reg(), wormhole_bounds ) &&
+                    ( not reserved_sm || reserved_sm->at( random_pos ).empty() );
 
     if ( is_valid )
     {

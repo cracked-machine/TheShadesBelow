@@ -5,7 +5,7 @@
 #include <Components/UUID.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <entt/fwd.hpp>
 #include <unordered_map>
 

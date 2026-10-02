@@ -255,7 +255,7 @@ void RenderGameSystem::render_shockwaves()
 
 void RenderGameSystem::render_arrow_compass()
 {
-  static const std::string kNoItem;
+  static const Sys::ItemKey kNoItem;
 
   for ( auto [player_entt, pc_cmp, pc_pos_cmp] : reg().view<Cmp::Player::Character, Cmp::Position>().each() )
   {

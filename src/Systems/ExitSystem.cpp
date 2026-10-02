@@ -51,7 +51,7 @@ void ExitSystem::create_exit()
 
   entt::entity selected_entity = entt::null;
   Cmp::Position selected_pos_cmp( { 0, 0 }, { 0, 0 } );
-  const auto &kGraveExitSpritesheet = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.graveyard.exit.locked" );
+  const auto &kGraveExitSpritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.exit.locked" );
   const int kMaxAttempts = 100;
 
   auto reserved_sm = m_reserved_sm.lock();
@@ -61,7 +61,7 @@ void ExitSystem::create_exit()
     auto exclude_list = Utils::Rnd::ExcludePack<Cmp::Wall, Cmp::Exit, Cmp::Player::Character, Cmp::Npc::NPC>{};
     auto [rand_entity, rand_pos_cmp] = Utils::Rnd::get_random_position( reg(), {}, exclude_list, 0 );
     if ( reserved_sm && not reserved_sm->at( rand_pos_cmp ).empty() ) continue;
-    Cmp::Position multiblock_hitbox( rand_pos_cmp.position, kGraveExitSpritesheet.get_px_size() );
+    Cmp::Position multiblock_hitbox( rand_pos_cmp.position, kGraveExitSpritesheet.sprite_size() );
 
     bool collides_with_wall = false;
     for ( auto [wall_entt, wall_cmp, wall_pos_cmp] : reg().view<Cmp::Wall, Cmp::Position>().each() )
@@ -115,7 +115,7 @@ void ExitSystem::unlock_exit()
       if ( not exit_pos_cmp.findIntersection( exit_mb_cmp ) ) continue;
       anim_cmp.m_sprite_type = "sprite.graveyard.exit.unlocked";
       Factory::Multiblock::detail::update_segments<Cmp::Grave::ExitMultiBlock, Cmp::Grave::ExitSegment>(
-          reg(), Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.graveyard.exit.unlocked" ), exit_mb_entt, exit_mb_cmp );
+          reg(), Sys::SpriteStore::instance().get( "sprite.graveyard.exit.unlocked" ), exit_mb_entt, exit_mb_cmp );
       break;
     }
 
@@ -135,8 +135,8 @@ void ExitSystem::update_exit_zorder()
     for ( auto [segment_entt, segment_cmp, segment_pos_cmp, segment_z_cmp] : segment_view.each() )
     {
       if ( not player_pos.findIntersection( segment_pos_cmp ) ) continue;
-      mb_z_cmp.setZOrder( segment_z_cmp.getZOrder() );
-      SPDLOG_DEBUG( "Updated zorder to {}", segment_z_cmp.getZOrder() );
+      mb_z_cmp.set( segment_z_cmp.get() );
+      SPDLOG_DEBUG( "Updated zorder to {}", segment_z_cmp.get() );
     }
   }
 }

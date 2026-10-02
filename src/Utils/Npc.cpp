@@ -9,8 +9,8 @@
 #include <Components/Position.hpp>
 #include <PathFinding/AStar.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
-#include <Sprites/SpriteMetaType.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Npc.hpp>
@@ -51,7 +51,7 @@ entt::entity get_world_pos_entt( entt::registry &reg, entt::entity npc_entt )
   return entt::null;
 }
 
-Sprites::SpriteMetaType get_sprite_type( entt::registry &reg, entt::entity npc_entt, std::source_location loc )
+Sys::SpriteKey get_sprite_type( entt::registry &reg, entt::entity npc_entt, std::source_location loc )
 {
   auto loc_data = std::string( loc.file_name() ) + ":" + std::to_string( loc.line() ) + " - ";
   auto *anim_cmp = reg.try_get<Cmp::AnimData>( npc_entt );

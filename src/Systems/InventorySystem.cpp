@@ -92,7 +92,7 @@ void InventorySystem::swap_inventory()
   if ( m_swap_item_cooldown_timer.getElapsedTime() < sf::milliseconds( 750.f ) ) return;
 
   auto player_pos = Cmp::RectBounds::scaled( Utils::Player::get_position( reg() ), 0.5 );
-  Sprites::SpriteMetaType existing_player_inventory_type;
+  Sys::SpriteKey existing_player_inventory_type;
 
   // drop inventory if we have one
   auto inventory_view = reg().view<Cmp::PlayerInventorySlot>();
@@ -141,8 +141,7 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
       if ( Utils::Player::is_in_spawn( reg(), Utils::Player::get_position( reg() ) ) ) return;
 
       auto [mb_entt, segment_entt_list] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>(
-          reg(), plant_pos, Sys::SpriteStore::instance().get_spritesheet_by_type( inventory_slot_cmp->m_item.sprite_type ), 0, 0,
-          m_reserved_sm.lock().get() );
+          reg(), plant_pos, Sys::SpriteStore::instance().get( inventory_slot_cmp->m_item.sprite_type ), 0, 0, m_reserved_sm.lock().get() );
       // Preserve the item this plant was grown from, so digging it back up (see the DIG handler in
       // on_player_action_event) can hand it back via the normal pickup_world_item path instead of
       // having to re-derive an item id from the multiblock's sprite.
@@ -258,7 +257,7 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
   // swap spoiled world items to rotten food in-place so position/zorder/spatial-grid entries are preserved
   for ( auto worlditem_entt : spoiled_world_items )
   {
-    const auto &rotten_item = Sys::ItemStore::instance().get_item( "item.rottenfood" );
+    const auto &rotten_item = Sys::ItemStore::instance().get( "item.rottenfood" );
     reg().emplace_or_replace<Cmp::WorldItem>( worlditem_entt, rotten_item );
     reg().emplace_or_replace<Cmp::AnimData>( worlditem_entt, Cmp::AnimData::Config{ .sprite_type = rotten_item.sprite_type, .enabled = false } );
     reg().remove<Cmp::Inventory::WearLevel>( worlditem_entt );

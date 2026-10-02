@@ -222,7 +222,7 @@ void RenderDebugSystem::render_ui_zorder_list()
   }
 
   // clang-format off
-  std::set<Sprites::SpriteMetaType> exclusions = {
+  std::set<std::string> exclusions = {
       "sprite.graveyard.wall.ext",
       "sprite.graveyard.wall.int.main",
       "sprite.graveyard.wall.int.cap",
@@ -260,8 +260,8 @@ void RenderDebugSystem::render_ui_zorder_list()
       auto *sprite_anim_cmp = reg().try_get<Cmp::AnimData>( zorder_entry.e );
       if ( sprite_anim_cmp )
       {
-        if ( exclusions.find( sprite_anim_cmp->m_sprite_type ) != exclusions.end() ) { continue; }
-        name = sprite_anim_cmp->m_sprite_type;
+        if ( exclusions.find( sprite_anim_cmp->m_sprite_type.str() ) != exclusions.end() ) { continue; }
+        name = sprite_anim_cmp->m_sprite_type.str();
       }
 
       auto *particle_sprite_owner = reg().try_get<Cmp::Particle::SpriteOwner>( zorder_entry.e );
@@ -304,7 +304,7 @@ void RenderDebugSystem::render_ui_npc_list()
       draw_line( " " + std::to_string( entt::to_integral( npc_entity ) ) +
                  ": [" + std::to_string( static_cast<int>( npc_pos_cmp.position.x ) ) +
                  "," + std::to_string( static_cast<int>( npc_pos_cmp.position.y ) ) + "] - " +
-                 npc_anim_cmp.m_sprite_type);
+                 npc_anim_cmp.m_sprite_type.str());
       // clang-format on
     }
   }
@@ -335,7 +335,7 @@ void RenderDebugSystem::render_ui_entity_inspect()
       if ( auto *cmp = reg().try_get<Cmp::AnimData>( entity ) )
       {
         auto sprite_idx = std::to_string( cmp->getFrameIndexOffset() );
-        draw_line( " " + cmp->m_sprite_type + " [" + sprite_idx + "]" );
+        draw_line( " " + cmp->m_sprite_type.str() + " [" + sprite_idx + "]" );
       }
       if ( auto reserved_sm = m_reserved_sm.lock(); reserved_sm && not reserved_sm->at( pos_cmp ).empty() )
       {
@@ -394,7 +394,7 @@ void RenderDebugSystem::render_ui_entity_inspect()
 
       if ( auto *cmp = reg().try_get<Cmp::ZOrderValue>( entity ) )
       {
-        auto zorder = std::to_string( cmp->getZOrder() );
+        auto zorder = std::to_string( cmp->get() );
         draw_line( "  ZOrder: " + zorder );
       }
     }
@@ -455,7 +455,7 @@ void RenderDebugSystem::render_spatial_grid_neighbours( const Cmp::Position &que
 }
 
 void RenderDebugSystem::render_pathfinding_vector( const Cmp::Position &start_pos_cmp, const Cmp::Position &end_pos_cmp, sf::Color color,
-                                                     PathFinding::QueryCompass query_compass )
+                                                   PathFinding::QueryCompass query_compass )
 {
   if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), start_pos_cmp ) ) return;
 

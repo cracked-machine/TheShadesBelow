@@ -46,8 +46,8 @@
 namespace Game::Factory::Npc
 {
 
-void create_npc_container( entt::registry &reg, entt::entity entt, Cmp::Position pos_cmp, Sprites::SpriteMetaType sprite_type,
-                           std::size_t sprite_tile_idx, float zorder )
+void create_npc_container( entt::registry &reg, entt::entity entt, Cmp::Position pos_cmp, Sys::SpriteKey sprite_type, std::size_t sprite_tile_idx,
+                           float zorder )
 {
   reg.emplace_or_replace<Cmp::Armable>( entt );
   reg.emplace_or_replace<Cmp::Npc::Container>( entt );
@@ -99,7 +99,7 @@ bool create_shockwave( entt::registry &registry, entt::entity npc_entt )
   return false;
 }
 
-entt::entity create_npc( entt::registry &reg, entt::entity position_entity, const std::string &npc_type,
+entt::entity create_npc( entt::registry &reg, entt::entity position_entity, const Sys::NpcKey &npc_type,
                          const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
 {
 
@@ -117,7 +117,7 @@ entt::entity create_npc( entt::registry &reg, entt::entity position_entity, cons
   reg.emplace_or_replace<Cmp::ZOrderValue>( new_pos_entity, pos_cmp->position.y );
   reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 0, 0 } );
   reg.emplace_or_replace<Cmp::UUID>( new_pos_entity, Cmp::UUID::generate() );
-  auto npc_cmp = Sys::NpcStore::instance().get_item( npc_type );
+  auto npc_cmp = Sys::NpcStore::instance().get( npc_type );
   reg.emplace_or_replace<Cmp::Npc::NPC>( new_pos_entity, npc_cmp );
 
   // clang-format off
@@ -215,7 +215,7 @@ entt::entity destroy_npc( entt::registry &reg, entt::entity npc_entity )
   return loot_entity;
 }
 
-entt::entity create_npc_death_anim( entt::registry &reg, Cmp::Position npc_pos_cmp, const Sprites::SpriteMetaType &death_anim )
+entt::entity create_npc_death_anim( entt::registry &reg, Cmp::Position npc_pos_cmp, const Sys::SpriteKey &death_anim )
 {
   auto npc_death_entity = reg.create();
   reg.emplace<Cmp::Position>( npc_death_entity, npc_pos_cmp.position, npc_pos_cmp.size );

@@ -3,8 +3,8 @@
 
 #include <Components/Grave/MultiBlock.hpp>
 #include <Events/PlayerActionEvent.hpp>
-#include <Sprites/SpriteMetaType.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 #include <vector>
 
@@ -83,7 +83,7 @@ private:
 
   //! @brief Pick a random item from the pool, drop it as loot, and apply its Cmp::SpawnAction modifiers to the player
   //! @param loot_pool
-  void spawn_grave_loot( const std::vector<Sprites::SpriteMetaType> &loot_pool );
+  void spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool );
 };
 
 } // namespace Game::Sys

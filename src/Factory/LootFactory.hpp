@@ -23,7 +23,7 @@ namespace Game::Factory::Loot
 //! @param sprite_type
 //! @param sprite_tile_idx
 //! @param zorder
-void create_loot_container( entt::registry &registry, entt::entity entt, Cmp::Position pos_cmp, Sprites::SpriteMetaType sprite_type,
+void create_loot_container( entt::registry &registry, entt::entity entt, Cmp::Position pos_cmp, Sys::SpriteKey sprite_type,
                             std::size_t sprite_tile_idx, float zorder );
 
 //! @brief Remove the components added by create_loot_container(), without destroying the entity.

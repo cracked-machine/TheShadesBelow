@@ -31,15 +31,15 @@ void create_bookcase( entt::registry &reg, sf::Vector2f spawn_position, const Sp
 {
   // We must modify the **existing** Cmp::Position-owning entity so that we don't have
   // new entity with Cmp::Npc::NoPathFinding and existing entity without. This screws up path finding
-  Cmp::Position search_pos( spawn_position, bookcase_ms.get_sprite_size() );
+  Cmp::Position search_pos( spawn_position, bookcase_ms.sprite_size() );
   for ( auto [existing_entt, existing_pos_cmp] : reg.view<Cmp::Position>().each() )
   {
     if ( search_pos.findIntersection( existing_pos_cmp ) )
     {
-      reg.emplace_or_replace<Cmp::Position>( existing_entt, spawn_position, bookcase_ms.get_sprite_size() );
+      reg.emplace_or_replace<Cmp::Position>( existing_entt, spawn_position, bookcase_ms.sprite_size() );
       // clang-format off
       reg.emplace_or_replace<Cmp::AnimData>( existing_entt, Cmp::AnimData::Config{ 
-            .sprite_type = bookcase_ms.get_sprite_type(), 
+            .sprite_type = bookcase_ms.type(), 
             .frame_index_offset = sprite_idx,
             .enabled = true
       });
@@ -58,11 +58,11 @@ void create_cobweb( entt::registry &reg, entt::entity selected_entt, sf::Vector2
                     size_t sprite_idx, PathFinding::SpatialHashGrid &reserved_sm )
 {
   // auto cobweb_entt = reg.create();
-  Cmp::Position new_pos( spawn_position, cobweb_ms.get_sprite_size() );
+  Cmp::Position new_pos( spawn_position, cobweb_ms.sprite_size() );
   reg.emplace_or_replace<Cmp::Position>( selected_entt, new_pos );
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( selected_entt, Cmp::AnimData::Config{
-        .sprite_type = cobweb_ms.get_sprite_type(),
+        .sprite_type = cobweb_ms.type(),
         .frame_index_offset = sprite_idx,
         .enabled = true
   });
@@ -78,20 +78,20 @@ void create_shadow_hand( entt::registry &reg, sf::Vector2f scene_dimensions, con
 
   if ( not exists )
   {
-    auto npc_shadowhand_cmp = Sys::NpcStore::instance().get_item( "npc.shadowhand" );
-    const auto hand_ms_size = hand_ms.get_sprite_size();
+    auto npc_shadowhand_cmp = Sys::NpcStore::instance().get( "npc.shadowhand" );
+    const auto hand_ms_size = hand_ms.sprite_size();
     sf::Vector2f starting_pos = { 0 - hand_ms_size.x, ( scene_dimensions.y / 2 ) - ( hand_ms_size.y / 2 ) };
 
     auto shadowhand_entt = reg.create();
-    reg.emplace_or_replace<Cmp::Position>( shadowhand_entt, starting_pos, hand_ms.get_sprite_size() );
+    reg.emplace_or_replace<Cmp::Position>( shadowhand_entt, starting_pos, hand_ms.sprite_size() );
     // clang-format off
     reg.emplace_or_replace<Cmp::AnimData>( shadowhand_entt, Cmp::AnimData::Config{ 
-          .sprite_type = hand_ms.get_sprite_type(), 
+          .sprite_type = hand_ms.type(), 
           .frame_index_offset = sprite_idx,
           .enabled = true
     });
     // clang-format on
-    reg.emplace_or_replace<Cmp::ZOrderValue>( shadowhand_entt, hand_ms.get_zorder( 0 ) ); // above everythign
+    reg.emplace_or_replace<Cmp::ZOrderValue>( shadowhand_entt, hand_ms.zorder( 0 ) ); // above everythign
     reg.emplace_or_replace<Cmp::AbsoluteAlpha>( shadowhand_entt, 200 );
     reg.emplace_or_replace<Cmp::Npc::NPC>( shadowhand_entt, npc_shadowhand_cmp );
     reg.emplace_or_replace<Cmp::Npc::ShadowHand>( shadowhand_entt );

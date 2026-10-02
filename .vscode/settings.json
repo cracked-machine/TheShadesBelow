@@ -1,129 +1,130 @@
 {
-    "files.associations": {
-        "array": "cpp",
-        "atomic": "cpp",
-        "bit": "cpp",
-        "bitset": "cpp",
-        "cctype": "cpp",
-        "charconv": "cpp",
-        "chrono": "cpp",
-        "clocale": "cpp",
-        "cmath": "cpp",
-        "codecvt": "cpp",
-        "compare": "cpp",
-        "complex": "cpp",
-        "concepts": "cpp",
-        "condition_variable": "cpp",
-        "cstdarg": "cpp",
-        "cstddef": "cpp",
-        "cstdint": "cpp",
-        "cstdio": "cpp",
-        "cstdlib": "cpp",
-        "cstring": "cpp",
-        "ctime": "cpp",
-        "cwchar": "cpp",
-        "cwctype": "cpp",
-        "deque": "cpp",
-        "list": "cpp",
-        "map": "cpp",
-        "string": "cpp",
-        "unordered_map": "cpp",
-        "unordered_set": "cpp",
-        "vector": "cpp",
-        "exception": "cpp",
-        "expected": "cpp",
-        "algorithm": "cpp",
-        "functional": "cpp",
-        "iterator": "cpp",
-        "memory": "cpp",
-        "memory_resource": "cpp",
-        "numeric": "cpp",
-        "optional": "cpp",
-        "random": "cpp",
-        "ratio": "cpp",
-        "regex": "cpp",
-        "source_location": "cpp",
-        "string_view": "cpp",
-        "system_error": "cpp",
-        "tuple": "cpp",
-        "type_traits": "cpp",
-        "utility": "cpp",
-        "format": "cpp",
-        "fstream": "cpp",
-        "initializer_list": "cpp",
-        "iomanip": "cpp",
-        "iosfwd": "cpp",
-        "iostream": "cpp",
-        "istream": "cpp",
-        "limits": "cpp",
-        "mutex": "cpp",
-        "new": "cpp",
-        "numbers": "cpp",
-        "ostream": "cpp",
-        "semaphore": "cpp",
-        "span": "cpp",
-        "sstream": "cpp",
-        "stdexcept": "cpp",
-        "stop_token": "cpp",
-        "streambuf": "cpp",
-        "text_encoding": "cpp",
-        "thread": "cpp",
-        "cfenv": "cpp",
-        "cinttypes": "cpp",
-        "typeinfo": "cpp",
-        "variant": "cpp"
+  "files.associations": {
+    "array": "cpp",
+    "atomic": "cpp",
+    "bit": "cpp",
+    "bitset": "cpp",
+    "cctype": "cpp",
+    "charconv": "cpp",
+    "chrono": "cpp",
+    "clocale": "cpp",
+    "cmath": "cpp",
+    "codecvt": "cpp",
+    "compare": "cpp",
+    "complex": "cpp",
+    "concepts": "cpp",
+    "condition_variable": "cpp",
+    "cstdarg": "cpp",
+    "cstddef": "cpp",
+    "cstdint": "cpp",
+    "cstdio": "cpp",
+    "cstdlib": "cpp",
+    "cstring": "cpp",
+    "ctime": "cpp",
+    "cwchar": "cpp",
+    "cwctype": "cpp",
+    "deque": "cpp",
+    "list": "cpp",
+    "map": "cpp",
+    "string": "cpp",
+    "unordered_map": "cpp",
+    "unordered_set": "cpp",
+    "vector": "cpp",
+    "exception": "cpp",
+    "expected": "cpp",
+    "algorithm": "cpp",
+    "functional": "cpp",
+    "iterator": "cpp",
+    "memory": "cpp",
+    "memory_resource": "cpp",
+    "numeric": "cpp",
+    "optional": "cpp",
+    "random": "cpp",
+    "ratio": "cpp",
+    "regex": "cpp",
+    "source_location": "cpp",
+    "string_view": "cpp",
+    "system_error": "cpp",
+    "tuple": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp",
+    "format": "cpp",
+    "fstream": "cpp",
+    "initializer_list": "cpp",
+    "iomanip": "cpp",
+    "iosfwd": "cpp",
+    "iostream": "cpp",
+    "istream": "cpp",
+    "limits": "cpp",
+    "mutex": "cpp",
+    "new": "cpp",
+    "numbers": "cpp",
+    "ostream": "cpp",
+    "semaphore": "cpp",
+    "span": "cpp",
+    "sstream": "cpp",
+    "stdexcept": "cpp",
+    "stop_token": "cpp",
+    "streambuf": "cpp",
+    "text_encoding": "cpp",
+    "thread": "cpp",
+    "cfenv": "cpp",
+    "cinttypes": "cpp",
+    "typeinfo": "cpp",
+    "variant": "cpp"
+  },
+  "clangd.arguments": [
+    "-j",
+    "24",
+    "--clang-tidy"
+  ],
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "**/spritesheets.json"
+      ],
+      "url": "./res/json/spritesheets_schema.json"
     },
-    "clangd.arguments": [
-        "-j", "24",
-        "--clang-tidy"
-    ],
-    "json.schemas": [
-        {
-            "fileMatch": [
-                "**/spritesheets.json"
-            ],
-            "url": "./res/json/spritesheets_schema.json"
-        },
-        {
-            "fileMatch": [
-                "**/persistent_components.json"
-            ],
-            "url": "./res/json/persistent_components_schema.json"
-        },
-        {
-            "fileMatch": [
-                "**/tilemap_config.json"
-            ],
-            "url": "./res/json/tilemap_config_schema.json"
-        },
-        {
-            "fileMatch": [
-                "**/items.json"
-            ],
-            "url": "./res/json/items_schema.json"
-        },
-        {
-            "fileMatch": [
-                "**/npc.json"
-            ],
-            "url": "./res/json/npc_schema.json"
-        }
-    ],
-    "doxdocgen.c.triggerSequence": "//",
-    "doxdocgen.c.firstLine": "",
-    "doxdocgen.c.lastLine": "",
-    "doxdocgen.c.commentPrefix": "//! ",
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "xaver.clang-format",
-    "clang-format.language.glsl.enable": true,
-    "clang-format.language.glsl.style": "",
-    "glsl-linter.validatorPath": "/usr/bin/glslang",
-    "editor.indentSize": "tabSize",
-    "editor.tabSize": 2,
-    "[cpp]": {
+    {
+      "fileMatch": [
+        "**/persistent_components.json"
+      ],
+      "url": "./res/json/persistent_components_schema.json"
     },
+    {
+      "fileMatch": [
+        "**/tilemap_config.json"
+      ],
+      "url": "./res/json/tilemap_config_schema.json"
+    },
+    {
+      "fileMatch": [
+        "**/items.json"
+      ],
+      "url": "./res/json/items_schema.json"
+    },
+    {
+      "fileMatch": [
+        "**/npc.json"
+      ],
+      "url": "./res/json/npc_schema.json"
+    }
+  ],
+  "doxdocgen.c.triggerSequence": "//",
+  "doxdocgen.c.firstLine": "",
+  "doxdocgen.c.lastLine": "",
+  "doxdocgen.c.commentPrefix": "//! ",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "xaver.clang-format",
+  "clang-format.language.glsl.enable": true,
+  "clang-format.language.glsl.style": "",
+  "glsl-linter.validatorPath": "/usr/bin/glslang",
+  "editor.indentSize": "tabSize",
+  "editor.tabSize": 2,
+  "[cpp]": {},
 
-    // stop tripping over the hover pages when browsing the code
-    "editor.hover.delay": 1000,
-    "editor.inlineSuggest.enabled": true
+  // stop tripping over the hover pages when browsing the code
+  "editor.hover.delay": 1000,
+  "editor.inlineSuggest.enabled": true,
+
 }

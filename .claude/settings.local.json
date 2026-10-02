@@ -6,7 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cmd=$(jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE 'cmake +--build|(^|[;&|] *)ninja( |$)|scripts/build\\.sh'; then lock=/tmp/claude-build.lock; if [ -d \"$lock\" ]; then age=$(( $(date +%s) - $(stat -c %Y \"$lock\" 2>/dev/null || echo 0) )); [ \"$age\" -gt 1800 ] && rmdir \"$lock\" 2>/dev/null; fi; if mkdir \"$lock\" 2>/dev/null; then echo '{}'; else echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"A build/compile is already running elsewhere in this session (lock: /tmp/claude-build.lock). Wait for it to finish before starting another \\u2014 concurrent builds can overload the machine.\"}}'; fi; else echo '{}'; fi"
+            "command":
+                "cmd=$(jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE 'cmake +--build|(^|[;&|] *)ninja( |$)|scripts/build\\.sh'; then lock=/tmp/claude-build.lock; if [ -d \"$lock\" ]; then age=$(( $(date +%s) - $(stat -c %Y \"$lock\" 2>/dev/null || echo 0) )); [ \"$age\" -gt 1800 ] && rmdir \"$lock\" 2>/dev/null; fi; if mkdir \"$lock\" 2>/dev/null; then echo '{}'; else echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"A build/compile is already running elsewhere in this session (lock: /tmp/claude-build.lock). Wait for it to finish before starting another \\u2014 concurrent builds can overload the machine.\"}}'; fi; else echo '{}'; fi"
           }
         ]
       }
@@ -17,7 +18,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cmd=$(jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE 'cmake +--build|(^|[;&|] *)ninja( |$)|scripts/build\\.sh'; then rmdir /tmp/claude-build.lock 2>/dev/null; fi; true"
+            "command":
+                "cmd=$(jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE 'cmake +--build|(^|[;&|] *)ninja( |$)|scripts/build\\.sh'; then rmdir /tmp/claude-build.lock 2>/dev/null; fi; true"
           }
         ]
       }
@@ -28,10 +30,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cmd=$(jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE 'cmake +--build|(^|[;&|] *)ninja( |$)|scripts/build\\.sh'; then rmdir /tmp/claude-build.lock 2>/dev/null; fi; true"
+            "command":
+                "cmd=$(jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qE 'cmake +--build|(^|[;&|] *)ninja( |$)|scripts/build\\.sh'; then rmdir /tmp/claude-build.lock 2>/dev/null; fi; true"
           }
         ]
       }
     ]
+  },
+  "permissions": {
+    "defaultMode": "plan"
   }
 }

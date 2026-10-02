@@ -184,7 +184,7 @@ protected:
   //! @param alpha
   //! @param origin
   //! @param angle
-  void safe_render_sprite_to_target( sf::RenderTarget &target, const std::string &sprite_type, const sf::FloatRect &pos_cmp,
+  void safe_render_sprite_to_target( sf::RenderTarget &target, const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos_cmp,
                                      std::size_t sprite_index = 0, sf::Vector2f scale = { 1.f, 1.f }, uint8_t alpha = 255,
                                      sf::Vector2f origin = { 0.f, 0.f }, sf::Angle angle = sf::degrees( 0.f ) );
 
@@ -202,7 +202,7 @@ protected:
   //! @param alpha
   //! @param origin
   //! @param angle
-  void safe_render_sprite_screen( const std::string &sprite_type, const sf::FloatRect &position, std::size_t sprite_index = 0,
+  void safe_render_sprite_screen( const Sys::SpriteKey &sprite_type, const sf::FloatRect &position, std::size_t sprite_index = 0,
                                   sf::Vector2f scale = { 1.f, 1.f }, uint8_t alpha = 255, sf::Vector2f origin = { 0.f, 0.f },
                                   sf::Angle angle = sf::degrees( 0.f ) );
 
@@ -214,7 +214,7 @@ protected:
   //! @param alpha
   //! @param origin
   //! @param angle
-  void safe_render_sprite_world( const std::string &sprite_type, const sf::FloatRect &position, std::size_t sprite_index = 0,
+  void safe_render_sprite_world( const Sys::SpriteKey &sprite_type, const sf::FloatRect &position, std::size_t sprite_index = 0,
                                  sf::Vector2f scale = { 1.f, 1.f }, uint8_t alpha = 255, sf::Vector2f origin = { 0.f, 0.f },
                                  sf::Angle angle = sf::degrees( 0.f ) );
 

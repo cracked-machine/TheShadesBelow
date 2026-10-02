@@ -2,7 +2,7 @@
 #define SRC_FACTORY_ALTARFACTORY_HPP__
 
 #include <Components/Position.hpp>
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <entt/entity/fwd.hpp>
 
 namespace Game::Factory::Altar
@@ -12,7 +12,7 @@ namespace Game::Factory::Altar
 //! @param reg
 //! @param pos Position and size of the animation entity.
 //! @param anim_type Sprite type to play.
-void create_altar_sacrifice_anim( entt::registry &reg, Cmp::Position pos, Sprites::SpriteMetaType anim_type );
+void create_altar_sacrifice_anim( entt::registry &reg, Cmp::Position pos, Sys::SpriteKey anim_type );
 
 } // namespace Game::Factory::Altar
 

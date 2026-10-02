@@ -33,13 +33,13 @@
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <SFML/System/Time.hpp>
-#include <Sprites/SpriteMetaType.hpp>
 #include <Systems/AltarSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -96,13 +96,13 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
   //! @brief Common actions following an altar sacrifice
   auto common_activation = [&]( SacrificeAnimType sacrifice_anim_type )
   {
-    Sprites::SpriteMetaType sprite_type = ( sacrifice_anim_type == SacrificeAnimType::KEY ) ? "sprite.graveyard.altar.key.anim"
-                                                                                            : "sprite.graveyard.altar.relic.anim";
+    Sys::SpriteKey sprite_type = ( sacrifice_anim_type == SacrificeAnimType::KEY ) ? "sprite.graveyard.altar.key.anim"
+                                                                                   : "sprite.graveyard.altar.relic.anim";
 
     Utils::Player::apply_action_from_inventory_item<Cmp::SacrificeAction>( reg() );
     Factory::Player::destroy_inventory( reg(), sacrifice_type );
 
-    float altar_sacrifice_anim_height = Sys::SpriteStore::instance().get_spritesheet_by_type( sprite_type ).get_sprite_size().y;
+    float altar_sacrifice_anim_height = Sys::SpriteStore::instance().get( sprite_type ).sprite_size().y;
     // get the center (topleft coord), then adjust to center the altar_sacrifice_anim, then adjust for altar_sacrifice_anim height
     Cmp::Position new_pos( altar_cmp.getCenter() - sf::Vector2{ 8.f, 4.f } - sf::Vector2{ 0.f, altar_sacrifice_anim_height },
                            Constants::kGridSizePxF );

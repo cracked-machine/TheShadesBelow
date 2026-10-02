@@ -2,7 +2,7 @@
 #define SRC_SYSTEMS_STORES_ITEMSTORE_HPP__
 
 #include <Components/Inventory/WorldItem.hpp>
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Systems/Stores/StoreSingleton.hpp>
 
 namespace Game::Sys

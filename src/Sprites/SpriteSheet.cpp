@@ -1,3 +1,4 @@
+#include <Components/Random.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <Sprites/SpriteSheet.hpp>
@@ -10,8 +11,8 @@
 namespace Game::Sprites
 {
 
-SpriteSheet::SpriteSheet( SpriteMetaType type, std::string display_name, const std::vector<float> &zorder_list,
-                          const std::filesystem::path &tilemap_path, const std::vector<uint32_t> &tilemap_picks, sf::Vector2i grid_size,
+SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list,
+                          const std::filesystem::path &spritesheet_png, const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size,
                           unsigned int sprites_per_frame, unsigned int sprites_per_sequence, std::vector<bool> solid_mask,
                           sf::Vector2i door_position )
     : m_sprite_type{ std::move( type ) },
@@ -23,22 +24,22 @@ SpriteSheet::SpriteSheet( SpriteMetaType type, std::string display_name, const s
       m_solid_mask{ std::move( solid_mask ) },
       m_door_position( door_position )
 {
-  m_tilemap_texture = std::make_unique<sf::Texture>();
-  if ( !m_tilemap_texture->loadFromFile( tilemap_path ) )
+  m_spritesheet_texture = std::make_unique<sf::Texture>();
+  if ( !m_spritesheet_texture->loadFromFile( spritesheet_png ) )
   {
-    SPDLOG_ERROR( "Unable to load tile map {}", tilemap_path.string() );
-    throw std::runtime_error( "Unable to load tile map: " + tilemap_path.string() );
+    SPDLOG_ERROR( "Unable to load spritesheet texture {}", spritesheet_png.string() );
+    throw std::runtime_error( "Unable to load spritesheet texture: " + spritesheet_png.string() );
   }
-  m_tilemap_texture->setSmooth( false );
-  SPDLOG_DEBUG( "Loaded tilemap texture: {}", tilemap_path.string() );
-  if ( !add_sprite( tilemap_picks ) )
+  m_spritesheet_texture->setSmooth( false );
+  SPDLOG_DEBUG( "Loaded spritesheet texture: {}", tilemap_path.string() );
+  if ( !add_sprite( spritesheet_selections ) )
   {
-    SPDLOG_CRITICAL( "Failed to load tilemap: {}", tilemap_path.string() );
-    throw std::runtime_error( "Failed to load tilemap: " + tilemap_path.string() );
+    SPDLOG_CRITICAL( "Failed to add sprite: {}", spritesheet_png.string() );
+    throw std::runtime_error( "Failed to add sprite: " + spritesheet_png.string() );
   }
 }
 
-SpriteSheet::SpriteSheet( SpriteMetaType type, std::string display_name, const std::vector<float> &zorder_list, sf::Texture tilemap_texture,
+SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list, sf::Texture tilemap_texture,
                           const std::vector<uint32_t> &tilemap_picks, sf::Vector2i grid_size, unsigned int sprites_per_frame,
                           unsigned int sprites_per_sequence, std::vector<bool> solid_mask, sf::Vector2i door_position )
     : m_sprite_type{ std::move( type ) },
@@ -51,8 +52,8 @@ SpriteSheet::SpriteSheet( SpriteMetaType type, std::string display_name, const s
       m_door_position( door_position )
 {
   SPDLOG_DEBUG( "Loaded tilemap texture" );
-  m_tilemap_texture = std::make_shared<sf::Texture>( std::move( tilemap_texture ) );
-  m_tilemap_texture->setSmooth( false );
+  m_spritesheet_texture = std::make_shared<sf::Texture>( std::move( tilemap_texture ) );
+  m_spritesheet_texture->setSmooth( false );
   if ( !add_sprite( tilemap_picks ) )
   {
     SPDLOG_CRITICAL( "Failed to load tilemap" );
@@ -76,7 +77,7 @@ bool SpriteSheet::add_sprite( const std::vector<uint32_t> &tilemap_picks )
     sf::VertexArray current_va( sf::PrimitiveType::Triangles, 6 );
 
     // Calculate texture coordinates based on 16x16 base tile grid (not sprite grid)
-    const int base_tiles_per_row = m_tilemap_texture->getSize().x / Constants::kGridSizePx.x;
+    const int base_tiles_per_row = m_spritesheet_texture->getSize().x / Constants::kGridSizePx.x;
     const int base_tile_x = tile_idx % base_tiles_per_row;
     const int base_tile_y = tile_idx / base_tiles_per_row;
 
@@ -106,6 +107,11 @@ bool SpriteSheet::add_sprite( const std::vector<uint32_t> &tilemap_picks )
   }
   SPDLOG_DEBUG( "Created {} sprites ", m_va_list.size() );
   return true;
+}
+
+std::size_t SpriteSheet::get_random_texture_index() const
+{
+  return static_cast<std::size_t>( Cmp::RandomInt( 0, static_cast<int>( sheet_size() ) - 1 ).gen() );
 }
 
 } // namespace Game::Sprites

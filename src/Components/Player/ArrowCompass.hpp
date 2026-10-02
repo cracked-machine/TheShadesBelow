@@ -5,6 +5,7 @@
 #include <Components/Crypt/Entrance.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Position.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
@@ -44,7 +45,7 @@ struct ArrowCompass
     sf::Vector2f origin;
   };
 
-  inline static const std::string kSpriteType{ "sprite.graveyard.arrow" };
+  inline static const Sys::SpriteKey kSpriteType{ "sprite.graveyard.arrow" };
 
   //! @brief Inset from the view edge at which the arrow is placed
   static constexpr float kEdgeMargin{ 32.f };
@@ -52,7 +53,7 @@ struct ArrowCompass
   //! @brief Recompute the mode if the inventory item type has changed since the last call.
   //! @param item_type The item type currently in the player's inventory slot (empty if none)
   //! @return true if the mode was recomputed (forces a retarget on the next refresh_target())
-  bool update_mode( const std::string &item_type )
+  bool update_mode( const Sys::ItemKey &item_type )
   {
     if ( item_type == m_cached_item_type ) return false;
     m_cached_item_type = item_type;
@@ -190,7 +191,7 @@ private:
   }
 
   Mode m_mode{ Mode::NONE };
-  std::string m_cached_item_type;
+  Sys::ItemKey m_cached_item_type;
   std::optional<Cmp::Position> m_target;
   bool m_retarget_pending{ true };
 

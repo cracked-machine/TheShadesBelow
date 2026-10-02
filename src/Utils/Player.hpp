@@ -7,7 +7,7 @@
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Stats/PlayerStats.hpp>
 #include <SFML/Graphics/Rect.hpp>
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <source_location>
 
 namespace Game::Cmp
@@ -142,9 +142,9 @@ void remove_lerp_cmp( entt::registry &reg );
 
 //! @brief Get the entity and sprite type currently held in the player's (single-slot) inventory.
 //! @param reg reference to the entt registry
-//! @return std::tuple<entt::entity, std::string, Sprites::SpriteMetaType> The inventory slot entity, its item type and its sprite type;
+//! @return std::tuple<entt::entity, Sys::ItemKey, Sys::SpriteKey> The inventory slot entity, its item type and its sprite type;
 //! entt::null and empty strings for the types if the inventory is empty.
-std::tuple<entt::entity, std::string, Sprites::SpriteMetaType> get_inventory( entt::registry &reg );
+std::tuple<entt::entity, Sys::ItemKey, Sys::SpriteKey> get_inventory( entt::registry &reg );
 
 //! @brief Get the wear level of the item in the player's inventory slot.
 //! @param reg reference to the entt registry
@@ -232,7 +232,7 @@ void apply_action_from_inventory_item( entt::registry &reg );
 //! @param item_type string identifier (see item.json)
 //! @throws std::runtime_error if the key is not present in the store.
 template <typename ActionT>
-void apply_action_from_item_store( entt::registry &reg, const std::string &item_type );
+void apply_action_from_item_store( entt::registry &reg, const Sys::ItemKey &item_type );
 
 //! @brief Look up the ActionT stat-modifier from the item store, without applying it.
 //! @tparam ActionT The Cmp::BaseAction subclass to look up (e.g. Cmp::DestroyAction). Only the subclasses
@@ -242,7 +242,7 @@ void apply_action_from_item_store( entt::registry &reg, const std::string &item_
 //! @throws std::runtime_error if the key is not present in the store.
 //! @throws std::out_of_range if the item has no ActionT registered.
 template <typename ActionT>
-Cmp::BaseAction get_action_from_item_store( const std::string &item_type );
+Cmp::BaseAction get_action_from_item_store( const Sys::ItemKey &item_type );
 
 //! @brief Lookup up and apply the ActionT stat-modifier from the npc store.
 //! @tparam ActionT The Cmp::BaseAction subclass to apply (e.g. Cmp::DestroyAction). Only the subclasses
@@ -251,7 +251,7 @@ Cmp::BaseAction get_action_from_item_store( const std::string &item_type );
 //! @param npc_type string identifier (see npc.json)
 //! @throws std::runtime_error if the key is not present in the store.
 template <typename ActionT>
-void apply_action_from_npc_store( entt::registry &reg, const std::string &npc_type );
+void apply_action_from_npc_store( entt::registry &reg, const Sys::NpcKey &npc_type );
 
 Cmp::Player::HeartBeat &get_heartbeat( entt::registry &reg );
 

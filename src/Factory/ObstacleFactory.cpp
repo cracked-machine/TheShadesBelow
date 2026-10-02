@@ -49,17 +49,17 @@ void add_obstacle_cap( entt::registry &reg, entt::entity entity ) { reg.emplace_
 void decorate_obstacle( entt::registry &reg, entt::entity entity, Cmp::Position pos_cmp, const Sprites::SpriteSheet &ms, std::size_t sprite_tile_idx,
                         float zorder, bool blocking, const PathFinding::SpatialHashGrid *reserved_sm )
 {
-  if ( sprite_tile_idx > ms.get_sprite_count() - 1 )
+  if ( sprite_tile_idx > ms.sheet_size() - 1 )
   {
-    throw std::runtime_error( "Unable to get index " + std::to_string( sprite_tile_idx ) + " in " + ms.get_sprite_type() +
-                              " ( size: " + std::to_string( ms.get_sprite_count() ) + " )" );
+    throw std::runtime_error( "Unable to get index " + std::to_string( sprite_tile_idx ) + " in " + ms.type().str() +
+                              " ( size: " + std::to_string( ms.sheet_size() ) + " )" );
   }
   Cmp::ZOrderValue zorder_cmp( 0 );
 
   // Use the non-zero function arg, or the non-zero json value, or fallback to the sprite y-axis
-  if ( zorder != 0 ) { zorder_cmp.setZOrder( zorder ); }
-  else if ( ms.get_zorder( sprite_tile_idx ) != 0 ) { zorder_cmp.setZOrder( ms.get_zorder( sprite_tile_idx ) ); }
-  else { zorder_cmp.setZOrder( pos_cmp.position.y ); }
+  if ( zorder != 0 ) { zorder_cmp.set( zorder ); }
+  else if ( ms.zorder( sprite_tile_idx ) != 0 ) { zorder_cmp.set( ms.zorder( sprite_tile_idx ) ); }
+  else { zorder_cmp.set( pos_cmp.position.y ); }
 
   if ( reg.any_of<Cmp::Player::Character>( entity ) ) { return; }
   if ( ( reserved_sm != nullptr ) && not reserved_sm->at( pos_cmp ).empty() ) { return; }
@@ -75,14 +75,14 @@ void decorate_obstacle( entt::registry &reg, entt::entity entity, Cmp::Position 
   reg.emplace_or_replace<Cmp::Armable>( entity );
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( entity, Cmp::AnimData::Config{ 
-        .sprite_type = ms.get_sprite_type(), 
+        .sprite_type = ms.type(), 
         .frame_index_offset = sprite_tile_idx,
         .enabled = true
   });
   // clang-format on
   reg.emplace_or_replace<Cmp::Armable>( entity );
 
-  SPDLOG_DEBUG( "Added obstacle {} at [{},{}] Z: {}", ms.get_display_name(), pos_cmp.x(), pos_cmp.y(), zorder_cmp.getZOrder() );
+  SPDLOG_DEBUG( "Added obstacle {} at [{},{}] Z: {}", ms.get_display_name(), pos_cmp.x(), pos_cmp.y(), zorder_cmp.get() );
 }
 
 void remove_obstacle( entt::registry &reg, entt::entity search_entt, DeleteExtras delete_extras,

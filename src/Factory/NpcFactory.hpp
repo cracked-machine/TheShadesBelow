@@ -4,7 +4,7 @@
 #include <Components/Position.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <entt/fwd.hpp>
 
 namespace Game::Sprites
@@ -22,7 +22,7 @@ namespace Game::Factory::Npc
 //! @param sprite_type
 //! @param sprite_tile_idx
 //! @param zorder
-void create_npc_container( entt::registry &registry, entt::entity entt, Cmp::Position pos_cmp, Sprites::SpriteMetaType sprite_type,
+void create_npc_container( entt::registry &registry, entt::entity entt, Cmp::Position pos_cmp, Sys::SpriteKey sprite_type,
                            std::size_t sprite_tile_idx, float zorder );
 
 //! @brief Remove the components added by create_npc_container(), without destroying the entity.
@@ -38,7 +38,7 @@ void destroy_npc_container( entt::registry &registry, entt::entity npc_container
 //! @param npc_type
 //! @param reserved_sm If provided, un-reserves the container's position when hatching from a container (nightwatchman/skeleton).
 //! @return entt::entity
-entt::entity create_npc( entt::registry &registry, entt::entity position_entity, const std::string &npc_type,
+entt::entity create_npc( entt::registry &registry, entt::entity position_entity, const Sys::NpcKey &npc_type,
                          const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr );
 
 //! @brief Remove an NPC's components (applying its DestroyAction stat modifiers to the player first).
@@ -52,7 +52,7 @@ entt::entity destroy_npc( entt::registry &registry, entt::entity npc_entity );
 //! @param npc_position_cmp
 //! @param death_anim
 //! @return The new death animation entity.
-entt::entity create_npc_death_anim( entt::registry &registry, Cmp::Position npc_position_cmp, const Sprites::SpriteMetaType &death_anim );
+entt::entity create_npc_death_anim( entt::registry &registry, Cmp::Position npc_position_cmp, const Sys::SpriteKey &death_anim );
 
 //! @brief Remove the components added by create_npc_death_anim(), without destroying the entity.
 //! @param registry

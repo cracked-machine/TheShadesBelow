@@ -1,7 +1,7 @@
 #ifndef SRC_COMPONENTS_RUIN_OBJECTIVETYPE_HPP__
 #define SRC_COMPONENTS_RUIN_OBJECTIVETYPE_HPP__
 
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 namespace Game::Cmp::Ruin
 {
@@ -14,12 +14,12 @@ class ObjectiveType
 public:
   //! @brief Construct a new ObjectiveType.
   //! @param type Sprite/meta type identifying the objective.
-  ObjectiveType( Sprites::SpriteMetaType type )
+  ObjectiveType( Sys::SpriteKey type )
       : m_type( type )
   {
   }
   //! @brief Sprite/meta type identifying the objective.
-  Sprites::SpriteMetaType m_type;
+  Sys::SpriteKey m_type;
 };
 
 } // namespace Game::Cmp::Ruin

@@ -103,7 +103,7 @@ void ZOrderQueue::queue_positioned_view( entt::registry &reg, sf::FloatRect view
 
 void ZOrderQueue::push( entt::entity entity, const Cmp::ZOrderValue &z_order_cmp )
 {
-  m_entries.push_back( Entry{ .z = z_order_cmp.getZOrder(), .e = entity } );
+  m_entries.push_back( Entry{ .z = z_order_cmp.get(), .e = entity } );
 }
 
 } // namespace Game::Sys

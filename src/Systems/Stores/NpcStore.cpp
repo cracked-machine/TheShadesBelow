@@ -48,10 +48,10 @@ void NpcStore::init_store()
   nlohmann::json json = Utils::JsonDeserializer::load_json_file( m_json_file_path );
   for ( const auto &[item_key, item_value] : json.items() )
   {
-    std::vector<Sprites::SpriteMetaType> mtype_list;
+    std::vector<Sys::SpriteKey> mtype_list;
     for ( const auto &sprite_json : item_value.at( "sprites" ) )
     {
-      mtype_list.push_back( sprite_json.get<std::string>() );
+      mtype_list.emplace_back( sprite_json.get<std::string>() );
     }
 
     auto lerp_speed = item_value.at( "lerpspeed" );
@@ -74,7 +74,7 @@ void NpcStore::init_store()
         else { SPDLOG_WARN( "Unknown action key: {}", action_key ); }
       }
     }
-    m_store.emplace( item_key, std::move( npc ) );
+    m_store.emplace( key_type( item_key ), std::move( npc ) );
     SPDLOG_DEBUG( "Loaded item: {}", item_key );
   }
   SPDLOG_DEBUG( "NPC store loaded with {} items", m_store.size() );

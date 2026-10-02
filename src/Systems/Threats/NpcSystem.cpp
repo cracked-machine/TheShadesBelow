@@ -324,10 +324,10 @@ void NpcSystem::update_movement_for( PathFinding::SpatialHashGrid &navmesh, entt
   float zorder_augment = 0.f;
   if ( Utils::Npc::get_sprite_type( reg(), npc_entity ).contains( "wisp" ) )
   {
-    const auto &spritesheet = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.wisp.east" );
-    zorder_augment = spritesheet.get_zorder( 0 );
+    const auto &spritesheet = Sys::SpriteStore::instance().get( "sprite.wisp.east" );
+    zorder_augment = spritesheet.zorder( 0 );
   }
-  reg().patch<Cmp::ZOrderValue>( npc_entity, [&]( auto &zorder_cmp ) { zorder_cmp.setZOrder( pos_cmp->position.y + zorder_augment ); } );
+  reg().patch<Cmp::ZOrderValue>( npc_entity, [&]( auto &zorder_cmp ) { zorder_cmp.set( pos_cmp->position.y + zorder_augment ); } );
 }
 
 void NpcSystem::check_once_collision()

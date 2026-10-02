@@ -1,7 +1,7 @@
 #ifndef SRC_SCENECONTROL_SCENEDATA_HPP__
 #define SRC_SCENECONTROL_SCENEDATA_HPP__
 
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Utils/JsonDeserializer.hpp>
 #include <nlohmann/json_fwd.hpp>
 
@@ -80,7 +80,7 @@ public:
     //! @brief tile index list for the object layout
     std::vector<sf::FloatRect> solid_objectlayer;
     //! @brief tile index list for the mutliblock layout
-    std::multimap<Sprites::SpriteMetaType, sf::Vector2f> multiblock_objectlayer;
+    std::multimap<std::string, sf::Vector2f> multiblock_objectlayer;
 
     //! @brief Player start location
     sf::Vector2u player_start_position{ 0, 0 };
@@ -119,9 +119,9 @@ public:
   //! @return int
   [[nodiscard]] int reserved_tile_id() const { return m_map_data.main_tileset.reserved_tile_id + m_map_data.main_tileset.first_gid; }
 
-  //! @brief Get the multiblock object layer, mapping each multiblock's sprite type to its position.
-  //! @return std::multimap<Sprites::SpriteMetaType, sf::Vector2f>
-  [[nodiscard]] std::multimap<Sprites::SpriteMetaType, sf::Vector2f> multiblock_objectlayer() const { return m_map_data.multiblock_objectlayer; }
+  //! @brief Get the multiblock object layer, mapping each object's marker name (a sprite, item or npc type) to its position.
+  //! @return std::multimap<std::string, sf::Vector2f>
+  [[nodiscard]] std::multimap<std::string, sf::Vector2f> multiblock_objectlayer() const { return m_map_data.multiblock_objectlayer; }
   //! @brief Get the solid (collidable) object layer bounds.
   //! @return std::vector<sf::FloatRect>
   [[nodiscard]] std::vector<sf::FloatRect> solid_objectlayer() const { return m_map_data.solid_objectlayer; }

@@ -2,8 +2,8 @@
 #define SRC_SYSTEMS_PROCGEN_LEVELGENERATOR_HPP__
 
 #include <PathFinding/SmartPointers.hpp>
-#include <Sprites/SpriteMetaType.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Window.hpp>
@@ -82,11 +82,11 @@ public:
   std::vector<entt::entity> gen_random_plants();
 
   //! @brief Generate the given plant type in the game area. Called by `gen_random_plants()` and `build_scene_from_data()`.
-  //! @param plant_type SpriteMetaType
+  //! @param plant_type Sys::SpriteKey
   //! @param pos Position to place the plant
   //! @return true
   //! @return false
-  bool gen_plant( const std::string &plant_type, sf::Vector2f pos );
+  bool gen_plant( const Sys::ItemKey &plant_type, sf::Vector2f pos );
 
   //! @brief Scatter loot containers across the map at random unreserved positions.
   //! @param reg

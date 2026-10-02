@@ -42,12 +42,12 @@
 #include <Factory/PlayerFactory.hpp>
 #include <Factory/ToxicityFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
-#include <Sprites/SpriteMetaType.hpp>
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 
@@ -110,7 +110,7 @@ entt::entity add_spawn_area( entt::registry &reg, entt::entity entity, float zor
   // We need to reserve these positions for the player start area, dont add NpcNoPathFinding.
   // We want NPCs to pathfind player within spawn. We block NPCs from entering spawn directly in NpcSystem::update_pathfinding.
   reg.emplace_or_replace<Cmp::SpawnArea>( entity, false );
-  auto [_, idx] = Sys::SpriteStore::instance().get_random_type_and_texture_index( { "sprite.graveyard.playerspawn" } );
+  auto idx = Sys::SpriteStore::instance().get( "sprite.graveyard.playerspawn" ).get_random_texture_index();
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( entity, Cmp::AnimData::Config{ 
         .sprite_type = "sprite.graveyard.playerspawn", 
@@ -127,16 +127,16 @@ void create_player_death_anim( entt::registry &reg, Cmp::Position player_pos_cmp
 {
   auto player_blood_splat_entity = reg.create();
   sf::Vector2f offset;
-  if ( ( sprite.get_sprite_size().x == Constants::kGridSizePxF.x ) and ( sprite.get_sprite_size().y == Constants::kGridSizePxF.y ) )
+  if ( ( sprite.sprite_size().x == Constants::kGridSizePxF.x ) and ( sprite.sprite_size().y == Constants::kGridSizePxF.y ) )
   {
     offset = sf::Vector2f{ 0, 0 };
   }
-  else { offset = sprite.get_sprite_size() / 2.f; }
+  else { offset = sprite.sprite_size() / 2.f; }
   reg.emplace_or_replace<Cmp::Position>( player_blood_splat_entity, player_pos_cmp.position - offset, player_pos_cmp.size );
   reg.emplace_or_replace<Cmp::DeathPosition>( player_blood_splat_entity, player_pos_cmp.position - offset, player_pos_cmp.size );
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( player_blood_splat_entity, Cmp::AnimData::Config{ 
-        .sprite_type = sprite.get_sprite_type(), 
+        .sprite_type = sprite.type(), 
         .framerate = 0.1,
         .enabled = true,
         .anim_type = Cmp::AnimType::ONESHOTHOLD
@@ -145,10 +145,10 @@ void create_player_death_anim( entt::registry &reg, Cmp::Position player_pos_cmp
   reg.emplace_or_replace<Cmp::ZOrderValue>( player_blood_splat_entity, player_pos_cmp.position.y * 3 ); // always infront
 }
 
-void add_inventory( entt::registry &reg, const std::string &item )
+void add_inventory( entt::registry &reg, const Sys::ItemKey &item )
 {
   auto inventory_entity = reg.create();
-  reg.emplace_or_replace<Cmp::PlayerInventorySlot>( inventory_entity, Sys::ItemStore::instance().get_item( item ) );
+  reg.emplace_or_replace<Cmp::PlayerInventorySlot>( inventory_entity, Sys::ItemStore::instance().get( item ) );
   if ( item.contains( "axe" ) or item.contains( "shovel" ) or item.contains( ".forage" ) )
   {
     reg.emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, 100.f );
@@ -163,13 +163,13 @@ void add_inventory( entt::registry &reg, const std::string &item )
 
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( inventory_entity, Cmp::AnimData::Config{ 
-        .sprite_type = Sys::ItemStore::instance().get_item( item ).sprite_type, 
+        .sprite_type = Sys::ItemStore::instance().get( item ).sprite_type, 
         .enabled = true
   });
   // clang-format on
 }
 
-void destroy_inventory( entt::registry &reg, const Sprites::SpriteMetaType &type )
+void destroy_inventory( entt::registry &reg, const Sys::ItemKey &type )
 {
   auto inventory_view = reg.view<Cmp::PlayerInventorySlot>();
   for ( auto [inventory_entt, inventory_cmp] : inventory_view.each() )

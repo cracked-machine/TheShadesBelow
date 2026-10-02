@@ -2,7 +2,7 @@
 #define SRC_COMPONENTS_NPC_NPC_HPP__
 
 #include <Components/Stats/BaseAction.hpp>
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 #include <typeindex>
 
@@ -21,8 +21,8 @@ public:
   //! @param sprite_type The sprite to use, wrapped into a single-element sprite_type_list.
   //! @param lerp_speed Interpolation speed used when smoothing this NPC's movement.
   //! @param frame_rate Animation frame rate for the sprite.
-  NPC( Sprites::SpriteMetaType sprite_type, float lerp_speed, float frame_rate )
-      : sprite_type_list( std::vector<Sprites::SpriteMetaType>{ std::move( sprite_type ) } ),
+  NPC( Sys::SpriteKey sprite_type, float lerp_speed, float frame_rate )
+      : sprite_type_list( std::vector<Sys::SpriteKey>{ std::move( sprite_type ) } ),
         m_lerp_speed( lerp_speed ),
         m_frame_rate( frame_rate )
   {
@@ -32,7 +32,7 @@ public:
   //! @param sprite_type_list The list of sprites, see res/json/npc.json.
   //! @param lerp_speed Interpolation speed used when smoothing this NPC's movement.
   //! @param frame_rate Animation frame rate for the sprites.
-  NPC( std::vector<Sprites::SpriteMetaType> sprite_type_list, float lerp_speed, float frame_rate )
+  NPC( std::vector<Sys::SpriteKey> sprite_type_list, float lerp_speed, float frame_rate )
       : sprite_type_list( std::move( sprite_type_list ) ),
         m_lerp_speed( lerp_speed ),
         m_frame_rate( frame_rate )
@@ -41,7 +41,7 @@ public:
   // bool active = true;
 
   //! @brief The associated sprite. Supports multiple sprites for animation. See res/json/npc.json.
-  std::vector<Sprites::SpriteMetaType> sprite_type_list;
+  std::vector<Sys::SpriteKey> sprite_type_list;
 
   //! @brief Interpolation speed used when smoothing this NPC's movement.
   float m_lerp_speed{ 0 };

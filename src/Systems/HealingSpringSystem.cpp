@@ -44,8 +44,8 @@ void HealingSpringSystem::update_building_zorder()
     for ( auto [segment_entt, segment_cmp, segment_pos_cmp, segment_z_cmp] : segment_view.each() )
     {
       if ( not player_pos.findIntersection( segment_pos_cmp ) ) continue;
-      mb_z_cmp.setZOrder( segment_z_cmp.getZOrder() );
-      SPDLOG_DEBUG( "Updated zorder to {}", segment_z_cmp.getZOrder() );
+      mb_z_cmp.set( segment_z_cmp.get() );
+      SPDLOG_DEBUG( "Updated zorder to {}", segment_z_cmp.get() );
     }
   }
 }

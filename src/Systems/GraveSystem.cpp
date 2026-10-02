@@ -141,9 +141,9 @@ void GraveSystem::apply_dig_hit( entt::entity grave_entity, Cmp::Grave::MultiBlo
 
 void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_anim_cmp )
 {
-  if ( std::string::size_type n = grave_anim_cmp.m_sprite_type.find( ".closed" ); n != std::string::npos )
+  if ( std::string::size_type n = grave_anim_cmp.m_sprite_type.str().find( ".closed" ); n != std::string::npos )
   {
-    grave_anim_cmp.m_sprite_type = grave_anim_cmp.m_sprite_type.substr( 0, n ) + ".opened";
+    grave_anim_cmp.m_sprite_type = Sys::SpriteKey( grave_anim_cmp.m_sprite_type.str().substr( 0, n ) + ".opened" );
     SPDLOG_DEBUG( "Grave Cmp::SpriteAnimation changed to opened type: {}", grave_anim_cmp.m_sprite_type );
 
     // select the final smash sound
@@ -206,7 +206,7 @@ void GraveSystem::trigger_grave_consequence( entt::entity grave_entity )
   }
 }
 
-void GraveSystem::spawn_grave_loot( const std::vector<Sprites::SpriteMetaType> &loot_pool )
+void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool )
 {
   Cmp::RandomInt loot_picker( 0, static_cast<int>( loot_pool.size() ) - 1 );
   const auto &selected_item_type = loot_pool.at( static_cast<std::size_t>( loot_picker.gen() ) );

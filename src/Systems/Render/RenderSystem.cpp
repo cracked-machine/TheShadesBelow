@@ -80,18 +80,18 @@ void RenderSystem::render_text( std::string text, unsigned int size, sf::Vector2
   active_render_target().draw( title_text );
 }
 
-void RenderSystem::safe_render_sprite_to_target( sf::RenderTarget &target, const std::string &sprite_type, const sf::FloatRect &pos_cmp,
+void RenderSystem::safe_render_sprite_to_target( sf::RenderTarget &target, const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos_cmp,
                                                  std::size_t sprite_index, sf::Vector2f scale, uint8_t alpha, sf::Vector2f origin, sf::Angle angle )
 {
 
   try
   {
-    const auto &sprite = Sys::SpriteStore::instance().get_spritesheet_by_type( sprite_type );
+    const auto &sprite = Sys::SpriteStore::instance().get( sprite_type );
 
-    if ( sprite_index < sprite.get_sprite_count() )
+    if ( sprite_index < sprite.sheet_size() )
     {
-      const auto &readonly_texture = sprite.get_texture();
-      Sys::VertexSprite sprite_buffer( sprite.m_va_list[sprite_index], readonly_texture );
+      const auto &readonly_texture = sprite.texture();
+      Sys::VertexSprite sprite_buffer( sprite.get_vertex_array( sprite_index ), readonly_texture );
 
       // Adjust position to compensate for origin offset when origin != (0,0)
       sf::Vector2f adjusted_position = pos_cmp.position;
@@ -106,7 +106,7 @@ void RenderSystem::safe_render_sprite_to_target( sf::RenderTarget &target, const
     }
     else
     {
-      SPDLOG_WARN( "Unable to get idx: {}. {} has sprite count = {}", sprite_index, sprite_type, sprite.get_sprite_count() );
+      SPDLOG_WARN( "Unable to get idx: {}. {} has sprite count = {}", sprite_index, sprite_type, sprite.sheet_size() );
       render_fallback_square_to_target( target, pos_cmp, sf::Color::Cyan );
     }
   } catch ( const std::out_of_range &e )
@@ -126,7 +126,7 @@ void RenderSystem::render_fallback_square_to_target( sf::RenderTarget &target, c
   target.draw( fallback_square ); // Draw to specified target
 }
 
-void RenderSystem::safe_render_sprite_screen( const std::string &sprite_type, const sf::FloatRect &pos_cmp, std::size_t sprite_index,
+void RenderSystem::safe_render_sprite_screen( const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos_cmp, std::size_t sprite_index,
                                               sf::Vector2f scale, uint8_t alpha, sf::Vector2f origin, sf::Angle angle )
 {
   auto &target = active_render_target();
@@ -137,7 +137,7 @@ void RenderSystem::safe_render_sprite_screen( const std::string &sprite_type, co
 }
 
 // Keep the original for backwards compatibility
-void RenderSystem::safe_render_sprite_world( const std::string &sprite_type, const sf::FloatRect &pos_cmp, std::size_t sprite_index,
+void RenderSystem::safe_render_sprite_world( const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos_cmp, std::size_t sprite_index,
                                              sf::Vector2f scale, uint8_t alpha, sf::Vector2f origin, sf::Angle angle )
 {
   auto &target = active_render_target();

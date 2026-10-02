@@ -25,14 +25,14 @@ entt::entity add_wall_entity( entt::registry &reg, const sf::Vector2f &pos, cons
   reg.emplace_or_replace<Cmp::Wall>( entity );
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( entity, Cmp::AnimData::Config{ 
-      .sprite_type = ms.get_sprite_type(), 
+      .sprite_type = ms.type(), 
       .frame_index_offset = static_cast<size_t>(sprite_index),
       .enabled = true
   });
   // clang-format on
   Cmp::ZOrderValue zorder_cmp( 0 );
-  if ( ms.get_zorder( sprite_index ) != 0 ) { zorder_cmp.setZOrder( ms.get_zorder( sprite_index ) ); }
-  else { zorder_cmp.setZOrder( pos.y + ms.get_sprite_size().y ); }
+  if ( ms.zorder( sprite_index ) != 0 ) { zorder_cmp.set( ms.zorder( sprite_index ) ); }
+  else { zorder_cmp.set( pos.y + ms.sprite_size().y ); }
   reg.emplace_or_replace<Cmp::ZOrderValue>( entity, zorder_cmp );
   return entity;
 }

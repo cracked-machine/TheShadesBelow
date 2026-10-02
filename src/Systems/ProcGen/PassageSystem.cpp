@@ -623,8 +623,8 @@ void PassageSystem::empty_open_passages()
 void PassageSystem::fill_all_passages()
 {
   // Position view iteration is fully complete
-  const Sprites::SpriteSheet &ss_main = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.crypt.wall.int.main" );
-  const Sprites::SpriteSheet &ss_cap = Sys::SpriteStore::instance().get_spritesheet_by_type( "sprite.crypt.wall.int.cap" );
+  const Sprites::SpriteSheet &ss_main = Sys::SpriteStore::instance().get( "sprite.crypt.wall.int.main" );
+  const Sprites::SpriteSheet &ss_cap = Sys::SpriteStore::instance().get( "sprite.crypt.wall.int.cap" );
   PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock();
   auto reserved_sm = m_reserved_sm.lock();
 
@@ -644,7 +644,7 @@ void PassageSystem::fill_all_passages()
     if ( m_passage_block_grid.at( pos_cmp ).empty() ) continue;
 
     Factory::Obstacle::add_obstacle( reg(), pos_entt );
-    Factory::Obstacle::decorate_obstacle( reg(), pos_entt, pos_cmp, ss_main, 0, pos_cmp.y() + ss_main.get_zorder( 0 ) );
+    Factory::Obstacle::decorate_obstacle( reg(), pos_entt, pos_cmp, ss_main, 0, pos_cmp.y() + ss_main.zorder( 0 ) );
 
     auto uuid = Cmp::UUID::generate();
     reg().emplace_or_replace<Cmp::UUID>( pos_entt, uuid );
@@ -652,7 +652,7 @@ void PassageSystem::fill_all_passages()
     auto cap_entt = reg().create();
     Cmp::Position cap_position( { pos_cmp.x(), pos_cmp.y() - pos_cmp.size.y }, pos_cmp.size );
     reg().emplace_or_replace<Cmp::Position>( cap_entt, cap_position );
-    Factory::Obstacle::decorate_obstacle( reg(), cap_entt, cap_position, ss_cap, 0, pos_cmp.y() + ss_cap.get_zorder( 0 ), false );
+    Factory::Obstacle::decorate_obstacle( reg(), cap_entt, cap_position, ss_cap, 0, pos_cmp.y() + ss_cap.zorder( 0 ), false );
     if ( reserved_sm ) reserved_sm->insert( cap_entt, cap_position );
     reg().emplace_or_replace<Cmp::UUID>( cap_entt, uuid );
     Factory::Obstacle::add_obstacle_cap( reg(), cap_entt );

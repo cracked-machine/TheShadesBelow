@@ -46,9 +46,9 @@ void ItemStore::init_store()
   nlohmann::json json = Utils::JsonDeserializer::load_json_file( m_json_file_path );
   for ( const auto &[item_key, item_value] : json.items() )
   {
-    Sprites::SpriteMetaType sprite_mtype = item_value.at( "sprite" ).get<std::string>();
+    Sys::SpriteKey sprite_mtype( item_value.at( "sprite" ).get<std::string>() );
     auto expiry = item_value.at( "expiry" ).get<float>();
-    Cmp::WorldItem worlditem( item_key, sprite_mtype, sf::seconds( expiry ) );
+    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, sf::seconds( expiry ) );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )
@@ -63,7 +63,7 @@ void ItemStore::init_store()
         else { SPDLOG_WARN( "Unknown action key: {}", action_key ); }
       }
     }
-    m_store.emplace( item_key, std::move( worlditem ) );
+    m_store.emplace( key_type( item_key ), std::move( worlditem ) );
     SPDLOG_DEBUG( "Loaded item: {} ({})", item_key, sprite_mtype );
   }
   SPDLOG_DEBUG( "Item store loaded with {} items", m_store.size() );

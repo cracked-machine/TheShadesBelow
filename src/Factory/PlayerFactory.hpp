@@ -5,6 +5,7 @@
 #include <Components/RectBounds.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <Sprites/SpriteSheet.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <entt/entity/fwd.hpp>
 #include <entt/fwd.hpp>
 
@@ -32,13 +33,13 @@ void create_player_death_anim( entt::registry &registry, Cmp::Position player_po
 //! @brief Destroy all player inventory slots matching a type. See "item.xxxx" in res/json/items.json
 //! @param reg the ECS registry
 //! @param type the type to destroy
-void destroy_inventory( entt::registry &reg, const std::string &type );
+void destroy_inventory( entt::registry &reg, const Sys::ItemKey &type );
 
 //! @brief Create a new player inventory slot entity for `item`, attaching any item-specific components
 //! (wear level for axe/shovel, seeing stone target for scrying balls, etc).
 //! @param reg
 //! @param item Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
-void add_inventory( entt::registry &reg, const std::string &item );
+void add_inventory( entt::registry &reg, const Sys::ItemKey &item );
 
 //! @brief Record the player's last graveyard position, so they can return to it later (e.g. after a crypt run).
 //! @param reg

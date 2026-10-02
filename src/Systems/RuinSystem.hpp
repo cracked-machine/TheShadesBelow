@@ -2,8 +2,8 @@
 #define SRC_SYSTEMS_RUINSYSTEM_HPP__
 
 #include <Components/Ruin/FloorAccess.hpp>
-#include <Sprites/SpriteMetaType.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 #include <future>
 

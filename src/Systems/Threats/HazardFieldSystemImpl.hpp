@@ -97,7 +97,7 @@ void HazardFieldSystem<HazardType>::promote_to_hazard_cell( entt::entity entity,
   // clang-format off
   reg().template emplace_or_replace<HazardType>( entity );
   reg().template emplace_or_replace<Cmp::AnimData>( entity, Cmp::AnimData::Config{
-        .sprite_type =  std::string( Traits::sprite_type ),
+        .sprite_type =  Sys::SpriteKey( std::string( Traits::sprite_type ) ),
         .enabled = true
   });
   // clang-format on

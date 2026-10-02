@@ -1,7 +1,7 @@
 #ifndef SRC_UTILS_NPC_HPP__
 #define SRC_UTILS_NPC_HPP__
 
-#include <Sprites/SpriteMetaType.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <source_location>
 namespace Game::Cmp
 {
@@ -38,9 +38,9 @@ entt::entity get_world_pos_entt( entt::registry &reg, entt::entity npc_entt );
 //! @param reg reference to the entt registry
 //! @param npc_entt The NPC entity to query.
 //! @param loc Caller location, used in the thrown error message (defaults to the call site).
-//! @return Sprites::SpriteMetaType The NPC's sprite type.
+//! @return Sys::SpriteKey The NPC's sprite type.
 //! @throws std::runtime_error if `npc_entt` has no Cmp::AnimData component.
-Sprites::SpriteMetaType get_sprite_type( entt::registry &reg, entt::entity npc_entt, std::source_location loc = std::source_location::current() );
+Sys::SpriteKey get_sprite_type( entt::registry &reg, entt::entity npc_entt, std::source_location loc = std::source_location::current() );
 
 //! @brief Outcome of a single pathfind_toward() step
 enum class PathfindResult {
