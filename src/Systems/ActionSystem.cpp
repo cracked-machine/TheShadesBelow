@@ -51,6 +51,7 @@
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Systems/Threats/LightningSystem.hpp>
 #include <Systems/Threats/WormholeSystem.hpp>
 #include <Utils/Collision.hpp>
@@ -396,6 +397,7 @@ void ActionSystem::check_player_smash_pot()
   auto loot_container_view = reg().view<Cmp::LootContainer, Cmp::Position, Cmp::AnimData>();
 
   sf::Vector2f cached_loot_container_pos;
+  bool loot_container_destroyed = false;
 
   for ( auto [loot_entity, loot_container, loot_container_pos, loot_container_anim] : loot_container_view.each() )
   {
@@ -425,6 +427,7 @@ void ActionSystem::check_player_smash_pot()
       {
         // wait until we're outside of the view loop to spawn the loot
         cached_loot_container_pos = loot_container_pos.position;
+        loot_container_destroyed = true;
 
         m_sound_bank.get_effect( "break_pot" ).play();
         auto inventory_wear_view = reg().view<Cmp::PlayerInventorySlot, Cmp::Inventory::WearLevel>();
@@ -440,24 +443,35 @@ void ActionSystem::check_player_smash_pot()
     }
   }
 
+  if ( not loot_container_destroyed ) return;
+
   // drop loot - 50% chance
-  const auto &loot_ss = Sys::SpriteStore::instance().get_random(
-      { "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" } );
+  auto loot_choices = std::vector<Sys::SpriteKey>{ "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" };
+  const auto &loot_ss = Sys::SpriteStore::instance().get_random( loot_choices );
   Cmp::RandomInt do_drop( 0, 1 );
   if ( do_drop.gen() == 0 )
   {
     auto reserved_sm = m_reserved_sm.lock();
+    // clang-format off
     auto dropped_loot_entt = Factory::Loot::create_loot_drop(
         reg(),
-        Cmp::AnimData(
-            Cmp::AnimData::Config{ .sprite_type = loot_ss.type(), .frame_index_offset = loot_ss.get_random_texture_index(), .enabled = false } ),
-        sf::FloatRect( Utils::snap_to_grid( cached_loot_container_pos ), Constants::kGridSizePxF ), Factory::IncludePack<>{},
-        Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{},
-        /*zorder_offset=*/-8.f, reserved_sm.get() );
-
+        Cmp::AnimData(Cmp::AnimData::Config{ 
+          .sprite_type = loot_ss.type(), 
+          .frame_index_offset = loot_ss.get_random_texture_index(), 
+          .enabled = false 
+        } ),
+        sf::FloatRect( Utils::snap_to_grid( cached_loot_container_pos ), Constants::kGridSizePxF ), 
+        Factory::IncludePack<>{},
+        Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 
+        // no spatial exclude for the player: they are usually overlapping the pot's tile when they smash it
+        Factory::ExcludePack<Cmp::Obstacle>{},
+        /*zorder_offset=*/-8.f, 
+        reserved_sm.get() 
+    );
+    // clang-format on
     if ( dropped_loot_entt != entt::null )
     {
-      SPDLOG_INFO( "Loot was dropped at {},{}", cached_loot_container_pos.x, cached_loot_container_pos.y );
+      SPDLOG_DEBUG( "Loot was dropped at {},{}", cached_loot_container_pos.x, cached_loot_container_pos.y );
       m_sound_bank.get_effect( "drop_loot" ).play();
     }
   }
