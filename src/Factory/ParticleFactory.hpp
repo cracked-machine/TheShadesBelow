@@ -163,6 +163,10 @@ void add_flame( entt::registry &reg, const std::string &tag, Cmp::UUID &uuid_cmp
 //! @param reg
 void add_flame_for_player_inventory_slot( entt::registry &reg );
 
+//! @brief Create a flame particle sprite for a candle spawned in the game world upon scene creation.
+//! @param reg
+void add_flame_for_world_items( entt::registry &reg, const std::string &ps_tag );
+
 //! @brief Tag of the screen-space flames created by sync_flames_for_shop_inventory().
 //! @note Deliberately does not contain "candle": RenderOverlaySystem::render_ui_particles() pins
 //! any screen-space "candle" sprite to the player inventory icon.

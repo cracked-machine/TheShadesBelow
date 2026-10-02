@@ -277,6 +277,21 @@ void add_flame_for_player_inventory_slot( entt::registry &reg )
   }
 }
 
+void add_flame_for_world_items( entt::registry &reg, const std::string &ps_tag )
+{
+  // add flame particle sprites for any candle items in the new game world. Use the Candle item UUID to initialise the ParticleSprite.
+  // Take the flame zorder from the candle (not the player) so the flame always draws just above its own candle.
+  for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp, worlditem_uuid_cmp, worlditem_zorder_cmp] :
+        reg.view<Cmp::WorldItem, Cmp::Position, Cmp::UUID, Cmp::ZOrderValue>().each() )
+  {
+    if ( worlditem_cmp.item_type != "item.candle" ) continue;
+    Factory::Particle::add_flame(
+        reg, ps_tag, worlditem_uuid_cmp,
+        { worlditem_pos_cmp.getCenter().x, worlditem_pos_cmp.getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset },
+        worlditem_zorder_cmp.get() + 1.f, Cmp::Particle::kWorldScalePreset );
+  }
+}
+
 void sync_flames_for_shop_inventory( entt::registry &reg )
 {
   std::ptrdiff_t missing = 0;

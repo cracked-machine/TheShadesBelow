@@ -182,17 +182,7 @@ void GraveyardScene::on_init()
   m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().init_hazard_field();
   m_sys.find<Sys::Store::Type::WormholeSystem>().spawn_wormhole( Sys::WormholeSystem::SpawnPhase::InitialSpawn );
 
-  // add flame particle sprites for any candle items in the new game world. Use the Candle item UUID to initialise the ParticleSprite.
-  // Take the flame zorder from the candle (not the player) so the flame always draws just above its own candle.
-  for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp, worlditem_uuid_cmp, worlditem_zorder_cmp] :
-        m_reg.view<Cmp::WorldItem, Cmp::Position, Cmp::UUID, Cmp::ZOrderValue>().each() )
-  {
-    if ( worlditem_cmp.item_type != "item.candle" ) continue;
-    Factory::Particle::add_flame(
-        m_reg, "graveyard.candle.particle.flame", worlditem_uuid_cmp,
-        { worlditem_pos_cmp.getCenter().x, worlditem_pos_cmp.getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset },
-        worlditem_zorder_cmp.get() + 1.f, Cmp::Particle::kWorldScalePreset );
-  }
+  Factory::Particle::add_flame_for_world_items( m_reg, "graveyard.candle.particle.flame" );
 }
 
 void GraveyardScene::on_enter()
