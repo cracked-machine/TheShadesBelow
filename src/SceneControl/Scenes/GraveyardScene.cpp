@@ -285,7 +285,7 @@ void GraveyardScene::do_update( sf::Time dt )
 
   PROFILED( m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::BombSystem>().update() );
-  PROFILED( m_sys.find<Sys::Store::Type::LootSystem>().check_loot_collision() );
+  PROFILED( m_sys.find<Sys::Store::Type::LootSystem>().check_loot_collision( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::NpcSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::WispSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::WispSystem>().spawn_wisp() );

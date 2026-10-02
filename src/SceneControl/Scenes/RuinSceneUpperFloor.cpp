@@ -43,9 +43,9 @@
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderOverlaySystem.hpp>
 #include <Systems/RuinSystem.hpp>
+#include <Systems/ShaderSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 #include <Systems/Threats/NpcSystem.hpp>
-#include <Systems/ShaderSystem.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -171,7 +171,7 @@ void RuinSceneUpperFloor::do_update( sf::Time dt )
   m_sys.find<Store::Type::AnimSystem>().update( dt );
   m_sys.find<Store::Type::NpcSystem>().update( dt );
   m_sys.find<Sys::Store::Type::FootstepSystem>().update();
-  m_sys.find<Store::Type::LootSystem>().check_loot_collision();
+  m_sys.find<Store::Type::LootSystem>().check_loot_collision( dt );
   m_sys.find<Store::Type::RuinSystem>().check_floor_access_collision( Cmp::Ruin::FloorAccess::Direction::TO_LOWER );
   m_sys.find<Store::Type::RuinSystem>().check_movement_slowdowns();
 

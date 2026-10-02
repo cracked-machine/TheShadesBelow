@@ -164,7 +164,7 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
       meter_inner_color = sf::Color::Red;
       should_render = true;
 
-      if ( update_flash_toggle<Cmp::FlashUIHealth>( dt, m_flash_health_ui_interval ) ) { meter_outer_color = sf::Color::Cyan; }
+      if ( update_flash_toggle<Cmp::FlashUIHealth>( dt ) ) { meter_outer_color = sf::Color::Cyan; }
     }
     else if ( meter.name == "fear_meter" )
     {
@@ -282,6 +282,30 @@ void RenderOverlaySystem::render_ui_texts()
   }
 }
 
+//! @brief Advances `interval` by `dt` while a `FlashComponent` is present on any entity, removing it once its duration has elapsed.
+//! Returns whether the UI element should currently be drawn in its "flashed" state (toggles on/off at m_ui_flash_factor ms).
+//! @tparam FlashComponent
+//! @param dt
+//! @param interval accumulated flash time; reset to zero once the flash expires
+//! @return true if the UI element should currently be drawn in its "flashed" state, false otherwise.
+template <typename FlashComponent>
+bool RenderOverlaySystem::update_flash_toggle( sf::Time dt )
+{
+  auto view = reg().view<FlashComponent>();
+  if ( view.empty() ) return false;
+
+  auto flash_entt = view.front();
+  auto &flash_cmp = view.template get<FlashComponent>( flash_entt );
+  flash_cmp.cooldown_timer += dt;
+  if ( flash_cmp.cooldown_timer >= flash_cmp.timeout() )
+  {
+    reg().remove<FlashComponent>( flash_entt );
+    flash_cmp.cooldown_timer = sf::Time::Zero;
+    return false;
+  }
+  return static_cast<int>( flash_cmp.cooldown_timer.asMilliseconds() / m_ui_flash_factor ) % 2 == 1;
+}
+
 void RenderOverlaySystem::render_ui_labels( sf::Time dt )
 {
   if ( not m_main_ui_data )
@@ -318,28 +342,28 @@ void RenderOverlaySystem::render_ui_labels( sf::Time dt )
     text.setOutlineThickness( 2.f );
 
     // flash the text if we just increased the bomb blast radius
-    if ( ui_label.name == "radius_label" and update_flash_toggle<Cmp::FlashUIRadius>( dt, m_flash_radius_ui_interval ) )
+    if ( ui_label.name == "radius_label" and update_flash_toggle<Cmp::FlashUIRadius>( dt ) )
     {
       text.setFillColor( sf::Color::White );
       text.setOutlineColor( sf::Color::White );
     }
 
     // flash the text if we just picked up a cadaver
-    if ( ui_label.name == "cadaver_label" and update_flash_toggle<Cmp::FlashUICadaver>( dt, m_flash_cadaver_ui_interval ) )
+    if ( ui_label.name == "cadaver_label" and update_flash_toggle<Cmp::FlashUICadaver>( dt ) )
     {
       text.setFillColor( sf::Color::White );
       text.setOutlineColor( sf::Color::White );
     }
 
     // flash the text if we just deposited something in a well
-    if ( ui_label.name == "wealth_label" and update_flash_toggle<Cmp::FlashUIWealth>( dt, m_flash_wealth_ui_interval ) )
+    if ( ui_label.name == "wealth_label" and update_flash_toggle<Cmp::FlashUIWealth>( dt ) )
     {
       text.setFillColor( sf::Color::White );
       text.setOutlineColor( sf::Color::White );
     }
 
     // flash the text if we just picked up a Key
-    if ( ui_label.name == "inventory_label" and update_flash_toggle<Cmp::FlashUIInventory>( dt, m_flash_inventory_ui_interval ) )
+    if ( ui_label.name == "inventory_label" and update_flash_toggle<Cmp::FlashUIInventory>( dt ) )
     {
       text.setFillColor( sf::Color::Black );
       text.setOutlineColor( sf::Color::White );

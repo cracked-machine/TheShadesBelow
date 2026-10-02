@@ -38,10 +38,10 @@
 #include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderOverlaySystem.hpp>
+#include <Systems/ShaderSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 #include <Systems/Threats/NpcSystem.hpp>
 #include <Systems/Threats/ShockwaveSystem.hpp>
-#include <Systems/ShaderSystem.hpp>
 #include <Utils/Player.hpp>
 
 namespace Game::Scene
@@ -171,7 +171,7 @@ void CryptScene::do_update( sf::Time dt )
   m_sys.find<Sys::Store::Type::AnimSystem>().update( dt );
   m_sys.find<Sys::Store::Type::NpcSystem>().update( dt );
   m_sys.find<Sys::Store::Type::FootstepSystem>().update();
-  m_sys.find<Sys::Store::Type::LootSystem>().check_loot_collision();
+  m_sys.find<Sys::Store::Type::LootSystem>().check_loot_collision( dt );
   m_sys.find<Sys::Store::Type::CryptSystem>().update( dt );
   m_sys.find<Sys::Store::Type::ShockwaveSystem>().update( dt );
   m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt );

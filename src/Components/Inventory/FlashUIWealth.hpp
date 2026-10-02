@@ -6,10 +6,14 @@ namespace Game::Cmp
 
 //! @brief Signals to the Render system to flash the UI for player wealth
 //! @note This is destroyed by the Render system.
-struct FlashUIWealth
+class FlashUIWealth
 {
-  //! @brief How long the flash effect lasts before this component is destroyed.
-  sf::Time duration{ sf::seconds( 3.f ) };
+public:
+  sf::Time cooldown_timer{ sf::Time::Zero };
+  sf::Time timeout() { return cooldown_timeout; }
+
+private:
+  sf::Time cooldown_timeout{ sf::seconds( 3.f ) };
 };
 
 } // namespace Game::Cmp

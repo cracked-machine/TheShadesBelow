@@ -85,29 +85,8 @@ private:
   //! @param size
   void render_crypt_maze_timer( sf::Vector2f pos, unsigned int size );
 
-  //! @brief Advances `interval` by `dt` while a `FlashComponent` is present on any entity, removing it once its duration has elapsed.
-  //! Returns whether the UI element should currently be drawn in its "flashed" state (toggles on/off at m_ui_flash_factor ms).
-  //! @tparam FlashComponent
-  //! @param dt
-  //! @param interval accumulated flash time; reset to zero once the flash expires
-  //! @return true if the UI element should currently be drawn in its "flashed" state, false otherwise.
   template <typename FlashComponent>
-  bool update_flash_toggle( sf::Time dt, sf::Time &interval )
-  {
-    auto view = reg().view<FlashComponent>();
-    if ( view.empty() ) return false;
-
-    auto flash_entt = view.front();
-    auto &flash_cmp = view.template get<FlashComponent>( flash_entt );
-    interval += dt;
-    if ( flash_cmp.duration != sf::Time::Zero and interval > flash_cmp.duration )
-    {
-      reg().remove<FlashComponent>( flash_entt );
-      interval = sf::Time::Zero;
-      return false;
-    }
-    return static_cast<int>( interval.asMilliseconds() / m_ui_flash_factor ) % 2 == 1;
-  }
+  bool update_flash_toggle( sf::Time dt );
 
   //! @brief Draw a list of UI outline rectangles (panel borders).
   //! @param outlines
@@ -130,21 +109,6 @@ private:
 
   //! @brief Layout data object for the shop scene overlay
   std::unique_ptr<Render::UiData> m_shop_ui_data;
-
-  //! @brief Used to flash the UI wealth text
-  sf::Time m_flash_wealth_ui_interval;
-
-  //! @brief Used to flash the UI health text
-  sf::Time m_flash_health_ui_interval;
-
-  //! @brief Used to flash the UI cadaver text
-  sf::Time m_flash_cadaver_ui_interval;
-
-  //! @brief Used to flash the UI inevntory text
-  sf::Time m_flash_inventory_ui_interval;
-
-  //! @brief Used to flash the UI radius text
-  sf::Time m_flash_radius_ui_interval;
 
   //! @brief Screen flash frequency
   int m_ui_flash_factor{ 300 };

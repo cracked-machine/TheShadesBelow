@@ -3,20 +3,11 @@
 
 #include <Components/Font.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
-#include <Shaders/TitleScreenShader.hpp>
-#include <Sprites/SpriteSheet.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Render/ZOrderQueue.hpp>
-#include <Utils/Constants.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Optimizations.hpp>
 
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/Rect.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/RenderTarget.hpp>
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/Sprite.hpp>
-#include <SFML/Graphics/Text.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <entt/entity/fwd.hpp>
 #include <functional>

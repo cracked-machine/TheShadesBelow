@@ -6,10 +6,14 @@ namespace Game::Cmp
 
 //! @brief Signals to the Render system to flash the UI for player health
 //! @note This is destroyed by the Render system.
-struct FlashUIHealth
+class FlashUIHealth
 {
-  //! @brief How long the flash effect lasts before this component is destroyed.
-  sf::Time duration{ sf::Time::Zero };
+public:
+  sf::Time cooldown_timer{ sf::Time::Zero };
+  sf::Time timeout() { return cooldown_timeout; }
+
+private:
+  sf::Time cooldown_timeout{ sf::seconds( 3.f ) };
 };
 
 } // namespace Game::Cmp

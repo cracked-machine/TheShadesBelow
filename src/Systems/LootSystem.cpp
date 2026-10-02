@@ -1,24 +1,21 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/AnimData.hpp>
-#include <Components/Armable.hpp>
 #include <Components/Inventory/FlashUICadaver.hpp>
+#include <Components/Inventory/FlashUIHealth.hpp>
+#include <Components/Inventory/FlashUIInventory.hpp>
 #include <Components/Inventory/FlashUIRadius.hpp>
+#include <Components/Inventory/FlashUIWealth.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/WearLevel.hpp>
-#include <Components/Inventory/WorldItem.hpp>
-#include <Components/Persistent/BombBonus.hpp>
+#include <Components/Loot.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
-#include <Components/Player/KeysCount.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
-#include <Components/Stats/BaseAction.hpp>
-#include <Components/ZOrderValue.hpp>
 #include <Events/CryptRoomEvent.hpp>
-#include <Events/UnlockDoorEvent.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Systems/LootSystem.hpp>
 #include <Systems/PersistSystem.hpp>
@@ -36,7 +33,7 @@ LootSystem::LootSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
   SPDLOG_DEBUG( "LootSystem initialized" );
 }
 
-void LootSystem::check_loot_collision()
+void LootSystem::check_loot_collision( sf::Time dt )
 {
   // Store both loot effects and the player velocities
   struct LootEffect
@@ -55,11 +52,14 @@ void LootSystem::check_loot_collision()
     auto player_hitbox = Cmp::RectBounds::scaled( pc_pos_cmp.position, pc_pos_cmp.size, 0.5f );
     for ( auto [loot_entt, loot_cmp, loot_pos_cmp, loot_sprite_anim] : reg().view<Cmp::Loot, Cmp::Position, Cmp::AnimData>().each() )
     {
-      if ( not Utils::is_visible_in_view( view_bounds, loot_pos_cmp ) ) continue;
+      // always update the loot timer, even off screen loot
+      loot_cmp.cooldown_timer += dt;
 
-      if ( pc_pos_cmp.findIntersection( loot_pos_cmp ) )
+      // only process on-screen loot
+      if ( not Utils::is_visible_in_view( view_bounds, loot_pos_cmp ) ) continue;
+      if ( pc_pos_cmp.findIntersection( loot_pos_cmp ) and loot_cmp.cooldown_timer >= loot_cmp.timeout() )
       {
-        // Store effect to apply after collision detection
+        // Store effect to apply after collision detection. Don't bother reseting the cmp timer, we're about to destroy the cmp.
         loot_effects.push_back( { loot_entt, loot_sprite_anim.m_sprite_type, pc_entt } );
       }
     }
@@ -82,6 +82,10 @@ void LootSystem::check_loot_collision()
     {
       auto &health_bonus = Sys::PersistSystem::get<Cmp::Persist::HealthBonus>( reg() );
 
+      // signal UI to flash
+      auto flash_entt = reg().create();
+      reg().emplace_or_replace<Cmp::FlashUIHealth>( flash_entt );
+
       Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ health_bonus.get_value() }, {}, {}, {}, {}, {} } );
       collect_loot( effect.loot_entity );
     }
@@ -100,6 +104,11 @@ void LootSystem::check_loot_collision()
             // increase weapon level by 50, up to max level 100
             wear_level_cmp->m_level = std::clamp( wear_level_cmp->m_level + 50.f, 0.f, 100.f );
             collect_loot( effect.loot_entity );
+
+            // signal UI to flash
+            auto flash_entt = reg().create();
+            reg().emplace_or_replace<Cmp::FlashUIInventory>( flash_entt );
+
             break; // only repair (and consume) one tool per loot pickup
           }
         }
@@ -148,6 +157,10 @@ void LootSystem::check_loot_collision()
         SPDLOG_WARN( "Player entt has no component: Cmp::Player::Wealth" );
         continue;
       }
+      // signal UI to flash
+      auto flash_entt = reg().create();
+      reg().emplace_or_replace<Cmp::FlashUIWealth>( flash_entt );
+
       wealth_cmp->wealth += 1;
       collect_loot( effect.loot_entity );
     }

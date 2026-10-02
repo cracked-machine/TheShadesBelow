@@ -25,7 +25,7 @@ public:
   void on_resume() override {}
 
   //! @brief Check for player collision with loot items i.e. player picks up loot
-  void check_loot_collision();
+  void check_loot_collision( sf::Time dt );
 
 private:
 };

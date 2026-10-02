@@ -1,16 +1,20 @@
 #ifndef SRC_COMPONENTS_LOOT_HPP__
 #define SRC_COMPONENTS_LOOT_HPP__
 
-#include <Sprites/SpriteSheet.hpp>
+#include <SFML/System/Time.hpp>
 
 namespace Game::Cmp
 {
 
 //! @brief Mark an entity as a dropped loot item
-struct Loot
+class Loot
 {
-  //! @brief Whether this loot item is currently active/available.
-  [[maybe_unused]] bool active = true;
+public:
+  sf::Time cooldown_timer{ sf::Time::Zero };
+  sf::Time timeout() { return cooldown_timeout; }
+
+private:
+  sf::Time cooldown_timeout{ sf::seconds( 1.f ) };
 };
 
 } // namespace Game::Cmp
