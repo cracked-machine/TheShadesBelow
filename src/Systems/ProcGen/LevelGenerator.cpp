@@ -173,11 +173,13 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
   }
 
   // clang-format off
-  // Multiblock layer
+  // Multiblock layer - only builds sprites from the tiled layer if they are explicitly included below
   using MultiblockFactoryFn = std::function<entt::entity( entt::registry &, sf::Vector2f, const Sprites::SpriteSheet & )>;
   const std::unordered_map<std::string, MultiblockFactoryFn> kMultiblockFactories{
       { "sprite.graveyard.healingspring", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
         { return Factory::Multiblock::add_multiblock_with_segments<Cmp::HealingSpringMultiBlock, Cmp::HealingSpringSegment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
+      { "sprite.graveyard.altar.inactive", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
+        { return Factory::Multiblock::add_multiblock_with_segments<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
       { "sprite.crypt.objective.closed",[this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
         { return Factory::Multiblock::add_multiblock_with_segments<Cmp::Crypt::ObjectiveMultiBlock, Cmp::Crypt::ObjectiveSegment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
       { "sprite.crypt.altar.inactive", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )

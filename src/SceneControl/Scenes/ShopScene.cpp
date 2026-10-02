@@ -21,6 +21,7 @@
 #include <SceneControl/Events/ProcessShopSceneInputEvent.hpp>
 #include <SceneControl/SceneData.hpp>
 #include <SceneControl/Scenes/ShopScene.hpp>
+#include <Systems/AltarSystem.hpp>
 #include <Systems/AnimSystem.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
@@ -144,6 +145,7 @@ void ShopScene::do_update( [[maybe_unused]] sf::Time dt )
   m_sys.find<Sys::Store::Type::ShopSystem>().check_exit_collision();
   m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
   m_sys.find<Sys::Store::Type::InventorySystem>().update( dt );
+  m_sys.find<Sys::Store::Type::AltarSystem>().update( dt );
 
   if ( m_scene_data )
   {
