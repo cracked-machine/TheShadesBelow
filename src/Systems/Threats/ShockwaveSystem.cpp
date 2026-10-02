@@ -7,6 +7,7 @@
 #include <Components/Persistent/PcDamageDelay.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/TookDamage.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/UUID.hpp>
@@ -158,7 +159,7 @@ void ShockwaveSystem::check_shockwave_player_collision()
         continue;
       if ( intersects_with_visible_segments( shockwave, player_pos ) )
       {
-
+        reg().emplace_or_replace<Cmp::Player::TookDamage>( player_entity );
         Utils::Player::apply_action_from_npc_store<Cmp::ProjectileAction>( reg(), "npc.priest" );
         player_cmp.skip_damage_cooldown_once = false;
         m_sound_bank.get_effect( "damage_player" ).play();

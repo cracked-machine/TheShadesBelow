@@ -105,6 +105,9 @@ void RuinSceneUpperFloor::on_init()
   m_reg.emplace<Sprites::Containers::VertexFloor>( floor_entity, floortiles );
   m_reg.emplace<Cmp::ZOrderValue>( floor_entity, -16.f );
 
+  Factory::Shader::add_red_vignette( m_sys.find<Sys::Store::Type::ShaderSystem>(),
+                                     Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
+
   // create navmeshes for pathfinding
   m_generic_npc_navmesh = Factory::Pathfinding::create_npc_navmesh( m_reg );
   m_open_navmesh = Factory::Pathfinding::create_open_navmesh( m_reg );

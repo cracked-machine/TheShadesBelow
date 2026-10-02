@@ -98,6 +98,9 @@ void CryptScene::on_init()
   m_sys.find<Sys::Store::Type::CryptSystem>().cache_all_room_connections();
   m_sys.find<Sys::Store::Type::CryptSystem>().gen_crypt_initial_interior();
 
+  Factory::Shader::add_red_vignette( m_sys.find<Sys::Store::Type::ShaderSystem>(),
+                                     Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
+
   // create navmeshes for pathfinding
   m_generic_npc_navmesh = Factory::Pathfinding::create_npc_navmesh( m_reg );
   m_open_navmesh = Factory::Pathfinding::create_open_navmesh( m_reg );
