@@ -14,6 +14,7 @@
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
 
+#include <Components/SpawnArea.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/PlayerActionEvent.hpp>
@@ -58,7 +59,7 @@ void ExitSystem::create_exit()
   bool found_valid_position = false;
   for ( int attempt_count = 0; attempt_count < kMaxAttempts; ++attempt_count )
   {
-    auto exclude_list = Utils::Rnd::ExcludePack<Cmp::Wall, Cmp::Exit, Cmp::Player::Character, Cmp::Npc::NPC>{};
+    auto exclude_list = Utils::Rnd::ExcludePack<Cmp::Wall, Cmp::Exit, Cmp::Player::Character, Cmp::Npc::NPC, Cmp::SpawnArea>{};
     auto [rand_entity, rand_pos_cmp] = Utils::Rnd::get_random_position( reg(), {}, exclude_list, 0 );
     if ( reserved_sm && not reserved_sm->at( rand_pos_cmp ).empty() ) continue;
     Cmp::Position multiblock_hitbox( rand_pos_cmp.position, kGraveExitSpritesheet.sprite_size() );
@@ -72,7 +73,18 @@ void ExitSystem::create_exit()
         break;
       }
     }
-    if ( not collides_with_wall )
+
+    bool collides_with_spawnarea = false;
+    for ( auto [spawnarea_entt, spawnarea_cmp, spawnarea_pos_cmp] : reg().view<Cmp::SpawnArea, Cmp::Position>().each() )
+    {
+      if ( multiblock_hitbox.findIntersection( spawnarea_pos_cmp ) )
+      {
+        collides_with_spawnarea = true;
+        break;
+      }
+    }
+
+    if ( not collides_with_wall and not collides_with_spawnarea )
     {
       selected_entity = rand_entity;
       selected_pos_cmp = rand_pos_cmp;
