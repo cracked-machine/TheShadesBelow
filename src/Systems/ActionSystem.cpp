@@ -85,6 +85,7 @@ void ActionSystem::update( [[maybe_unused]] sf::Time dt )
   Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.obstacle.particle.dig" );
   Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.plant.particle.leaves" );
   Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.plant.particle.twigs" );
+  Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.pot.particle.twigs" );
 
   update_burning_worlditems( dt );
 
@@ -444,6 +445,10 @@ void ActionSystem::check_player_smash_pot()
   }
 
   if ( not loot_container_destroyed ) return;
+
+  auto pot_particle_uuid = Cmp::UUID::generate();
+  Factory::Particle::add_pot_ps( reg(), "graveyard.pot.particle.dig", 20, 2.f, 50.f, 10.f, pot_particle_uuid, cached_loot_container_pos,
+                                 cached_loot_container_pos.y );
 
   // drop loot - 50% chance
   auto loot_choices = std::vector<Sys::SpriteKey>{ "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" };
