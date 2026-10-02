@@ -27,6 +27,7 @@
 #include <Components/Toxicity/Venom.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Factory/ParticleFactory.hpp>
 #include <SceneControl/Scenes/CryptScene.hpp>
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -403,6 +404,21 @@ void RenderOverlaySystem::render_shop_inventory_overlay()
   // Draw all UI outlines
   render_outlines( m_shop_ui_data->m_outlines );
 
+  // The shop flames are an unassigned pool (see Factory::Particle::sync_flames_for_shop_inventory):
+  // each candle slot just takes the next unused one.
+  auto flame_view = reg().view<Cmp::Particle::SpriteOwner>();
+  auto flame_it = flame_view.begin();
+  auto next_slot_flame = [&]() -> Cmp::Particle::SpriteOwner *
+  {
+    while ( flame_it != flame_view.end() )
+    {
+      auto &owner = flame_view.get<Cmp::Particle::SpriteOwner>( *flame_it );
+      ++flame_it;
+      if ( owner.sprite and owner.sprite->get_tag() == Factory::Particle::kShopSlotFlameTag ) return &owner;
+    }
+    return nullptr;
+  };
+
   // Draw all UI Icons
   for ( auto [icon, slot] : std::views::zip( m_shop_ui_data->m_icons, inventory_cmp.m_slots ) )
   {
@@ -418,6 +434,22 @@ void RenderOverlaySystem::render_shop_inventory_overlay()
     }
 
     RenderSystem::safe_render_sprite_screen( sprite_type, sprite_pos, 0, sprite_scale );
+
+    if ( item != "item.candle" ) continue;
+    auto *flame_owner = next_slot_flame();
+    if ( not flame_owner ) continue;
+    auto &flame = *flame_owner->sprite;
+    // same wick offset as the player inventory icon in render_ui_particles()
+    const sf::Vector2f emitter_pos{ icon.rect.position.x + ( icon.scale * 8.f ), icon.rect.position.y + ( icon.scale * 6.f ) };
+    if ( flame.get_emitter_position() != emitter_pos )
+    {
+      // slots shift when an item is bought: drop the particles still rising from the old position
+      flame.set_emitter_position( emitter_pos );
+      flame.clear();
+    }
+    flame.set_view_transform( m_window, m_window.getDefaultView() );
+    flame.restart();
+    draw_screen( flame );
   }
 
   //! @brief Helper to draw predefined `sf_text` at `pos`

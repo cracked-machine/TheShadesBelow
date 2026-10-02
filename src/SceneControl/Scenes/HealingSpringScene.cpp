@@ -9,8 +9,8 @@
 #include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/SceneSettings/ShowNavmesh.hpp>
 #include <Components/SceneSettings/ShowPathFinding.hpp>
-
 #include <Factory/MultiblockFactory.hpp>
+#include <Factory/ParticleFactory.hpp>
 #include <Factory/PathfindingFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
@@ -120,6 +120,9 @@ void HealingSpringScene::on_enter()
 
   // Set the default footstep SFX for this scene
   m_reg.emplace_or_replace<Cmp::Player::Footstep>( Utils::Player::get_entity( m_reg ), Cmp::Player::Footstep::Type::STONE );
+
+  // check if the player inventory has a candle, if so light it up!
+  Factory::Particle::add_flame_for_player_inventory_slot( m_reg );
 }
 
 void HealingSpringScene::on_exit()

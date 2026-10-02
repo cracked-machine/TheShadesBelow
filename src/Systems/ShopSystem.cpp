@@ -5,6 +5,7 @@
 #include <Components/Player/Wealth.hpp>
 #include <Components/Shop/Inventory.hpp>
 #include <Events/DropInventoryEvent.hpp>
+#include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>
 #include <Systems/PersistSystem.hpp>
@@ -31,6 +32,7 @@ void ShopSystem::create_shop_inventory()
 
   auto shop_inventory_entt = reg().create();
   reg().emplace_or_replace<Cmp::Shop::Inventory>( shop_inventory_entt, shop_inventory_cmp );
+  Factory::Particle::sync_flames_for_shop_inventory( reg() );
 }
 
 void ShopSystem::add_shop_inventory_item( Cmp::Shop::Inventory &shop_inventory_cmp )
@@ -103,6 +105,8 @@ void ShopSystem::buy_shop_item( uint8_t item_idx )
 
       // add new carryitem into player inventory
       Factory::Player::add_inventory( reg(), item );
+      // check if the player inventory has a candle, if so light it up!
+      Factory::Particle::add_flame_for_player_inventory_slot( m_reg );
 
       // delete item from shop inventory
       auto &slots = inventory_cmp.m_slots;
@@ -120,6 +124,9 @@ void ShopSystem::buy_shop_item( uint8_t item_idx )
       add_shop_inventory_item( inventory_cmp );
     }
   }
+
+  // the stock may have gained or lost a candle
+  Factory::Particle::sync_flames_for_shop_inventory( reg() );
 }
 
 } // namespace Game::Sys

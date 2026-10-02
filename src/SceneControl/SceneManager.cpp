@@ -45,7 +45,7 @@ void SceneManager::update( sf::Time dt )
   m_scene_stack.current().update( dt );
   m_window.display();
 
-  // Now safely consume any deferred events outside of Scene::update()
+  // Now safely consume any deferred events queued by Scene::update()
   if ( m_nav_event_dispatcher.size() > 0 ) { m_nav_event_dispatcher.update(); }
   if ( m_scenemanager_event_dispatcher.size() > 0 ) { m_scenemanager_event_dispatcher.update(); }
 }
@@ -54,7 +54,7 @@ void SceneManager::push( std::unique_ptr<IScene> new_scene, RegCopyMode mode )
 {
   RegistryTransfer::RegCopy reg_copy = nullptr;
 
-  // in case this is the first scene pushed, avoid using empty stack front
+  // in case this is the first scene pushed, avoid calling front on empty stack
   if ( not m_scene_stack.empty() )
   {
     reg_copy = m_reg_xfer.copy_reg( m_scene_stack.current(), mode );
@@ -81,7 +81,7 @@ void SceneManager::push_no_exit( std::unique_ptr<IScene> new_scene, RegCopyMode 
 {
   RegistryTransfer::RegCopy reg_copy = nullptr;
 
-  // in case this is the first scene pushed, avoid using empty stack front
+  // in case this is the first scene pushed, avoid calling front on empty stack
   if ( not m_scene_stack.empty() ) { reg_copy = m_reg_xfer.copy_reg( m_scene_stack.current(), mode ); }
 
   m_scene_stack.push( std::move( new_scene ) );

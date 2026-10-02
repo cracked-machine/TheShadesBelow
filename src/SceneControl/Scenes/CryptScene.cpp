@@ -113,13 +113,15 @@ void CryptScene::on_init()
   m_reg.emplace<Sprites::Containers::VertexFloor>( floor_entity, floortiles );
   m_reg.emplace<Cmp::ZOrderValue>( floor_entity, -16.f );
 
-  for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp, worlditem_uuid_cmp] : m_reg.view<Cmp::WorldItem, Cmp::Position, Cmp::UUID>().each() )
+  // The player has not been moved to the start position yet, so take the flame zorder from the candle (not the player).
+  for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp, worlditem_uuid_cmp, worlditem_zorder_cmp] :
+        m_reg.view<Cmp::WorldItem, Cmp::Position, Cmp::UUID, Cmp::ZOrderValue>().each() )
   {
     if ( worlditem_cmp.item_type != "item.candle" ) continue;
     Factory::Particle::add_flame(
         m_reg, "crypt.candle.particle.flame", worlditem_uuid_cmp,
         { worlditem_pos_cmp.getCenter().x, worlditem_pos_cmp.getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset },
-        Utils::Player::get_position( m_reg ).y() - 1, Cmp::Particle::kWorldScalePreset );
+        worlditem_zorder_cmp.get() + 1.f, Cmp::Particle::kWorldScalePreset );
   }
 }
 
@@ -150,6 +152,9 @@ void CryptScene::on_enter()
 
   // Set the default footstep SFX for this scene
   m_reg.emplace_or_replace<Cmp::Player::Footstep>( Utils::Player::get_entity( m_reg ), Cmp::Player::Footstep::Type::STONE );
+
+  // check if the player inventory has a candle, if so light it up!
+  Factory::Particle::add_flame_for_player_inventory_slot( m_reg );
 
   // Hide the sudden position update/camera pan behind a forced loading screen.
   std::this_thread::sleep_for( std::chrono::seconds( 1 ) );

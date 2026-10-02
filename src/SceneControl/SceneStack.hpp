@@ -54,7 +54,7 @@ public:
   //! @brief Safe access to current scene
   //! @note Throws std::runtime_error if the stack is empty.
   //! @return const IScene&
-  const IScene &current() const
+  [[nodiscard]] const IScene &current() const
   {
     if ( m_stack.empty() ) { throw std::runtime_error( "SceneStack::current: No current scene available" ); }
     return *m_stack.back();
@@ -62,11 +62,11 @@ public:
 
   //! @brief Check whether the stack has no scenes.
   //! @return bool
-  bool empty() const noexcept { return m_stack.empty(); }
+  [[nodiscard]] bool empty() const noexcept { return m_stack.empty(); }
 
   //! @brief Get the number of scenes on the stack.
   //! @return std::size_t
-  std::size_t size() const noexcept { return m_stack.size(); }
+  [[nodiscard]] std::size_t size() const noexcept { return m_stack.size(); }
 
   //! @brief Safe access to previous scene (for overlays)
   //! @return IScene* The scene beneath the current one, or nullptr if there is no such scene.
@@ -74,14 +74,14 @@ public:
 
   //! @brief Safe access to previous scene (for overlays)
   //! @return const IScene* The scene beneath the current one, or nullptr if there is no such scene.
-  const IScene *previous() const { return ( m_stack.size() >= 2 ) ? m_stack[m_stack.size() - 2].get() : nullptr; }
+  [[nodiscard]] const IScene *previous() const { return ( m_stack.size() >= 2 ) ? m_stack[m_stack.size() - 2].get() : nullptr; }
 
   //! @brief Iterator access for debugging/logging (read-only)
   //! @return Iterator to the bottom of the stack.
-  auto begin() const { return m_stack.begin(); }
+  [[nodiscard]] auto begin() const { return m_stack.begin(); }
   //! @brief Iterator access for debugging/logging (read-only)
   //! @return Iterator past the top of the stack.
-  auto end() const { return m_stack.end(); }
+  [[nodiscard]] auto end() const { return m_stack.end(); }
 
   //! @brief Log the current stack contents (index and scene name), top-most last, via SPDLOG_INFO.
   void print_stack()
@@ -89,7 +89,7 @@ public:
     std::stringstream ss;
     for ( std::size_t i = 0; i < m_stack.size(); ++i )
     {
-      auto s = m_stack[i].get();
+      auto *s = m_stack[i].get();
       ss << "[" << i << "] " << s->get_name() << " ";
     }
     ss << "(top)";

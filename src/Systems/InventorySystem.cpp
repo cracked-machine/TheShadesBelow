@@ -220,7 +220,8 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
       {
         ps_owner.sprite->set_view_type( Cmp::Particle::ViewType::WORLD );
         ps_owner.sprite->set_scale( Cmp::Particle::kWorldScalePreset );
-        reg().emplace_or_replace<Cmp::ZOrderValue>( ps_entt, Utils::Player::get_position( reg() ).y() - 1 );
+        // one above the dropped item zorder so the flame never ties with its own candle
+        reg().emplace_or_replace<Cmp::ZOrderValue>( ps_entt, pos.y );
       }
     }
     reg().emplace_or_replace<Cmp::UUID>( world_item_entt, uuid_cmp->data );

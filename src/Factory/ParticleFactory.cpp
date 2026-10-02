@@ -18,6 +18,7 @@
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
+#include <Components/Shop/Inventory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <SFML/System/Angle.hpp>
 #include <SFML/System/Time.hpp>
@@ -25,6 +26,7 @@
 #include <Utils/Maths.hpp>
 #include <Utils/Player.hpp>
 
+#include <algorithm>
 #include <entt/entity/fwd.hpp>
 
 namespace Game::Factory::Particle
@@ -254,12 +256,10 @@ void add_skelebones_ps( entt::registry &reg, const std::string &tag, int particl
 void add_flame_for_player_inventory_slot( entt::registry &reg )
 {
   // Add a flame ParticleSprite for a candle in the player inventory
-  SPDLOG_DEBUG( "add_flame_for_player_inventory_slot: {} PlayerInventorySlot+UUID entities present",
-                reg.view<Cmp::PlayerInventorySlot, Cmp::UUID>().size_hint() );
   for ( auto [inventory_entt, inventory_cmp, inventory_uuid_cmp] : reg.view<Cmp::PlayerInventorySlot, Cmp::UUID>().each() )
   {
-    SPDLOG_DEBUG( "add_flame_for_player_inventory_slot: candidate slot sprite_type={}", inventory_cmp.m_item.sprite_type );
     if ( inventory_cmp.m_item.item_type != "item.candle" ) continue;
+
     Factory::Particle::add_flame( reg, "ui.candle.particle.flame", inventory_uuid_cmp, Utils::Player::get_position( reg ).getCenter(), 50000,
                                   Cmp::Particle::kUiScalePreset );
     SPDLOG_DEBUG( "add_flame_for_player_inventory_slot: created flame for candle uuid {}", inventory_uuid_cmp.str() );
@@ -274,6 +274,37 @@ void add_flame_for_player_inventory_slot( entt::registry &reg )
       ps_owner.sprite->clear();
       ps_owner.sprite->set_view_type( Cmp::Particle::ViewType::SCREEN );
     }
+  }
+}
+
+void sync_flames_for_shop_inventory( entt::registry &reg )
+{
+  std::ptrdiff_t missing = 0;
+  for ( auto [inventory_entt, inventory_cmp] : reg.view<Cmp::Shop::Inventory>().each() )
+  {
+    missing += std::ranges::count( inventory_cmp.m_slots, "item.candle", []( const auto &slot ) { return slot.first; } );
+  }
+
+  // existing flames are reused; destroy any that no longer have a candle to sit on
+  for ( auto [ps_entt, ps_owner] : reg.view<Cmp::Particle::SpriteOwner>().each() )
+  {
+    if ( ps_owner.sprite->get_tag() != kShopSlotFlameTag ) continue;
+    if ( --missing < 0 ) reg.destroy( ps_entt );
+  }
+
+  for ( ; missing > 0; --missing )
+  {
+    auto uuid_cmp = Cmp::UUID::generate();
+    Factory::Particle::add_flame( reg, kShopSlotFlameTag, uuid_cmp, { 0.f, 0.f }, 50000, Cmp::Particle::kUiScalePreset );
+  }
+
+  for ( auto [ps_entt, ps_owner] : reg.view<Cmp::Particle::SpriteOwner>().each() )
+  {
+    if ( ps_owner.sprite->get_tag() != kShopSlotFlameTag ) continue;
+    if ( ps_owner.sprite->get_view_type() == Cmp::Particle::ViewType::SCREEN ) continue;
+    // The emitter position is set by RenderOverlaySystem using the UiData object.
+    ps_owner.sprite->clear();
+    ps_owner.sprite->set_view_type( Cmp::Particle::ViewType::SCREEN );
   }
 }
 

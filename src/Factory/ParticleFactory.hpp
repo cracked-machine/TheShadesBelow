@@ -3,6 +3,7 @@
 
 #include <SFML/System/Vector2.hpp>
 #include <entt/entity/fwd.hpp>
+#include <string>
 
 // clang-format off
 namespace Game::Cmp { class UUID; class ZOrderValue; }
@@ -161,6 +162,18 @@ void add_flame( entt::registry &reg, const std::string &tag, Cmp::UUID &uuid_cmp
 //! switching it to render in the UI/inventory view instead of the game world.
 //! @param reg
 void add_flame_for_player_inventory_slot( entt::registry &reg );
+
+//! @brief Tag of the screen-space flames created by sync_flames_for_shop_inventory().
+//! @note Deliberately does not contain "candle": RenderOverlaySystem::render_ui_particles() pins
+//! any screen-space "candle" sprite to the player inventory icon.
+inline const std::string kShopSlotFlameTag{ "ui.shopslot.particle.flame" };
+
+//! @brief Make the number of screen-space shop flames match the number of candles currently stocked in
+//! the shop inventory, creating or destroying flames as needed. Call whenever the shop stock changes.
+//! The flames are not bound to a slot or position: RenderOverlaySystem::render_shop_inventory_overlay()
+//! hands one to each candle slot and positions it over the icon each frame.
+//! @param reg
+void sync_flames_for_shop_inventory( entt::registry &reg );
 
 //! @brief Spawn a smoke particle effect.
 //! @param reg
