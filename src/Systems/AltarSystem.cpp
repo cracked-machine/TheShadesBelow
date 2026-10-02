@@ -124,6 +124,21 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
     reg().emplace_or_replace<Cmp::FlashUIWealth>( flash_entt );
   }
 
+  // sacrifice spent tools at any time
+  if ( sacrifice_type.contains( "item.axe" ) or sacrifice_type.contains( "item.pickaxe" ) or sacrifice_type.contains( "item.shovel" ) )
+  {
+    if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 )
+    {
+      SPDLOG_INFO( "Player made an offering: {}", sacrifice_type );
+      common_activation( SacrificeAnimType::JEWELS );
+      auto &player_wealth = Utils::Player::get_wealth( reg() );
+      player_wealth.wealth += 2;
+      // signal UI to flash
+      auto flash_entt = reg().create();
+      reg().emplace_or_replace<Cmp::FlashUIWealth>( flash_entt );
+    }
+  }
+
   // sacrifice witches jar at any time
   if ( sacrifice_type.contains( "item.witchesjar" ) )
   {
