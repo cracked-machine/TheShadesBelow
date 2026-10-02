@@ -434,36 +434,35 @@ void CryptSystem::check_chest_activation( Events::PlayerActionEvent::GameActions
 {
   if ( action != Events::PlayerActionEvent::GameActions::ACTIVATE ) return;
 
-  auto player_view = reg().view<Cmp::Player::Character, Cmp::Position>();
+  auto pc_pos_cmp = Utils::Player::get_position( reg() );
+  auto player_hitbox = Cmp::RectBounds::scaled( pc_pos_cmp.position, Constants::kGridSizePxF, 1.5f );
+
   auto chest_view = reg().view<Cmp::Crypt::Chest, Cmp::Position, Cmp::AnimData>();
-
-  for ( auto [pc_entity, pc_cmp, pc_pos_cmp] : player_view.each() )
+  for ( auto [chest_entt, chest_cmp, chest_pos_cmp, chest_anim_cmp] : chest_view.each() )
   {
-    auto player_hitbox = Cmp::RectBounds::scaled( pc_pos_cmp.position, Constants::kGridSizePxF, 1.5f );
-    for ( auto [chest_entt, chest_cmp, chest_pos_cmp, chest_anim_cmp] : chest_view.each() )
-    {
-      // prevent player from spamming chest twice
-      if ( chest_cmp.open ) continue;
-      if ( not player_hitbox.findIntersection( chest_pos_cmp ) ) continue;
+    // prevent player from spamming chest twice
+    if ( chest_cmp.open ) continue;
+    if ( not player_hitbox.findIntersection( chest_pos_cmp ) ) continue;
 
-      chest_cmp.open = true;
-      chest_anim_cmp.m_enabled = true;
-      m_sound_bank.get_effect( "crypt_chest_open" ).play();
+    chest_cmp.open = true;
+    chest_anim_cmp.m_enabled = true;
+    m_sound_bank.get_effect( "crypt_chest_open" ).play();
 
-      // clang-format off
-      auto reserved_sm = m_reserved_sm.lock();
-      auto loot_entt = Factory::Loot::create_loot_drop(
-        reg(),
-        Cmp::AnimData( Cmp::AnimData::Config{ .sprite_type = "sprite.crypt.loot.gold", .enabled = true}),
-        Cmp::RectBounds::scaled( chest_pos_cmp, 3.f ).getBounds(),
-        Factory::IncludePack<>{},
-        Factory::ExcludePack<Cmp::Player::Character, Cmp::Crypt::Chest, Cmp::Crypt::RoomLavaPitCell, Cmp::Crypt::PassageBlock, Cmp::Wall, Cmp::Obstacle>{} ,
-        Factory::ExcludePack<Cmp::Player::Character, Cmp::Crypt::Chest, Cmp::Crypt::RoomLavaPitCell, Cmp::Crypt::PassageBlock, Cmp::Wall, Cmp::Obstacle>{},
-        64.f, reserved_sm.get());
-      // clang-format on
+    auto reserved_sm = m_reserved_sm.lock();
+    // clang-format off
+    auto loot_entt = Factory::Loot::create_loot_drop(
+      reg(),
+      Cmp::AnimData( Cmp::AnimData::Config{ .sprite_type = "sprite.crypt.loot.gold", .enabled = true}),
+      Cmp::RectBounds::scaled( chest_pos_cmp, 3.f ).getBounds(),
+      Factory::IncludePack<>{},
+      Factory::ExcludePack<Cmp::Player::Character, Cmp::Crypt::Chest, Cmp::Crypt::RoomLavaPitCell, Cmp::Crypt::PassageBlock, Cmp::Wall, Cmp::Obstacle>{},
+      Factory::ExcludePack<Cmp::Player::Character, Cmp::Crypt::Chest, Cmp::Crypt::RoomLavaPitCell, Cmp::Crypt::PassageBlock, Cmp::Wall, Cmp::Obstacle>{},
+      64.f, 
+      reserved_sm.get()
+    );
+    // clang-format on
 
-      if ( loot_entt != entt::null ) m_sound_bank.get_effect( "drop_loot" ).play();
-    }
+    if ( loot_entt != entt::null ) m_sound_bank.get_effect( "drop_loot" ).play();
   }
 }
 

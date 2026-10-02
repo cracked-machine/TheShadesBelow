@@ -2,6 +2,7 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Crypt/Chest.hpp>
+#include <Components/Crypt/ObjectiveMultiBlock.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
@@ -86,6 +87,13 @@ void InventorySystem::swap_inventory()
   for ( auto [chest_entt, chest_cmp, chest_pos_cmp] : reg().view<Cmp::Crypt::Chest, Cmp::Position>().each() )
   {
     if ( not Utils::Player::is_player_near( reg(), chest_pos_cmp ) ) continue;
+    return;
+  }
+
+  // if player is standing next to a Cmp::Crypt::ObjectiveMultiblock let them activate it without dropping the inventory item
+  for ( auto [objective_entt, objective_mb_cmp] : reg().view<Cmp::Crypt::ObjectiveMultiBlock>().each() )
+  {
+    if ( not Utils::Player::is_player_near( reg(), objective_mb_cmp ) ) continue;
     return;
   }
 
