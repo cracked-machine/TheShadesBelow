@@ -34,8 +34,8 @@ Action make_action( const nlohmann::json &j )
 namespace Game::Sys
 {
 
-ItemStore::ItemStore()
-    : StoreSingleton<ItemStore, Cmp::WorldItem>( "res/json/items.json" )
+ItemStore::ItemStore( std::filesystem::path json_file_path )
+    : StoreSingleton<ItemStore, Cmp::WorldItem>( std::move( json_file_path ) )
 {
   init_store();
   SPDLOG_DEBUG( "ItemStore initialized" );

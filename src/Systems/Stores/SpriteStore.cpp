@@ -17,8 +17,8 @@
 namespace Game::Sys
 {
 
-SpriteStore::SpriteStore()
-    : StoreSingleton<SpriteStore, Sprites::SpriteSheet>( "res/json/spritesheets.json" )
+SpriteStore::SpriteStore( std::filesystem::path json_file_path )
+    : StoreSingleton<SpriteStore, Sprites::SpriteSheet>( std::move( json_file_path ) )
 {
   init_store();
   SPDLOG_DEBUG( "SpriteStore initialized" );

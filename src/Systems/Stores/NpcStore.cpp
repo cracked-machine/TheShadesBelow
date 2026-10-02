@@ -36,8 +36,8 @@ Action make_action( const nlohmann::json &j )
 namespace Game::Sys
 {
 
-NpcStore::NpcStore()
-    : StoreSingleton<NpcStore, Cmp::Npc::NPC>( "res/json/npc.json" )
+NpcStore::NpcStore( std::filesystem::path json_file_path )
+    : StoreSingleton<NpcStore, Cmp::Npc::NPC>( std::move( json_file_path ) )
 {
   init_store();
   SPDLOG_DEBUG( "NpcStore initialized" );

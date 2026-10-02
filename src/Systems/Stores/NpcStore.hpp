@@ -13,7 +13,8 @@ class NpcStore : public StoreSingleton<NpcStore, Cmp::Npc::NPC>
 {
 public:
   //! @brief Construct a new Npc Store object
-  NpcStore();
+  //! @param json_file_path Path of the JSON file to load; override to load a fixture (e.g. in tests).
+  explicit NpcStore( std::filesystem::path json_file_path = "res/json/npc.json" );
 
   //! @brief Destroy the Npc Store object
   ~NpcStore() {}

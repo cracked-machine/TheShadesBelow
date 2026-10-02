@@ -23,7 +23,10 @@ class StoreSingleton
 {
 public:
   //! @brief Clears the singleton instance pointer.
-  ~StoreSingleton() { s_instance = nullptr; }
+  ~StoreSingleton()
+  {
+    if ( s_instance == static_cast<Derived *>( this ) ) s_instance = nullptr;
+  }
 
   //! @brief Stores are non-copyable and non-movable: s_instance points at the single live object.
   StoreSingleton( const StoreSingleton & ) = delete;
@@ -100,9 +103,11 @@ public:
 protected:
   //! @brief Construct the store and register it as the singleton instance of Derived.
   //! @param json_file_path Path of the JSON file the derived store loads its data from.
+  //! @throws std::runtime_error if an instance of Derived already exists.
   explicit StoreSingleton( std::filesystem::path json_file_path )
       : m_json_file_path( std::move( json_file_path ) )
   {
+    if ( s_instance ) throw std::runtime_error( "Store already initialized" );
     s_instance = static_cast<Derived *>( this );
   }
 

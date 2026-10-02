@@ -13,7 +13,8 @@ class ItemStore : public StoreSingleton<ItemStore, Cmp::WorldItem>
 {
 public:
   //! @brief Construct a new Item Store object
-  ItemStore();
+  //! @param json_file_path Path of the JSON file to load; override to load a fixture (e.g. in tests).
+  explicit ItemStore( std::filesystem::path json_file_path = "res/json/items.json" );
 
   //! @brief Destroy the Item Store object
   ~ItemStore() {}
