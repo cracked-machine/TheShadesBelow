@@ -47,7 +47,6 @@
 #include <Components/Persistent/NpcWatchmanSpawnMax.hpp>
 #include <Components/Persistent/NpcWatchmanSweepAmplitude.hpp>
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
-#include <Components/Persistent/PcDamageDelay.hpp>
 #include <Components/Persistent/PlantBurnDuration.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
@@ -160,7 +159,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::NpcWatchmanSweepSpeed>();
   add_component<Cmp::Persist::NpcWatchmanSweepAmplitude>();
   add_component<Cmp::Persist::NpcWatchmanIdleDirectionChangeInterval>();
-  add_component<Cmp::Persist::PcDamageDelay>();
   add_component<Cmp::Persist::PlantBurnDuration>();
   add_component<Cmp::Persist::PlayerAnimStrideLength>();
   add_component<Cmp::Persist::PlayerDiagonalLerpSpeedModifier>();

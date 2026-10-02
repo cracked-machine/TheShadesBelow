@@ -4,7 +4,6 @@
 #include <Components/Obstacle.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
-#include <Components/Persistent/PcDamageDelay.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/TookDamage.hpp>
@@ -143,7 +142,6 @@ void ShockwaveSystem::check_shockwave_player_collision()
   if ( not Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled ) return;
 
   // we need the projectile_action modifiers for this NPC type.
-  auto &pc_damage_cooldown = Sys::PersistSystem::get<Cmp::Persist::PcDamageDelay>( reg() );
   auto player_view = reg().view<Cmp::Player::Character, Cmp::Position, Cmp::PlayerStats, Cmp::Player::Mortality>();
 
   for ( auto entt : reg().view<Cmp::Npc::Shockwave>() )
@@ -154,16 +152,14 @@ void ShockwaveSystem::check_shockwave_player_collision()
     {
       // dont spam death events if the player is already dead
       if ( player_mort_cmp.state == Cmp::Player::Mortality::State::DEAD ) continue;
-      if ( not player_cmp.skip_damage_cooldown_once &&
-           player_cmp.m_damage_cooldown_timer.getElapsedTime().asSeconds() < pc_damage_cooldown.get_value() )
-        continue;
+      if ( not player_cmp.skip_damage_cooldown_once and player_cmp.m_damage_cooldown_timer < player_cmp.damage_cooldown_timeout() ) continue;
       if ( intersects_with_visible_segments( shockwave, player_pos ) )
       {
         reg().emplace_or_replace<Cmp::Player::TookDamage>( player_entity );
         Utils::Player::apply_action_from_npc_store<Cmp::ProjectileAction>( reg(), "npc.priest" );
         player_cmp.skip_damage_cooldown_once = false;
         m_sound_bank.get_effect( "damage_player" ).play();
-        player_cmp.m_damage_cooldown_timer.restart();
+        player_cmp.m_damage_cooldown_timer = sf::Time::Zero;
         SPDLOG_INFO( "Player (health:{}) INTERSECTS with Shockwave (position: {},{} - effective_radius: {})", player_stats_cmp.health(),
                      shockwave.sprite.get_position().x, shockwave.sprite.get_position().y, shockwave.sprite.get_radius() );
 

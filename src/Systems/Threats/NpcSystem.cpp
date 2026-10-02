@@ -23,7 +23,6 @@
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
-#include <Components/Persistent/PcDamageDelay.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/TookDamage.hpp>
 #include <Components/Position.hpp>
@@ -335,7 +334,6 @@ void NpcSystem::check_once_collision()
   auto player_collision_view = reg().view<Cmp::Player::Character>();
   auto npc_collision_view = reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::Direction>( entt::exclude<Cmp::Npc::Friendly> );
 
-  auto &player_dmg_cooldown = Sys::PersistSystem::get<Cmp::Persist::PcDamageDelay>( reg() );
   auto &player_pos = Utils::Player::get_position( reg() );
   auto &player_mort = Utils::Player::get_mortality( reg() );
   const auto view_bounds = Utils::calculate_view_bounds( RenderSystem::get_world_view() );
@@ -369,9 +367,7 @@ void NpcSystem::check_once_collision()
         }
       }
 
-      if ( not player_cmp.skip_damage_cooldown_once &&
-           player_cmp.m_damage_cooldown_timer.getElapsedTime().asSeconds() < player_dmg_cooldown.get_value() )
-        continue;
+      if ( not player_cmp.skip_damage_cooldown_once && player_cmp.m_damage_cooldown_timer < player_cmp.damage_cooldown_timeout() ) continue;
 
       auto npc_collision_action = npc_cmp.at<Cmp::CollisionAction>();
       auto &[action, timer] = npc_collision_action;
@@ -387,7 +383,7 @@ void NpcSystem::check_once_collision()
 
       if ( check_player_death( player_mort ) ) return;
 
-      player_cmp.m_damage_cooldown_timer.restart();
+      player_cmp.m_damage_cooldown_timer = sf::Time::Zero;
 
       find_pushback_position( npc_dir_cmp );
     }

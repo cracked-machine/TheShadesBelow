@@ -47,7 +47,6 @@
 #include <Components/Persistent/NpcWatchmanSpawnMax.hpp>
 #include <Components/Persistent/NpcWatchmanSweepAmplitude.hpp>
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
-#include <Components/Persistent/PcDamageDelay.hpp>
 #include <Components/Persistent/PlantBurnDuration.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
@@ -200,7 +199,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::DiggingCooldownThreshold>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::PcDamageDelay>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::CameraSmoothSpeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerLerpInterruptThreshold>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PostPullMovementDelay>( reg() ).render_widget();

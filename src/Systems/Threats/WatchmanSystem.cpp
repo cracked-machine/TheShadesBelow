@@ -15,7 +15,6 @@
 #include <Components/Persistent/NpcWatchmanSpawnMax.hpp>
 #include <Components/Persistent/NpcWatchmanSweepAmplitude.hpp>
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
-#include <Components/Persistent/PcDamageDelay.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>
@@ -247,16 +246,12 @@ void WatchmanSystem::check_gunfire_player_collision()
 {
   if ( not Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled ) return;
 
-  auto &pc_damage_cooldown = Sys::PersistSystem::get<Cmp::Persist::PcDamageDelay>( reg() );
-
   auto player_view = reg().view<Cmp::Player::Character, Cmp::Position, Cmp::PlayerStats, Cmp::Player::Mortality>();
   for ( auto [player_entt, player_cmp, player_pos_cmp, player_stats_cmp, player_mort_cmp] : player_view.each() )
   {
     // don't spam death events if the player is already dead
     if ( player_mort_cmp.state == Cmp::Player::Mortality::State::DEAD ) continue;
-    if ( not player_cmp.skip_damage_cooldown_once &&
-         player_cmp.m_damage_cooldown_timer.getElapsedTime().asSeconds() < pc_damage_cooldown.get_value() )
-      continue;
+    if ( not player_cmp.skip_damage_cooldown_once && player_cmp.m_damage_cooldown_timer < player_cmp.damage_cooldown_timeout() ) continue;
 
     bool hit = false;
     for ( auto &gunfire_sprite : Sys::ParticleSystem::find( reg(), "watchman.gun.particle.shot" ) )
@@ -268,7 +263,7 @@ void WatchmanSystem::check_gunfire_player_collision()
     Utils::Player::apply_action_from_npc_store<Cmp::ProjectileAction>( reg(), "npc.nightwatchman" );
     player_cmp.skip_damage_cooldown_once = false;
     m_sound_bank.get_effect( "damage_player" ).play();
-    player_cmp.m_damage_cooldown_timer.restart();
+    player_cmp.m_damage_cooldown_timer = sf::Time::Zero;
     SPDLOG_INFO( "Player (health:{}) hit by Watchman gunfire", player_stats_cmp.health() );
 
     if ( player_stats_cmp.health() <= 0 )

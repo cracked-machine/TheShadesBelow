@@ -30,7 +30,6 @@
 #include <Components/ObstacleCap.hpp>
 #include <Components/Particle/BlockParticle.hpp>
 #include <Components/Particle/SpriteBase.hpp>
-#include <Components/Persistent/PcDamageDelay.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
@@ -134,6 +133,11 @@ void PlayerSystem::update( sf::Time dt )
 
   Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.skele.particle.bones" );
 
+  for ( auto [player_entt, player_cmp] : reg().view<Cmp::Player::Character>().each() )
+  {
+    if ( not player_cmp.damage_cooldown_paused ) { player_cmp.m_damage_cooldown_timer += dt; }
+  }
+
   fade_player_on_wormhole_jump();
   blink_player();
 
@@ -175,7 +179,7 @@ void PlayerSystem::disable_damage_cooldown()
 {
   for ( auto [player_entt, player_cmp] : reg().view<Cmp::Player::Character>().each() )
   {
-    player_cmp.m_damage_cooldown_timer.stop();
+    player_cmp.damage_cooldown_paused = true;
   }
 }
 
@@ -183,7 +187,8 @@ void PlayerSystem::enable_damage_cooldown()
 {
   for ( auto [player_entt, player_cmp] : reg().view<Cmp::Player::Character>().each() )
   {
-    player_cmp.m_damage_cooldown_timer.restart();
+    player_cmp.damage_cooldown_paused = false;
+    player_cmp.m_damage_cooldown_timer = sf::Time::Zero;
   }
 }
 
@@ -859,9 +864,8 @@ void PlayerSystem::blink_player()
     // fade_player_on_wormhole_jump() owns alpha while a jump is pending - don't clobber its fade
     if ( reg().all_of<Cmp::Wormhole::Jump>( player_entt ) ) continue;
 
-    auto &pc_damage_cooldown = Sys::PersistSystem::get<Cmp::Persist::PcDamageDelay>( reg() );
-    bool is_in_damage_cooldown = player_cmp.m_damage_cooldown_timer.getElapsedTime().asSeconds() < pc_damage_cooldown.get_value();
-    bool blink_visible = ( player_cmp.m_damage_cooldown_timer.getElapsedTime().asMilliseconds() / 100 ) % 2 == 0;
+    bool is_in_damage_cooldown = player_cmp.m_damage_cooldown_timer < player_cmp.damage_cooldown_timeout();
+    bool blink_visible = ( player_cmp.m_damage_cooldown_timer.asMilliseconds() / 100 ) % 2 == 0;
 
     auto &alpha_cmp = Utils::Player::get_alpha( reg() );
     if ( not is_in_damage_cooldown or player_cmp.skip_damage_cooldown_once or ( is_in_damage_cooldown and blink_visible ) ) { alpha_cmp = 255; }

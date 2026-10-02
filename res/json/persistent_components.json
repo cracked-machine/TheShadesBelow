@@ -372,14 +372,6 @@
     "detail": "NPC Shockwave Speed",
     "format": "%d"
   },
-  "PcDamageDelay": {
-    "type": "float",
-    "value": 3.0,
-    "min_value": 0.01,
-    "max_value": 0.5,
-    "detail": "Player Damage Cooldown",
-    "format": "%.1f seconds"
-  },
   "PlantBurnDuration": {
     "type": "float",
     "value": 9.0,
