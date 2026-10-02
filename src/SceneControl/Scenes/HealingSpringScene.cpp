@@ -20,6 +20,7 @@
 #include <Systems/CryptSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/HealingSpringSystem.hpp>
+#include <Systems/InventorySystem.hpp>
 #include <Systems/ItemSystem.hpp>
 #include <Systems/LootSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
@@ -143,7 +144,7 @@ void HealingSpringScene::do_update( sf::Time dt )
   m_sys.find<Sys::Store::Type::FootstepSystem>().update();
   m_sys.find<Sys::Store::Type::LootSystem>().check_loot_collision( dt );
   m_sys.find<Sys::Store::Type::HealingSpringSystem>().check_exit_collision();
-  // m_sys.find<Sys::Store::Type::HealingSpringSystem>().check_inventory_deposit( dt );
+  m_sys.find<Sys::Store::Type::InventorySystem>().update( dt );
 
   m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt );
   m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt );

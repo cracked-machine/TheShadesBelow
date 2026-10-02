@@ -17,7 +17,6 @@
 #include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/SceneSettings/ShowNavmesh.hpp>
 #include <Components/SceneSettings/ShowPathFinding.hpp>
-
 #include <Factory/MultiblockFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PathfindingFactory.hpp>
@@ -32,6 +31,7 @@
 #include <Systems/CryptSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/HealingSpringSystem.hpp>
+#include <Systems/InventorySystem.hpp>
 #include <Systems/ItemSystem.hpp>
 #include <Systems/LootSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
@@ -179,6 +179,7 @@ void RuinSceneUpperFloor::do_update( sf::Time dt )
   m_sys.find<Store::Type::RuinSystem>().check_movement_slowdowns();
 
   m_sys.find<Store::Type::PlayerSystem>().update( dt );
+  m_sys.find<Store::Type::InventorySystem>().update( dt );
   m_sys.find<Store::Type::ShaderSystem>().update( dt );
   m_sys.find<Store::Type::PlayerSystem>().disable_damage_cooldown();
 

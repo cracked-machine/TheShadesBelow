@@ -54,6 +54,19 @@
                  "width":0,
                  "x":224,
                  "y":128
+                }, 
+                {
+                 "height":0,
+                 "id":12,
+                 "name":"item.candle",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":16,
+                 "y":80
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -201,7 +214,7 @@
          "y":0
         }],
  "nextlayerid":6,
- "nextobjectid":12,
+ "nextobjectid":13,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

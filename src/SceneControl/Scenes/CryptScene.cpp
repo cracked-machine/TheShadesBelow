@@ -27,6 +27,7 @@
 #include <Systems/AnimSystem.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
+#include <Systems/InventorySystem.hpp>
 #include <Systems/ItemSystem.hpp>
 #include <Systems/LootSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
@@ -185,6 +186,7 @@ void CryptScene::do_update( sf::Time dt )
   m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt );
   m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt );
   m_sys.find<Sys::Store::Type::PassageSystem>().update( dt );
+  m_sys.find<Sys::Store::Type::InventorySystem>().update( dt );
 
   m_sys.find<Sys::Store::Type::ParticleSystem>().check_collsion();
   m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );

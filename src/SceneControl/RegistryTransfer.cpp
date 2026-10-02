@@ -25,6 +25,7 @@
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Curse.hpp>
+#include <Components/Player/EatingTimeAccumulator.hpp>
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -199,7 +200,9 @@ void RegistryTransfer::xfer_player_entt( entt::registry &source_registry, entt::
   // Ensure all known player component storages exist in target registry
   init_missing_cmp_storages( target_registry );
 
-  // Create a copy of an entity component by component (from entt wiki)
+  // Copy from source to target:
+  // Walks the source registry and copies every component the source player has onto the target player,
+  // replacing any existing copy.
   std::vector<std::string> transferred_cmps;
   std::vector<std::string> removed_cmps;
   std::vector<std::string> no_storage_cmps;
@@ -228,7 +231,28 @@ void RegistryTransfer::xfer_player_entt( entt::registry &source_registry, entt::
       else { no_storage_cmps.emplace_back( source_storage.type().name() ); }
     }
   }
+
+  // Remove stale items from target:
+  // Walks the target registry and removes player entt from any target storage
+  // where the source storage exists but no longer contains the player entt.
+  std::vector<std::string> stale_cmps;
+  for ( auto &&curr : target_registry.storage() )
+  {
+    auto &target_storage = curr.second;
+    if ( not target_storage.contains( target_entity ) ) continue;
+
+    auto type_hash = curr.first;
+    if ( is_player_deny_listed( type_hash ) ) continue;
+
+    auto *source_storage = source_registry.storage( type_hash );
+    if ( not source_storage or source_storage->contains( source_entity ) ) continue;
+
+    target_storage.erase( target_entity );
+    stale_cmps.emplace_back( target_storage.type().name() );
+  }
+
   pretty_print( "Removed", removed_cmps );
+  pretty_print( "Removed stale", stale_cmps );
   pretty_print( "Transferred", transferred_cmps );
   pretty_print( "No Storage Found", no_storage_cmps );
 }
@@ -264,6 +288,7 @@ void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
   registry.storage<Cmp::Ruin::ObjectiveType>();
   registry.storage<Cmp::UUID>();
   registry.storage<Cmp::Grimoire>();
+  registry.storage<Cmp::Player::EatingTimeAccumulator>();
   // Add other player-related components as needed
 }
 

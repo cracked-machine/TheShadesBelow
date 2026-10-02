@@ -35,6 +35,7 @@
 #include <Systems/CryptSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/HealingSpringSystem.hpp>
+#include <Systems/InventorySystem.hpp>
 #include <Systems/ItemSystem.hpp>
 #include <Systems/LootSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
@@ -131,9 +132,6 @@ void RuinSceneLowerFloor::on_init()
   m_open_navmesh = Factory::Pathfinding::create_open_navmesh( m_reg );
   reinit_navmesh();
 
-  Factory::Player::add_inventory( m_reg, "item.candle" );
-  Factory::Particle::add_flame_for_player_inventory_slot( m_reg );
-
   // Hide the sudden position update/camera pan behind a forced loading screen.
   std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 }
@@ -225,6 +223,7 @@ void RuinSceneLowerFloor::do_update( [[maybe_unused]] sf::Time dt )
   m_sys.find<Store::Type::RuinSystem>().creaking_rope_update();
   m_sys.find<Store::Type::RuinSystem>().check_puzzle_status();
   m_sys.find<Store::Type::ActionSystem>().update( dt );
+  m_sys.find<Sys::Store::Type::InventorySystem>().update( dt );
 
   m_sys.find<Store::Type::PlayerSystem>().update( dt );
   m_sys.find<Store::Type::ShaderSystem>().update( dt );

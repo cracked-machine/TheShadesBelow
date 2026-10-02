@@ -136,7 +136,6 @@ void SceneInputRouter::graveyard_scene_state_handler()
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::F7 )
       {
 
-        get_systems_event_queue().trigger( Events::DropInventoryEvent() );
         Factory::Player::add_player_last_graveyard_pos( reg(), Utils::Player::get_position( reg() ), { 0.f, 0.f } );
 
         enqueue( Events::SceneManagerEvent::Type::ENTER_RUIN_LOWER );

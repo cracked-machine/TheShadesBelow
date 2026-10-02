@@ -39,14 +39,14 @@ public:
   //! @return RegCopy A unique pointer to the copied registry
   RegCopy copy_reg( IScene &scene, RegCopyMode copy_mode = RegCopyMode::NONE );
 
-  //! @brief Transfer all components owned by player entity from one registry to another
+  //! @brief Sync two registries for player entity components only.
   //! @details Use this to transfer player owned components between scenes.
   //!          Note the component must be registered via `init_missing_cmp_storages()` in order for this to work
   //! @param source_registry Source registry
   //! @param target_registry Target registry
   void xfer_player_entt( entt::registry &source_registry, entt::registry &target_registry );
 
-  //! @brief Transfer a component from one registry to another
+  //! @brief Sync two registries for a specific component only.
   //! @details Use this to transfer components between scenes.
   //!          Note the component must be registered via `init_missing_cmp_storages()` in order for this to work
   //! @tparam COMPONENT

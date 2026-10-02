@@ -97,6 +97,10 @@ void InventorySystem::swap_inventory()
     return;
   }
 
+  // still chewing?
+  auto *eating_time = Utils::Player::is_player_eating( reg() );
+  if ( eating_time ) return;
+
   if ( m_swap_item_cooldown_timer.getElapsedTime() < sf::milliseconds( 750.f ) ) return;
 
   auto player_pos = Cmp::RectBounds::scaled( Utils::Player::get_position( reg() ), 0.5 );
@@ -335,11 +339,11 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
 
 void InventorySystem::consume_inventory( sf::Time dt )
 {
-
-  auto player_entt = Utils::Player::get_entity( reg() );
-  auto *eating_time = reg().try_get<Cmp::Player::EatingTimeAccumulator>( player_entt );
-  if ( not eating_time ) return;
   static sf::Time eating_timeout = sf::milliseconds( 3000 );
+
+  // not chewing? See Factory::Action::try_eat_inventory()
+  auto *eating_time = Utils::Player::is_player_eating( reg() );
+  if ( not eating_time ) return;
 
   if ( *eating_time < eating_timeout )
   {
@@ -381,7 +385,7 @@ void InventorySystem::consume_inventory( sf::Time dt )
   {
     // all done
     m_sound_bank.get_effect( "eating" ).stop();
-    reg().remove<Cmp::Player::EatingTimeAccumulator>( player_entt );
+    reg().remove<Cmp::Player::EatingTimeAccumulator>( Utils::Player::get_entity( reg() ) );
     Utils::Player::apply_action_from_inventory_item<Cmp::ConsumeAction>( reg() );
     auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
     Factory::Player::destroy_inventory( reg(), inventory_type );

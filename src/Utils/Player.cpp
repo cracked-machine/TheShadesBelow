@@ -17,6 +17,7 @@
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Curse.hpp>
+#include <Components/Player/EatingTimeAccumulator.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Player/HeartBeat.hpp>
@@ -460,6 +461,12 @@ Cmp::Player::HeartBeat &get_heartbeat( entt::registry &reg )
   auto *heartbeat_cmp = reg.try_get<Cmp::Player::HeartBeat>( player_entt );
   if ( not heartbeat_cmp ) throw std::runtime_error( "Player has no Cmp::Player::HeartBeat component." );
   return *heartbeat_cmp;
+}
+
+Cmp::Player::EatingTimeAccumulator *is_player_eating( entt::registry &reg )
+{
+  auto player_entt = Utils::Player::get_entity( reg );
+  return reg.try_get<Cmp::Player::EatingTimeAccumulator>( player_entt );
 }
 
 } // namespace Game::Utils::Player
