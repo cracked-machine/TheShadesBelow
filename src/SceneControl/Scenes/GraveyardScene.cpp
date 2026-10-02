@@ -247,6 +247,7 @@ void GraveyardScene::on_exit()
   }
 
   m_sound_bank.get_music( "graveyard_music" ).stop();
+  m_sound_bank.get_effect( "skeleton_moving" ).stop();
 }
 
 void GraveyardScene::do_update( sf::Time dt )

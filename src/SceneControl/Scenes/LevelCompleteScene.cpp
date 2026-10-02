@@ -24,6 +24,7 @@ void LevelCompleteScene::on_enter()
   persistent_sys.load_state();
   m_sound_bank.get_music( "graveyard_music" ).stop();
   m_sound_bank.get_music( "title_music" ).play();
+  m_sound_bank.get_effect( "skeleton_moving" ).stop();
 }
 
 void LevelCompleteScene::on_exit()

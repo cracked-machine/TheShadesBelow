@@ -19,6 +19,7 @@ void GameOverScene::on_enter()
   persistent_sys.initialize_component_registry();
   persistent_sys.load_state();
   m_sound_bank.get_effect( "bubbling_lava" ).stop();
+  m_sound_bank.get_effect( "skeleton_moving" ).stop();
 }
 void GameOverScene::on_exit()
 {

@@ -157,6 +157,8 @@ void CryptScene::on_enter()
   // check if the player inventory has a candle, if so light it up!
   Factory::Particle::add_flame_for_player_inventory_slot( m_reg );
 
+  m_sound_bank.get_effect( "skeleton_moving" ).stop();
+
   // Hide the sudden position update/camera pan behind a forced loading screen.
   std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 }

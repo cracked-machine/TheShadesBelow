@@ -8,8 +8,8 @@
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderMenuSystem.hpp>
-#include <Systems/Stores/SystemStore.hpp>
 #include <Systems/ShaderSystem.hpp>
+#include <Systems/Stores/SystemStore.hpp>
 
 namespace Game::Scene
 {
@@ -41,6 +41,8 @@ void TitleScene::on_enter()
   auto &music_volume = Sys::PersistSystem::get<Cmp::Persist::MusicVolume>( m_reg ).get_value();
   m_sound_bank.get_music( "graveyard_music" ).stop();
   m_sound_bank.update_music_volume( music_volume );
+
+  m_sound_bank.get_effect( "skeleton_moving" ).stop();
 
   if ( m_sound_bank.get_music( "title_music" ).getStatus() != sf::Music::Status::Playing )
   {

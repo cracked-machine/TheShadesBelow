@@ -104,6 +104,7 @@ void ShopScene::on_enter()
 {
   SPDLOG_DEBUG( "Entering {}", get_name() );
   m_sound_bank.get_music( "graveyard_music" ).stop();
+  m_sound_bank.get_effect( "skeleton_moving" ).stop();
 
   auto &m_persistent_sys = m_sys.find<Sys::Store::Type::PersistSystem>();
   m_persistent_sys.initialize_component_registry();
