@@ -27,8 +27,10 @@
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
-#include <Components/Persistent/MaxNumAltars.hpp>
-#include <Components/Persistent/MaxNumCrypts.hpp>
+#include <Components/Persistent/MinNumAltars.hpp>
+#include <Components/Persistent/MinNumCrypts.hpp>
+#include <Components/Persistent/MinNumHealingSprings.hpp>
+#include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcDeathAnimFramerate.hpp>
@@ -139,8 +141,10 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::HazardPushbackResist>();
   add_component<Cmp::Persist::HealthBonus>();
   add_component<Cmp::Persist::LightningDamage>();
-  add_component<Cmp::Persist::MaxNumAltars>();
-  add_component<Cmp::Persist::MaxNumCrypts>();
+  add_component<Cmp::Persist::MinNumAltars>();
+  add_component<Cmp::Persist::MinNumCrypts>();
+  add_component<Cmp::Persist::MinNumHealingSprings>();
+  add_component<Cmp::Persist::MinNumRuins>();
   add_component<Cmp::Persist::MusicVolume>();
   add_component<Cmp::Persist::NpcActivateScale>();
   add_component<Cmp::Persist::NpcDeathAnimFramerate>();

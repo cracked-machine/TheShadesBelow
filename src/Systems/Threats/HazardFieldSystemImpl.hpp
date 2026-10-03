@@ -80,7 +80,7 @@ sf::Vector2f HazardFieldSystem<HazardType>::init_hazard_field()
   if ( reserved_sm && not reserved_sm->at( random_pos ).empty() ) { return {}; }
 
   promote_to_hazard_cell( random_entity, random_pos, reserved_sm );
-  SPDLOG_INFO( "{} hazard spawned at position [{}, {}].", std::string( Traits::sprite_type ), random_pos.position.x, random_pos.position.y );
+  SPDLOG_INFO( "Added {} to position [{}, {}].", std::string( Traits::sprite_type ), random_pos.position.x, random_pos.position.y );
 
   return random_pos.position;
 }

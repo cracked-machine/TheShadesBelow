@@ -11,6 +11,7 @@
 #include <Components/Crypt/RoomOpen.hpp>
 #include <Components/Crypt/RoomStart.hpp>
 #include <Components/Exit.hpp>
+#include <Components/Grave/ExitSegment.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
@@ -20,8 +21,10 @@
 #include <Components/Moveable.hpp>
 #include <Components/ObstacleCap.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
-#include <Components/Persistent/MaxNumAltars.hpp>
-#include <Components/Persistent/MaxNumCrypts.hpp>
+#include <Components/Persistent/MinNumAltars.hpp>
+#include <Components/Persistent/MinNumCrypts.hpp>
+#include <Components/Persistent/MinNumHealingSprings.hpp>
+#include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
@@ -78,6 +81,7 @@
 #include <ranges>
 #include <spdlog/fmt/ranges.h>
 #include <spdlog/spdlog.h>
+#include <tuple>
 #include <unordered_map>
 
 namespace Game::Sys::ProcGen
@@ -326,7 +330,7 @@ void LevelGenerator::add_ruin_rune_markers()
 
   int placed = 0;
   int attempts = 0;
-  while ( placed < kRuneMarkerCount && attempts < kMaxAttempts )
+  while ( placed < kRuneMarkerCount and attempts < kMaxAttempts )
   {
     attempts++;
     auto [rnd_entt, rnd_pos] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character>{} );
@@ -367,7 +371,7 @@ void LevelGenerator::add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scen
   int attempts = 0;
   // Retry on a wasted pick (already reserved or colliding) rather than giving up on that cobweb,
   // otherwise unlucky rolls silently place fewer than num_cobwebs.
-  while ( placed < num_cobwebs && attempts < kMaxAttempts )
+  while ( placed < num_cobwebs and attempts < kMaxAttempts )
   {
     attempts++;
     auto [rnd_entt, rnd_pos] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character>{} );
@@ -385,10 +389,13 @@ void LevelGenerator::add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scen
 void LevelGenerator::gen_graveyard_exterior_multiblocks()
 {
   auto grave_num_multiplier = Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() );
-  auto max_num_altars = Sys::PersistSystem::get<Cmp::Persist::MaxNumAltars>( reg() );
-  auto max_num_crypts = Sys::PersistSystem::get<Cmp::Persist::MaxNumCrypts>( reg() );
-  std::size_t max_number_healing_springs = 1;
-  std::size_t max_number_ruins = 1;
+  auto min_num_altars = Sys::PersistSystem::get<Cmp::Persist::MinNumAltars>( reg() );
+  auto min_num_crypts = Sys::PersistSystem::get<Cmp::Persist::MinNumCrypts>( reg() );
+  auto min_num_healing_springs = Sys::PersistSystem::get<Cmp::Persist::MinNumHealingSprings>( reg() );
+  auto min_num_ruins = Sys::PersistSystem::get<Cmp::Persist::MinNumRuins>( reg() );
+
+  // minimum clearance (in grid cells, both axes) between altars, crypts, healing springs and ruins
+  constexpr int kMinBuildingSpacingCells = 10;
 
   // shared spawn-location lookup for every multiblock placed below
   auto find_spawn_pos = [&]( const Sprites::SpriteSheet &ms ) -> std::optional<Cmp::Position>
@@ -408,7 +415,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
   else
   {
     SPDLOG_DEBUG( "Found {}, {}", grave_meta_types[0], grave_meta_types[1] );
-    auto max_num_graves = static_cast<size_t>( max_num_altars.get_value() * grave_num_multiplier.get_value() );
+    auto max_num_graves = static_cast<size_t>( min_num_altars.get_value() * grave_num_multiplier.get_value() );
     for ( std::size_t i = 0; i < max_num_graves; ++i )
     {
       const auto &spritesheet = Sys::SpriteStore::instance().get_random( grave_meta_types );
@@ -425,27 +432,39 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
 
   // ALTARS
   const auto &altar_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.altar.inactive" );
-  spawn_multiblocks<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( static_cast<std::size_t>( max_num_altars.get_value() ), altar_spritesheet );
+  spawn_multiblocks<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( static_cast<std::size_t>( min_num_altars.get_value() ), altar_spritesheet,
+                                                                  /*log=*/true, kMinBuildingSpacingCells );
 
   // CRYPTS - note: we use keys from altars to open crypts so the number should be equal
   const auto &crypt_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.crypt.closed" );
-  spawn_multiblocks<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( static_cast<std::size_t>( max_num_crypts.get_value() ),
-                                                                                  crypt_spritesheet, /*log=*/true );
+  spawn_multiblocks<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( static_cast<std::size_t>( min_num_crypts.get_value() ),
+                                                                                  crypt_spritesheet, /*log=*/true, kMinBuildingSpacingCells );
 
   const auto &healingspring_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.building.healingspring" );
-  spawn_multiblocks<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>( max_number_healing_springs, healingspring_spritesheet,
-                                                                                              /*log=*/true );
+  spawn_multiblocks<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>(
+      static_cast<std::size_t>( min_num_healing_springs.get_value() ), healingspring_spritesheet, /*log=*/true, kMinBuildingSpacingCells );
 
   const auto &ruin_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.ruin" );
-  spawn_multiblocks<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>( max_number_ruins, ruin_spritesheet, /*log=*/true );
+  spawn_multiblocks<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>( static_cast<std::size_t>( min_num_ruins.get_value() ),
+                                                                                ruin_spritesheet,
+                                                                                /*log=*/true, kMinBuildingSpacingCells );
 }
 
 template <typename MULTIBLOCK, typename MBSEGMENT>
-void LevelGenerator::spawn_multiblocks( std::size_t count, const Sprites::SpriteSheet &ss, bool log )
+void LevelGenerator::spawn_multiblocks( std::size_t count, const Sprites::SpriteSheet &ss, bool log, int min_spacing_cells )
 {
   for ( std::size_t i = 0; i < count; ++i )
   {
-    auto [random_entity, random_origin_position] = find_spawn_location( ss, 0 );
+    // Try the requested spacing first, then halve it until a position is found, so the
+    // requested count is still met when the map is too crowded for the full spacing.
+    int spacing = min_spacing_cells;
+    auto [random_entity, random_origin_position] = find_spawn_location( ss, 0, spacing );
+    while ( random_entity == entt::null and spacing > 0 )
+    {
+      spacing /= 2;
+      SPDLOG_WARN( "No spawn position for {} with requested spacing, retrying with {} grid cells.", ss.type(), spacing );
+      std::tie( random_entity, random_origin_position ) = find_spawn_location( ss, 0, spacing );
+    }
     if ( random_entity == entt::null )
     {
       SPDLOG_ERROR( "Failed to find valid spawn position for {}.", ss.type() );
@@ -459,7 +478,8 @@ void LevelGenerator::spawn_multiblocks( std::size_t count, const Sprites::Sprite
   }
 }
 
-std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( const Sprites::SpriteSheet &ms, unsigned long seed )
+std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( const Sprites::SpriteSheet &ms, unsigned long seed,
+                                                                            int min_spacing_cells )
 {
   constexpr int kMaxAttempts = 1000;
   int attempts = 0;
@@ -473,23 +493,36 @@ std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( cons
     auto lo_sprite_size = Sys::SpriteStore::instance().get( ms.type() ).sprite_size();
     auto new_lo_hitbox = Cmp::RectBounds::scaled( random_pos.position, lo_sprite_size, 1.f );
 
-    // Check collisions with walls, graves, shrines, and anything else already claiming this position
+    // Check collisions with walls, graves, shrines, the exit, and anything else already claiming this position
     auto is_valid = [&]() -> bool
     {
       using Utils::Collision::any_intersects;
-      return not( any_intersects<Cmp::Wall>( reg(), new_lo_hitbox ) || any_intersects<Cmp::Grave::Segment>( reg(), new_lo_hitbox ) ||
-                  any_intersects<Cmp::Altar::Segment>( reg(), new_lo_hitbox ) ||
-                  any_intersects<Cmp::Crypt::BuildingSegment>( reg(), new_lo_hitbox ) ||
-                  any_intersects<Cmp::HealingSpringBuildingSegment>( reg(), new_lo_hitbox ) ||
-                  any_intersects<Cmp::Ruin::BuildingSegment>( reg(), new_lo_hitbox ) ||
-                  any_intersects<Cmp::Crypt::ObjectiveSegment>( reg(), new_lo_hitbox ) ||
-                  not m_reserved_sm->query_rect( new_lo_hitbox.getBounds() ).empty() || any_intersects<Cmp::SpawnArea>( reg(), new_lo_hitbox ) ||
-                  any_intersects<Cmp::Player::Character>( reg(), new_lo_hitbox ) );
+      return not any_intersects<Cmp::Wall>( reg(), new_lo_hitbox ) and not any_intersects<Cmp::Grave::Segment>( reg(), new_lo_hitbox ) and
+             not any_intersects<Cmp::Altar::Segment>( reg(), new_lo_hitbox ) and
+             not any_intersects<Cmp::Crypt::BuildingSegment>( reg(), new_lo_hitbox ) and
+             not any_intersects<Cmp::HealingSpringBuildingSegment>( reg(), new_lo_hitbox ) and
+             not any_intersects<Cmp::Ruin::BuildingSegment>( reg(), new_lo_hitbox ) and
+             not any_intersects<Cmp::Crypt::ObjectiveSegment>( reg(), new_lo_hitbox ) and
+             not any_intersects<Cmp::Grave::ExitSegment>( reg(), new_lo_hitbox ) and
+             m_reserved_sm->query_rect( new_lo_hitbox.getBounds() ).empty() and not any_intersects<Cmp::SpawnArea>( reg(), new_lo_hitbox ) and
+             not any_intersects<Cmp::Player::Character>( reg(), new_lo_hitbox );
     };
 
-    if ( is_valid() )
+    // Keep the large graveyard buildings at least `min_spacing_cells` apart in both axes, and away from the exit
+    auto is_spaced = [&]() -> bool
     {
-      if ( current_seed != seed && seed > 0 )
+      if ( min_spacing_cells <= 0 ) return true;
+      using Utils::Collision::any_intersects;
+      auto spacing_hitbox = Cmp::RectBounds::expanded( random_pos.position, lo_sprite_size, min_spacing_cells );
+      return not(
+          any_intersects<Cmp::Altar::Segment>( reg(), spacing_hitbox ) || any_intersects<Cmp::Crypt::BuildingSegment>( reg(), spacing_hitbox ) ||
+          any_intersects<Cmp::HealingSpringBuildingSegment>( reg(), spacing_hitbox ) ||
+          any_intersects<Cmp::Ruin::BuildingSegment>( reg(), spacing_hitbox ) || any_intersects<Cmp::Grave::ExitSegment>( reg(), spacing_hitbox ) );
+    };
+
+    if ( is_valid() and is_spaced() )
+    {
+      if ( current_seed != seed and seed > 0 )
       {
         SPDLOG_WARN( "Large Obstacle spawn: original seed {} was invalid, used seed {} instead (attempt {})", seed, current_seed, attempts + 1 );
       }
@@ -515,7 +548,7 @@ bool LevelGenerator::gen_plant( const Sys::ItemKey &plant_type, sf::Vector2f pos
   // reserved tile it doesn't share an entity with, e.g. the player spawn.
   auto plant_grid_size = plant_ss.get_grid_size();
   bool footprint_clear = true;
-  for ( int gy = 0; gy < plant_grid_size.y && footprint_clear; ++gy )
+  for ( int gy = 0; gy < plant_grid_size.y and footprint_clear; ++gy )
   {
     for ( int gx = 0; gx < plant_grid_size.x; ++gx )
     {

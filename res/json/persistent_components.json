@@ -208,20 +208,36 @@
     "detail": "Health Bonus",
     "format": "%d"
   },
-  "MaxNumAltars": {
+  "MinNumAltars": {
     "type": "int",
     "value": 5,
     "min_value": 1,
     "max_value": 10,
-    "detail": "Max NNumber of Altars",
+    "detail": "Min Number of Altars",
     "format": "%d"
   },
-  "MaxNumCrypts": {
+  "MinNumCrypts": {
     "type": "int",
     "value": 3,
     "min_value": 1,
     "max_value": 10,
-    "detail": "Max Number of Crypts",
+    "detail": "Min Number of Crypts",
+    "format": "%d"
+  },
+  "MinNumHealingSprings": {
+    "type": "int",
+    "value": 1,
+    "min_value": 1,
+    "max_value": 5,
+    "detail": "Min Number of Healing Springs",
+    "format": "%d"
+  },
+  "MinNumRuins": {
+    "type": "int",
+    "value": 1,
+    "min_value": 1,
+    "max_value": 5,
+    "detail": "Min Number of Ruins",
     "format": "%d"
   },
   "MusicVolume": {

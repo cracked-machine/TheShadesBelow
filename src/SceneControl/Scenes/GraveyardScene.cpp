@@ -135,7 +135,7 @@ void GraveyardScene::on_init()
   Factory::Shader::add_tunnel_vision( m_sys.find<Sys::Store::Type::ShaderSystem>(),
                                       Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
 
-  // create the level contents
+  // Create the level contents - "reserved" spatial map prevents overlap
   auto &level_gen = m_sys.find<Sys::Store::Type::LevelGenerator>();
   level_gen.init( m_reserved_sm );
   level_gen.build_scene_from_data( *m_scene_data );

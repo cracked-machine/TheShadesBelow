@@ -6,7 +6,6 @@
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Persistent/ExitKeyRequirement.hpp>
-#include <Components/Persistent/MaxNumAltars.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Player/NoPath.hpp>
@@ -99,7 +98,7 @@ void ExitSystem::create_exit()
 
   Factory::Multiblock::add_multiblock_with_segments<Cmp::Grave::ExitMultiBlock, Cmp::Grave::ExitSegment>(
       reg(), selected_pos_cmp.position, kGraveExitSpritesheet, 0, 0, reserved_sm.get() );
-  SPDLOG_INFO( "Exit spawned at position ({}, {})", selected_pos_cmp.position.x, selected_pos_cmp.position.y );
+  SPDLOG_INFO( "Added {} to ({}, {})", kGraveExitSpritesheet.type(), selected_pos_cmp.position.x, selected_pos_cmp.position.y );
 }
 
 void ExitSystem::on_player_action( Events::PlayerActionEvent ev )

@@ -61,7 +61,6 @@ void WispSystem::spawn_wisp()
   // find a random start position in the game area and create a new npc at that position
   auto [spawn_entt, spawn_pos] = Utils::Rnd::get_random_position( reg(), {}, {} );
   auto npc_entt = Factory::Npc::create_npc( reg(), spawn_entt, "npc.wisp" );
-  SPDLOG_DEBUG( "Created wisp npc {}", static_cast<uint32_t>( npc_entt ) );
 
   // find a random target position in the game area that is distant from the spawn_pos
   static constexpr float kMinTargetDistance = 100.f;
@@ -81,7 +80,7 @@ void WispSystem::spawn_wisp()
     open_navmesh->insert( target_entt, target_pos );
   }
 
-  SPDLOG_INFO( "Spawned wisp {} at {},{}. Target is {},{}", static_cast<uint32_t>( npc_entt ), spawn_pos.x(), spawn_pos.y(), target_pos.x(),
+  SPDLOG_INFO( "Add npc.wisp to {},{}. Target is {},{}", static_cast<uint32_t>( npc_entt ), spawn_pos.x(), spawn_pos.y(), target_pos.x(),
                target_pos.y() );
 }
 
@@ -107,7 +106,7 @@ void WispSystem::reset_wisp_target( entt::entity wisp_entt )
     reg().remove<Cmp::Npc::Target>( old_target_entt ); // remove from old target first
     reg().emplace_or_replace<Cmp::Npc::Target>( new_target_entt, wisp_entt );
 
-    SPDLOG_INFO( "Reset wisp {} target to {},{}", static_cast<uint32_t>( wisp_entt ), new_target_pos.x(), new_target_pos.y() );
+    SPDLOG_INFO( "Reset npc.wisp target to {},{}", new_target_pos.x(), new_target_pos.y() );
     m_wisp_target_reset_clock.reset();
     break; // only one target per wisp
   }

@@ -215,7 +215,7 @@ void WormholeSystem::spawn_wormhole( SpawnPhase phase )
     reserved_sm->insert( center_entity, reg().get<Cmp::Position>( center_entity ) );
   }
 
-  SPDLOG_INFO( "Wormhole spawned at position ({}, {}) with zorder: {}", multiblock_pos.position.x, multiblock_pos.position.y,
+  SPDLOG_INFO( "Added {} to ({}, {}) with zorder: {}", wormhole_ss.type(), multiblock_pos.position.x, multiblock_pos.position.y,
                multiblock_pos.position.y - multiblock_pos.size.y );
 }
 

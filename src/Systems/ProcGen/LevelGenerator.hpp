@@ -74,8 +74,9 @@ public:
   //! @brief Find a valid spawn location for a large obstacle given a seed.
   //! @param ms Sprite sheet of the object being placed, used to size its collision hitbox
   //! @param seed Seed for the random position search
+  //! @param min_spacing_cells Minimum clearance (grid cells, both axes) from any altar, crypt, healing spring, ruin or the exit. 0 disables.
   //! @return std::pair<entt::entity, Cmp::Position>
-  std::pair<entt::entity, Cmp::Position> find_spawn_location( const Sprites::SpriteSheet &ms, unsigned long seed );
+  std::pair<entt::entity, Cmp::Position> find_spawn_location( const Sprites::SpriteSheet &ms, unsigned long seed, int min_spacing_cells = 0 );
 
   //! @brief Generate a number of plant world items in the new game area.
   //! @return std::vector<entt::entity>
@@ -142,8 +143,9 @@ private:
                            float cap_y_offset, bool moveable );
 
   //! @brief Spawn `count` multiblocks of the given type at random valid positions found via find_spawn_location().
+  //! @param min_spacing_cells Preferred clearance from other large buildings; halved on failure so `count` is still met.
   template <typename MULTIBLOCK, typename MBSEGMENT>
-  void spawn_multiblocks( std::size_t count, const Sprites::SpriteSheet &ss, bool log = false );
+  void spawn_multiblocks( std::size_t count, const Sprites::SpriteSheet &ss, bool log = false, int min_spacing_cells = 0 );
 
   //! @brief Spatial map for finding obstacles during level gen / cell automata algorithm
   PathFinding::SpatialHashGridUniquePtr m_obstacle_sm;

@@ -27,8 +27,10 @@
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
-#include <Components/Persistent/MaxNumAltars.hpp>
-#include <Components/Persistent/MaxNumCrypts.hpp>
+#include <Components/Persistent/MinNumAltars.hpp>
+#include <Components/Persistent/MinNumCrypts.hpp>
+#include <Components/Persistent/MinNumHealingSprings.hpp>
+#include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcDeathAnimFramerate.hpp>
@@ -274,10 +276,12 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     // Procedural Generation
     ImGui::SeparatorText( "Procedural Generation" );
 
-    Sys::PersistSystem::get<Cmp::Persist::MaxNumAltars>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::MinNumAltars>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ExitKeyRequirement>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::MaxNumCrypts>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::MinNumCrypts>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::MinNumHealingSprings>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::MinNumRuins>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RuinProcGenInitChance>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RuinProcGenMaxIterations>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RuinProcGenBirthThreshold>( reg() ).render_widget();
