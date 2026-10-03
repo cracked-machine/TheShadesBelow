@@ -1,6 +1,6 @@
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Plant/BurningTimer.hpp>
-#include <Components/Player/EatingTimeAccumulator.hpp>
+#include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Position.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/UUID.hpp>
@@ -13,13 +13,11 @@ namespace Game::Factory::Action
 void try_eat_inventory( entt::registry &reg )
 {
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg );
-  if ( ( inventory_type.contains( ".forage" ) and Utils::Player::get_inventory_wear_level( reg ) > 0 ) or inventory_type.contains( ".rottenfood" ) )
+  if ( ( inventory_type.contains( ".forage" ) and Utils::Player::get_inventory_wear_level( reg ) > 0 ) or inventory_type.contains( ".rottenfood" ) or
+       inventory_type.contains( "wine" ) )
   {
     auto player_entt = Utils::Player::get_entity( reg );
-    if ( not reg.any_of<Cmp::Player::EatingTimeAccumulator>( player_entt ) )
-    {
-      reg.emplace_or_replace<Cmp::Player::EatingTimeAccumulator>( player_entt );
-    }
+    if ( not reg.any_of<Cmp::Player::ConsumeTimer>( player_entt ) ) { reg.emplace_or_replace<Cmp::Player::ConsumeTimer>( player_entt ); }
   }
 }
 

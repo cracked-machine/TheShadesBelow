@@ -92,7 +92,7 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
   if ( not altar_uuid_cmp ) throw std::runtime_error( "Altar does not have UUID" );
 
   auto [_, sacrifice_type, _] = Utils::Player::get_inventory( reg() );
-  enum class SacrificeAnimType { RELIC, KEY, JEWELS, WITCHESJAR };
+  enum class SacrificeAnimType { DEFAULT, KEY };
 
   //! @brief Common actions following an altar sacrifice
   auto common_activation = [&]( SacrificeAnimType sacrifice_anim_type )
@@ -117,7 +117,7 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
   if ( sacrifice_type.contains( "item.jewelry" ) )
   {
     SPDLOG_INFO( "Player made an offering: {}", sacrifice_type );
-    common_activation( SacrificeAnimType::JEWELS );
+    common_activation( SacrificeAnimType::DEFAULT );
     auto &player_wealth = Utils::Player::get_wealth( reg() );
     player_wealth.wealth += 2;
     // signal UI to flash
@@ -131,7 +131,7 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
     if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 )
     {
       SPDLOG_INFO( "Player made an offering: {}", sacrifice_type );
-      common_activation( SacrificeAnimType::JEWELS );
+      common_activation( SacrificeAnimType::DEFAULT );
       auto &player_wealth = Utils::Player::get_wealth( reg() );
       player_wealth.wealth += 2;
       // signal UI to flash
@@ -140,12 +140,20 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
     }
   }
 
-  // spawn a dowsing rod
+  // spawn dowsing rod
   if ( sacrifice_type == "item.plant.rowan.drop" )
   {
-    common_activation( SacrificeAnimType::JEWELS );
+    common_activation( SacrificeAnimType::DEFAULT );
     Factory::Player::destroy_inventory( reg(), sacrifice_type );
     get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), "item.dowsingrod", "drop_loot" ) );
+  }
+
+  // spawn a dowsing rod
+  if ( sacrifice_type == "item.plant.rowan.forage" )
+  {
+    common_activation( SacrificeAnimType::DEFAULT );
+    Factory::Player::destroy_inventory( reg(), sacrifice_type );
+    get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), "item.rowanwine", "drop_loot" ) );
   }
 
   // sacrifice witches jar at any time
@@ -172,7 +180,7 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
     else if ( anim_cmp->m_sprite_type.contains( "sprite.graveyard.altar" ) )
     {
       // player kills all spawned ghosts in the game
-      common_activation( SacrificeAnimType::WITCHESJAR );
+      common_activation( SacrificeAnimType::DEFAULT );
       for ( auto [npc_entt, npc_cmp, npc_pos_cmp, anim_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::AnimData>().each() )
       {
         if ( anim_cmp.m_sprite_type.contains( "ghost" ) )
@@ -196,7 +204,7 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
       sf::Vector2f flame_ps_pos = altar_cmp.position + altar_cmp.flame_offsets[sacrifice_count];
       Factory::Particle::add_flame( m_reg, "graveyard.altar.particle.flame", *altar_uuid_cmp, flame_ps_pos, 5000, Cmp::Particle::kWorldScalePreset );
       SPDLOG_DEBUG( "Altar activated to state {}.", sacrifice_count + 1 );
-      common_activation( SacrificeAnimType::RELIC );
+      common_activation( SacrificeAnimType::DEFAULT );
     }
   }
   // We still need to satisfy the exitkey sacrifice threshold to get an cryptkey drop

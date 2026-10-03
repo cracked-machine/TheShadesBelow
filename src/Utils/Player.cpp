@@ -16,8 +16,8 @@
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/Curse.hpp>
-#include <Components/Player/EatingTimeAccumulator.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Player/HeartBeat.hpp>
@@ -463,10 +463,10 @@ Cmp::Player::HeartBeat &get_heartbeat( entt::registry &reg )
   return *heartbeat_cmp;
 }
 
-Cmp::Player::EatingTimeAccumulator *is_player_eating( entt::registry &reg )
+Cmp::Player::ConsumeTimer *is_player_eating( entt::registry &reg )
 {
   auto player_entt = Utils::Player::get_entity( reg );
-  return reg.try_get<Cmp::Player::EatingTimeAccumulator>( player_entt );
+  return reg.try_get<Cmp::Player::ConsumeTimer>( player_entt );
 }
 
 } // namespace Game::Utils::Player

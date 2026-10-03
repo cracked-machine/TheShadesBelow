@@ -58,7 +58,7 @@ struct ArrowCompass
     m_cached_item_type = item_type;
 
     // precedence matches the original render order: relic > cryptkey > exitkey
-    if ( item_type.contains( "relic" ) or item_type.contains( "rowan.drop" ) )
+    if ( item_type.contains( "relic" ) or item_type.contains( "rowan.drop" ) or item_type.contains( "rowan.forage" ) )
       m_mode = Mode::ALTAR;
     else if ( item_type.contains( "cryptkey" ) )
       m_mode = Mode::CRYPT;

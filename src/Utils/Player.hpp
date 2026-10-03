@@ -3,7 +3,7 @@
 
 #include <Components/AbsoluteAlpha.hpp>
 #include <Components/AnimData.hpp>
-#include <Components/Player/EatingTimeAccumulator.hpp>
+#include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Stats/PlayerStats.hpp>
@@ -262,7 +262,7 @@ Cmp::Player::HeartBeat &get_heartbeat( entt::registry &reg );
 //! @brief Check player entity for Cmp::Player::EatingTimeAccumulator component
 //! @param reg
 //! @return Cmp::Player::EatingTimeAccumulator* modifiable component, or nullptr if the player is not eating
-Cmp::Player::EatingTimeAccumulator *is_player_eating( entt::registry &reg );
+Cmp::Player::ConsumeTimer *is_player_eating( entt::registry &reg );
 
 } // namespace Game::Utils::Player
 

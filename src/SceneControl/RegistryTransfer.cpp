@@ -24,8 +24,8 @@
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/Curse.hpp>
-#include <Components/Player/EatingTimeAccumulator.hpp>
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -288,7 +288,7 @@ void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
   registry.storage<Cmp::Ruin::ObjectiveType>();
   registry.storage<Cmp::UUID>();
   registry.storage<Cmp::Grimoire>();
-  registry.storage<Cmp::Player::EatingTimeAccumulator>();
+  registry.storage<Cmp::Player::ConsumeTimer>();
   // Add other player-related components as needed
 }
 

@@ -132,8 +132,19 @@ void NpcSystem::check_npc_container_collision()
 
 void NpcSystem::update_animation()
 {
+  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+
   for ( auto [npc_entt, npc_cmp, npc_dir_cmp, anim_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Direction, Cmp::AnimData>().each() )
   {
+    // dowsing rod "blinds" all NPC pathfinding, except wisps: let them walk out their current step, then stand still
+    if ( inventory_type.contains( "dowsingrod" ) and not reg().any_of<Cmp::Npc::Wisp>( npc_entt ) )
+    {
+      if ( reg().all_of<Cmp::LerpPosition>( npc_entt ) ) continue;
+      npc_dir_cmp = Cmp::Direction( { 0.0f, 0.0f } );
+      anim_cmp.m_enabled = false;
+      continue;
+    }
+
     // Watchmen face wherever their searchlight is currently pointing — sweeping, patrolling a
     // cardinal direction, or locked onto the player — even while standing still, rather than
     // freezing on whatever direction they last walked.
@@ -221,6 +232,10 @@ void NpcSystem::update_sfx()
 
 void NpcSystem::update_pathfinding( sf::Time dt )
 {
+  // dowsing rod "blinds" all NPC pathfinding. Steps already in progress are left for update_movement to finish.
+  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+  if ( inventory_type.contains( "dowsingrod" ) ) return;
+
   static constexpr float kPathfindingInterval = 0.10f;
   m_pathfinding_timer += dt;
   if ( m_pathfinding_timer.asSeconds() >= kPathfindingInterval )
@@ -260,7 +275,6 @@ void NpcSystem::update_pathfinding_for( PathFinding::SpatialHashGrid &navmesh, c
 
 void NpcSystem::update_movement( sf::Time dt )
 {
-
   for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position>().each() )
   {
     auto navmesh = navmesh_for( npc_entt );

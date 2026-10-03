@@ -1472,6 +1472,20 @@
         }
       }
     },
+    "sprite.item.rowanwine": {
+      "spritesheet": {
+        "displayname": "Rowan Wine",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [17],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
     "sprite.item.bomb": {
       "spritesheet": {
         "displayname": "Dynamite",

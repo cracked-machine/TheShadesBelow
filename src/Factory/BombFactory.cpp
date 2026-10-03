@@ -71,13 +71,14 @@ void destroy_armed( entt::registry &reg, entt::entity armed_entity )
   if ( reg.all_of<Cmp::Npc::NoPathFinding>( armed_entity ) ) { reg.remove<Cmp::Npc::NoPathFinding>( armed_entity ); }
 }
 
-void add_detonated( entt::registry &reg, entt::entity armed_entity, Cmp::Position &armed_pos_cmp )
+void add_detonated( entt::registry &reg, entt::entity armed_entity, [[maybe_unused]] Cmp::Position &armed_pos_cmp )
 {
   reg.remove<Cmp::Npc::NoPathFinding>( armed_entity );
   reg.remove<Cmp::Player::NoPath>( armed_entity );
   reg.remove<Cmp::Particle::BlockParticle>( armed_entity );
   reg.emplace_or_replace<Cmp::AnimData>( armed_entity, Cmp::AnimData::Config{ .sprite_type = "sprite.graveyard.detonated" } );
-  reg.emplace_or_replace<Cmp::ZOrderValue>( armed_entity, armed_pos_cmp.position.y - 256.f );
+  // floor decal: above the floor (-16), below dowsing rod guide lines (-12) and everything else
+  reg.emplace_or_replace<Cmp::ZOrderValue>( armed_entity, -14.f );
   reg.emplace_or_replace<Cmp::DestroyedObstacle>( armed_entity );
 }
 

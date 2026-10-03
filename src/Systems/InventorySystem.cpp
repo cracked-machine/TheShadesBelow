@@ -12,7 +12,7 @@
 #include <Components/LastDirection.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Player/Character.hpp>
-#include <Components/Player/EatingTimeAccumulator.hpp>
+#include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
@@ -61,7 +61,7 @@ void InventorySystem::update( sf::Time dt )
   Factory::Particle::delete_expired_particle_sprites( reg(), "player.forage.particle.eating" );
 
   auto player_entt = Utils::Player::get_entity( reg() );
-  if ( reg().any_of<Cmp::Player::EatingTimeAccumulator>( player_entt ) ) { consume_inventory( dt ); }
+  if ( reg().any_of<Cmp::Player::ConsumeTimer>( player_entt ) ) { consume_inventory( dt ); }
 
   update_item_expiry_damage( dt );
 }
@@ -212,7 +212,10 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
   if ( inventory_slot_level_cmp ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( world_item_entt, inventory_slot_level_cmp->m_level ); }
 
   auto *inventory_slot_dowsing_cmp = reg().try_get<Cmp::Inventory::DowsingTarget>( inventory_slot_entt );
-  if ( inventory_slot_dowsing_cmp ) { reg().emplace_or_replace<Cmp::Inventory::DowsingTarget>( world_item_entt, inventory_slot_dowsing_cmp->target ); }
+  if ( inventory_slot_dowsing_cmp )
+  {
+    reg().emplace_or_replace<Cmp::Inventory::DowsingTarget>( world_item_entt, inventory_slot_dowsing_cmp->target );
+  }
 
   auto *uuid_cmp = reg().try_get<Cmp::UUID>( inventory_slot_entt );
   if ( uuid_cmp )
@@ -345,53 +348,66 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
 
 void InventorySystem::consume_inventory( sf::Time dt )
 {
-  static sf::Time eating_timeout = sf::milliseconds( 3000 );
+  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
 
   // not chewing? See Factory::Action::try_eat_inventory()
-  auto *eating_time = Utils::Player::is_player_eating( reg() );
-  if ( not eating_time ) return;
+  auto *consume_timer = Utils::Player::is_player_eating( reg() );
+  if ( not consume_timer ) return;
 
-  if ( *eating_time < eating_timeout )
+  if ( *consume_timer < consume_timer->timeout() )
   {
-    // stll eating
-    if ( m_sound_bank.get_effect( "eating" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "eating" ).play(); }
-    *eating_time += dt;
+    *consume_timer += dt;
 
-    auto uuid = Cmp::UUID::generate();
-    auto player_pos = Utils::Player::get_position( reg() ).getCenter();
-    auto adj_player_pos = sf::Vector2f( player_pos.x, player_pos.y + 3 );
-    auto player_zorder_pos = Utils::Player::get_position( reg() ).position.y;
-    constexpr auto kParticleCount = 1;
-    constexpr auto kLifetimeSeconds = 1.f;
-    constexpr auto kSpeed = 25.f;
-    constexpr auto kSize = 5.f;
-    auto last_direction = Utils::Player::get_last_direction( reg() );
-    if ( last_direction == Utils::Cardinal( Utils::Cardinal::North ).vector() )
+    // stll consuming
+    if ( inventory_type.contains( "wine" ) )
     {
-      Factory::Particle::add_eatingcrumbs_ps( reg(), "player.forage.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
-                                              adj_player_pos, last_direction, player_zorder_pos - 1.f );
+      if ( m_sound_bank.get_effect( "drinking" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "drinking" ).play(); }
     }
-    else if ( last_direction == Utils::Cardinal( Utils::Cardinal::East ).vector() )
+    else
     {
-      Factory::Particle::add_eatingcrumbs_ps( reg(), "player.forage.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
-                                              { adj_player_pos.x + 2, adj_player_pos.y }, last_direction, player_zorder_pos + 1.f );
-    }
-    else if ( last_direction == Utils::Cardinal( Utils::Cardinal::West ).vector() )
-    {
-      Factory::Particle::add_eatingcrumbs_ps( reg(), "player.forage.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
-                                              { adj_player_pos.x - 2, adj_player_pos.y }, last_direction, player_zorder_pos + 1.f );
-    }
-    else if ( last_direction == Utils::Cardinal( Utils::Cardinal::South ).vector() )
-    {
-      Factory::Particle::add_eatingcrumbs_ps( reg(), "player.forage.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
-                                              adj_player_pos, last_direction, player_zorder_pos + 1.f );
+      if ( m_sound_bank.get_effect( "eating" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "eating" ).play(); }
+
+      auto uuid = Cmp::UUID::generate();
+      auto player_pos = Utils::Player::get_position( reg() ).getCenter();
+      auto adj_player_pos = sf::Vector2f( player_pos.x, player_pos.y + 3 );
+      auto player_zorder_pos = Utils::Player::get_position( reg() ).position.y;
+      constexpr auto kParticleCount = 1;
+      constexpr auto kLifetimeSeconds = 1.f;
+      constexpr auto kSpeed = 25.f;
+      constexpr auto kSize = 5.f;
+      auto last_direction = Utils::Player::get_last_direction( reg() );
+      if ( last_direction == Utils::Cardinal( Utils::Cardinal::North ).vector() )
+      {
+        Factory::Particle::add_eatingcrumbs_ps( reg(), "player.forage.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
+                                                adj_player_pos, last_direction, player_zorder_pos - 1.f );
+      }
+      else if ( last_direction == Utils::Cardinal( Utils::Cardinal::East ).vector() )
+      {
+        Factory::Particle::add_eatingcrumbs_ps( reg(), "player.forage.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
+                                                { adj_player_pos.x + 2, adj_player_pos.y }, last_direction, player_zorder_pos + 1.f );
+      }
+      else if ( last_direction == Utils::Cardinal( Utils::Cardinal::West ).vector() )
+      {
+        Factory::Particle::add_eatingcrumbs_ps( reg(), "player.forage.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
+                                                { adj_player_pos.x - 2, adj_player_pos.y }, last_direction, player_zorder_pos + 1.f );
+      }
+      else if ( last_direction == Utils::Cardinal( Utils::Cardinal::South ).vector() )
+      {
+        Factory::Particle::add_eatingcrumbs_ps( reg(), "player.forage.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,
+                                                adj_player_pos, last_direction, player_zorder_pos + 1.f );
+      }
     }
   }
   else
   {
     // all done
     m_sound_bank.get_effect( "eating" ).stop();
-    reg().remove<Cmp::Player::EatingTimeAccumulator>( Utils::Player::get_entity( reg() ) );
+    if ( inventory_type.contains( "wine" ) )
+    {
+      m_sound_bank.get_effect( "drinking" ).stop();
+      if ( m_sound_bank.get_effect( "drinking_end" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "drinking_end" ).play(); }
+    }
+    reg().remove<Cmp::Player::ConsumeTimer>( Utils::Player::get_entity( reg() ) );
     Utils::Player::apply_action_from_inventory_item<Cmp::ConsumeAction>( reg() );
     auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
     Factory::Player::destroy_inventory( reg(), inventory_type );
