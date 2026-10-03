@@ -7,6 +7,7 @@
 #include <Components/AnimData.hpp>
 #include <Components/Armable.hpp>
 #include <Components/DestroyedObstacle.hpp>
+#include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/FlashUIInventory.hpp>
 #include <Components/Inventory/FlashUIWealth.hpp>
@@ -156,7 +157,7 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
                                              { altar_cmp.position.x + 8.f, altar_cmp.position.y + 24.f }, 5000 );
       Factory::Player::destroy_inventory( reg(), sacrifice_type );
       auto flash_entt = reg().create();
-      reg().emplace_or_replace<Cmp::FlashUIHealth>( flash_entt );
+      reg().emplace_or_replace<Cmp::FlashUIExtraLife>( flash_entt );
       reg().emplace_or_replace<Cmp::Player::ExtraLife>( Utils::Player::get_entity( reg() ) );
       m_sound_bank.get_effect( "crypt_altar_activate" ).play();
     }

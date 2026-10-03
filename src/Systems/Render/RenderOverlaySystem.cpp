@@ -2,6 +2,7 @@
 #include <Components/Crypt/ShuffleTimer.hpp>
 #include <Components/Hazard/FieldCell.hpp>
 #include <Components/Inventory/FlashUICadaver.hpp>
+#include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/FlashUIInventory.hpp>
 #include <Components/Inventory/FlashUIRadius.hpp>
@@ -28,6 +29,7 @@
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/ParticleFactory.hpp>
+#include <SFML/System/Time.hpp>
 #include <SceneControl/Scenes/CryptScene.hpp>
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -166,6 +168,8 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
       should_render = true;
 
       if ( update_flash_toggle<Cmp::FlashUIHealth>( dt ) ) { meter_outer_color = sf::Color::Cyan; }
+      if ( update_flash_toggle<Cmp::FlashUIExtraLife>( dt ) ) { meter_inner_color = sf::Color::Magenta; }
+      else { meter_inner_color = sf::Color::Red; }
     }
     else if ( meter.name == "fear_meter" )
     {
@@ -298,7 +302,7 @@ bool RenderOverlaySystem::update_flash_toggle( sf::Time dt )
   auto flash_entt = view.front();
   auto &flash_cmp = view.template get<FlashComponent>( flash_entt );
   flash_cmp.cooldown_timer += dt;
-  if ( flash_cmp.cooldown_timer >= flash_cmp.timeout() )
+  if ( flash_cmp.timeout() != sf::Time::Zero and flash_cmp.cooldown_timer >= flash_cmp.timeout() )
   {
     reg().remove<FlashComponent>( flash_entt );
     flash_cmp.cooldown_timer = sf::Time::Zero;

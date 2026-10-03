@@ -5,6 +5,7 @@
 #include <Components/AnimData.hpp>
 #include <Components/DeathPosition.hpp>
 #include <Components/Direction.hpp>
+#include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/ScryingBall.hpp>
@@ -199,7 +200,7 @@ void remove_player_extra_life( entt::registry &reg )
     reg.remove<Cmp::Player::ExtraLife>( extra_life_entt );
   }
 
-  for ( auto [flash_entt, flash_cmp] : reg.view<Cmp::FlashUIHealth>().each() )
+  for ( auto [flash_entt, flash_cmp] : reg.view<Cmp::FlashUIExtraLife>().each() )
   {
     reg.destroy( flash_entt );
   }
