@@ -17,8 +17,8 @@
 #include <Components/FractalCurve.hpp>
 #include <Components/Grave/ExitMultiBlock.hpp>
 #include <Components/Grave/MultiBlock.hpp>
+#include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
-#include <Components/Inventory/ScryingBall.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/Moveable.hpp>
@@ -97,7 +97,6 @@ void RenderGameSystem::render_game( sf::Time dt, const PathFinding::SpatialHashG
 
   // render the zorder queue, anything after this is treated as an "overlay" to the main render pipeline
   PROFILED( render_zorder_queue() );
-
   PROFILED( render_shockwaves() );
   PROFILED( render_arrow_compass() );
 
@@ -132,6 +131,7 @@ void RenderGameSystem::render_zorder_queue()
     }
     else if ( auto *particle_owner = reg().try_get<Cmp::Particle::SpriteOwner>( entity ) ) { draw_particle_sprite( *particle_owner ); }
     else if ( auto *floor_tiles = reg().try_get<Sprites::Containers::VertexFloor>( entity ) ) { draw_vertex_floor( *floor_tiles ); }
+    else if ( auto *dowsing_cmp = reg().try_get<Cmp::Inventory::DowsingTarget>( entity ) ) { render_dowsingrod_doglegs( *dowsing_cmp ); }
   }
 }
 
@@ -188,7 +188,6 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
                             origin, angle );
 
   // per-entity decorations drawn on top of the sprite
-  if ( const auto *stone_cmp = reg().try_get<Cmp::SeeingStone>( entity ) ) render_seeingstone_doglegs( *stone_cmp, pos_cmp );
   if ( const auto *wear_cmp = reg().try_get<Cmp::Inventory::WearLevel>( entity ) ) render_wear_level( wear_cmp->m_level, pos_cmp );
   if ( const auto *armed_cmp = reg().try_get<Cmp::Armed>( entity ) ) render_armed_indicator( *armed_cmp, pos_cmp );
 }
@@ -277,8 +276,10 @@ void RenderGameSystem::render_arrow_compass()
   }
 }
 
-void RenderGameSystem::render_seeingstone_doglegs( const Cmp::SeeingStone &stone_cmp, const Cmp::Position &pos_cmp )
+void RenderGameSystem::render_dowsingrod_doglegs( const Cmp::Inventory::DowsingTarget &dowsing_cmp )
 {
+  using Target = Cmp::Inventory::DowsingTarget::Target;
+
   auto draw_dogleg = [this]( sf::Vector2f source_pos, sf::Vector2f target_pos, sf::Color color, float thickness )
   {
     sf::Vector2f corner{};
@@ -290,10 +291,11 @@ void RenderGameSystem::render_seeingstone_doglegs( const Cmp::SeeingStone &stone
   };
 
   constexpr float kLineThickness = 3.f;
-  if ( not stone_cmp.active ) { return; }
-  switch ( stone_cmp.target )
+
+  auto pos_cmp = Utils::Player::get_position( reg() );
+  switch ( dowsing_cmp.target )
   {
-    case Cmp::SeeingStone::Target::YELLOW: {
+    case Target::YELLOW: {
       auto altar_view = reg().view<Cmp::Altar::MultiBlock>();
       for ( auto [altar_entt, altar_cmp] : altar_view.each() )
       {
@@ -302,7 +304,7 @@ void RenderGameSystem::render_seeingstone_doglegs( const Cmp::SeeingStone &stone
       }
       break;
     }
-    case Cmp::SeeingStone::Target::RED: {
+    case Target::RED: {
       auto crypt_view = reg().view<Cmp::Crypt::Entrance, Cmp::Position>();
       for ( auto [crypt_entt, crypt_cmp, crypt_pos_cmp] : crypt_view.each() )
       {
@@ -311,7 +313,7 @@ void RenderGameSystem::render_seeingstone_doglegs( const Cmp::SeeingStone &stone
       }
       break;
     }
-    case Cmp::SeeingStone::Target::GREEN: {
+    case Target::GREEN: {
       auto exit_view = reg().view<Cmp::Exit, Cmp::Position>();
       for ( auto [exit_entt, exit_cmp, exit_pos_cmp] : exit_view.each() )
       {
@@ -319,7 +321,7 @@ void RenderGameSystem::render_seeingstone_doglegs( const Cmp::SeeingStone &stone
       }
       break;
     }
-    case Cmp::SeeingStone::Target::NONE: {
+    case Target::NONE: {
       break;
     }
   }

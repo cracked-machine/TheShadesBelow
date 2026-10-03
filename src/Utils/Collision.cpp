@@ -5,7 +5,7 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/Wisp.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
-#include <Components/Plant/BurningTimeAccumulator.hpp>
+#include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/TorchRadius.hpp>
 #include <Components/UUID.hpp>
 #include <Systems/Render/RenderSystem.hpp>
@@ -59,7 +59,7 @@ LightSources collect_light_sources( entt::registry &reg )
     lights.lava.push_back( lava_cmp );
   }
 
-  auto burning_plant_view = reg.view<Cmp::PlantMultiBlock, Cmp::Plant::BurningTimeAccumulator, Cmp::UUID>();
+  auto burning_plant_view = reg.view<Cmp::PlantMultiBlock, Cmp::Plant::BurningTimer, Cmp::UUID>();
   for ( auto [plant_entt, plant_cmp, plant_burn_cmp, plant_uuid_cmp] : burning_plant_view.each() )
   {
     if ( not Utils::is_visible_in_view( light_bounds, plant_cmp ) ) continue;

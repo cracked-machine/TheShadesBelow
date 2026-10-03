@@ -5,8 +5,8 @@
 #include <Components/Crypt/ObjectiveMultiBlock.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
+#include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
-#include <Components/Inventory/ScryingBall.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
@@ -211,8 +211,8 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
   auto *inventory_slot_level_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inventory_slot_entt );
   if ( inventory_slot_level_cmp ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( world_item_entt, inventory_slot_level_cmp->m_level ); }
 
-  auto *inventory_scryingball_cmp = reg().try_get<Cmp::SeeingStone>( inventory_slot_entt );
-  if ( inventory_scryingball_cmp ) { reg().emplace_or_replace<Cmp::SeeingStone>( world_item_entt, true, inventory_scryingball_cmp->target ); }
+  auto *inventory_slot_dowsing_cmp = reg().try_get<Cmp::Inventory::DowsingTarget>( inventory_slot_entt );
+  if ( inventory_slot_dowsing_cmp ) { reg().emplace_or_replace<Cmp::Inventory::DowsingTarget>( world_item_entt, inventory_slot_dowsing_cmp->target ); }
 
   auto *uuid_cmp = reg().try_get<Cmp::UUID>( inventory_slot_entt );
   if ( uuid_cmp )
@@ -316,12 +316,18 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
     reg.emplace_or_replace<Cmp::UUID>( inventory_entity, uuid_cmp->data );
   }
 
+  // transfer the dowsing target from the worlditem to the new player inventory item. The slot has no position,
+  // so give it a fixed zorder to draw its guide lines just above the floor and below everything else.
+  auto *dowsing_target_cmp = reg.try_get<Cmp::Inventory::DowsingTarget>( world_item_entt );
+  if ( dowsing_target_cmp )
+  {
+    reg.emplace_or_replace<Cmp::Inventory::DowsingTarget>( inventory_entity, dowsing_target_cmp->target );
+    reg.emplace_or_replace<Cmp::ZOrderValue>( inventory_entity, -12.f );
+  }
+
   // transfer the wear level from the worlditem to the new player inventory item
   auto *wear_level_cmp = reg.try_get<Cmp::Inventory::WearLevel>( world_item_entt );
   if ( wear_level_cmp ) { reg.emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, wear_level_cmp->m_level ); }
-
-  auto *scryingball_cmp = reg.try_get<Cmp::SeeingStone>( world_item_entt );
-  if ( scryingball_cmp ) { reg.emplace_or_replace<Cmp::SeeingStone>( inventory_entity, false, scryingball_cmp->target ); }
 
   // now destroy the world item entt
   Factory::Plant::remove_plant_mb( reg, world_item_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );

@@ -5,10 +5,10 @@
 #include <Components/AnimData.hpp>
 #include <Components/DeathPosition.hpp>
 #include <Components/Direction.hpp>
+#include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
-#include <Components/Inventory/ScryingBall.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
@@ -154,12 +154,7 @@ void add_inventory( entt::registry &reg, const Sys::ItemKey &item )
   {
     reg.emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, 100.f );
   }
-  if ( item.contains( "scryingball" ) )
-  {
-    Cmp::SeeingStone sb;
-    sb.target = Game::Cmp::SeeingStone::random_pick( {} );
-    reg.emplace_or_replace<Cmp::SeeingStone>( inventory_entity, sb );
-  }
+
   if ( item.contains( "candle" ) ) { reg.emplace_or_replace<Cmp::UUID>( inventory_entity, Cmp::UUID::generate() ); }
 
   // clang-format off

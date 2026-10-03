@@ -140,6 +140,14 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
     }
   }
 
+  // spawn a dowsing rod
+  if ( sacrifice_type == "item.plant.rowan.drop" )
+  {
+    common_activation( SacrificeAnimType::JEWELS );
+    Factory::Player::destroy_inventory( reg(), sacrifice_type );
+    get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), "item.dowsingrod", "drop_loot" ) );
+  }
+
   // sacrifice witches jar at any time
   if ( sacrifice_type.contains( "item.witchesjar" ) )
   {

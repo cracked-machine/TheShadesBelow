@@ -333,7 +333,6 @@
         }
       }
     },
-  
     "sprite.plant.rowan.drop": {
       "spritesheet": {
         "displayname": "Rowan Stick",
@@ -1451,6 +1450,20 @@
         "zorder": [0],
         "texture_path": "res/textures/graveyard.png",
         "sprite_indices": [18],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.dowsingrod": {
+      "spritesheet": {
+        "displayname": "Dowsing Rod",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [16],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {

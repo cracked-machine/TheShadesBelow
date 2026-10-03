@@ -22,7 +22,6 @@
 #include <cmath>
 #include <limits>
 #include <optional>
-#include <string>
 #include <tuple>
 
 namespace Game::Cmp::Player
@@ -34,7 +33,7 @@ namespace Game::Cmp::Player
 struct ArrowCompass
 {
   //! @brief What the compass is pointing at, derived from the player's inventory item type
-  enum class Mode { NONE, EXIT, CRYPT, RELIC };
+  enum class Mode { NONE, EXIT, CRYPT, ALTAR };
 
   //! @brief Where and how to draw the arrow sprite this frame
   struct Placement
@@ -59,10 +58,14 @@ struct ArrowCompass
     m_cached_item_type = item_type;
 
     // precedence matches the original render order: relic > cryptkey > exitkey
-    if ( item_type.contains( "relic" ) ) m_mode = Mode::RELIC;
-    else if ( item_type.contains( "cryptkey" ) ) m_mode = Mode::CRYPT;
-    else if ( item_type.contains( "exitkey" ) ) m_mode = Mode::EXIT;
-    else m_mode = Mode::NONE;
+    if ( item_type.contains( "relic" ) or item_type.contains( "rowan.drop" ) )
+      m_mode = Mode::ALTAR;
+    else if ( item_type.contains( "cryptkey" ) )
+      m_mode = Mode::CRYPT;
+    else if ( item_type.contains( "exitkey" ) )
+      m_mode = Mode::EXIT;
+    else
+      m_mode = Mode::NONE;
 
     m_target.reset();
     m_retarget_pending = true;
@@ -91,15 +94,16 @@ struct ArrowCompass
         break;
       }
       case Mode::CRYPT: {
-        m_target = nearest( reg.view<Cmp::Crypt::Entrance, Cmp::Position>(), player_center,
-                            []( entt::entity, const Cmp::Crypt::Entrance &crypt_cmp, const Cmp::Position &crypt_pos_cmp ) -> std::optional<Cmp::Position>
+        m_target = nearest(
+            reg.view<Cmp::Crypt::Entrance, Cmp::Position>(), player_center,
+            []( entt::entity, const Cmp::Crypt::Entrance &crypt_cmp, const Cmp::Position &crypt_pos_cmp ) -> std::optional<Cmp::Position>
         {
           if ( crypt_cmp.is_open() ) return std::nullopt;
           return crypt_pos_cmp;
         } );
         break;
       }
-      case Mode::RELIC: {
+      case Mode::ALTAR: {
         m_target = nearest( reg.view<Cmp::Altar::MultiBlock>(), player_center,
                             []( entt::entity, const Cmp::Altar::MultiBlock &altar_cmp ) -> std::optional<Cmp::Position>
         {

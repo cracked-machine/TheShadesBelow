@@ -1,18 +1,21 @@
-#ifndef SRC_COMPONENTS_INVENTORY_SCRYINGBALL_HPP__
-#define SRC_COMPONENTS_INVENTORY_SCRYINGBALL_HPP__
+#ifndef SRC_COMPONENTS_INVENTORY_DOWSINGTARGET_HPP__
+#define SRC_COMPONENTS_INVENTORY_DOWSINGTARGET_HPP__
 
 #include <Components/Random.hpp>
+
+#include <algorithm>
 #include <vector>
-namespace Game::Cmp
+
+namespace Game::Cmp::Inventory
 {
 
-//! @brief A scrying ball item. When active, the Render system draws a colored "dogleg" guide line from
-//! the holder to the nearest landmark matching `target` (an altar, crypt entrance, or exit).
-struct SeeingStone
+//! @brief The landmark a dowsing rod guides towards. Assigned once when the rod is created and carried with it
+//! between the world item and the player inventory slot. While the rod is in the player inventory, the Render
+//! system draws a colored "dogleg" guide line from the player to each landmark matching `target`.
+struct DowsingTarget
 {
-  //! @brief The landmark a scrying ball guides towards, also used as the color of its guide line.
-  enum class Target
-  {
+  //! @brief The landmark a dowsing rod guides towards, also used as the color of its guide line.
+  enum class Target {
     //! @brief No landmark - no guide line is drawn.
     NONE,
     //! @brief Guides towards crypt entrances, drawn in red.
@@ -23,8 +26,7 @@ struct SeeingStone
     GREEN
   };
 
-  //! @brief Pick a random Target not present in `excludes`, so that multiple scrying balls in play
-  //! don't guide towards the same kind of landmark.
+  //! @brief Pick a random Target not present in `excludes`.
   //! @param excludes Targets to exclude from the pick.
   //! @return Target A randomly chosen Target from the remaining pool, or Target::NONE if none remain.
   static Target random_pick( std::vector<Target> excludes )
@@ -36,12 +38,10 @@ struct SeeingStone
     return pool.at( rnd.gen() );
   }
 
-  //! @brief Whether the guide line should currently be rendered.
-  bool active{ false };
-  //! @brief The landmark this scrying ball guides towards.
+  //! @brief The landmark this dowsing rod guides towards.
   Target target{ Target::NONE };
 };
 
-} // namespace Game::Cmp
+} // namespace Game::Cmp::Inventory
 
-#endif // SRC_COMPONENTS_INVENTORY_SCRYINGBALL_HPP__
+#endif // SRC_COMPONENTS_INVENTORY_DOWSINGTARGET_HPP__

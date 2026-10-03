@@ -12,7 +12,7 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/Wisp.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
-#include <Components/Plant/BurningTimeAccumulator.hpp>
+#include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>

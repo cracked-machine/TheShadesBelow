@@ -18,9 +18,8 @@
 #include <Components/ObstacleCap.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
-#include <Components/Persistent/PlantBurnDuration.hpp>
 #include <Components/Persistent/WeaponDegradePerHit.hpp>
-#include <Components/Plant/BurningTimeAccumulator.hpp>
+#include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
 #include <Components/Random.hpp>
@@ -341,7 +340,7 @@ void ActionSystem::player_plant_interact()
         auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
 
         // Prevent digging/chopping a plant on fire
-        auto *burning_accum = reg().try_get<Cmp::Plant::BurningTimeAccumulator>( plant_entt );
+        auto *burning_accum = reg().try_get<Cmp::Plant::BurningTimer>( plant_entt );
         if ( burning_accum ) continue;
 
         if ( inventory_type.contains( "item.shovel" ) )
@@ -598,11 +597,10 @@ void ActionSystem::update_burning_worlditems( sf::Time dt )
 
   for ( auto [plant_entt, plant_cmp, plant_uuid] : reg().view<Cmp::PlantMultiBlock, Cmp::UUID>().each() )
   {
-    auto *burning_time = reg().try_get<Cmp::Plant::BurningTimeAccumulator>( plant_entt );
-    if ( not burning_time ) continue;
+    auto *burn_timer = reg().try_get<Cmp::Plant::BurningTimer>( plant_entt );
+    if ( not burn_timer ) continue;
 
-    auto burning_timeout = sf::seconds( Sys::PersistSystem::get<Cmp::Persist::PlantBurnDuration>( reg() ).get_value() );
-    if ( *burning_time < burning_timeout )
+    if ( *burn_timer < burn_timer->timeout() )
     {
       // update player stats with burn_action: apply once if interval == 0, otherwise every `interval`
       // seconds. BurningTimeAccumulator resets to zero at the start of each burn, so a one-shot fires
@@ -614,10 +612,10 @@ void ActionSystem::update_burning_worlditems( sf::Time dt )
         auto burn_action = plant_item->get_action<Cmp::BurnAction>();
         auto interval = burn_action.interval();
         bool should_apply_burn_action;
-        if ( interval <= 0.f ) { should_apply_burn_action = ( *burning_time == sf::Time::Zero ); }
+        if ( interval <= 0.f ) { should_apply_burn_action = ( *burn_timer == sf::Time::Zero ); }
         else
         {
-          auto elapsed_before = burning_time->asSeconds();
+          auto elapsed_before = burn_timer->asSeconds();
           auto elapsed_after = elapsed_before + dt.asSeconds();
           should_apply_burn_action = static_cast<int>( elapsed_before / interval ) != static_cast<int>( elapsed_after / interval );
         }
@@ -663,13 +661,13 @@ void ActionSystem::update_burning_worlditems( sf::Time dt )
         Factory::Particle::add_ashpile( reg(), kAshPileTag, plant_uuid, ash_emitter_pos, plant_cmp.position.y + 1, ash_scale, ash_particle_size,
                                         ash_particle_speed, ash_particle_count );
       }
-      *burning_time += dt;
+      *burn_timer += dt;
     }
     else
     {
       // all done
       m_sound_bank.get_effect( "burning" ).stop();
-      reg().remove<Cmp::Plant::BurningTimeAccumulator>( plant_entt );
+      reg().remove<Cmp::Plant::BurningTimer>( plant_entt );
       for ( auto [ps_owner_entt, ps_owner_cmp, ps_owner_uuid] : reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID>().each() )
       {
         if ( ps_owner_uuid != plant_uuid ) continue;

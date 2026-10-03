@@ -1,7 +1,8 @@
 #include <Components/Grave/PlantMultiBlock.hpp>
-#include <Components/Plant/BurningTimeAccumulator.hpp>
+#include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/EatingTimeAccumulator.hpp>
 #include <Components/Position.hpp>
+#include <Components/Stats/BaseAction.hpp>
 #include <Components/UUID.hpp>
 #include <Factory/ActionFactory.hpp>
 #include <Utils/Player.hpp>
@@ -32,10 +33,7 @@ void try_burn_worlditem( entt::registry &reg )
       if ( not Utils::Player::is_player_near( reg, plant_cmp ) ) continue;
       if ( not Utils::Player::get_projected_position( reg ).findIntersection( plant_cmp ) ) continue;
 
-      if ( not reg.any_of<Cmp::Plant::BurningTimeAccumulator>( plant_entt ) )
-      {
-        reg.emplace_or_replace<Cmp::Plant::BurningTimeAccumulator>( plant_entt );
-      }
+      if ( not reg.any_of<Cmp::Plant::BurningTimer>( plant_entt ) ) { reg.emplace_or_replace<Cmp::Plant::BurningTimer>( plant_entt ); }
     }
   }
 }

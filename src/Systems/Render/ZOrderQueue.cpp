@@ -1,4 +1,5 @@
 #include <Components/AnimData.hpp>
+#include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/NoRender.hpp>
 #include <Components/Position.hpp>
 #include <Components/ZOrderValue.hpp>
@@ -25,6 +26,8 @@ void ZOrderQueue::refresh( entt::registry &reg, sf::FloatRect view_bounds, const
   PROFILED( queue_all<Sprites::Containers::VertexFloor>( reg ) );
   PROFILED( queue_particles( reg, view_bounds ) );
   PROFILED( queue_all<Cmp::Shader::SpriteOwner>( reg ) );
+  // inventory slots only have a zorder when they draw something in the world, e.g. dowsing rod guide lines
+  PROFILED( queue_all<Cmp::PlayerInventorySlot>( reg ) );
   PROFILED( queue_positioned( reg, view_bounds, render_position_grid ) );
 
   PROFILED( std::ranges::sort( m_entries, {}, &Entry::z ) );

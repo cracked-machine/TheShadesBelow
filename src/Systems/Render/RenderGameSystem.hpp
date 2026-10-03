@@ -2,7 +2,7 @@
 #define SRC_SYSTEMS_RENDER_RENDERGAMESYSTEM_HPP__
 
 #include <Components/AnimData.hpp>
-#include <Components/Inventory/ScryingBall.hpp>
+#include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/NoRender.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
@@ -42,6 +42,7 @@ struct FractalCurve;
 
 namespace Game::Cmp::Particle { class IParticleSprite; struct SpriteOwner; }
 namespace Game::Cmp::Shader { struct SpriteOwner; }
+namespace Game::Cmp::Inventory { struct DowsingTarget; }
 // clang-format on
 namespace Game::Sys
 {
@@ -79,7 +80,7 @@ private:
   void update_camera( sf::Time deltaTime );
 
   //! @brief Draws a Cmp::Position + Cmp::AnimData sprite, applying any Absolute* overrides, then its decorations
-  //! (seeing stone doglegs, wear level, armed indicator)
+  //! (wear level, armed indicator)
   void draw_animated_sprite( entt::entity entity );
 
   //! @brief Draws a shader sprite. Post-process shaders composite everything drawn before them in the queue.
@@ -98,8 +99,9 @@ private:
   //! @brief Used by GraveyardScene when player has key and relic carryitems
   void render_arrow_compass();
 
-  //! @brief Used by GraveyardScene when player places a seeing stone
-  void render_seeingstone_doglegs( const Cmp::SeeingStone &stone_cmp, const Cmp::Position &pos_cmp );
+  //! @brief Draws guide lines from the player to each landmark matching the dowsing rod target. Called from the
+  //! zorder queue for the player inventory slot holding the rod, so the lines sit above the floor and below sprites.
+  void render_dowsingrod_doglegs( const Cmp::Inventory::DowsingTarget &dowsing_cmp );
 
   //! @brief Draw a small wear-level bar above an item, filled proportionally to `wearlevel`.
   //! @param wearlevel

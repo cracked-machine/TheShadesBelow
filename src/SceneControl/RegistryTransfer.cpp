@@ -12,9 +12,9 @@
 #include <Components/Direction.hpp>
 #include <Components/FootStepAlpha.hpp>
 #include <Components/FootStepTimer.hpp>
+#include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/Grimoire.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
-#include <Components/Inventory/ScryingBall.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
@@ -282,7 +282,7 @@ void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
   registry.storage<Cmp::WorldItem>();
   registry.storage<Cmp::Inventory::WearLevel>();
   registry.storage<Cmp::ZOrderValue>();
-  registry.storage<Cmp::SeeingStone>();
+  registry.storage<Cmp::Inventory::DowsingTarget>();
   registry.storage<Cmp::Player::LastGraveyardPosition>();
   registry.storage<Cmp::Player::RuinLocation>();
   registry.storage<Cmp::Ruin::ObjectiveType>();

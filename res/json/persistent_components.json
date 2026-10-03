@@ -388,14 +388,6 @@
     "detail": "NPC Shockwave Speed",
     "format": "%d"
   },
-  "PlantBurnDuration": {
-    "type": "float",
-    "value": 9.0,
-    "min_value": 1.0,
-    "max_value": 30.0,
-    "detail": "Plant Burn Duration",
-    "format": "%.1f seconds"
-  },
   "PlayerAnimStrideLength": {
     "type": "float",
     "value": 7.5,

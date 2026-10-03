@@ -15,7 +15,6 @@
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Hazard/CollisionResist.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
-#include <Components/Inventory/ScryingBall.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
@@ -37,7 +36,7 @@
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
 #include <Components/Persistent/WeaponDegradePerHit.hpp>
-#include <Components/Plant/BurningTimeAccumulator.hpp>
+#include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
