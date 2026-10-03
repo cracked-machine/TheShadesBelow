@@ -150,7 +150,7 @@ void add_inventory( entt::registry &reg, const Sys::ItemKey &item )
 {
   auto inventory_entity = reg.create();
   reg.emplace_or_replace<Cmp::PlayerInventorySlot>( inventory_entity, Sys::ItemStore::instance().get( item ) );
-  if ( item.contains( "axe" ) or item.contains( "shovel" ) or item.contains( ".forage" ) )
+  if ( item.contains( "axe" ) or item.contains( "shovel" ) or item.contains( ".forage" ) or item.contains( "dowsingrod" ) )
   {
     reg.emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, 100.f );
   }

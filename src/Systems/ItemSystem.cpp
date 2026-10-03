@@ -48,7 +48,7 @@ void ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKey &item,
   reg().emplace_or_replace<Cmp::Npc::NoPathFinding>( world_item_entt );
   // Use a UUID to identify the InventoryItem/PlayerInventorySlot when the entity is destroyed.
   reg().emplace_or_replace<Cmp::UUID>( world_item_entt, Cmp::UUID::generate() );
-  if ( item == "item.axe" || item == "item.pickaxe" || item == "item.shovel" )
+  if ( item == "item.axe" || item == "item.pickaxe" || item == "item.shovel" || item == "item.dowsingrod" )
   {
     reg().emplace_or_replace<Cmp::Inventory::WearLevel>( world_item_entt, 100.f );
   }

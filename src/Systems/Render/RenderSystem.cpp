@@ -72,7 +72,7 @@ void RenderSystem::render_text( std::string text, unsigned int size, sf::Vector2
   float cell_padding = 20;
   sf::RectangleShape title_bg;
   sf::FloatRect title_bounds = title_text.getLocalBounds();
-  title_bg.setSize( { title_bounds.size.x + cell_padding * 2.f, title_bounds.size.y + cell_padding * 2.f } );
+  title_bg.setSize( { title_bounds.size.x + ( cell_padding * 2.f ), title_bounds.size.y + ( cell_padding * 2.f ) } );
   title_bg.setFillColor( sf::Color::Black );
   title_bg.setPosition( { final_position.x + title_bounds.position.x - cell_padding, final_position.y + title_bounds.position.y - cell_padding } );
 

@@ -247,9 +247,11 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
   m_expiry_update_timer = sf::Time::Zero;
 
   // Returns true once the item has fully spoiled. Non-perishable items are left untouched.
-  auto apply_spoilage = []( Cmp::WorldItem &item, Cmp::Inventory::WearLevel &wearlevel_cmp ) -> bool
+  // Forage spoils wherever it is; the dowsing rod only wears out while the player is carrying it.
+  auto apply_spoilage = []( Cmp::WorldItem &item, Cmp::Inventory::WearLevel &wearlevel_cmp, bool in_inventory ) -> bool
   {
-    if ( not item.item_type.contains( ".forage" ) ) return false;
+    const bool is_carried_dowsingrod = in_inventory and item.item_type.contains( "dowsingrod" );
+    if ( not item.item_type.contains( ".forage" ) and not is_carried_dowsingrod ) return false;
     if ( item.expiry() == sf::Time::Zero ) return false;
 
     float dmg_delta = 100.f / ( item.expiry().asSeconds() / expiry_update_timeout.asSeconds() );
@@ -261,13 +263,13 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
   std::vector<entt::entity> spoiled_world_items;
   for ( auto [worlditem_entt, worlditem_cmp, wearlevel_cmp] : reg().view<Cmp::WorldItem, Cmp::Inventory::WearLevel>().each() )
   {
-    if ( apply_spoilage( worlditem_cmp, wearlevel_cmp ) ) spoiled_world_items.push_back( worlditem_entt );
+    if ( apply_spoilage( worlditem_cmp, wearlevel_cmp, false ) ) spoiled_world_items.push_back( worlditem_entt );
   }
 
   std::vector<entt::entity> spoiled_inventory_items;
   for ( auto [inventory_entt, inventory_cmp, wearlevel_cmp] : reg().view<Cmp::PlayerInventorySlot, Cmp::Inventory::WearLevel>().each() )
   {
-    if ( apply_spoilage( inventory_cmp.m_item, wearlevel_cmp ) ) spoiled_inventory_items.push_back( inventory_entt );
+    if ( apply_spoilage( inventory_cmp.m_item, wearlevel_cmp, true ) ) spoiled_inventory_items.push_back( inventory_entt );
   }
 
   // swap spoiled world items to rotten food in-place so position/zorder/spatial-grid entries are preserved
@@ -281,8 +283,10 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
 
   for ( auto inventory_entt : spoiled_inventory_items )
   {
+    // a worn out dowsing rod is simply lost; spoiled forage turns into rotten food
+    const bool is_dowsingrod = reg().get<Cmp::PlayerInventorySlot>( inventory_entt ).m_item.item_type.contains( "dowsingrod" );
     reg().destroy( inventory_entt );
-    Factory::Player::add_inventory( reg(), "item.rottenfood" );
+    if ( not is_dowsingrod ) Factory::Player::add_inventory( reg(), "item.rottenfood" );
   }
 }
 

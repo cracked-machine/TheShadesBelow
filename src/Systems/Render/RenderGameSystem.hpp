@@ -99,8 +99,10 @@ private:
   //! @brief Used by GraveyardScene when player has key and relic carryitems
   void render_arrow_compass();
 
-  //! @brief Draws guide lines from the player to each landmark matching the dowsing rod target. Called from the
-  //! zorder queue for the player inventory slot holding the rod, so the lines sit above the floor and below sprites.
+  //! @brief Draws a train of chevrons travelling from the player towards each landmark matching the dowsing rod
+  //! target. All paths share one pulse, which restarts once it has reached the landmark or left the view on every
+  //! path. Called from the zorder
+  //! queue for the player inventory slot holding the rod, so the chevrons sit above the floor and below sprites.
   void render_dowsingrod_doglegs( const Cmp::Inventory::DowsingTarget &dowsing_cmp );
 
   //! @brief Draw a small wear-level bar above an item, filled proportionally to `wearlevel`.
@@ -140,6 +142,9 @@ private:
 
   //! @brief Whether `m_camera_position` has been seeded with the player's position yet, to avoid lerping from the origin on the first frame.
   bool m_camera_initialized{ false };
+
+  //! @brief Time since the dowsing rod pulse last left the player, accumulated from the frame delta in render_game().
+  sf::Time m_dowsing_pulse_time{ sf::Time::Zero };
 
   //! @brief Copy of the window contents taken when the z-order loop reaches a post-process shader, which is then
   //! drawn into that shader's render texture. Reused across passes and frames.

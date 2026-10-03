@@ -71,12 +71,47 @@
 #include <Utils/Profiling.hpp>
 #include <Utils/Utils.hpp>
 
+#include <algorithm>
+#include <array>
 #include <memory>
 #include <optional>
 #include <tracy/Tracy.hpp>
+#include <vector>
 
 namespace Game::Sys
 {
+
+namespace
+{
+
+//! @brief Triangle list for a chevron in marker-local space: +x is the direction of travel, y is sideways, units
+//! are pixels. The two arms are separate parallelograms sharing the centre edge so that a semi-transparent color
+//! is not blended twice at the tip.
+//! @param width Sideways extent between the two trailing ends
+//! @param height Extent along the direction of travel, from trailing ends to tip
+//! @param thickness Stroke thickness of each arm, measured along the direction of travel
+constexpr std::array<sf::Vector2f, 12> make_chevron_shape( float width, float height, float thickness )
+{
+  const float front = ( height + thickness ) * 0.5f;
+  const float back = front - height;
+  const float half_width = width * 0.5f;
+
+  const sf::Vector2f tip{ front, 0.f };
+  const sf::Vector2f notch{ front - thickness, 0.f };
+  const sf::Vector2f left{ back, -half_width };
+  const sf::Vector2f left_inner{ back - thickness, -half_width };
+  const sf::Vector2f right{ back, half_width };
+  const sf::Vector2f right_inner{ back - thickness, half_width };
+
+  return { tip, left, left_inner, tip, left_inner, notch, tip, right, right_inner, tip, right_inner, notch };
+}
+
+//! @brief Shape of each marker in the dowsing rod pulse train, as a triangle list in marker-local space (+x is the
+//! direction of travel, origin is the marker centre, units are pixels). Replace this to change the marker shape;
+//! any number of triangles is fine.
+constexpr auto kDowsingMarkerShape = make_chevron_shape( 10.f, 5.f, 3.f );
+
+} // namespace
 
 RenderGameSystem::RenderGameSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
     : RenderSystem( reg, window, sound_bank )
@@ -94,6 +129,9 @@ void RenderGameSystem::render_game( sf::Time dt, const PathFinding::SpatialHashG
 
   // re-populate the z-order queue with the latest entity/component data
   PROFILED( s_zorder_queue.refresh( reg(), Utils::calculate_view_bounds( s_world_view ), render_position_grid ) );
+
+  // advance the dowsing rod pulse once per frame, no matter how many paths get drawn from the zorder queue
+  m_dowsing_pulse_time += dt;
 
   // render the zorder queue, anything after this is treated as an "overlay" to the main render pipeline
   PROFILED( render_zorder_queue() );
@@ -280,17 +318,33 @@ void RenderGameSystem::render_dowsingrod_doglegs( const Cmp::Inventory::DowsingT
 {
   using Target = Cmp::Inventory::DowsingTarget::Target;
 
-  auto draw_dogleg = [this]( sf::Vector2f source_pos, sf::Vector2f target_pos, sf::Color color, float thickness )
+  constexpr int kMarkerCount = 10;       // markers in the pulse train
+  constexpr float kMarkerSpacing = 8.f; // px between consecutive markers
+  constexpr float kPulseSpeed = 50.f;   // px per second
+  constexpr float kTrainLength = kMarkerCount * kMarkerSpacing;
+  constexpr float kViewMargin = 8.f; // px past the view edge, so markers slide off screen instead of popping
+  constexpr sf::Color kAltarColour{ 255, 255, 0, 255 };
+  constexpr sf::Color kCryptColour{ 255, 0, 0, 255 };
+  constexpr sf::Color kExitColour{ 0, 255, 0, 255 };
+
+  struct Dogleg
+  {
+    sf::Vector2f source;
+    sf::Vector2f corner;
+    sf::Vector2f target;
+    sf::Color color;
+    [[nodiscard]] float length() const { return ( corner - source ).length() + ( target - corner ).length(); }
+  };
+  std::vector<Dogleg> doglegs;
+
+  auto add_dogleg = [&doglegs]( sf::Vector2f source_pos, sf::Vector2f target_pos, sf::Color color )
   {
     sf::Vector2f corner{};
     if ( target_pos.y - source_pos.y < target_pos.x - source_pos.x ) { corner = sf::Vector2f{ source_pos.x, target_pos.y }; }
     else { corner = sf::Vector2f{ target_pos.x, source_pos.y }; }
 
-    draw_world( Utils::Maths::thick_line_rect( source_pos, corner, color, thickness ) );
-    draw_world( Utils::Maths::thick_line_rect( corner, target_pos, color, thickness ) );
+    doglegs.push_back( { source_pos, corner, target_pos, color } );
   };
-
-  constexpr float kLineThickness = 3.f;
 
   auto pos_cmp = Utils::Player::get_position( reg() );
   switch ( dowsing_cmp.target )
@@ -300,7 +354,7 @@ void RenderGameSystem::render_dowsingrod_doglegs( const Cmp::Inventory::DowsingT
       for ( auto [altar_entt, altar_cmp] : altar_view.each() )
       {
         // yellow for altar paths
-        draw_dogleg( pos_cmp.getCenter(), altar_cmp.getCenter(), sf::Color( 255, 255, 0, 128 ), kLineThickness );
+        add_dogleg( pos_cmp.getCenter(), altar_cmp.getCenter(), kAltarColour );
       }
       break;
     }
@@ -309,7 +363,7 @@ void RenderGameSystem::render_dowsingrod_doglegs( const Cmp::Inventory::DowsingT
       for ( auto [crypt_entt, crypt_cmp, crypt_pos_cmp] : crypt_view.each() )
       {
         // red for crypt paths
-        draw_dogleg( pos_cmp.getCenter(), crypt_pos_cmp.getCenter(), sf::Color( 255, 0, 0, 128 ), kLineThickness );
+        add_dogleg( pos_cmp.getCenter(), crypt_pos_cmp.getCenter(), kCryptColour );
       }
       break;
     }
@@ -317,7 +371,7 @@ void RenderGameSystem::render_dowsingrod_doglegs( const Cmp::Inventory::DowsingT
       auto exit_view = reg().view<Cmp::Exit, Cmp::Position>();
       for ( auto [exit_entt, exit_cmp, exit_pos_cmp] : exit_view.each() )
       {
-        draw_dogleg( pos_cmp.getCenter(), exit_pos_cmp.getCenter(), sf::Color( 0, 255, 0, 128 ), kLineThickness );
+        add_dogleg( pos_cmp.getCenter(), exit_pos_cmp.getCenter(), kExitColour );
       }
       break;
     }
@@ -325,6 +379,79 @@ void RenderGameSystem::render_dowsingrod_doglegs( const Cmp::Inventory::DowsingT
       break;
     }
   }
+  if ( doglegs.empty() ) return;
+
+  // the pulse only needs to travel the part of each path that is on screen: the distance from the player to
+  // where the path leaves the view, or the whole path if the target is in view
+  const auto view_bounds = Utils::calculate_view_bounds( RenderSystem::get_world_view() );
+  auto visible_length = [&view_bounds]( const Dogleg &dogleg )
+  {
+    float travelled = 0.f;
+    const std::array<sf::Vector2f, 3> points{ dogleg.source, dogleg.corner, dogleg.target };
+    for ( std::size_t i = 0; i + 1 < points.size(); ++i )
+    {
+      const sf::Vector2f start = points[i];
+      const sf::Vector2f delta = points[i + 1] - start;
+      if ( not view_bounds.contains( start ) ) return travelled;
+      if ( view_bounds.contains( points[i + 1] ) )
+      {
+        travelled += delta.length();
+        continue;
+      }
+
+      // leg leaves the view: find the fraction of the leg at which it crosses the view edge
+      float exit_fraction = 1.f;
+      if ( delta.x > 0.f ) exit_fraction = std::min( exit_fraction, ( view_bounds.position.x + view_bounds.size.x - start.x ) / delta.x );
+      if ( delta.x < 0.f ) exit_fraction = std::min( exit_fraction, ( view_bounds.position.x - start.x ) / delta.x );
+      if ( delta.y > 0.f ) exit_fraction = std::min( exit_fraction, ( view_bounds.position.y + view_bounds.size.y - start.y ) / delta.y );
+      if ( delta.y < 0.f ) exit_fraction = std::min( exit_fraction, ( view_bounds.position.y - start.y ) / delta.y );
+      return std::min( travelled + ( delta.length() * exit_fraction ) + kViewMargin, dogleg.length() );
+    }
+    return travelled;
+  };
+
+  // all paths share one pulse, so they launch together; restart once the tail has cleared the longest visible path
+  float longest = 0.f;
+  for ( const auto &dogleg : doglegs )
+    longest = std::max( longest, visible_length( dogleg ) );
+
+  float head = m_dowsing_pulse_time.asSeconds() * kPulseSpeed;
+  if ( head > longest + kTrainLength )
+  {
+    m_dowsing_pulse_time = sf::Time::Zero;
+    head = 0.f;
+  }
+
+  sf::VertexArray markers( sf::PrimitiveType::Triangles );
+  for ( const auto &dogleg : doglegs )
+  {
+    const float first_leg_length = ( dogleg.corner - dogleg.source ).length();
+    const float end_length = visible_length( dogleg );
+
+    for ( int i = 0; i < kMarkerCount; ++i )
+    {
+      // distance of this marker along the path; markers emerge from the player and vanish at the target or view edge
+      const float dist = head - ( static_cast<float>( i ) * kMarkerSpacing );
+      if ( dist < 0.f or dist > end_length ) continue;
+
+      const bool on_first_leg = dist < first_leg_length;
+      const sf::Vector2f leg_start = on_first_leg ? dogleg.source : dogleg.corner;
+      const sf::Vector2f leg_end = on_first_leg ? dogleg.corner : dogleg.target;
+      const auto dir = Utils::Maths::normalized( leg_end - leg_start );
+      if ( not dir ) continue;
+
+      const sf::Vector2f marker_pos = leg_start + ( *dir * ( on_first_leg ? dist : dist - first_leg_length ) );
+      const sf::Vector2f side = dir->perpendicular();
+
+      // fade towards the tail of the train
+      sf::Color color = dogleg.color;
+      color.a = static_cast<std::uint8_t>( color.a * ( kMarkerCount - i ) / kMarkerCount );
+
+      for ( const auto &v : kDowsingMarkerShape )
+        markers.append( sf::Vertex{ marker_pos + ( *dir * v.x ) + ( side * v.y ), color } );
+    }
+  }
+  draw_world( markers );
 }
 
 void RenderGameSystem::render_wear_level( float wearlevel, const Cmp::Position &pos )
