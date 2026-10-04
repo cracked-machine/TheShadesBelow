@@ -3,6 +3,7 @@
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/InteriorMultiBlock.hpp>
 #include <Components/Grave/MultiBlock.hpp>
+#include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Moveable.hpp>
 #include <Components/NoRender.hpp>
@@ -14,12 +15,15 @@
 #include <Components/Position.hpp>
 #include <Components/Ruin/BuildingMultiBlock.hpp>
 #include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
+#include <Components/UUID.hpp>
 #include <Components/Weapons/Arrow.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/PathfindingFactory.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/Render/RenderPassTypes.hpp>
+
+#include <unordered_set>
 
 namespace Game::Factory::Pathfinding
 {
@@ -49,10 +53,25 @@ PathFinding::SpatialHashGridSharedPtr create_ghost_navmesh( entt::registry &reg 
   {
     pathfinding_navmesh->insert( pos_entt, pos_cmp );
   }
+  // identify rowan segments via the UUID
+  std::unordered_set<Cmp::UUID> rowan_uuids;
+  for ( auto [mb_entt, mb_cmp, anim_cmp, uuid_cmp] : reg.view<Cmp::PlantMultiBlock, Cmp::AnimData, Cmp::UUID>().each() )
+  {
+    if ( anim_cmp.m_sprite_type == "sprite.item.plant.rowan" ) { rowan_uuids.insert( uuid_cmp ); }
+  }
+
   // second pass: If we find any position with a Cmp::Npc::NoPathFinding then that invalidates the entire bucket at that position.
   for ( auto [pos_entt, pos_cmp] : reg.view<Cmp::Position>().each() )
   {
-    if ( reg.all_of<Cmp::Npc::NoPathFinding>( pos_entt ) ) { pathfinding_navmesh->remove_all( pos_cmp ); }
+    if ( not reg.all_of<Cmp::Npc::NoPathFinding>( pos_entt ) ) continue;
+
+    // Allow ghosts to pass through rowan trees
+    if ( reg.all_of<Cmp::PlantSegment>( pos_entt ) )
+    {
+      auto *seg_uuid_cmp = reg.try_get<Cmp::UUID>( pos_entt );
+      if ( seg_uuid_cmp and rowan_uuids.contains( *seg_uuid_cmp ) ) continue;
+    }
+    pathfinding_navmesh->remove_all( pos_cmp );
   }
   return pathfinding_navmesh;
 }
