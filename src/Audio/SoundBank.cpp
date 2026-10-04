@@ -26,6 +26,7 @@ void SoundBank::init()
   sounds.emplace( "shotgun_rack", EffectsData{ "res/audio/shotgun_rack.mp3" } );
   sounds.emplace( "shotgun_fire", EffectsData{ "res/audio/shotgun_fire.mp3" } );
   sounds.emplace( "rattling_bones", EffectsData{ "res/audio/rattling_bones.mp3" } );
+  sounds.emplace( "tool_break", EffectsData{ "res/audio/tool_break.mp3" } );
 
   sounds.emplace( "footstep_grass", EffectsData{ "res/audio/footstep_grass.mp3" } );
   sounds.emplace( "footstep_woodfloor", EffectsData{ "res/audio/footstep_woodfloor.mp3" } );

@@ -24,6 +24,7 @@
 #include <Events/PauseClocksEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/ResumeClocksEvent.hpp>
+#include <Events/UpdateDmgEvent.hpp>
 #include <Factory/BombFactory.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Factory/NpcFactory.hpp>
@@ -130,7 +131,8 @@ void BombSystem::update()
       if ( item_entt == armed_entt ) return;
       if ( item_cmp.item_type == "item.pickaxe" or item_cmp.item_type == "item.axe" or item_cmp.item_type == "item.shovel" )
       {
-        Utils::Player::reduce_inventory_wear_level( reg(), Sys::PersistSystem::get<Cmp::Persist::BombDamage>( reg() ).get_value() );
+        auto dmg = Sys::PersistSystem::get<Cmp::Persist::BombDamage>( reg() ).get_value();
+        get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
       }
       else if ( item_cmp.item_type == "item.bomb" )
       {

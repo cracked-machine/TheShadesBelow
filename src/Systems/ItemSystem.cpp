@@ -3,15 +3,19 @@
 #include <Components/AnimData.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/WearLevel.hpp>
+#include <Components/Inventory/WorldItem.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Position.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateItemEvent.hpp>
+#include <Events/UpdateDmgEvent.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/ItemSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Utils/Player.hpp>
+
+#include <algorithm>
 
 namespace Game::Sys
 {
@@ -21,9 +25,35 @@ ItemSystem::ItemSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
 {
   SPDLOG_DEBUG( "ItemSystem initialized" );
   std::ignore = get_systems_event_queue().sink<Events::CreateItemEvent>().connect<&ItemSystem::on_create_item_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::UpdateDmgEvent>().connect<&ItemSystem::on_update_dmg_event>( this );
 }
 
 void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev ) { create_world_item( ev.m_pos, ev.m_item, ev.m_sfx, ev.m_zorder ); }
+void ItemSystem::on_update_dmg_event( const Events::UpdateDmgEvent &ev )
+{
+  // don't assume the item has a wear level
+  if ( reg().all_of<Cmp::WorldItem, Cmp::Inventory::WearLevel>( ev.m_item_entt ) )
+  {
+    auto &wearlevel_cmp = reg().get<Cmp::Inventory::WearLevel>( ev.m_item_entt );
+    switch ( ev.m_type )
+    {
+      case Events::UpdateDmgEvent::ADD:
+        wearlevel_cmp.m_level = std::clamp( wearlevel_cmp.m_level + ev.m_amount, 0.f, 100.f );
+        break;
+      case Events::UpdateDmgEvent::SUBTRACT:
+        wearlevel_cmp.m_level = std::clamp( wearlevel_cmp.m_level - ev.m_amount, 0.f, 100.f );
+        break;
+    }
+
+    if ( wearlevel_cmp.m_level <= 0 )
+    {
+      const auto &rotten_item = Sys::ItemStore::instance().get( "item.rottenfood" );
+      reg().emplace_or_replace<Cmp::WorldItem>( ev.m_item_entt, rotten_item );
+      reg().emplace_or_replace<Cmp::AnimData>( ev.m_item_entt, Cmp::AnimData::Config{ .sprite_type = rotten_item.sprite_type, .enabled = false } );
+      reg().remove<Cmp::Inventory::WearLevel>( ev.m_item_entt );
+    }
+  }
+}
 
 void ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKey &item, std::string sfx, float zorder )
 {

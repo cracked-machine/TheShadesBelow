@@ -148,15 +148,12 @@ void remove_lerp_cmp( entt::registry &reg );
 //! entt::null and empty strings for the types if the inventory is empty.
 std::tuple<entt::entity, Sys::ItemKey, Sys::SpriteKey> get_inventory( entt::registry &reg );
 
+entt::entity get_inventory_entt( entt::registry &reg );
+
 //! @brief Get the wear level of the item in the player's inventory slot.
 //! @param reg reference to the entt registry
 //! @return float The wear level, or -1 if the inventory slot has no Cmp::Inventory::WearLevel.
 float get_inventory_wear_level( entt::registry &reg );
-
-//! @brief Reduce the wear level of the item in the player's inventory slot by `amount`.
-//! @param reg reference to the entt registry
-//! @param amount The amount to subtract from the current wear level.
-void reduce_inventory_wear_level( entt::registry &reg, float amount );
 
 //! @brief Check whether the given position is inside a spawn area.
 //! @param reg reference to the entt registry

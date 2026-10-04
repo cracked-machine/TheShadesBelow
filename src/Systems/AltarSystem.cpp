@@ -120,13 +120,15 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
     common_activation( SacrificeAnimType::DEFAULT );
     auto &player_wealth = Utils::Player::get_wealth( reg() );
     player_wealth.wealth += 2;
+    m_sound_bank.get_effect( "get_loot" ).play();
     // signal UI to flash
     auto flash_entt = reg().create();
     reg().emplace_or_replace<Cmp::FlashUIWealth>( flash_entt );
   }
 
   // sacrifice spent tools at any time
-  if ( sacrifice_type.contains( "item.axe" ) or sacrifice_type.contains( "item.pickaxe" ) or sacrifice_type.contains( "item.shovel" ) )
+  if ( sacrifice_type.contains( "item.axe" ) or sacrifice_type.contains( "item.pickaxe" ) or sacrifice_type.contains( "item.shovel" ) or
+       sacrifice_type.contains( "item.dowsingrod" ) )
   {
     if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 )
     {
@@ -134,6 +136,7 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
       common_activation( SacrificeAnimType::DEFAULT );
       auto &player_wealth = Utils::Player::get_wealth( reg() );
       player_wealth.wealth += 2;
+      m_sound_bank.get_effect( "get_loot" ).play();
       // signal UI to flash
       auto flash_entt = reg().create();
       reg().emplace_or_replace<Cmp::FlashUIWealth>( flash_entt );

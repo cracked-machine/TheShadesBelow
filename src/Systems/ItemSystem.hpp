@@ -2,6 +2,7 @@
 #define SRC_SYSTEMS_ITEMSYSTEM_HPP__
 
 #include <Events/CreateItemEvent.hpp>
+#include <Events/UpdateDmgEvent.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Stores/StoreKey.hpp>
@@ -35,6 +36,10 @@ public:
   //! @brief Event handler that forwards to create_world_item().
   //! @param ev
   void on_create_item_event( Game::Events::CreateItemEvent ev );
+
+  //! @brief Apply wear to the world item
+  //! @param ev
+  void on_update_dmg_event( const Events::UpdateDmgEvent &ev );
 
   //! @brief Create a generic world item entity, dispatching to create_explosive() for bombs.
   //! @param pos

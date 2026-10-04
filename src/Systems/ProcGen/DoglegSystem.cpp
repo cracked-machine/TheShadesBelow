@@ -61,7 +61,7 @@ constexpr float kViewMargin = 8.f; // px past the view edge, so markers slide of
 void DoglegSystem::update( sf::Time dt )
 {
   // always clear first, so nothing stale is left to render once the rod leaves the inventory
-  clear_doglegs();
+  clear();
 
   auto [inventory_entt, _, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_entt == entt::null ) return;
@@ -177,7 +177,7 @@ void DoglegSystem::update_markers( Cmp::Inventory::DowsingTarget &dowsing_cmp )
   }
 }
 
-void DoglegSystem::clear_doglegs()
+void DoglegSystem::clear()
 {
   auto &dl_cmp = Utils::Player::get_doglegs( reg() );
   dl_cmp.m_doglegs.clear();

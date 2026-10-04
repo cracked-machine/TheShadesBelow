@@ -48,7 +48,7 @@ private:
   void update_markers( Cmp::Inventory::DowsingTarget &dowsing_cmp );
 
   //! @brief Clear doglegs and markers from the component
-  void clear_doglegs();
+  void clear();
 
   //! @brief Distance from the player to where the path leaves the view, or the whole path if the target is in view
   static float visible_length( const Cmp::Player::Doglegs::Dogleg &dogleg, const sf::FloatRect &view_bounds );

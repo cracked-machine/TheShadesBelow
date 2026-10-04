@@ -4,7 +4,6 @@
 #include <Components/AnimData.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/Segment.hpp>
-#include <Components/Inventory/WearLevel.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
 #include <Components/Persistent/WeaponDegradePerHit.hpp>
@@ -17,6 +16,7 @@
 #include <Components/Stats/SpawnAction.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
+#include <Events/UpdateDmgEvent.hpp>
 #include <Factory/BombFactory.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Factory/NpcFactory.hpp>
@@ -124,8 +124,8 @@ void GraveSystem::apply_dig_hit( entt::entity grave_entity, Cmp::Grave::MultiBlo
 {
   constexpr float kGraveMaxHp = 255.f;
 
-  float reduction_amount = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
-  Utils::Player::reduce_inventory_wear_level( reg(), reduction_amount );
+  float dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
+  get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 
   grave_cmp.hp -= Utils::Maths::to_percent( kGraveMaxHp, Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).get_value() );
 

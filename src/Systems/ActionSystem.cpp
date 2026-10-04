@@ -33,6 +33,7 @@
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
+#include <Events/UpdateDmgEvent.hpp>
 #include <Factory/BombFactory.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Factory/NpcFactory.hpp>
@@ -167,7 +168,6 @@ void ActionSystem::check_player_dig_obstacle_collision()
       // We are in proximity to an entity that is a candidate for a new SelectedPosition component.
       // Add a new SelectedPosition component to the entity
       reg().emplace_or_replace<Cmp::SelectedPosition>( obstacle_entt, obstacle_pos_cmp.position );
-
       reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
       // calculate new alpha value and apply to the current obstacle and any obstacle with matching UUID (cap sprite obstacles)
@@ -177,8 +177,8 @@ void ActionSystem::check_player_dig_obstacle_collision()
       else if ( inventory_type.contains( "shovel" ) or inventory_type.contains( "axe" ) ) { damage_per_hit = damage_per_hit / 5; }
       obstacle_cmp.damage += damage_per_hit;
 
-      float reduction_amount = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
-      Utils::Player::reduce_inventory_wear_level( reg(), reduction_amount );
+      float dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
+      get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 
       // Destroy the obstacle?
       if ( obstacle_cmp.damage >= 100 )
@@ -315,8 +315,8 @@ void ActionSystem::player_plant_interact()
 
       reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
-      float reduction_amount = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
-      Utils::Player::reduce_inventory_wear_level( reg(), reduction_amount );
+      float dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
+      get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 
       auto inventory_wear_view = reg().view<Cmp::PlayerInventorySlot>();
       if ( inventory_wear_view->empty() )
@@ -414,8 +414,8 @@ void ActionSystem::check_player_smash_pot()
       reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
       loot_container.hp -= Utils::Maths::to_percent( 100.f, Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).get_value() );
 
-      float weapon_dmg_delta = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
-      Utils::Player::reduce_inventory_wear_level( reg(), weapon_dmg_delta );
+      float dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
+      get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 
       if ( loot_container.hp > 0 )
       {
@@ -430,12 +430,9 @@ void ActionSystem::check_player_smash_pot()
         loot_container_destroyed = true;
 
         m_sound_bank.get_effect( "break_pot" ).play();
-        auto inventory_wear_view = reg().view<Cmp::PlayerInventorySlot, Cmp::Inventory::WearLevel>();
-        for ( auto [weapons_entity, inventory_slot, wear_level] : inventory_wear_view.each() )
-        {
-          // Decrease weapons level based on damage dealt
-          wear_level.m_level -= Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
-        }
+        auto dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
+        get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
+
         Factory::Loot::destroy_loot_container( reg(), loot_entity, m_reserved_sm.lock() );
 
         break;
@@ -531,8 +528,8 @@ void ActionSystem::check_player_axe_npc_kill()
       // Add a new SelectedPosition component to the entity
       reg().emplace_or_replace<Cmp::SelectedPosition>( npc_entity, npc_pos_cmp.position );
 
-      float reduction_amount = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
-      Utils::Player::reduce_inventory_wear_level( reg(), reduction_amount );
+      float dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
+      get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 
       // select the final smash sound
       m_sound_bank.get_effect( "axe_whip" ).play();

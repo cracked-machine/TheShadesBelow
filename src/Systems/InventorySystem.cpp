@@ -23,6 +23,7 @@
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
+#include <Events/UpdateDmgEvent.hpp>
 #include <Factory/MultiblockFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlantFactory.hpp>
@@ -53,6 +54,7 @@ InventorySystem::InventorySystem( entt::registry &reg, sf::RenderWindow &window,
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&InventorySystem::on_player_action>( this );
   std::ignore = get_systems_event_queue().sink<Events::DropInventoryEvent>().connect<&InventorySystem::on_drop_inventory_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::PickupWorldItemEvent>().connect<&InventorySystem::on_pickup_world_item_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::UpdateDmgEvent>().connect<&InventorySystem::on_update_dmg_event>( this );
   SPDLOG_DEBUG( "InventorySystem initialized" );
 }
 
@@ -80,6 +82,41 @@ void InventorySystem::on_drop_inventory_event( [[maybe_unused]] Events::DropInve
 }
 
 void InventorySystem::on_pickup_world_item_event( Events::PickupWorldItemEvent ev ) { pickup_world_item( reg(), ev.world_item_entt ); }
+
+void InventorySystem::on_update_dmg_event( const Events::UpdateDmgEvent &ev ) { update_dmg( ev.m_item_entt, ev.m_amount, ev.m_type ); }
+
+void InventorySystem::update_dmg( entt::entity entt, float amount, Events::UpdateDmgEvent::Type type )
+{
+  // don't assume the slot has a wear level
+  if ( reg().all_of<Cmp::PlayerInventorySlot, Cmp::Inventory::WearLevel>( entt ) )
+  {
+    auto &wearlevel_cmp = reg().get<Cmp::Inventory::WearLevel>( entt );
+    switch ( type )
+    {
+      case Events::UpdateDmgEvent::ADD:
+        wearlevel_cmp.m_level = std::clamp( wearlevel_cmp.m_level + amount, 0.f, 100.f );
+        break;
+      case Events::UpdateDmgEvent::SUBTRACT:
+        wearlevel_cmp.m_level = std::clamp( wearlevel_cmp.m_level - amount, 0.f, 100.f );
+        break;
+    }
+
+    if ( wearlevel_cmp.m_level <= 0 )
+    {
+      auto inventory_type = reg().get<Cmp::PlayerInventorySlot>( entt ).m_item.item_type;
+      if ( inventory_type.contains( "forage" ) )
+      {
+        reg().destroy( entt );
+        Factory::Player::add_inventory( reg(), "item.rottenfood" );
+      }
+      else
+      {
+        // dead tools remain in inventory for altar sacrifice
+        m_sound_bank.get_effect( "tool_break" ).play();
+      }
+    }
+  }
+}
 
 void InventorySystem::swap_inventory()
 {
@@ -246,47 +283,34 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
   if ( m_expiry_update_timer < expiry_update_timeout ) return;
   m_expiry_update_timer = sf::Time::Zero;
 
-  // Returns true once the item has fully spoiled. Non-perishable items are left untouched.
-  // Forage spoils wherever it is; the dowsing rod only wears out while the player is carrying it.
-  auto apply_spoilage = []( Cmp::WorldItem &item, Cmp::Inventory::WearLevel &wearlevel_cmp, bool in_inventory ) -> bool
-  {
-    const bool is_carried_dowsingrod = in_inventory and item.item_type.contains( "dowsingrod" );
-    if ( not item.item_type.contains( ".forage" ) and not is_carried_dowsingrod ) return false;
-    if ( item.expiry() == sf::Time::Zero ) return false;
-
-    float dmg_delta = 100.f / ( item.expiry().asSeconds() / expiry_update_timeout.asSeconds() );
-    wearlevel_cmp.m_level = std::clamp( wearlevel_cmp.m_level - dmg_delta, 0.f, 100.f );
-    return wearlevel_cmp.m_level <= 0.f;
-  };
-
-  // Collect spoiled entities first - don't modify the registry while iterating its views
-  std::vector<entt::entity> spoiled_world_items;
+  // Collect world entities first - don't modify the registry while iterating its views
+  std::vector<entt::entity> world_items;
   for ( auto [worlditem_entt, worlditem_cmp, wearlevel_cmp] : reg().view<Cmp::WorldItem, Cmp::Inventory::WearLevel>().each() )
   {
-    if ( apply_spoilage( worlditem_cmp, wearlevel_cmp, false ) ) spoiled_world_items.push_back( worlditem_entt );
+    if ( worlditem_cmp.expiry() == sf::Time::Zero ) continue;
+    // the dowsing rod only wears out while the player is carrying it
+    if ( worlditem_cmp.item_type.contains( "dowsingrod" ) ) continue;
+    world_items.push_back( worlditem_entt );
+  }
+  for ( auto worlditem_entt : world_items )
+  {
+    auto &worlditem_cmp = reg().get<Cmp::WorldItem>( worlditem_entt );
+    float dmg = 100.f / ( worlditem_cmp.expiry().asSeconds() / expiry_update_timeout.asSeconds() );
+    get_systems_event_queue().trigger( Events::UpdateDmgEvent( worlditem_entt, dmg ) );
   }
 
-  std::vector<entt::entity> spoiled_inventory_items;
+  // there is only one inventory slot so stop after the first one
   for ( auto [inventory_entt, inventory_cmp, wearlevel_cmp] : reg().view<Cmp::PlayerInventorySlot, Cmp::Inventory::WearLevel>().each() )
   {
-    if ( apply_spoilage( inventory_cmp.m_item, wearlevel_cmp, true ) ) spoiled_inventory_items.push_back( inventory_entt );
-  }
-
-  // swap spoiled world items to rotten food in-place so position/zorder/spatial-grid entries are preserved
-  for ( auto worlditem_entt : spoiled_world_items )
-  {
-    const auto &rotten_item = Sys::ItemStore::instance().get( "item.rottenfood" );
-    reg().emplace_or_replace<Cmp::WorldItem>( worlditem_entt, rotten_item );
-    reg().emplace_or_replace<Cmp::AnimData>( worlditem_entt, Cmp::AnimData::Config{ .sprite_type = rotten_item.sprite_type, .enabled = false } );
-    reg().remove<Cmp::Inventory::WearLevel>( worlditem_entt );
-  }
-
-  for ( auto inventory_entt : spoiled_inventory_items )
-  {
-    // a worn out dowsing rod is simply lost; spoiled forage turns into rotten food
-    const bool is_dowsingrod = reg().get<Cmp::PlayerInventorySlot>( inventory_entt ).m_item.item_type.contains( "dowsingrod" );
-    reg().destroy( inventory_entt );
-    if ( not is_dowsingrod ) Factory::Player::add_inventory( reg(), "item.rottenfood" );
+    if ( wearlevel_cmp.m_level <= 0 ) continue;
+    // the slot entity has no Cmp::WorldItem of its own - the item lives inside the slot component.
+    // Tools have no expiry; they only wear through use.
+    if ( inventory_cmp.m_item.expiry() != sf::Time::Zero )
+    {
+      float dmg = 100.f / ( inventory_cmp.m_item.expiry().asSeconds() / expiry_update_timeout.asSeconds() );
+      update_dmg( inventory_entt, dmg, Events::UpdateDmgEvent::SUBTRACT );
+    }
+    break; // only one inventory slot
   }
 }
 

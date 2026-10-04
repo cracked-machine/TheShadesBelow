@@ -4,11 +4,13 @@
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
+#include <Events/UpdateDmgEvent.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <SFML/System/Time.hpp>
 #include <Systems/BaseSystem.hpp>
 
 #include <SFML/System/Clock.hpp>
+#include <entt/entity/fwd.hpp>
 
 namespace Game::Sys
 {
@@ -59,6 +61,16 @@ private:
   //! @param ev
   void on_pickup_world_item_event( Events::PickupWorldItemEvent ev );
 
+  //! @brief handler for Events::UpdateDmgEvent. Calls update_dmg().
+  //! @param ev
+  void on_update_dmg_event( const Events::UpdateDmgEvent &ev );
+
+  //! @brief Apply damage to item
+  //! @param entt
+  //! @param amount
+  //! @param type
+  void update_dmg( entt::entity entt, float amount, Events::UpdateDmgEvent::Type type );
+
   //! @brief Drop the inventory (if player has one) and pickup the nearest workd item into inventory
   void swap_inventory();
 
@@ -67,7 +79,8 @@ private:
   //! @param inventory_slot_entt the player inventory slot entt
   void drop_inventory_item( sf::Vector2f pos, entt::entity inventory_slot_entt );
 
-  //! @brief Update wear level of both inventory and world items using their built-in expiry date
+  //! @brief Fixed-step expiry tick for perishable inventory and world items. Wear is applied via
+  //! update_dmg() (inventory) or Events::UpdateDmgEvent (world items); fully spoiled items are then replaced/removed.
   //! @param dt
   void update_item_expiry_damage( sf::Time dt );
 

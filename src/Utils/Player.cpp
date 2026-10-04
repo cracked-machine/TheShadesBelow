@@ -237,6 +237,19 @@ std::tuple<entt::entity, Sys::ItemKey, Sys::SpriteKey> get_inventory( entt::regi
   return { found_entt, found_inv_type, found_sprite_type };
 }
 
+entt::entity get_inventory_entt( entt::registry &reg )
+{
+  auto inv_view = reg.view<Cmp::PlayerInventorySlot>();
+  entt::entity found_entt = entt::null;
+  // this assumes there is only one slot in the inventory, so warn if there is a bug somewhere
+  if ( inv_view.size() > 1 ) throw std::runtime_error( "Found multiple slots in single slot inventory" );
+  for ( auto [inv_entt, inv_cmp] : inv_view.each() )
+  {
+    found_entt = inv_entt;
+  }
+  return found_entt;
+}
+
 float get_inventory_wear_level( entt::registry &reg )
 {
   auto inventory_wear_view = reg.view<Cmp::PlayerInventorySlot, Cmp::Inventory::WearLevel>();
@@ -246,17 +259,6 @@ float get_inventory_wear_level( entt::registry &reg )
   }
   SPDLOG_DEBUG( "Player Inventory slot has no appropriate WearLevel component" );
   return -1;
-}
-
-void reduce_inventory_wear_level( entt::registry &reg, float amount )
-{
-  auto inventory_wear_view = reg.view<Cmp::PlayerInventorySlot, Cmp::Inventory::WearLevel>();
-  for ( auto [inventory_entity, inventory_slot, wear_level] : inventory_wear_view.each() )
-  {
-    wear_level.m_level -= amount;
-    return;
-  }
-  SPDLOG_DEBUG( "Player Inventory slot has no appropriate WearLevel component" );
 }
 
 bool is_in_spawn( entt::registry &reg, const Cmp::Position &player_pos_cmp )
