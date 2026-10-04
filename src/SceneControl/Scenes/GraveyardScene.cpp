@@ -64,6 +64,7 @@
 #include <Systems/PlayerSystem.hpp>
 #include <Systems/ProcGen/CellAutomataSystem.hpp>
 #include <Systems/ProcGen/DLASystem.hpp>
+#include <Systems/ProcGen/DoglegSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
@@ -286,6 +287,7 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::WormholeSystem>().check_player_wormhole_collision() );
   PROFILED( m_sys.find<Sys::Store::Type::ActionSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::FootstepSystem>().update() );
+  PROFILED( m_sys.find<Sys::Store::Type::DoglegSystem>().update( dt ) );
 
   PROFILED( m_sys.find<Sys::Store::Type::CryptSystem>().update_exit_zorder() );
   if ( m_scene_exit_cooldown.getElapsedTime() >= m_scene_exit_cooldown_time )

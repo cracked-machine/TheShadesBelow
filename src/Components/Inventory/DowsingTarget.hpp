@@ -3,6 +3,8 @@
 
 #include <Components/Random.hpp>
 
+#include <SFML/System/Time.hpp>
+
 #include <algorithm>
 #include <vector>
 
@@ -10,8 +12,8 @@ namespace Game::Cmp::Inventory
 {
 
 //! @brief The landmark a dowsing rod guides towards. Assigned once when the rod is created and carried with it
-//! between the world item and the player inventory slot. While the rod is in the player inventory, the Render
-//! system sends colored chevrons along a "dogleg" path from the player to each landmark matching `target`.
+//! between the world item and the player inventory slot. While the rod is in the player inventory, DoglegSystem
+//! sends colored chevrons along a "dogleg" path from the player to each landmark matching `target`.
 struct DowsingTarget
 {
   //! @brief The landmark a dowsing rod guides towards, also used as the color of its guide chevrons.
@@ -40,6 +42,9 @@ struct DowsingTarget
 
   //! @brief The landmark this dowsing rod guides towards.
   Target target{ Target::NONE };
+
+  //! @brief Time since the chevron pulse last left the player. Advanced and reset by DoglegSystem.
+  sf::Time m_dowsing_pulse_time{ sf::Time::Zero };
 };
 
 } // namespace Game::Cmp::Inventory

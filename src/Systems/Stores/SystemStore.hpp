@@ -11,21 +11,21 @@
 // clang-format off
 namespace Game::Audio { class SoundBank; }
 namespace sf { class RenderWindow; }
-namespace Game::Sys::ProcGen { class CellAutomataSystem; class DLASystem; class LevelGenerator; }
+namespace Game::Sys::ProcGen { class CellAutomataSystem; class DLASystem; class DoglegSystem; class LevelGenerator; }
 // clang-format on
 
 namespace Game::Sys
 {
 
 // Forward declare all system classes
-class BaseSystem;
 class AnimSystem;
+class ActionSystem;
 class ArrowSystem;
 class AltarSystem;
+class BaseSystem;
 class BombSystem;
 class CorruptionHazardSystem;
 class CryptSystem;
-class ActionSystem;
 class ExitSystem;
 class FootstepSystem;
 class GraveSystem;
@@ -33,10 +33,10 @@ class GrimoireSystem;
 class HealingSpringSystem;
 class InventorySystem;
 class ItemStore;
-class SpriteStore;
 class ItemSystem;
-class NpcStore;
+class LightningSystem;
 class LootSystem;
+class NpcStore;
 class NpcSystem;
 class ParticleSystem;
 class PassageSystem;
@@ -46,13 +46,13 @@ class RenderDebugSystem;
 class RenderGameSystem;
 class RenderMenuSystem;
 class RenderOverlaySystem;
+class RuinSystem;
 class SceneInputRouter;
 class SinkHoleHazardSystem;
+class SpriteStore;
 class ShaderSystem;
 class ShockwaveSystem;
 class ShopSystem;
-class LightningSystem;
-class RuinSystem;
 class WatchmanSystem;
 class WispSystem;
 class WormholeSystem;
@@ -80,6 +80,8 @@ public:
     CryptSystem,
     //! @brief Key for ProcGen::DLASystem.
     DiffusionLtdAggrSystem,
+    //! @brief Key for DoglegSystem system
+    DoglegSystem,
     //! @brief Key for ActionSystem.
     ActionSystem,
     //! @brief Key for ExitSystem.
@@ -219,6 +221,7 @@ template<> struct Store::SystemTraits<Store::Type::CellAutomataSystem>     { usi
 template<> struct Store::SystemTraits<Store::Type::CorruptionHazardSystem> { using type = CorruptionHazardSystem; };
 template<> struct Store::SystemTraits<Store::Type::CryptSystem>            { using type = Game::Sys::CryptSystem; };
 template<> struct Store::SystemTraits<Store::Type::DiffusionLtdAggrSystem> { using type = ProcGen::DLASystem; };
+template<> struct Store::SystemTraits<Store::Type::DoglegSystem>           { using type = ProcGen::DoglegSystem; };
 template<> struct Store::SystemTraits<Store::Type::ExitSystem>             { using type = ExitSystem; };
 template<> struct Store::SystemTraits<Store::Type::FootstepSystem>         { using type = FootstepSystem; };
 template<> struct Store::SystemTraits<Store::Type::GraveSystem>            { using type = GraveSystem; };

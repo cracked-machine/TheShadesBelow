@@ -2,7 +2,6 @@
 #define SRC_SYSTEMS_RENDER_RENDERGAMESYSTEM_HPP__
 
 #include <Components/AnimData.hpp>
-#include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/NoRender.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
@@ -42,7 +41,6 @@ struct FractalCurve;
 
 namespace Game::Cmp::Particle { class IParticleSprite; struct SpriteOwner; }
 namespace Game::Cmp::Shader { struct SpriteOwner; }
-namespace Game::Cmp::Inventory { struct DowsingTarget; }
 // clang-format on
 namespace Game::Sys
 {
@@ -99,12 +97,6 @@ private:
   //! @brief Used by GraveyardScene when player has key and relic carryitems
   void render_arrow_compass();
 
-  //! @brief Draws a train of chevrons travelling from the player towards each landmark matching the dowsing rod
-  //! target. All paths share one pulse, which restarts once it has reached the landmark or left the view on every
-  //! path. Called from the zorder
-  //! queue for the player inventory slot holding the rod, so the chevrons sit above the floor and below sprites.
-  void render_dowsingrod_doglegs( const Cmp::Inventory::DowsingTarget &dowsing_cmp );
-
   //! @brief Draw a small wear-level bar above an item, filled proportionally to `wearlevel`.
   //! @param wearlevel
   //! @param pos
@@ -142,9 +134,6 @@ private:
 
   //! @brief Whether `m_camera_position` has been seeded with the player's position yet, to avoid lerping from the origin on the first frame.
   bool m_camera_initialized{ false };
-
-  //! @brief Time since the dowsing rod pulse last left the player, accumulated from the frame delta in render_game().
-  sf::Time m_dowsing_pulse_time{ sf::Time::Zero };
 
   //! @brief Copy of the window contents taken when the z-order loop reaches a post-process shader, which is then
   //! drawn into that shader's render texture. Reused across passes and frames.

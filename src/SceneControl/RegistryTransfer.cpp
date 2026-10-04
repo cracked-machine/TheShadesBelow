@@ -26,6 +26,7 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/Curse.hpp>
+#include <Components/Player/Doglegs.hpp>
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -52,7 +53,10 @@ namespace Game::Scene
 namespace
 {
 //! @brief Player components that are scene-local caches and must never be copied/transferred between scenes
-bool is_player_deny_listed( entt::id_type type_hash ) { return type_hash == entt::type_hash<Cmp::Player::ArrowCompass>::value(); }
+bool is_player_deny_listed( entt::id_type type_hash )
+{
+  return type_hash == entt::type_hash<Cmp::Player::ArrowCompass>::value() or type_hash == entt::type_hash<Cmp::Player::Doglegs>::value();
+}
 } // namespace
 
 //! @brief Creates a deep copy of selected entities from a scene's ECS registry into a new standalone registry. The function supports different copy

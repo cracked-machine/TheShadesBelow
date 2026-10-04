@@ -19,6 +19,7 @@
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Curse.hpp>
+#include <Components/Player/Doglegs.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Player/HeartBeat.hpp>
@@ -103,6 +104,7 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   reg.emplace_or_replace<Cmp::AbsoluteAlpha>( entity, 255 );       // fully opaque
   reg.emplace_or_replace<Cmp::AbsoluteRotation>( entity, 0 );
   reg.emplace_or_replace<Cmp::Player::HeartBeat>( entity );
+  reg.emplace_or_replace<Cmp::Player::Doglegs>( entity );
   add_inventory( reg, "item.pickaxe" );
 }
 

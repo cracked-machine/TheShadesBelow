@@ -18,6 +18,7 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/Curse.hpp>
+#include <Components/Player/Doglegs.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Player/HeartBeat.hpp>
@@ -467,6 +468,13 @@ Cmp::Player::ConsumeTimer *is_player_eating( entt::registry &reg )
 {
   auto player_entt = Utils::Player::get_entity( reg );
   return reg.try_get<Cmp::Player::ConsumeTimer>( player_entt );
+}
+
+Cmp::Player::Doglegs &get_doglegs( entt::registry &reg )
+{
+  auto player_entt = get_entity( reg );
+  // scene-local cache that is not transferred between scenes, so create it on demand
+  return reg.get_or_emplace<Cmp::Player::Doglegs>( player_entt );
 }
 
 } // namespace Game::Utils::Player

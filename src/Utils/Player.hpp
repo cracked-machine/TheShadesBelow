@@ -4,6 +4,7 @@
 #include <Components/AbsoluteAlpha.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
+#include <Components/Player/Doglegs.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Stats/PlayerStats.hpp>
@@ -263,6 +264,11 @@ Cmp::Player::HeartBeat &get_heartbeat( entt::registry &reg );
 //! @param reg
 //! @return Cmp::Player::EatingTimeAccumulator* modifiable component, or nullptr if the player is not eating
 Cmp::Player::ConsumeTimer *is_player_eating( entt::registry &reg );
+
+//! @brief Get the player's dowsing rod doglegs, creating an empty component if the player has none in this scene
+//! @param reg
+//! @return Cmp::Player::Doglegs& modifiable component
+Cmp::Player::Doglegs &get_doglegs( entt::registry &reg );
 
 } // namespace Game::Utils::Player
 
