@@ -5,6 +5,8 @@
 #include <Components/ZOrderValue.hpp>
 #include <Shaders/CircularDistortionShader.hpp>
 #include <Shaders/DarkModeShader.hpp>
+#include <Shaders/DizzyEchoShader.hpp>
+#include <Shaders/DollyZoomShader.hpp>
 #include <Shaders/FloodWaterShader.hpp>
 #include <Shaders/MistShader.hpp>
 #include <Shaders/NightStaticShader.hpp>
@@ -67,6 +69,22 @@ void add_red_vignette( Sys::ShaderSystem &shader_sys, const Cmp::Persist::Displa
 //! @param shader_sys
 //! @param display_res
 void add_tunnel_vision( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res );
+
+//! @brief Register the dizzy echo overlay shader, sized to the display resolution. It leaves echoes of the player,
+//! NPC and world item sprites behind them; its z-order sits above the world sprites but below add_night_static's,
+//! so the echoes are darkened by the night like the sprites they trail. The echoes strengthen with the player's
+//! vertigo toxicity stat; see Sprites::DizzyEchoShader::update.
+//! @param shader_sys
+//! @param display_res
+void add_dizzy_echo( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res );
+
+//! @brief Register the dolly zoom full-screen post-process shader, sized to the display resolution. Its z-order
+//! sits between add_circular_distortion's and add_tunnel_vision's, so the zoom includes the distortion but the
+//! tunnel vision aperture and red vignette stay put. The zoom strengthens with the player's vertigo toxicity
+//! stat; see Sprites::DollyZoomShader::update.
+//! @param shader_sys
+//! @param display_res
+void add_dolly_zoom( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res );
 
 } // namespace Game::Factory::Shader
 

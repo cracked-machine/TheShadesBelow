@@ -26,6 +26,7 @@
 #include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <Components/Toxicity/Venom.hpp>
+#include <Components/Toxicity/Vertigo.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/ParticleFactory.hpp>
@@ -238,6 +239,14 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
     else if ( meter.name == "venom_meter" )
     {
       auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Venom>();
+      meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
+      meter_inner_color = sf::Color::Green;
+      meter_outer_color = sf::Color( 64, 64, 64, 255 );
+      should_render = true;
+    }
+    else if ( meter.name == "vertigo_meter" )
+    {
+      auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Vertigo>();
       meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
       meter_inner_color = sf::Color::Green;
       meter_outer_color = sf::Color( 64, 64, 64, 255 );

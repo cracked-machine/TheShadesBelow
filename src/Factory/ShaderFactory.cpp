@@ -78,4 +78,35 @@ void add_tunnel_vision( Sys::ShaderSystem &shader_sys, const Cmp::Persist::Displ
   tunnel_vision_shader->set_tag( "TunnelVision" );
   shader_sys.add( std::move( tunnel_vision_shader ), Cmp::ZOrderValue( 2000000.f ) );
 }
+
+void add_dizzy_echo( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res )
+{
+
+  constexpr std::size_t frame_count = 4;
+  constexpr float alpha_rolloff = 0.6f;
+  constexpr sf::Time echo_delay = sf::milliseconds( 120 );
+  constexpr float sway_radius = 40.f;
+  constexpr float sway_frequency = 0.1f;
+  constexpr float sway_ratio = 1.3f;
+  auto dizzy_echo_shader = std::make_unique<Sprites::DizzyEchoShader>( "res/shaders/Generic.vert", "res/shaders/DizzyEcho.frag", display_res,
+                                                                       frame_count, alpha_rolloff, echo_delay, sway_radius, sway_frequency,
+                                                                       sway_ratio );
+
+  dizzy_echo_shader->set_tag( "DizzyEcho" );
+  shader_sys.add( std::move( dizzy_echo_shader ), Cmp::ZOrderValue( 30000.f ) );
+}
+
+void add_dolly_zoom( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res )
+{
+
+  constexpr float zoom_amount = 0.15f;
+  constexpr float zoom_frequency = 0.15f;
+  constexpr sf::Angle skew_amount = sf::degrees( 2.5f );
+  constexpr float skew_frequency = 0.2f;
+  auto dolly_zoom_shader = std::make_unique<Sprites::DollyZoomShader>( "res/shaders/Generic.vert", "res/shaders/DollyZoom.frag", display_res,
+                                                                       zoom_amount, zoom_frequency, skew_amount, skew_frequency );
+
+  dolly_zoom_shader->set_tag( "DollyZoom" );
+  shader_sys.add( std::move( dolly_zoom_shader ), Cmp::ZOrderValue( 1500000.f ) );
+}
 } // namespace Game::Factory::Shader

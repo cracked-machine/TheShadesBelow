@@ -4,6 +4,7 @@
 #include <Components/Toxicity/Phototoxia.hpp>
 #include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Venom.hpp>
+#include <Components/Toxicity/Vertigo.hpp>
 #include <Factory/ToxicityFactory.hpp>
 
 #include <spdlog/spdlog.h>
@@ -19,6 +20,7 @@ Cmp::Toxicity::Toxidrome create_toxidrome( const std::string &type, int toxicity
   if ( type == "hypoxia" ) return ToxidromeBuilder<>{}.add<Cmp::Toxicity::Hypoxia>( toxicity ).build();
   if ( type == "phototoxia" ) return ToxidromeBuilder<>{}.add<Cmp::Toxicity::Phototoxia>( toxicity ).build();
   if ( type == "venom" ) return ToxidromeBuilder<>{}.add<Cmp::Toxicity::Venom>( toxicity ).build();
+  if ( type == "vertigo" ) return ToxidromeBuilder<>{}.add<Cmp::Toxicity::Vertigo>( toxicity ).build();
   if ( type != "none" ) SPDLOG_WARN( "Unknown toxidrome type: {}", type );
   return ToxidromeBuilder<>{}.build();
 }

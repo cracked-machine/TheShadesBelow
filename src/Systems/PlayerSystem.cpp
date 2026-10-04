@@ -73,6 +73,7 @@
 #include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <Components/Toxicity/Venom.hpp>
+#include <Components/Toxicity/Vertigo.hpp>
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
 #include <Components/Wormhole/Jump.hpp>
@@ -592,6 +593,7 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
   const Cmp::BaseAction max_tachycardia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
   const Cmp::BaseAction max_bradycardia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
   const Cmp::BaseAction max_venom_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
+  const Cmp::BaseAction max_vertigo_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
   const Cmp::BaseAction player_onfire_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {} );
 
   update_timed_action_clocks( dt );
@@ -619,6 +621,11 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Venom>() == 100 )
     {
       player_stats.apply( max_venom_modifier );
+      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+    }
+    if ( player_stats.toxidrome().at<Cmp::Toxicity::Vertigo>() == 100 )
+    {
+      player_stats.apply( max_vertigo_modifier );
       reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     }
     if ( player_stats.fear() == 100 )
@@ -800,6 +807,10 @@ void PlayerSystem::kill_player_if_stats_are_max()
   else if ( Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Venom>() == 100 )
   {
     on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::POISONED, Utils::Player::get_position( reg() ) ) );
+  }
+  else if ( Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Vertigo>() == 100 )
+  {
+    on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::TERRIFIED, Utils::Player::get_position( reg() ) ) );
   }
   else if ( Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Phototoxia>() == 100 )
   {

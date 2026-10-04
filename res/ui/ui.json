@@ -61,7 +61,7 @@
                  "visible":true,
                  "width":180,
                  "x":80,
-                 "y":520
+                 "y":560
                 }, 
                 {
                  "height":0,
@@ -114,7 +114,7 @@
                  "visible":true,
                  "width":0,
                  "x":50,
-                 "y":370
+                 "y":400
                 }, 
                 {
                  "height":0,
@@ -143,7 +143,7 @@
                  "visible":true,
                  "width":0,
                  "x":50,
-                 "y":410
+                 "y":440
                 }, 
                 {
                  "height":0,
@@ -172,7 +172,7 @@
                  "visible":true,
                  "width":0,
                  "x":50,
-                 "y":450
+                 "y":480
                 }, 
                 {
                  "height":0,
@@ -196,7 +196,7 @@
                  "visible":true,
                  "width":0,
                  "x":120,
-                 "y":370
+                 "y":400
                 }, 
                 {
                  "height":0,
@@ -220,7 +220,7 @@
                  "visible":true,
                  "width":0,
                  "x":120,
-                 "y":410
+                 "y":440
                 }, 
                 {
                  "height":0,
@@ -244,7 +244,7 @@
                  "visible":true,
                  "width":0,
                  "x":120,
-                 "y":450
+                 "y":480
                 }, 
                 {
                  "height":20,
@@ -285,7 +285,7 @@
                  "visible":true,
                  "width":0,
                  "x":130,
-                 "y":550
+                 "y":590
                 }, 
                 {
                  "height":10,
@@ -297,7 +297,7 @@
                  "visible":true,
                  "width":130,
                  "x":100,
-                 "y":660
+                 "y":700
                 }, 
                 {
                  "height":20,
@@ -345,7 +345,7 @@
                  "visible":true,
                  "width":0,
                  "x":170,
-                 "y":700
+                 "y":740
                 }, 
                 {
                  "height":0,
@@ -682,6 +682,42 @@
                  "width":0,
                  "x":210,
                  "y":318
+                }, 
+                {
+                 "height":20,
+                 "id":54,
+                 "name":"vertigo_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":120,
+                 "x":40,
+                 "y":360
+                }, 
+                {
+                 "height":0,
+                 "id":55,
+                 "name":"vertigo_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"vertigo"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":70,
+                 "y":358
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -690,7 +726,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":52,
+ "nextobjectid":56,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

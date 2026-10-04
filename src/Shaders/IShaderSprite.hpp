@@ -58,6 +58,12 @@ public:
   //! overlay. See FearDistortionShader for the concrete example.
   [[nodiscard]] virtual bool is_post_process() const { return false; }
 
+  //! @brief Whether this shader samples a layer holding only the player, NPC and world item sprites, rather than
+  //! its own self-contained texture or the whole frame. When RenderGameSystem's z-order loop reaches such a
+  //! shader it redraws just those sprites into get_render_texture() (transparent elsewhere) and then blends
+  //! this sprite over the window in screen space. See DizzyEchoShader for the concrete example.
+  [[nodiscard]] virtual bool is_sprite_layer() const { return false; }
+
 protected:
   //! @brief Access the underlying SFML shader object, for setting uniforms.
   //! @return Reference to the wrapped sf::Shader.

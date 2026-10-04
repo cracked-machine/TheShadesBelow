@@ -8,6 +8,7 @@
 #include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/TraitsBase.hpp>
 #include <Components/Toxicity/Venom.hpp>
+#include <Components/Toxicity/Vertigo.hpp>
 #include <algorithm>
 #include <entt/core/type_info.hpp>
 #include <entt/fwd.hpp>

@@ -135,6 +135,8 @@ void GraveyardScene::on_init()
                                             Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
   Factory::Shader::add_tunnel_vision( m_sys.find<Sys::Store::Type::ShaderSystem>(),
                                       Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
+  Factory::Shader::add_dolly_zoom( m_sys.find<Sys::Store::Type::ShaderSystem>(),
+                                   Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
 
   // Create the level contents - "reserved" spatial map prevents overlap
   auto &level_gen = m_sys.find<Sys::Store::Type::LevelGenerator>();

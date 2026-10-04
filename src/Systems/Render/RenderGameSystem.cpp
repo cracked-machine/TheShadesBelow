@@ -20,6 +20,7 @@
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/WearLevel.hpp>
+#include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/Moveable.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
@@ -199,6 +200,14 @@ void RenderGameSystem::draw_shader_sprite( Cmp::Shader::SpriteOwner &shader_owne
   if ( not shader_owner.sprite ) return;
   auto &sprite = *shader_owner.sprite;
 
+  if ( sprite.is_sprite_layer() )
+  {
+    if ( not sprite.active() ) return;
+    capture_sprite_layer( sprite );
+    draw_screen( sprite );
+    return;
+  }
+
   if ( not sprite.is_post_process() )
   {
     draw_world( sprite );
@@ -216,6 +225,22 @@ void RenderGameSystem::draw_shader_sprite( Cmp::Shader::SpriteOwner &shader_owne
   render_texture.draw( sf::Sprite( m_frame_capture ) );
   render_texture.display();
   draw_screen( sprite );
+}
+
+void RenderGameSystem::capture_sprite_layer( Sprites::IShaderSprite &sprite )
+{
+  auto &render_texture = sprite.get_render_texture();
+  render_texture.clear( sf::Color::Transparent );
+
+  // reuse the z-order queue so the layer keeps the frame's visibility culling and draw order
+  set_render_target( render_texture );
+  for ( const auto &[z, entity] : s_zorder_queue )
+  {
+    if ( not reg().any_of<Cmp::Player::Character, Cmp::Npc::NPC, Cmp::WorldItem>( entity ) ) continue;
+    if ( reg().all_of<Cmp::Position, Cmp::AnimData>( entity ) ) { draw_animated_sprite( entity ); }
+  }
+  restore_render_target();
+  render_texture.display();
 }
 
 void RenderGameSystem::draw_particle_sprite( Cmp::Particle::SpriteOwner &particle_owner )

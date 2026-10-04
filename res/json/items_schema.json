@@ -88,7 +88,7 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["none", "tachycardia", "bradycardia", "halucinogen", "hypoxia", "phototoxia", "venom"]
+              "enum": ["none", "tachycardia", "bradycardia", "halucinogen", "hypoxia", "phototoxia", "venom", "vertigo"]
             },
             "toxicity": { "type": "number" }
           }

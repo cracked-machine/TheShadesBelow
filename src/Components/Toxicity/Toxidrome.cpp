@@ -5,6 +5,7 @@
 #include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <Components/Toxicity/Venom.hpp>
+#include <Components/Toxicity/Vertigo.hpp>
 
 namespace Game::Cmp::Toxicity
 {
@@ -55,7 +56,7 @@ template <typename... Ts>
 
 [[nodiscard]] bool Toxidrome::is_excluded( entt::id_type id ) const
 {
-  return is_excluded_by<Bradycardia, Tachycardia, Hypoxia, Hallucinogen, Phototoxia, Venom>( id );
+  return is_excluded_by<Bradycardia, Tachycardia, Hypoxia, Hallucinogen, Phototoxia, Venom, Vertigo>( id );
 }
 
 //! @brief Spends up to `delta` reducing T's own active toxicity value towards zero,
@@ -102,7 +103,7 @@ int Toxidrome::fight_exclusion_by( entt::id_type id, int delta )
 
 int Toxidrome::fight_exclusion( entt::id_type id, int delta )
 {
-  return fight_exclusion_by<Bradycardia, Tachycardia, Hypoxia, Hallucinogen, Phototoxia, Venom>( id, delta );
+  return fight_exclusion_by<Bradycardia, Tachycardia, Hypoxia, Hallucinogen, Phototoxia, Venom, Vertigo>( id, delta );
 }
 
 } // namespace Game::Cmp::Toxicity

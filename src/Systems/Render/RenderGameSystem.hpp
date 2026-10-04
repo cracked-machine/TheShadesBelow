@@ -81,8 +81,13 @@ private:
   //! (wear level, armed indicator)
   void draw_animated_sprite( entt::entity entity );
 
-  //! @brief Draws a shader sprite. Post-process shaders composite everything drawn before them in the queue.
+  //! @brief Draws a shader sprite. Post-process shaders composite everything drawn before them in the queue;
+  //! sprite-layer shaders composite a layer of just the player, NPC and world item sprites.
   void draw_shader_sprite( Cmp::Shader::SpriteOwner &shader_owner );
+
+  //! @brief Redraws only the queued player, NPC and world item sprites into the shader's render texture, leaving
+  //! the rest transparent. See IShaderSprite::is_sprite_layer().
+  void capture_sprite_layer( Sprites::IShaderSprite &sprite );
 
   //! @brief Draws a world-space particle sprite. Screen-space particles are drawn by RenderOverlaySystem.
   void draw_particle_sprite( Cmp::Particle::SpriteOwner &particle_owner );
