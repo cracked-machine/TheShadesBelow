@@ -338,7 +338,7 @@
         "displayname": "Rowan Stick",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [12],
+        "sprite_indices": [24],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -352,7 +352,7 @@
         "displayname": "Elder Stick",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [13],
+        "sprite_indices": [25],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -366,7 +366,7 @@
         "displayname": "Yew Stick",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [14],
+        "sprite_indices": [26],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -380,7 +380,7 @@
         "displayname": "Hawthorn Stick",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [15],
+        "sprite_indices": [27],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -408,7 +408,7 @@
         "displayname": "Nettle Fiber",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [20],
+        "sprite_indices": [32],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -422,7 +422,7 @@
         "displayname": "Burdock thistle",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [21],
+        "sprite_indices": [33],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -450,7 +450,21 @@
         "displayname": "Henbane Stick",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [23],
+        "sprite_indices": [35],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.witchesbroom": {
+      "spritesheet": {
+        "displayname": "Witches Broom",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [47],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -1430,20 +1444,6 @@
         }
       }
     },
-    "sprite.item.bow": {
-      "spritesheet": {
-        "displayname": "Bow",
-        "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [360],
-        "sprites_per_sequence": 1,
-        "sprites_per_frame": 1,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
     "sprite.item.arrow": {
       "spritesheet": {
         "displayname": "Arrow",
@@ -1463,7 +1463,35 @@
         "displayname": "Dowsing Rod",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [16],
+        "sprite_indices": [36],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.bow": {
+      "spritesheet": {
+        "displayname": "Bow",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [38],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.lightningrod": {
+      "spritesheet": {
+        "displayname": "Lightning Rod",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [39],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {
@@ -1477,7 +1505,49 @@
         "displayname": "Rowan Wine",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [17],
+        "sprite_indices": [12],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.elderflute": {
+      "spritesheet": {
+        "displayname": "Elder Flute",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [37],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.elderwine": {
+      "spritesheet": {
+        "displayname": "Elder Wine",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [13],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.hawthornwine": {
+      "spritesheet": {
+        "displayname": "Hawthorn Wine",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [15 ],
         "sprites_per_sequence": 1,
         "sprites_per_frame": 1,
         "grid_size": {

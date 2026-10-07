@@ -150,13 +150,34 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
     Factory::Player::destroy_inventory( reg(), sacrifice_type );
     get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), "item.dowsingrod", "drop_loot" ) );
   }
+  // spawn elder flute
+  if ( sacrifice_type == "item.plant.elder.drop" )
+  {
+    common_activation( SacrificeAnimType::DEFAULT );
+    Factory::Player::destroy_inventory( reg(), sacrifice_type );
+    get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), "item.elderflute", "drop_loot" ) );
+  }
+  // spawn bow
+  if ( sacrifice_type == "item.plant.yew.drop" )
+  {
+    common_activation( SacrificeAnimType::DEFAULT );
+    Factory::Player::destroy_inventory( reg(), sacrifice_type );
+    get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), "item.bow", "drop_loot" ) );
+  }
 
-  // spawn a dowsing rod
+  // spawn rowan wine
   if ( sacrifice_type == "item.plant.rowan.forage" )
   {
     common_activation( SacrificeAnimType::DEFAULT );
     Factory::Player::destroy_inventory( reg(), sacrifice_type );
     get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), "item.rowanwine", "drop_loot" ) );
+  }
+  // spawn elder wine
+  if ( sacrifice_type == "item.plant.elder.forage" )
+  {
+    common_activation( SacrificeAnimType::DEFAULT );
+    Factory::Player::destroy_inventory( reg(), sacrifice_type );
+    get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), "item.elderwine", "drop_loot" ) );
   }
 
   // sacrifice witches jar at any time
