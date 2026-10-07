@@ -180,11 +180,12 @@ target_include_directories(${TARGET} SYSTEM PRIVATE
 target_compile_options(${TARGET} PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>:
         -std=c++2c
-        -Werror                         # treat warnings as errors
-        -Wpedantic                      # enable all warnings demanded by ISO C++ standard
-        -Wall                           # enable all warnings
-        -Wextra                         # enable extra warnings
-        -ftrivial-auto-var-init=zero    # initialize all automatic variables to zero
+        -Werror                                     # treat warnings as errors
+        -Wpedantic                                  # enable all warnings demanded by ISO C++ standard
+        -Wall                                       # enable all warnings
+        -Wextra                                     # enable extra warnings
+        -ftrivial-auto-var-init=zero                # initialize all automatic variables to zero
+        $<$<CONFIG:Debug>:-D_GLIBCXX_ASSERTIONS>    # enable libstdc++ lightweight bounds-checking (debug only)
         # mingw limits object data sizes so enable large object files (fixes 'file too big' error)
         $<$<STREQUAL:${TARGET_TRIPLET},x86_64-w64-mingw32>:-Wa,-mbig-obj>
     >
