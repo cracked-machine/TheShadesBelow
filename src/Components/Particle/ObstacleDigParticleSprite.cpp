@@ -54,7 +54,7 @@ void ObstacleDigParticleSprite::simulate( sf::Time dt )
     p.m_lifetime -= dt;
 
     // if the particle is dead, respawn it
-    if ( p.m_lifetime <= sf::Time::Zero ) p.do_emit();
+    if ( p.m_lifetime <= sf::Time::Zero and not try_emit( p ) ) continue;
 
     // quad the lifetime ratio so speed drops off sharply early on and eases out near zero,
     // rather than bleeding off at a constant rate. Ease out against this particle's OWN initial

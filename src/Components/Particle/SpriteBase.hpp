@@ -5,6 +5,7 @@
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <algorithm>
 #include <random>
 
 namespace Game::Cmp::Particle
@@ -184,6 +185,12 @@ public:
   virtual void set_scale( float scale ) = 0;
 
   virtual void set_particle_size_range( std::uniform_real_distribution<float> size_dist ) = 0;
+
+  //! @brief Set the minimum distance a live particle must have travelled from the emitter before the
+  //!        next particle may be emitted. 0 (the default) disables the check.
+  //! @note Only guaranteed at the moment of emission: particles with differing speeds or sideways
+  //!       motion can close the gap afterwards. Measured from the emitter position.
+  virtual void set_min_particle_spacing( float spacing ) = 0;
 
   //! @brief Get the sprite's maximum bounding size (width/height), i.e. the full extent a particle
   //! could reach from the emitter given the sprite's configured max speed, lifetime and particle size.
@@ -550,6 +557,8 @@ public:
 
   void set_scale( float scale ) override { m_scale = scale; }
 
+  void set_min_particle_spacing( float spacing ) override { m_min_particle_spacing = spacing; }
+
   //! @brief See IParticleSprite::get_size().
   sf::Vector2f get_size() const override { return m_cached_size; }
 
@@ -557,6 +566,22 @@ public:
   sf::FloatRect get_bounds() const override { return m_cached_bounds; }
 
 protected:
+  //! @brief Emit an expired particle unless a live particle is still within the minimum spacing of
+  //!        the emitter (see set_min_particle_spacing()). A blocked particle is hidden and retried
+  //!        next frame.
+  //! @return false if the particle is waiting and should be skipped this frame
+  bool try_emit( TParticle &p )
+  {
+    // stopped particles bypass the check so they can still idle and be pruned
+    if ( p.m_particle_active and not emitter_is_clear() )
+    {
+      p.m_vertex.color.a = 0;
+      return false;
+    }
+    p.do_emit();
+    return true;
+  }
+
   //! @brief Default translation function is a noop. See set_view_transform()
   std::function<sf::Vector2f( sf::Vector2f )> m_world_to_screen = []( sf::Vector2f p ) { return p; };
   //! @brief Window-pixels-per-world-unit ratio computed alongside m_world_to_screen (see
@@ -576,6 +601,20 @@ protected:
   float m_scale;
 
 private:
+  //! @brief True if no live particle is within the minimum spacing of the emitter.
+  bool emitter_is_clear() const
+  {
+    if ( m_min_particle_spacing <= 0.f ) return true;
+    const float min_spacing_squared = m_min_particle_spacing * m_min_particle_spacing;
+    return std::ranges::none_of( m_particles_list, [&]( const TParticle &p )
+    {
+      return p.m_lifetime > sf::Time::Zero and ( p.m_vertex.position - m_emitter_position ).lengthSquared() < min_spacing_squared;
+    } );
+  }
+
+  //! @brief See set_min_particle_spacing().
+  float m_min_particle_spacing{ 0.f };
+
   //! @brief Max generations for the Particles in this sprite.
   size_t m_max_generations{ 0 };
 

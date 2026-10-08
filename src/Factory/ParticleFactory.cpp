@@ -374,6 +374,8 @@ void add_notes( entt::registry &reg, const std::string &tag, Cmp::UUID &uuid_cmp
   ps.set_generations( 0 );
   ps.set_emitter_position( pos );
   ps.set_lifetime_ms( std::uniform_int_distribution<int>( 1200, 2200 ) );
+  // notes leave the emitter one at a time, each once the previous one is this far away
+  ps.set_min_particle_spacing( 10.f );
   // spread speed per-particle so notes rising together don't travel in lock-step
   constexpr float pspeed = 25.f;
   ps.set_speed( std::uniform_real_distribution<float>( pspeed * 0.7f, pspeed * 1.f ) );

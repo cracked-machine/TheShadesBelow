@@ -39,7 +39,7 @@ void ShockWave::simulate( sf::Time dt )
     p.m_lifetime -= dt;
 
     // if the particle is dead, respawn it
-    if ( p.m_lifetime <= sf::Time::Zero ) { p.do_emit(); }
+    if ( p.m_lifetime <= sf::Time::Zero and not try_emit( p ) ) continue;
 
     // update the position of the corresponding vertex
     p.m_vertex.position += p.m_velocity * dt.asSeconds();
