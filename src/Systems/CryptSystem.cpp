@@ -395,6 +395,7 @@ void CryptSystem::check_lever_activation()
   auto player_view = reg().view<Cmp::Player::Character, Cmp::Position>();
   auto lever_view = reg().view<Cmp::Crypt::Lever, Cmp::Position>();
 
+  bool lever_activated = false;
   for ( auto [pc_entity, player_cmp, player_pos_cmp] : player_view.each() )
   {
     auto player_hitbox = Cmp::RectBounds::scaled( player_pos_cmp.position, Constants::kGridSizePxF, 0.5f );
@@ -405,10 +406,11 @@ void CryptSystem::check_lever_activation()
       if ( not player_hitbox.findIntersection( lever_pos_cmp ) ) { continue; }
       lever_cmp.setEnabled( true );
       m_enabled_levers++;
+      lever_activated = true;
 
       // clang-format off
-      reg().emplace_or_replace<Cmp::AnimData>( lever_entt, Cmp::AnimData::Config{ 
-            .sprite_type = "sprite.crypt.switch", 
+      reg().emplace_or_replace<Cmp::AnimData>( lever_entt, Cmp::AnimData::Config{
+            .sprite_type = "sprite.crypt.switch",
             .frame_index_offset = 1,
             .enabled = true
       });
@@ -416,18 +418,21 @@ void CryptSystem::check_lever_activation()
 
       m_sound_bank.get_effect( "crypt_lever_open" ).play();
       SPDLOG_DEBUG( "Lever enabled at {},{} - Count:{}", lever_pos_cmp.position.x, lever_pos_cmp.position.y, m_enabled_levers );
-
-      // check if we have activated enough levers to access the maze objective
-      if ( m_enabled_levers > 2 and not m_maze_unlocked )
-      {
-        m_maze_unlocked = true;
-
-        unlock_objective_passage();
-        Utils::Crypt::reset_crypt_shuffle_timer( reg() );
-      }
-      else { shuffle_rooms_passages(); }
     }
   }
+
+  // the shuffle/unlock creates and destroys levers and positions, so it must not run while the views above are being iterated
+  if ( not lever_activated ) return;
+
+  // check if we have activated enough levers to access the maze objective
+  if ( m_enabled_levers > 2 )
+  {
+    m_maze_unlocked = true;
+
+    unlock_objective_passage();
+    Utils::Crypt::reset_crypt_shuffle_timer( reg() );
+  }
+  else { shuffle_rooms_passages(); }
 }
 
 void CryptSystem::check_chest_activation( Events::PlayerActionEvent::GameActions action )
