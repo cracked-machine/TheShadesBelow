@@ -234,7 +234,7 @@ void NpcSystem::update_pathfinding( sf::Time dt )
 {
   // dowsing rod "blinds" all NPC pathfinding. Steps already in progress are left for update_movement to finish.
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-  if ( inventory_type.contains( "dowsingrod" ) ) return;
+  if ( inventory_type.contains( "dowsingrod" ) and Utils::Player::get_inventory_wear_level( reg() ) > 0 ) return;
 
   static constexpr float kPathfindingInterval = 0.10f;
   m_pathfinding_timer += dt;

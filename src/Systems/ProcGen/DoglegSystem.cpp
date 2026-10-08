@@ -2,6 +2,7 @@
 #include <Components/Crypt/Entrance.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
+#include <Components/Inventory/WearLevel.hpp>
 #include <Components/Player/Doglegs.hpp>
 #include <Components/Position.hpp>
 #include <Systems/ProcGen/DoglegSystem.hpp>
@@ -67,6 +68,8 @@ void DoglegSystem::update( sf::Time dt )
   if ( inventory_entt == entt::null ) return;
   auto *dowsing_cmp = reg().try_get<Cmp::Inventory::DowsingTarget>( inventory_entt );
   if ( not dowsing_cmp ) return;
+
+  if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) return;
 
   dowsing_cmp->m_dowsing_pulse_time += dt;
   update_target( *dowsing_cmp );
