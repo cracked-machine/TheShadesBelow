@@ -187,6 +187,17 @@ void sync_flames_for_shop_inventory( entt::registry &reg );
 //! @param zorder Draw order relative to other entities.
 void add_smoke( entt::registry &reg, const std::string &tag, Cmp::UUID &uuid_cmp, sf::Vector2f pos, float zorder );
 
+//! @brief Spawn a note particle effect.
+//! @param reg
+//! @param tag <location>.<item>.particle.<sprite>
+//! @param uuid_cmp UUID assigned to the created entity, so it can be tracked/updated later (e.g. via update_position()).
+//! @param pos World position of the emitter.
+//! @param zorder Draw order relative to other entities.
+void add_notes( entt::registry &reg, const std::string &tag, Cmp::UUID &uuid_cmp, sf::Vector2f pos, float zorder );
+
+//! @brief Tag of the player's floating music-note particles, followed every frame to the player's feet.
+inline const std::string kPlayerNotesTag{ "player.flute.particle.notes" };
+
 //! @brief Spawn a small pyramid-shaped pile of ash. Particles fall from the apex, staggered over
 //! `buildup_seconds` so the pile fills in gradually rather than dropping all at once, and settle
 //! permanently inside a triangular cross-section (see AshPileParticleSprite::kFallDistance/kBaseWidth),

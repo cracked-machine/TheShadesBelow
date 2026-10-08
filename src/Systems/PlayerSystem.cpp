@@ -157,6 +157,7 @@ void PlayerSystem::update( sf::Time dt )
   check_player_mortality();
   apply_timed_action_side_effects( dt );
   create_healing_particles();
+  update_notes_particle_position();
 
   update_heartbeat( dt );
 
@@ -850,6 +851,13 @@ void PlayerSystem::create_healing_particles()
       }
     }
   }
+}
+
+void PlayerSystem::update_notes_particle_position()
+{
+  const auto player_pos = Utils::Player::get_position( reg() );
+  const sf::Vector2f feet_pos( player_pos.getCenter().x, player_pos.position.y );
+  Factory::Particle::update_position( reg(), Factory::Particle::kPlayerNotesTag, feet_pos );
 }
 
 void PlayerSystem::fade_player_on_wormhole_jump()

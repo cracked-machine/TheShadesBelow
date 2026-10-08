@@ -3,6 +3,7 @@
 #include <Components/Particle/CryptAltarParticleSprite.hpp>
 #include <Components/Particle/EatingCrumbsParticleSprite.hpp>
 #include <Components/Particle/FlameParticleSprite.hpp>
+#include <Components/Particle/NoteParticleSprite.hpp>
 #include <Components/Particle/ObstacleDigParticleSprite.hpp>
 #include <Components/Particle/PlantLeavesParticleSprite.hpp>
 #include <Components/Particle/PlantTwigsParticleSprite.hpp>
@@ -360,6 +361,27 @@ void add_smoke( entt::registry &reg, const std::string &tag, Cmp::UUID &uuid_cmp
 
   auto entt = reg.create();
   reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::Smoke>( ps ) ) );
+  reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
+  reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
+  SPDLOG_DEBUG( "Created smoke ParticleSprite {}", static_cast<uint32_t>( entt ) );
+}
+
+void add_notes( entt::registry &reg, const std::string &tag, Cmp::UUID &uuid_cmp, sf::Vector2f pos, float zorder )
+{
+  auto ps = Cmp::Particle::NoteParticleSprite( 4 );
+  ps.set_tag( tag );
+  // 0 = never auto-stop; notes keep respawning forever
+  ps.set_generations( 0 );
+  ps.set_emitter_position( pos );
+  ps.set_lifetime_ms( std::uniform_int_distribution<int>( 1200, 2200 ) );
+  // spread speed per-particle so notes rising together don't travel in lock-step
+  constexpr float pspeed = 25.f;
+  ps.set_speed( std::uniform_real_distribution<float>( pspeed * 0.7f, pspeed * 1.f ) );
+  ps.set_phase( std::uniform_real_distribution( 0.f, 2.f * std::numbers::pi_v<float> ) );
+  ps.set_freq( std::uniform_real_distribution( 0.3f, 0.8f ) );
+
+  auto entt = reg.create();
+  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::NoteParticleSprite>( ps ) ) );
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
   reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
   SPDLOG_DEBUG( "Created smoke ParticleSprite {}", static_cast<uint32_t>( entt ) );

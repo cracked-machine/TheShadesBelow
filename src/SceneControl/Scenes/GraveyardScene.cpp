@@ -135,8 +135,7 @@ void GraveyardScene::on_init()
                                             Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
   Factory::Shader::add_tunnel_vision( m_sys.find<Sys::Store::Type::ShaderSystem>(),
                                       Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
-  Factory::Shader::add_dolly_zoom( m_sys.find<Sys::Store::Type::ShaderSystem>(),
-                                   Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
+  Factory::Shader::add_dolly_zoom( m_sys.find<Sys::Store::Type::ShaderSystem>(), Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
 
   // Create the level contents - "reserved" spatial map prevents overlap
   auto &level_gen = m_sys.find<Sys::Store::Type::LevelGenerator>();
@@ -186,6 +185,11 @@ void GraveyardScene::on_init()
   m_sys.find<Sys::Store::Type::WormholeSystem>().spawn_wormhole( Sys::WormholeSystem::SpawnPhase::InitialSpawn );
 
   Factory::Particle::add_flame_for_world_items( m_reg, "graveyard.candle.particle.flame" );
+
+  auto uuid_cmp = Cmp::UUID::generate();
+  auto player_pos = Utils::Player::get_position( m_reg );
+  sf::Vector2 note_ps_pos( player_pos.getCenter().x, player_pos.position.y );
+  Factory::Particle::add_notes( m_reg, Factory::Particle::kPlayerNotesTag, uuid_cmp, note_ps_pos, note_ps_pos.y );
 }
 
 void GraveyardScene::on_enter()
@@ -312,7 +316,8 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::ArrowSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::InventorySystem>().update( dt ) );
 
-  PROFILED( m_sys.find<Sys::Store::Type::ParticleSystem>().check_collsion( { "graveyard.plant.particle.flame" } ) );
+  PROFILED( m_sys.find<Sys::Store::Type::ParticleSystem>().check_collsion(
+      { "graveyard.plant.particle.flame", Factory::Particle::kPlayerNotesTag } ) );
   PROFILED( m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt ) );
 
   PROFILED( m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt ) );

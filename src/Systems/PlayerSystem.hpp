@@ -117,6 +117,9 @@ private:
   //! @brief Add/remove the player healing particle sprite depending on proximity to an active healing spring fountain.
   void create_healing_particles();
 
+  //! @brief Follow the floating music-note particle emitter to the player's current feet position.
+  void update_notes_particle_position();
+
   //! @brief Move a selected Cmp::Moveable obstacle by one step in the direction the player is pushing/pulling.
   //! @param target_position
   void move_obstacle( const sf::FloatRect &target_position );
