@@ -3,113 +3,38 @@
 
 #include <Debug/AssertHandler.hpp>
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <dbghelp.h>
-#include <windows.h>
+#include <cstdint>
+#include <cstdio>
+#include <fstream>
+#include <stacktrace>
+#include <string>
 
 namespace Debug
 {
 
-void stack_trace( void )
+void stack_trace()
 {
   SPDLOG_CRITICAL( "=== Stack Trace ===" );
 
-  HANDLE process = GetCurrentProcess();
-  HANDLE thread = GetCurrentThread();
-
-  // Initialize symbol handler
-  SymSetOptions( SYMOPT_LOAD_LINES | SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS );
-  if ( !SymInitialize( process, nullptr, TRUE ) )
+  // skip this function's own frame
+  auto trace = std::stacktrace::current( 1 );
+  if ( trace.empty() )
   {
-    SPDLOG_CRITICAL( "Failed to initialize symbol handler" );
+    SPDLOG_CRITICAL( "Stack trace unavailable" );
     return;
   }
 
-  CONTEXT context;
-  memset( &context, 0, sizeof( CONTEXT ) );
-  context.ContextFlags = CONTEXT_FULL;
-  RtlCaptureContext( &context );
-
-  DWORD image;
-  STACKFRAME64 stackframe;
-  ZeroMemory( &stackframe, sizeof( STACKFRAME64 ) );
-
-#ifdef _M_IX86
-  image = IMAGE_FILE_MACHINE_I386;
-  stackframe.AddrPC.Offset = context.Eip;
-  stackframe.AddrPC.Mode = AddrModeFlat;
-  stackframe.AddrFrame.Offset = context.Ebp;
-  stackframe.AddrFrame.Mode = AddrModeFlat;
-  stackframe.AddrStack.Offset = context.Esp;
-  stackframe.AddrStack.Mode = AddrModeFlat;
-#elif _M_X64
-  image = IMAGE_FILE_MACHINE_AMD64;
-  stackframe.AddrPC.Offset = context.Rip;
-  stackframe.AddrPC.Mode = AddrModeFlat;
-  stackframe.AddrFrame.Offset = context.Rsp;
-  stackframe.AddrFrame.Mode = AddrModeFlat;
-  stackframe.AddrStack.Offset = context.Rsp;
-  stackframe.AddrStack.Mode = AddrModeFlat;
-#elif _M_IA64
-  image = IMAGE_FILE_MACHINE_IA64;
-  stackframe.AddrPC.Offset = context.StIIP;
-  stackframe.AddrPC.Mode = AddrModeFlat;
-  stackframe.AddrFrame.Offset = context.IntSp;
-  stackframe.AddrFrame.Mode = AddrModeFlat;
-  stackframe.AddrBStore.Offset = context.RsBSP;
-  stackframe.AddrBStore.Mode = AddrModeFlat;
-  stackframe.AddrStack.Offset = context.IntSp;
-  stackframe.AddrStack.Mode = AddrModeFlat;
-#endif // _M_IA64
-
-  for ( size_t i = 0; i < 25; i++ )
+  size_t i = 0;
+  for ( const auto &frame : trace )
   {
-    BOOL result = StackWalk64( image, process, thread, &stackframe, &context, NULL, SymFunctionTableAccess64, SymGetModuleBase64, NULL );
+    auto name = frame.description();
+    if ( name.empty() ) { name = "Unknown function"; }
 
-    if ( !result ) { break; }
-
-    char buffer[sizeof( SYMBOL_INFO ) + MAX_SYM_NAME * sizeof( TCHAR )];
-    PSYMBOL_INFO symbol = (PSYMBOL_INFO)buffer;
-    symbol->SizeOfStruct = sizeof( SYMBOL_INFO );
-    symbol->MaxNameLen = MAX_SYM_NAME;
-
-    DWORD64 displacement = 0;
-
-    // Get symbol information
-    if ( SymFromAddr( process, stackframe.AddrPC.Offset, &displacement, symbol ) )
-    {
-      // Get line information
-      IMAGEHLP_LINE64 line;
-      line.SizeOfStruct = sizeof( IMAGEHLP_LINE64 );
-      DWORD lineDisplacement;
-
-      // Get module information
-      IMAGEHLP_MODULE64 moduleInfo;
-      moduleInfo.SizeOfStruct = sizeof( IMAGEHLP_MODULE64 );
-      bool hasModuleInfo = SymGetModuleInfo64( process, stackframe.AddrPC.Offset, &moduleInfo );
-
-      if ( SymGetLineFromAddr64( process, stackframe.AddrPC.Offset, &lineDisplacement, &line ) )
-      {
-        // We have full symbol information
-        SPDLOG_CRITICAL( "[{:2}] {} in {}:{}", i, symbol->Name, line.FileName, line.LineNumber );
-
-        if ( hasModuleInfo ) { SPDLOG_CRITICAL( "    Module: {}", moduleInfo.ModuleName ); }
-      }
-      else
-      {
-        // We only have function name
-        SPDLOG_CRITICAL( "[{:2}] {} (no line info)", i, symbol->Name );
-      }
-    }
-    else
-    {
-      // No symbol information at all
-      SPDLOG_CRITICAL( "[{:2}] Unknown function at {:016X}", i, stackframe.AddrPC.Offset );
-    }
+    // file/line come from the DWARF debug info in the executable, so are only available for unstripped builds
+    if ( not frame.source_file().empty() ) { SPDLOG_CRITICAL( "[{:2}] {} in {}:{}", i, name, frame.source_file(), frame.source_line() ); }
+    else { SPDLOG_CRITICAL( "[{:2}] {} at {:016X} (no line info)", i, name, static_cast<uintptr_t>( frame.native_handle() ) ); }
+    i++;
   }
-
-  SymCleanup( process );
 }
 
 [[noreturn]] void assert_handler( const char *condition, const char *message, const char *file, const int line )
@@ -123,7 +48,7 @@ void stack_trace( void )
 
 #ifdef _WIN32
   // Break into debugger if attached (Windows)
-  if ( IsDebuggerPresent() ) { DebugBreak(); }
+  if ( IsDebuggerPresent() != 0 ) { DebugBreak(); }
 #elif defined( __unix__ )
   // Break into debugger if attached (Unix)
   if ( std::getenv( "UNDER_GDB" ) || std::getenv( "UNDER_LLDB" ) ) { raise( SIGTRAP ); }
@@ -131,21 +56,43 @@ void stack_trace( void )
 
   Debug::stack_trace();
 
+  // already reported above, so don't let the SIGABRT handler report it again
+  std::signal( SIGABRT, SIG_DFL );
   std::abort();
 }
 
-} // namespace Debug
+namespace
+{
 
-#else // For non-Windows platforms, we can use a placeholder or implement a
-      // different stack trace mechanism
-#include <iostream>
-namespace Debug
+std::string s_stderr_path;
+
+void abort_handler( int )
 {
-void stack_trace( void )
-{
-  // Implement platform-specific stack trace for non-Windows platforms here
-  std::cerr << "Stack trace not implemented for this platform\n";
+  SPDLOG_CRITICAL( "\n" );
+  SPDLOG_CRITICAL( "=== Abnormal Termination (SIGABRT) ===" );
+
+  // copy whatever was written to stderr (e.g. the libstdc++ assertion text) into the log
+  std::fflush( stderr );
+  std::ifstream stderr_file( s_stderr_path );
+  for ( std::string line; std::getline( stderr_file, line ); )
+  {
+    if ( not line.empty() ) { SPDLOG_CRITICAL( "stderr: {}", line ); }
+  }
+  SPDLOG_CRITICAL( "======================================" );
+
+  Debug::stack_trace();
 }
-} // namespace Debug
 
-#endif // For non-Windows platforms
+} // namespace
+
+void install_crash_logging( const char *stderr_path )
+{
+  s_stderr_path = stderr_path;
+
+  // unbuffered so the text is on disk before abort() kills the process
+  if ( std::freopen( stderr_path, "w", stderr ) ) { std::setvbuf( stderr, nullptr, _IONBF, 0 ); }
+
+  std::signal( SIGABRT, abort_handler );
+}
+
+} // namespace Debug

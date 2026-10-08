@@ -13,8 +13,7 @@ namespace Debug
 {
 
 //! @brief Prints a stack trace of the current call stack to the log (SPDLOG_CRITICAL).
-//! @note Implemented via Windows debug-help APIs on Windows; on other platforms this is
-//! currently a placeholder that only logs that stack traces are unavailable.
+//! @note Uses std::stacktrace; function names and file:line need an unstripped build (-g).
 void stack_trace();
 
 //! @brief Custom assertion-failure handler: logs the failed condition, message, and location,
@@ -24,7 +23,14 @@ void stack_trace();
 //! @param file Source file where the assertion fired.
 //! @param line Source line where the assertion fired.
 //! @note Does not return; terminates the process via std::abort().
-[[noreturn]] void assert_handler( const char *condition, const char *message, const char *file, const int line );
+[[noreturn]] void assert_handler( const char *condition, const char *message, const char *file, int line );
+
+//! @brief Redirects stderr to a file and installs a SIGABRT handler that copies its contents,
+//! plus a stack trace, to the log (SPDLOG_CRITICAL).
+//! @details Covers failures that bypass assert_handler() and exceptions: libstdc++ assertions
+//! (_GLIBCXX_ASSERTIONS), plain assert() and std::terminate().
+//! @param stderr_path Filesystem path of the file that receives stderr output.
+void install_crash_logging( const char *stderr_path );
 
 } // namespace Debug
 

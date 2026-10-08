@@ -7,7 +7,7 @@
 int main()
 {
   // Logging: make sure errors - exceptions and failed asserts - go to log file
-  fclose( stderr );
+  Debug::install_crash_logging( "stderr.txt" );
 
   using Logger = Game::Logging::BasicLogController;
   std::unique_ptr<Logger> logger{ std::make_unique<Logger>( "logger", "log.txt" ) };

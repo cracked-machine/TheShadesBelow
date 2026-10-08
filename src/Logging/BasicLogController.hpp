@@ -6,6 +6,8 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
+#include <utility>
+
 //! @brief Example usage:
 //! @code
 //! #include <BasicLogController.hpp>
@@ -29,8 +31,8 @@ public:
   //! @param log_name Name assigned to the underlying spdlog::logger.
   //! @param log_path Filesystem path of the log file sink.
   BasicLogController( std::string log_name, std::string log_path )
-      : m_log_name( log_name ),
-        m_log_path( log_path )
+      : m_log_name( std::move( log_name ) ),
+        m_log_path( std::move( log_path ) )
   {
     m_console_sink->set_level( spdlog::level::trace );
     // m_console_sink->set_pattern("[%c] [%^%l%$] %s:%v");
@@ -57,11 +59,11 @@ private:
   std::shared_ptr<spdlog::sinks::basic_file_sink_mt> m_file_sink{ std::make_shared<spdlog::sinks::basic_file_sink_mt>( m_log_path, true ) };
 
   //! @brief Sink that forwards log messages to a user-supplied callback (currently a no-op).
-  std::shared_ptr<spdlog::sinks::callback_sink_mt> m_callback_sink{ std::make_shared<spdlog::sinks::callback_sink_mt>(
-      []( [[maybe_unused]] const spdlog::details::log_msg &msg )
-      {
-        // std::cout << "BasicLogController Callback!!!" << "\n";
-      } ) };
+  std::shared_ptr<spdlog::sinks::callback_sink_mt> m_callback_sink{
+      std::make_shared<spdlog::sinks::callback_sink_mt>( []( [[maybe_unused]] const spdlog::details::log_msg &msg )
+  {
+    // std::cout << "BasicLogController Callback!!!" << "\n";
+  } ) };
 
   //! @brief The spdlog::logger instance, initialized with the console, file, and callback sinks.
   std::shared_ptr<spdlog::logger> m_logger{ std::make_shared<spdlog::logger>( spdlog::logger( m_log_name, {
