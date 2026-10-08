@@ -64,13 +64,15 @@ void ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKey &item,
     return;
   }
 
+  const auto &world_item = Sys::ItemStore::instance().get( item );
+
   auto world_item_entt = reg().create();
   Cmp::Position world_item_pos( pos.position, pos.size );
   reg().emplace_or_replace<Cmp::Position>( world_item_entt, world_item_pos );
   if ( auto reserved_sm = m_reserved_sm.lock() ) reserved_sm->insert( world_item_entt, world_item_pos );
   // clang-format off
   reg().emplace_or_replace<Cmp::AnimData>( world_item_entt, Cmp::AnimData::Config{ 
-        .sprite_type =  Sys::ItemStore::instance().get( item ).sprite_type, 
+        .sprite_type =  world_item.sprite_type, 
         .enabled = true
   });
   // clang-format on
@@ -78,17 +80,14 @@ void ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKey &item,
   reg().emplace_or_replace<Cmp::Npc::NoPathFinding>( world_item_entt );
   // Use a UUID to identify the InventoryItem/PlayerInventorySlot when the entity is destroyed.
   reg().emplace_or_replace<Cmp::UUID>( world_item_entt, Cmp::UUID::generate() );
-  if ( item == "item.axe" || item == "item.pickaxe" || item == "item.shovel" || item == "item.dowsingrod" )
-  {
-    reg().emplace_or_replace<Cmp::Inventory::WearLevel>( world_item_entt, 100.f );
-  }
+  if ( world_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( world_item_entt, 100.f ); }
   // the target is picked once here, then carried with the item between the world and the player inventory
   if ( item == "item.dowsingrod" )
   {
     reg().emplace_or_replace<Cmp::Inventory::DowsingTarget>( world_item_entt, Cmp::Inventory::DowsingTarget::random_pick( {} ) );
   }
 
-  reg().emplace_or_replace<Cmp::WorldItem>( world_item_entt, Sys::ItemStore::instance().get( item ) );
+  reg().emplace_or_replace<Cmp::WorldItem>( world_item_entt, world_item );
 
   SPDLOG_INFO( "Placed {} at {},{}", item, pos.position.x, pos.position.y );
   if ( world_item_entt != entt::null and not sfx.empty() ) { m_sound_bank.get_effect( sfx ).play(); }

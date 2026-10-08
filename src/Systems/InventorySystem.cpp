@@ -20,6 +20,7 @@
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/AddInventoryEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
@@ -52,6 +53,7 @@ InventorySystem::InventorySystem( entt::registry &reg, sf::RenderWindow &window,
   // The entt::dispatcher is independent of the registry, so it is safe to bind event handlers in
   // the constructor
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&InventorySystem::on_player_action>( this );
+  std::ignore = get_systems_event_queue().sink<Events::AddInventoryEvent>().connect<&InventorySystem::on_add_inventory_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::DropInventoryEvent>().connect<&InventorySystem::on_drop_inventory_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::PickupWorldItemEvent>().connect<&InventorySystem::on_pickup_world_item_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::UpdateDmgEvent>().connect<&InventorySystem::on_update_dmg_event>( this );
@@ -72,6 +74,8 @@ void InventorySystem::on_player_action( const Events::PlayerActionEvent &event )
 {
   if ( event.action == Events::PlayerActionEvent::GameActions::SWAP_INVENTORY ) { swap_inventory(); }
 }
+
+void InventorySystem::on_add_inventory_event( Events::AddInventoryEvent ev ) { add_inventory_item( ev.m_item ); }
 
 void InventorySystem::on_drop_inventory_event( [[maybe_unused]] Events::DropInventoryEvent ev )
 {
@@ -107,7 +111,7 @@ void InventorySystem::update_dmg( entt::entity entt, float amount, Events::Updat
       if ( inventory_type.contains( "forage" ) )
       {
         reg().destroy( entt );
-        Factory::Player::add_inventory( reg(), "item.rottenfood" );
+        add_inventory_item( "item.rottenfood" );
       }
       else
       {
@@ -116,6 +120,24 @@ void InventorySystem::update_dmg( entt::entity entt, float amount, Events::Updat
       }
     }
   }
+}
+
+void InventorySystem::add_inventory_item( const Sys::ItemKey &item )
+{
+  const auto &inventory_item = Sys::ItemStore::instance().get( item );
+
+  auto inventory_entity = reg().create();
+  reg().emplace_or_replace<Cmp::PlayerInventorySlot>( inventory_entity, inventory_item );
+  if ( inventory_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, 100.f ); }
+
+  if ( item.contains( "candle" ) ) { reg().emplace_or_replace<Cmp::UUID>( inventory_entity, Cmp::UUID::generate() ); }
+
+  // clang-format off
+  reg().emplace_or_replace<Cmp::AnimData>( inventory_entity, Cmp::AnimData::Config{ 
+        .sprite_type = inventory_item.sprite_type, 
+        .enabled = true
+  });
+  // clang-format on
 }
 
 void InventorySystem::swap_inventory()
@@ -288,8 +310,7 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
   for ( auto [worlditem_entt, worlditem_cmp, wearlevel_cmp] : reg().view<Cmp::WorldItem, Cmp::Inventory::WearLevel>().each() )
   {
     if ( worlditem_cmp.expiry() == sf::Time::Zero ) continue;
-    // the dowsing rod only wears out while the player is carrying it
-    if ( worlditem_cmp.item_type.contains( "dowsingrod" ) ) continue;
+    if ( not worlditem_cmp.wears_in_world() ) continue;
     world_items.push_back( worlditem_entt );
   }
   for ( auto worlditem_entt : world_items )
@@ -305,7 +326,7 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
     if ( wearlevel_cmp.m_level <= 0 ) continue;
     // the slot entity has no Cmp::WorldItem of its own - the item lives inside the slot component.
     // Tools have no expiry; they only wear through use.
-    if ( inventory_cmp.m_item.expiry() != sf::Time::Zero )
+    if ( inventory_cmp.m_item.wears_in_inventory() and inventory_cmp.m_item.expiry() != sf::Time::Zero )
     {
       float dmg = 100.f / ( inventory_cmp.m_item.expiry().asSeconds() / expiry_update_timeout.asSeconds() );
       update_dmg( inventory_entt, dmg, Events::UpdateDmgEvent::SUBTRACT );

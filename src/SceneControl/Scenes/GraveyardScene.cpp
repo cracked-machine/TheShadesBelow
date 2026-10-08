@@ -31,6 +31,7 @@
 #include <Components/SelectedPosition.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/AddInventoryEvent.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PathfindingFactory.hpp>
@@ -122,7 +123,11 @@ void GraveyardScene::on_init()
   m_sys.find<Sys::Store::Type::ExitSystem>().init( m_reserved_sm );
 
   // create the player, optionally increment the level counter
-  if ( m_reg.view<Cmp::Player::Character>().size() == 0 ) { Factory::Player::create_player( m_reg, m_reserved_sm ); }
+  if ( m_reg.view<Cmp::Player::Character>().size() == 0 )
+  {
+    Factory::Player::create_player( m_reg, m_reserved_sm );
+    Sys::BaseSystem::get_systems_event_queue().trigger( Events::AddInventoryEvent( "item.pickaxe" ) );
+  }
   else { Utils::Player::get_level_depth( m_reg ).increment_count( 1 ); }
 
   auto [map_size_grid, map_size_pixel] = m_scene_data->map_size();

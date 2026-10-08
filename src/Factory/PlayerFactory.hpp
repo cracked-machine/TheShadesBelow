@@ -12,7 +12,7 @@
 namespace Game::Factory::Player
 {
 
-//! @brief Create the player entity at its start position, with default stats and a starting pickaxe.
+//! @brief Create the player entity at its start position, with default stats.
 //! @param registry
 //! @param reserved_sm If provided, reserves the player's position.
 void create_player( entt::registry &registry, const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr );
@@ -34,12 +34,6 @@ void create_player_death_anim( entt::registry &registry, Cmp::Position player_po
 //! @param reg the ECS registry
 //! @param type the type to destroy
 void destroy_inventory( entt::registry &reg, const Sys::ItemKey &type );
-
-//! @brief Create a new player inventory slot entity for `item`, attaching any item-specific components
-//! (wear level for axe/shovel, seeing stone target for scrying balls, etc).
-//! @param reg
-//! @param item Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
-void add_inventory( entt::registry &reg, const Sys::ItemKey &item );
 
 //! @brief Record the player's last graveyard position, so they can return to it later (e.g. after a crypt run).
 //! @param reg

@@ -66,7 +66,7 @@ namespace
 
 std::string s_stderr_path;
 
-void abort_handler( int )
+void abort_handler( int /*unused*/ )
 {
   SPDLOG_CRITICAL( "\n" );
   SPDLOG_CRITICAL( "=== Abnormal Termination (SIGABRT) ===" );

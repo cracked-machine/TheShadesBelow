@@ -29,6 +29,7 @@
 #include <Components/Stats/DestroyAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
+#include <Events/AddInventoryEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
@@ -40,7 +41,6 @@
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlantFactory.hpp>
-#include <Factory/PlayerFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <Sprites/SpriteSheet.hpp>
@@ -329,7 +329,7 @@ void ActionSystem::player_plant_interact()
           auto plantleaves_particle_uuid = Cmp::UUID::generate();
           Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
                                                  plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
-          Factory::Player::add_inventory( reg(), Sys::ItemKey( plant_item->item_type.str() + ".forage" ) );
+          get_systems_event_queue().trigger( Events::AddInventoryEvent( Sys::ItemKey( plant_item->item_type.str() + ".forage" ) ) );
           Utils::Player::apply_action_from_inventory_item<Cmp::SpawnAction>( reg() );
           m_sound_bank.get_effect( "chopping_final" ).play();
         }

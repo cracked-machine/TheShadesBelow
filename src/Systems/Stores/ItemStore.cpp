@@ -29,6 +29,18 @@ Action make_action( const nlohmann::json &j )
       Game::Factory::Toxicity::create_toxidrome( JsonDeserializer::get_string( tox, "type" ), JsonDeserializer::get_int( tox, "toxicity" ) ) );
 }
 
+//! @brief Convert the "wear_location" string of a JSON item entry.
+Game::Cmp::WorldItem::Location make_wear_location( const std::string &wear_location )
+{
+  using Location = Game::Cmp::WorldItem::Location;
+  if ( wear_location == "None" ) return Location::NONE;
+  if ( wear_location == "World" ) return Location::WORLD;
+  if ( wear_location == "Inventory" ) return Location::INVENTORY;
+  if ( wear_location == "Both" ) return Location::BOTH;
+  SPDLOG_WARN( "Unknown wear location: {}", wear_location );
+  return Location::NONE;
+}
+
 } // namespace
 
 namespace Game::Sys
@@ -48,7 +60,8 @@ void ItemStore::init_store()
   {
     Sys::SpriteKey sprite_mtype( item_value.at( "sprite" ).get<std::string>() );
     auto expiry = item_value.at( "expiry" ).get<float>();
-    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, sf::seconds( expiry ) );
+    auto wear_location = make_wear_location( item_value.at( "wear_location" ).get<std::string>() );
+    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, sf::seconds( expiry ), wear_location );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )

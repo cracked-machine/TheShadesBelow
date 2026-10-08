@@ -48,9 +48,9 @@ public:
 
 private:
   //! @brief Name of the underlying spdlog::logger.
-  std::string m_log_name{};
+  std::string m_log_name;
   //! @brief Filesystem path of the log file sink.
-  std::string m_log_path{};
+  std::string m_log_path;
 
   //! @brief Sink for logging to stdout.
   std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> m_console_sink{ std::make_shared<spdlog::sinks::stdout_color_sink_mt>() };

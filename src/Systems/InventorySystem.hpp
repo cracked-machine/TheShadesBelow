@@ -1,6 +1,7 @@
 #ifndef SRC_SYSTEMS_INVENTORYSYSTEM_HPP__
 #define SRC_SYSTEMS_INVENTORYSYSTEM_HPP__
 
+#include <Events/AddInventoryEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
@@ -15,9 +16,9 @@
 namespace Game::Sys
 {
 
-//! @brief Moves items between the player's inventory slot and the world. Event-driven, responding to
-//! Events::DropInventoryEvent, Events::PickupWorldItemEvent, and the DROP_INVENTORY action of
-//! Events::PlayerActionEvent.
+//! @brief Creates player inventory items and moves items between the player's inventory slot and the world.
+//! Event-driven, responding to Events::AddInventoryEvent, Events::DropInventoryEvent, Events::PickupWorldItemEvent,
+//! and the DROP_INVENTORY action of Events::PlayerActionEvent.
 class InventorySystem : public BaseSystem
 {
 public:
@@ -53,6 +54,10 @@ private:
   //! @param event
   void on_player_action( const Events::PlayerActionEvent &event );
 
+  //! @brief Event handler for Events::AddInventoryEvent. Calls add_inventory_item().
+  //! @param ev
+  void on_add_inventory_event( Events::AddInventoryEvent ev );
+
   //! @brief Single drop, no pickup
   //! @param ev
   void on_drop_inventory_event( Events::DropInventoryEvent ev );
@@ -70,6 +75,11 @@ private:
   //! @param amount
   //! @param type
   void update_dmg( entt::entity entt, float amount, Events::UpdateDmgEvent::Type type );
+
+  //! @brief Create a new player inventory slot entity for `item`, attaching any item-specific components
+  //! (wear level if the item has one, UUID for candles).
+  //! @param item Item identifier, e.g. "item.pickaxe". See res/json/items.json.
+  void add_inventory_item( const Sys::ItemKey &item );
 
   //! @brief Drop the inventory (if player has one) and pickup the nearest workd item into inventory
   void swap_inventory();

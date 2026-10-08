@@ -9,7 +9,6 @@
 #include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
-#include <Components/Inventory/WearLevel.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Particle/SpriteBase.hpp>
@@ -37,7 +36,6 @@
 #include <Components/Stats/SacrificeAction.hpp>
 #include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
-#include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/PlantFactory.hpp>
@@ -47,7 +45,6 @@
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
-#include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Player.hpp>
@@ -105,7 +102,6 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   reg.emplace_or_replace<Cmp::AbsoluteRotation>( entity, 0 );
   reg.emplace_or_replace<Cmp::Player::HeartBeat>( entity );
   reg.emplace_or_replace<Cmp::Player::Doglegs>( entity );
-  add_inventory( reg, "item.pickaxe" );
 }
 
 entt::entity add_spawn_area( entt::registry &reg, entt::entity entity, float zorder )
@@ -146,25 +142,6 @@ void create_player_death_anim( entt::registry &reg, Cmp::Position player_pos_cmp
   });
   // clang-format on
   reg.emplace_or_replace<Cmp::ZOrderValue>( player_blood_splat_entity, player_pos_cmp.position.y * 3 ); // always infront
-}
-
-void add_inventory( entt::registry &reg, const Sys::ItemKey &item )
-{
-  auto inventory_entity = reg.create();
-  reg.emplace_or_replace<Cmp::PlayerInventorySlot>( inventory_entity, Sys::ItemStore::instance().get( item ) );
-  if ( item.contains( "axe" ) or item.contains( "shovel" ) or item.contains( ".forage" ) or item.contains( "dowsingrod" ) )
-  {
-    reg.emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, 100.f );
-  }
-
-  if ( item.contains( "candle" ) ) { reg.emplace_or_replace<Cmp::UUID>( inventory_entity, Cmp::UUID::generate() ); }
-
-  // clang-format off
-  reg.emplace_or_replace<Cmp::AnimData>( inventory_entity, Cmp::AnimData::Config{ 
-        .sprite_type = Sys::ItemStore::instance().get( item ).sprite_type, 
-        .enabled = true
-  });
-  // clang-format on
 }
 
 void destroy_inventory( entt::registry &reg, const Sys::ItemKey &type )
