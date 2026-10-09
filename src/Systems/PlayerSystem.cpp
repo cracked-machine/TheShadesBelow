@@ -859,9 +859,10 @@ void PlayerSystem::update_note_particles()
 
   auto ps_tag = std::string( Cmp::Particle::NoteParticleSprite::kPlayerNotesTag );
   auto ps_list = Sys::ParticleSystem::find( reg(), ps_tag );
+  auto wearlevel = Utils::Player::get_inventory_wear_level( reg() );
   auto [inventory_entt, inventory_type, _] = Utils::Player::get_inventory( reg() );
 
-  if ( inventory_type == "item.elderflute" )
+  if ( inventory_type == "item.elderflute" and wearlevel > 0 )
   {
     if ( ps_list.empty() )
     {
