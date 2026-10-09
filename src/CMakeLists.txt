@@ -14,6 +14,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Components/Particle/CryptAltarParticleSprite.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Particle/NoteParticleSprite.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Particle/RuneParticleSprite.cpp
+    ${CMAKE_SOURCE_DIR}/src/Components/Particle/GraveHaloParticleSprite.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Particle/WormholeParticleSprite.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Particle/ObstacleDigParticleSprite.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Particle/PotParticleSprite.cpp

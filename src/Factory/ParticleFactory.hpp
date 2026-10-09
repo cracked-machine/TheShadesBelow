@@ -56,6 +56,17 @@ void add_watchman_gunfire_ps( entt::registry &reg, const std::string &tag, float
 void add_rune_ps( entt::registry &reg, const std::string &tag, float lifetime_seconds, float speed, Cmp::UUID &uuid_cmp, sf::Vector2f pos,
                   float zorder );
 
+//! @brief Spawn a Grave Halo particle effect.
+//! @param reg
+//! @param tag <location>.<item>.particle.<sprite>
+//! @param lifetime_seconds Maximum particle lifetime, in seconds.
+//! @param speed Maximum particle speed.
+//! @param uuid_cmp UUID assigned to the created entity, so it can be tracked/updated later (e.g. via update_position()).
+//! @param pos World position of the emitter.
+//! @param zorder Draw order relative to other entities.
+void add_grave_halo_ps( entt::registry &reg, const std::string &tag, float lifetime_seconds, float speed, Cmp::UUID &uuid_cmp, sf::Vector2f pos,
+                        float zorder );
+
 //! @brief Spawn a wormhole particle effect.
 //! @param reg
 //! @param tag <location>.<item>.particle.<sprite>

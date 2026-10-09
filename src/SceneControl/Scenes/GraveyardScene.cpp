@@ -295,6 +295,7 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::ActionSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::FootstepSystem>().update() );
   PROFILED( m_sys.find<Sys::Store::Type::DoglegSystem>().update( dt ) );
+  PROFILED( m_sys.find<Sys::Store::Type::GraveSystem>().update() );
 
   PROFILED( m_sys.find<Sys::Store::Type::CryptSystem>().update_exit_zorder() );
   if ( m_scene_exit_cooldown.getElapsedTime() >= m_scene_exit_cooldown_time )

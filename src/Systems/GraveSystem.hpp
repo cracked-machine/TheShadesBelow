@@ -28,6 +28,9 @@ public:
   //! @param sound_bank
   GraveSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
+  //! @brief Use Cmp::SelectedPosition to mark targetted graves and destroy them when appropriate tool is equipped.
+  void update();
+
   //! @brief event handlers for pausing system clocks
   void on_pause() override {}
   //! @brief event handlers for resuming system clocks
@@ -37,23 +40,6 @@ private:
   //! @brief handler for Events::PlayerActionEvent::GameActions::DIG
   //! @param event
   void on_player_action( const Events::PlayerActionEvent &event );
-
-  //! @brief Use Cmp::SelectedPosition to mark targetted graves and destroy them when appropriate tool is equipped.
-  void update();
-
-  //! @brief Random consequence rolled when a grave is fully dug open
-  enum class GraveConsequence {
-    //! @brief Spawns a hostile NPC from the grave.
-    NPC_TRAP = 1,
-    //! @brief Spawns a bomb trap from the grave.
-    BOMB_TRAP,
-    //! @brief Drops a relic item.
-    RELIC,
-    //! @brief Drops jewelry loot.
-    JEWELRY,
-    //! @brief Drops a curse tablet
-    CURSE_TABLET
-  };
 
   //! @brief True if the player has a digging tool equipped with remaining wear
   bool has_digging_tool_equipped();
@@ -67,6 +53,8 @@ private:
   //! @brief True if any Cmp::Player::Character entity's hitbox intersects the grave
   //! @param grave_cmp
   bool is_player_near( const Cmp::Grave::MultiBlock &grave_cmp );
+
+  void update_grave_halo_particles();
 
   //! @brief Apply one dig hit: reduce tool wear and grave hp, then play the hit sound or open the grave
   //! @param grave_entity
@@ -82,6 +70,8 @@ private:
   //! @brief Pick a random item from the pool, drop it as loot, and apply its Cmp::SpawnAction modifiers to the player
   //! @param loot_pool
   void spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool );
+
+  bool player_digging{ false };
 };
 
 } // namespace Game::Sys

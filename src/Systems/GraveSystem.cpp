@@ -5,6 +5,7 @@
 #include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/Segment.hpp>
+#include <Components/Particle/GraveHaloParticleSprite.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
 #include <Components/Persistent/WeaponDegradePerHit.hpp>
@@ -22,6 +23,7 @@
 #include <Factory/LootFactory.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
+#include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/GraveSystem.hpp>
@@ -30,6 +32,7 @@
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Utils/Maths.hpp>
+#include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 
@@ -44,6 +47,10 @@ GraveSystem::GraveSystem( entt::registry &reg, sf::RenderWindow &window, Audio::
 
 void GraveSystem::update()
 {
+  // must run before the digging early-outs below: the flute is not a digging tool
+  update_grave_halo_particles();
+
+  if ( not player_digging ) return;
   if ( not has_digging_tool_equipped() ) return;
   if ( is_dig_on_cooldown() ) return;
 
@@ -75,6 +82,8 @@ void GraveSystem::update()
     // emplace Cmp::Position/Cmp::AnimData onto new entities, which can reallocate the pools this view iterates -
     // continuing to iterate afterward would be undefined behaviour. Only one grave can match the mouse position
     // at a time anyway, so stop here rather than advancing the now-possibly-invalidated iterator.
+
+    player_digging = false;
     break;
   }
 }
@@ -119,6 +128,41 @@ bool GraveSystem::is_player_near( const Cmp::Grave::MultiBlock &grave_cmp )
     if ( player_hitbox.findIntersection( grave_cmp ) ) return true;
   }
   return false;
+}
+
+void GraveSystem::update_grave_halo_particles()
+{
+  auto ps_tag = std::string( Cmp::Particle::GraveHaloParticleSprite::kTag );
+  auto ps_list = Sys::ParticleSystem::find( reg(), ps_tag );
+  auto [inventory_entt, inventory_type, _] = Utils::Player::get_inventory( reg() );
+  const bool holding_flute = inventory_type == "item.elderflute";
+  const int player_luck = Utils::Player::get_stats( reg() ).luck();
+
+  for ( auto [grave_mb_entt, grave_mb, grave_uuid, consequence] : reg().view<Cmp::Grave::MultiBlock, Cmp::UUID, Cmp::Grave::Consequence>().each() )
+  {
+    // only one halo per grave: find the one this grave already owns, if any
+    auto halo = std::ranges::find_if( ps_list, [&]( const auto &entt_ps )
+    {
+      auto *ps_uuid = reg().try_get<Cmp::UUID>( entt_ps.first );
+      return ps_uuid and *ps_uuid == grave_uuid;
+    } );
+    const bool has_halo = halo != ps_list.end();
+
+    if ( holding_flute and consequence.get( player_luck ) == Cmp::Grave::Consequence::Type::NPC_TRAP )
+    {
+      // restart is a no-op if already running
+      if ( has_halo ) { halo->second.get().restart(); }
+      else
+      {
+        Factory::Particle::add_grave_halo_ps( reg(), ps_tag, 1.f, 10.f, grave_uuid, grave_mb.getCenter(), grave_mb.position.y + grave_mb.size.y + 1 );
+      }
+    }
+    else if ( has_halo )
+    {
+      // flute not held, or a luck change means this is no longer a ghost grave: let the existing particles die out
+      halo->second.get().stop();
+    }
+  }
 }
 
 void GraveSystem::apply_dig_hit( entt::entity grave_entity, Cmp::Grave::MultiBlock &grave_cmp, Cmp::AnimData &grave_anim_cmp )
@@ -189,11 +233,7 @@ void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool )
 
 void GraveSystem::on_player_action( const Events::PlayerActionEvent &event )
 {
-  if ( event.action == Events::PlayerActionEvent::GameActions::DIG )
-  {
-    // Check for collisions with diggable obstacles
-    update();
-  }
+  if ( event.action == Events::PlayerActionEvent::GameActions::DIG ) { player_digging = true; }
 }
 
 } // namespace Game::Sys
