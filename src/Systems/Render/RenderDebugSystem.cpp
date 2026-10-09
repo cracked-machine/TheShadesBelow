@@ -177,10 +177,11 @@ void RenderDebugSystem::render_debug_stats()
   auto half_view = Cmp::RectBounds::scaled( Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() ), 0.5f );
   render_square( half_view.getBounds().position, half_view.getBounds().size, sf::Color::Red );
 
+  const int player_luck = Utils::Player::get_stats( reg() ).luck();
   for ( auto [grave_entt, grave_mb, consequence] : reg().view<Cmp::Grave::MultiBlock, Cmp::Grave::Consequence>().each() )
   {
     if ( not Utils::is_visible_in_view( get_screen_view(), grave_mb ) ) continue;
-    if ( consequence.get() != Cmp::Grave::Consequence::Type::NPC_TRAP ) continue;
+    if ( consequence.get( player_luck ) != Cmp::Grave::Consequence::Type::NPC_TRAP ) continue;
     render_square( grave_mb.position, grave_mb.size, sf::Color::Blue );
   }
   draw_debug_overlay();

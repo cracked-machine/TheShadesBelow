@@ -80,6 +80,9 @@ private:
   //! registry.
   void render_grimoire_inventory_overlay();
 
+  //! @brief Render the halo effect around the graves that are marked as ghost spawners. Only active when player is carrying ElderFlute.
+  void render_ghost_grave_halos();
+
   //! @brief Render the countdown until the crypt maze next shuffles, if the shuffle timer has not already expired.
   //! @param pos
   //! @param size

@@ -428,13 +428,12 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
         auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<Cmp::Grave::MultiBlock, Cmp::Grave::Segment>(
             reg(), pos->position, spritesheet, index, 0, m_reserved_sm.get() );
         m_reserved_sm->insert( mb_entt, pos.value() );
-        // decide the consequence at creation
-        auto choice = Sys::GraveSystem::choose_grave_consequence( Utils::Player::get_stats( reg() ).luck() );
-        reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, choice );
-        gc_dist[choice]++;
+        // fix the roll at creation; the consequence is resolved against the player's current luck when needed
+        auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 99 ).gen() );
+        gc_dist[consequence.get( Utils::Player::get_stats( reg() ).luck() )]++;
       }
     }
-    SPDLOG_INFO( "Grave Consequences dist: {}", gc_dist );
+    SPDLOG_INFO( "Grave Consequences dist at current luck: {}", gc_dist );
   }
 
   // ALTARS

@@ -42,33 +42,6 @@ GraveSystem::GraveSystem( entt::registry &reg, sf::RenderWindow &window, Audio::
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&GraveSystem::on_player_action>( this );
 }
 
-Cmp::Grave::Consequence::Type GraveSystem::choose_grave_consequence( int player_luck )
-{
-  // Roulette wheel. We take the inverse of player luck and use both numbers to gate the spawn probablities.
-  // For example, if player luck is 50, then the badluck is also 50
-
-  const int good_weight = player_luck;
-  const int bad_weight = 100 - good_weight;
-
-  auto grave_activation_rng = Cmp::RandomInt( 0, 99 );
-  const int roll = grave_activation_rng.gen();
-
-  const int tier1_threshold = bad_weight / 2;                   // Tier1 is a roll below 25
-  const int tier2_threshold = ( bad_weight / 2 ) + 5;           // Tier2 is a roll between 25 and 30
-  const int tier3_threshold = bad_weight;                       // Tier3 is a roll between 30 and 50
-  const int tier4_threshold = bad_weight + ( good_weight / 2 ); // Tier4 is a roll between 50 and 75
-                                                                // Remaining rolls between 75 and 100
-
-  Cmp::Grave::Consequence::Type consequence;
-  if ( roll < tier1_threshold ) { consequence = Cmp::Grave::Consequence::Type::BOMB_TRAP; }
-  else if ( roll < tier2_threshold ) { consequence = Cmp::Grave::Consequence::Type::CURSE_TABLET; }
-  else if ( roll < tier3_threshold ) { consequence = Cmp::Grave::Consequence::Type::NPC_TRAP; }
-  else if ( roll < tier4_threshold ) { consequence = Cmp::Grave::Consequence::Type::RELIC; }
-  else { consequence = Cmp::Grave::Consequence::Type::JEWELRY; }
-
-  return consequence;
-}
-
 void GraveSystem::update()
 {
   if ( not has_digging_tool_equipped() ) return;
@@ -180,7 +153,7 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
 
   auto *consequence = reg().try_get<Cmp::Grave::Consequence>( grave_entity );
   if ( not consequence ) return;
-  switch ( consequence->get() )
+  switch ( consequence->get( Utils::Player::get_stats( reg() ).luck() ) )
   {
     case Cmp::Grave::Consequence::Type::NPC_TRAP:
       SPDLOG_DEBUG( "Grave activated NPC trap." );

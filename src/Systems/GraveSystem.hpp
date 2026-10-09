@@ -28,11 +28,6 @@ public:
   //! @param sound_bank
   GraveSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
-  //! @brief Randomly select a consequence for opening a grave
-  //! @param player_luck
-  //! @return Cmp::Grave::Consequence::Type
-  static Cmp::Grave::Consequence::Type choose_grave_consequence( int player_luck );
-
   //! @brief event handlers for pausing system clocks
   void on_pause() override {}
   //! @brief event handlers for resuming system clocks

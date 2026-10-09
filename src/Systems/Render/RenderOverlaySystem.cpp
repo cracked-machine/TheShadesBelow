@@ -1,5 +1,7 @@
 #include <Components/AnimData.hpp>
 #include <Components/Crypt/ShuffleTimer.hpp>
+#include <Components/Grave/Consequence.hpp>
+#include <Components/Grave/MultiBlock.hpp>
 #include <Components/Hazard/FieldCell.hpp>
 #include <Components/Inventory/FlashUICadaver.hpp>
 #include <Components/Inventory/FlashUIExtraLife.hpp>
@@ -70,6 +72,7 @@ void RenderOverlaySystem::render_overlay( sf::Time dt )
   PROFILED( render_ui_labels( dt ) );
   PROFILED( render_ui_texts() );
   PROFILED( render_level_depth() );
+  PROFILED( render_ghost_grave_halos() );
 
   auto display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
   render_crypt_maze_timer( { static_cast<float>( display_size.x ) / 2.f, 0.f }, 100 );
@@ -524,6 +527,26 @@ void RenderOverlaySystem::render_grimoire_inventory_overlay()
   for ( const auto &[item, is_enabled] : grimoire_cmp.contents )
   {
     draw_line( item.str() + " - " + ( is_enabled ? "Shown" : "Hidden" ) );
+  }
+}
+
+void RenderOverlaySystem::render_ghost_grave_halos()
+{
+  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+  auto wearlevel = Utils::Player::get_inventory_wear_level( reg() );
+  if ( inventory_type != "item.elderflute" or ( inventory_type == "item.elderflute" and wearlevel == 0 ) ) return;
+  const int player_luck = Utils::Player::get_stats( reg() ).luck();
+
+  for ( auto [grave_entt, grave_mb, consequence] : reg().view<Cmp::Grave::MultiBlock, Cmp::Grave::Consequence>().each() )
+  {
+    if ( not Utils::is_visible_in_view( get_screen_view(), grave_mb ) ) continue;
+    if ( consequence.get( player_luck ) != Cmp::Grave::Consequence::Type::NPC_TRAP ) continue;
+    sf::RectangleShape rect( grave_mb.size );
+    rect.setPosition( grave_mb.position );
+    rect.setFillColor( sf::Color::Transparent );
+    rect.setOutlineColor( sf::Color::Blue );
+    rect.setOutlineThickness( 1.f );
+    draw_world( rect );
   }
 }
 
