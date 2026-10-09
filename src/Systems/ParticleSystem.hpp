@@ -8,6 +8,8 @@
 #include <Events/ParticleEvents.hpp>
 #include <Systems/BaseSystem.hpp>
 
+#include <entt/entity/fwd.hpp>
+#include <functional>
 #include <spdlog/spdlog.h>
 #include <utility>
 
@@ -31,6 +33,8 @@ namespace Game::Sys
 class ParticleSystem : public BaseSystem
 {
 public:
+  using entt_ps_pair = std::pair<entt::entity, std::reference_wrapper<Cmp::Particle::IParticleSprite>>;
+
   //! @brief Construct a new Particle System object
   //! @param reg
   //! @param window
@@ -71,11 +75,11 @@ public:
   //! @param excl_ps_tag_list List of particle sprite tags to exclude from the collision checks
   void check_collsion( const std::vector<std::string> &excl_ps_tag_list = {} );
 
-  //! @brief Find a SpriteOwner by tag and return a pointer to SpriteBase<IParticle>, or nullptr if not found
+  //! @brief Find a SpriteOwner by tag and returns a vector of (entity, sprite reference) pairs, empty if there is no match.
   //! @param reg
   //! @param tag
-  //! @return std::vector<std::reference_wrapper<Cmp::Particle::IParticleSprite>>
-  [[nodiscard]] static std::vector<std::reference_wrapper<Cmp::Particle::IParticleSprite>> find( entt::registry &reg, const std::string &tag );
+  //! @return std::vector<ParticleSystem::entt_ps_pair>
+  [[nodiscard]] static std::vector<entt_ps_pair> find( entt::registry &reg, const std::string &tag );
 
   //! @brief event handlers for pausing system clocks
   void on_pause() override {};

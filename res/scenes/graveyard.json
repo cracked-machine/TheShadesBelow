@@ -1897,6 +1897,19 @@
                  "width":0,
                  "x":720,
                  "y":816
+                }, 
+                {
+                 "height":0,
+                 "id":277,
+                 "name":"item.elderflute",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":816,
+                 "y":816
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1905,7 +1918,7 @@
          "y":0
         }],
  "nextlayerid":11,
- "nextobjectid":277,
+ "nextobjectid":278,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

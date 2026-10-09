@@ -108,12 +108,13 @@ void ParticleSystem::check_collsion( const std::vector<std::string> &excl_ps_tag
   }
 }
 
-[[nodiscard]] std::vector<std::reference_wrapper<Cmp::Particle::IParticleSprite>> ParticleSystem::find( entt::registry &reg, const std::string &tag )
+[[nodiscard]] std::vector<ParticleSystem::entt_ps_pair> ParticleSystem::find( entt::registry &reg, const std::string &tag )
 {
-  std::vector<std::reference_wrapper<Cmp::Particle::IParticleSprite>> particle_sprites;
+
+  std::vector<entt_ps_pair> particle_sprites;
   for ( auto [entt, owner] : reg.view<Cmp::Particle::SpriteOwner>().each() )
   {
-    if ( owner.sprite->get_tag() == tag ) particle_sprites.emplace_back( *owner.sprite );
+    if ( owner.sprite->get_tag() == tag ) particle_sprites.emplace_back( entt, *owner.sprite );
   }
   return particle_sprites;
 }

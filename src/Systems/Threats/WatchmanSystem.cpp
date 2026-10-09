@@ -254,9 +254,9 @@ void WatchmanSystem::check_gunfire_player_collision()
     if ( not player_cmp.skip_damage_cooldown_once && player_cmp.m_damage_cooldown_timer < player_cmp.damage_cooldown_timeout() ) continue;
 
     bool hit = false;
-    for ( auto &gunfire_sprite : Sys::ParticleSystem::find( reg(), "watchman.gun.particle.shot" ) )
+    for ( auto [entt, gunfire_ps] : Sys::ParticleSystem::find( reg(), "watchman.gun.particle.shot" ) )
     {
-      if ( gunfire_sprite.get().check_particle_collision( player_pos_cmp ) ) hit = true;
+      if ( gunfire_ps.get().check_particle_collision( player_pos_cmp ) ) hit = true;
     }
     if ( not hit ) continue;
 
@@ -282,13 +282,14 @@ void WatchmanSystem::check_gunfire_player_collision()
 void WatchmanSystem::check_gunfire_npc_collision()
 {
   if ( not Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled ) return;
+  auto gunfire_entt_ps_pair = Sys::ParticleSystem::find( reg(), "watchman.gun.particle.shot" );
 
   for ( auto [npc_entt, npc_cmp, skeleton_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Npc::Skeleton, Cmp::Position>().each() )
   {
     bool hit = false;
-    for ( auto &gunfire_sprite : Sys::ParticleSystem::find( reg(), "watchman.gun.particle.shot" ) )
+    for ( auto [entt, gunfire_ps] : gunfire_entt_ps_pair )
     {
-      if ( gunfire_sprite.get().check_particle_collision( npc_pos_cmp ) ) hit = true;
+      if ( gunfire_ps.get().check_particle_collision( npc_pos_cmp ) ) hit = true;
     }
     if ( not hit ) continue;
 

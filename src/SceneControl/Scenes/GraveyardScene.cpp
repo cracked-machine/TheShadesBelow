@@ -9,6 +9,7 @@
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
 #include <Components/Particle/FlameParticleSprite.hpp>
+#include <Components/Particle/NoteParticleSprite.hpp>
 #include <Components/Particle/SpriteBase.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
@@ -190,11 +191,6 @@ void GraveyardScene::on_init()
   m_sys.find<Sys::Store::Type::WormholeSystem>().spawn_wormhole( Sys::WormholeSystem::SpawnPhase::InitialSpawn );
 
   Factory::Particle::add_flame_for_world_items( m_reg, "graveyard.candle.particle.flame" );
-
-  auto uuid_cmp = Cmp::UUID::generate();
-  auto player_pos = Utils::Player::get_position( m_reg );
-  sf::Vector2 note_ps_pos( player_pos.getCenter().x, player_pos.position.y );
-  Factory::Particle::add_notes( m_reg, Factory::Particle::kPlayerNotesTag, uuid_cmp, note_ps_pos, note_ps_pos.y );
 }
 
 void GraveyardScene::on_enter()
@@ -322,7 +318,7 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::InventorySystem>().update( dt ) );
 
   PROFILED( m_sys.find<Sys::Store::Type::ParticleSystem>().check_collsion(
-      { "graveyard.plant.particle.flame", Factory::Particle::kPlayerNotesTag } ) );
+      { "graveyard.plant.particle.flame", std::string( Cmp::Particle::NoteParticleSprite::kPlayerNotesTag ) } ) );
   PROFILED( m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt ) );
 
   PROFILED( m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt ) );

@@ -35,6 +35,9 @@ private:
 class NoteParticleSprite : public SpriteBase<detail::NoteParticle>
 {
 public:
+  //! @brief Tag of the player's floating music-note particles, followed every frame to the player's feet.
+  static constexpr std::string_view kPlayerNotesTag = "player.flute.particle.notes";
+
   //! @brief Construct a new NoteParticleSprite object
   //! @param count Number of particles in this sprite
   NoteParticleSprite( size_t count );

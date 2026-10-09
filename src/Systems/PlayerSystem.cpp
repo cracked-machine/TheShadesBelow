@@ -28,6 +28,7 @@
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
 #include <Components/Particle/BlockParticle.hpp>
+#include <Components/Particle/NoteParticleSprite.hpp>
 #include <Components/Particle/SpriteBase.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
@@ -157,7 +158,7 @@ void PlayerSystem::update( sf::Time dt )
   check_player_mortality();
   apply_timed_action_side_effects( dt );
   create_healing_particles();
-  update_notes_particle_position();
+  update_note_particles();
 
   update_heartbeat( dt );
 
@@ -853,11 +854,46 @@ void PlayerSystem::create_healing_particles()
   }
 }
 
-void PlayerSystem::update_notes_particle_position()
+void PlayerSystem::update_note_particles()
 {
-  const auto player_pos = Utils::Player::get_position( reg() );
-  const sf::Vector2f feet_pos( player_pos.getCenter().x, player_pos.position.y );
-  Factory::Particle::update_position( reg(), Factory::Particle::kPlayerNotesTag, feet_pos );
+
+  auto ps_tag = std::string( Cmp::Particle::NoteParticleSprite::kPlayerNotesTag );
+  auto ps_list = Sys::ParticleSystem::find( reg(), ps_tag );
+  auto [inventory_entt, inventory_type, _] = Utils::Player::get_inventory( reg() );
+
+  if ( inventory_type == "item.elderflute" )
+  {
+    if ( ps_list.empty() )
+    {
+      // add missing NoteParticleSprite
+      auto uuid_cmp = Cmp::UUID::generate();
+      auto player_pos = Utils::Player::get_position( reg() );
+      sf::Vector2 note_ps_pos( player_pos.getCenter().x, player_pos.position.y );
+      Factory::Particle::add_notes( reg(), ps_tag, uuid_cmp, note_ps_pos, note_ps_pos.y );
+    }
+    else
+    {
+      // restart (no-op if already running) and follow the player's feet
+      const auto player_pos = Utils::Player::get_position( reg() );
+      const sf::Vector2f feet_pos( player_pos.getCenter().x, player_pos.position.y );
+      for ( auto [entt, ps] : ps_list )
+      {
+        ps.get().set_emitter_position( feet_pos );
+        ps.get().restart();
+      }
+    }
+  }
+  else
+  {
+    if ( not ps_list.empty() )
+    {
+      // stop NoteParticleSprites if not in inventory
+      for ( auto [entt, ps] : ps_list )
+      {
+        ps.get().stop();
+      }
+    }
+  }
 }
 
 void PlayerSystem::fade_player_on_wormhole_jump()

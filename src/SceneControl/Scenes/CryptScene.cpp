@@ -4,6 +4,7 @@
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Particle/FlameParticleSprite.hpp>
+#include <Components/Particle/NoteParticleSprite.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/Character.hpp>
@@ -190,7 +191,8 @@ void CryptScene::do_update( sf::Time dt )
   m_sys.find<Sys::Store::Type::PassageSystem>().update( dt );
   m_sys.find<Sys::Store::Type::InventorySystem>().update( dt );
 
-  m_sys.find<Sys::Store::Type::ParticleSystem>().check_collsion();
+  auto excludes = { std::string( Cmp::Particle::NoteParticleSprite::kPlayerNotesTag ) };
+  m_sys.find<Sys::Store::Type::ParticleSystem>().check_collsion( excludes );
   m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
 
   m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt );
