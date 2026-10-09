@@ -40,6 +40,10 @@ public:
   //! uniforms each frame.
   //! @param reg The entt registry, used to source torch/candle particles, Watchman searchlights and player state.
   void update( entt::registry &reg, sf::Time dt ) override;
+
+private:
+  //! @brief Time the player has held a usable ElderFlute, capped at the fade-in duration. Drives the ghost grave light fade-in.
+  sf::Time m_ghost_grave_fade{ sf::Time::Zero };
 };
 
 } // namespace Game::Sprites

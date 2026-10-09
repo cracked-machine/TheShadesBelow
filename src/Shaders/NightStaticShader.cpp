@@ -1,5 +1,7 @@
 #include <Components/Crypt/RoomLavaPit.hpp>
 #include <Components/Crypt/RoomLavaPitCell.hpp>
+#include <Components/Grave/Consequence.hpp>
+#include <Components/Grave/MultiBlock.hpp>
 #include <Components/Npc/Watchman.hpp>
 #include <Components/Npc/WatchmanSearchlight.hpp>
 #include <Components/Npc/Wisp.hpp>
@@ -27,7 +29,11 @@ namespace
 const sf::Glsl::Vec4 WARM_YELLOW{ 1.0f, 0.92f, 0.6f, 1.0f };
 const sf::Glsl::Vec4 WARM_ORANGE{ 1.0f, 0.6f, 0.2f, 1.0f };
 const sf::Glsl::Vec4 EERIE_BLUE{ 0.1f, 0.15f, 1.0f, 1.0f };
+const sf::Glsl::Vec4 GHOST_GRAVE{ 0.6f, 0.f, 1.0f, 1.0f };
 const sf::Glsl::Vec4 COOL_WHITE{ 0.8f, 0.85f, 1.0f, 1.0f };
+
+// Time taken for the ghost grave lights to reach full strength after the player picks up the ElderFlute
+const sf::Time kGhostGraveFadeIn = sf::seconds( 1.5f );
 } // namespace
 
 void NightStaticShader::update( entt::registry &reg, sf::Time dt )
@@ -52,8 +58,37 @@ void NightStaticShader::update( entt::registry &reg, sf::Time dt )
     torch_colors.push_back( WARM_YELLOW );
   }
 
-  // flame particle sprites are paused when candle is in inventory so we need to add the radius explicitly
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg );
+  auto wearlevel = Utils::Player::get_inventory_wear_level( reg );
+  // light up the ghost graves while the player carries a usable ElderFlute
+  if ( inventory_type == "item.elderflute" and wearlevel > 0 )
+  {
+    // fade the lights in via the color alpha, which the frag shader uses as the light's strength
+    m_ghost_grave_fade = std::min( m_ghost_grave_fade + dt, kGhostGraveFadeIn );
+    sf::Glsl::Vec4 ghost_grave_color = GHOST_GRAVE;
+    ghost_grave_color.w *= m_ghost_grave_fade / kGhostGraveFadeIn;
+
+    const int player_luck = Utils::Player::get_stats( reg ).luck();
+    // pad the view by the light radius so a grave just off-screen still casts its light onto the screen.
+    // The frag shader flickers the radius up to 10% larger (TORCH_EDGE_FLICKER_PERCENT), so pad for that too
+    const float light_radius = Utils::Player::get_torch_radius( reg ).value * 1.1f;
+    const sf::FloatRect lit_view_bounds( { view_top_left.x - light_radius, view_top_left.y - light_radius },
+                                         { view_size.x + ( light_radius * 2.f ), view_size.y + ( light_radius * 2.f ) } );
+    for ( auto [grave_entt, grave_mb, consequence] : reg.view<Cmp::Grave::MultiBlock, Cmp::Grave::Consequence>().each() )
+    {
+      if ( not Utils::is_visible_in_view( lit_view_bounds, grave_mb ) ) continue;
+      if ( consequence.get( player_luck ) != Cmp::Grave::Consequence::Type::NPC_TRAP ) continue;
+      torch_positions.push_back( grave_mb.getCenter() );
+      torch_colors.push_back( ghost_grave_color );
+    }
+  }
+  else
+  {
+    // lights cut out as soon as the flute is dropped/expired, and fade in from zero next time
+    m_ghost_grave_fade = sf::Time::Zero;
+  }
+
+  // flame particle sprites are paused when candle is in inventory so we need to add the radius explicitly
   if ( inventory_type.contains( "candle" ) )
   {
     torch_positions.push_back( Utils::Player::get_position( reg ).getCenter() );

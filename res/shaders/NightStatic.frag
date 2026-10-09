@@ -23,7 +23,8 @@ uniform float fear;
 const int MAX_TORCH_COUNT = 40;
 uniform int torch_count;
 uniform vec2 torch_world_pos[MAX_TORCH_COUNT];
-// per-torch light color, RGB normalized (0..1) not 8bit RGB; alpha scales how strongly the color tints the pixel
+// per-torch light color, RGB normalized (0..1) not 8bit RGB; alpha is the light's strength (0.0 == off, 1.0 == full),
+// scaling both how much it lifts the darkness and how strongly the color tints the pixel
 uniform vec4 torch_color[MAX_TORCH_COUNT];
 
 const float M_PI = 3.1415926535897932384626433832795;
@@ -149,7 +150,7 @@ void main()
   vec4 frag_light_color = vec4( 0.0 );
   for ( int i = 0; i < torch_count; i++ )
   {
-    float torch_light_amount = player_torch_pixel( frag_coord, i );
+    float torch_light_amount = player_torch_pixel( frag_coord, i ) * torch_color[i].a;
     if ( torch_light_amount > frag_coord_light_amount )
     {
       frag_coord_light_amount = torch_light_amount;
