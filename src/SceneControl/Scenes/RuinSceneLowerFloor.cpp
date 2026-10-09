@@ -183,6 +183,7 @@ void RuinSceneLowerFloor::on_enter()
     case EntryMode::FROM_UPPER_FLOOR: {
       SPDLOG_DEBUG( "Player entering from upper floor" );
       player_pos.position = Utils::snap_to_grid( player_pos.position );
+      m_sys.find<Sys::Store::Type::PlayerSystem>().enable_damage_cooldown();
       m_sys.find<Sys::Store::Type::PlayerSystem>().force_expire_damage_cooldown();
       break;
     }
