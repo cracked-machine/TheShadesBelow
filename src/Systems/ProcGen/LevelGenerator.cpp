@@ -11,6 +11,7 @@
 #include <Components/Crypt/RoomOpen.hpp>
 #include <Components/Crypt/RoomStart.hpp>
 #include <Components/Exit.hpp>
+#include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/ExitSegment.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
@@ -61,6 +62,7 @@
 #include <SceneControl/SceneData.hpp>
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Systems/GraveSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/Render/RenderSystem.hpp>
@@ -414,9 +416,9 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
   if ( grave_meta_types.size() < 2 ) { SPDLOG_WARN( "No GRAVE spritesheets found in SpriteStore" ); }
   else
   {
-    SPDLOG_DEBUG( "Found {}, {}", grave_meta_types[0], grave_meta_types[1] );
-    auto max_num_graves = static_cast<size_t>( min_num_altars.get_value() * grave_num_multiplier.get_value() );
-    for ( std::size_t i = 0; i < max_num_graves; ++i )
+    std::map<Cmp::Grave::Consequence::Type, int> gc_dist;
+    auto required_num_graves = static_cast<size_t>( min_num_altars.get_value() * grave_num_multiplier.get_value() );
+    for ( std::size_t i = 0; i < required_num_graves; ++i )
     {
       const auto &spritesheet = Sys::SpriteStore::instance().get_random( grave_meta_types );
       auto index = spritesheet.get_random_texture_index();
@@ -426,8 +428,13 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
         auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<Cmp::Grave::MultiBlock, Cmp::Grave::Segment>(
             reg(), pos->position, spritesheet, index, 0, m_reserved_sm.get() );
         m_reserved_sm->insert( mb_entt, pos.value() );
+        // decide the consequence at creation
+        auto choice = Sys::GraveSystem::choose_grave_consequence( Utils::Player::get_stats( reg() ).luck() );
+        reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, choice );
+        gc_dist[choice]++;
       }
     }
+    SPDLOG_INFO( "Grave Consequences dist: {}", gc_dist );
   }
 
   // ALTARS

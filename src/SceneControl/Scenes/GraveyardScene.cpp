@@ -317,10 +317,9 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::ArrowSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::InventorySystem>().update( dt ) );
 
-  PROFILED( m_sys.find<Sys::Store::Type::ParticleSystem>().check_collsion(
-      { "graveyard.plant.particle.flame", std::string( Cmp::Particle::NoteParticleSprite::kPlayerNotesTag ) } ) );
+  auto excludes = { std::string( "graveyard.plant.particle.flame" ), std::string( Cmp::Particle::NoteParticleSprite::kPlayerNotesTag ) };
+  m_sys.find<Sys::Store::Type::ParticleSystem>().check_collsion( excludes );
   PROFILED( m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt ) );
-
   PROFILED( m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_overlay( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug() );

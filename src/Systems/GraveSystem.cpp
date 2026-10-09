@@ -2,6 +2,7 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/AbsoluteAlpha.hpp>
 #include <Components/AnimData.hpp>
+#include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/Segment.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
@@ -39,6 +40,33 @@ GraveSystem::GraveSystem( entt::registry &reg, sf::RenderWindow &window, Audio::
     : BaseSystem( reg, window, sound_bank )
 {
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&GraveSystem::on_player_action>( this );
+}
+
+Cmp::Grave::Consequence::Type GraveSystem::choose_grave_consequence( int player_luck )
+{
+  // Roulette wheel. We take the inverse of player luck and use both numbers to gate the spawn probablities.
+  // For example, if player luck is 50, then the badluck is also 50
+
+  const int good_weight = player_luck;
+  const int bad_weight = 100 - good_weight;
+
+  auto grave_activation_rng = Cmp::RandomInt( 0, 99 );
+  const int roll = grave_activation_rng.gen();
+
+  const int tier1_threshold = bad_weight / 2;                   // Tier1 is a roll below 25
+  const int tier2_threshold = ( bad_weight / 2 ) + 5;           // Tier2 is a roll between 25 and 30
+  const int tier3_threshold = bad_weight;                       // Tier3 is a roll between 30 and 50
+  const int tier4_threshold = bad_weight + ( good_weight / 2 ); // Tier4 is a roll between 50 and 75
+                                                                // Remaining rolls between 75 and 100
+
+  Cmp::Grave::Consequence::Type consequence;
+  if ( roll < tier1_threshold ) { consequence = Cmp::Grave::Consequence::Type::BOMB_TRAP; }
+  else if ( roll < tier2_threshold ) { consequence = Cmp::Grave::Consequence::Type::CURSE_TABLET; }
+  else if ( roll < tier3_threshold ) { consequence = Cmp::Grave::Consequence::Type::NPC_TRAP; }
+  else if ( roll < tier4_threshold ) { consequence = Cmp::Grave::Consequence::Type::RELIC; }
+  else { consequence = Cmp::Grave::Consequence::Type::JEWELRY; }
+
+  return consequence;
 }
 
 void GraveSystem::update()
@@ -150,57 +178,28 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
     m_sound_bank.get_effect( "pickaxe_final" ).play();
   }
 
-  trigger_grave_consequence( grave_entity );
-}
-
-void GraveSystem::trigger_grave_consequence( entt::entity grave_entity )
-{
-  // Roulette wheel. We take the inverse of player luck and use both numbers to gate the spawn probablities.
-  // For example, if player luck is 50, then the badluck is also 50
-  auto player_luck_stat = Utils::Player::get_stats( reg() ).luck();
-  const int good_weight = player_luck_stat;
-  const int bad_weight = 100 - good_weight;
-
-  auto grave_activation_rng = Cmp::RandomInt( 0, 99 );
-  const int roll = grave_activation_rng.gen();
-
-  const int tier1_threshold = bad_weight / 2;                   // Tier1 is a roll below 25
-  const int tier2_threshold = ( bad_weight / 2 ) + 5;           // Tier2 is a roll between 25 and 30
-  const int tier3_threshold = bad_weight;                       // Tier3 is a roll between 30 and 50
-  const int tier4_threshold = bad_weight + ( good_weight / 2 ); // Tier4 is a roll between 50 and 75
-                                                                // Remaining rolls between 75 and 100
-
-  GraveConsequence consequence;
-  if ( roll < tier1_threshold ) { consequence = GraveConsequence::BOMB_TRAP; }
-  else if ( roll < tier2_threshold ) { consequence = GraveConsequence::CURSE_TABLET; }
-  else if ( roll < tier3_threshold ) { consequence = GraveConsequence::NPC_TRAP; }
-  else if ( roll < tier4_threshold ) { consequence = GraveConsequence::RELIC; }
-  else { consequence = GraveConsequence::JEWELRY; }
-
-  switch ( consequence )
+  auto *consequence = reg().try_get<Cmp::Grave::Consequence>( grave_entity );
+  if ( not consequence ) return;
+  switch ( consequence->get() )
   {
-    case GraveConsequence::NPC_TRAP: {
+    case Cmp::Grave::Consequence::Type::NPC_TRAP:
       SPDLOG_DEBUG( "Grave activated NPC trap." );
       Factory::Npc::create_npc( reg(), grave_entity, "npc.ghost" );
       m_sound_bank.get_effect( "spawn_ghost" ).play();
       break;
-    }
-    case GraveConsequence::BOMB_TRAP: {
+    case Cmp::Grave::Consequence::Type::BOMB_TRAP:
       SPDLOG_DEBUG( "Grave activated bomb trap." );
       get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::TRIGGER_BOMB ) );
       break;
-    }
-    case GraveConsequence::RELIC: {
+    case Cmp::Grave::Consequence::Type::RELIC:
       spawn_grave_loot( { "item.relic1", "item.relic2", "item.relic3", "item.relic4" } );
       break;
-    }
-    case GraveConsequence::JEWELRY: {
+    case Cmp::Grave::Consequence::Type::JEWELRY:
       spawn_grave_loot( { "item.jewelry_sapphire_necklace", "item.jewelry_amephyst_ring", "item.jewelry_ruby_ring", "item.jewelry_emerald_necklace",
                           "item.jewelry_emerald_gemstone", "item.jewelry_sapphire_gemstone", "item.jewelry_diamond_gemstone",
                           "item.jewelry_amephyst_gemstone" } );
       break;
-    }
-    case GraveConsequence::CURSE_TABLET:
+    case Cmp::Grave::Consequence::Type::CURSE_TABLET:
       spawn_grave_loot( { "item.cursetablet" } );
       break;
   }

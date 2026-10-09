@@ -1,6 +1,7 @@
 #ifndef SRC_SYSTEMS_GRAVESYSTEM_HPP__
 #define SRC_SYSTEMS_GRAVESYSTEM_HPP__
 
+#include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -11,6 +12,7 @@
 // clang-format off
 namespace Game::Cmp { class AnimData; }
 namespace Game::Cmp::Player { class Character; }
+namespace Game::Cmp::Grave { class Consequence; }
 // clang-format on
 
 namespace Game::Sys
@@ -25,6 +27,11 @@ public:
   //! @param window
   //! @param sound_bank
   GraveSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
+
+  //! @brief Randomly select a consequence for opening a grave
+  //! @param player_luck
+  //! @return Cmp::Grave::Consequence::Type
+  static Cmp::Grave::Consequence::Type choose_grave_consequence( int player_luck );
 
   //! @brief event handlers for pausing system clocks
   void on_pause() override {}
@@ -76,10 +83,6 @@ private:
   //! @param grave_entity
   //! @param grave_anim_cmp
   void open_grave( entt::entity grave_entity, Cmp::AnimData &grave_anim_cmp );
-
-  //! @brief Randomly spawn an NPC trap, a bomb trap, a relic, or jewelry from the opened grave
-  //! @param grave_entity
-  void trigger_grave_consequence( entt::entity grave_entity );
 
   //! @brief Pick a random item from the pool, drop it as loot, and apply its Cmp::SpawnAction modifiers to the player
   //! @param loot_pool

@@ -33,11 +33,11 @@ public:
 
   //! @brief Get the number of activated sprites in this multi-block.
   //! @return uint8_t
-  uint8_t get_activation_count() const { return m_activation_count; }
+  [[nodiscard]] uint8_t get_activation_count() const { return m_activation_count; }
 
   //! @brief Get the activation count threshold, derived from the multi-block's size in 16x16 blocks.
   //! @return uint8_t
-  uint8_t get_activation_threshold() const { return m_activation_threshold; }
+  [[nodiscard]] uint8_t get_activation_threshold() const { return m_activation_threshold; }
 
   //! @brief Set whether this multi-block's powers/effects are active.
   //! @param activate true to activate, false to deactivate.
@@ -45,7 +45,7 @@ public:
 
   //! @brief Check whether this multi-block's powers/effects are active.
   //! @return bool
-  bool are_powers_active() const { return m_powers_active; }
+  [[nodiscard]] bool are_powers_active() const { return m_powers_active; }
 
   //! @brief hit points/health until opened
   int hp{ 100 };
