@@ -136,6 +136,7 @@ void GraveSystem::update_grave_halo_particles()
   auto ps_list = Sys::ParticleSystem::find( reg(), ps_tag );
   auto [inventory_entt, inventory_type, _] = Utils::Player::get_inventory( reg() );
   const bool holding_flute = inventory_type == "item.elderflute";
+  auto wearlevel = Utils::Player::get_inventory_wear_level( reg() );
   const int player_luck = Utils::Player::get_stats( reg() ).luck();
 
   for ( auto [grave_mb_entt, grave_mb, grave_uuid, consequence] : reg().view<Cmp::Grave::MultiBlock, Cmp::UUID, Cmp::Grave::Consequence>().each() )
@@ -144,11 +145,11 @@ void GraveSystem::update_grave_halo_particles()
     auto halo = std::ranges::find_if( ps_list, [&]( const auto &entt_ps )
     {
       auto *ps_uuid = reg().try_get<Cmp::UUID>( entt_ps.first );
-      return ps_uuid and *ps_uuid == grave_uuid;
+      return ps_uuid and * ps_uuid == grave_uuid;
     } );
     const bool has_halo = halo != ps_list.end();
 
-    if ( holding_flute and consequence.get( player_luck ) == Cmp::Grave::Consequence::Type::NPC_TRAP )
+    if ( holding_flute and consequence.get( player_luck ) == Cmp::Grave::Consequence::Type::NPC_TRAP and wearlevel > 0 )
     {
       // restart is a no-op if already running
       if ( has_halo ) { halo->second.get().restart(); }
