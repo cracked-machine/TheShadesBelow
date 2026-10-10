@@ -502,7 +502,7 @@ void ActionSystem::check_player_axe_npc_kill()
   SPDLOG_DEBUG( "position_view size: {}", position_view.size_hint() );
   for ( auto [npc_entity, npc_pos_cmp, npc_cmp, anim_cmp] : position_view.each() )
   {
-    if ( anim_cmp.m_sprite_type.contains( "sprite.ghost" ) ) continue;
+    if ( not anim_cmp.m_sprite_type.contains( "sprite.skeleton" ) ) continue;
     auto mouse_position_bounds = Utils::get_mouse_bounds_in_gameview( m_window, RenderSystem::get_world_view() );
     if ( mouse_position_bounds.findIntersection( npc_pos_cmp ) )
     {
