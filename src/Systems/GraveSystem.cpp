@@ -56,6 +56,8 @@ void GraveSystem::update()
 
   clear_stale_grave_selections();
 
+  player_digging = false;
+
   // Iterate through all closed grave entities
   auto position_view = reg().view<Cmp::Position, Cmp::Grave::MultiBlock, Cmp::AnimData>( entt::exclude<Cmp::SelectedPosition> );
   for ( auto [grave_entity, grave_pos_cmp, grave_cmp, grave_anim_cmp] : position_view.each() )
@@ -83,7 +85,6 @@ void GraveSystem::update()
     // continuing to iterate afterward would be undefined behaviour. Only one grave can match the mouse position
     // at a time anyway, so stop here rather than advancing the now-possibly-invalidated iterator.
 
-    player_digging = false;
     break;
   }
 }
