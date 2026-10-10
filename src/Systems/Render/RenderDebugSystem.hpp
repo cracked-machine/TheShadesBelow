@@ -7,6 +7,7 @@
 #include <Systems/Render/UiData.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Optimizations.hpp>
+#include <span>
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
@@ -123,8 +124,9 @@ private:
   //! @param end_pos_cmp
   //! @param color
   //! @param query_compass
+  //! @param footprint_cells The cells an NPC stands on, anchor cell first, see Cmp::Npc::Footprint.
   void render_pathfinding_vector( const Cmp::Position &start_pos_cmp, const Cmp::Position &end_pos_cmp, sf::Color color,
-                                  PathFinding::QueryCompass query_compass );
+                                  PathFinding::QueryCompass query_compass, std::span<const sf::Vector2i> footprint_cells = {} );
 
   //! @brief Draw an outlined square for every entity that has the given Component (used as a position), if visible in the world view.
   //! @tparam Component

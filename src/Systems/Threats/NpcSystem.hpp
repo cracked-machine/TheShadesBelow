@@ -88,7 +88,8 @@ private:
 
   //! @brief Find a suitable knockback position for the player
   //! @param npc_direction
-  void find_pushback_position( const Cmp::Direction &npc_direction );
+  //! @param npc_bounds The NPC's collision bounds; the player is pushed clear of all of it.
+  void find_pushback_position( const Cmp::Direction &npc_direction, const sf::FloatRect &npc_bounds );
 
   //! @brief Transition the player to HAUNTED and enqueue the mortality event if health has depleted.
   //! @param player_mort

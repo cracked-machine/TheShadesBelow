@@ -96,11 +96,6 @@ public:
   //! secret sound the first time it unlocks.
   void check_puzzle_status();
 
-  //! @brief Create a witch entt if none exist
-  //! @param reg s
-  //! @param scene_boundary
-  void check_create_witch( sf::FloatRect scene_boundary );
-
   //! @brief Create spider NPCs using Cmp::Persist::RuinMaxSpiders as a limit.
   //! @param reg
   //! @param scene_boundary

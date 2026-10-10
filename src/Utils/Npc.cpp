@@ -10,6 +10,7 @@
 #include <PathFinding/AStar.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
@@ -18,9 +19,13 @@
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 
+#include <algorithm>
+#include <cmath>
 #include <entt/entity/fwd.hpp>
-#include <span>
+#include <functional>
+#include <ranges>
 #include <source_location>
+#include <span>
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 
@@ -60,9 +65,16 @@ Sys::SpriteKey get_sprite_type( entt::registry &reg, entt::entity npc_entt, std:
   return anim_cmp->m_sprite_type;
 }
 
+sf::FloatRect collision_bounds( entt::registry &reg, entt::entity npc_entt )
+{
+  const auto &npc_pos = reg.get<Cmp::Position>( npc_entt );
+  // NPCs created outside Factory::Npc::create_npc (e.g. the shadow hand) have no footprint: all of them collides
+  const auto *footprint = reg.try_get<Cmp::Npc::Footprint>( npc_entt );
+  return footprint ? footprint->bounds( npc_pos.position ) : sf::FloatRect( npc_pos );
+}
+
 PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGrid &navmesh, const Cmp::Position &target_pos, entt::entity npc_entity,
-                                bool target_in_spawn, bool target_illuminated, bool always_pathfind,
-                                const Utils::Collision::LightSources *lights )
+                                bool target_in_spawn, bool target_illuminated, bool always_pathfind, const Utils::Collision::LightSources *lights )
 {
   auto *npc_anim_cmp = reg.try_get<Cmp::AnimData>( npc_entity );
   if ( not npc_anim_cmp ) return PathfindResult::Blocked;
@@ -78,6 +90,10 @@ PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGri
     return PathfindResult::Blocked;
   }
 
+  // NPCs that can't move (e.g. the shadow hand, which has its own movement) have nothing to pathfind
+  auto *npc_lerp_speed_cmp = reg.try_get<Cmp::Npc::LerpSpeed>( npc_entity );
+  if ( not npc_lerp_speed_cmp ) return PathfindResult::Blocked;
+
   // don't intterupt NPC mid-lerp or it causes indecisive pathfinding
   auto *npc_lerp_pos_cmp = reg.try_get<Cmp::LerpPosition>( npc_entity );
   if ( npc_lerp_pos_cmp && npc_lerp_pos_cmp->m_lerp_factor < 1.0f ) return PathfindResult::Blocked;
@@ -91,6 +107,13 @@ PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGri
   // adjacent cell, exceeding the 24px too_far threshold when NPC approaches from left/above.
   Cmp::Position grid_target( Utils::snap_to_grid( target_pos.position, Utils::Rounding::TOWARDS_ZERO ), target_pos.size );
 
+  // Pathfind the footprint's anchor cell. A multiblock NPC is top-left anchored but stands on the cells given by
+  // its sprite's solid mask, and needs clearance for all of them.
+  auto *footprint_cmp = reg.try_get<Cmp::Npc::Footprint>( npc_entity );
+  if ( not footprint_cmp ) return PathfindResult::Blocked;
+  const Cmp::Npc::Footprint &footprint = *footprint_cmp;
+  const Cmp::Position start_pos = footprint.anchor( npc_pos_cmp->position );
+
   std::vector<PathFinding::PathNode> path;
   if ( lights )
   {
@@ -98,21 +121,26 @@ PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGri
     // boundary stop below can halt the NPC at their edge. Test the target's real (unsnapped) position so
     // this agrees with `target_illuminated`. A* never tests the start cell, so an NPC caught inside a
     // light can still step out to an unlit neighbour, but it can't walk deeper through it.
-    auto is_lit = [&]( const Cmp::Position &pos ) {
-      return lights->blocks( pos, target_illuminated ? std::span( &target_pos, 1 ) : std::span<const Cmp::Position>() );
-    };
-    path = PathFinding::astar( reg, navmesh, *npc_pos_cmp, grid_target, query_compass, is_lit );
+    auto is_lit = [&]( const Cmp::Position &pos )
+    { return lights->blocks( pos, target_illuminated ? std::span( &target_pos, 1 ) : std::span<const Cmp::Position>() ); };
+    path = PathFinding::astar( reg, navmesh, start_pos, grid_target, query_compass, is_lit, footprint.cells() );
   }
-  else { path = PathFinding::astar( reg, navmesh, *npc_pos_cmp, grid_target, query_compass ); }
+  else { path = PathFinding::astar( reg, navmesh, start_pos, grid_target, query_compass, {}, footprint.cells() ); }
 
   SPDLOG_DEBUG( "{} pathsize: {}", static_cast<uint32_t>( npc_entity ), path.size() );
   if ( path.size() <= 1 ) return PathfindResult::NoPath;
 
   Cmp::Position next_npc_pos = path[1].pos;
 
+  // the path is in terms of the footprint's anchor cell; the NPC's position is top-left anchored
+  const sf::Vector2f next_position = footprint.top_left_for_anchor( next_npc_pos.position );
+
+  // The boundary stops below apply to every cell the NPC would stand on at its next step
+  auto any_next_cell = [&]( auto &&test ) { return std::ranges::any_of( footprint.world_cells( next_position ), test ); };
+
   // If player is in spawn, only stop when the very next step would cross into spawn.
   // This lets the NPC walk the full path to the boundary before stopping.
-  if ( target_in_spawn and Utils::Player::is_in_spawn( reg, next_npc_pos ) )
+  if ( target_in_spawn and any_next_cell( [&]( const Cmp::Position &cell ) { return Utils::Player::is_in_spawn( reg, cell ); } ) )
   {
     reg.emplace_or_replace<Cmp::Direction>( npc_entity, Cmp::Direction( { 0.0f, 0.0f } ) );
     return PathfindResult::Blocked;
@@ -121,7 +149,8 @@ PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGri
   // If the player is illuminated, only stop when the very next step would cross into the radius of
   // whichever light source is currently illuminating them. This lets the NPC walk the full path to
   // that light's boundary before stopping, mirroring the spawn-boundary check above.
-  const bool next_step_lit = lights ? lights->illuminates( next_npc_pos ) : Utils::Collision::is_position_illuminated( reg, next_npc_pos );
+  const bool next_step_lit = any_next_cell( [&]( const Cmp::Position &cell )
+  { return lights ? lights->illuminates( cell ) : Utils::Collision::is_position_illuminated( reg, cell ); } );
   if ( target_illuminated and next_step_lit )
   {
     reg.emplace_or_replace<Cmp::Direction>( npc_entity, Cmp::Direction( { 0.0f, 0.0f } ) );
@@ -129,10 +158,8 @@ PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGri
   }
 
   // calculate the direction and update the NPC lerp
-  auto *npc_lerp_speed_cmp = reg.try_get<Cmp::Npc::LerpSpeed>( npc_entity );
-  if ( not npc_lerp_speed_cmp ) return PathfindResult::Blocked;
-  auto candidate_lerp_pos = Cmp::LerpPosition( next_npc_pos.position, npc_lerp_speed_cmp->speed );
-  auto distance_to_target = next_npc_pos.position - npc_pos_cmp->position;
+  auto candidate_lerp_pos = Cmp::LerpPosition( next_position, npc_lerp_speed_cmp->speed );
+  auto distance_to_target = next_position - npc_pos_cmp->position;
   if ( distance_to_target == sf::Vector2f( 0.0f, 0.0f ) ) return PathfindResult::Blocked;
 
   // prevent NPC warping via another NPCs pathfinding

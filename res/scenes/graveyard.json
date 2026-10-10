@@ -1910,6 +1910,19 @@
                  "width":0,
                  "x":816,
                  "y":816
+                }, 
+                {
+                 "height":0,
+                 "id":278,
+                 "name":"npc.eldermother",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":752,
+                 "y":816
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1918,7 +1931,7 @@
          "y":0
         }],
  "nextlayerid":11,
- "nextobjectid":278,
+ "nextobjectid":279,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

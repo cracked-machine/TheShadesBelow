@@ -562,39 +562,4 @@ void RuinSystem::create_spiders( sf::FloatRect scene_boundary )
   }
 }
 
-void RuinSystem::check_create_witch( sf::FloatRect scene_boundary )
-{
-  auto has_collision = [&]( const Cmp::RectBounds &pos )
-  {
-    if ( Utils::Collision::any_intersects<Cmp::Ruin::Bookcase>( reg(), pos ) ) { return true; }
-    if ( Utils::Collision::any_intersects<Cmp::Npc::NoPathFinding>( reg(), pos ) ) { return true; }
-    if ( Utils::Collision::any_intersects<Cmp::Ruin::StairsSegment>( reg(), pos ) ) { return true; }
-
-    // ensure spider is inside scene
-    if ( not Cmp::RectBounds::scaled( pos.position(), pos.size(), 1.5f ).findIntersection( scene_boundary ) ) { return true; }
-    return false;
-  };
-
-  bool witch_exists = false;
-  for ( auto [npc_entt, npc_cmp, npc_sprite_cmp] : reg().view<Cmp::Npc::NPC, Cmp::AnimData>().each() )
-  {
-    if ( npc_sprite_cmp.m_sprite_type == "sprite.witch" ) { witch_exists = true; }
-  }
-
-  if ( not witch_exists )
-  {
-    for ( auto _ : std::views::iota( 0, 100 ) )
-    {
-      auto [rnd_entt, rnd_pos_cmp] = Utils::Rnd::get_random_position( reg(), {}, {} );
-      if ( has_collision( Cmp::RectBounds::scaled( rnd_pos_cmp.position, rnd_pos_cmp.size, 1 ) ) ) continue;
-
-      auto new_witch_entity = reg().create();
-      Cmp::Position position_cmp = reg().emplace<Cmp::Position>( new_witch_entity, rnd_pos_cmp.position, rnd_pos_cmp.size );
-      [[maybe_unused]] Cmp::ZOrderValue zorder_cmp = reg().emplace<Cmp::ZOrderValue>( new_witch_entity, position_cmp.position.y );
-      Factory::Npc::create_npc( reg(), new_witch_entity, "npc.witch" );
-      break;
-    }
-  }
-}
-
 } // namespace Game::Sys

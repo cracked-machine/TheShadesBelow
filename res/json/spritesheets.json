@@ -1135,6 +1135,25 @@
         }
       }
     },
+    "sprite.eldermother": {
+      "spritesheet": {
+        "displayname": "Elder Mother",
+        "zorder": [32],
+        "texture_path": "res/textures/eldermother.png",
+        "sprite_indices": [0],
+        "solid_mask": [
+          false, false,
+          false, false,
+          true,  true
+        ],
+        "sprites_per_sequence": 1,
+        "sprites_per_frame": 1,
+        "grid_size": {
+          "x": 2,
+          "y": 3
+        }
+      }
+    },
     "sprite.drknox": {
       "spritesheet": {
         "displayname": "sprite.drknox",

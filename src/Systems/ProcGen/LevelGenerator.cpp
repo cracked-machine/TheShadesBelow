@@ -20,6 +20,8 @@
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Moveable.hpp>
+#include <Components/Npc/Footprint.hpp>
+#include <Components/Npc/Npc.hpp>
 #include <Components/ObstacleCap.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/MinNumAltars.hpp>
@@ -104,6 +106,15 @@ PathFinding::SpatialHashGrid &LevelGenerator::get_reserved_sm() { return *m_rese
 
 void LevelGenerator::cleanup_reserved()
 {
+  // NPCs move away from their spawn cells, so only reserve those for the duration of level generation
+  for ( auto [npc_entt, npc_cmp, npc_footprint_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Npc::Footprint, Cmp::Position>().each() )
+  {
+    for ( const auto &cell_pos : npc_footprint_cmp.world_cells( npc_pos_cmp.position ) )
+    {
+      m_reserved_sm->remove( npc_entt, cell_pos );
+    }
+  }
+
   for ( auto entt : reg().view<Cmp::Obstacle, Cmp::Position>() )
   {
     m_reserved_sm->remove( entt, reg().get<Cmp::Position>( entt ) );
@@ -210,7 +221,16 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
     {
       auto npc_entt = reg().create();
       reg().emplace_or_replace<Cmp::Position>( npc_entt, pos, Constants::kGridSizePxF );
-      Factory::Npc::create_npc( reg(), npc_entt, Sys::NpcKey( ms_type ), m_reserved_sm );
+      auto new_npc_entt = Factory::Npc::create_npc( reg(), npc_entt, Sys::NpcKey( ms_type ), m_reserved_sm );
+      // keep level generation from placing obstacles under the NPC - released again in cleanup_reserved()
+      if ( new_npc_entt != entt::null )
+      {
+        const auto &[npc_footprint_cmp, npc_pos_cmp] = reg().get<Cmp::Npc::Footprint, Cmp::Position>( new_npc_entt );
+        for ( const auto &cell_pos : npc_footprint_cmp.world_cells( npc_pos_cmp.position ) )
+        {
+          m_reserved_sm->insert( new_npc_entt, cell_pos );
+        }
+      }
       continue;
     }
 

@@ -6,6 +6,7 @@
 #include <entt/entity/entity.hpp>
 
 #include <functional>
+#include <span>
 
 /// Main class
 namespace Game::PathFinding
@@ -87,10 +88,15 @@ struct PathNode
 //! @param goal Target position.
 //! @param query_compass Which neighbour offsets to consider when expanding a node.
 //! @param is_blocked Optional extra obstacle test; neighbour positions for which it returns true are never expanded.
+//! @param footprint_cells The grid pos of every cell the pathfinding entity stands on, within its sprite's grid;
+//! index zero is the anchor cell, which is what `start` and each path node refer to. Empty or one cell for a
+//! single-block entity. A node is only expanded if the other cells are walkable too, and the goal is reached once
+//! any of the cells is the goal cell. See Cmp::Npc::Footprint.
 //! @return The path from start to goal as an ordered list of PathNode, or an empty vector if no path was found.
 std::vector<PathNode> astar( entt::registry &reg, const PathFinding::SpatialHashGrid &grid, Cmp::Position start, Cmp::Position goal,
                              PathFinding::QueryCompass query_compass = PathFinding::QueryCompass::CARDINAL,
-                             const std::function<bool( const Cmp::Position & )> &is_blocked = {} );
+                             const std::function<bool( const Cmp::Position & )> &is_blocked = {},
+                             std::span<const sf::Vector2i> footprint_cells = {} );
 
 } // namespace Game::PathFinding
 

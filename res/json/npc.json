@@ -47,8 +47,8 @@
       { "collision_action":   { "health": -15, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "npc.witch": {
-    "sprites": ["sprite.witch"],
+  "npc.eldermother": {
+    "sprites": ["sprite.eldermother"],
     "lerpspeed": 1.5,
     "framerate": 0.6,    
     "actions": [

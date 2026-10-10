@@ -59,6 +59,7 @@
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Time.hpp>
+#include <algorithm>
 #include <cmath>
 #include <spdlog/spdlog.h>
 
@@ -333,13 +334,9 @@ void NpcSystem::update_movement_for( PathFinding::SpatialHashGrid &navmesh, entt
     pos_cmp->position.y = one_minus_t * lerp_pos_cmp->m_start.y + t * lerp_pos_cmp->m_target.y;
   }
 
-  // add additional zorder for Wisp NPCs (read from JSON)
-  float zorder_augment = 0.f;
-  if ( Utils::Npc::get_sprite_type( reg(), npc_entity ).contains( "wisp" ) )
-  {
-    const auto &spritesheet = Sys::SpriteStore::instance().get( "sprite.wisp.east" );
-    zorder_augment = spritesheet.zorder( 0 );
-  }
+  // y-axis position plus the sprite's json zorder offset, same as multiblocks: wisps use it to float above
+  // everything, multiblock NPCs use it to move their sorting line down from the top-left anchor to their feet
+  const float zorder_augment = Sys::SpriteStore::instance().get( Utils::Npc::get_sprite_type( reg(), npc_entity ) ).zorder( 0 );
   reg().patch<Cmp::ZOrderValue>( npc_entity, [&]( auto &zorder_cmp ) { zorder_cmp.set( pos_cmp->position.y + zorder_augment ); } );
 }
 
@@ -359,9 +356,13 @@ void NpcSystem::check_once_collision()
     {
       if ( not Utils::is_visible_in_view( view_bounds, npc_pos_cmp ) ) continue;
 
-      // relaxed bounds to allow player to sneak past during lerp transition
-      auto npc_pos_cmp_bounds_current = Cmp::RectBounds::scaled( npc_pos_cmp.position, npc_pos_cmp.size, 0.1f );
-      const bool touching_player = player_pos.findIntersection( npc_pos_cmp_bounds_current.getBounds() ).has_value();
+      // relaxed bounds to allow player to sneak past during lerp transition. Inset by a fixed margin rather
+      // than scaled, so a multiblock NPC keeps a hitbox covering its body instead of a dot at its centre.
+      // Only the cells a multiblock NPC stands on collide: the rows above them are off the ground.
+      const sf::FloatRect npc_bounds = Utils::Npc::collision_bounds( reg(), npc_entity );
+      const sf::Vector2f touch_inset = Constants::kGridSizePxF * 0.45f;
+      const sf::FloatRect npc_touch_bounds( npc_bounds.position + touch_inset, npc_bounds.size - touch_inset * 2.f );
+      const bool touching_player = player_pos.findIntersection( npc_touch_bounds ).has_value();
 
       // a Watchman that's touched the player obviously knows exactly where they are — snap its
       // searchlight (and, since sprite facing already follows cone_direction, its sprite too) to
@@ -399,7 +400,7 @@ void NpcSystem::check_once_collision()
 
       player_cmp.m_damage_cooldown_timer = sf::Time::Zero;
 
-      find_pushback_position( npc_dir_cmp );
+      find_pushback_position( npc_dir_cmp, npc_bounds );
     }
   }
 }
@@ -423,7 +424,8 @@ void NpcSystem::check_timed_collision( sf::Time dt )
     npc_action_timer += dt;
     if ( npc_action_timer.asSeconds() < npc_action.interval() ) continue;
 
-    if ( not player_pos.findIntersection( npc_pos_cmp ) ) continue;
+    // only the cells a multiblock NPC stands on collide: the rows above them are off the ground
+    if ( not player_pos.findIntersection( Utils::Npc::collision_bounds( reg(), npc_entity ) ) ) continue;
 
     Utils::Player::get_stats( reg() ).apply( npc_action );
     reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
@@ -444,7 +446,7 @@ bool NpcSystem::check_player_death( Cmp::Player::Mortality &player_mort )
   return true;
 }
 
-void NpcSystem::find_pushback_position( const Cmp::Direction &npc_direction )
+void NpcSystem::find_pushback_position( const Cmp::Direction &npc_direction, const sf::FloatRect &npc_bounds )
 {
   auto &player_pos = Utils::Player::get_position( reg() );
 
@@ -473,21 +475,32 @@ void NpcSystem::find_pushback_position( const Cmp::Direction &npc_direction )
     if ( c.vector() != primary_direction ) candidate_directions.push_back( c.vector() );
   }
 
+  // A single-block NPC knocks the player back one cell. A multiblock NPC can still cover that cell, so keep
+  // stepping until the player is clear of its body.
+  const sf::Vector2f npc_cells = npc_bounds.size.componentWiseDiv( Constants::kGridSizePxF );
+  const float npc_max_cells = std::max( npc_cells.x, npc_cells.y );
+  const int max_steps = npc_max_cells > 1.f ? static_cast<int>( std::ceil( npc_max_cells ) ) + 1 : 1;
+
   for ( const auto &direction : candidate_directions )
   {
-    auto new_position = Utils::snap_to_grid( player_pos.position + direction.componentWiseMul( Constants::kGridSizePxF ) );
-    auto new_pos_rect = Cmp::RectBounds::scaled( new_position, Constants::kGridSizePxF, 1.f );
-
-    auto blocker = blocking_component_name( new_pos_rect );
-    if ( not blocker.empty() )
+    for ( int step = 1; step <= max_steps; ++step )
     {
-      SPDLOG_INFO( "Knockback direction {},{} blocked by {} at {},{}", direction.x, direction.y, blocker, new_position.x, new_position.y );
-      continue;
-    }
+      auto new_position = Utils::snap_to_grid( player_pos.position +
+                                               direction.componentWiseMul( Constants::kGridSizePxF ) * static_cast<float>( step ) );
+      auto new_pos_rect = Cmp::RectBounds::scaled( new_position, Constants::kGridSizePxF, 1.f );
+      if ( step < max_steps and new_pos_rect.findIntersection( npc_bounds ) ) continue;
 
-    SPDLOG_INFO( "Knockback succeeded: player moved to {},{}", new_position.x, new_position.y );
-    player_pos.position = new_position;
-    return;
+      auto blocker = blocking_component_name( new_pos_rect );
+      if ( not blocker.empty() )
+      {
+        SPDLOG_INFO( "Knockback direction {},{} blocked by {} at {},{}", direction.x, direction.y, blocker, new_position.x, new_position.y );
+        break;
+      }
+
+      SPDLOG_INFO( "Knockback succeeded: player moved to {},{}", new_position.x, new_position.y );
+      player_pos.position = new_position;
+      return;
+    }
   }
 
   SPDLOG_INFO( "Knockback blocked in all directions" );

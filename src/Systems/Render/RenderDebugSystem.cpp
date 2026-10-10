@@ -29,6 +29,7 @@
 #include <Components/LastDirection.hpp>
 #include <Components/LerpPosition.hpp>
 #include <Components/Moveable.hpp>
+#include <Components/Npc/Footprint.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Obstacle.hpp>
@@ -129,14 +130,16 @@ void RenderDebugSystem::render_pathfinding()
   render_lerp_positions();
   render_spatial_grid_neighbours( player_center_hitbox, sf::Color::Cyan, PathFinding::QueryCompass::CARDINAL );
 
-  for ( auto [npc_entt, npc_cmp, npc_pos_cmp, anim_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::AnimData>().each() )
+  for ( auto [npc_entt, npc_cmp, npc_pos_cmp, anim_cmp, footprint_cmp] :
+        reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::AnimData, Cmp::Npc::Footprint>().each() )
   {
     auto query_compass = PathFinding::QueryCompass::CARDINAL;
     if ( anim_cmp.m_sprite_type.contains( "sprite.ghost" ) ) query_compass = PathFinding::QueryCompass::BOTH;
     Cmp::Position npc_center_hitbox( npc_pos_cmp.getCenter(), { 1.f, 1.f } );
 
     render_spatial_grid_neighbours( npc_center_hitbox, sf::Color::Magenta, query_compass );
-    render_pathfinding_vector( npc_pos_cmp, player_pos_cmp, sf::Color::White, query_compass );
+    // mirror Utils::Npc::pathfind_toward: the path is for the cell(s) the NPC stands on, not its top-left
+    render_pathfinding_vector( footprint_cmp.anchor( npc_pos_cmp.position ), player_pos_cmp, sf::Color::White, query_compass, footprint_cmp.cells() );
   }
 }
 
@@ -463,7 +466,7 @@ void RenderDebugSystem::render_spatial_grid_neighbours( const Cmp::Position &que
 }
 
 void RenderDebugSystem::render_pathfinding_vector( const Cmp::Position &start_pos_cmp, const Cmp::Position &end_pos_cmp, sf::Color color,
-                                                   PathFinding::QueryCompass query_compass )
+                                                   PathFinding::QueryCompass query_compass, std::span<const sf::Vector2i> footprint_cells )
 {
   if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), start_pos_cmp ) ) return;
 
@@ -472,7 +475,8 @@ void RenderDebugSystem::render_pathfinding_vector( const Cmp::Position &start_po
     // Mirror Utils::Npc::pathfind_toward: A* needs a grid-aligned goal, but the player (and an NPC mid-lerp) sit off-grid.
     const Cmp::Position grid_start( Utils::snap_to_grid( start_pos_cmp.position, Utils::Rounding::TOWARDS_ZERO ), start_pos_cmp.size );
     const Cmp::Position grid_goal( Utils::snap_to_grid( end_pos_cmp.position, Utils::Rounding::TOWARDS_ZERO ), end_pos_cmp.size );
-    std::vector<PathFinding::PathNode> path = PathFinding::astar( reg(), *spatialgrid_ptr, grid_start, grid_goal, query_compass );
+    std::vector<PathFinding::PathNode> path = PathFinding::astar( reg(), *spatialgrid_ptr, grid_start, grid_goal, query_compass, {},
+                                                                  footprint_cells );
 
     for ( auto pathnode : path )
     {

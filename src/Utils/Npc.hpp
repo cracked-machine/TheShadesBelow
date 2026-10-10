@@ -1,6 +1,7 @@
 #ifndef SRC_UTILS_NPC_HPP__
 #define SRC_UTILS_NPC_HPP__
 
+#include <Components/Npc/Footprint.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <source_location>
 namespace Game::Cmp
@@ -41,6 +42,14 @@ entt::entity get_world_pos_entt( entt::registry &reg, entt::entity npc_entt );
 //! @return Sys::SpriteKey The NPC's sprite type.
 //! @throws std::runtime_error if `npc_entt` has no Cmp::AnimData component.
 Sys::SpriteKey get_sprite_type( entt::registry &reg, entt::entity npc_entt, std::source_location loc = std::source_location::current() );
+
+//! @brief Get the world rect of an NPC that collides with the player: its footprint, since the rows of a multiblock
+//! NPC above the cells it stands on are off the ground. NPCs without a Cmp::Npc::Footprint collide with their
+//! whole Cmp::Position.
+//! @param reg reference to the entt registry
+//! @param npc_entt An NPC entity with a Cmp::Position.
+//! @return sf::FloatRect
+sf::FloatRect collision_bounds( entt::registry &reg, entt::entity npc_entt );
 
 //! @brief Outcome of a single pathfind_toward() step
 enum class PathfindResult {

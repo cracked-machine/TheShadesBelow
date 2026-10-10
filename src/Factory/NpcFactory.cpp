@@ -6,6 +6,8 @@
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/Container.hpp>
 #include <Components/Npc/Drknox.hpp>
+#include <Components/Npc/ElderMother.hpp>
+#include <Components/Npc/Footprint.hpp>
 #include <Components/Npc/Friendly.hpp>
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/LerpSpeed.hpp>
@@ -34,7 +36,9 @@
 #include <Systems/BaseSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Stores/NpcStore.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Cardinal.hpp>
+#include <Utils/Npc.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Random.hpp>
 
@@ -110,14 +114,19 @@ entt::entity create_npc( entt::registry &reg, entt::entity position_entity, cons
     return entt::null;
   }
 
+  auto npc_cmp = Sys::NpcStore::instance().get( npc_type );
+  // the NPC's footprint and z-order offset come from its sprite sheet, so multiblock NPCs (grid_size > 1x1)
+  // are top-left anchored at the spawn position, same as multiblock structures
+  const auto &npc_ss = Sys::SpriteStore::instance().get( npc_cmp.sprite_type_list.front() );
+
   // create a new entity for the NPC using the existing position
   auto new_pos_entity = reg.create();
-  reg.emplace_or_replace<Cmp::Position>( new_pos_entity, pos_cmp->position, Constants::kGridSizePxF );
+  reg.emplace_or_replace<Cmp::Position>( new_pos_entity, pos_cmp->position, npc_ss.sprite_size() );
+  reg.emplace_or_replace<Cmp::Npc::Footprint>( new_pos_entity, npc_ss );
   reg.emplace_or_replace<Cmp::Armable>( new_pos_entity );
-  reg.emplace_or_replace<Cmp::ZOrderValue>( new_pos_entity, pos_cmp->position.y );
+  reg.emplace_or_replace<Cmp::ZOrderValue>( new_pos_entity, pos_cmp->position.y + npc_ss.zorder( 0 ) );
   reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 0, 0 } );
   reg.emplace_or_replace<Cmp::UUID>( new_pos_entity, Cmp::UUID::generate() );
-  auto npc_cmp = Sys::NpcStore::instance().get( npc_type );
   reg.emplace_or_replace<Cmp::Npc::NPC>( new_pos_entity, npc_cmp );
 
   // clang-format off
@@ -167,6 +176,11 @@ entt::entity create_npc( entt::registry &reg, entt::entity position_entity, cons
     reg.emplace_or_replace<Cmp::Npc::Witch>( new_pos_entity );
     reg.emplace_or_replace<Cmp::Npc::LerpSpeed>( new_pos_entity, npc_cmp.m_lerp_speed );
   }
+  else if ( npc_type == "npc.eldermother" )
+  {
+    reg.emplace_or_replace<Cmp::Npc::ElderMother>( new_pos_entity );
+    reg.emplace_or_replace<Cmp::Npc::LerpSpeed>( new_pos_entity, npc_cmp.m_lerp_speed );
+  }
   else if ( npc_type == "npc.wisp" )
   {
     reg.emplace_or_replace<Cmp::Npc::Wisp>( new_pos_entity );
@@ -207,6 +221,7 @@ entt::entity destroy_npc( entt::registry &reg, entt::entity npc_entity )
 
   // kill npc once we are done
   reg.remove<Cmp::Npc::NPC>( npc_entity );
+  reg.remove<Cmp::Npc::Footprint>( npc_entity );
   reg.remove<Cmp::Position>( npc_entity );
   reg.remove<Cmp::Direction>( npc_entity );
   reg.remove<Cmp::AnimData>( npc_entity );
@@ -218,8 +233,10 @@ entt::entity destroy_npc( entt::registry &reg, entt::entity npc_entity )
 entt::entity create_npc_death_anim( entt::registry &reg, Cmp::Position npc_pos_cmp, const Sys::SpriteKey &death_anim )
 {
   auto npc_death_entity = reg.create();
-  reg.emplace<Cmp::Position>( npc_death_entity, npc_pos_cmp.position, npc_pos_cmp.size );
-  reg.emplace_or_replace<Cmp::DeathPosition>( npc_death_entity, npc_pos_cmp.position, npc_pos_cmp.size );
+  // anchor the animation on the middle cell of the NPC's body (a no-op for single-block NPCs)
+  const sf::Vector2f death_pos = npc_pos_cmp.position + ( npc_pos_cmp.size - Constants::kGridSizePxF ) * 0.5f;
+  reg.emplace<Cmp::Position>( npc_death_entity, death_pos, Constants::kGridSizePxF );
+  reg.emplace_or_replace<Cmp::DeathPosition>( npc_death_entity, death_pos, Constants::kGridSizePxF );
 
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( npc_death_entity, Cmp::AnimData::Config{ 
@@ -230,7 +247,7 @@ entt::entity create_npc_death_anim( entt::registry &reg, Cmp::Position npc_pos_c
   });
   // clang-format on
 
-  reg.emplace_or_replace<Cmp::ZOrderValue>( npc_death_entity, npc_pos_cmp.position.y );
+  reg.emplace_or_replace<Cmp::ZOrderValue>( npc_death_entity, death_pos.y );
   return npc_death_entity;
 }
 
