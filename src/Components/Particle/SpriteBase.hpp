@@ -192,6 +192,15 @@ public:
   //!       motion can close the gap afterwards. Measured from the emitter position.
   virtual void set_min_particle_spacing( float spacing ) = 0;
 
+  //! @brief Enable/disable pre-warming for this sprite (see prewarm()). Disabled by default.
+  //! @note Only meant for continuous emitters: one-shot effects are supposed to start as a single batch.
+  virtual void set_prewarm( bool enable ) = 0;
+
+  //! @brief Fast-forwards a freshly (re)started sprite by one max particle lifetime, so it first appears
+  //!        in its steady state rather than as a single clump of simultaneously emitted particles.
+  //! @note No-op unless enabled via set_prewarm() and the sprite has (re)started since the last call.
+  virtual void prewarm() = 0;
+
   //! @brief Get the sprite's maximum bounding size (width/height), i.e. the full extent a particle
   //! could reach from the emitter given the sprite's configured max speed, lifetime and particle size.
   //! @note Cached — recomputed only when speed/lifetime/particle-size change, not from live particle
@@ -329,6 +338,8 @@ public:
       p.m_particle_active = true;
     }
     m_sprite_active = true;
+    // the new particle list is all expired, i.e. it would emit as a single batch again
+    m_prewarm_pending = true;
     SPDLOG_DEBUG( "ParticleSprite is running." );
   }
 
@@ -559,6 +570,23 @@ public:
 
   void set_min_particle_spacing( float spacing ) override { m_min_particle_spacing = spacing; }
 
+  void set_prewarm( bool enable ) override { m_prewarm_enabled = enable; }
+
+  void prewarm() override
+  {
+    if ( not m_prewarm_enabled or not m_prewarm_pending ) return;
+    m_prewarm_pending = false;
+
+    // every particle starts expired, so they all emit together on the first simulate() call. Their
+    // random lifetimes only spread them out over the following max lifetime: run that period now,
+    // before the sprite is first drawn.
+    const sf::Time step = sf::seconds( 1.f / 60.f );
+    for ( sf::Time elapsed = sf::Time::Zero; elapsed < m_max_lifetime; elapsed += step )
+    {
+      simulate( step );
+    }
+  }
+
   //! @brief See IParticleSprite::get_size().
   sf::Vector2f get_size() const override { return m_cached_size; }
 
@@ -614,6 +642,11 @@ private:
 
   //! @brief See set_min_particle_spacing().
   float m_min_particle_spacing{ 0.f };
+
+  //! @brief See set_prewarm().
+  bool m_prewarm_enabled{ false };
+  //! @brief True while the sprite has (re)started but not yet been pre-warmed, see prewarm().
+  bool m_prewarm_pending{ true };
 
   //! @brief Max generations for the Particles in this sprite.
   size_t m_max_generations{ 0 };

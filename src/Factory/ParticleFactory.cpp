@@ -39,6 +39,7 @@ void add_crypt_altar_ps( entt::registry &reg, const std::string &tag, float life
 {
   auto ps = Cmp::Particle::CryptAltarParticleSprite( 1000 );
   ps.set_tag( tag );
+  ps.set_prewarm( true );
   ps.set_emitter_position( pos );
   ps.set_lifetime_ms( std::uniform_int_distribution<int>( 0, sf::seconds( lifetime_seconds ).asMilliseconds() ) );
   ps.set_speed( std::uniform_real_distribution<float>( 1.f, speed ) );
@@ -57,6 +58,7 @@ void add_player_healing_ps( entt::registry &reg, const std::string &tag, float l
 {
   auto ps = Cmp::Particle::PlayerHealingParticleSprite( 100 );
   ps.set_tag( tag );
+  ps.set_prewarm( true );
   ps.set_emitter_position( pos );
   ps.set_lifetime_ms( std::uniform_int_distribution<int>( 0, sf::seconds( lifetime_seconds ).asMilliseconds() ) );
   ps.set_speed( std::uniform_real_distribution<float>( 1.f, speed ) );
@@ -102,6 +104,7 @@ void add_rune_ps( entt::registry &reg, const std::string &tag, float lifetime_se
 {
   auto ps = Cmp::Particle::RuneParticleSprite( 1000 );
   ps.set_tag( tag );
+  ps.set_prewarm( true );
   ps.set_emitter_position( pos );
   ps.set_lifetime_ms( std::uniform_int_distribution<int>( 0, sf::seconds( lifetime_seconds ).asMilliseconds() ) );
   ps.set_speed( std::uniform_real_distribution<float>( 1.f, speed ) );
@@ -119,6 +122,7 @@ void add_grave_halo_ps( entt::registry &reg, const std::string &tag, float lifet
 {
   auto ps = Cmp::Particle::GraveHaloParticleSprite( 1000 );
   ps.set_tag( tag );
+  ps.set_prewarm( true );
   ps.set_emitter_position( pos );
   ps.set_lifetime_ms( std::uniform_int_distribution<int>( 0, sf::seconds( lifetime_seconds ).asMilliseconds() ) );
   ps.set_speed( std::uniform_real_distribution<float>( 1.f, speed ) );
@@ -137,6 +141,7 @@ void add_wormhole_ps( entt::registry &reg, const std::string &tag, float lifetim
 {
   auto ps = Cmp::Particle::WormholeParticleSprite( 1000 );
   ps.set_tag( tag );
+  ps.set_prewarm( true );
   ps.set_emitter_position( pos );
   ps.set_lifetime_ms( std::uniform_int_distribution<int>( 0, sf::seconds( lifetime_seconds ).asMilliseconds() ) );
   ps.set_speed( std::uniform_real_distribution<float>( 1.f, speed ) );
@@ -349,6 +354,7 @@ void add_flame( entt::registry &reg, const std::string &tag, Cmp::UUID &uuid_cmp
 
   auto ps = Cmp::Particle::FlameParticleSprite( pcount );
   ps.set_tag( tag );
+  ps.set_prewarm( true );
   ps.set_emitter_position( initial_pos );
   ps.set_lifetime_ms( std::uniform_int_distribution<int>( 0, sf::seconds( plifetime ).asMilliseconds() ) );
   // spread speed per-particle rather than a single fixed value: particles that emit together would

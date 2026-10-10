@@ -49,11 +49,7 @@ std::vector<entt::entity> ParticleSystem::add_to_registry( Cmp::Particle::Sprite
 
 void ParticleSystem::update( sf::Time dt )
 {
-  // update the ParticleSprite position for Candle items in the world. Filter down to candle
-  // world items first (there are only ever a handful) rather than re-scanning every world item
-  // (every plant and dropped loot item on the level) for every particle sprite below.
-  // A candle flame draws just above its own candle, but is capped just below the player so that
-  // the player always walks in front of it. The floor is far below any y-sorted zorder.
+  // Cap the candle flame zorder to prevent it showing in front of the player sprite.
   float max_flame_zorder = std::numeric_limits<float>::max();
   auto player_view = reg().view<Cmp::Player::Character, Cmp::ZOrderValue>();
   for ( auto player_entt : player_view )
@@ -74,6 +70,12 @@ void ParticleSystem::update( sf::Time dt )
     }
   }
 
+  // The first frame after a scene load (or any hitch) arrives with a dt covering the whole stall.
+  // Particles are advanced by velocity * dt on the frame they are emitted, so an unclamped step
+  // would fling the whole batch far past its normal range.
+  const sf::Time kMaxSimulationStep = sf::milliseconds( 50 );
+  dt = std::min( dt, kMaxSimulationStep );
+
   // update all particlesprite simulations
   const auto &world_view = Sys::RenderSystem::get_world_view();
   for ( auto [entt, owner] : reg().view<Cmp::Particle::SpriteOwner>().each() )
@@ -83,6 +85,7 @@ void ParticleSystem::update( sf::Time dt )
     if ( owner.sprite->get_view_type() == Cmp::Particle::ViewType::WORLD && not Utils::is_visible_in_view( world_view, owner.sprite->get_bounds() ) )
       continue;
 
+    owner.sprite->prewarm();
     owner.sprite->simulate( dt );
     owner.sprite->prune_inactive_expired_particles();
     owner.sprite->deactivate_extinct_particles();
