@@ -392,7 +392,7 @@ void CryptSystem::check_lever_activation()
 {
   if ( m_maze_unlocked ) return;
 
-  auto player_view = reg().view<Cmp::Player::Character, Cmp::Position>();
+  auto player_view = reg().view<Cmp::Player::Character, const Cmp::Position>();
   auto lever_view = reg().view<Cmp::Crypt::Lever, Cmp::Position>();
 
   bool lever_activated = false;

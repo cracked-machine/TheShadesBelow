@@ -11,7 +11,7 @@
 #include <optional>
 
 // clang-format off
-namespace Game::Events { class DropInventoryEvent; class PlayerActionEvent; class PlayerMortalityEvent; }
+namespace Game::Events { class DropInventoryEvent; class PlayerActionEvent; class PlayerMortalityEvent; class UpdatePlayerPositionEvent; }
 namespace Game::Sprites { class SpriteSheet; }
 namespace Game::Cmp { class LerpPosition; class Position; class AnimData; class RectBounds; class BaseAction; }
 namespace Game::Cmp::Npc { class Shockwave; }
@@ -44,6 +44,8 @@ public:
     m_npc_navmesh = npc_navmesh;
     m_player_navmesh = player_navmesh;
     m_open_navmesh = open_navmesh;
+    // the navmeshes were rebuilt from the registry, so whatever position we last synced no longer applies
+    m_last_written_pos.reset();
   }
 
   //! @brief Update the player system.
@@ -157,6 +159,17 @@ private:
   //! @param ev
   void on_player_mortality_event( Game::Events::PlayerMortalityEvent ev );
 
+  //! @brief Move the player. This is the only place that writes the player's Cmp::Position, so that the NPC and
+  //! open navmeshes are always updated along with it: a navmesh entry left behind in the old cell breaks NPC
+  //! pathfinding. Everything else triggers Events::UpdatePlayerPositionEvent.
+  //! @param event Holds the player's new top-left world position.
+  void on_update_player_position_event( const Game::Events::UpdatePlayerPositionEvent &event );
+
+  //! @brief Move the player's entry in the NPC and open navmeshes from the bucket for `old_position` to the
+  //! bucket for the player's current position, and record that position in m_last_written_pos.
+  //! @param old_position The world position the navmeshes currently hold the player at.
+  void sync_player_navmesh( sf::Vector2f old_position );
+
   //! @brief Promotes any Cmp::Player::PendingNoPath entity to a real Cmp::Player::NoPath - if the player is no longer
   //! standing on it - and inserts it into m_player_navmesh.
   void promote_pending_no_path();
@@ -178,6 +191,11 @@ private:
 
   //! @brief All grid positions that are open (not blocked) for movement
   PathFinding::SpatialHashGridWeakPtr m_open_navmesh;
+
+  //! @brief The player position last written by on_update_player_position_event, which is where the navmeshes
+  //! hold the player. Empty until the first update after init(). If the player's Cmp::Position differs from
+  //! this, something modified the component directly instead of triggering Events::UpdatePlayerPositionEvent.
+  std::optional<sf::Vector2f> m_last_written_pos;
 
   //! @brief Hazard cell currently being pushed against by `resolve_hazard_pushback`, or entt::null.
   entt::entity m_hazard_pushback_target;

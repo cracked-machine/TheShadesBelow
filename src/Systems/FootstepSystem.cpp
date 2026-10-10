@@ -5,10 +5,10 @@
 #include <Components/FootStepAlpha.hpp>
 #include <Components/FootStepTimer.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
+#include <Components/Persistent/EffectsVolume.hpp>
 #include <Components/Persistent/PlayerFootstepAddDelay.hpp>
 #include <Components/Persistent/PlayerFootstepFadeDelay.hpp>
 #include <Components/Persistent/PlayerFootstepSfxStrideLength.hpp>
-#include <Components/Persistent/EffectsVolume.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Player/MovementDelta.hpp>
@@ -59,7 +59,7 @@ void FootstepSystem::update()
 {
 
   // add new footstep for player
-  auto player_view = reg().view<Cmp::Player::Character, Cmp::Position, Cmp::Direction>();
+  auto player_view = reg().view<Cmp::Player::Character, const Cmp::Position, Cmp::Direction>();
   for ( auto [entity, player, pos_cmp, dir_cmp] : player_view.each() )
   {
     if ( dir_cmp == sf::Vector2f( 0.0f, 0.0f ) ) { continue; }

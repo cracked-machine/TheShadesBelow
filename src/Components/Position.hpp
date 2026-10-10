@@ -20,10 +20,10 @@ public:
   }
 
   //! @brief Returns the x coordinate of the position, in pixels.
-  float x() { return position.x; }
+  float x() const { return position.x; }
 
   //! @brief Returns the y coordinate of the position, in pixels.
-  float y() { return position.y; }
+  float y() const { return position.y; }
 
   //! @brief Adds the positions of two Position components, keeping this instance's size.
   //! @param rhs The position to add.

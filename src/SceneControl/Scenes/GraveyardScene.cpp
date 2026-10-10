@@ -33,6 +33,7 @@
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/AddInventoryEvent.hpp>
+#include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PathfindingFactory.hpp>
@@ -213,16 +214,17 @@ void GraveyardScene::on_enter()
   Utils::Player::remove_lerp_cmp( m_reg );
 
   // Respawn player back in the graveyard: either at the last position when they left, or fallback to their start position
-  auto &player_pos = Utils::Player::get_position( m_reg );
+  const auto &player_pos = Utils::Player::get_position( m_reg );
   auto *player_last_graveyard_pos = Utils::Player::get_last_graveyard_pos( m_reg );
   if ( player_last_graveyard_pos != nullptr )
   {
-    player_pos.position = player_last_graveyard_pos->position;
+    Sys::BaseSystem::get_systems_event_queue().trigger( Events::UpdatePlayerPositionEvent( player_last_graveyard_pos->position ) );
     SPDLOG_INFO( "Player re-entered graveyard at position ({}, {})", player_pos.position.x, player_pos.position.y );
   }
   else if ( m_just_spawned )
   {
-    player_pos.position = sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( m_reg ) );
+    Sys::BaseSystem::get_systems_event_queue().trigger(
+        Events::UpdatePlayerPositionEvent( sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( m_reg ) ) ) );
     SPDLOG_INFO( "Player entered graveyard at position ({}, {})", player_pos.position.x, player_pos.position.y );
     m_just_spawned = false;
   }

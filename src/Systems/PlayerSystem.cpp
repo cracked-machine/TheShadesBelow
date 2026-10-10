@@ -81,6 +81,7 @@
 #include <Components/ZOrderValue.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
+#include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Factory/MultiblockFactory.hpp>
 #include <Factory/NpcFactory.hpp>
@@ -123,14 +124,48 @@ PlayerSystem::PlayerSystem( entt::registry &reg, sf::RenderWindow &window, Audio
 {
   SPDLOG_DEBUG( "PlayerSystem initialized" );
   std::ignore = get_systems_event_queue().sink<Events::PlayerMortalityEvent>().connect<&PlayerSystem::on_player_mortality_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::UpdatePlayerPositionEvent>().connect<&PlayerSystem::on_update_player_position_event>( this );
+}
+
+void PlayerSystem::on_update_player_position_event( const Events::UpdatePlayerPositionEvent &event )
+{
+  auto &player_pos = reg().get<Cmp::Position>( Utils::Player::get_entity( reg() ) );
+  const sf::Vector2f old_position = m_last_written_pos.value_or( player_pos.position );
+  player_pos.position = event.m_position;
+  sync_player_navmesh( old_position );
+}
+
+void PlayerSystem::sync_player_navmesh( sf::Vector2f old_position )
+{
+  const auto player_entt = Utils::Player::get_entity( reg() );
+  const Cmp::Position &player_pos = Utils::Player::get_position( reg() );
+  const Cmp::Position old_player_pos( old_position, player_pos.size );
+
+  if ( PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock() )
+  {
+    pathfinding_navmesh->update( player_entt, old_player_pos, player_pos );
+  }
+  if ( PathFinding::SpatialHashGridSharedPtr open_navmesh = m_open_navmesh.lock() )
+  {
+    open_navmesh->update( player_entt, old_player_pos, player_pos );
+  }
+  m_last_written_pos = player_pos.position;
 }
 
 void PlayerSystem::update( sf::Time dt )
 {
   promote_pending_no_path();
 
-  // cache position so we can update player in spatial grid after changes.
-  auto old_player_pos = Utils::Player::get_position( reg() );
+  // The navmeshes hold the player at the last position written by on_update_player_position_event. If the
+  // component has moved since then, something wrote it directly and left the navmeshes behind: report it and resync.
+  const sf::Vector2f current_player_pos = Utils::Player::get_position( reg() ).position;
+  if ( not m_last_written_pos ) { m_last_written_pos = current_player_pos; }
+  else if ( *m_last_written_pos != current_player_pos )
+  {
+    SPDLOG_ERROR( "Player Cmp::Position was modified directly ({},{} -> {},{}): trigger Events::UpdatePlayerPositionEvent instead",
+                  m_last_written_pos->x, m_last_written_pos->y, current_player_pos.x, current_player_pos.y );
+    sync_player_navmesh( *m_last_written_pos );
+  }
 
   Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.skele.particle.bones" );
 
@@ -166,15 +201,6 @@ void PlayerSystem::update( sf::Time dt )
 
   if ( is_player_in_light() ) { reg().emplace_or_replace<Cmp::Player::Illuminated>( Utils::Player::get_entity( reg() ) ); }
   else { reg().remove<Cmp::Player::Illuminated>( Utils::Player::get_entity( reg() ) ); }
-
-  if ( PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock() )
-  {
-    pathfinding_navmesh->update( Utils::Player::get_entity( reg() ), old_player_pos, Utils::Player::get_position( reg() ) );
-  }
-  if ( PathFinding::SpatialHashGridSharedPtr open_navmesh = m_open_navmesh.lock() )
-  {
-    open_navmesh->update( Utils::Player::get_entity( reg() ), old_player_pos, Utils::Player::get_position( reg() ) );
-  }
 }
 
 void PlayerSystem::disable_damage_cooldown()
@@ -261,7 +287,7 @@ void PlayerSystem::move_obstacle( const sf::FloatRect &target_position )
     // move the player and the obstacle
     if ( new_position_is_empty )
     {
-      Utils::Player::get_position( reg() ).position = player_dest_position.position();
+      on_update_player_position_event( Events::UpdatePlayerPositionEvent( player_dest_position.position() ) );
 
       m_sound_bank.get_effect( "crypt_open" ).play();
 
@@ -387,7 +413,7 @@ void PlayerSystem::update_player_position( sf::Time dt )
 
   if ( movement_suppressed() ) return;
 
-  Cmp::Position &player_pos = Utils::Player::get_position( reg() );
+  const Cmp::Position &player_pos = Utils::Player::get_position( reg() );
 
   auto step_direction = compute_step_direction( dt, true );
   if ( not step_direction ) return;
@@ -427,7 +453,8 @@ void PlayerSystem::update_player_position( sf::Time dt )
       else
       {
         // ensure player moves fully against obstacle edge
-        player_pos.position.x = Utils::snap_to_grid( player_pos ).position.x;
+        on_update_player_position_event(
+            Events::UpdatePlayerPositionEvent( { Utils::snap_to_grid( player_pos ).position.x, player_pos.position.y } ) );
       }
     }
   };
@@ -454,7 +481,8 @@ void PlayerSystem::update_player_position( sf::Time dt )
       else
       {
         // else ensure player moves fully against obstacle edge
-        player_pos.position.y = Utils::snap_to_grid( player_pos ).position.y;
+        on_update_player_position_event(
+            Events::UpdatePlayerPositionEvent( { player_pos.position.x, Utils::snap_to_grid( player_pos ).position.y } ) );
       }
     }
   };
@@ -484,7 +512,7 @@ void PlayerSystem::update_player_position( sf::Time dt )
 
   if ( can_move )
   {
-    player_pos.position += resolved_dir_vector;
+    on_update_player_position_event( Events::UpdatePlayerPositionEvent( player_pos.position + resolved_dir_vector ) );
     movement_delta->m_distance = std::hypot( resolved_dir_vector.x, resolved_dir_vector.y );
 
     // Record which axis actually carried this frame's movement using the resolved vector (not raw
@@ -543,7 +571,7 @@ void PlayerSystem::update_player_animation()
 void PlayerSystem::check_player_mortality()
 {
 
-  auto player_view = reg().view<Cmp::Player::Character, Cmp::Player::Mortality, Cmp::Position>();
+  auto player_view = reg().view<Cmp::Player::Character, Cmp::Player::Mortality, const Cmp::Position>();
   for ( auto [entity, pc_cmp, mortality_cmp, player_pos_cmp] : player_view.each() )
   {
     auto *post_death_timer = reg().try_get<Cmp::Player::PostDeathTimer>( entity );
@@ -552,7 +580,8 @@ void PlayerSystem::check_player_mortality()
     {
       if ( Utils::Player::player_has_extra_life( reg() ) )
       {
-        player_pos_cmp.position = Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() );
+        on_update_player_position_event(
+            Events::UpdatePlayerPositionEvent( sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() ) ) ) );
         Factory::Player::remove_player_extra_life( reg() );
         m_sound_bank.get_effect( "player_respawn" ).play();
         Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 100 }, {}, {}, {}, {}, {}, {} } );

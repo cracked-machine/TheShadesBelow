@@ -189,7 +189,7 @@ template <ValidHazard HazardType>
 void HazardFieldSystem<HazardType>::check_player_hazard_field_collision()
 {
   auto hazard_view = reg().template view<HazardType, Cmp::Position>();
-  auto player_view = reg().template view<Cmp::Player::Character, Cmp::PlayerStats, Cmp::Player::Mortality, Cmp::Position>();
+  auto player_view = reg().template view<Cmp::Player::Character, Cmp::PlayerStats, Cmp::Player::Mortality, const Cmp::Position>();
   const auto &player_position = Utils::Player::get_position( reg() );
   const auto view_bounds = Utils::calculate_view_bounds( RenderSystem::get_world_view() );
 

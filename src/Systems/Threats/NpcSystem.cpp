@@ -38,6 +38,7 @@
 #include <Components/Wormhole/Jump.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
+#include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
@@ -319,7 +320,9 @@ void NpcSystem::update_movement_for( PathFinding::SpatialHashGrid &navmesh, entt
   // lerp has completed
   if ( lerp_pos_cmp->m_lerp_factor >= 1.0f )
   {
-    auto old_position = *pos_cmp;
+    // the cell the NPC set off from, which is the bucket it is in: its mid-lerp position has already crossed
+    // into the target cell when moving left or up
+    const Cmp::Position old_position( lerp_pos_cmp->m_start, pos_cmp->size );
     pos_cmp->position = lerp_pos_cmp->m_target;
     reg().remove<Cmp::LerpPosition>( npc_entity );
     navmesh.update( npc_entity, old_position, *pos_cmp );
@@ -501,7 +504,7 @@ void NpcSystem::find_pushback_position( const Cmp::Direction &npc_direction, con
       }
 
       SPDLOG_INFO( "Knockback succeeded: player moved to {},{}", new_position.x, new_position.y );
-      player_pos.position = new_position;
+      get_systems_event_queue().trigger( Events::UpdatePlayerPositionEvent( new_position ) );
       return;
     }
   }

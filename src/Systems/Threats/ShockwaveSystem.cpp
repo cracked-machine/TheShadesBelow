@@ -11,6 +11,7 @@
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/UUID.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
+#include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
@@ -110,7 +111,7 @@ bool ShockwaveSystem::intersects_with_visible_segments( const Cmp::Npc::Shockwav
         {
           if ( sf::FloatRect( new_position, Constants::kGridSizePxF ).findIntersection( obstacle_pos_cmp ) ) is_valid = false;
         }
-        if ( is_valid ) { player_pos_cmp.position = new_position; }
+        if ( is_valid ) { get_systems_event_queue().trigger( Events::UpdatePlayerPositionEvent( new_position ) ); }
         else { SPDLOG_DEBUG( "New Position was invalid so cancelled" ); }
 
         return true;
@@ -142,7 +143,7 @@ void ShockwaveSystem::check_shockwave_player_collision()
   if ( not Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled ) return;
 
   // we need the projectile_action modifiers for this NPC type.
-  auto player_view = reg().view<Cmp::Player::Character, Cmp::Position, Cmp::PlayerStats, Cmp::Player::Mortality>();
+  auto player_view = reg().view<Cmp::Player::Character, const Cmp::Position, Cmp::PlayerStats, Cmp::Player::Mortality>();
 
   for ( auto entt : reg().view<Cmp::Npc::Shockwave>() )
   {
@@ -168,7 +169,8 @@ void ShockwaveSystem::check_shockwave_player_collision()
         {
           if ( Utils::Player::player_has_extra_life( reg() ) )
           {
-            Utils::Player::get_position( reg() ).position = Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() );
+            get_systems_event_queue().trigger(
+                Events::UpdatePlayerPositionEvent( sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() ) ) ) );
             Factory::Player::remove_player_extra_life( reg() );
             m_sound_bank.get_effect( "player_respawn" ).play();
           }

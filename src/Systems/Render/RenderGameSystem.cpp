@@ -283,7 +283,7 @@ void RenderGameSystem::render_arrow_compass()
 {
   static const Sys::ItemKey kNoItem;
 
-  for ( auto [player_entt, pc_cmp, pc_pos_cmp] : reg().view<Cmp::Player::Character, Cmp::Position>().each() )
+  for ( auto [player_entt, pc_cmp, pc_pos_cmp] : reg().view<Cmp::Player::Character, const Cmp::Position>().each() )
   {
     auto &compass = reg().get_or_emplace<Cmp::Player::ArrowCompass>( player_entt );
 

@@ -123,7 +123,7 @@ void GraveSystem::clear_stale_grave_selections()
 bool GraveSystem::is_player_near( const Cmp::Grave::MultiBlock &grave_cmp )
 {
   constexpr float kPlayerProximityScale = 1.5f;
-  for ( auto [pc_entt, pc_cmp, pc_pos_cmp] : reg().view<Cmp::Player::Character, Cmp::Position>().each() )
+  for ( auto [pc_entt, pc_cmp, pc_pos_cmp] : reg().view<Cmp::Player::Character, const Cmp::Position>().each() )
   {
     auto player_hitbox = Cmp::RectBounds::scaled( pc_pos_cmp.position, Constants::kGridSizePxF, kPlayerProximityScale );
     if ( player_hitbox.findIntersection( grave_cmp ) ) return true;

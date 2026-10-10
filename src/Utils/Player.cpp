@@ -62,18 +62,19 @@ namespace Game::Utils::Player
 
 entt::entity get_entity( entt::registry &reg )
 {
-  auto player_view = reg.view<Cmp::Player::Character, Cmp::Position>();
+  auto player_view = reg.view<Cmp::Player::Character, const Cmp::Position>();
   if ( player_view.front() == entt::null ) throw std::runtime_error( "Player entity could not be found" );
   return player_view.front();
 }
 
 //! @brief Get the player position object
+//! @note To prevent navmesh de-sync, you must modify the player position using `UpdatePlayerPositionEvent`.
 //! @throws runtime_error if player has no Cmp::Position
 //! @param reg
 //! @return Cmp::Position&
-Cmp::Position &get_position( entt::registry &reg )
+const Cmp::Position &get_position( entt::registry &reg )
 {
-  auto player_view = reg.view<Cmp::Player::Character, Cmp::Position>();
+  auto player_view = reg.view<Cmp::Player::Character, const Cmp::Position>();
   for ( auto [entt, player_cmp, pos_cmp] : player_view.each() )
   {
     return pos_cmp;
@@ -276,7 +277,7 @@ bool is_illuminated( entt::registry &reg ) { return reg.all_of<Cmp::Player::Illu
 //! @brief True if the player's hitbox (scaled 1.5x the grid size) intersects the given bounds
 bool is_player_near( entt::registry &reg, const sf::FloatRect &bounds )
 {
-  for ( auto [pc_entt, pc_cmp, pc_pos_cmp] : reg.view<Cmp::Player::Character, Cmp::Position>().each() )
+  for ( auto [pc_entt, pc_cmp, pc_pos_cmp] : reg.view<Cmp::Player::Character, const Cmp::Position>().each() )
   {
     auto player_hitbox = Cmp::RectBounds::scaled( pc_pos_cmp.position, Constants::kGridSizePxF, 1.5f );
     if ( player_hitbox.findIntersection( bounds ) ) return true;

@@ -20,6 +20,7 @@
 #include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/SceneSettings/ShowNavmesh.hpp>
 #include <Components/SceneSettings/ShowPathFinding.hpp>
+#include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PathfindingFactory.hpp>
@@ -32,6 +33,7 @@
 #include <SceneControl/Scenes/RuinSceneLowerFloor.hpp>
 #include <Systems/ActionSystem.hpp>
 #include <Systems/AnimSystem.hpp>
+#include <Systems/BaseSystem.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/HealingSpringSystem.hpp>
@@ -168,21 +170,26 @@ void RuinSceneLowerFloor::on_enter()
   // prevent the player from wandering off before the scene has loaded
   Utils::Player::get_direction( m_reg ) = Cmp::Direction{ { 0.f, 0.f } };
 
-  auto &player_pos = Utils::Player::get_position( m_reg );
+  // re-initialise the spatial grid weak_ptr for when we return from upper floor scene. The player is moved
+  // through PlayerSystem, which needs this scene's navmeshes to keep them in sync.
+  reinit_navmesh();
+
+  const auto &player_pos = Utils::Player::get_position( m_reg );
   switch ( m_entry_mode )
   {
     case EntryMode::FROM_DOOR: {
       if ( m_just_spawned )
       {
         SPDLOG_DEBUG( "Player entering from door" );
-        player_pos.position = Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( m_reg );
+        Sys::BaseSystem::get_systems_event_queue().trigger(
+            Events::UpdatePlayerPositionEvent( sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( m_reg ) ) ) );
         m_just_spawned = false;
       }
       break;
     }
     case EntryMode::FROM_UPPER_FLOOR: {
       SPDLOG_DEBUG( "Player entering from upper floor" );
-      player_pos.position = Utils::snap_to_grid( player_pos.position );
+      Sys::BaseSystem::get_systems_event_queue().trigger( Events::UpdatePlayerPositionEvent( Utils::snap_to_grid( player_pos.position ) ) );
       m_sys.find<Sys::Store::Type::PlayerSystem>().enable_damage_cooldown();
       m_sys.find<Sys::Store::Type::PlayerSystem>().force_expire_damage_cooldown();
       break;
@@ -194,9 +201,6 @@ void RuinSceneLowerFloor::on_enter()
   m_reg.emplace_or_replace<Cmp::Player::RuinLocation>( player_entt, Cmp::Player::RuinLocation::Floor::LOWER );
 
   m_sys.find<Sys::Store::Type::RuinSystem>().reset_floor_access_cooldown();
-
-  // re-initialise the spatial grid weak_ptr for when we return from upper floor scene
-  reinit_navmesh();
 
   // Set the default footstep SFX for this scene
   m_reg.emplace_or_replace<Cmp::Player::Footstep>( Utils::Player::get_entity( m_reg ), Cmp::Player::Footstep::Type::STONE );

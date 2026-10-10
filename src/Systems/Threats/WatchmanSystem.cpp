@@ -23,6 +23,7 @@
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/UUID.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
+#include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
@@ -246,7 +247,7 @@ void WatchmanSystem::check_gunfire_player_collision()
 {
   if ( not Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled ) return;
 
-  auto player_view = reg().view<Cmp::Player::Character, Cmp::Position, Cmp::PlayerStats, Cmp::Player::Mortality>();
+  auto player_view = reg().view<Cmp::Player::Character, const Cmp::Position, Cmp::PlayerStats, Cmp::Player::Mortality>();
   for ( auto [player_entt, player_cmp, player_pos_cmp, player_stats_cmp, player_mort_cmp] : player_view.each() )
   {
     // don't spam death events if the player is already dead
@@ -270,7 +271,8 @@ void WatchmanSystem::check_gunfire_player_collision()
     {
       if ( Utils::Player::player_has_extra_life( reg() ) )
       {
-        Utils::Player::get_position( reg() ).position = Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() );
+        get_systems_event_queue().trigger(
+            Events::UpdatePlayerPositionEvent( sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() ) ) ) );
         Factory::Player::remove_player_extra_life( reg() );
         m_sound_bank.get_effect( "player_respawn" ).play();
       }

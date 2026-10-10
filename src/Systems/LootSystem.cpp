@@ -46,7 +46,7 @@ void LootSystem::check_loot_collision( sf::Time dt )
   std::vector<LootEffect> loot_effects;
   const auto view_bounds = Utils::calculate_view_bounds( RenderSystem::get_world_view() );
 
-  for ( auto [pc_entt, pc_cmp, pc_pos_cmp] : reg().view<Cmp::Player::Character, Cmp::Position>().each() )
+  for ( auto [pc_entt, pc_cmp, pc_pos_cmp] : reg().view<Cmp::Player::Character, const Cmp::Position>().each() )
   {
     // reduce hitbox to prevent premature pickup
     auto player_hitbox = Cmp::RectBounds::scaled( pc_pos_cmp.position, pc_pos_cmp.size, 0.5f );

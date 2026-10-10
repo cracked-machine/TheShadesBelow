@@ -17,6 +17,7 @@
 #include <Components/SceneSettings/ShowNavmesh.hpp>
 #include <Components/SceneSettings/ShowPathFinding.hpp>
 #include <Events/CryptRoomEvent.hpp>
+#include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/CryptFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PathfindingFactory.hpp>
@@ -26,6 +27,7 @@
 #include <SceneControl/SceneData.hpp>
 #include <SceneControl/Scenes/CryptScene.hpp>
 #include <Systems/AnimSystem.hpp>
+#include <Systems/BaseSystem.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/InventorySystem.hpp>
@@ -138,10 +140,13 @@ void CryptScene::on_enter()
 
   m_sys.find<Sys::Store::Type::RenderGameSystem>().init_world_view();
 
+  // the player is moved through PlayerSystem, which needs this scene's navmeshes to keep them in sync
+  reinit_navmesh();
+
   if ( m_just_spawned )
   {
-    auto &player_pos = Utils::Player::get_position( m_reg );
-    player_pos.position = Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( m_reg );
+    Sys::BaseSystem::get_systems_event_queue().trigger(
+        Events::UpdatePlayerPositionEvent( sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( m_reg ) ) ) );
     m_just_spawned = false;
     m_sys.find<Sys::Store::Type::CryptSystem>().setup();
     const auto kCryptShuffleTimeout = Sys::PersistSystem::get<Cmp::Persist::CryptShuffleTimeout>( m_reg ).get_value();

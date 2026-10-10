@@ -17,6 +17,7 @@
 #include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/SceneSettings/ShowNavmesh.hpp>
 #include <Components/SceneSettings/ShowPathFinding.hpp>
+#include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/MultiblockFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PathfindingFactory.hpp>
@@ -28,6 +29,7 @@
 #include <SceneControl/SceneData.hpp>
 #include <SceneControl/Scenes/RuinSceneUpperFloor.hpp>
 #include <Systems/AnimSystem.hpp>
+#include <Systems/BaseSystem.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/HealingSpringSystem.hpp>
@@ -144,10 +146,13 @@ void RuinSceneUpperFloor::on_enter()
   auto &player_dir = Utils::Player::get_direction( m_reg );
   player_dir = Cmp::Direction{ { 0.f, 0.f } };
 
+  // the player is moved through PlayerSystem, which needs this scene's navmeshes to keep them in sync
+  reinit_navmesh();
+
   if ( m_just_spawned )
   {
-    auto &player_pos = Utils::Player::get_position( m_reg );
-    player_pos.position = Utils::snap_to_grid( player_pos.position );
+    Sys::BaseSystem::get_systems_event_queue().trigger(
+        Events::UpdatePlayerPositionEvent( Utils::snap_to_grid( Utils::Player::get_position( m_reg ).position ) ) );
     m_just_spawned = false;
   }
 

@@ -52,9 +52,10 @@ entt::entity get_entity( entt::registry &reg );
 
 //! @brief Get the player's position object.
 //! @param reg reference to the entt registry
-//! @return Cmp::Position& Reference to the player's position.
+//! @return const Cmp::Position& Read-only reference to the player's position. To move the player, trigger
+//! Events::UpdatePlayerPositionEvent: PlayerSystem is the only writer, so the navmeshes stay in sync.
 //! @throws std::runtime_error if the player has no Cmp::Position.
-Cmp::Position &get_position( entt::registry &reg );
+const Cmp::Position &get_position( entt::registry &reg );
 
 //! @brief Get the player's direction object.
 //! @param reg reference to the entt registry

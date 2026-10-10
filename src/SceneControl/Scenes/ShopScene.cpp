@@ -12,6 +12,7 @@
 #include <Components/SceneSettings/ShowPathFinding.hpp>
 #include <Components/Shop/Inventory.hpp>
 #include <Components/UUID.hpp>
+#include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/MultiblockFactory.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
@@ -23,6 +24,7 @@
 #include <SceneControl/Scenes/ShopScene.hpp>
 #include <Systems/AltarSystem.hpp>
 #include <Systems/AnimSystem.hpp>
+#include <Systems/BaseSystem.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/HealingSpringSystem.hpp>
@@ -112,11 +114,14 @@ void ShopScene::on_enter()
 
   m_sys.find<Sys::Store::Type::RenderGameSystem>().init_world_view();
 
+  // the player is moved through PlayerSystem, which needs this scene's navmeshes to keep them in sync
+  reinit_navmesh();
+
   if ( m_just_spawned )
   {
-    auto &player_pos = Utils::Player::get_position( m_reg );
-    player_pos.position = Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( m_reg );
-    SPDLOG_DEBUG( "player_start_pos_px: {},{}", player_pos.position.x, player_pos.position.y );
+    Sys::BaseSystem::get_systems_event_queue().trigger(
+        Events::UpdatePlayerPositionEvent( sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( m_reg ) ) ) );
+    SPDLOG_DEBUG( "player_start_pos_px: {},{}", Utils::Player::get_position( m_reg ).position.x, Utils::Player::get_position( m_reg ).position.y );
     m_just_spawned = false;
   }
 

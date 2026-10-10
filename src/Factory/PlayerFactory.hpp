@@ -40,7 +40,7 @@ void destroy_inventory( entt::registry &reg, const Sys::ItemKey &type );
 //! @param last_known_pos
 //! @param offset Unused; kept for call-site symmetry.
 //! @return `last_known_pos`, unchanged.
-Cmp::Position add_player_last_graveyard_pos( entt::registry &reg, Cmp::Position &last_known_pos,
+Cmp::Position add_player_last_graveyard_pos( entt::registry &reg, const Cmp::Position &last_known_pos,
                                              sf::Vector2f offset = { 0.f, Constants::kGridSizePxF.y } );
 
 //! @brief Remove the player's recorded last graveyard position.

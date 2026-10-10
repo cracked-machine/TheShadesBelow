@@ -105,6 +105,12 @@ std::vector<PathNode> astar( entt::registry &reg, const PathFinding::SpatialHash
                                                  Constants::kGridSizePxF );
       const Cmp::Position *neighbour_pos = &snapped_neighbour_pos;
 
+      // A node must be the cell of the bucket its entity was found in. An entity that moved without its navmesh
+      // entry being updated is still bucketed in the cell it left, and would otherwise add a node at its new,
+      // possibly distant, position: a path that jumps straight there.
+      const sf::Vector2f step = neighbour_pos->position - current.pos.position;
+      if ( std::abs( step.x ) > Constants::kGridSizePxF.x or std::abs( step.y ) > Constants::kGridSizePxF.y ) continue;
+
       // Skip other NPCs so they don't block each other's pathfinding
       if ( reg.any_of<Cmp::Npc::NPC>( neighbour_entt ) ) continue;
 

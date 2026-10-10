@@ -9,6 +9,7 @@
 #include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/SceneSettings/ShowNavmesh.hpp>
 #include <Components/SceneSettings/ShowPathFinding.hpp>
+#include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/MultiblockFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PathfindingFactory.hpp>
@@ -17,6 +18,7 @@
 #include <SceneControl/SceneData.hpp>
 #include <SceneControl/Scenes/HealingSpringScene.hpp>
 #include <Systems/AnimSystem.hpp>
+#include <Systems/BaseSystem.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/HealingSpringSystem.hpp>
@@ -106,10 +108,13 @@ void HealingSpringScene::on_enter()
 
   m_sys.find<Sys::Store::Type::RenderGameSystem>().init_world_view();
 
+  // the player is moved through PlayerSystem, which needs this scene's navmeshes to keep them in sync
+  reinit_navmesh();
+
   if ( m_just_spawned )
   {
-    auto &player_pos = Utils::Player::get_position( m_reg );
-    player_pos.position = Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( m_reg );
+    Sys::BaseSystem::get_systems_event_queue().trigger(
+        Events::UpdatePlayerPositionEvent( sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( m_reg ) ) ) );
     m_just_spawned = false;
   }
 
