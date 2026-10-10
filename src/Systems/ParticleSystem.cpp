@@ -4,6 +4,7 @@
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Particle/BlockParticle.hpp>
 #include <Components/Particle/FlameParticleSprite.hpp>
+#include <Components/Player/Character.hpp>
 #include <Components/Position.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
@@ -13,6 +14,7 @@
 #include <Utils/Optimizations.hpp>
 
 #include <entt/entity/fwd.hpp>
+#include <limits>
 
 namespace Game::Sys
 {
@@ -50,14 +52,25 @@ void ParticleSystem::update( sf::Time dt )
   // update the ParticleSprite position for Candle items in the world. Filter down to candle
   // world items first (there are only ever a handful) rather than re-scanning every world item
   // (every plant and dropped loot item on the level) for every particle sprite below.
-  for ( auto [candle_entt, candle_cmp, candle_pos_cmp, candle_uuid_cmp] : reg().view<Cmp::WorldItem, Cmp::Position, Cmp::UUID>().each() )
+  // A candle flame draws just above its own candle, but is capped just below the player so that
+  // the player always walks in front of it. The floor is far below any y-sorted zorder.
+  float max_flame_zorder = std::numeric_limits<float>::max();
+  auto player_view = reg().view<Cmp::Player::Character, Cmp::ZOrderValue>();
+  for ( auto player_entt : player_view )
+  {
+    max_flame_zorder = player_view.get<Cmp::ZOrderValue>( player_entt ).get() - 1.f;
+  }
+
+  for ( auto [candle_entt, candle_cmp, candle_pos_cmp, candle_uuid_cmp, candle_zorder_cmp] :
+        reg().view<Cmp::WorldItem, Cmp::Position, Cmp::UUID, Cmp::ZOrderValue>().each() )
   {
     if ( not candle_cmp.sprite_type.contains( "candle" ) ) continue;
-    for ( auto [ps_entt, ps_owner, ps_uuid_cmp] : reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID>().each() )
+    for ( auto [ps_entt, ps_owner, ps_uuid_cmp, ps_zorder_cmp] : reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID, Cmp::ZOrderValue>().each() )
     {
       if ( ps_uuid_cmp != candle_uuid_cmp ) continue;
       ps_owner.sprite->set_emitter_position(
           { candle_pos_cmp.getCenter().x, candle_pos_cmp.getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset } );
+      ps_zorder_cmp.set( std::min( candle_zorder_cmp.get() + 1.f, max_flame_zorder ) );
     }
   }
 
