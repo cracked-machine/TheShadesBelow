@@ -7,17 +7,17 @@
 namespace Game::Cmp::Persist
 {
 
-//! @brief Frame duration of the wormhole animation.
+//! @brief Playback rate of the wormhole animation.
 class WormholeAnimFramerate : public BasePersistent<float>
 {
 public:
-  //! @brief Construct with an initial frame duration and optional min/max bounds.
-  //! @note Time unit is seconds per frame; the engine converts to sf::Time as needed.
-  //! @param seconds_per_frame initial frame duration in seconds per frame
-  //! @param min_value minimum allowed frame duration
-  //! @param max_value maximum allowed frame duration
-  WormholeAnimFramerate( float seconds_per_frame = 0.f, float min_value = 0.f, float max_value = 0.f )
-      : BasePersistent<float>( seconds_per_frame, min_value, max_value )
+  //! @brief Construct with an initial framerate and optional min/max bounds.
+  //! @note The unit is frames per second. 0 = not animated.
+  //! @param framerate initial framerate in frames per second
+  //! @param min_value minimum allowed framerate
+  //! @param max_value maximum allowed framerate
+  WormholeAnimFramerate( float framerate = 0.f, float min_value = 0.f, float max_value = 0.f )
+      : BasePersistent<float>( framerate, min_value, max_value )
   {
   }
   //! @brief Get the class name used for persistence/registry lookup.

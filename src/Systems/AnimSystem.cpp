@@ -32,7 +32,7 @@ void AnimSystem::update( sf::Time dt )
     if ( anim_cmp.m_enabled )
     {
       const auto &ms = Sys::SpriteStore::instance().get( anim_cmp.m_sprite_type );
-      update_sequence_frame( anim_cmp, dt, ms, sf::seconds( anim_cmp.get_framerate() ) );
+      update_sequence_frame( anim_cmp, dt, ms, anim_cmp.get_framerate() );
 
       // disable oneshot animations at the end of their sequence
       if ( anim_cmp.m_anim_type == Cmp::AnimType::LOOP ) continue;
@@ -55,15 +55,19 @@ void AnimSystem::update( sf::Time dt )
 
     SPDLOG_DEBUG( "NPC {} framerate is {}", anim_cmp.m_sprite_type, anim_cmp.get_framerate() );
     const auto &npc_walk_sequence = Sys::SpriteStore::instance().get( anim_cmp.m_sprite_type );
-    update_sequence_frame( anim_cmp, dt, npc_walk_sequence, sf::seconds( anim_cmp.get_framerate() ) );
+    update_sequence_frame( anim_cmp, dt, npc_walk_sequence, anim_cmp.get_framerate() );
   }
 }
 
-void AnimSystem::update_sequence_frame( Cmp::AnimData &anim, sf::Time globalDeltaTime, const Sprites::SpriteSheet &ms, sf::Time frame_rate )
+void AnimSystem::update_sequence_frame( Cmp::AnimData &anim, sf::Time globalDeltaTime, const Sprites::SpriteSheet &ms, float framerate )
 {
+  // a zero framerate means the sprite does not animate
+  if ( framerate <= 0.f ) return;
+
+  const sf::Time frame_time = sf::seconds( 1.f / framerate );
   anim.m_elapsed_time += globalDeltaTime;
 
-  if ( anim.m_elapsed_time >= frame_rate )
+  if ( anim.m_elapsed_time >= frame_time )
   {
     unsigned int num_animation_frames = ms.indices_per_sequence() / ms.indices_per_frame();
     if ( num_animation_frames < 1 )
@@ -74,7 +78,7 @@ void AnimSystem::update_sequence_frame( Cmp::AnimData &anim, sf::Time globalDelt
     unsigned int next_anim_frame = ( current_anim_frame + 1 ) % num_animation_frames;
 
     anim.m_current_frame = next_anim_frame * ms.indices_per_frame();
-    anim.m_elapsed_time -= frame_rate;
+    anim.m_elapsed_time -= frame_time;
   }
 }
 

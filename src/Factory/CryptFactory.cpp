@@ -77,7 +77,7 @@ entt::entity create_crypt_chest( entt::registry &reg, sf::Vector2f pos, Sys::Spr
   reg.emplace_or_replace<Cmp::AnimData>( entt, Cmp::AnimData::Config{ 
         .sprite_type = sprite_type, 
         .frame_index_offset = sprite_idx,
-        .framerate = 0.4, 
+        .framerate = 2.5f, 
         .enabled = false, 
         .anim_type = Cmp::AnimType::ONESHOTHOLD 
   });
@@ -166,7 +166,7 @@ void add_spike_trap( entt::registry &reg, const entt::entity entt, const int pas
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( spike_entt, Cmp::AnimData::Config{ 
         .sprite_type = "sprite.crypt.spikes", 
-        .framerate = 0.2,
+        .framerate = 5.f,
         .enabled = false,
         .anim_type =   Cmp::AnimType::ONESHOTRESET
   });

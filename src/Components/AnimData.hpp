@@ -33,8 +33,8 @@ struct AnimData
     unsigned int base_frame = 0;
     //! @brief Fixed offset into the sprite sheet for multi-block sprites; see AnimData::m_frame_index_offset.
     size_t frame_index_offset = 0;
-    //! @brief Seconds between frame changes.
-    float framerate = 0.1f;
+    //! @brief Animation framerate in frames per second. 0 = not animated.
+    float framerate = 10.f;
     //! @brief Whether the animation is initially advancing.
     bool enabled = true;
     //! @brief Behaviour of the animation once it reaches its last frame.
@@ -79,15 +79,15 @@ struct AnimData
   //! @brief Behaviour of the animation once it reaches its last frame.
   AnimType m_anim_type;
 
-  //! @brief Get the seconds between frame changes.
-  //! @return float Framerate in seconds per frame.
+  //! @brief Get the animation framerate.
+  //! @return float Framerate in frames per second. 0 = not animated.
   float get_framerate() { return m_framerate; }
 
-  //! @brief Set the seconds between frame changes.
+  //! @brief Set the animation framerate, in frames per second. 0 = not animated.
   void set_framerate( float framerate ) { m_framerate = framerate; }
 
 private:
-  //! @brief Seconds between frame changes.
+  //! @brief Animation framerate in frames per second. 0 = not animated.
   float m_framerate;
   //! @brief Get the relative frame index offset within multi-block sprites
   //! This should be immutable for the lifetime of the component

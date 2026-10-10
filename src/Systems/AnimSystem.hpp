@@ -45,8 +45,8 @@ private:
   //! @param anim
   //! @param globalDeltaTime
   //! @param ms
-  //! @param frame_rate
-  static void update_sequence_frame( Cmp::AnimData &anim, sf::Time globalDeltaTime, const Sprites::SpriteSheet &ms, sf::Time frame_rate );
+  //! @param framerate Frames per second. 0 (or less) = not animated.
+  static void update_sequence_frame( Cmp::AnimData &anim, sf::Time globalDeltaTime, const Sprites::SpriteSheet &ms, float framerate );
 };
 
 } // namespace Game::Sys

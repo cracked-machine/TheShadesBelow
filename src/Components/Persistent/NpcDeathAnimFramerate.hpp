@@ -11,12 +11,12 @@ class NpcDeathAnimFramerate : public BasePersistent<float>
 {
 public:
   //! @brief Construct the NPC death animation framerate setting.
-  //! @note The unit is seconds per frame; the engine should convert to sf::Time as needed.
-  //! @param seconds_per_frame Initial time each animation frame is held for, in seconds.
+  //! @note The unit is frames per second. 0 = not animated.
+  //! @param framerate Initial framerate, in frames per second.
   //! @param min_value Minimum allowed value (ImGui slider bound).
   //! @param max_value Maximum allowed value (ImGui slider bound).
-  NpcDeathAnimFramerate( float seconds_per_frame = 0.f, float min_value = 0.f, float max_value = 0.f )
-      : BasePersistent<float>( seconds_per_frame, min_value, max_value )
+  NpcDeathAnimFramerate( float framerate = 0.f, float min_value = 0.f, float max_value = 0.f )
+      : BasePersistent<float>( framerate, min_value, max_value )
   {
   }
   //! @brief Returns the unique registry identifier for this persistent setting.

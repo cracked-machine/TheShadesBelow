@@ -518,7 +518,7 @@ void PlayerSystem::update_player_animation()
   const float movement_speed = Sys::PersistSystem::get<Cmp::Persist::PlayerMovementSpeed>( reg() ).get_value();
   const float speed_penalty = Utils::Player::get_speed_penalty( reg() );
   const float effective_speed = movement_speed * speed_penalty;
-  anim_cmp.set_framerate( effective_speed > 0.f ? stride_length / effective_speed : stride_length );
+  anim_cmp.set_framerate( effective_speed > 0.f ? effective_speed / stride_length : 1.f / stride_length );
 
   // update the animation state based on movement direction
   if ( direction_cmp == sf::Vector2f( 0.0f, 0.0f ) ) { anim_cmp.m_enabled = false; }

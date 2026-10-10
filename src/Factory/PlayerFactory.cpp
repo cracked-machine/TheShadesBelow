@@ -136,7 +136,7 @@ void create_player_death_anim( entt::registry &reg, Cmp::Position player_pos_cmp
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( player_blood_splat_entity, Cmp::AnimData::Config{ 
         .sprite_type = sprite.type(), 
-        .framerate = 0.1,
+        .framerate = 10.f,
         .enabled = true,
         .anim_type = Cmp::AnimType::ONESHOTHOLD
   });

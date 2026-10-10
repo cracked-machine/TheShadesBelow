@@ -20,7 +20,7 @@ void create_loot_container( entt::registry &reg, entt::entity entt, Cmp::Positio
   reg.emplace_or_replace<Cmp::AnimData>( entt, Cmp::AnimData::Config{ 
         .sprite_type = sprite_type, 
         .frame_index_offset = sprite_tile_idx,
-        .framerate = 0.2,
+        .framerate = 5.f,
         .enabled = false,
         .anim_type =   Cmp::AnimType::ONESHOTRESET
   });

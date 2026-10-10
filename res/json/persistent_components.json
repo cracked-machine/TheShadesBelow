@@ -258,11 +258,11 @@
     },
   "NpcDeathAnimFramerate": {
     "type": "float",
-    "value": 0.1,
-    "min_value": 0.01,
-    "max_value": 5.0,
+    "value": 10.0,
+    "min_value": 0.0,
+    "max_value": 60.0,
     "detail": "NPC Death Animation Framerate",
-    "format": "%.2f"
+    "format": "%.0f fps"
   },
   
   "NpcWatchmanGunFireRate": {
@@ -543,10 +543,10 @@
   },
   "WormholeAnimFramerate": {
     "type": "float",
-    "value": 0.1,
-    "min_value": 0.01,
-    "max_value": 5.0,
+    "value": 10.0,
+    "min_value": 0.0,
+    "max_value": 60.0,
     "detail": "Wormhole Animation Framerate",
-    "format": "%.2f"
+    "format": "%.0f fps"
   }
 }

@@ -915,7 +915,7 @@ void CryptSystem::do_lava_pit_animation()
       // clang-format off
       reg().emplace_or_replace<Cmp::AnimData>( lava_anim_entt, Cmp::AnimData::Config{ 
             .sprite_type = "sprite.crypt.anim.lava", 
-            .framerate = 0.2,
+            .framerate = 5.f,
             .enabled = true,
             .anim_type = Cmp::AnimType::ONESHOTRESET
       });

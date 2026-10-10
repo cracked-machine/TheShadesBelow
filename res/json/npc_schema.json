@@ -19,7 +19,8 @@
         },
         "framerate": {
           "type": "number",
-          "description": "Animation framerate"
+          "description": "Animation framerate in frames per second. 0 = not animated",
+          "minimum": 0
         },
         "actions": {
           "type": "array",
