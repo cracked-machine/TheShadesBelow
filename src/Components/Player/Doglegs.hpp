@@ -16,14 +16,19 @@ namespace Game::Cmp::Player
 class Doglegs
 {
 public:
-  //! @brief An L-shaped path from `source` to `target`, turning once at `corner`.
+  //! @brief A path from the player to a landmark, as a polyline: `points` holds the player, each turn and the
+  //! landmark, in that order. An L-shaped "crow flies" path in the open, or a route along the passages in the crypt.
   struct Dogleg
   {
-    sf::Vector2f source;
-    sf::Vector2f corner;
-    sf::Vector2f target;
+    std::vector<sf::Vector2f> points;
     sf::Color color;
-    [[nodiscard]] float length() const { return ( corner - source ).length() + ( target - corner ).length(); }
+    [[nodiscard]] float length() const
+    {
+      float total = 0.f;
+      for ( std::size_t i = 0; i + 1 < points.size(); ++i )
+        total += ( points[i + 1] - points[i] ).length();
+      return total;
+    }
   };
   //! @brief One path per landmark matching the dowsing rod target.
   std::vector<Dogleg> m_doglegs;

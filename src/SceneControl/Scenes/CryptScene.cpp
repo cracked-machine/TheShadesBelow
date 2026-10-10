@@ -37,6 +37,7 @@
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/PlayerSystem.hpp>
+#include <Systems/ProcGen/DoglegSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/ProcGen/PassageSystem.hpp>
 #include <Systems/Render/RenderDebugSystem.hpp>
@@ -194,6 +195,7 @@ void CryptScene::do_update( sf::Time dt )
   m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt );
   m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt );
   m_sys.find<Sys::Store::Type::PassageSystem>().update( dt );
+  m_sys.find<Sys::Store::Type::DoglegSystem>().update( Sys::ProcGen::DoglegSystem::Location::CRYPT, dt );
   m_sys.find<Sys::Store::Type::InventorySystem>().update( dt );
 
   auto excludes = { std::string( Cmp::Particle::NoteParticleSprite::kPlayerNotesTag ) };
@@ -209,6 +211,7 @@ void CryptScene::reinit_navmesh()
 {
   m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh );
   m_sys.find<Sys::Store::Type::PassageSystem>().init_nav_mesh( m_generic_npc_navmesh );
+  m_sys.find<Sys::Store::Type::DoglegSystem>().init( m_generic_npc_navmesh );
   m_sys.find<Sys::Store::Type::CryptSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
   m_sys.find<Sys::Store::Type::RenderDebugSystem>().init( m_generic_npc_navmesh, m_reserved_sm );

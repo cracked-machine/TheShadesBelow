@@ -13,16 +13,17 @@ namespace Game::Cmp::Inventory
 
 //! @brief The landmark a dowsing rod guides towards. Assigned once when the rod is created and carried with it
 //! between the world item and the player inventory slot. While the rod is in the player inventory, DoglegSystem
-//! sends colored chevrons along a "dogleg" path from the player to each landmark matching `target`.
+//! sends colored chevrons along a path from the player to each landmark matching `target`: an L-shaped "dogleg" in
+//! the graveyard, the walkable route along the passages in the crypt.
 struct DowsingTarget
 {
   //! @brief The landmark a dowsing rod guides towards, also used as the color of its guide chevrons.
   enum class Target {
     //! @brief No landmark - no guide chevrons are drawn.
     NONE,
-    //! @brief Guides towards crypt entrances, drawn in red.
+    //! @brief Guides towards crypt entrances in the graveyard and the lever in the crypt, drawn in red.
     RED,
-    //! @brief Guides towards altars, drawn in yellow.
+    //! @brief Guides towards altars in the graveyard and chests in the crypt, drawn in yellow.
     YELLOW,
     //! @brief Guides towards exits, drawn in green.
     GREEN

@@ -53,10 +53,7 @@ namespace Game::Scene
 namespace
 {
 //! @brief Player components that are scene-local caches and must never be copied/transferred between scenes
-bool is_player_deny_listed( entt::id_type type_hash )
-{
-  return type_hash == entt::type_hash<Cmp::Player::ArrowCompass>::value() or type_hash == entt::type_hash<Cmp::Player::Doglegs>::value();
-}
+bool is_player_deny_listed( entt::id_type type_hash ) { return type_hash == entt::type_hash<Cmp::Player::ArrowCompass>::value(); }
 } // namespace
 
 //! @brief Creates a deep copy of selected entities from a scene's ECS registry into a new standalone registry. The function supports different copy
@@ -281,6 +278,7 @@ void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
   registry.storage<Cmp::Player::HeartBeat>();
   registry.storage<Cmp::Player::CadaverCount>();
   registry.storage<Cmp::AnimData>();
+  registry.storage<Cmp::Inventory::DowsingTarget>();
   registry.storage<Cmp::PlayerInventorySlot>();
   registry.storage<Cmp::TorchRadius>();
   registry.storage<Cmp::WorldItem>();

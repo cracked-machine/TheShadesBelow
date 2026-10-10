@@ -1,18 +1,24 @@
 #include <Components/Altar/MultiBlock.hpp>
+#include <Components/Crypt/Chest.hpp>
 #include <Components/Crypt/Entrance.hpp>
+#include <Components/Crypt/Lever.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Player/Doglegs.hpp>
 #include <Components/Position.hpp>
+#include <PathFinding/BreadthFirst.hpp>
+#include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/ProcGen/DoglegSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
+#include <Utils/Utils.hpp>
 
 #include <algorithm>
 #include <array>
+#include <optional>
 #include <vector>
 
 namespace Game::Sys::ProcGen
@@ -55,14 +61,46 @@ constexpr int kMarkerCount = 10;      // markers in the pulse train
 constexpr float kMarkerSpacing = 8.f; // px between consecutive markers
 constexpr float kPulseSpeed = 50.f;   // px per second
 constexpr float kTrainLength = kMarkerCount * kMarkerSpacing;
-constexpr float kViewMargin = 8.f; // px past the view edge, so markers slide off screen instead of popping
+constexpr float kViewMargin = 8.f;                   // px past the view edge, so markers slide off screen instead of popping
+const sf::Time kFieldRefresh = sf::seconds( 0.25f ); // how stale the crypt routes may get while the player stands still
+
+//! @brief Where a marker sits on a path, and which way it faces
+struct MarkerPlacement
+{
+  sf::Vector2f position;
+  sf::Vector2f direction;
+};
+
+//! @brief Find the point `dist` px along a path
+//! @return std::nullopt if `dist` is past the end of the path
+std::optional<MarkerPlacement> place_marker( const Cmp::Player::Doglegs::Dogleg &dogleg, float dist )
+{
+  for ( std::size_t i = 0; i + 1 < dogleg.points.size(); ++i )
+  {
+    const sf::Vector2f delta = dogleg.points[i + 1] - dogleg.points[i];
+    const float length = delta.length();
+    if ( length <= 0.f ) continue;
+    if ( dist <= length ) return MarkerPlacement{ .position = dogleg.points[i] + ( delta * ( dist / length ) ), .direction = delta / length };
+    dist -= length;
+  }
+  return std::nullopt;
+}
 
 } // namespace
 
-void DoglegSystem::update( sf::Time dt )
+void DoglegSystem::init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh )
+{
+  m_npc_navmesh = npc_navmesh;
+  // a field belongs to the navmesh it was made from
+  m_field.clear();
+}
+
+void DoglegSystem::update( const Location &location, sf::Time dt )
 {
   // always clear first, so nothing stale is left to render once the rod leaves the inventory
   clear();
+
+  m_location = location;
 
   auto [inventory_entt, _, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_entt == entt::null ) return;
@@ -72,6 +110,7 @@ void DoglegSystem::update( sf::Time dt )
   if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) return;
 
   dowsing_cmp->m_dowsing_pulse_time += dt;
+  if ( m_location == Location::CRYPT ) update_field( dt );
   update_target( *dowsing_cmp );
   update_markers( *dowsing_cmp );
 }
@@ -83,7 +122,48 @@ void DoglegSystem::add_dogleg( sf::Vector2f source_pos, sf::Vector2f target_pos,
   if ( target_pos.y - source_pos.y < target_pos.x - source_pos.x ) { corner = sf::Vector2f{ source_pos.x, target_pos.y }; }
   else { corner = sf::Vector2f{ target_pos.x, source_pos.y }; }
 
-  dl_cmp.m_doglegs.push_back( { source_pos, corner, target_pos, color } );
+  dl_cmp.m_doglegs.push_back( { { source_pos, corner, target_pos }, color } );
+}
+
+void DoglegSystem::add_route( sf::Vector2f source_pos, sf::Vector2f target_pos, sf::Color color )
+{
+  const std::vector<sf::Vector2f> route = PathFinding::route_to( m_field, target_pos );
+  if ( route.empty() ) return; // no way there on foot
+
+  // The route runs between cell centres, but the player moves sub-grid: leave from the player and step sideways
+  // onto the line of the first leg, rather than cutting a diagonal that could clip a passage corner.
+  std::vector<sf::Vector2f> points{ source_pos };
+  if ( route.size() == 1 ) { points.push_back( target_pos ); }
+  else
+  {
+    const bool first_leg_horizontal = route[0].y == route[1].y;
+    const sf::Vector2f join = first_leg_horizontal ? sf::Vector2f{ source_pos.x, route[0].y } : sf::Vector2f{ route[0].x, source_pos.y };
+    if ( join != source_pos ) points.push_back( join );
+    points.insert( points.end(), route.begin() + 1, route.end() );
+  }
+
+  Utils::Player::get_doglegs( reg() ).m_doglegs.push_back( { std::move( points ), color } );
+}
+
+void DoglegSystem::update_field( sf::Time dt )
+{
+  auto navmesh = m_npc_navmesh.lock();
+  if ( not navmesh )
+  {
+    m_field.clear();
+    return;
+  }
+
+  // Searching the whole crypt every frame is wasteful: redo it when the player changes cell, and every so often
+  // besides, since rooms and passages open and close around a player who is standing still.
+  const sf::Vector2f player_centre = Utils::Player::get_position( reg() ).getCenter();
+  const sf::Vector2f player_cell = Utils::snap_to_grid( player_centre, Utils::Rounding::TOWARDS_ZERO );
+  m_field_age += dt;
+  if ( not m_field.empty() and player_cell == m_field_cell and m_field_age < kFieldRefresh ) return;
+
+  m_field = PathFinding::breadth_first_field( reg(), *navmesh, player_centre );
+  m_field_cell = player_cell;
+  m_field_age = sf::Time::Zero;
 }
 
 void DoglegSystem::update_target( const Cmp::Inventory::DowsingTarget &dowsing_cmp )
@@ -95,28 +175,70 @@ void DoglegSystem::update_target( const Cmp::Inventory::DowsingTarget &dowsing_c
   switch ( dowsing_cmp.target )
   {
     case Target::YELLOW: {
-      auto altar_view = reg().view<Cmp::Altar::MultiBlock>();
-      for ( auto [altar_entt, altar_cmp] : altar_view.each() )
+      switch ( m_location )
       {
-        // yellow for altar paths
-        add_dogleg( pos_cmp.getCenter(), altar_cmp.getCenter(), kAltarColour );
+        case Location::GRAVEYARD: {
+          auto altar_view = reg().view<Cmp::Altar::MultiBlock>();
+          for ( auto [altar_entt, altar_cmp] : altar_view.each() )
+          {
+            add_dogleg( pos_cmp.getCenter(), altar_cmp.getCenter(), kAltarColour );
+          }
+          break;
+        }
+        case Location::CRYPT: {
+          auto crypt_chest_view = reg().view<Cmp::Crypt::Chest, Cmp::Position>();
+          for ( auto [chest_entt, chest_cmp, chest_pos] : crypt_chest_view.each() )
+          {
+            if ( chest_cmp.open ) continue;
+            add_route( pos_cmp.getCenter(), chest_pos.getCenter(), kAltarColour );
+          }
+          break;
+        }
       }
       break;
     }
     case Target::RED: {
-      auto crypt_view = reg().view<Cmp::Crypt::Entrance, Cmp::Position>();
-      for ( auto [crypt_entt, crypt_cmp, crypt_pos_cmp] : crypt_view.each() )
+      switch ( m_location )
       {
-        // red for crypt paths
-        add_dogleg( pos_cmp.getCenter(), crypt_pos_cmp.getCenter(), kCryptColour );
+        case Location::GRAVEYARD: {
+          auto crypt_entrance_view = reg().view<Cmp::Crypt::Entrance, Cmp::Position>();
+          for ( auto [crypt_entt, crypt_cmp, crypt_pos_cmp] : crypt_entrance_view.each() )
+          {
+            add_dogleg( pos_cmp.getCenter(), crypt_pos_cmp.getCenter(), kCryptColour );
+          }
+          break;
+        }
+        case Location::CRYPT: {
+          auto crypt_lever_view = reg().view<Cmp::Crypt::Lever, Cmp::Position>();
+          for ( auto [lever_entt, lever_cmp, lever_pos_cmp] : crypt_lever_view.each() )
+          {
+            if ( lever_cmp.isEnabled() ) continue;
+            add_route( pos_cmp.getCenter(), lever_pos_cmp.getCenter(), kCryptColour );
+          }
+          break;
+        }
       }
       break;
     }
     case Target::GREEN: {
-      auto exit_view = reg().view<Cmp::Exit, Cmp::Position>();
-      for ( auto [exit_entt, exit_cmp, exit_pos_cmp] : exit_view.each() )
+      switch ( m_location )
       {
-        add_dogleg( pos_cmp.getCenter(), exit_pos_cmp.getCenter(), kExitColour );
+        case Location::GRAVEYARD: {
+          auto graveyard_exit_view = reg().view<Cmp::Exit, Cmp::Position>();
+          for ( auto [exit_entt, exit_cmp, exit_pos_cmp] : graveyard_exit_view.each() )
+          {
+            add_dogleg( pos_cmp.getCenter(), exit_pos_cmp.getCenter(), kExitColour );
+          }
+          break;
+        }
+        case Location::CRYPT: {
+          auto crypt_exit_view = reg().view<Cmp::Exit, Cmp::Position>();
+          for ( auto [exit_entt, exit_cmp, exit_pos_cmp] : crypt_exit_view.each() )
+          {
+            add_route( pos_cmp.getCenter(), exit_pos_cmp.getCenter(), kExitColour );
+          }
+          break;
+        }
       }
       break;
     }
@@ -152,7 +274,6 @@ void DoglegSystem::update_markers( Cmp::Inventory::DowsingTarget &dowsing_cmp )
   for ( std::size_t dogleg_idx = 0; dogleg_idx < dogleg_cmp.m_doglegs.size(); ++dogleg_idx )
   {
     const auto &dogleg = dogleg_cmp.m_doglegs[dogleg_idx];
-    const float first_leg_length = ( dogleg.corner - dogleg.source ).length();
     const float end_length = end_lengths[dogleg_idx];
 
     for ( int i = 0; i < kMarkerCount; ++i )
@@ -161,21 +282,16 @@ void DoglegSystem::update_markers( Cmp::Inventory::DowsingTarget &dowsing_cmp )
       const float dist = head - ( static_cast<float>( i ) * kMarkerSpacing );
       if ( dist < 0.f or dist > end_length ) continue;
 
-      const bool on_first_leg = dist < first_leg_length;
-      const sf::Vector2f leg_start = on_first_leg ? dogleg.source : dogleg.corner;
-      const sf::Vector2f leg_end = on_first_leg ? dogleg.corner : dogleg.target;
-      const auto dir = Utils::Maths::normalized( leg_end - leg_start );
-      if ( not dir ) continue;
-
-      const sf::Vector2f marker_pos = leg_start + ( *dir * ( on_first_leg ? dist : dist - first_leg_length ) );
-      const sf::Vector2f side = dir->perpendicular();
+      const auto marker = place_marker( dogleg, dist );
+      if ( not marker ) continue;
+      const sf::Vector2f side = marker->direction.perpendicular();
 
       // fade towards the tail of the train
       sf::Color color = dogleg.color;
       color.a = static_cast<std::uint8_t>( color.a * ( kMarkerCount - i ) / kMarkerCount );
 
       for ( const auto &v : kDowsingMarkerShape )
-        dogleg_cmp.m_markers.append( sf::Vertex{ .position = marker_pos + ( *dir * v.x ) + ( side * v.y ), .color = color } );
+        dogleg_cmp.m_markers.append( sf::Vertex{ .position = marker->position + ( marker->direction * v.x ) + ( side * v.y ), .color = color } );
     }
   }
 }
@@ -190,7 +306,7 @@ void DoglegSystem::clear()
 float DoglegSystem::visible_length( const Cmp::Player::Doglegs::Dogleg &dogleg, const sf::FloatRect &view_bounds )
 {
   float travelled = 0.f;
-  const std::array<sf::Vector2f, 3> points{ dogleg.source, dogleg.corner, dogleg.target };
+  const auto &points = dogleg.points;
   for ( std::size_t i = 0; i + 1 < points.size(); ++i )
   {
     const sf::Vector2f start = points[i];

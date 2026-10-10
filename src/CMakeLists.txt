@@ -140,6 +140,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Components/Stats/PlayerStats.cpp
     ${CMAKE_SOURCE_DIR}/src/PathFinding/SpatialHashGrid.cpp
     ${CMAKE_SOURCE_DIR}/src/PathFinding/AStar.cpp
+    ${CMAKE_SOURCE_DIR}/src/PathFinding/BreadthFirst.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Toxicity/Toxidrome.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Npc/Footprint.cpp
 )
