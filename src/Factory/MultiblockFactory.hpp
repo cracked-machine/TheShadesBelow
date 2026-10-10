@@ -59,8 +59,8 @@ namespace Game::Factory::Multiblock
 //! @brief Component requirements for a multiblock segment type (one grid cell of a multiblock structure).
 template <typename T>
 concept IsMBSegment = requires( T t ) {
-  { t.isSolidMask() } -> std::convertible_to<bool>;
-  { t.set_solid_mask( true ) } -> std::same_as<void>;
+  { t.isCollisionMask() } -> std::convertible_to<bool>;
+  { t.set_collision_mask( true ) } -> std::same_as<void>;
 };
 
 //! @brief Component requirements for a multiblock bounds type - must derive from sf::FloatRect.
@@ -83,11 +83,11 @@ template <typename MULTIBLOCK>
 void create_multiblock( entt::registry &reg, entt::entity entity, const Cmp::UUID &uuid, Cmp::Position pos, const Sprites::SpriteSheet &ss,
                         size_t ss_index = 0 );
 
-//! @brief Recompute solid mask, z-order and pathfinding-blocking components for every MBSEGMENT inside `mb_cmp`'s bounds.
+//! @brief Recompute collision mask, z-order and pathfinding-blocking components for every MBSEGMENT inside `mb_cmp`'s bounds.
 //! @tparam MULTIBLOCK Multiblock bounds component type.
 //! @tparam MBSEGMENT Multiblock segment component type.
 //! @param reg
-//! @param ss Sprite sheet providing the solid mask and z-order lookup tables.
+//! @param ss Sprite sheet providing the collision mask and z-order lookup tables.
 //! @param mb_entt
 //! @param mb_cmp Multiblock bounds used to find owned segments and their relative grid position.
 template <typename MULTIBLOCK, typename MBSEGMENT>

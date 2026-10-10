@@ -36,7 +36,7 @@ void AnimSystem::update( sf::Time dt )
 
       // disable oneshot animations at the end of their sequence
       if ( anim_cmp.m_anim_type == Cmp::AnimType::LOOP ) continue;
-      if ( anim_cmp.m_current_frame == ms.sequence_size() - 1 )
+      if ( anim_cmp.m_current_frame == ms.indices_per_sequence() - 1 )
       {
         SPDLOG_DEBUG( "Deactivating animation: {}", static_cast<int>( anim_entt ) );
         anim_cmp.m_enabled = false;
@@ -65,15 +65,15 @@ void AnimSystem::update_sequence_frame( Cmp::AnimData &anim, sf::Time globalDelt
 
   if ( anim.m_elapsed_time >= frame_rate )
   {
-    unsigned int num_animation_frames = ms.sequence_size() / ms.frame_size();
+    unsigned int num_animation_frames = ms.indices_per_sequence() / ms.indices_per_frame();
     if ( num_animation_frames < 1 )
     {
-      throw std::runtime_error( "Not enough indices in Sprite '" + ms.type().str() + "': sprites per sequence / sprites per frame == 0" );
+      throw std::runtime_error( "Not enough indices in Sprite '" + ms.type().str() + "': indices_per_sequence / indices_per_frame == 0" );
     }
-    unsigned int current_anim_frame = anim.m_current_frame / ms.frame_size();
+    unsigned int current_anim_frame = anim.m_current_frame / ms.indices_per_frame();
     unsigned int next_anim_frame = ( current_anim_frame + 1 ) % num_animation_frames;
 
-    anim.m_current_frame = next_anim_frame * ms.frame_size();
+    anim.m_current_frame = next_anim_frame * ms.indices_per_frame();
     anim.m_elapsed_time -= frame_rate;
   }
 }

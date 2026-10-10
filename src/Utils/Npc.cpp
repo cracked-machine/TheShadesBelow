@@ -65,12 +65,14 @@ Sys::SpriteKey get_sprite_type( entt::registry &reg, entt::entity npc_entt, std:
   return anim_cmp->m_sprite_type;
 }
 
-sf::FloatRect collision_bounds( entt::registry &reg, entt::entity npc_entt )
+std::optional<sf::FloatRect> collision_bounds( entt::registry &reg, entt::entity npc_entt )
 {
   const auto &npc_pos = reg.get<Cmp::Position>( npc_entt );
   // NPCs created outside Factory::Npc::create_npc (e.g. the shadow hand) have no footprint: all of them collides
   const auto *footprint = reg.try_get<Cmp::Npc::Footprint>( npc_entt );
-  return footprint ? footprint->bounds( npc_pos.position ) : sf::FloatRect( npc_pos );
+  if ( not footprint ) return sf::FloatRect( npc_pos );
+  if ( not footprint->collides() ) return std::nullopt;
+  return footprint->bounds( npc_pos.position );
 }
 
 PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGrid &navmesh, const Cmp::Position &target_pos, entt::entity npc_entity,
@@ -108,7 +110,7 @@ PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGri
   Cmp::Position grid_target( Utils::snap_to_grid( target_pos.position, Utils::Rounding::TOWARDS_ZERO ), target_pos.size );
 
   // Pathfind the footprint's anchor cell. A multiblock NPC is top-left anchored but stands on the cells given by
-  // its sprite's solid mask, and needs clearance for all of them.
+  // its sprite's collision mask, and needs clearance for all of them.
   auto *footprint_cmp = reg.try_get<Cmp::Npc::Footprint>( npc_entity );
   if ( not footprint_cmp ) return PathfindResult::Blocked;
   const Cmp::Npc::Footprint &footprint = *footprint_cmp;

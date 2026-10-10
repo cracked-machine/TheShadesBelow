@@ -8,23 +8,23 @@ namespace Game::Cmp::Altar
 class Segment
 {
 public:
-  //! @brief Construct a Segment with the given initial solid mask state.
-  //! @param solid_mask Whether collision detection is enabled for this segment's sprite.
-  Segment( bool solid_mask )
-      : m_solid_mask( solid_mask )
+  //! @brief Construct a Segment with the given initial collision mask state.
+  //! @param collision_mask Whether collision detection is enabled for this segment's sprite.
+  Segment( bool collision_mask )
+      : m_collision_mask( collision_mask )
   {
   }
 
   //! @brief Whether collision detection is currently enabled for this segment's sprite.
   //! @return bool True if solid (collidable).
-  bool isSolidMask() const { return m_solid_mask; }
+  bool isCollisionMask() const { return m_collision_mask; }
   //! @brief Set whether collision detection is enabled for this segment's sprite.
-  //! @param solid_mask The new solid mask state.
-  void set_solid_mask( bool solid_mask ) { m_solid_mask = solid_mask; }
+  //! @param collision_mask The new collision mask state.
+  void set_collision_mask( bool collision_mask ) { m_collision_mask = collision_mask; }
 
 private:
   //! @brief Is collision detection enabled for this sprite.
-  bool m_solid_mask{ true };
+  bool m_collision_mask{ true };
 };
 
 } // namespace Game::Cmp::Altar

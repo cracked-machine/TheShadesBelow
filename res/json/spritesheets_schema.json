@@ -40,14 +40,14 @@
               },
               "minItems": 1
             },
-            "sprites_per_frame": {
+            "indices_per_frame": {
               "type": "number",
-              "description": "Number of sprites in each animation frame.",
+              "description": "How many 'sprite_indices' entries make one animation frame. Each entry already selects a whole 'grid_size' area, so this is normally 1, including for multi-block sprites.",
               "minimum": 1
             },
-            "sprites_per_sequence": {
+            "indices_per_sequence": {
               "type": "number",
-              "description": "Total number of sprites in the animation sequence. 1 = static sprite.",
+              "description": "How many 'sprite_indices' entries the animation loops over. The number of animation frames is this divided by 'indices_per_frame'. 1 = static sprite.",
               "minimum": 1
             },
             "grid_size": {
@@ -71,9 +71,9 @@
               "description": "Path to the texture file",
               "pattern": "^res/textures/.*\\.(png|jpg|jpeg|bmp|tga)$"
             },
-            "solid_mask": {
+            "collision_mask": {
               "type": "array",
-              "description": "Indicates which 'sprite_indices' the player cannot traverse. Array size must match sprite_indices size.",
+              "description": "Which cells of the sprite collide, one boolean per 'grid_size' cell in row-major order (left to right, top to bottom). For NPCs these are the cells it stands on, used for collision and pathfinding clearance. Shortcut: a single entry (e.g. [true]) applies that value to every cell, whatever the 'grid_size'. Otherwise there must be at least one entry per cell. If omitted, every cell collides. All false is valid: the sprite does not collide (an NPC then logs a warning at spawn and cannot touch the player).",
               "items": {
                 "type": "boolean"
               },
@@ -91,7 +91,7 @@
               "uniqueItems": true
             }
           },
-          "required": ["displayname", "zorder", "texture_path", "sprite_indices", "grid_size", "sprites_per_frame", "sprites_per_sequence"],
+          "required": ["displayname", "zorder", "texture_path", "sprite_indices", "grid_size", "indices_per_frame", "indices_per_sequence"],
           "additionalProperties": false
         }
       },

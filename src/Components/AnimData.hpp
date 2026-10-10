@@ -54,14 +54,10 @@ struct AnimData
   {
   }
 
-  //! @brief Tracks the frame position in the animation sequence.
-  //! @note For multi-block sprites, this is relative to the sprite index.
-  //!       E.g. for single sprites:
-  //!         Frame #1: [0], Frame #2: [1], etc.
-  //!         so 0 is the first block, 1 is the second frame, etc.
-  //!       E.g. for multi-block sprites (4 blocks per frame):
-  //!         Frame #1: [0,1,2,3], Frame #2: [4,5,6,7], etc.
-  //!         so 0 is the first frame, 4 is the second frame, etc.
+  //! @brief Tracks the frame position in the animation sequence, as an index into the sprite sheet's
+  //! `sprite_indices`.
+  //! @note It advances by the sheet's `indices_per_frame` each frame. That is 1 for every current sheet, single
+  //!       or multi-block, so 0 is the first frame, 1 is the second frame, etc.
   unsigned int m_current_frame;
 
   //! @brief The start frame in the animation sequence.

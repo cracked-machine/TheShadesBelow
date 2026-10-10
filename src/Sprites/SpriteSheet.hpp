@@ -28,14 +28,14 @@ public:
   //! @param spritesheet_path
   //! @param spritesheet_selections
   //! @param grid_size
-  //! @param sprites_per_frame
-  //! @param sprites_per_sequence
-  //! @param solid_mask
+  //! @param indices_per_frame
+  //! @param indices_per_sequence
+  //! @param collision_mask
   //! @param door_position
   explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list,
                         const std::filesystem::path &spritesheet_png, const std::vector<uint32_t> &spritesheet_selections,
-                        sf::Vector2i grid_size = { 1, 1 }, unsigned int sprites_per_frame = 1, unsigned int sprites_per_sequence = 1,
-                        std::vector<bool> solid_mask = {}, sf::Vector2i door_position = {} );
+                        sf::Vector2i grid_size = { 1, 1 }, unsigned int indices_per_frame = 1, unsigned int indices_per_sequence = 1,
+                        std::vector<bool> collision_mask = {}, sf::Vector2i door_position = {} );
 
   //! @brief Construct a new Multi Sprite object using texture object
   //! @param type
@@ -44,13 +44,13 @@ public:
   //! @param spritesheet_texture
   //! @param spritesheet_selections
   //! @param grid_size
-  //! @param sprites_per_frame
-  //! @param sprites_per_sequence
-  //! @param solid_mask
+  //! @param indices_per_frame
+  //! @param indices_per_sequence
+  //! @param collision_mask
   //! @param door_position
   explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list, sf::Texture spritesheet_texture,
-                        const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size = { 1, 1 }, unsigned int sprites_per_frame = 1,
-                        unsigned int sprites_per_sequence = 1, std::vector<bool> solid_mask = {}, sf::Vector2i door_position = {} );
+                        const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size = { 1, 1 }, unsigned int indices_per_frame = 1,
+                        unsigned int indices_per_sequence = 1, std::vector<bool> collision_mask = {}, sf::Vector2i door_position = {} );
 
   SpriteSheet( SpriteSheet && ) = default;
   SpriteSheet &operator=( SpriteSheet && ) = default;
@@ -81,17 +81,19 @@ public:
   //! @return A texture index in the range [0, sprite count)
   [[nodiscard]] std::size_t get_random_texture_index() const;
 
-  //! @brief The number of 16x16 sprites within an animation frame
+  //! @brief How many `sprite_indices` entries make one animation frame. Each entry already selects a whole
+  //! `grid_size` area, so this is normally 1.
   //! @return unsigned int
-  [[nodiscard]] unsigned int frame_size() const { return m_sprites_per_frame; }
+  [[nodiscard]] unsigned int indices_per_frame() const { return m_indices_per_frame; }
 
-  //! @brief The number of frames per animation sequence
+  //! @brief How many `sprite_indices` entries the animation loops over. The number of animation frames is this
+  //! divided by indices_per_frame().
   //! @return unsigned int
-  [[nodiscard]] unsigned int sequence_size() const { return m_sprites_per_sequence; }
+  [[nodiscard]] unsigned int indices_per_sequence() const { return m_indices_per_sequence; }
 
-  //! @brief The solid mask list of bools
-  //! @return const std::vector<bool>&
-  [[nodiscard]] const std::vector<bool> &solid_mask() const { return m_solid_mask; }
+  //! @brief Which cells of the sprite collide, one bool per grid cell in row-major order.
+  //! @return Either empty, meaning every cell collides, or at least one entry per `grid_size` cell.
+  [[nodiscard]] const std::vector<bool> &collision_mask() const { return m_collision_mask; }
 
   //! @brief Get the door tile position within the sprite grid.
   //! @return sf::Vector2i
@@ -138,6 +140,15 @@ private:
   //! @return false otherwise
   bool add_sprite( const std::vector<uint32_t> &spritesheet_selections );
 
+  //! @brief Apply the collision mask rules from spritesheets.json: an omitted mask stays empty (every cell
+  //! collides), and a single entry is expanded to that value for every grid cell.
+  //! @param collision_mask The mask as loaded.
+  //! @param grid_size The sprite's grid size.
+  //! @param type The sprite sheet's type, for the error message.
+  //! @return The mask to store.
+  //! @throws std::runtime_error if the mask has more than one entry but fewer than one per grid cell.
+  static std::vector<bool> normalise_collision_mask( std::vector<bool> collision_mask, sf::Vector2i grid_size, const Sys::SpriteKey &type );
+
   //! @brief Identifier for this sprite sheet's type.
   Sys::SpriteKey m_sprite_type;
 
@@ -150,14 +161,14 @@ private:
   //! @brief width and height grid size for the multi-sprite
   sf::Vector2i m_grid_size{ 1, 1 };
 
-  //! @brief number of sprites per animation frame
-  unsigned int m_sprites_per_frame{ 1 };
+  //! @brief Number of `sprite_indices` entries per animation frame. See indices_per_frame().
+  unsigned int m_indices_per_frame{ 1 };
 
-  //! @brief Number of animation frames per full animation sequence.
-  unsigned int m_sprites_per_sequence{ 1 };
+  //! @brief Number of `sprite_indices` entries in a full animation sequence. See indices_per_sequence().
+  unsigned int m_indices_per_sequence{ 1 };
 
-  //! @brief Indicates which 'sprite_indices' the player cannot traverse. Array size must match sprite_indices size.
-  std::vector<bool> m_solid_mask;
+  //! @brief Which grid cells of the sprite collide, in row-major order. See collision_mask().
+  std::vector<bool> m_collision_mask;
 
   //! @brief Door tile position within the sprite grid, if this sheet represents a structure with a door.
   sf::Vector2i m_door_position;

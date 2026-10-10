@@ -100,7 +100,7 @@ std::vector<PathNode> astar( entt::registry &reg, const PathFinding::SpatialHash
       // A node is the grid cell its entity is bucketed in, but not every navmesh entity is one aligned cell: the
       // player moves sub-grid, and a multiblock root spans several cells from its top-left. Reduce each to its
       // cell, otherwise the exact goal comparison never matches an off-grid player, and a multiblock root is
-      // expanded from its centre, which sits inside its own solid cells and lets the path jump through them.
+      // expanded from its centre, which sits inside its own colliding cells and lets the path jump through them.
       const Cmp::Position snapped_neighbour_pos( Utils::snap_to_grid( neighbour_entity_pos->position, Utils::Rounding::TOWARDS_ZERO ),
                                                  Constants::kGridSizePxF );
       const Cmp::Position *neighbour_pos = &snapped_neighbour_pos;

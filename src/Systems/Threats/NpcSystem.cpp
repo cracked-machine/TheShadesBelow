@@ -359,7 +359,9 @@ void NpcSystem::check_once_collision()
       // relaxed bounds to allow player to sneak past during lerp transition. Inset by a fixed margin rather
       // than scaled, so a multiblock NPC keeps a hitbox covering its body instead of a dot at its centre.
       // Only the cells a multiblock NPC stands on collide: the rows above them are off the ground.
-      const sf::FloatRect npc_bounds = Utils::Npc::collision_bounds( reg(), npc_entity );
+      const auto npc_collision_bounds = Utils::Npc::collision_bounds( reg(), npc_entity );
+      if ( not npc_collision_bounds ) continue;
+      const sf::FloatRect &npc_bounds = *npc_collision_bounds;
       const sf::Vector2f touch_inset = Constants::kGridSizePxF * 0.45f;
       const sf::FloatRect npc_touch_bounds( npc_bounds.position + touch_inset, npc_bounds.size - touch_inset * 2.f );
       const bool touching_player = player_pos.findIntersection( npc_touch_bounds ).has_value();
@@ -425,7 +427,8 @@ void NpcSystem::check_timed_collision( sf::Time dt )
     if ( npc_action_timer.asSeconds() < npc_action.interval() ) continue;
 
     // only the cells a multiblock NPC stands on collide: the rows above them are off the ground
-    if ( not player_pos.findIntersection( Utils::Npc::collision_bounds( reg(), npc_entity ) ) ) continue;
+    const auto npc_collision_bounds = Utils::Npc::collision_bounds( reg(), npc_entity );
+    if ( not npc_collision_bounds or not player_pos.findIntersection( *npc_collision_bounds ) ) continue;
 
     Utils::Player::get_stats( reg() ).apply( npc_action );
     reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );

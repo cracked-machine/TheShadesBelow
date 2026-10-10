@@ -3,6 +3,7 @@
 
 #include <Components/Npc/Footprint.hpp>
 #include <Systems/Stores/StoreKey.hpp>
+#include <optional>
 #include <source_location>
 namespace Game::Cmp
 {
@@ -48,8 +49,8 @@ Sys::SpriteKey get_sprite_type( entt::registry &reg, entt::entity npc_entt, std:
 //! whole Cmp::Position.
 //! @param reg reference to the entt registry
 //! @param npc_entt An NPC entity with a Cmp::Position.
-//! @return sf::FloatRect
-sf::FloatRect collision_bounds( entt::registry &reg, entt::entity npc_entt );
+//! @return The collision rect, or std::nullopt if the NPC's footprint does not collide (an all-false collision mask).
+std::optional<sf::FloatRect> collision_bounds( entt::registry &reg, entt::entity npc_entt );
 
 //! @brief Outcome of a single pathfind_toward() step
 enum class PathfindResult {

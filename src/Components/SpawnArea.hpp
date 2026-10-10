@@ -9,18 +9,18 @@ class SpawnArea
 {
 public:
   //! @brief Construct a spawn area marker.
-  //! @param solid_mask Whether collision detection is enabled for this spawn area.
-  SpawnArea( bool solid_mask )
-      : m_solid_mask( solid_mask )
+  //! @param collision_mask Whether collision detection is enabled for this spawn area.
+  SpawnArea( bool collision_mask )
+      : m_collision_mask( collision_mask )
   {
   }
 
   //! @brief Returns whether collision detection is enabled for this spawn area.
-  bool isSolidMask() const { return m_solid_mask; }
+  bool isCollisionMask() const { return m_collision_mask; }
 
 private:
   //! @brief Is collision detection enabled for this sprite.
-  bool m_solid_mask{ true };
+  bool m_collision_mask{ true };
 };
 
 } // namespace Game::Cmp

@@ -132,8 +132,9 @@ Sprite sheets are loaded using the [SpriteStore](src/Systems/Stores/SpriteStore.
 |sprite_indices|The 16x16 grid index location for each sprite that should be loaded from the texture file.|
 |zorder|Each sprite index can have an independent zorder value. If you set the value to zero then the y-axis position is used.|
 |grid_size|Multi-block setting. The width and height of the sprite in 16x16 grid size.|
-|sprites_per_frame|The number of `sprite_indices` entries that make up one animation frame. Set this to 1, including for multi-block sprites: each `sprite_indices` entry already selects the whole `grid_size` area.|
-|sprites_per_sequence|Animation setting. To enable animation this should match the length of the `sprite_indices` field. To disable animation set it to 1.|
+|indices_per_frame|The number of `sprite_indices` entries that make up one animation frame. Set this to 1, including for multi-block sprites: each `sprite_indices` entry already selects the whole `grid_size` area.|
+|collision_mask|Optional. Which cells of the sprite collide, one boolean per `grid_size` cell in row-major order. For NPCs these are the cells it stands on, used for collision and pathfinding clearance. A single entry (e.g. `[true]`) applies to every cell. If omitted, every cell collides. All `false` means the sprite does not collide.|
+|indices_per_sequence|Animation setting. To enable animation this should match the length of the `sprite_indices` field. To disable animation set it to 1.|
 
 ## Particle System
 

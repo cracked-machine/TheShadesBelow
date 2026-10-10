@@ -2,30 +2,33 @@
 #include <Sprites/SpriteSheet.hpp>
 
 #include <algorithm>
-#include <functional>
+#include <spdlog/spdlog.h>
 
 namespace Game::Cmp::Npc
 {
 
 Footprint::Footprint( const Sprites::SpriteSheet &ss )
 {
-  auto grid = ss.get_grid_size();
-  if ( grid == sf::Vector2i{ 1, 1 } ) return;
-
-  const auto &solid_mask = ss.solid_mask();
-  const auto grid_cell_count = grid.x * grid.y;
-  // a missing, short or all-false mask means the NPC stands on every cell it covers
-  const bool use_mask = solid_mask.size() >= static_cast<size_t>( grid_cell_count ) and
-                        std::ranges::any_of( solid_mask | std::views::take( grid_cell_count ), std::identity{} );
+  const auto grid = ss.get_grid_size();
+  // the sprite sheet guarantees the mask is either empty (every cell collides) or has at least one entry per cell
+  const auto &collision_mask = ss.collision_mask();
 
   m_cells.clear();
   for ( int gy = 0; gy < grid.y; ++gy )
   {
     for ( int gx = 0; gx < grid.x; ++gx )
     {
-      if ( use_mask and not solid_mask[( gy * grid.x ) + gx] ) continue;
+      if ( not collision_mask.empty() and not collision_mask[static_cast<std::size_t>( ( gy * grid.x ) + gx )] ) continue;
       m_cells.emplace_back( gx, gy );
     }
+  }
+
+  if ( m_cells.empty() )
+  {
+    // an all-false mask is valid: the NPC doesn't collide. Pathfinding still needs a cell to route.
+    SPDLOG_WARN( "{} has no true entries in its collision_mask: NPC will not collide", ss.type().str() );
+    m_cells.emplace_back( 0, 0 );
+    m_collides = false;
   }
 
   sf::Vector2i min_cell = m_cells.front();

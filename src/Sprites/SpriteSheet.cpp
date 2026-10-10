@@ -13,15 +13,15 @@ namespace Game::Sprites
 
 SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list,
                           const std::filesystem::path &spritesheet_png, const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size,
-                          unsigned int sprites_per_frame, unsigned int sprites_per_sequence, std::vector<bool> solid_mask,
+                          unsigned int indices_per_frame, unsigned int indices_per_sequence, std::vector<bool> collision_mask,
                           sf::Vector2i door_position )
     : m_sprite_type{ std::move( type ) },
       m_display_name( std::move( display_name ) ),
       m_zorder_list( zorder_list ),
       m_grid_size{ grid_size },
-      m_sprites_per_frame{ sprites_per_frame },
-      m_sprites_per_sequence{ sprites_per_sequence },
-      m_solid_mask{ std::move( solid_mask ) },
+      m_indices_per_frame{ indices_per_frame },
+      m_indices_per_sequence{ indices_per_sequence },
+      m_collision_mask{ normalise_collision_mask( std::move( collision_mask ), grid_size, m_sprite_type ) },
       m_door_position( door_position )
 {
   m_spritesheet_texture = std::make_unique<sf::Texture>();
@@ -40,15 +40,15 @@ SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const s
 }
 
 SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list, sf::Texture tilemap_texture,
-                          const std::vector<uint32_t> &tilemap_picks, sf::Vector2i grid_size, unsigned int sprites_per_frame,
-                          unsigned int sprites_per_sequence, std::vector<bool> solid_mask, sf::Vector2i door_position )
+                          const std::vector<uint32_t> &tilemap_picks, sf::Vector2i grid_size, unsigned int indices_per_frame,
+                          unsigned int indices_per_sequence, std::vector<bool> collision_mask, sf::Vector2i door_position )
     : m_sprite_type{ std::move( type ) },
       m_display_name( std::move( display_name ) ),
       m_zorder_list( zorder_list ),
       m_grid_size{ grid_size },
-      m_sprites_per_frame{ sprites_per_frame },
-      m_sprites_per_sequence{ sprites_per_sequence },
-      m_solid_mask{ std::move( solid_mask ) },
+      m_indices_per_frame{ indices_per_frame },
+      m_indices_per_sequence{ indices_per_sequence },
+      m_collision_mask{ normalise_collision_mask( std::move( collision_mask ), grid_size, m_sprite_type ) },
       m_door_position( door_position )
 {
   SPDLOG_DEBUG( "Loaded tilemap texture" );
@@ -59,6 +59,29 @@ SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const s
     SPDLOG_CRITICAL( "Failed to load tilemap" );
     throw std::runtime_error( "Failed to load tilemap" );
   }
+}
+
+std::vector<bool> SpriteSheet::normalise_collision_mask( std::vector<bool> collision_mask, sf::Vector2i grid_size, const Sys::SpriteKey &type )
+{
+  const auto cell_count = static_cast<std::size_t>( grid_size.x * grid_size.y );
+
+  // omitted: every cell collides. Readers treat an empty mask that way.
+  if ( collision_mask.empty() ) return collision_mask;
+
+  // shortcut: a single entry applies to every cell
+  if ( collision_mask.size() == 1 )
+  {
+    collision_mask.assign( cell_count, collision_mask.front() );
+    return collision_mask;
+  }
+
+  if ( collision_mask.size() < cell_count )
+  {
+    SPDLOG_ERROR( "{} collision_mask has {} entries, expected 1 or at least {}", type.str(), collision_mask.size(), cell_count );
+    throw std::runtime_error( "Invalid collision_mask for " + type.str() + ": expected 1 or at least " + std::to_string( cell_count ) +
+                              " entries, got " + std::to_string( collision_mask.size() ) );
+  }
+  return collision_mask;
 }
 
 bool SpriteSheet::add_sprite( const std::vector<uint32_t> &tilemap_picks )

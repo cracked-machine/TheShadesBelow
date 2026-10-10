@@ -66,18 +66,18 @@ void create_multiblock( entt::registry &reg, entt::entity entity, const Cmp::UUI
   // clang-format on
 }
 
-//! @brief Recompute solid mask, z-order and pathfinding-blocking components for every MBSEGMENT inside `mb_cmp`'s bounds.
+//! @brief Recompute collision mask, z-order and pathfinding-blocking components for every MBSEGMENT inside `mb_cmp`'s bounds.
 //! @tparam MULTIBLOCK Multiblock bounds component type.
 //! @tparam MBSEGMENT Multiblock segment component type.
 //! @param reg
-//! @param ss Sprite sheet providing the solid mask and z-order lookup tables.
+//! @param ss Sprite sheet providing the collision mask and z-order lookup tables.
 //! @param mb_entt
 //! @param mb_cmp Multiblock bounds used to find owned segments and their relative grid position.
 template <typename MULTIBLOCK, typename MBSEGMENT>
   requires IsMB<MULTIBLOCK> && IsMBSegment<MBSEGMENT>
 void update_segments( entt::registry &reg, const Sprites::SpriteSheet &ss, [[maybe_unused]] entt::entity mb_entt, MULTIBLOCK mb_cmp )
 {
-  auto solid_masks = ss.solid_mask();
+  auto collision_masks = ss.collision_mask();
 
   for ( auto [entity, segment_cmp, pos_cmp] : reg.view<MBSEGMENT, Cmp::Position>().each() )
   {
@@ -91,15 +91,15 @@ void update_segments( entt::registry &reg, const Sprites::SpriteSheet &ss, [[may
 
     std::size_t calculated_grid_index = ( rel_grid_y * ss.get_grid_size().x ) + rel_grid_x;
 
-    bool new_solid_mask = true;
-    if ( not solid_masks.empty() && solid_masks.size() > calculated_grid_index ) { new_solid_mask = solid_masks.at( calculated_grid_index ); }
+    bool new_collision_mask = true;
+    if ( not collision_masks.empty() && collision_masks.size() > calculated_grid_index ) { new_collision_mask = collision_masks.at( calculated_grid_index ); }
 
-    segment_cmp.set_solid_mask( new_solid_mask );
+    segment_cmp.set_collision_mask( new_collision_mask );
     reg.emplace_or_replace<Cmp::ZOrderValue>( entity, pos_cmp.position.y + ss.zorder( calculated_grid_index ) );
     SPDLOG_DEBUG( "{} {} Zorder is set {} for y {}", static_cast<uint32_t>( entity ), ss.get_sprite_type(),
                   pos_cmp.position.y + ss.get_zorder( calculated_grid_index ), pos_cmp.position.y );
 
-    if ( new_solid_mask )
+    if ( new_collision_mask )
     {
       reg.emplace_or_replace<Cmp::Npc::NoPathFinding>( entity );
       if constexpr ( std::is_same_v<MBSEGMENT, Cmp::PlantSegment> )

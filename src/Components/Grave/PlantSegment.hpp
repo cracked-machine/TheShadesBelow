@@ -10,23 +10,23 @@ class PlantSegment
 {
 public:
   //! @brief Construct a new PlantSegment object.
-  //! @param solid_mask Whether collision detection is enabled for this segment.
-  PlantSegment( bool solid_mask )
-      : m_solid_mask( solid_mask )
+  //! @param collision_mask Whether collision detection is enabled for this segment.
+  PlantSegment( bool collision_mask )
+      : m_collision_mask( collision_mask )
   {
   }
 
   //! @brief Check whether collision detection is enabled for this segment.
   //! @return bool
-  bool isSolidMask() const { return m_solid_mask; }
+  bool isCollisionMask() const { return m_collision_mask; }
 
   //! @brief Set whether collision detection is enabled for this segment.
-  //! @param solid_mask true to enable collision detection.
-  void set_solid_mask( bool solid_mask ) { m_solid_mask = solid_mask; }
+  //! @param collision_mask true to enable collision detection.
+  void set_collision_mask( bool collision_mask ) { m_collision_mask = collision_mask; }
 
 private:
   //! @brief Is collision detection enabled for this segment.
-  bool m_solid_mask{ true };
+  bool m_collision_mask{ true };
 };
 
 } // namespace Game::Cmp
