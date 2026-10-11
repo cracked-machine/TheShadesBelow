@@ -114,10 +114,13 @@ void BombSystem::update()
 
     // detonate loot containers - component removal is handled by LootSystem
     Utils::Collision::for_each_intersect<Cmp::LootContainer>( reg(), armed_pos_cmp,
-                                                              [&]( entt::entity loot_entt, Cmp::LootContainer &, Cmp::Position & )
+                                                              [&]( entt::entity loot_entt, Cmp::LootContainer &, Cmp::Position &loot_pos_cmp )
     {
       if ( loot_entt != entt::null ) { m_sound_bank.get_effect( "break_pot" ).play(); }
       Factory::Loot::destroy_loot_container( reg(), loot_entt, reserved_sm );
+      pathfinding_navmesh->insert( loot_entt, loot_pos_cmp );
+      player_navmesh->remove( loot_entt, loot_pos_cmp );
+      if ( auto ghost_navmesh = m_ghost_navmesh.lock() ) { ghost_navmesh->insert( loot_entt, loot_pos_cmp ); }
     } );
 
     // detonate npc containers - these are activated by proximity so just destroy them

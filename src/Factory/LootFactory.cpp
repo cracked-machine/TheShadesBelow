@@ -1,6 +1,9 @@
 #include <Components/Armable.hpp>
 #include <Components/LootContainer.hpp>
+#include <Components/Npc/NoPathFinding.hpp>
+#include <Components/Particle/BlockParticle.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/NoPath.hpp>
 #include <Components/Position.hpp>
 #include <Factory/LootFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
@@ -16,6 +19,9 @@ void create_loot_container( entt::registry &reg, entt::entity entt, Cmp::Positio
 
   reg.emplace_or_replace<Cmp::Armable>( entt );
   reg.emplace_or_replace<Cmp::LootContainer>( entt );
+  reg.emplace_or_replace<Cmp::Player::NoPath>( entt );
+  reg.emplace_or_replace<Cmp::Npc::NoPathFinding>( entt );
+  reg.emplace_or_replace<Cmp::Particle::BlockParticle>( entt );
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( entt, Cmp::AnimData::Config{ 
         .sprite_type = sprite_type, 
@@ -31,6 +37,9 @@ void destroy_loot_container( entt::registry &registry, entt::entity loot_contain
                              const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
 {
   registry.remove<Cmp::LootContainer>( loot_container_entity );
+  registry.remove<Cmp::Player::NoPath>( loot_container_entity );
+  registry.remove<Cmp::Npc::NoPathFinding>( loot_container_entity );
+  registry.remove<Cmp::Particle::BlockParticle>( loot_container_entity );
   if ( reserved_sm )
   {
     if ( auto *pos_cmp = registry.try_get<Cmp::Position>( loot_container_entity ) ) reserved_sm->remove( loot_container_entity, *pos_cmp );

@@ -452,7 +452,16 @@ void ActionSystem::check_player_smash_pot()
         auto dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
         get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 
+        // copy the position: destroy_loot_container removes components from this entity
+        Cmp::Position destroyed_pos_cmp = loot_container_pos;
         Factory::Loot::destroy_loot_container( reg(), loot_entity, m_reserved_sm.lock() );
+
+        // add the position to the spatial grid so it can be used in pathfinding
+        if ( PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock() )
+          pathfinding_navmesh->insert( loot_entity, destroyed_pos_cmp );
+        if ( PathFinding::SpatialHashGridSharedPtr ghost_navmesh = m_ghost_navmesh.lock() ) ghost_navmesh->insert( loot_entity, destroyed_pos_cmp );
+        if ( PathFinding::SpatialHashGridSharedPtr player_navmesh = m_player_navmesh.lock() )
+          player_navmesh->remove( loot_entity, destroyed_pos_cmp );
 
         break;
       }
@@ -483,7 +492,7 @@ void ActionSystem::check_player_smash_pot()
         sf::FloatRect( Utils::snap_to_grid( cached_loot_container_pos ), Constants::kGridSizePxF ), 
         Factory::IncludePack<>{},
         Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 
-        // no spatial exclude for the player: they are usually overlapping the pot's tile when they smash it
+        // no spatial exclude for the player: they are adjacent to the pot's tile when they smash it
         Factory::ExcludePack<Cmp::Obstacle>{},
         /*zorder_offset=*/-8.f, 
         reserved_sm.get() 

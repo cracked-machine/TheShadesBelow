@@ -17,6 +17,8 @@ namespace Game::Factory::Loot
 {
 
 //! @brief Turn `entt` into a loot container entity (chest/pot etc.) that can later drop loot.
+//! The container blocks player movement (Cmp::Player::NoPath) and NPC pathfinding (Cmp::Npc::NoPathFinding).
+//! @note Call before the navmeshes are built, otherwise they need updating by the caller.
 //! @param registry
 //! @param entt Entity to attach the loot container components to.
 //! @param pos_cmp
@@ -27,6 +29,8 @@ void create_loot_container( entt::registry &registry, entt::entity entt, Cmp::Po
                             std::size_t sprite_tile_idx, float zorder );
 
 //! @brief Remove the components added by create_loot_container(), without destroying the entity.
+//! @note The NPC navmeshes dropped this tile when they were built, so the caller must re-insert the
+//! entity into them afterwards to make the tile traversable for NPCs again.
 //! @param registry
 //! @param loot_entity
 //! @param reserved_sm If provided, un-reserves the container's position.
