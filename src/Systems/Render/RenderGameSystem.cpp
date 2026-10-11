@@ -64,6 +64,7 @@
 #include <Systems/Render/RenderPassTypes.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Threats/HazardFieldSystemImpl.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
@@ -187,8 +188,25 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
   sf::FloatRect render_rect = pos_cmp;
   if ( render_offset_cmp ) render_rect.position += render_offset_cmp->getOffset();
 
-  safe_render_sprite_world( anim_cmp.m_sprite_type, render_rect, anim_cmp.getFrameIndexOffset() + anim_cmp.m_current_frame, { 1.f, 1.f }, alpha,
-                            origin, angle );
+  // a negative scale mirrors the sprite about its origin, so shift it back to mirror it in place
+  sf::Vector2f scale{ 1.f, 1.f };
+  if ( anim_cmp.m_flip_x or anim_cmp.m_flip_y )
+  {
+    const sf::Vector2f sprite_size = Sys::SpriteStore::instance().get( anim_cmp.m_sprite_type ).sprite_size();
+    if ( anim_cmp.m_flip_x )
+    {
+      scale.x = -1.f;
+      render_rect.position.x += sprite_size.x - ( 2.f * origin.x );
+    }
+    if ( anim_cmp.m_flip_y )
+    {
+      scale.y = -1.f;
+      render_rect.position.y += sprite_size.y - ( 2.f * origin.y );
+    }
+  }
+
+  safe_render_sprite_world( anim_cmp.m_sprite_type, render_rect, anim_cmp.getFrameIndexOffset() + anim_cmp.m_current_frame, scale, alpha, origin,
+                            angle );
 
   // per-entity decorations drawn on top of the sprite
   if ( const auto *wear_cmp = reg().try_get<Cmp::Inventory::WearLevel>( entity ) ) render_wear_level( wear_cmp->m_level, pos_cmp );

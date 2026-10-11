@@ -22,14 +22,6 @@ public:
       : sf::Vector2f( dir )
   {
   }
-
-  //! @brief Used for sprite flipping: 1.f for moving right, -1.f for moving left.
-  //! @note Defaults to 1.f, otherwise we get no sprite until we move.
-  float x_scale = 1.f;
-
-  //! @brief Used for sprite positioning after flip: 0 for moving right,
-  //!        BaseSystem::kGridSquareSizePixels.x for moving left.
-  float x_offset = 0.f;
 };
 
 } // namespace Game::Cmp

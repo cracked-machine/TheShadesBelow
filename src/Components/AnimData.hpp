@@ -10,8 +10,7 @@ namespace Game::Cmp
 {
 
 //! @brief How an animation sequence behaves once it reaches its last frame.
-enum class AnimType
-{
+enum class AnimType {
   //! @brief Restart the sequence from its base frame and keep animating indefinitely.
   LOOP,
   //! @brief Play once, then deactivate and reset the current frame back to the base frame.
@@ -71,16 +70,22 @@ struct AnimData
   //! @brief The SpriteSheet object type (string) that we are animating
   Sys::SpriteKey m_sprite_type;
 
+  //! @brief Draw the sprite mirrored horizontally, in place. For sprites with a single side-facing sheet.
+  bool m_flip_x{ false };
+
+  //! @brief Draw the sprite mirrored vertically, in place.
+  bool m_flip_y{ false };
+
   //! @brief Get the frame index offset for multi-block sprites
   //! @return unsigned int
-  unsigned int getFrameIndexOffset() const { return m_frame_index_offset; }
+  [[nodiscard]] unsigned int getFrameIndexOffset() const { return m_frame_index_offset; }
 
   //! @brief Behaviour of the animation once it reaches its last frame.
   AnimType m_anim_type;
 
   //! @brief Get the framerate override, if one has been set.
   //! @return std::optional<float> Framerate in frames per second, or empty to use the sprite sheet's framerate.
-  std::optional<float> framerate_override() const { return m_framerate_override; }
+  [[nodiscard]] std::optional<float> framerate_override() const { return m_framerate_override; }
 
   //! @brief Replace the sprite sheet's framerate for this entity. Used for movement-driven animation.
   //! @param framerate Frames per second. 0 = not animated.

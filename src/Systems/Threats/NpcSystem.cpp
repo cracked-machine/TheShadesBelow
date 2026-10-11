@@ -220,6 +220,11 @@ void NpcSystem::update_animation()
       if ( npc_dir_cmp.x > 0 ) { anim_cmp.m_sprite_type = "sprite.wisp.east"; }
       else if ( npc_dir_cmp.x < 0 ) { anim_cmp.m_sprite_type = "sprite.wisp.west"; }
     }
+    else if ( anim_cmp.m_sprite_type.contains( "sprite.eldermother" ) )
+    {
+      if ( npc_dir_cmp.x > 0 ) { anim_cmp.m_flip_x = false; }
+      else if ( npc_dir_cmp.x < 0 ) { anim_cmp.m_flip_x = true; }
+    }
   }
 }
 
