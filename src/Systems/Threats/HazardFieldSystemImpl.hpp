@@ -16,10 +16,10 @@
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/DestroyNpcEvent.hpp>
 #include <Events/PauseClocksEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/ResumeClocksEvent.hpp>
-#include <Factory/NpcFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <SFML/System/Time.hpp>
 #include <Systems/PersistSystemImpl.hpp>
@@ -267,12 +267,7 @@ void HazardFieldSystem<HazardType>::check_npc_hazard_field_collision()
     {
       if ( not npc_pos_cmp.findIntersection( hazard_pos_cmp ) ) continue;
 
-      auto loot_entity = Factory::Npc::destroy_npc( reg(), npc_entt );
-      if ( loot_entity != entt::null )
-      {
-        SPDLOG_DEBUG( "Dropped RELIC_DROP loot at NPC death position." );
-        m_sound_bank.get_effect( "drop_relic" ).play();
-      }
+      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt ) );
       SPDLOG_DEBUG( "NPC fell into a hazard field at position ({}, {})!", hazard_pos_cmp.x, hazard_pos_cmp.y );
       return;
     }

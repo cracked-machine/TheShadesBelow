@@ -21,6 +21,7 @@
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/DestroyNpcEvent.hpp>
 #include <Events/PauseClocksEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/ResumeClocksEvent.hpp>
@@ -186,12 +187,10 @@ void BombSystem::update()
     {
       auto *npc_pos_cmp = reg().try_get<Cmp::Position>( npc_entt );
       if ( not npc_pos_cmp ) continue;      // already processed (e.g. removed by an earlier entity's side effects)
-      Cmp::Position npc_pos = *npc_pos_cmp; // copy - destroy_npc() below removes the component
-
-      Factory::Npc::create_npc_death_anim( reg(), npc_pos, "sprite.death.anim.explosion" );
+      Cmp::Position npc_pos = *npc_pos_cmp; // copy - the DestroyNpcEvent below removes the component
 
       SPDLOG_INFO( "NPC entity {} exploded at {},{}", static_cast<int>( npc_entt ), npc_pos.position.x, npc_pos.position.y );
-      Factory::Npc::destroy_npc( reg(), npc_entt );
+      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, Sys::SpriteKey( "sprite.death.anim.explosion" ) ) );
 
       const auto &loot_ss = Sys::SpriteStore::instance().get_random(
           { "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" } );

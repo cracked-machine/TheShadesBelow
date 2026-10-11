@@ -11,14 +11,23 @@
 #include <Components/Grave/Segment.hpp>
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/Container.hpp>
+#include <Components/Npc/Drknox.hpp>
 #include <Components/Npc/ElderMother.hpp>
 #include <Components/Npc/Friendly.hpp>
 #include <Components/Npc/Ghost.hpp>
+#include <Components/Npc/LerpSpeed.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Npc/Priest.hpp>
+#include <Components/Npc/ShadowHand.hpp>
 #include <Components/Npc/Shockwave.hpp>
+#include <Components/Npc/ShockwaveTimer.hpp>
+#include <Components/Npc/Skeleton.hpp>
+#include <Components/Npc/Spider.hpp>
+#include <Components/Npc/Watchman.hpp>
 #include <Components/Npc/WatchmanSearchlight.hpp>
 #include <Components/Npc/Wisp.hpp>
+#include <Components/Npc/Witch.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
@@ -38,6 +47,7 @@
 #include <Components/Wall.hpp>
 #include <Components/Wormhole/Jump.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/DestroyNpcEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/UpdateNpcPositionEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
@@ -74,6 +84,7 @@ NpcSystem::NpcSystem( entt::registry &reg, sf::RenderWindow &window, Audio::Soun
 {
   SPDLOG_DEBUG( "NpcSystem initialized" );
   std::ignore = get_systems_event_queue().sink<Events::UpdateNpcPositionEvent>().connect<&NpcSystem::on_update_npc_position_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::DestroyNpcEvent>().connect<&NpcSystem::on_destroy_npc_event>( this );
 }
 
 void NpcSystem::on_update_npc_position_event( const Events::UpdateNpcPositionEvent &event )
@@ -104,10 +115,60 @@ void NpcSystem::on_update_npc_position_event( const Events::UpdateNpcPositionEve
   }
 }
 
+void NpcSystem::on_destroy_npc_event( const Events::DestroyNpcEvent &event )
+{
+  const entt::entity npc_entity = event.m_npc_entity;
+  if ( not reg().valid( npc_entity ) ) return;
+  auto *pos_cmp = reg().try_get<Cmp::Position>( npc_entity );
+  if ( not pos_cmp ) return;
+
+  // The bucket the NPC is in is the cell it last set off from, not wherever it has lerped to since. A step that
+  // hasn't started yet (zero lerp factor) has no m_start: the NPC is still in the cell it is standing on.
+  Cmp::Position bucket_position = *pos_cmp;
+  if ( auto *lerp_pos_cmp = reg().try_get<Cmp::LerpPosition>( npc_entity ) )
+  {
+    if ( lerp_pos_cmp->m_lerp_factor > 0.0f ) { bucket_position.position = lerp_pos_cmp->m_start; }
+    reg().remove<Cmp::LerpPosition>( npc_entity );
+  }
+
+  // navmesh_for reads the NPC's type marker, so this has to happen before the markers are removed below
+  if ( auto navmesh = navmesh_for( npc_entity ) ) { navmesh->remove( npc_entity, bucket_position ); }
+
+  // the animation plays where the NPC is seen to be, which is its mid-step position rather than its bucket
+  if ( event.m_death_anim ) { create_death_anim( *pos_cmp, *event.m_death_anim ); }
+
+  Factory::Npc::destroy_npc( reg(), npc_entity );
+
+  // the entity outlives its NPC, so strip everything else that would have it mistaken for a live one
+  reg().remove<Cmp::Npc::LerpSpeed, Cmp::Npc::Friendly, Cmp::Npc::ShockwaveTimer, Cmp::Npc::WatchmanSearchlight>( npc_entity );
+  reg().remove<Cmp::Npc::Drknox, Cmp::Npc::ElderMother, Cmp::Npc::Ghost, Cmp::Npc::Priest, Cmp::Npc::ShadowHand, Cmp::Npc::Skeleton, Cmp::Npc::Spider,
+               Cmp::Npc::Watchman, Cmp::Npc::Wisp, Cmp::Npc::Witch>( npc_entity );
+}
+
+entt::entity NpcSystem::create_death_anim( const Cmp::Position &npc_pos_cmp, const Sys::SpriteKey &death_anim )
+{
+  auto npc_death_entity = reg().create();
+  // anchor the animation on the middle cell of the NPC's body (a no-op for single-block NPCs)
+  const sf::Vector2f death_pos = npc_pos_cmp.position + ( npc_pos_cmp.size - Constants::kGridSizePxF ) * 0.5f;
+  reg().emplace<Cmp::Position>( npc_death_entity, death_pos, Constants::kGridSizePxF );
+  reg().emplace_or_replace<Cmp::DeathPosition>( npc_death_entity, death_pos, Constants::kGridSizePxF );
+
+  // clang-format off
+  reg().emplace_or_replace<Cmp::AnimData>( npc_death_entity, Cmp::AnimData::Config{ 
+        .sprite_type = death_anim, 
+        .enabled = true,
+        .anim_type =  Cmp::AnimType::ONESHOTRESET
+  });
+  // clang-format on
+
+  reg().emplace_or_replace<Cmp::ZOrderValue>( npc_death_entity, death_pos.y );
+  return npc_death_entity;
+}
+
 void NpcSystem::update( sf::Time dt )
 {
 
-  // remove any finished explosions
+  // remove any finished death animations
   for ( auto [death_entt, death_cmp, anim_cmp] : reg().view<Cmp::DeathPosition, Cmp::AnimData>().each() )
   {
     if ( not anim_cmp.m_enabled ) { Factory::Npc::remove_npc_death_anim( reg(), death_entt ); }
@@ -132,6 +193,9 @@ void NpcSystem::update( sf::Time dt )
   }
   update_sfx();
   update_movement( dt );
+
+  // before the collision checks, so the ElderMother can't hurt the player on the frame she is banished
+  check_elderflute_banish();
 
   if ( Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled )
   {
@@ -377,6 +441,21 @@ void NpcSystem::update_movement_for( PathFinding::SpatialHashGrid &navmesh, entt
   // everything, multiblock NPCs use it to move their sorting line down from the top-left anchor to their feet
   const float zorder_augment = Sys::SpriteStore::instance().get( Utils::Npc::get_sprite_type( reg(), npc_entity ) ).zorder( 0 );
   reg().patch<Cmp::ZOrderValue>( npc_entity, [&]( auto &zorder_cmp ) { zorder_cmp.set( pos_cmp->position.y + zorder_augment ); } );
+}
+
+void NpcSystem::check_elderflute_banish()
+{
+  auto [inventory_entt, inventory_type, _] = Utils::Player::get_inventory( reg() );
+  if ( inventory_type != "item.elderflute" or Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) return;
+
+  // same relaxed range as the NPC proximity modifiers in PlayerSystem::apply_npc_modifiers()
+  auto half_view = Cmp::RectBounds::scaled( Utils::calculate_view_bounds( RenderSystem::get_world_view() ), 0.5f );
+
+  for ( auto [npc_entt, em_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::ElderMother, Cmp::Position>().each() )
+  {
+    if ( not Utils::is_visible_in_view( half_view.getBounds(), npc_pos_cmp ) ) continue;
+    get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, Sys::SpriteKey( "sprite.death.anim.banish" ) ) );
+  }
 }
 
 void NpcSystem::check_once_collision()

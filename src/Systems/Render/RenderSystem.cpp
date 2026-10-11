@@ -47,7 +47,7 @@ void RenderSystem::draw_world( const sf::Drawable &drawable )
   target.setView( previous_view );
 }
 
-void RenderSystem::render_text( std::string text, unsigned int size, sf::Vector2f position, Alignment align, float letter_spacing,
+void RenderSystem::render_text( const std::string &text, unsigned int size, sf::Vector2f position, Alignment align, float letter_spacing,
                                 sf::Color fill_color, sf::Color outline_color )
 {
   sf::Text title_text( m_font, text, size );
@@ -62,7 +62,7 @@ void RenderSystem::render_text( std::string text, unsigned int size, sf::Vector2
   {
     sf::FloatRect text_bounds = title_text.getLocalBounds();
     sf::Vector2u display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
-    final_position.x = display_size.x * 0.5f;
+    final_position.x = static_cast<float>( display_size.x ) * 0.5f;
     final_position.x -= text_bounds.size.x * 0.5f;
   }
 
@@ -80,7 +80,7 @@ void RenderSystem::render_text( std::string text, unsigned int size, sf::Vector2
   active_render_target().draw( title_text );
 }
 
-void RenderSystem::safe_render_sprite_to_target( sf::RenderTarget &target, const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos_cmp,
+void RenderSystem::safe_render_sprite_to_target( sf::RenderTarget &target, const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos,
                                                  std::size_t sprite_index, sf::Vector2f scale, uint8_t alpha, sf::Vector2f origin, sf::Angle angle )
 {
 
@@ -94,7 +94,7 @@ void RenderSystem::safe_render_sprite_to_target( sf::RenderTarget &target, const
       Sys::VertexSprite sprite_buffer( sprite.get_vertex_array( sprite_index ), readonly_texture );
 
       // Adjust position to compensate for origin offset when origin != (0,0)
-      sf::Vector2f adjusted_position = pos_cmp.position;
+      sf::Vector2f adjusted_position = pos.position;
       if ( origin != sf::Vector2f( 0.f, 0.f ) ) { adjusted_position += origin; }
       sprite_buffer.setPosition( adjusted_position );
 
@@ -107,52 +107,52 @@ void RenderSystem::safe_render_sprite_to_target( sf::RenderTarget &target, const
     else
     {
       SPDLOG_WARN( "Unable to get idx: {}. {} has sprite count = {}", sprite_index, sprite_type, sprite.sheet_size() );
-      render_fallback_square_to_target( target, pos_cmp, sf::Color::Cyan );
+      render_fallback_square_to_target( target, pos, sf::Color::Cyan );
     }
   } catch ( const std::out_of_range &e )
   {
     // SPDLOG_WARN( "Missing sprite '{}' in map, rendering fallback square", sprite_type );
-    render_fallback_square_to_target( target, pos_cmp, sf::Color::Magenta );
+    render_fallback_square_to_target( target, pos, sf::Color::Magenta );
   }
 }
 
-void RenderSystem::render_fallback_square_to_target( sf::RenderTarget &target, const sf::FloatRect &pos_cmp, const sf::Color &color )
+void RenderSystem::render_fallback_square_to_target( sf::RenderTarget &target, const sf::FloatRect &pos, const sf::Color &color )
 {
   sf::RectangleShape fallback_square( Constants::kGridSizePxF );
-  fallback_square.setPosition( pos_cmp.position );
+  fallback_square.setPosition( pos.position );
   fallback_square.setFillColor( color );
   fallback_square.setOutlineColor( sf::Color::White );
   fallback_square.setOutlineThickness( 1.f );
   target.draw( fallback_square ); // Draw to specified target
 }
 
-void RenderSystem::safe_render_sprite_screen( const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos_cmp, std::size_t sprite_index,
+void RenderSystem::safe_render_sprite_screen( const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos, std::size_t sprite_index,
                                               sf::Vector2f scale, uint8_t alpha, sf::Vector2f origin, sf::Angle angle )
 {
   auto &target = active_render_target();
   const sf::View previous_view = target.getView();
   target.setView( get_screen_view() );
-  safe_render_sprite_to_target( target, sprite_type, pos_cmp, sprite_index, scale, alpha, origin, angle );
+  safe_render_sprite_to_target( target, sprite_type, pos, sprite_index, scale, alpha, origin, angle );
   target.setView( previous_view );
 }
 
 // Keep the original for backwards compatibility
-void RenderSystem::safe_render_sprite_world( const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos_cmp, std::size_t sprite_index,
+void RenderSystem::safe_render_sprite_world( const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos, std::size_t sprite_index,
                                              sf::Vector2f scale, uint8_t alpha, sf::Vector2f origin, sf::Angle angle )
 {
   auto &target = active_render_target();
   const sf::View previous_view = target.getView();
   target.setView( get_world_view() );
-  safe_render_sprite_to_target( target, sprite_type, pos_cmp, sprite_index, scale, alpha, origin, angle );
+  safe_render_sprite_to_target( target, sprite_type, pos, sprite_index, scale, alpha, origin, angle );
   target.setView( previous_view );
 }
 
-void RenderSystem::render_fallback_square_world( const sf::FloatRect &pos_cmp, const sf::Color &color )
+void RenderSystem::render_fallback_square_world( const sf::FloatRect &pos, const sf::Color &color )
 {
   auto &target = active_render_target();
   const sf::View previous_view = target.getView();
   target.setView( get_world_view() );
-  render_fallback_square_to_target( target, pos_cmp, color );
+  render_fallback_square_to_target( target, pos, color );
   target.setView( previous_view );
 }
 

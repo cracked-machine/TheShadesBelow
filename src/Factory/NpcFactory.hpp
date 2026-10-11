@@ -42,19 +42,13 @@ entt::entity create_npc( entt::registry &registry, entt::entity position_entity,
                          const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr );
 
 //! @brief Remove an NPC's components (applying its DestroyAction stat modifiers to the player first).
+//! @note Only NpcSystem may call this, as it keeps the NPC's navmesh in sync. Trigger an Events::DestroyNpcEvent instead.
 //! @param registry
 //! @param npc_entity
 //! @return entt::null. Kept for symmetry with create_npc(); no loot entity is created here.
 entt::entity destroy_npc( entt::registry &registry, entt::entity npc_entity );
 
-//! @brief Create the death animation entity played when an NPC dies.
-//! @param registry
-//! @param npc_position_cmp
-//! @param death_anim
-//! @return The new death animation entity.
-entt::entity create_npc_death_anim( entt::registry &registry, Cmp::Position npc_position_cmp, const Sys::SpriteKey &death_anim );
-
-//! @brief Remove the components added by create_npc_death_anim(), without destroying the entity.
+//! @brief Remove the components of an NPC death animation (see NpcSystem), without destroying the entity.
 //! @param registry
 //! @param entity
 void remove_npc_death_anim( entt::registry &registry, entt::entity entity );

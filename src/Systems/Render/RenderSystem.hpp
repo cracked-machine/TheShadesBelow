@@ -162,7 +162,7 @@ protected:
   //! @param fill_color Optional color for the text fill (default: White)
   //! @param outline_color Optional color for the text outline (default:
   //! Transparent). Outline thickness is 0.f if set to Transparent.
-  void render_text( std::string text, unsigned int size, sf::Vector2f position, Alignment align, float letter_spacing = 1.f,
+  void render_text( const std::string &text, unsigned int size, sf::Vector2f position, Alignment align, float letter_spacing = 1.f,
                     sf::Color fill_color = sf::Color::White, sf::Color outline_color = sf::Color::Transparent );
 
   //! @brief Render a sprite by type/index to an arbitrary render target, drawing a fallback square if the sprite type or index is
@@ -175,7 +175,7 @@ protected:
   //! @param alpha
   //! @param origin
   //! @param angle
-  void safe_render_sprite_to_target( sf::RenderTarget &target, const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos_cmp,
+  void safe_render_sprite_to_target( sf::RenderTarget &target, const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos,
                                      std::size_t sprite_index = 0, sf::Vector2f scale = { 1.f, 1.f }, uint8_t alpha = 255,
                                      sf::Vector2f origin = { 0.f, 0.f }, sf::Angle angle = sf::degrees( 0.f ) );
 
@@ -183,7 +183,7 @@ protected:
   //! @param target
   //! @param pos_cmp
   //! @param color
-  void render_fallback_square_to_target( sf::RenderTarget &target, const sf::FloatRect &pos_cmp, const sf::Color &color = sf::Color::Magenta );
+  void render_fallback_square_to_target( sf::RenderTarget &target, const sf::FloatRect &pos, const sf::Color &color = sf::Color::Magenta );
 
   //! @brief Render a sprite by type/index in screen view coordinates. Draws a fallback square if the sprite type or index is missing.
   //! @param sprite_type
@@ -193,7 +193,7 @@ protected:
   //! @param alpha
   //! @param origin
   //! @param angle
-  void safe_render_sprite_screen( const Sys::SpriteKey &sprite_type, const sf::FloatRect &position, std::size_t sprite_index = 0,
+  void safe_render_sprite_screen( const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos, std::size_t sprite_index = 0,
                                   sf::Vector2f scale = { 1.f, 1.f }, uint8_t alpha = 255, sf::Vector2f origin = { 0.f, 0.f },
                                   sf::Angle angle = sf::degrees( 0.f ) );
 
@@ -205,14 +205,14 @@ protected:
   //! @param alpha
   //! @param origin
   //! @param angle
-  void safe_render_sprite_world( const Sys::SpriteKey &sprite_type, const sf::FloatRect &position, std::size_t sprite_index = 0,
+  void safe_render_sprite_world( const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos, std::size_t sprite_index = 0,
                                  sf::Vector2f scale = { 1.f, 1.f }, uint8_t alpha = 255, sf::Vector2f origin = { 0.f, 0.f },
                                  sf::Angle angle = sf::degrees( 0.f ) );
 
   //! @brief Draw a solid colored square in world view coordinates in place of a missing sprite.
   //! @param pos_cmp
   //! @param color
-  void render_fallback_square_world( const sf::FloatRect &pos_cmp, const sf::Color &color = sf::Color::Magenta );
+  void render_fallback_square_world( const sf::FloatRect &pos, const sf::Color &color = sf::Color::Magenta );
 
   //! @brief Draw an outlined rectangle for the given bounds in world view coordinates, if visible in the current world view.
   //! @param bounds

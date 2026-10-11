@@ -33,6 +33,7 @@
 #include <Components/UUID.hpp>
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
+#include <Events/DestroyNpcEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
@@ -558,11 +559,7 @@ void ActionSystem::check_player_axe_npc_kill()
                                             npc_pos_cmp.getCenter(), npc_pos_cmp.position.y );
 
       // now destroy the NPC
-      if ( reg().valid( npc_entity ) )
-      {
-        pathfinding_navmesh->remove( npc_entity, npc_pos_cmp );
-        Factory::Npc::destroy_npc( reg(), npc_entity );
-      }
+      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entity ) );
 
       SPDLOG_DEBUG( "Dug through obstacle at position ({}, {})!", npc_pos_cmp.position.x, npc_pos_cmp.position.y );
     }

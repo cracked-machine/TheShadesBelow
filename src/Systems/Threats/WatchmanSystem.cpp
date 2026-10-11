@@ -22,6 +22,7 @@
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/UUID.hpp>
+#include <Events/DestroyNpcEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/NpcFactory.hpp>
@@ -296,8 +297,7 @@ void WatchmanSystem::check_gunfire_npc_collision()
     if ( not hit ) continue;
 
     SPDLOG_INFO( "Skeleton NPC entity {} killed by Watchman gunfire", static_cast<int>( npc_entt ) );
-    Factory::Npc::create_npc_death_anim( reg(), npc_pos_cmp, "sprite.death.anim.bloodsplat" );
-    Factory::Npc::destroy_npc( reg(), npc_entt );
+    get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, Sys::SpriteKey( "sprite.death.anim.bloodsplat" ) ) );
   }
 }
 

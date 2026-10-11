@@ -224,26 +224,6 @@ entt::entity destroy_npc( entt::registry &reg, entt::entity npc_entity )
   return loot_entity;
 }
 
-entt::entity create_npc_death_anim( entt::registry &reg, Cmp::Position npc_pos_cmp, const Sys::SpriteKey &death_anim )
-{
-  auto npc_death_entity = reg.create();
-  // anchor the animation on the middle cell of the NPC's body (a no-op for single-block NPCs)
-  const sf::Vector2f death_pos = npc_pos_cmp.position + ( npc_pos_cmp.size - Constants::kGridSizePxF ) * 0.5f;
-  reg.emplace<Cmp::Position>( npc_death_entity, death_pos, Constants::kGridSizePxF );
-  reg.emplace_or_replace<Cmp::DeathPosition>( npc_death_entity, death_pos, Constants::kGridSizePxF );
-
-  // clang-format off
-  reg.emplace_or_replace<Cmp::AnimData>( npc_death_entity, Cmp::AnimData::Config{ 
-        .sprite_type = death_anim, 
-        .enabled = true,
-        .anim_type =  Cmp::AnimType::ONESHOTRESET
-  });
-  // clang-format on
-
-  reg.emplace_or_replace<Cmp::ZOrderValue>( npc_death_entity, death_pos.y );
-  return npc_death_entity;
-}
-
 void remove_npc_death_anim( entt::registry &registry, entt::entity entity )
 {
   registry.remove<Cmp::DeathPosition>( entity );

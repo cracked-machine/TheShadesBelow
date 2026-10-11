@@ -26,10 +26,10 @@
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateItemEvent.hpp>
+#include <Events/DestroyNpcEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Factory/AltarFactory.hpp>
 #include <Factory/LootFactory.hpp>
-#include <Factory/NpcFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
@@ -209,8 +209,7 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
       {
         if ( anim_cmp.m_sprite_type.contains( "ghost" ) )
         {
-          Factory::Npc::create_npc_death_anim( reg(), npc_pos_cmp, "sprite.death.anim.banish" );
-          Factory::Npc::destroy_npc( reg(), npc_entt );
+          get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, Sys::SpriteKey( "sprite.death.anim.banish" ) ) );
         }
       }
     }

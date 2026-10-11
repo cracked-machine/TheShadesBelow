@@ -2,6 +2,7 @@
 #define SRC_SYSTEMS_THREATS_NPCSYSTEM_HPP__
 
 #include <Systems/BaseSystem.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
@@ -11,7 +12,7 @@
 // clang-format off
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
-namespace Game::Events { class UpdateNpcPositionEvent; }
+namespace Game::Events { class UpdateNpcPositionEvent; class DestroyNpcEvent; }
 namespace Game::Cmp { class Position; }
 namespace Game::Cmp { class Direction; class LerpPosition; } 
 namespace Game::Cmp::Player { class Mortality; } 
@@ -63,6 +64,17 @@ private:
   //! @param event
   void on_update_npc_position_event( const Game::Events::UpdateNpcPositionEvent &event );
 
+  //! @brief Kill an NPC and keep its navmesh in sync, optionally playing a death animation where it stood. This is
+  //! the only place allowed to call Factory::Npc::destroy_npc. Everything else must trigger an Events::DestroyNpcEvent.
+  //! @param event
+  void on_destroy_npc_event( const Game::Events::DestroyNpcEvent &event );
+
+  //! @brief Create the death animation entity played when an NPC dies.
+  //! @param npc_pos_cmp The dying NPC's position.
+  //! @param death_anim
+  //! @return The new death animation entity.
+  entt::entity create_death_anim( const Cmp::Position &npc_pos_cmp, const Sys::SpriteKey &death_anim );
+
   //! @brief Pick the navmesh matching an NPC's traversal type: wisps roam the open
   //! navmesh, ghosts use the plant-permeable ghost navmesh, everyone else the npc navmesh
   //! @param npc_entity
@@ -83,6 +95,9 @@ private:
 
   //! @brief Check for player collision proximity with NPC containers
   void check_npc_container_collision();
+
+  //! @brief Banish the ElderMother when she comes within range of a player carrying a usable ElderFlute.
+  void check_elderflute_banish();
 
   //! @brief Check Player/NPC collision for Cmp::CollisionActions with zero tick.
   //! @note Player cooldown and knockback are ENABLED.
