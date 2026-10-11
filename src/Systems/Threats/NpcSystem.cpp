@@ -141,8 +141,9 @@ void NpcSystem::on_destroy_npc_event( const Events::DestroyNpcEvent &event )
 
   // the entity outlives its NPC, so strip everything else that would have it mistaken for a live one
   reg().remove<Cmp::Npc::LerpSpeed, Cmp::Npc::Friendly, Cmp::Npc::ShockwaveTimer, Cmp::Npc::WatchmanSearchlight>( npc_entity );
-  reg().remove<Cmp::Npc::Drknox, Cmp::Npc::ElderMother, Cmp::Npc::Ghost, Cmp::Npc::Priest, Cmp::Npc::ShadowHand, Cmp::Npc::Skeleton, Cmp::Npc::Spider,
-               Cmp::Npc::Watchman, Cmp::Npc::Wisp, Cmp::Npc::Witch>( npc_entity );
+  reg()
+      .remove<Cmp::Npc::Drknox, Cmp::Npc::ElderMother, Cmp::Npc::Ghost, Cmp::Npc::Priest, Cmp::Npc::ShadowHand, Cmp::Npc::Skeleton, Cmp::Npc::Spider,
+              Cmp::Npc::Watchman, Cmp::Npc::Wisp, Cmp::Npc::Witch>( npc_entity );
 }
 
 entt::entity NpcSystem::create_death_anim( const Cmp::Position &npc_pos_cmp, const Sys::SpriteKey &death_anim )
@@ -161,7 +162,7 @@ entt::entity NpcSystem::create_death_anim( const Cmp::Position &npc_pos_cmp, con
   });
   // clang-format on
 
-  reg().emplace_or_replace<Cmp::ZOrderValue>( npc_death_entity, death_pos.y );
+  reg().emplace_or_replace<Cmp::ZOrderValue>( npc_death_entity, death_pos.y + 64 );
   return npc_death_entity;
 }
 
@@ -448,13 +449,14 @@ void NpcSystem::check_elderflute_banish()
   auto [inventory_entt, inventory_type, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_type != "item.elderflute" or Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) return;
 
-  // same relaxed range as the NPC proximity modifiers in PlayerSystem::apply_npc_modifiers()
-  auto half_view = Cmp::RectBounds::scaled( Utils::calculate_view_bounds( RenderSystem::get_world_view() ), 0.5f );
+  // the distance efficacy where the elder flute can banish the elder mother
+  auto half_view = Cmp::RectBounds::scaled( Utils::calculate_view_bounds( RenderSystem::get_world_view() ), 0.25f );
 
   for ( auto [npc_entt, em_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::ElderMother, Cmp::Position>().each() )
   {
     if ( not Utils::is_visible_in_view( half_view.getBounds(), npc_pos_cmp ) ) continue;
     get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, Sys::SpriteKey( "sprite.death.anim.banish" ) ) );
+    m_sound_bank.get_effect( "witches_jar_sacrifice" ).play();
   }
 }
 

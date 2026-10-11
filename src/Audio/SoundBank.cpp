@@ -95,6 +95,7 @@ void SoundBank::init()
   music.emplace( "ruin_creaking_rope", MusicData{ "res/audio/rope.mp3" } );
   music.emplace( "ruin_music", MusicData{ "res/audio/PhaseTones.mp3" } );
   music.emplace( "healing_spring", MusicData{ "res/audio/HealingSpring.mp3" } );
+  music.emplace( "elder_flute", MusicData{ "res/audio/elder_flute.mp3" } );
 }
 
 void SoundBank::update_effects_volume( float volume )
@@ -110,6 +111,18 @@ void SoundBank::update_music_volume( float volume )
   for ( auto &[name, music_data] : music )
   {
     music_data.control.setVolume( volume );
+  }
+}
+
+void SoundBank::stop_all()
+{
+  for ( auto &[name, music_data] : music )
+  {
+    music_data.control.stop();
+  }
+  for ( auto &[name, music_data] : music )
+  {
+    music_data.control.stop();
   }
 }
 

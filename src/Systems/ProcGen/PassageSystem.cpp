@@ -1,4 +1,3 @@
-#include <Audio/SoundBank.hpp>
 #include <Components/Crypt/Chest.hpp>
 #include <Components/Crypt/PassageBlock.hpp>
 #include <Components/Crypt/PassageDoor.hpp>

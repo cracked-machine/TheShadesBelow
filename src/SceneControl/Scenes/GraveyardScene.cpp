@@ -203,7 +203,7 @@ void GraveyardScene::on_enter()
   m_persistent_sys.initialize_component_registry();
   m_persistent_sys.load_state();
 
-  m_sound_bank.get_music( "title_music" ).stop();
+  m_sound_bank.stop_all();
   if ( m_sound_bank.get_music( "graveyard_music" ).getStatus() != sf::Sound::Status::Playing )
   {
     m_sound_bank.get_music( "graveyard_music" ).play();
@@ -247,7 +247,6 @@ void GraveyardScene::on_exit()
   SPDLOG_DEBUG( "Exiting {}", get_name() );
   m_reg.clear();
   m_sound_bank.get_music( "graveyard_music" ).stop();
-  m_sound_bank.get_music( "title_music" ).play();
 
   m_sys.find<Sys::Store::Type::FootstepSystem>().stop_footsteps_sound();
 
@@ -296,7 +295,7 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::WormholeSystem>().check_player_wormhole_collision() );
   PROFILED( m_sys.find<Sys::Store::Type::ActionSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::FootstepSystem>().update() );
-  PROFILED( m_sys.find<Sys::Store::Type::DoglegSystem>().update( Sys::ProcGen::DoglegSystem::Location::GRAVEYARD, dt ) );
+  PROFILED( m_sys.find<Sys::Store::Type::DoglegSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::GraveSystem>().update() );
 
   PROFILED( m_sys.find<Sys::Store::Type::CryptSystem>().update_exit_zorder() );

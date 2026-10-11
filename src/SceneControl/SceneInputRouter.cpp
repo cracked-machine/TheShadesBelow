@@ -1,3 +1,4 @@
+
 #include <Audio/SoundBank.hpp>
 #include <Components/Direction.hpp>
 #include <Components/Exit.hpp>
@@ -471,6 +472,7 @@ void SceneInputRouter::queue_quit_game_event()
 {
   // Prevent skipping the death animation and leaving the game in a bad state
   if ( Utils::Player::get_mortality( reg() ).state != Cmp::Player::Mortality::State::ALIVE ) return;
+  m_sound_bank.stop_all();
   enqueue( Events::SceneManagerEvent::Type::QUIT_GAME );
 }
 

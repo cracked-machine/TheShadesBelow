@@ -33,6 +33,7 @@
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
+#include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/SpawnArea.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/BurnAction.hpp>
@@ -54,6 +55,7 @@
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
+#include <Utils/Utils.hpp>
 
 #include <stdexcept>
 
@@ -260,6 +262,13 @@ float get_inventory_wear_level( entt::registry &reg )
   }
   SPDLOG_DEBUG( "Player Inventory slot has no appropriate WearLevel component" );
   return -1;
+}
+
+bool is_elderflute_active( entt::registry &reg )
+{
+  if ( not Utils::is_current_scene( reg, Cmp::SceneSettings::SceneId::GRAVEYARD ) ) return false;
+  auto [_, inventory_type, _] = get_inventory( reg );
+  return inventory_type == "item.elderflute" and get_inventory_wear_level( reg ) > 0;
 }
 
 bool is_in_spawn( entt::registry &reg, const Cmp::Position &player_pos_cmp )

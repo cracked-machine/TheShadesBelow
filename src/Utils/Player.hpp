@@ -162,6 +162,11 @@ float get_inventory_wear_level( entt::registry &reg );
 //! @return bool true if `player_pos_cmp` intersects any Cmp::SpawnArea.
 bool is_in_spawn( entt::registry &reg, const Cmp::Position &player_pos_cmp );
 
+//! @brief Check whether the ElderFlute is currently playing.
+//! @param reg reference to the entt registry
+//! @return bool true if the player is in the graveyard with an ElderFlute in the inventory slot that has not worn out.
+bool is_elderflute_active( entt::registry &reg );
+
 bool is_illuminated( entt::registry &reg );
 
 //! @brief True if the player's hitbox (scaled 1.5x the grid size) intersects the given bounds

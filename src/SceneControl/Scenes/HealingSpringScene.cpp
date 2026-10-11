@@ -94,8 +94,7 @@ void HealingSpringScene::on_init()
 void HealingSpringScene::on_enter()
 {
   SPDLOG_DEBUG( "Entering {}", get_name() );
-  m_sound_bank.get_music( "graveyard_music" ).stop();
-  m_sound_bank.get_effect( "skeleton_moving" ).stop();
+  m_sound_bank.stop_all();
   if ( m_sound_bank.get_music( "healing_spring" ).getStatus() != sf::Sound::Status::Playing )
   {
     m_sound_bank.get_music( "healing_spring" ).play();

@@ -1,7 +1,6 @@
 #ifndef SRC_SYSTEMS_THREATS_HAZARDFIELDSYSTEMIMPL_HPP__
 #define SRC_SYSTEMS_THREATS_HAZARDFIELDSYSTEMIMPL_HPP__
 
-#include <Audio/SoundBank.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Hazard/CollisionResist.hpp>

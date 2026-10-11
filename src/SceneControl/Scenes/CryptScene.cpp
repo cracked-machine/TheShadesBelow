@@ -1,3 +1,4 @@
+
 #include <Audio/SoundBank.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
@@ -164,7 +165,7 @@ void CryptScene::on_enter()
   // check if the player inventory has a candle, if so light it up!
   Factory::Particle::add_flame_for_player_inventory_slot( m_reg );
 
-  m_sound_bank.get_effect( "skeleton_moving" ).stop();
+  m_sound_bank.stop_all();
 
   // Hide the sudden position update/camera pan behind a forced loading screen.
   std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
@@ -195,7 +196,7 @@ void CryptScene::do_update( sf::Time dt )
   m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt );
   m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt );
   m_sys.find<Sys::Store::Type::PassageSystem>().update( dt );
-  m_sys.find<Sys::Store::Type::DoglegSystem>().update( Sys::ProcGen::DoglegSystem::Location::CRYPT, dt );
+  m_sys.find<Sys::Store::Type::DoglegSystem>().update( dt );
   m_sys.find<Sys::Store::Type::InventorySystem>().update( dt );
 
   auto excludes = { std::string( Cmp::Particle::NoteParticleSprite::kPlayerNotesTag ) };

@@ -2,6 +2,7 @@
 #define SRC_SYSTEMS_PROCGEN_DOGLEGSYSTEM_HPP__
 
 #include <Components/Player/Doglegs.hpp>
+#include <Components/SceneSettings/CurrentScene.hpp>
 #include <PathFinding/BreadthFirst.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -24,8 +25,6 @@ namespace Game::Sys::ProcGen
 class DoglegSystem : public BaseSystem
 {
 public:
-  enum class Location { GRAVEYARD, CRYPT };
-
   //! @brief Construct a new DoglegSystem object
   DoglegSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
       : BaseSystem( reg, window, sound_bank )
@@ -37,9 +36,8 @@ public:
   void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh );
 
   //! @brief Rebuild the doglegs and markers for this frame. Leaves both empty if the player holds no dowsing rod.
-  //! @param location Which scene is updating, selects the landmarks and the kind of path
   //! @param dt Frame delta, advances the pulse
-  void update( const Location &location, sf::Time dt );
+  void update( sf::Time dt );
 
   //! @brief event handlers for pausing system clocks
   void on_pause() override {}
@@ -75,7 +73,8 @@ private:
   //! @brief Distance from the player to where the path leaves the view, or the whole path if the target is in view
   static float visible_length( const Cmp::Player::Doglegs::Dogleg &dogleg, const sf::FloatRect &view_bounds );
 
-  Location m_location{ Location::GRAVEYARD };
+  //! @brief Which scene is updating, selects the landmarks and the kind of path
+  Cmp::SceneSettings::SceneId m_location{ Cmp::SceneSettings::SceneId::GRAVEYARD };
 
   //! @brief Navmesh searched to find the crypt routes
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;

@@ -1,7 +1,6 @@
-#include <SceneControl/Scenes/GameOverScene.hpp>
-
 #include <Audio/SoundBank.hpp>
 #include <SceneControl/Events/ProcessGameoverSceneInputEvent.hpp>
+#include <SceneControl/Scenes/GameOverScene.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/PlayerSystem.hpp>
@@ -18,8 +17,7 @@ void GameOverScene::on_enter()
   auto &persistent_sys = static_cast<Sys::PersistSystem &>( m_sys.find<Sys::Store::Type::PersistSystem>() );
   persistent_sys.initialize_component_registry();
   persistent_sys.load_state();
-  m_sound_bank.get_effect( "bubbling_lava" ).stop();
-  m_sound_bank.get_effect( "skeleton_moving" ).stop();
+  m_sound_bank.stop_all();
 }
 void GameOverScene::on_exit()
 {

@@ -95,12 +95,12 @@ void DoglegSystem::init( const PathFinding::SpatialHashGridSharedPtr &npc_navmes
   m_field.clear();
 }
 
-void DoglegSystem::update( const Location &location, sf::Time dt )
+void DoglegSystem::update( sf::Time dt )
 {
   // always clear first, so nothing stale is left to render once the rod leaves the inventory
   clear();
 
-  m_location = location;
+  m_location = Utils::scene_setting<Cmp::SceneSettings::CurrentScene>( reg() ).id;
 
   auto [inventory_entt, _, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_entt == entt::null ) return;
@@ -110,7 +110,7 @@ void DoglegSystem::update( const Location &location, sf::Time dt )
   if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) return;
 
   dowsing_cmp->m_dowsing_pulse_time += dt;
-  if ( m_location == Location::CRYPT ) update_field( dt );
+  if ( m_location == Cmp::SceneSettings::SceneId::CRYPT ) update_field( dt );
   update_target( *dowsing_cmp );
   update_markers( *dowsing_cmp );
 }
@@ -177,7 +177,7 @@ void DoglegSystem::update_target( const Cmp::Inventory::DowsingTarget &dowsing_c
     case Target::YELLOW: {
       switch ( m_location )
       {
-        case Location::GRAVEYARD: {
+        case Cmp::SceneSettings::SceneId::GRAVEYARD: {
           auto altar_view = reg().view<Cmp::Altar::MultiBlock>();
           for ( auto [altar_entt, altar_cmp] : altar_view.each() )
           {
@@ -185,7 +185,7 @@ void DoglegSystem::update_target( const Cmp::Inventory::DowsingTarget &dowsing_c
           }
           break;
         }
-        case Location::CRYPT: {
+        case Cmp::SceneSettings::SceneId::CRYPT: {
           auto crypt_chest_view = reg().view<Cmp::Crypt::Chest, Cmp::Position>();
           for ( auto [chest_entt, chest_cmp, chest_pos] : crypt_chest_view.each() )
           {
@@ -194,13 +194,15 @@ void DoglegSystem::update_target( const Cmp::Inventory::DowsingTarget &dowsing_c
           }
           break;
         }
+        default:
+          break;
       }
       break;
     }
     case Target::RED: {
       switch ( m_location )
       {
-        case Location::GRAVEYARD: {
+        case Cmp::SceneSettings::SceneId::GRAVEYARD: {
           auto crypt_entrance_view = reg().view<Cmp::Crypt::Entrance, Cmp::Position>();
           for ( auto [crypt_entt, crypt_cmp, crypt_pos_cmp] : crypt_entrance_view.each() )
           {
@@ -208,7 +210,7 @@ void DoglegSystem::update_target( const Cmp::Inventory::DowsingTarget &dowsing_c
           }
           break;
         }
-        case Location::CRYPT: {
+        case Cmp::SceneSettings::SceneId::CRYPT: {
           auto crypt_lever_view = reg().view<Cmp::Crypt::Lever, Cmp::Position>();
           for ( auto [lever_entt, lever_cmp, lever_pos_cmp] : crypt_lever_view.each() )
           {
@@ -217,13 +219,15 @@ void DoglegSystem::update_target( const Cmp::Inventory::DowsingTarget &dowsing_c
           }
           break;
         }
+        default:
+          break;
       }
       break;
     }
     case Target::GREEN: {
       switch ( m_location )
       {
-        case Location::GRAVEYARD: {
+        case Cmp::SceneSettings::SceneId::GRAVEYARD: {
           auto graveyard_exit_view = reg().view<Cmp::Exit, Cmp::Position>();
           for ( auto [exit_entt, exit_cmp, exit_pos_cmp] : graveyard_exit_view.each() )
           {
@@ -231,7 +235,7 @@ void DoglegSystem::update_target( const Cmp::Inventory::DowsingTarget &dowsing_c
           }
           break;
         }
-        case Location::CRYPT: {
+        case Cmp::SceneSettings::SceneId::CRYPT: {
           auto crypt_exit_view = reg().view<Cmp::Exit, Cmp::Position>();
           for ( auto [exit_entt, exit_cmp, exit_pos_cmp] : crypt_exit_view.each() )
           {
@@ -239,6 +243,8 @@ void DoglegSystem::update_target( const Cmp::Inventory::DowsingTarget &dowsing_c
           }
           break;
         }
+        default:
+          break;
       }
       break;
     }

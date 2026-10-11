@@ -27,6 +27,11 @@ class LerpPosition;
 class CurrentScene;
 } // namespace Game::Cmp
 
+namespace Game::Cmp::SceneSettings
+{
+enum class SceneId;
+} // namespace Game::Cmp::SceneSettings
+
 namespace Game::Cmp::Player
 {
 class Wealth;
@@ -126,6 +131,12 @@ SCENESETTING &scene_setting( entt::registry &reg )
   scene_setting_cmp = reg.try_get<SCENESETTING>( scene_entt );
   return *scene_setting_cmp;
 }
+
+//! @brief Check which scene owns the registry.
+//! @param reg reference to the entt registry
+//! @param scene_id The scene to test for.
+//! @return bool true if the registry's Cmp::SceneSettings::CurrentScene matches `scene_id`. False if it has none (e.g. menu scenes).
+bool is_current_scene( entt::registry &reg, Cmp::SceneSettings::SceneId scene_id );
 
 //! @brief Get the Grid Position object
 //! @tparam Signedness The signedness of the grid position coordinates (int or unsigned int).

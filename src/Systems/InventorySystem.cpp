@@ -30,6 +30,7 @@
 #include <Factory/PlantFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
+#include <SFML/Audio/Music.hpp>
 #include <SFML/Audio/SoundChannel.hpp>
 #include <Systems/InventorySystem.hpp>
 #include <Systems/ParticleSystem.hpp>
@@ -68,6 +69,9 @@ void InventorySystem::update( sf::Time dt )
   if ( reg().any_of<Cmp::Player::ConsumeTimer>( player_entt ) ) { consume_inventory( dt ); }
 
   update_item_expiry_damage( dt );
+
+  if ( Utils::Player::is_elderflute_active( reg() ) ) { play_elder_flute_music(); }
+  else { stop_elder_flute_music(); }
 }
 
 void InventorySystem::on_player_action( const Events::PlayerActionEvent &event )
@@ -324,6 +328,8 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
   for ( auto [inventory_entt, inventory_cmp, wearlevel_cmp] : reg().view<Cmp::PlayerInventorySlot, Cmp::Inventory::WearLevel>().each() )
   {
     if ( wearlevel_cmp.m_level <= 0 ) continue;
+    // the elderflute only wears while it is playing
+    if ( inventory_cmp.m_item.item_type == "item.elderflute" and not Utils::Player::is_elderflute_active( reg() ) ) break;
     // the slot entity has no Cmp::WorldItem of its own - the item lives inside the slot component.
     // Tools have no expiry; they only wear through use.
     if ( inventory_cmp.m_item.wears_in_inventory() and inventory_cmp.m_item.expiry() != sf::Time::Zero )
@@ -461,6 +467,23 @@ void InventorySystem::consume_inventory( sf::Time dt )
     auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
     Factory::Player::destroy_inventory( reg(), inventory_type );
   }
+}
+
+void InventorySystem::play_elder_flute_music()
+{
+  m_sound_bank.get_music( "graveyard_music" ).pause();
+  if ( m_sound_bank.get_music( "elder_flute" ).getStatus() != sf::Music::Status::Playing )
+  {
+    m_sound_bank.get_music( "elder_flute" ).setLooping( true );
+    m_sound_bank.get_music( "elder_flute" ).play();
+  }
+}
+
+void InventorySystem::stop_elder_flute_music()
+{
+  if ( m_sound_bank.get_music( "elder_flute" ).getStatus() != sf::Music::Status::Playing ) return;
+  m_sound_bank.get_music( "elder_flute" ).stop();
+  if ( m_sound_bank.get_music( "graveyard_music" ).getStatus() == sf::Music::Status::Paused ) { m_sound_bank.get_music( "graveyard_music" ).play(); }
 }
 
 } // namespace Game::Sys

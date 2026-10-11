@@ -103,6 +103,12 @@ private:
   //! @param dt Update the EatingTimeAccumulator with the delta time.
   void consume_inventory( sf::Time dt );
 
+  //! @brief Pause the graveyard music and loop the ElderFlute music in its place. No-op if already playing.
+  void play_elder_flute_music();
+
+  //! @brief Stop the ElderFlute music and resume the graveyard music. No-op if the ElderFlute music is not playing.
+  void stop_elder_flute_music();
+
   //! @brief All grid positions that block NPC pathfinding
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;
 

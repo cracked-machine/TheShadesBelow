@@ -239,4 +239,13 @@ std::string wrap_text_to_width( const std::string &text, std::size_t max_chars_p
   return result;
 }
 
+bool is_current_scene( entt::registry &reg, Cmp::SceneSettings::SceneId scene_id )
+{
+  for ( auto [scene_entt, scene_cmp] : reg.view<Cmp::SceneSettings::CurrentScene>().each() )
+  {
+    return scene_cmp.id == scene_id;
+  }
+  return false;
+}
+
 } // namespace Game::Utils

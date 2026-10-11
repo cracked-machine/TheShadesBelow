@@ -27,6 +27,8 @@ public:
   //! @param volume
   void update_music_volume( float volume );
 
+  void stop_all();
+
   //! @brief Returns a reference to the pooled sf::Sound instance for `name`.
   //! Bind with `auto &`/`const auto &` - copying into a local (`auto`) creates a
   //! disconnected sf::Sound with its own OpenAL source, so calls like .play()/.stop()

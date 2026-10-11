@@ -1,8 +1,11 @@
 
-#include <Audio/SoundBank.hpp>
 #include <Systems/BaseSystem.hpp>
 
 #include <entt/entity/registry.hpp>
+
+// clang-format off
+namespace Audio  { class SoundBank; }
+// clang-format on
 
 namespace Game::Sys
 {

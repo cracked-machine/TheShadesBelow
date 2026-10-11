@@ -888,10 +888,8 @@ void PlayerSystem::update_note_particles()
 
   auto ps_tag = std::string( Cmp::Particle::NoteParticleSprite::kPlayerNotesTag );
   auto ps_list = Sys::ParticleSystem::find( reg(), ps_tag );
-  auto wearlevel = Utils::Player::get_inventory_wear_level( reg() );
-  auto [inventory_entt, inventory_type, _] = Utils::Player::get_inventory( reg() );
 
-  if ( inventory_type == "item.elderflute" and wearlevel > 0 )
+  if ( Utils::Player::is_elderflute_active( reg() ) )
   {
     if ( ps_list.empty() )
     {
@@ -917,7 +915,7 @@ void PlayerSystem::update_note_particles()
   {
     if ( not ps_list.empty() )
     {
-      // stop NoteParticleSprites if not in inventory
+      // stop NoteParticleSprites while the elderflute is not playing
       for ( auto [entt, ps] : ps_list )
       {
         ps.get().stop();
@@ -1062,6 +1060,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
 
     case Cmp::Player::Mortality::State::FALLING: {
       SPDLOG_INFO( "Player is falling" );
+      m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
@@ -1069,6 +1068,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::DECAYING: {
+      m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
@@ -1076,6 +1076,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::HAUNTED: {
+      m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
@@ -1083,6 +1084,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::EXPLODING: {
+      m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
@@ -1090,9 +1092,11 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::DROWNING: {
+      m_sound_bank.stop_all();
       break;
     }
     case Cmp::Player::Mortality::State::SQUISHED: {
+      m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
@@ -1100,6 +1104,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::SUICIDE: {
+      m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
@@ -1107,6 +1112,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::IGNITED: {
+      m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.flames" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "shrine_lighting" ).play();
@@ -1114,6 +1120,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::SKEWERED: {
+      m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
@@ -1121,6 +1128,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::SHOCKED: {
+      m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
@@ -1128,6 +1136,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::TERRIFIED: {
+      m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
@@ -1135,9 +1144,11 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::DEAD: {
+      m_sound_bank.stop_all();
       break;
     }
     case Cmp::Player::Mortality::State::SHADOWCURSED: {
+      m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
@@ -1145,6 +1156,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::SUFFOCATED: {
+      m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
@@ -1152,6 +1164,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::CARDIACARREST: {
+      m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
@@ -1159,6 +1172,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::POISONED: {
+      m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
       m_sound_bank.get_effect( "player_blood_splat" ).play();
