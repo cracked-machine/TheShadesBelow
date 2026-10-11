@@ -39,6 +39,7 @@
 #include <Components/Wormhole/Jump.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
+#include <Events/UpdateNpcPositionEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
@@ -72,6 +73,35 @@ NpcSystem::NpcSystem( entt::registry &reg, sf::RenderWindow &window, Audio::Soun
     : BaseSystem( reg, window, sound_bank )
 {
   SPDLOG_DEBUG( "NpcSystem initialized" );
+  std::ignore = get_systems_event_queue().sink<Events::UpdateNpcPositionEvent>().connect<&NpcSystem::on_update_npc_position_event>( this );
+}
+
+void NpcSystem::on_update_npc_position_event( const Events::UpdateNpcPositionEvent &event )
+{
+  const entt::entity npc_entity = event.m_npc_entity;
+  if ( not reg().valid( npc_entity ) ) return;
+  auto *pos_cmp = reg().try_get<Cmp::Position>( npc_entity );
+  if ( not pos_cmp ) return;
+
+  // The bucket the NPC is in is the cell it last set off from, not wherever it has lerped to since. A step that
+  // hasn't started yet (zero lerp factor) has no m_start: the NPC is still in the cell it is standing on.
+  Cmp::Position old_position = *pos_cmp;
+  if ( auto *lerp_pos_cmp = reg().try_get<Cmp::LerpPosition>( npc_entity ) )
+  {
+    if ( lerp_pos_cmp->m_lerp_factor > 0.0f ) { old_position.position = lerp_pos_cmp->m_start; }
+    // abandon the step, otherwise update_movement_for lerps the NPC straight back onto it
+    reg().remove<Cmp::LerpPosition>( npc_entity );
+  }
+
+  pos_cmp->position = event.m_position;
+  if ( auto navmesh = navmesh_for( npc_entity ) ) { navmesh->update( npc_entity, old_position, *pos_cmp ); }
+
+  // update_movement_for only refreshes the zorder while the NPC is stepping
+  if ( reg().all_of<Cmp::ZOrderValue>( npc_entity ) )
+  {
+    const float zorder_augment = Sys::SpriteStore::instance().get( Utils::Npc::get_sprite_type( reg(), npc_entity ) ).zorder( 0 );
+    reg().patch<Cmp::ZOrderValue>( npc_entity, [&]( auto &zorder_cmp ) { zorder_cmp.set( pos_cmp->position.y + zorder_augment ); } );
+  }
 }
 
 void NpcSystem::update( sf::Time dt )

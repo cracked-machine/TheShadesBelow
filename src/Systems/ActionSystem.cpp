@@ -37,6 +37,7 @@
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
+#include <Events/UpdateNpcPositionEvent.hpp>
 #include <Factory/BombFactory.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Factory/NpcFactory.hpp>
@@ -374,7 +375,7 @@ void ActionSystem::player_plant_interact()
           }
           Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
 
-          // 50/50 chance that chopping down a eldertree spawn/relocate the eldermother
+          // 50% chance that chopping down an eldertree spawn/relocate the eldermother
           Cmp::RandomInt elderspawn( 0, 1 );
           if ( plant_item and plant_item->item_type.contains( "elder" ) and elderspawn.gen() == 1 )
           {
@@ -382,9 +383,9 @@ void ActionSystem::player_plant_interact()
               Factory::Npc::create_npc( reg(), plant_entt, "npc.eldermother" );
             else
             {
-              for ( auto [em_entt, em_cmp, em_pos_cmp] : reg().view<Cmp::Npc::ElderMother, Cmp::Position>().each() )
+              for ( auto em_entt : reg().view<Cmp::Npc::ElderMother, Cmp::Position>() )
               {
-                em_pos_cmp.position = plant_mb_cmp.position;
+                get_systems_event_queue().trigger( Events::UpdateNpcPositionEvent( em_entt, plant_mb_cmp.position ) );
               }
             }
           }
@@ -694,6 +695,8 @@ void ActionSystem::update_burning_worlditems( sf::Time dt )
       const sf::Vector2f emitter_pos( plant_cmp.getCenter().x, plant_cmp.position.y + ( plant_cmp.size.y - 7 ) );
       auto burnt_uuid = Cmp::UUID::generate();
       Factory::Particle::add_smoke( reg(), kPlantSmokeTag, burnt_uuid, emitter_pos, plant_cmp.position.y );
+
+      // 100% chance that burning down an eldertree spawn/relocate the eldermother
       auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
       if ( plant_item and plant_item->item_type.contains( "elder" ) )
       {
@@ -701,9 +704,9 @@ void ActionSystem::update_burning_worlditems( sf::Time dt )
           Factory::Npc::create_npc( reg(), plant_entt, "npc.eldermother" );
         else
         {
-          for ( auto [em_entt, em_cmp, em_pos_cmp] : reg().view<Cmp::Npc::ElderMother, Cmp::Position>().each() )
+          for ( auto em_entt : reg().view<Cmp::Npc::ElderMother, Cmp::Position>() )
           {
-            em_pos_cmp.position = plant_cmp.position;
+            get_systems_event_queue().trigger( Events::UpdateNpcPositionEvent( em_entt, plant_cmp.position ) );
           }
         }
       }

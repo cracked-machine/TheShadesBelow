@@ -100,7 +100,7 @@ bool ShockwaveSystem::intersects_with_visible_segments( const Cmp::Npc::Shockwav
         // do shockwave/player knockback
         sf::Vector2f shockwave_direction( cos_angle, sin_angle );
 
-        auto &player_pos_cmp = Utils::Player::get_position( reg() );
+        const auto &player_pos_cmp = Utils::Player::get_position( reg() );
         auto new_position = Utils::snap_to_grid( player_pos_cmp.position + ( shockwave_direction.componentWiseMul( Constants::kGridSizePxF ) ) );
         SPDLOG_DEBUG( "Player position was {},{} - Knockback direction is {}, {} - New Position should be {},{}", player_pos_cmp.position.x,
                       player_pos_cmp.position.y, normalised_direction.x, normalised_direction.y, new_position.x, new_position.y );

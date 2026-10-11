@@ -11,6 +11,7 @@
 // clang-format off
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
+namespace Game::Events { class UpdateNpcPositionEvent; }
 namespace Game::Cmp { class Position; }
 namespace Game::Cmp { class Direction; class LerpPosition; } 
 namespace Game::Cmp::Player { class Mortality; } 
@@ -57,6 +58,11 @@ public:
   void on_resume() override {}
 
 private:
+  //! @brief Relocate an NPC and keep its navmesh in sync. This is the only place allowed to write an NPC's
+  //! Cmp::Position outside of its own lerp movement. Everything else must trigger an Events::UpdateNpcPositionEvent.
+  //! @param event
+  void on_update_npc_position_event( const Game::Events::UpdateNpcPositionEvent &event );
+
   //! @brief Pick the navmesh matching an NPC's traversal type: wisps roam the open
   //! navmesh, ghosts use the plant-permeable ghost navmesh, everyone else the npc navmesh
   //! @param npc_entity
