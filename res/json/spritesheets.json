@@ -1143,7 +1143,7 @@
     "sprite.eldermother": {
       "spritesheet": {
         "displayname": "Elder Mother",
-        "zorder": [32, 32, 32, 32, 32, 32, 32, 32],
+        "zorder": [64, 64, 64, 64, 64, 64, 64, 64],
         "texture_path": "res/textures/eldermother.png",
         "sprite_indices": [0, 2, 4, 6, 8, 10, 12, 14],
         "collision_mask": [

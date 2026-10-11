@@ -1913,19 +1913,6 @@
                 }, 
                 {
                  "height":0,
-                 "id":278,
-                 "name":"npc.eldermother",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":752,
-                 "y":816
-                }, 
-                {
-                 "height":0,
                  "id":279,
                  "name":"item.dowsingrod",
                  "opacity":1,

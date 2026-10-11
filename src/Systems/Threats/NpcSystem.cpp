@@ -11,6 +11,7 @@
 #include <Components/Grave/Segment.hpp>
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/Container.hpp>
+#include <Components/Npc/ElderMother.hpp>
 #include <Components/Npc/Friendly.hpp>
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
@@ -287,7 +288,7 @@ void NpcSystem::update_movement( sf::Time dt )
 
 PathFinding::SpatialHashGridSharedPtr NpcSystem::navmesh_for( entt::entity npc_entity )
 {
-  if ( reg().any_of<Cmp::Npc::Wisp>( npc_entity ) ) { return m_open_navmesh.lock(); }
+  if ( reg().any_of<Cmp::Npc::Wisp>( npc_entity ) or reg().any_of<Cmp::Npc::ElderMother>( npc_entity ) ) { return m_open_navmesh.lock(); }
   if ( reg().any_of<Cmp::Npc::Ghost>( npc_entity ) )
   {
     // ghosts pass through plants; fall back to the regular navmesh in scenes without one
@@ -348,7 +349,7 @@ void NpcSystem::check_once_collision()
   auto player_collision_view = reg().view<Cmp::Player::Character>();
   auto npc_collision_view = reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::Direction>( entt::exclude<Cmp::Npc::Friendly> );
 
-  auto &player_pos = Utils::Player::get_position( reg() );
+  const auto &player_pos = Utils::Player::get_position( reg() );
   auto &player_mort = Utils::Player::get_mortality( reg() );
   const auto view_bounds = Utils::calculate_view_bounds( RenderSystem::get_world_view() );
 
@@ -414,7 +415,7 @@ void NpcSystem::check_timed_collision( sf::Time dt )
 {
   auto npc_collision_view = reg().view<Cmp::Npc::NPC, Cmp::Position>( entt::exclude<Cmp::Npc::Friendly> );
 
-  auto &player_pos = Utils::Player::get_position( reg() );
+  const auto &player_pos = Utils::Player::get_position( reg() );
   auto &player_mort = Utils::Player::get_mortality( reg() );
   const auto view_bounds = Utils::calculate_view_bounds( RenderSystem::get_world_view() );
 
@@ -454,7 +455,7 @@ bool NpcSystem::check_player_death( Cmp::Player::Mortality &player_mort )
 
 void NpcSystem::find_pushback_position( const Cmp::Direction &npc_direction, const sf::FloatRect &npc_bounds )
 {
-  auto &player_pos = Utils::Player::get_position( reg() );
+  const auto &player_pos = Utils::Player::get_position( reg() );
 
   // returns the name of the component blocking `rect`, or an empty string if it's clear
   auto blocking_component_name = [&]( const Cmp::RectBounds &rect ) -> std::string

@@ -6,6 +6,8 @@
 #include <Components/Exit.hpp>
 #include <Components/Hazard/CollisionResist.hpp>
 #include <Components/Hazard/CorruptionCell.hpp>
+#include <Components/Npc/ElderMother.hpp>
+#include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Persistent/HazardPushbackResist.hpp>
@@ -258,7 +260,8 @@ void HazardFieldSystem<HazardType>::check_npc_hazard_field_collision()
   for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : npc_view.each() )
   {
     // optimization
-    if ( !Utils::is_visible_in_view( view_bounds, npc_pos_cmp ) ) continue;
+    if ( not Utils::is_visible_in_view( view_bounds, npc_pos_cmp ) ) continue;
+    if ( reg().template any_of<Cmp::Npc::ElderMother, Cmp::Npc::Ghost>( npc_entt ) ) continue;
 
     for ( auto [hazard_entt, hazard_cmp, hazard_pos_cmp] : hazard_view.each() )
     {

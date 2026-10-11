@@ -103,7 +103,7 @@ PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGri
   // allow ghosts to sneak through corners
   auto query_compass = PathFinding::QueryCompass::CARDINAL;
 
-  if ( npc_type.contains( "sprite.ghost" ) ) query_compass = PathFinding::QueryCompass::BOTH;
+  if ( npc_type.contains( "sprite.ghost" ) or npc_type.contains( "sprite.eldermother" ) ) query_compass = PathFinding::QueryCompass::BOTH;
 
   // Snap goal to cell top-left: player moves sub-grid so can appear up to 31px into an
   // adjacent cell, exceeding the 24px too_far threshold when NPC approaches from left/above.

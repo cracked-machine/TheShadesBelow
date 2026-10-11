@@ -50,7 +50,7 @@
   "npc.eldermother": {
     "sprites": ["sprite.eldermother"],
     "lerpspeed": 1.5,
-    "framerate": 1,    
+    "framerate": 10,    
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},

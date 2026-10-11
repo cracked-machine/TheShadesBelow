@@ -34,8 +34,8 @@ void destroy_npc_container( entt::registry &registry, entt::entity npc_container
 
 //! @brief Create a new NPC. Creates a new entity at `position_entity`. Returns the new entity.
 //! @param registry
-//! @param position_entity
-//! @param npc_type
+//! @param position_entity The position reference for the new entity. Note this entity is not reused so it is safe to destroy.
+//! @param npc_type See npc.json
 //! @param reserved_sm If provided, un-reserves the container's position when hatching from a container (nightwatchman/skeleton).
 //! @return entt::entity
 entt::entity create_npc( entt::registry &registry, entt::entity position_entity, const Sys::NpcKey &npc_type,

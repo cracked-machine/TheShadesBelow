@@ -13,6 +13,7 @@
 #include <Components/LastDirection.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Moveable.hpp>
+#include <Components/Npc/ElderMother.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
@@ -22,6 +23,7 @@
 #include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
+#include <Components/Position.hpp>
 #include <Components/Random.hpp>
 #include <Components/SelectedPosition.hpp>
 #include <Components/Stats/BurnAction.hpp>
@@ -50,6 +52,7 @@
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
+#include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Systems/Threats/LightningSystem.hpp>
@@ -312,7 +315,6 @@ void ActionSystem::player_plant_interact()
       // We are in proximity to an entity that is a candidate for a new SelectedPosition component.
       // Add a new SelectedPosition component to the entity
       reg().emplace_or_replace<Cmp::SelectedPosition>( plant_entt, plant_mb_cmp.position );
-
       reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
       float dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
@@ -371,6 +373,21 @@ void ActionSystem::player_plant_interact()
                                                                         Sys::ItemKey( plant_item->item_type.str() + ".drop" ), "drop_loot" ) );
           }
           Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
+
+          // 50/50 chance that chopping down a eldertree spawn/relocate the eldermother
+          Cmp::RandomInt elderspawn( 0, 1 );
+          if ( plant_item and plant_item->item_type.contains( "elder" ) and elderspawn.gen() == 1 )
+          {
+            if ( reg().view<Cmp::Npc::ElderMother>().empty() )
+              Factory::Npc::create_npc( reg(), plant_entt, "npc.eldermother" );
+            else
+            {
+              for ( auto [em_entt, em_cmp, em_pos_cmp] : reg().view<Cmp::Npc::ElderMother, Cmp::Position>().each() )
+              {
+                em_pos_cmp.position = plant_mb_cmp.position;
+              }
+            }
+          }
           Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
           m_sound_bank.get_effect( "chopping_final" ).play();
         }
@@ -677,6 +694,19 @@ void ActionSystem::update_burning_worlditems( sf::Time dt )
       const sf::Vector2f emitter_pos( plant_cmp.getCenter().x, plant_cmp.position.y + ( plant_cmp.size.y - 7 ) );
       auto burnt_uuid = Cmp::UUID::generate();
       Factory::Particle::add_smoke( reg(), kPlantSmokeTag, burnt_uuid, emitter_pos, plant_cmp.position.y );
+      auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
+      if ( plant_item and plant_item->item_type.contains( "elder" ) )
+      {
+        if ( reg().view<Cmp::Npc::ElderMother>().empty() )
+          Factory::Npc::create_npc( reg(), plant_entt, "npc.eldermother" );
+        else
+        {
+          for ( auto [em_entt, em_cmp, em_pos_cmp] : reg().view<Cmp::Npc::ElderMother, Cmp::Position>().each() )
+          {
+            em_pos_cmp.position = plant_cmp.position;
+          }
+        }
+      }
       Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
     }
   }
