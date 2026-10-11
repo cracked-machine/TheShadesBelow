@@ -40,15 +40,15 @@
               },
               "minItems": 1
             },
-            "indices_per_frame": {
-              "type": "number",
-              "description": "How many 'sprite_indices' entries make one animation frame. Each entry already selects a whole 'grid_size' area, so this is normally 1, including for multi-block sprites.",
-              "minimum": 1
-            },
             "indices_per_sequence": {
               "type": "number",
-              "description": "How many 'sprite_indices' entries the animation loops over. The number of animation frames is this divided by 'indices_per_frame'. 1 = static sprite.",
+              "description": "How many 'sprite_indices' entries the animation loops over, one per animation frame. 1 = static sprite.",
               "minimum": 1
+            },
+            "framerate": {
+              "type": "number",
+              "description": "Animation framerate in frames per second. 0 = not animated. Use 0 for single-frame sprites.",
+              "minimum": 0
             },
             "grid_size": {
               "type": "object",
@@ -91,7 +91,7 @@
               "uniqueItems": true
             }
           },
-          "required": ["displayname", "zorder", "texture_path", "sprite_indices", "grid_size", "indices_per_frame", "indices_per_sequence"],
+          "required": ["displayname", "zorder", "texture_path", "sprite_indices", "grid_size", "indices_per_sequence", "framerate"],
           "additionalProperties": false
         }
       },

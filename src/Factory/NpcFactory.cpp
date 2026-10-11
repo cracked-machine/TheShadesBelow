@@ -132,7 +132,6 @@ entt::entity create_npc( entt::registry &reg, entt::entity position_entity, cons
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( new_pos_entity, Cmp::AnimData::Config{ 
         .sprite_type = npc_cmp.sprite_type_list.front(), 
-        .framerate = npc_cmp.m_framerate,
         .enabled = true
   });
   // clang-format on
@@ -236,7 +235,6 @@ entt::entity create_npc_death_anim( entt::registry &reg, Cmp::Position npc_pos_c
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( npc_death_entity, Cmp::AnimData::Config{ 
         .sprite_type = death_anim, 
-        .framerate = 10.f,
         .enabled = true,
         .anim_type =  Cmp::AnimType::ONESHOTRESET
   });

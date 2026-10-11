@@ -5,7 +5,7 @@
   "patternProperties": {
     "^npc\\..+$": {
       "type": "object",
-      "required": ["sprites", "actions", "lerpspeed", "framerate"],
+      "required": ["sprites", "actions", "lerpspeed"],
       "additionalProperties": false,
       "properties": {
         "sprites": {
@@ -16,11 +16,6 @@
         "lerpspeed": {
           "type": "number",
           "description": "Lerp completion speed"
-        },
-        "framerate": {
-          "type": "number",
-          "description": "Animation framerate in frames per second. 0 = not animated",
-          "minimum": 0
         },
         "actions": {
           "type": "array",

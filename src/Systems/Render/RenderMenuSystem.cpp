@@ -33,7 +33,6 @@
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
-#include <Components/Persistent/NpcDeathAnimFramerate.hpp>
 #include <Components/Persistent/NpcPushBack.hpp>
 #include <Components/Persistent/NpcShockwaveFreq.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
@@ -66,7 +65,6 @@
 #include <Components/Persistent/RuinProcGenSurvivalThreshold.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Persistent/WeaponDegradePerHit.hpp>
-#include <Components/Persistent/WormholeAnimFramerate.hpp>
 #include <Components/Persistent/WormholeSeed.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -221,7 +219,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::CorruptionDamage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::HazardPushbackResist>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::LightningDamage>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::WormholeAnimFramerate>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::WormholeSeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::CorruptionSeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::SinkholeSeed>( reg() ).render_widget();
@@ -262,7 +259,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
       npc_push_back.get_value() = roundf( npc_push_back.get_value() / step ) * step;
     }
 
-    Sys::PersistSystem::get<Cmp::Persist::NpcDeathAnimFramerate>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::NpcActivateScale>( reg() ).render_widget();
 
     // Audio

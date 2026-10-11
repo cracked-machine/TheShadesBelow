@@ -13,16 +13,15 @@ namespace Game::Sprites
 
 SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list,
                           const std::filesystem::path &spritesheet_png, const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size,
-                          unsigned int indices_per_frame, unsigned int indices_per_sequence, std::vector<bool> collision_mask,
-                          sf::Vector2i door_position )
+                          unsigned int indices_per_sequence, std::vector<bool> collision_mask, sf::Vector2i door_position, float framerate )
     : m_sprite_type{ std::move( type ) },
       m_display_name( std::move( display_name ) ),
       m_zorder_list( zorder_list ),
       m_grid_size{ grid_size },
-      m_indices_per_frame{ indices_per_frame },
       m_indices_per_sequence{ indices_per_sequence },
       m_collision_mask{ normalise_collision_mask( std::move( collision_mask ), grid_size, m_sprite_type ) },
-      m_door_position( door_position )
+      m_door_position( door_position ),
+      m_framerate{ normalise_framerate( framerate, indices_per_sequence, m_sprite_type ) }
 {
   m_spritesheet_texture = std::make_unique<sf::Texture>();
   if ( !m_spritesheet_texture->loadFromFile( spritesheet_png ) )
@@ -40,16 +39,17 @@ SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const s
 }
 
 SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list, sf::Texture tilemap_texture,
-                          const std::vector<uint32_t> &tilemap_picks, sf::Vector2i grid_size, unsigned int indices_per_frame,
-                          unsigned int indices_per_sequence, std::vector<bool> collision_mask, sf::Vector2i door_position )
+                          const std::vector<uint32_t> &tilemap_picks, sf::Vector2i grid_size,
+                          unsigned int indices_per_sequence, std::vector<bool> collision_mask, sf::Vector2i door_position,
+                          float framerate )
     : m_sprite_type{ std::move( type ) },
       m_display_name( std::move( display_name ) ),
       m_zorder_list( zorder_list ),
       m_grid_size{ grid_size },
-      m_indices_per_frame{ indices_per_frame },
       m_indices_per_sequence{ indices_per_sequence },
       m_collision_mask{ normalise_collision_mask( std::move( collision_mask ), grid_size, m_sprite_type ) },
-      m_door_position( door_position )
+      m_door_position( door_position ),
+      m_framerate{ normalise_framerate( framerate, indices_per_sequence, m_sprite_type ) }
 {
   SPDLOG_DEBUG( "Loaded tilemap texture" );
   m_spritesheet_texture = std::make_shared<sf::Texture>( std::move( tilemap_texture ) );
@@ -59,6 +59,23 @@ SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const s
     SPDLOG_CRITICAL( "Failed to load tilemap" );
     throw std::runtime_error( "Failed to load tilemap" );
   }
+}
+
+float SpriteSheet::normalise_framerate( float framerate, unsigned int indices_per_sequence, const Sys::SpriteKey &type )
+{
+  // a single frame has nothing to animate
+  if ( indices_per_sequence <= 1 )
+  {
+    if ( framerate != 0.f ) { SPDLOG_WARN( "{} has a single frame, ignoring framerate {}", type.str(), framerate ); }
+    return 0.f;
+  }
+
+  if ( framerate < 0.f )
+  {
+    SPDLOG_WARN( "{} has a negative framerate {}, treating it as 0", type.str(), framerate );
+    return 0.f;
+  }
+  return framerate;
 }
 
 std::vector<bool> SpriteSheet::normalise_collision_mask( std::vector<bool> collision_mask, sf::Vector2i grid_size, const Sys::SpriteKey &type )

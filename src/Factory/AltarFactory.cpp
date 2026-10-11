@@ -16,7 +16,6 @@ void create_altar_sacrifice_anim( entt::registry &reg, Cmp::Position pos, Sys::S
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( entt, Cmp::AnimData::Config{
     .sprite_type        = anim_type,
-    .framerate          = 5.f,
     .anim_type = Cmp::AnimType::ONESHOTRESET
   });
   // clang-format off

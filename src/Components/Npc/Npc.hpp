@@ -9,33 +9,29 @@
 namespace Game::Cmp::Npc
 {
 
-//! @brief ECS component holding an NPC's sprite animation set, lerp/framerate parameters,
+//! @brief ECS component holding an NPC's sprite animation set, lerp parameter,
 //! and the currently active gameplay-stat action modifiers with their elapsed times.
 class NPC
 {
 public:
-  //! @brief Default constructor. Leaves sprite_type_list empty and the lerp/framerate at 0.
+  //! @brief Default constructor. Leaves sprite_type_list empty and the lerp speed at 0.
   NPC() = default;
 
   //! @brief Construct an NPC with a single sprite type.
   //! @param sprite_type The sprite to use, wrapped into a single-element sprite_type_list.
   //! @param lerp_speed Interpolation speed used when smoothing this NPC's movement.
-  //! @param framerate Animation framerate for the sprite, in frames per second. 0 = not animated.
-  NPC( Sys::SpriteKey sprite_type, float lerp_speed, float framerate )
+  NPC( Sys::SpriteKey sprite_type, float lerp_speed )
       : sprite_type_list( std::vector<Sys::SpriteKey>{ std::move( sprite_type ) } ),
-        m_lerp_speed( lerp_speed ),
-        m_framerate( framerate )
+        m_lerp_speed( lerp_speed )
   {
   }
 
   //! @brief Construct an NPC with multiple sprite types (e.g. for animation).
   //! @param sprite_type_list The list of sprites, see res/json/npc.json.
   //! @param lerp_speed Interpolation speed used when smoothing this NPC's movement.
-  //! @param framerate Animation framerate for the sprites, in frames per second. 0 = not animated.
-  NPC( std::vector<Sys::SpriteKey> sprite_type_list, float lerp_speed, float framerate )
+  NPC( std::vector<Sys::SpriteKey> sprite_type_list, float lerp_speed )
       : sprite_type_list( std::move( sprite_type_list ) ),
-        m_lerp_speed( lerp_speed ),
-        m_framerate( framerate )
+        m_lerp_speed( lerp_speed )
   {
   }
   // bool active = true;
@@ -45,8 +41,6 @@ public:
 
   //! @brief Interpolation speed used when smoothing this NPC's movement.
   float m_lerp_speed{ 0 };
-  //! @brief Animation framerate for the sprite(s) in sprite_type_list, in frames per second. 0 = not animated.
-  float m_framerate{ 0 };
 
   //! @brief Object holding a list of action modifiers and time object
   struct ActionTimePair

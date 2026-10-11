@@ -33,7 +33,6 @@
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
-#include <Components/Persistent/NpcDeathAnimFramerate.hpp>
 #include <Components/Persistent/NpcPushBack.hpp>
 #include <Components/Persistent/NpcShockwaveFreq.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
@@ -70,7 +69,6 @@
 #include <Components/Persistent/ShopMinPrice.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Persistent/WeaponDegradePerHit.hpp>
-#include <Components/Persistent/WormholeAnimFramerate.hpp>
 #include <Components/Persistent/WormholeSeed.hpp>
 #include <Events/LoadSettingsEvent.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -146,7 +144,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::MinNumRuins>();
   add_component<Cmp::Persist::MusicVolume>();
   add_component<Cmp::Persist::NpcActivateScale>();
-  add_component<Cmp::Persist::NpcDeathAnimFramerate>();
   add_component<Cmp::Persist::NpcPushBack>();
   add_component<Cmp::Persist::NpcShockwaveFreq>();
   add_component<Cmp::Persist::NpcShockwaveMaxRadius>();
@@ -182,7 +179,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ShopMinPrice>();
   add_component<Cmp::Persist::ShopMaxPrice>();
   add_component<Cmp::Persist::WeaponDegradePerHit>();
-  add_component<Cmp::Persist::WormholeAnimFramerate>();
 
   // Add serdes functions to each component
   for ( const auto &[name, config] : definitions->items() )

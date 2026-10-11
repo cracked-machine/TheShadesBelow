@@ -256,14 +256,6 @@
     "detail": "NPC Activation Bounding Box Scale Factor",
     "format": "%.1f pixels"
     },
-  "NpcDeathAnimFramerate": {
-    "type": "float",
-    "value": 10.0,
-    "min_value": 0.0,
-    "max_value": 60.0,
-    "detail": "NPC Death Animation Framerate",
-    "format": "%.0f fps"
-  },
   
   "NpcWatchmanGunFireRate": {
     "type": "float",
@@ -540,13 +532,5 @@
     "max_value": 5.0,
     "detail": "Weapon Degrade Per Hit",
     "format": "%.1f pixels"
-  },
-  "WormholeAnimFramerate": {
-    "type": "float",
-    "value": 10.0,
-    "min_value": 0.0,
-    "max_value": 60.0,
-    "detail": "Wormhole Animation Framerate",
-    "format": "%.0f fps"
   }
 }

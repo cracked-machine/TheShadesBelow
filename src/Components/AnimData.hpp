@@ -4,6 +4,8 @@
 #include <SFML/System/Time.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
+#include <optional>
+
 namespace Game::Cmp
 {
 
@@ -18,8 +20,8 @@ enum class AnimType
   ONESHOTHOLD
 };
 
-//! @brief Component holding sprite-sheet animation state for an entity (current frame, framerate,
-//!        looping behaviour, etc).
+//! @brief Component holding sprite-sheet animation state for an entity (current frame, looping behaviour, etc).
+//! @note The animation framerate comes from the sprite sheet (`framerate` in res/json/spritesheets.json).
 struct AnimData
 {
   //! @brief Construction parameters for AnimData.
@@ -33,8 +35,6 @@ struct AnimData
     unsigned int base_frame = 0;
     //! @brief Fixed offset into the sprite sheet for multi-block sprites; see AnimData::m_frame_index_offset.
     size_t frame_index_offset = 0;
-    //! @brief Animation framerate in frames per second. 0 = not animated.
-    float framerate = 10.f;
     //! @brief Whether the animation is initially advancing.
     bool enabled = true;
     //! @brief Behaviour of the animation once it reaches its last frame.
@@ -49,15 +49,14 @@ struct AnimData
         m_enabled( cfg.enabled ),
         m_sprite_type( cfg.sprite_type ),
         m_anim_type( cfg.anim_type ),
-        m_framerate( cfg.framerate ),
         m_frame_index_offset( cfg.frame_index_offset )
   {
   }
 
   //! @brief Tracks the frame position in the animation sequence, as an index into the sprite sheet's
   //! `sprite_indices`.
-  //! @note It advances by the sheet's `indices_per_frame` each frame. That is 1 for every current sheet, single
-  //!       or multi-block, so 0 is the first frame, 1 is the second frame, etc.
+  //! @note It advances by 1 each frame for every sheet, single or multi-block, so 0 is the first frame, 1 is
+  //!       the second frame, etc.
   unsigned int m_current_frame;
 
   //! @brief The start frame in the animation sequence.
@@ -79,16 +78,17 @@ struct AnimData
   //! @brief Behaviour of the animation once it reaches its last frame.
   AnimType m_anim_type;
 
-  //! @brief Get the animation framerate.
-  //! @return float Framerate in frames per second. 0 = not animated.
-  float get_framerate() { return m_framerate; }
+  //! @brief Get the framerate override, if one has been set.
+  //! @return std::optional<float> Framerate in frames per second, or empty to use the sprite sheet's framerate.
+  std::optional<float> framerate_override() const { return m_framerate_override; }
 
-  //! @brief Set the animation framerate, in frames per second. 0 = not animated.
-  void set_framerate( float framerate ) { m_framerate = framerate; }
+  //! @brief Replace the sprite sheet's framerate for this entity. Used for movement-driven animation.
+  //! @param framerate Frames per second. 0 = not animated.
+  void set_framerate_override( float framerate ) { m_framerate_override = framerate; }
 
 private:
-  //! @brief Animation framerate in frames per second. 0 = not animated.
-  float m_framerate;
+  //! @brief Replaces the sprite sheet's framerate when set, in frames per second.
+  std::optional<float> m_framerate_override;
   //! @brief Get the relative frame index offset within multi-block sprites
   //! This should be immutable for the lifetime of the component
   //! @return unsigned int

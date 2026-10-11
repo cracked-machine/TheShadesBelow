@@ -55,9 +55,8 @@ void NpcStore::init_store()
     }
 
     auto lerp_speed = item_value.at( "lerpspeed" );
-    auto framerate = item_value.at( "framerate" );
 
-    Cmp::Npc::NPC npc( mtype_list, lerp_speed, framerate );
+    Cmp::Npc::NPC npc( mtype_list, lerp_speed );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )

@@ -28,14 +28,15 @@ public:
   //! @param spritesheet_path
   //! @param spritesheet_selections
   //! @param grid_size
-  //! @param indices_per_frame
   //! @param indices_per_sequence
   //! @param collision_mask
   //! @param door_position
+  //! @param framerate Animation framerate in frames per second. Forced to 0 for single-frame sheets.
   explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list,
                         const std::filesystem::path &spritesheet_png, const std::vector<uint32_t> &spritesheet_selections,
-                        sf::Vector2i grid_size = { 1, 1 }, unsigned int indices_per_frame = 1, unsigned int indices_per_sequence = 1,
-                        std::vector<bool> collision_mask = {}, sf::Vector2i door_position = {} );
+                        sf::Vector2i grid_size = { 1, 1 }, unsigned int indices_per_sequence = 1,
+                        std::vector<bool> collision_mask = {}, sf::Vector2i door_position = {},
+                        float framerate = 0.f );
 
   //! @brief Construct a new Multi Sprite object using texture object
   //! @param type
@@ -44,13 +45,14 @@ public:
   //! @param spritesheet_texture
   //! @param spritesheet_selections
   //! @param grid_size
-  //! @param indices_per_frame
   //! @param indices_per_sequence
   //! @param collision_mask
   //! @param door_position
+  //! @param framerate Animation framerate in frames per second. Forced to 0 for single-frame sheets.
   explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list, sf::Texture spritesheet_texture,
-                        const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size = { 1, 1 }, unsigned int indices_per_frame = 1,
-                        unsigned int indices_per_sequence = 1, std::vector<bool> collision_mask = {}, sf::Vector2i door_position = {} );
+                        const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size = { 1, 1 },
+                        unsigned int indices_per_sequence = 1, std::vector<bool> collision_mask = {}, sf::Vector2i door_position = {},
+                        float framerate = 0.f );
 
   SpriteSheet( SpriteSheet && ) = default;
   SpriteSheet &operator=( SpriteSheet && ) = default;
@@ -81,15 +83,14 @@ public:
   //! @return A texture index in the range [0, sprite count)
   [[nodiscard]] std::size_t get_random_texture_index() const;
 
-  //! @brief How many `sprite_indices` entries make one animation frame. Each entry already selects a whole
-  //! `grid_size` area, so this is normally 1.
-  //! @return unsigned int
-  [[nodiscard]] unsigned int indices_per_frame() const { return m_indices_per_frame; }
-
-  //! @brief How many `sprite_indices` entries the animation loops over. The number of animation frames is this
-  //! divided by indices_per_frame().
+  //! @brief How many `sprite_indices` entries the animation loops over, one per animation frame. Each entry
+  //! already selects a whole `grid_size` area, including for multi-block sprites.
   //! @return unsigned int
   [[nodiscard]] unsigned int indices_per_sequence() const { return m_indices_per_sequence; }
+
+  //! @brief Animation framerate for this sheet, from `framerate` in spritesheets.json.
+  //! @return float Frames per second. 0 = not animated, which is always the case for single-frame sheets.
+  [[nodiscard]] float framerate() const { return m_framerate; }
 
   //! @brief Which cells of the sprite collide, one bool per grid cell in row-major order.
   //! @return Either empty, meaning every cell collides, or at least one entry per `grid_size` cell.
@@ -149,6 +150,14 @@ private:
   //! @throws std::runtime_error if the mask has more than one entry but fewer than one per grid cell.
   static std::vector<bool> normalise_collision_mask( std::vector<bool> collision_mask, sf::Vector2i grid_size, const Sys::SpriteKey &type );
 
+  //! @brief Apply the framerate rules from spritesheets.json: a sheet with a single animation frame never
+  //! animates, so its framerate is 0 whatever was loaded, and a negative framerate is treated as 0.
+  //! @param framerate The framerate as loaded, in frames per second.
+  //! @param indices_per_sequence The sheet's indices per sequence.
+  //! @param type The sprite sheet's type, for the warning message.
+  //! @return The framerate to store.
+  static float normalise_framerate( float framerate, unsigned int indices_per_sequence, const Sys::SpriteKey &type );
+
   //! @brief Identifier for this sprite sheet's type.
   Sys::SpriteKey m_sprite_type;
 
@@ -161,9 +170,6 @@ private:
   //! @brief width and height grid size for the multi-sprite
   sf::Vector2i m_grid_size{ 1, 1 };
 
-  //! @brief Number of `sprite_indices` entries per animation frame. See indices_per_frame().
-  unsigned int m_indices_per_frame{ 1 };
-
   //! @brief Number of `sprite_indices` entries in a full animation sequence. See indices_per_sequence().
   unsigned int m_indices_per_sequence{ 1 };
 
@@ -172,6 +178,9 @@ private:
 
   //! @brief Door tile position within the sprite grid, if this sheet represents a structure with a door.
   sf::Vector2i m_door_position;
+
+  //! @brief Animation framerate in frames per second. See framerate().
+  float m_framerate{ 0.f };
 };
 
 } // namespace Game::Sprites
