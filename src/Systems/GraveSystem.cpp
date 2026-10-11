@@ -36,6 +36,8 @@
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 
+#include <utility>
+
 namespace Game::Sys
 {
 
@@ -50,13 +52,13 @@ void GraveSystem::update()
   // must run before the digging early-outs below: the flute is not a digging tool
   update_grave_halo_particles();
 
-  if ( not player_digging ) return;
+  // consume the dig request on the frame it arrives: leaving it latched across the early-outs below would
+  // land a hit on a grave once the cooldown expires, long after the click that was aimed at something else
+  if ( not std::exchange( player_digging, false ) ) return;
   if ( not has_digging_tool_equipped() ) return;
   if ( is_dig_on_cooldown() ) return;
 
   clear_stale_grave_selections();
-
-  player_digging = false;
 
   // Iterate through all closed grave entities
   auto position_view = reg().view<Cmp::Position, Cmp::Grave::MultiBlock, Cmp::AnimData>( entt::exclude<Cmp::SelectedPosition> );
@@ -69,8 +71,10 @@ void GraveSystem::update()
 
     SPDLOG_DEBUG( "Found diggable entity at position: [{}, {}]!", grave_cmp.position.x, grave_cmp.position.y );
 
-    // TODO: check player is facing the obstacle
     if ( not is_player_near( grave_cmp ) ) continue;
+
+    // check player is facing the grave
+    if ( not Utils::Player::get_projected_position( reg() ).findIntersection( grave_cmp ) ) continue;
 
     // We are in proximity to an entity that is a candidate for a new SelectedPosition component.
     // Add a new SelectedPosition component to the entity
