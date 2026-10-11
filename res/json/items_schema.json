@@ -5,7 +5,7 @@
   "patternProperties": {
     "^(item\\..+|ERROR_SPRITE)$": {
       "type": "object",
-      "required": ["sprite", "expiry", "actions"],
+      "required": ["sprite", "expiry", "wear_location", "actions"],
       "additionalProperties": false,
       "properties": {
         "sprite": {
@@ -15,6 +15,11 @@
         "expiry": {
           "type": "number",
           "description": "The expiry for this item in seconds. Zero if no expiry."
+        },
+        "wear_location": {
+          "type": "string",
+          "enum": ["None", "World", "Inventory", "Both"],
+          "description": "Where the item's wear level is active. None if the item does not wear."
         },
         "actions": {
           "type": "array",
