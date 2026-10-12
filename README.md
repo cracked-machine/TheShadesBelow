@@ -179,3 +179,19 @@ The randomly placed items within the game - obstacles, plants, etc... - are proc
  - Drunken walk is used for the Crypt Scenes. This creates meandering passageways between the rooms. 
 
 Implemtations can be found in [src/Systems/ProcGen](src/Systems/ProcGen)
+
+
+---
+
+Copyright (C) 2026 Chris Sutton. All Rights Reserved.
+
+This source code is published publicly solely for portfolio demonstration, educational, and peer-review purposes. 
+
+Permission is hereby granted to view, fork, and download this repository for personal evaluation and review only. 
+
+Strictly Prohibited Actions:
+1. Compiling, modifying, or distributing this source code, binaries, or assets for commercial purposes.
+2. Distributing compiled executables or modified versions of this project to the public.
+3. Hosting or distributing the project or its assets on external storefronts, platforms, or websites.
+
+This license will be updated or revoked when the project transitions to a commercial product.
