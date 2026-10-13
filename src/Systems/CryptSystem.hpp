@@ -192,8 +192,9 @@ private:
   //! @param player_pos_cmp
   void add_lava_pit_open_rooms( const Cmp::Position &player_pos_cmp );
 
-  //! @brief Advance the lava pit's animated hazard cells once the effect cooldown has elapsed.
-  void do_lava_pit_animation();
+  //! @brief Spit a fireball out of a random active lava pit cell once the effect cooldown has elapsed.
+  //! @param dt Time elapsed since the last frame.
+  void do_lava_pit_animation( sf::Time dt );
 
   //! @brief Remove lava pits from open rooms
   //! @param player_pos_cmp
@@ -252,10 +253,10 @@ private:
   //! @brief Indicates if the maze was unlocked this cycle
   bool m_maze_unlocked{ false };
 
-  //! @brief Rate-limits how often the lava pit hazard animation advances.
-  sf::Clock m_lava_effect_cooldown_timer;
+  //! @brief Time accumulated since the last lava pit fireball was emitted.
+  sf::Time m_lava_effect_cooldown_elapsed{ sf::Time::Zero };
 
-  //! @brief Minimum time between lava pit hazard animation advances.
+  //! @brief Minimum time between lava pit fireballs.
   sf::Time m_lava_effect_cooldown_threshold{ sf::seconds( 1.f ) };
 
   //! @brief All grid positions that block NPC pathfinding

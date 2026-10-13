@@ -157,6 +157,20 @@ void add_planttwigs_ps( entt::registry &reg, const std::string &tag, int particl
 void add_skelebones_ps( entt::registry &reg, const std::string &tag, int particle_count, float lifetime_seconds, float speed, float size,
                         Cmp::UUID &uuid_cmp, sf::Vector2f pos, float zorder );
 
+//! @brief Spawn a lava fireball particle effect: each particle is launched upwards (with a small random spread),
+//! travels in a parabola and is destroyed when it falls back to the y position of `pos`.
+//! @param reg
+//! @param tag <location>.<item>.particle.<sprite>
+//! @param particle_count Number of particles in the sprite.
+//! @param lifetime_seconds Upper limit on the flight time, in seconds. The particle normally lands before this.
+//! @param speed Launch speed (randomised slightly per particle).
+//! @param size Per-particle fireball radius, in world units.
+//! @param uuid_cmp UUID assigned to the created entity, so it can be tracked/updated later (e.g. via update_position()).
+//! @param pos World position of the emitter. Its y is also the height the particles land at.
+//! @param zorder Draw order relative to other entities.
+void add_lava_fireball_ps( entt::registry &reg, const std::string &tag, int particle_count, float lifetime_seconds, float speed, float size,
+                           Cmp::UUID &uuid_cmp, sf::Vector2f pos, float zorder );
+
 //! @brief Spawn a flame particle sprite (candle/altar fire).
 //! @param reg
 //! @param tag <location>.<item>.particle.<sprite>

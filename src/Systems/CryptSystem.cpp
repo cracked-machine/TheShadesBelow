@@ -15,7 +15,6 @@
 #include <Components/Crypt/RoomEnd.hpp>
 #include <Components/Crypt/RoomLavaPit.hpp>
 #include <Components/Crypt/RoomLavaPitCell.hpp>
-#include <Components/Crypt/RoomLavaPitCellEffect.hpp>
 #include <Components/Crypt/RoomOpen.hpp>
 #include <Components/Crypt/RoomStart.hpp>
 #include <Components/Direction.hpp>
@@ -24,6 +23,7 @@
 #include <Components/FootStepTimer.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Obstacle.hpp>
+#include <Components/Particle/LavaFireballParticleSprite.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/CadaverCount.hpp>
@@ -35,6 +35,7 @@
 #include <Components/RectBounds.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/Stats/SpawnAction.hpp>
+#include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/CryptRoomEvent.hpp>
@@ -45,6 +46,7 @@
 #include <Factory/MultiblockFactory.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
+#include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>
 #include <SceneControl/Scenes/CryptScene.hpp>
@@ -104,7 +106,7 @@ void CryptSystem::update( sf::Time dt )
 
   check_lever_activation();
   check_lava_pit_activation_by_proximity();
-  do_lava_pit_animation();
+  do_lava_pit_animation( dt );
   check_spike_trap_activation_by_proximity();
 }
 
@@ -883,45 +885,32 @@ void CryptSystem::add_lava_pit_open_rooms( const Cmp::Position &player_pos_cmp )
   }
 }
 
-void CryptSystem::do_lava_pit_animation()
+void CryptSystem::do_lava_pit_animation( sf::Time dt )
 {
-  // remove any pre-existing lava anim entities
-  auto lava_anim_view = reg().view<Cmp::Crypt::RoomLavaPitCellEffect, Cmp::AnimData>();
-  for ( auto [lava_anim_entt, lava_cell_anim_cmp, lava_anim_cmp] : lava_anim_view.each() )
+  const auto fireball_tag = std::string( Cmp::Particle::LavaFireballParticleSprite::kLavaPitTag );
+
+  // remove any landed (completed) lava fireballs
+  Factory::Particle::delete_expired_particle_sprites( reg(), fireball_tag );
+
+  m_lava_effect_cooldown_elapsed += dt;
+  if ( m_lava_effect_cooldown_elapsed < m_lava_effect_cooldown_threshold ) return;
+  m_lava_effect_cooldown_elapsed = sf::Time::Zero;
+
+  // add N new lava fireballs
+  auto found_lava_cell_entts = Utils::Rnd::get_n_rand_components<Cmp::Crypt::RoomLavaPitCell>( reg(), 1, {}, {} );
+
+  for ( auto lava_cell_entt : found_lava_cell_entts )
   {
-    // only delete the entity if it has finished its animation sequence
-    if ( lava_anim_cmp.m_enabled ) continue;
-    if ( reg().valid( lava_anim_entt ) ) reg().destroy( lava_anim_entt );
-  }
+    // disabled CryptRoomLavaPitCells have no zorder
+    auto *lava_zorder_cmp = reg().try_get<Cmp::ZOrderValue>( lava_cell_entt );
+    if ( not lava_zorder_cmp ) continue;
 
-  if ( m_lava_effect_cooldown_timer.getElapsedTime() > m_lava_effect_cooldown_threshold )
-  {
-    // add N new lava anim entities
-    auto found_lava_cell_entts = Utils::Rnd::get_n_rand_components<Cmp::Crypt::RoomLavaPitCell>( reg(), 1, {}, {} );
+    auto *lava_cell_cmp = reg().try_get<Cmp::Crypt::RoomLavaPitCell>( lava_cell_entt );
+    if ( not lava_cell_cmp ) continue;
 
-    for ( auto lava_cell_entt : found_lava_cell_entts )
-    {
-      // disabled CryptRoomLavaPitCells have no zorder
-      auto *lava_zorder_cmp = reg().try_get<Cmp::ZOrderValue>( lava_cell_entt );
-      if ( not lava_zorder_cmp ) continue;
-
-      auto *lava_cell_cmp = reg().try_get<Cmp::Crypt::RoomLavaPitCell>( lava_cell_entt );
-      if ( not lava_cell_cmp ) continue;
-
-      auto lava_anim_entt = reg().create();
-
-      reg().emplace_or_replace<Cmp::Crypt::RoomLavaPitCellEffect>( lava_anim_entt );
-      reg().emplace_or_replace<Cmp::Position>( lava_anim_entt, lava_cell_cmp->position, lava_cell_cmp->size );
-      // clang-format off
-      reg().emplace_or_replace<Cmp::AnimData>( lava_anim_entt, Cmp::AnimData::Config{ 
-            .sprite_type = "sprite.crypt.anim.lava", 
-            .enabled = true,
-            .anim_type = Cmp::AnimType::ONESHOTRESET
-      });
-      // clang-format on
-      reg().emplace_or_replace<Cmp::ZOrderValue>( lava_anim_entt, lava_cell_cmp->position.y + 64.f );
-    }
-    m_lava_effect_cooldown_timer.restart();
+    auto fireball_uuid = Cmp::UUID::generate();
+    Factory::Particle::add_lava_fireball_ps( reg(), fireball_tag, 1, 2.f, 125.f, 3.f, fireball_uuid, lava_cell_cmp->getCenter(),
+                                             lava_cell_cmp->position.y + 64.f );
   }
 }
 

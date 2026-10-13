@@ -1050,21 +1050,6 @@
         }
       }
     },
-    "sprite.crypt.anim.lava": {
-      "spritesheet": {
-        "displayname": "sprite.crypt.anim.lava",
-        "zorder": [0, 0, 0, 0, 0, 0],
-        "texture_path": "res/textures/fire_effect_and_bullet_16x16.png",
-        "sprite_indices": [24, 25, 26, 27, 28, 29],
-        "indices_per_sequence": 6,
-        "framerate": 5,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-
     "sprite.wisp.east": {
       "spritesheet": {
         "displayname": "sprite.wisp.east",
