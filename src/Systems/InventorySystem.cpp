@@ -430,7 +430,7 @@ void InventorySystem::consume_inventory( sf::Time dt )
       constexpr auto kLifetimeSeconds = 1.f;
       constexpr auto kSpeed = 25.f;
       constexpr auto kSize = 5.f;
-      auto last_direction = Utils::Player::get_last_direction( reg() );
+      const auto &last_direction = Utils::Player::get_last_direction( reg() );
       if ( last_direction == Utils::Cardinal( Utils::Cardinal::North ).vector() )
       {
         Factory::Particle::add_eatingcrumbs_ps( reg(), "player.forage.particle.eating", kParticleCount, kLifetimeSeconds, kSpeed, kSize, uuid,

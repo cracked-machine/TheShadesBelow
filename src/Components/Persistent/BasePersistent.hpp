@@ -35,6 +35,9 @@ public:
   //! @brief Get a mutable reference to the current value.
   //! @return T& the current value
   T &get_value() { return value; };
+  //! @brief Get a read-only reference to the current value.
+  //! @return const T& the current value
+  const T &get_value() const { return value; };
   //! @brief Get a mutable reference to the minimum allowed value.
   //! @return T& the minimum value
   T &get_min_value() { return min_value; };

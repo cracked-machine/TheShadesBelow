@@ -57,6 +57,11 @@ public:
     return actions.at( std::type_index( typeid( ActionT ) ) );
   }
   template <typename ActionT>
+  const auto &at() const
+  {
+    return actions.at( std::type_index( typeid( ActionT ) ) );
+  }
+  template <typename ActionT>
   void emplace( ActionT action )
   {
     actions.emplace( std::type_index( typeid( ActionT ) ), ActionTimePair{ action, sf::Time::Zero } );

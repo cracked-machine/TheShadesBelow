@@ -78,7 +78,7 @@ void create_shadow_hand( entt::registry &reg, sf::Vector2f scene_dimensions, con
 
   if ( not exists )
   {
-    auto npc_shadowhand_cmp = Sys::NpcStore::instance().get( "npc.shadowhand" );
+    const auto &npc_shadowhand_cmp = Sys::NpcStore::instance().get( "npc.shadowhand" );
     const auto hand_ms_size = hand_ms.sprite_size();
     sf::Vector2f starting_pos = { 0 - hand_ms_size.x, ( scene_dimensions.y / 2 ) - ( hand_ms_size.y / 2 ) };
 

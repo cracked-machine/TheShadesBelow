@@ -64,6 +64,11 @@ public:
   {
     return actions.at( std::type_index( typeid( ActionT ) ) );
   }
+  template <typename ActionT>
+  const auto &at() const
+  {
+    return actions.at( std::type_index( typeid( ActionT ) ) );
+  }
   //! @brief Add an action keyed by its concrete type. Must be a template: taking BaseAction by value would slice
   //! the argument and key every action under typeid(BaseAction).
   template <typename ActionT>

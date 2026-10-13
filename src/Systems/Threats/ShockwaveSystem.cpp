@@ -206,7 +206,7 @@ void ShockwaveSystem::update( sf::Time dt )
 
   // Invert the interval - larger values = faster updates, smaller values = slower updates
   auto speed_value = Sys::PersistSystem::get<Cmp::Persist::NpcShockwaveSpeed>( reg() ).get_value();
-  auto max_radius = Sys::PersistSystem::get<Cmp::Persist::NpcShockwaveMaxRadius>( reg() );
+  const auto &max_radius = Sys::PersistSystem::get<Cmp::Persist::NpcShockwaveMaxRadius>( reg() );
 
   for ( auto entt : reg().view<Cmp::Npc::Shockwave>() )
   {

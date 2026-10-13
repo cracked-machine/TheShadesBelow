@@ -383,8 +383,8 @@ void RenderMenuSystem::render_victory_screen( bool allow_continue )
     m_window.draw( start_text );
   }
 
-  auto wealth = Utils::Player::get_wealth( m_reg );
-  auto cadaver_count = Utils::Player::get_cadaver_count( m_reg );
+  const auto &wealth = Utils::Player::get_wealth( m_reg );
+  const auto &cadaver_count = Utils::Player::get_cadaver_count( m_reg );
 
   sf::Text cadaver_txt( m_font, "Cadaver count: " + std::to_string( cadaver_count.get_count() ), 24 );
   cadaver_txt.setFillColor( sf::Color::White );

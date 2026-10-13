@@ -74,7 +74,7 @@ void RenderOverlaySystem::render_overlay( sf::Time dt )
   PROFILED( render_level_depth() );
   PROFILED( render_ghost_grave_halos() );
 
-  auto display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
+  const auto &display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
   render_crypt_maze_timer( { static_cast<float>( display_size.x ) / 2.f, 0.f }, 100 );
 }
 
@@ -392,10 +392,10 @@ void RenderOverlaySystem::render_ui_labels( sf::Time dt )
 
 void RenderOverlaySystem::render_level_depth()
 {
-  auto player_level_cmp = Utils::Player::get_level_depth( reg() );
+  const auto &player_level_cmp = Utils::Player::get_level_depth( reg() );
   if ( player_level_cmp.display_timer.getElapsedTime() >= player_level_cmp.display_cooldown ) { return; }
 
-  auto display_res = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
+  const auto &display_res = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
   sf::Text level_txt( m_font, "Nekropolis " + std::to_string( player_level_cmp.get_count() ), 100 );
   level_txt.setPosition( sf::Vector2f( ( static_cast<float>( display_res.x ) / 2.f ) - level_txt.getLocalBounds().getCenter().x, 100.f ) );
   level_txt.setFillColor( sf::Color::White );

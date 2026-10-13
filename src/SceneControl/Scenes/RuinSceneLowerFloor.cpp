@@ -105,7 +105,7 @@ void RuinSceneLowerFloor::on_init()
   auto init_chance = Sys::PersistSystem::get<Cmp::Persist::RuinProcGenInitChance>( m_reg ).get_value();
   level_gen.add_ruin_interior_obstacles( init_chance );
 
-  auto max_iterations = Sys::PersistSystem::get<Cmp::Persist::RuinProcGenMaxIterations>( m_reg );
+  const auto &max_iterations = Sys::PersistSystem::get<Cmp::Persist::RuinProcGenMaxIterations>( m_reg );
   auto &dla_sys = m_sys.find<Sys::Store::Type::DiffusionLtdAggrSystem>();
   dla_sys.iterate( sf::FloatRect( { 0.f, 0.f }, map_size_pixel ), sf::Vector2f{ 224.f, 144.f }, max_iterations.get_value(),
                    level_gen.get_obstacle_sm(), *m_reserved_sm );

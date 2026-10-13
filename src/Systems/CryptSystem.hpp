@@ -147,7 +147,7 @@ private:
   //! @param main_entt
   //! @param main_pos_cmp
   //! @param room_wall_type
-  void decorate_interior_wall( entt::entity main_entt, Cmp::Position &main_pos_cmp, RoomWallType room_wall_type );
+  void decorate_interior_wall( entt::entity main_entt, const Cmp::Position &main_pos_cmp, RoomWallType room_wall_type );
 
   //! @brief Unlock the objective passage
   void unlock_objective_passage();

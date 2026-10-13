@@ -743,7 +743,7 @@ entt::entity CryptSystem::find_intersecting_multiblock( const Cmp::Position &pos
   return entt::null;
 }
 
-void CryptSystem::decorate_interior_wall( entt::entity main_entt, Cmp::Position &main_pos_cmp, RoomWallType room_wall_type )
+void CryptSystem::decorate_interior_wall( entt::entity main_entt, const Cmp::Position &main_pos_cmp, RoomWallType room_wall_type )
 {
   const Sprites::SpriteSheet &ss_main = Sys::SpriteStore::instance().get( "sprite.crypt.wall.int.main" );
   const Sprites::SpriteSheet &ss_cap = Sys::SpriteStore::instance().get( "sprite.crypt.wall.int.cap" );
@@ -790,7 +790,7 @@ void CryptSystem::fill_closed_rooms( const Factory::Obstacle::UUIDEntityMap &uui
 
   for ( auto [closed_room_entt, closed_room_cmp] : reg().view<Cmp::Crypt::RoomClosed>().each() )
   {
-    for ( auto [pos_entt, pos_cmp] : closed_room_cmp.m_position_list )
+    for ( const auto &[pos_entt, pos_cmp] : closed_room_cmp.m_position_list )
     {
       if ( reg().all_of<Cmp::Obstacle>( pos_entt ) ) continue;
       if ( reg().any_of<Cmp::FootStepTimer, Cmp::FootStepAlpha, Cmp::Direction>( pos_entt ) ) continue;
@@ -804,7 +804,7 @@ void CryptSystem::fill_closed_rooms( const Factory::Obstacle::UUIDEntityMap &uui
 
   for ( auto [closed_room_entt, closed_room_cmp] : reg().view<Cmp::Crypt::RoomClosed>().each() )
   {
-    for ( auto [pos_entt, pos_cmp] : closed_room_cmp.m_border_position_list )
+    for ( const auto &[pos_entt, pos_cmp] : closed_room_cmp.m_border_position_list )
     {
       // skip position outside closed room area or if position already has existing obstacle
       // if ( not closed_room_cmp.findIntersection( pos_cmp ) ) continue;
@@ -851,7 +851,7 @@ void CryptSystem::empty_open_rooms( const Factory::Obstacle::UUIDEntityMap &uuid
 
   for ( auto [open_room_entt, open_room_cmp] : reg().view<Cmp::Crypt::RoomOpen>().each() )
   {
-    for ( auto [pos_entt, pos_cmp] : open_room_cmp.m_position_list )
+    for ( const auto &[pos_entt, pos_cmp] : open_room_cmp.m_position_list )
     {
       // skip position outside open room area or if position doesn't have existing obstacle
       if ( not open_room_cmp.findIntersection( pos_cmp ) ) continue;
@@ -862,7 +862,7 @@ void CryptSystem::empty_open_rooms( const Factory::Obstacle::UUIDEntityMap &uuid
       if ( auto player_navmesh = m_player_navmesh.lock() ) { player_navmesh->remove( pos_entt, pos_cmp ); }
     }
 
-    for ( auto [pos_entt, pos_cmp] : open_room_cmp.m_border_position_list )
+    for ( const auto &[pos_entt, pos_cmp] : open_room_cmp.m_border_position_list )
     {
       if ( not reg().all_of<Cmp::Obstacle>( pos_entt ) ) continue;
       Factory::Obstacle::remove_obstacle( reg(), pos_entt, Factory::Obstacle::DeleteExtras::Yes, uuid_map, reserved_sm );
@@ -1266,8 +1266,8 @@ void CryptSystem::spawn_npc_in_open_rooms()
     // Spawn NPC in the selected room
     auto spawn_position = Utils::snap_to_grid( extracted_open_room_cmp.getCenter() );
     auto position_entity = reg().create();
-    Cmp::Position position_cmp = reg().emplace<Cmp::Position>( position_entity, spawn_position, Constants::kGridSizePxF );
-    [[maybe_unused]] Cmp::ZOrderValue zorder_cmp = reg().emplace<Cmp::ZOrderValue>( position_entity, position_cmp.position.y );
+    const auto &position_cmp = reg().emplace<Cmp::Position>( position_entity, spawn_position, Constants::kGridSizePxF );
+    [[maybe_unused]] const auto &zorder_cmp = reg().emplace<Cmp::ZOrderValue>( position_entity, position_cmp.position.y );
     Factory::Npc::create_npc( reg(), position_entity, "npc.priest" );
 
     SPDLOG_DEBUG( "Spawned NPC {} at position ({}, {})", r + 1, spawn_position.x, spawn_position.y );

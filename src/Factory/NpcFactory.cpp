@@ -114,7 +114,7 @@ entt::entity create_npc( entt::registry &reg, entt::entity position_entity, cons
     return entt::null;
   }
 
-  auto npc_cmp = Sys::NpcStore::instance().get( npc_type );
+  const auto &npc_cmp = Sys::NpcStore::instance().get( npc_type );
   // the NPC's footprint and z-order offset come from its sprite sheet, so multiblock NPCs (grid_size > 1x1)
   // are top-left anchored at the spawn position, same as multiblock structures
   const auto &npc_ss = Sys::SpriteStore::instance().get( npc_cmp.sprite_type_list.front() );

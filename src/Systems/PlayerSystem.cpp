@@ -231,7 +231,7 @@ bool PlayerSystem::movement_suppressed()
   auto *suppress_cmp = reg().try_get<Cmp::Player::MovementSuppressTimer>( Utils::Player::get_entity( reg() ) );
   if ( not suppress_cmp ) return false;
 
-  auto movement_delay = Sys::PersistSystem::get<Cmp::Persist::PostPullMovementDelay>( reg() );
+  const auto &movement_delay = Sys::PersistSystem::get<Cmp::Persist::PostPullMovementDelay>( reg() );
   return suppress_cmp->asSeconds() < movement_delay.get_value();
 }
 
@@ -257,7 +257,7 @@ void PlayerSystem::move_obstacle( const sf::FloatRect &target_position )
     if ( not target_position.findIntersection( selected_pos_cmp ) ) continue;
 
     // normalized direction
-    auto player_direction = Utils::Player::get_direction( reg() );
+    const auto &player_direction = Utils::Player::get_direction( reg() );
     // velocity vector
     auto player_velocity = Cmp::RectBounds::scaled( player_direction.componentWiseMul( Constants::kGridSizePxF ), target_position.size, 1 );
     // where we want the player to end up after the move (used for pull only)

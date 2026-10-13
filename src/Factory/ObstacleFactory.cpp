@@ -64,7 +64,7 @@ void decorate_obstacle( entt::registry &reg, entt::entity entity, Cmp::Position 
   if ( reg.any_of<Cmp::Player::Character>( entity ) ) { return; }
   if ( ( reserved_sm != nullptr ) && not reserved_sm->at( pos_cmp ).empty() ) { return; }
   if ( reg.all_of<Cmp::DestroyedObstacle>( entity ) ) { reg.remove<Cmp::DestroyedObstacle>( entity ); }
-  reg.emplace_or_replace<Cmp::ZOrderValue>( entity, zorder );
+  reg.emplace_or_replace<Cmp::ZOrderValue>( entity, zorder_cmp );
 
   if ( blocking )
   {

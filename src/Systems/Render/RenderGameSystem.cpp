@@ -116,7 +116,7 @@ void RenderGameSystem::init_world_view()
   s_world_view = sf::View( { kWorldViewSizeF.x * 0.5f, kWorldViewSizeF.y * 0.5f }, kWorldViewSizeF );
   s_world_view.setViewport( sf::FloatRect( { 0.f, 0.f }, { 1.f, 1.f } ) );
 
-  auto start_pos = Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() );
+  const auto &start_pos = Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() );
   s_world_view.setCenter( start_pos );
 }
 
@@ -396,7 +396,7 @@ void RenderGameSystem::render_obstacle_cracks()
 void RenderGameSystem::render_screen_flash( sf::Color color )
 {
 
-  auto display_res = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
+  const auto &display_res = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
   auto flash = sf::RectangleShape( sf::Vector2f( display_res ) );
   flash.setPosition( { 0.f, 0.f } );
   flash.setFillColor( color );

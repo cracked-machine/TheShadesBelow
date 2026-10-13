@@ -222,7 +222,7 @@ void PassageSystem::connect_occupied_and_end_room_passages( entt::registry &reg,
     auto &occupied_room_cmp = open_room_cmp;
 
     // no need to search for suitable target, we already have it
-    auto current_passage_door = occupied_room_cmp.m_connectors[Cmp::Crypt::CryptPassageDirection::NORTH];
+    const auto &current_passage_door = occupied_room_cmp.m_connectors[Cmp::Crypt::CryptPassageDirection::NORTH];
     m_passage_algos.increment_passage_id();
 
     std::vector<Cmp::Crypt::PassageBlock> passage_blocks = m_passage_algos.create_drunken_walk( reg, current_passage_door, *crypt_end_room_cmp,
@@ -487,7 +487,7 @@ void PassageSystem::create_cached_passages()
     return;
   }
 
-  auto [region, blocklist] = m_cached_passage_list.get( m_region_idx );
+  const auto &[region, blocklist] = m_cached_passage_list.get( m_region_idx );
   SPDLOG_DEBUG( "Spawning region {} with {} blocks", m_region_idx, blocklist.size() );
   for ( auto &block : blocklist )
   {

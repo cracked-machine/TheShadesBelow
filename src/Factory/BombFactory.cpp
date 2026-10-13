@@ -24,8 +24,8 @@ entt::entity create_armed( entt::registry &reg, entt::entity entity, Cmp::Armed:
 
   // get persistent settings
   // clang-format off
-  auto armed_block_colour_border = Sys::PersistSystem::get<Cmp::Persist::ArmedBlockColourBorder>(reg);
-  auto armed_block_colour_fill = Sys::PersistSystem::get<Cmp::Persist::ArmedBlockColourFill>(reg);
+  const auto &armed_block_colour_border = Sys::PersistSystem::get<Cmp::Persist::ArmedBlockColourBorder>(reg);
+  const auto &armed_block_colour_fill = Sys::PersistSystem::get<Cmp::Persist::ArmedBlockColourFill>(reg);
 
   auto &fuse_delay = Sys::PersistSystem::get<Cmp::Persist::FuseDelay>( reg );
   auto &armed_on_delay = Sys::PersistSystem::get<Cmp::Persist::ArmedOnDelay>( reg );

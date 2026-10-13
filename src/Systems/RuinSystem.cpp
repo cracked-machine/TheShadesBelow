@@ -364,7 +364,7 @@ void RuinSystem::gen_lowerfloor_bookcases( sf::FloatRect scene_dimensions )
 
       // add the line of bookshelf sprites
       SPDLOG_DEBUG( "bookcase candidate of length: {}", bookshelf_row_candidate.size() );
-      for ( auto [point, type] : bookshelf_row_candidate )
+      for ( const auto &[point, type] : bookshelf_row_candidate )
       {
         const auto &bookcase_ss = Sys::SpriteStore::instance().get( type );
         Factory::Ruin::create_bookcase( reg(), point.position(), bookcase_ss, bookcase_ss.get_random_texture_index() );
@@ -441,7 +441,7 @@ bool RuinSystem::check_activate_player_curse( sf::Vector2f scene_dimensions )
 {
   Cmp::Player::Curse &player_curse = Utils::Player::get_curse( reg() );
 
-  auto npc_shadowhand_cmp = Sys::NpcStore::instance().get( "npc.shadowhand" );
+  const auto &npc_shadowhand_cmp = Sys::NpcStore::instance().get( "npc.shadowhand" );
   const auto &hand_ms = Sys::SpriteStore::instance().get( npc_shadowhand_cmp.sprite_type_list.front() );
 
   auto [_, inventory_type, _] = Utils::Player::get_inventory( m_reg );
@@ -476,7 +476,7 @@ bool RuinSystem::check_activate_player_curse( sf::Vector2f scene_dimensions )
 void RuinSystem::update_shadow_hand_pos( sf::Vector2f scene_dimensions )
 {
   if ( not Utils::Player::get_curse( reg() ).active ) return;
-  auto npc_shadowhand_cmp = Sys::NpcStore::instance().get( "npc.shadowhand" );
+  const auto &npc_shadowhand_cmp = Sys::NpcStore::instance().get( "npc.shadowhand" );
 
   const auto &hand_ms = Sys::SpriteStore::instance().get( npc_shadowhand_cmp.sprite_type_list.front() );
   const auto hand_ms_size = hand_ms.sprite_size();
@@ -498,7 +498,7 @@ void RuinSystem::check_player_shadow_hand_collision( sf::Time dt )
   m_shadowhand_action_effects_time += dt;
   if ( m_shadowhand_action_effects_time.asSeconds() < kActionEffectInterval ) { return; }
 
-  auto npc_shadowhand_cmp = Sys::NpcStore::instance().get( "npc.shadowhand" );
+  const auto &npc_shadowhand_cmp = Sys::NpcStore::instance().get( "npc.shadowhand" );
   auto npc_collision_action = npc_shadowhand_cmp.at<Cmp::CollisionAction>();
 
   // only trigger PlayerMortalityEvents if player is alive
@@ -555,8 +555,8 @@ void RuinSystem::create_spiders( sf::FloatRect scene_boundary )
       SPDLOG_INFO( "Spawning spider {},{}", rnd_pos_cmp.position.x, rnd_pos_cmp.position.y );
 
       auto new_spider_entity = reg().create();
-      Cmp::Position position_cmp = reg().emplace<Cmp::Position>( new_spider_entity, rnd_pos_cmp.position, rnd_pos_cmp.size );
-      [[maybe_unused]] Cmp::ZOrderValue zorder_cmp = reg().emplace<Cmp::ZOrderValue>( new_spider_entity, position_cmp.position.y );
+      const auto &position_cmp = reg().emplace<Cmp::Position>( new_spider_entity, rnd_pos_cmp.position, rnd_pos_cmp.size );
+      [[maybe_unused]] const auto &zorder_cmp = reg().emplace<Cmp::ZOrderValue>( new_spider_entity, position_cmp.position.y );
       Factory::Npc::create_npc( reg(), new_spider_entity, "npc.spider" );
     }
   }

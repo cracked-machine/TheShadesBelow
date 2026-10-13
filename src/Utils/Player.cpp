@@ -414,7 +414,7 @@ template void apply_action_from_inventory_item<Cmp::SpawnAction>( entt::registry
 template <typename ActionT>
 void apply_action_from_item_store( entt::registry &reg, const Sys::ItemKey &item_type )
 {
-  auto item = Sys::ItemStore::instance().get( item_type );
+  const auto &item = Sys::ItemStore::instance().get( item_type );
   Utils::Player::get_stats( reg ).apply( item.at<ActionT>().action );
 }
 
@@ -433,7 +433,7 @@ template void apply_action_from_item_store<Cmp::SpawnAction>( entt::registry &, 
 template <typename ActionT>
 Cmp::BaseAction get_action_from_item_store( const Sys::ItemKey &item_type )
 {
-  auto item = Sys::ItemStore::instance().get( item_type );
+  const auto &item = Sys::ItemStore::instance().get( item_type );
   return item.at<ActionT>().action;
 }
 
@@ -452,7 +452,7 @@ template Cmp::BaseAction get_action_from_item_store<Cmp::SpawnAction>( const Sys
 template <typename ActionT>
 void apply_action_from_npc_store( entt::registry &reg, const Sys::NpcKey &npc_type )
 {
-  auto npc = Sys::NpcStore::instance().get( npc_type );
+  const auto &npc = Sys::NpcStore::instance().get( npc_type );
   Utils::Player::get_stats( reg ).apply( npc.at<ActionT>().action );
 }
 

@@ -410,11 +410,11 @@ void LevelGenerator::add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scen
 
 void LevelGenerator::gen_graveyard_exterior_multiblocks()
 {
-  auto grave_num_multiplier = Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() );
-  auto min_num_altars = Sys::PersistSystem::get<Cmp::Persist::MinNumAltars>( reg() );
-  auto min_num_crypts = Sys::PersistSystem::get<Cmp::Persist::MinNumCrypts>( reg() );
-  auto min_num_healing_springs = Sys::PersistSystem::get<Cmp::Persist::MinNumHealingSprings>( reg() );
-  auto min_num_ruins = Sys::PersistSystem::get<Cmp::Persist::MinNumRuins>( reg() );
+  const auto &grave_num_multiplier = Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() );
+  const auto &min_num_altars = Sys::PersistSystem::get<Cmp::Persist::MinNumAltars>( reg() );
+  const auto &min_num_crypts = Sys::PersistSystem::get<Cmp::Persist::MinNumCrypts>( reg() );
+  const auto &min_num_healing_springs = Sys::PersistSystem::get<Cmp::Persist::MinNumHealingSprings>( reg() );
+  const auto &min_num_ruins = Sys::PersistSystem::get<Cmp::Persist::MinNumRuins>( reg() );
 
   // minimum clearance (in grid cells, both axes) between altars, crypts, healing springs and ruins
   constexpr int kMinBuildingSpacingCells = 10;
