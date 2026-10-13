@@ -62,10 +62,8 @@
 #include <Components/Spring/HealingSpringMultiBlock.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/CarryAction.hpp>
-#include <Components/Stats/CollisionAction.hpp>
 #include <Components/Stats/DestroyAction.hpp>
 #include <Components/Stats/PlayerStats.hpp>
-#include <Components/Stats/ProjectileAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/Toxicity/Bradycadia.hpp>
@@ -627,7 +625,12 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
   const Cmp::BaseAction max_vertigo_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
   const Cmp::BaseAction player_onfire_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {} );
 
-  update_timed_action_clocks( dt );
+  auto player_entt = Utils::Player::get_entity( reg() );
+  if ( auto *suppress_timer = reg().try_get<Cmp::Player::MovementSuppressTimer>( player_entt ) ) *suppress_timer += dt;
+
+  // NPC/inventory modifiers keep their own per-action timers, so they are updated every frame
+  apply_npc_modifiers( dt );
+  apply_inventory_modifiers( dt );
 
   // Now apply the various stat modifiers if their conditions are met
   static constexpr float kTimedActionSyncClockMax = 1.0;
@@ -669,8 +672,6 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
       player_stats.apply( player_onfire_modifier );
       reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     }
-    apply_npc_modifiers();
-    apply_inventory_modifiers();
     apply_healing_spring_modifiers();
 
     m_timed_action_sync_clock = sf::Time::Zero;
@@ -703,7 +704,7 @@ void PlayerSystem::apply_healing_spring_modifiers()
   }
 }
 
-void PlayerSystem::apply_npc_modifiers()
+void PlayerSystem::apply_npc_modifiers( sf::Time dt )
 {
   // See NpcSystem for collision health damage
   // NPC proximity modifiers are only applied when they are within this rectangle
@@ -711,21 +712,26 @@ void PlayerSystem::apply_npc_modifiers()
 
   for ( auto [npc_entt, npc_cmp, npc_pos_cmp, npc_anim_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::AnimData>().each() )
   {
-    if ( not Utils::is_visible_in_view( half_view.getBounds(), npc_pos_cmp ) ) continue;
-    auto [proximity_action, proximity_timer] = npc_cmp.at<Cmp::ProximityAction>();
+    auto &[proximity_action, proximity_timer] = npc_cmp.at<Cmp::ProximityAction>();
+    if ( proximity_action.interval() == 0.f ) continue;
+    // the timer keeps running while the NPC is out of range
+    proximity_timer += dt;
 
+    if ( not Utils::is_visible_in_view( half_view.getBounds(), npc_pos_cmp ) ) continue;
     if ( proximity_timer.asSeconds() < proximity_action.interval() ) continue;
     Utils::Player::get_stats( reg() ).apply( proximity_action );
     proximity_timer = sf::Time::Zero;
   }
 }
 
-void PlayerSystem::apply_inventory_modifiers()
+void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
 {
   // We need the inventory component not the types
   for ( auto [slot_entt, slot_cmp] : reg().view<Cmp::PlayerInventorySlot>().each() )
   {
-    auto [carry_action, carry_timer] = slot_cmp.m_item.at<Cmp::CarryAction>();
+    auto &[carry_action, carry_timer] = slot_cmp.m_item.at<Cmp::CarryAction>();
+    if ( carry_action.interval() == 0.f ) continue;
+    carry_timer += dt;
     if ( carry_timer.asSeconds() < carry_action.interval() ) continue;
     Utils::Player::get_stats( reg() ).apply( carry_action );
     carry_timer = sf::Time::Zero;
@@ -777,39 +783,6 @@ void PlayerSystem::set_player_on_fire()
     m_sound_bank.get_effect( "burning" ).stop();
     m_player_is_on_fire = false;
   }
-}
-
-void PlayerSystem::update_timed_action_clocks( sf::Time dt )
-{
-  auto player_entt = Utils::Player::get_entity( reg() );
-  if ( auto *suppress_timer = reg().try_get<Cmp::Player::MovementSuppressTimer>( player_entt ) ) *suppress_timer += dt;
-
-  // update PlayerInventorySlot/NPC/DarknessFear clock every frame.
-  for ( auto [slot_entt, slot_cmp] : reg().view<Cmp::PlayerInventorySlot>().each() )
-  {
-    for ( auto &[action_type, item_action_pair] : slot_cmp.m_item )
-    {
-      if ( action_type == std::type_index( typeid( Cmp::CollisionAction ) ) ) continue;
-      if ( action_type == std::type_index( typeid( Cmp::ProjectileAction ) ) ) continue;
-      auto &[item_action, item_action_timer] = item_action_pair;
-      if ( item_action.interval() == 0.f ) continue;
-      item_action_timer += dt;
-      SPDLOG_DEBUG( "PlayerInventorySlot item_action_timer {}", item_action_timer.asSeconds() );
-    }
-  }
-  for ( auto [npc_entt, npc_cmp] : reg().view<Cmp::Npc::NPC>().each() )
-  {
-    for ( auto &[action_type, npc_action_pair] : npc_cmp )
-    {
-      if ( action_type == std::type_index( typeid( Cmp::CollisionAction ) ) ) continue;
-      if ( action_type == std::type_index( typeid( Cmp::ProjectileAction ) ) ) continue;
-      auto &[npc_action, npc_action_timer] = npc_action_pair;
-      if ( npc_action.interval() == 0.f ) continue;
-      npc_action_timer += dt;
-      SPDLOG_DEBUG( "NPC npc_action_timer {}", npc_action_timer.asSeconds() );
-    }
-  }
-  m_darkness_fear_clock += dt;
 }
 
 void PlayerSystem::kill_player_if_stats_are_max()

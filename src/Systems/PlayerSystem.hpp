@@ -100,18 +100,16 @@ private:
   //! @brief Apply the stat modifiers for the healing spring
   void apply_healing_spring_modifiers();
 
-  //! @brief Apply the stat modifiers for visible NPCs
-  void apply_npc_modifiers();
+  //! @brief Update the proximity action timers and apply the stat modifiers for visible NPCs
+  //! @param dt
+  void apply_npc_modifiers( sf::Time dt );
 
-  //! @brief Apply the stat modifiers for inventory item
-  void apply_inventory_modifiers();
+  //! @brief Update the carry action timers and apply the stat modifiers for inventory item
+  //! @param dt
+  void apply_inventory_modifiers( sf::Time dt );
 
   //! @brief Set the player on fire if Cmp::Toxicity::Phototoxia is 100%
   void set_player_on_fire();
-
-  //! @brief Update the clocks for the timed actions
-  //! @param dt
-  void update_timed_action_clocks( sf::Time dt );
 
   //! @brief Send mortality event if player fear/despair is 100%
   void kill_player_if_stats_are_max();
@@ -179,9 +177,6 @@ private:
 
   //! @brief Synchronizes the action stat modifiers.
   sf::Time m_timed_action_sync_clock;
-
-  //! @brief Global fear stat increase timer when player is standing in darkness.
-  sf::Time m_darkness_fear_clock;
 
   //! @brief Weak pointer to the pathfinding navmesh.
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;
