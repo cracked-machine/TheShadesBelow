@@ -26,6 +26,7 @@
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
+#include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/MinNumAltars.hpp>
 #include <Components/Persistent/MinNumCrypts.hpp>
@@ -137,6 +138,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::GraveyardProcGenSurvivalThreshold>();
   add_component<Cmp::Persist::HazardPushbackResist>();
   add_component<Cmp::Persist::HealthBonus>();
+  add_component<Cmp::Persist::LavaFireballDamage>();
   add_component<Cmp::Persist::LightningDamage>();
   add_component<Cmp::Persist::MinNumAltars>();
   add_component<Cmp::Persist::MinNumCrypts>();

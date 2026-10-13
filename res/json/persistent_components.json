@@ -81,6 +81,14 @@
     "detail": "Corruption Damage",
     "format": "%d"
   },
+  "LavaFireballDamage": {
+    "type": "int",
+    "value": 10,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Lava Fireball Damage",
+    "format": "%d"
+  },
   "LightningDamage": {
     "type": "int",
     "value": 25,

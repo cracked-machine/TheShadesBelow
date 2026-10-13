@@ -29,6 +29,8 @@
 #include <Components/Npc/Wisp.hpp>
 #include <Components/Npc/Witch.hpp>
 #include <Components/Obstacle.hpp>
+#include <Components/Particle/LavaFireballParticleSprite.hpp>
+#include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
@@ -202,6 +204,7 @@ void NpcSystem::update( sf::Time dt )
   {
     check_once_collision();
     check_timed_collision( dt );
+    check_lava_fireball_collision();
   }
 }
 
@@ -557,6 +560,37 @@ void NpcSystem::check_timed_collision( sf::Time dt )
     npc_action_timer = sf::Time::Zero;
 
     if ( check_player_death( player_mort ) ) return;
+  }
+}
+
+void NpcSystem::check_lava_fireball_collision()
+{
+  std::vector<Cmp::Particle::IParticleSprite *> fireballs;
+  for ( auto [ps_entt, ps_owner] : reg().view<Cmp::Particle::SpriteOwner>().each() )
+  {
+    if ( not ps_owner.sprite->is_active() ) continue;
+    if ( not ps_owner.sprite->get_tag().contains( Cmp::Particle::LavaFireballParticleSprite::kTagSuffix ) ) continue;
+    fireballs.push_back( ps_owner.sprite.get() );
+  }
+  if ( fireballs.empty() ) return;
+
+  // destroying an NPC modifies the registry, so take a snapshot of the hit NPCs rather than destroying them mid-iteration
+  std::vector<entt::entity> burnt_npcs;
+  for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position>( entt::exclude<Cmp::Npc::Ghost> ).each() )
+  {
+    bool hit = false;
+    for ( auto *fireball : fireballs )
+    {
+      // the collision check also kills the fireball particle that hit the NPC
+      if ( fireball->check_particle_collision( npc_pos_cmp ) ) hit = true;
+    }
+    if ( hit ) burnt_npcs.push_back( npc_entt );
+  }
+
+  for ( entt::entity npc_entt : burnt_npcs )
+  {
+    SPDLOG_INFO( "NPC entity {} killed by lava fireball", static_cast<int>( npc_entt ) );
+    get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, Sys::SpriteKey( "sprite.death.anim.flames" ) ) );
   }
 }
 

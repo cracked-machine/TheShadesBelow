@@ -26,6 +26,7 @@
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
+#include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/MinNumAltars.hpp>
 #include <Components/Persistent/MinNumCrypts.hpp>
@@ -219,6 +220,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::CorruptionDamage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::HazardPushbackResist>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::LightningDamage>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::LavaFireballDamage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::WormholeSeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::CorruptionSeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::SinkholeSeed>( reg() ).render_widget();

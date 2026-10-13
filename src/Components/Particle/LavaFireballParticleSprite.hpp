@@ -50,6 +50,10 @@ public:
   //! @param states Render states (transform/blend mode) to draw with.
   void draw( sf::RenderTarget &target, sf::RenderStates states ) const override;
 
+  //! @brief Every fireball sprite's tag must end with this: the player/NPC collision checks match on it,
+  //!        so they apply to fireballs from any scene.
+  static constexpr std::string_view kTagSuffix = "particle.fireball";
+
   //! @brief Tag of the fireballs spawned by CryptSystem::do_lava_pit_animation().
   static constexpr std::string_view kLavaPitTag = "crypt.lavapit.particle.fireball";
 

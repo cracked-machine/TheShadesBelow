@@ -107,6 +107,10 @@ private:
   //! @note Player cooldown and knockback are DISABLED.
   void check_timed_collision( sf::Time dt );
 
+  //! @brief Kill any NPC (except ghosts) hit by a fireball particle sprite (any sprite whose tag contains
+  //! Cmp::Particle::LavaFireballParticleSprite::kTagSuffix). The fireball is destroyed by the hit.
+  void check_lava_fireball_collision();
+
   //! @brief Find a suitable knockback position for the player
   //! @param npc_direction
   //! @param npc_bounds The NPC's collision bounds; the player is pushed clear of all of it.
