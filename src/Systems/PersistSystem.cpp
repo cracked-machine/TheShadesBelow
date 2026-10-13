@@ -16,6 +16,7 @@
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
+#include <Components/Persistent/EmberDamage.hpp>
 #include <Components/Persistent/EffectsVolume.hpp>
 #include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/FuseDelay.hpp>
@@ -128,6 +129,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::DiggingCooldownThreshold>();
   add_component<Cmp::Persist::DiggingDamagePerHit>();
   add_component<Cmp::Persist::DisplayResolution>();
+  add_component<Cmp::Persist::EmberDamage>();
   add_component<Cmp::Persist::EffectsVolume>();
   add_component<Cmp::Persist::ExitKeyRequirement>();
   add_component<Cmp::Persist::FuseDelay>();

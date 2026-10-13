@@ -111,15 +111,17 @@ private:
   //! @brief Set the player on fire if Cmp::Toxicity::Phototoxia is 100%
   void set_player_on_fire();
 
-  //! @brief Damage the player if they are hit by a fireball particle sprite (any sprite whose tag contains
-  //! Cmp::Particle::LavaFireballParticleSprite::kTagSuffix), then knock them back or kill them.
-  //! @note Respects the player damage cooldown. The fireball is destroyed by the hit.
-  void check_lava_fireball_collision();
+  //! @brief Damage the player if they are hit by a burning particle (lava fireball, ember), then knock them back
+  //! or kill them.
+  //! @note Respects the player damage cooldown. The particle is destroyed by the hit.
+  //! @param tag_suffix Particle sprites whose tag contains this are checked, e.g. Cmp::Particle::EmberParticleSprite::kTagSuffix
+  //! @param damage Health removed from the player per hit
+  void check_burning_particle_collision( std::string_view tag_suffix, int damage );
 
-  //! @brief Attempt to knock the player back one cell, away from the source of the fireball that hit them.
+  //! @brief Attempt to knock the player back one cell, away from the source of the particle that hit them.
   //! Does nothing if every candidate cell is blocked or hazardous.
-  //! @param emitter_pos World position the fireball was emitted from
-  void try_fireball_knockback( sf::Vector2f emitter_pos );
+  //! @param emitter_pos World position the particle was emitted from
+  void try_particle_knockback( sf::Vector2f emitter_pos );
 
   //! @brief Send mortality event if player fear/despair is 100%
   void kill_player_if_stats_are_max();

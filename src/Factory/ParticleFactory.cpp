@@ -2,6 +2,7 @@
 #include <Components/Particle/AshPileParticleSprite.hpp>
 #include <Components/Particle/CryptAltarParticleSprite.hpp>
 #include <Components/Particle/EatingCrumbsParticleSprite.hpp>
+#include <Components/Particle/EmberParticleSprite.hpp>
 #include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Particle/GraveHaloParticleSprite.hpp>
 #include <Components/Particle/LavaFireballParticleSprite.hpp>
@@ -302,6 +303,31 @@ void add_lava_fireball_ps( entt::registry &reg, const std::string &tag, int part
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
   reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
   SPDLOG_DEBUG( "Created lava fireball ParticleSprite {}", static_cast<uint32_t>( entt ) );
+}
+
+void add_ember_ps( entt::registry &reg, const std::string &tag, int particle_count, float lifetime_seconds, float speed, float size,
+                   Cmp::UUID &uuid_cmp, sf::Vector2f pos, float zorder )
+{
+  auto ps = Cmp::Particle::EmberParticleSprite( particle_count );
+  ps.set_tag( tag );
+  ps.set_generations( 1 );
+  ps.set_particle_size_range( std::uniform_real_distribution<float>( size, size ) );
+  ps.set_emitter_position( pos );
+  // only an upper limit: the particle is killed when it lands back at the emitter height
+  ps.set_lifetime_ms( sf::seconds( lifetime_seconds ) );
+  ps.set_speed( std::uniform_real_distribution<float>( speed * 0.8f, speed * 1.15f ) );
+
+  // launch upwards (negative y), with a spread so the embers scatter to both sides of the emitter.
+  // Keep the spread fairly tight: a flatter launch trades height for sideways distance.
+  constexpr float kUpDegrees = -90.f;
+  constexpr float kSpreadDegrees = 25.f;
+  ps.set_angle( std::uniform_real_distribution<float>( kUpDegrees - kSpreadDegrees, kUpDegrees + kSpreadDegrees ) );
+
+  auto entt = reg.create();
+  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::EmberParticleSprite>( ps ) ) );
+  reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
+  reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
+  SPDLOG_DEBUG( "Created ember ParticleSprite {}", static_cast<uint32_t>( entt ) );
 }
 
 void add_flame_for_player_inventory_slot( entt::registry &reg )

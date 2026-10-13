@@ -81,6 +81,14 @@
     "detail": "Corruption Damage",
     "format": "%d"
   },
+  "EmberDamage": {
+    "type": "int",
+    "value": 5,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Ember Damage",
+    "format": "%d"
+  },
   "LavaFireballDamage": {
     "type": "int",
     "value": 10,

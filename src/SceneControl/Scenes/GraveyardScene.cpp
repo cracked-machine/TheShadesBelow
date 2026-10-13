@@ -8,6 +8,7 @@
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
+#include <Components/Particle/EmberParticleSprite.hpp>
 #include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Particle/NoteParticleSprite.hpp>
 #include <Components/Particle/SpriteBase.hpp>
@@ -319,7 +320,9 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::ArrowSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::InventorySystem>().update( dt ) );
 
-  auto excludes = { std::string( "graveyard.plant.particle.flame" ), std::string( Cmp::Particle::NoteParticleSprite::kPlayerNotesTag ) };
+  // embers arc over obstacles rather than colliding with them
+  auto excludes = { std::string( "graveyard.plant.particle.flame" ), std::string( Cmp::Particle::NoteParticleSprite::kPlayerNotesTag ),
+                    std::string( Cmp::Particle::EmberParticleSprite::kYewTag ) };
   m_sys.find<Sys::Store::Type::ParticleSystem>().check_collsion( excludes );
   PROFILED( m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt ) );

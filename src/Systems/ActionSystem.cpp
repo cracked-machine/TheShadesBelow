@@ -17,6 +17,7 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
+#include <Components/Particle/EmberParticleSprite.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
 #include <Components/Persistent/WeaponDegradePerHit.hpp>
@@ -91,6 +92,7 @@ void ActionSystem::update( [[maybe_unused]] sf::Time dt )
   Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.plant.particle.leaves" );
   Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.plant.particle.twigs" );
   Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.pot.particle.twigs" );
+  Factory::Particle::delete_expired_particle_sprites( reg(), std::string( Cmp::Particle::EmberParticleSprite::kYewTag ) );
 
   update_burning_worlditems( dt );
 
@@ -682,6 +684,25 @@ void ActionSystem::update_burning_worlditems( sf::Time dt )
         Factory::Particle::add_ashpile( reg(), kAshPileTag, plant_uuid, ash_emitter_pos, plant_cmp.position.y + 1, ash_scale, ash_particle_size,
                                         ash_particle_speed, ash_particle_count );
       }
+
+      // burning yew trees throw off embers. Skip trees that are off screen: their particle sprites
+      // aren't simulated, so the embers would pile up unlaunched.
+      if ( plant_item and plant_item->item_type.contains( "yew" ) and Utils::is_visible_in_view( RenderSystem::get_world_view(), plant_cmp ) )
+      {
+        constexpr float kEmberInterval = 0.4f;
+        const float elapsed_before = burn_timer->asSeconds();
+        const float elapsed_after = elapsed_before + dt.asSeconds();
+        if ( static_cast<int>( elapsed_before / kEmberInterval ) != static_cast<int>( elapsed_after / kEmberInterval ) )
+        {
+          // each burst needs its own UUID: particle sprites sharing the plant's UUID are treated as its
+          // flame, and are destroyed when the plant has finished burning
+          auto ember_uuid = Cmp::UUID::generate();
+          const sf::Vector2f ember_emitter_pos( plant_cmp.getCenter().x, plant_cmp.position.y + plant_cmp.size.y - 4.f );
+          Factory::Particle::add_ember_ps( reg(), std::string( Cmp::Particle::EmberParticleSprite::kYewTag ), 2, 2.f, 140.f, 1.5f, ember_uuid,
+                                           ember_emitter_pos, plant_cmp.position.y + Constants::kGridSizePxF.y + 1.f );
+        }
+      }
+
       *burn_timer += dt;
     }
     else

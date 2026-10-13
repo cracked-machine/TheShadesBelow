@@ -26,6 +26,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Components/Particle/PlayerHealingParticleSprite.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Particle/AshPileParticleSprite.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Particle/LavaFireballParticleSprite.cpp
+    ${CMAKE_SOURCE_DIR}/src/Components/Particle/EmberParticleSprite.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Crypt/RoomBase.cpp
     ${CMAKE_SOURCE_DIR}/src/Debug/AssertHandler.cpp
     ${CMAKE_SOURCE_DIR}/src/Shaders/BaseShaderSprite.cpp

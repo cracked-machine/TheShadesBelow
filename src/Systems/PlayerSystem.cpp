@@ -28,10 +28,12 @@
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
 #include <Components/Particle/BlockParticle.hpp>
+#include <Components/Particle/EmberParticleSprite.hpp>
 #include <Components/Particle/LavaFireballParticleSprite.hpp>
 #include <Components/Particle/NoteParticleSprite.hpp>
 #include <Components/Particle/SpriteBase.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
+#include <Components/Persistent/EmberDamage.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
@@ -184,7 +186,10 @@ void PlayerSystem::update( sf::Time dt )
   else
   {
     set_player_on_fire();
-    check_lava_fireball_collision();
+    check_burning_particle_collision( Cmp::Particle::LavaFireballParticleSprite::kTagSuffix,
+                                      Sys::PersistSystem::get<Cmp::Persist::LavaFireballDamage>( reg() ).get_value() );
+    check_burning_particle_collision( Cmp::Particle::EmberParticleSprite::kTagSuffix,
+                                      Sys::PersistSystem::get<Cmp::Persist::EmberDamage>( reg() ).get_value() );
     check_player_can_push( dt );
     check_player_can_pull( dt );
     update_player_position( dt );
@@ -828,7 +833,7 @@ void PlayerSystem::kill_player_if_stats_are_max()
   }
 }
 
-void PlayerSystem::check_lava_fireball_collision()
+void PlayerSystem::check_burning_particle_collision( std::string_view tag_suffix, int damage )
 {
   if ( not Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled ) return;
 
@@ -840,24 +845,23 @@ void PlayerSystem::check_lava_fireball_collision()
 
   const Cmp::Position player_pos_cmp = Utils::Player::get_position( reg() );
 
-  // the collision check also kills the fireball particle that hit the player
+  // the collision check also kills the particle that hit the player
   std::optional<sf::Vector2f> emitter_pos;
   for ( auto [ps_entt, ps_owner] : reg().view<Cmp::Particle::SpriteOwner>().each() )
   {
     if ( not ps_owner.sprite->is_active() ) continue;
-    if ( not ps_owner.sprite->get_tag().contains( Cmp::Particle::LavaFireballParticleSprite::kTagSuffix ) ) continue;
+    if ( not ps_owner.sprite->get_tag().contains( tag_suffix ) ) continue;
     if ( ps_owner.sprite->check_particle_collision( player_pos_cmp ) ) emitter_pos = ps_owner.sprite->get_emitter_position();
   }
   if ( not emitter_pos ) return;
 
-  int fireball_dmg = Sys::PersistSystem::get<Cmp::Persist::LavaFireballDamage>( reg() ).get_value();
-  Cmp::BaseAction fireball_action( Cmp::Stats::Health{ -fireball_dmg }, {}, {}, {}, {}, {} );
-  Utils::Player::get_stats( reg() ).apply( fireball_action );
+  Cmp::BaseAction burn_action( Cmp::Stats::Health{ -damage }, {}, {}, {}, {}, {} );
+  Utils::Player::get_stats( reg() ).apply( burn_action );
   reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
   player_cmp.skip_damage_cooldown_once = false;
   player_cmp.m_damage_cooldown_timer = sf::Time::Zero;
   m_sound_bank.get_effect( "damage_player" ).play();
-  SPDLOG_INFO( "Player (health:{}) hit by lava fireball", Utils::Player::get_stats( reg() ).health() );
+  SPDLOG_INFO( "Player (health:{}) hit by {}", Utils::Player::get_stats( reg() ).health(), tag_suffix );
 
   if ( Utils::Player::get_stats( reg() ).health() <= 0 )
   {
@@ -865,14 +869,14 @@ void PlayerSystem::check_lava_fireball_collision()
     return;
   }
 
-  try_fireball_knockback( *emitter_pos );
+  try_particle_knockback( *emitter_pos );
 }
 
-void PlayerSystem::try_fireball_knockback( sf::Vector2f emitter_pos )
+void PlayerSystem::try_particle_knockback( sf::Vector2f emitter_pos )
 {
   const Cmp::Position player_pos_cmp = Utils::Player::get_position( reg() );
 
-  // push the player away from where the fireball came from, along whichever axis they are furthest from it
+  // push the player away from where the particle came from, along whichever axis they are furthest from it
   const sf::Vector2f away = player_pos_cmp.getCenter() - emitter_pos;
   const sf::Vector2f primary_direction = std::abs( away.x ) > std::abs( away.y ) ? sf::Vector2f( away.x < 0.f ? -1.f : 1.f, 0.f )
                                                                                  : sf::Vector2f( 0.f, away.y < 0.f ? -1.f : 1.f );
@@ -899,12 +903,12 @@ void PlayerSystem::try_fireball_knockback( sf::Vector2f emitter_pos )
     auto new_position = Utils::snap_to_grid( player_pos_cmp.position + direction.componentWiseMul( Constants::kGridSizePxF ) );
     if ( is_blocked( Cmp::RectBounds::scaled( new_position, Constants::kGridSizePxF, 1.f ) ) ) continue;
 
-    SPDLOG_INFO( "Fireball knockback succeeded: player moved to {},{}", new_position.x, new_position.y );
+    SPDLOG_INFO( "Particle knockback succeeded: player moved to {},{}", new_position.x, new_position.y );
     on_update_player_position_event( Events::UpdatePlayerPositionEvent( new_position ) );
     return;
   }
 
-  SPDLOG_INFO( "Fireball knockback blocked in all directions" );
+  SPDLOG_INFO( "Particle knockback blocked in all directions" );
 }
 
 void PlayerSystem::create_healing_particles()
