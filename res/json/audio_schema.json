@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Audio Schema",
+  "description": "Schema for the SoundBank's sound effects and music tracks",
+  "type": "object",
+  "properties": {
+    "sounds": {
+      "type": "array",
+      "description": "Sound effects, looked up by name via SoundBank::get_effect()",
+      "items": {
+        "$ref": "#/definitions/audioEntry"
+      }
+    },
+    "music": {
+      "type": "array",
+      "description": "Music tracks, looked up by name via SoundBank::get_music()",
+      "items": {
+        "$ref": "#/definitions/audioEntry"
+      }
+    }
+  },
+  "required": ["sounds", "music"],
+  "additionalProperties": false,
+  "definitions": {
+    "audioEntry": {
+      "type": "object",
+      "description": "A single named audio file",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique name used to look up the audio in the SoundBank",
+          "minLength": 1,
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "path": {
+          "type": "string",
+          "description": "Path to the audio file",
+          "pattern": "^res/audio/.*\\.(wav|mp3|ogg|flac)$"
+        }
+      },
+      "required": ["name", "path"],
+      "additionalProperties": false
+    }
+  }
+}

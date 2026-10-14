@@ -108,6 +108,12 @@
         "**/npc.json"
       ],
       "url": "./res/json/npc_schema.json"
+    },
+    {
+      "fileMatch": [
+        "**/audio.json"
+      ],
+      "url": "./res/json/audio_schema.json"
     }
   ],
   "doxdocgen.c.triggerSequence": "//",

@@ -56,6 +56,15 @@ public:
   //! @throws std::runtime_error if the field is missing or not a boolean.
   static bool get_bool( const nlohmann::json &j, const std::string &field, std::source_location loc = std::source_location::current() );
 
+  //! @brief Get a required array field.
+  //! @param j The JSON object to read from.
+  //! @param field The field name.
+  //! @param loc Caller location, used in error messages (defaults to the call site).
+  //! @return nlohmann::json A copy of the array.
+  //! @throws std::runtime_error if the field is missing or not an array.
+  static nlohmann::json get_array( const nlohmann::json &j, const std::string &field,
+                                    std::source_location loc = std::source_location::current() );
+
   //! @brief Get a required color field, given as a `#RRGGBB` or `#RRGGBBAA` (or without the leading `#`) hex string.
   //! @param j The JSON object to read from.
   //! @param field The field name.

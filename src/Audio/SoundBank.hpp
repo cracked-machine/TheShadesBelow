@@ -3,6 +3,7 @@
 
 #include <Audio/EffectsItem.hpp>
 #include <Audio/MusicItem.hpp>
+#include <filesystem>
 #include <unordered_map>
 
 namespace Game::Audio
@@ -15,9 +16,11 @@ public:
   //! @brief Construct a new Sound Bank. Call init() before resolving any effect/music name.
   SoundBank();
 
-  //! @brief Registers every sound effect and music track by name, loading their buffers.
+  //! @brief Registers every sound effect and music track listed in `json_file_path` by name, loading their buffers.
   //! Must be called once before get_effect()/get_music() can resolve any name.
-  void init();
+  //! @param json_file_path Path to the audio JSON file (see res/json/audio_schema.json).
+  //! @throws std::runtime_error if the file is malformed, a name is duplicated, or an audio file is missing.
+  void init( const std::filesystem::path &json_file_path = "res/json/audio.json" );
 
   //! @brief Applies `volume` to every registered sound effect.
   //! @param volume

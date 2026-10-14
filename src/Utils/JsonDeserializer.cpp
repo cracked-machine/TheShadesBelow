@@ -69,6 +69,14 @@ bool JsonDeserializer::get_bool( const nlohmann::json &j, const std::string &fie
   return j.at( field ).get<bool>();
 }
 
+nlohmann::json JsonDeserializer::get_array( const nlohmann::json &j, const std::string &field, std::source_location loc )
+{
+  check_contains( j, field, loc );
+  if ( not j.at( field ).is_array() )
+    throw std::runtime_error( make_loc_string( loc ) + "JSON field '" + field + "' is not an array, got: " + j.at( field ).type_name() );
+  return j.at( field );
+}
+
 std::vector<int> JsonDeserializer::get_int_list( const nlohmann::json &j, std::string field, std::source_location loc )
 {
   std::vector<int> results;
