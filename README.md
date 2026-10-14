@@ -1,7 +1,7 @@
 
 [WORK IN PROGRESS]
 
-You play a victorian grave digger who has become lost in a limbo dimension... a city of the dead. You must dig your way through obstacles to find the exit. The exit must be unlocked using items found in the surrounding graves. To survive in this world you can find plants that be used or consumed. Some may help you, others may not. You can sell your ill-gotten wares to surgeons of dubious ethics once you exit the level. 
+You play a victorian grave digger who has become lost in a limbo dimension... a city of the dead. To unlock the exit you must use your skills to explore the graveyard and uncover secrets that may help... or hinder... your escape. The mysterious Dr Knox is on hand to guide you on your journey back to the overworld. 
 
 # Game Engine
 
@@ -9,11 +9,11 @@ This uses a custom game engine using OpenGL/SFML3. The engine is managed using a
 
 # Build System
 
-The project is built using GCC and CMake. 
+Both Linux and Windows builds are supported. 
 
-The build environment runs within a [docker container](https://github.com/cracked-machine/TheShadesBelow/tree/main/.devcontainer/Dockerfile). All third party libraries are built from source. 
+The project is built using GCC/[MinGW](https://packages.debian.org/search?keywords=g%2B%2B-mingw-w64-x86-64&searchon=names&suite=all&section=all) 14.2 and CMake. All builds should be run on Linux. Use the mingw32 target to cross-compile for Windows.
 
-This project is setup to build on a linux system and cross-compile for a windows target via [MinGW](https://packages.debian.org/search?keywords=g%2B%2B-mingw-w64-x86-64&searchon=names&suite=all&section=all).  
+The project is configured to use VSCode remote extension to run the build on a Linux PC remotely over SSH from a Windows PC. If you want to run the build on a local linux machine you can run the scripts/build.sh directly. See the .vscode/tasks.json for examples. The build environment runs within a [docker container](https://github.com/cracked-machine/TheShadesBelow/tree/main/.devcontainer/Dockerfile) using Debian. All third party libraries are built from source. 
 
 You can determine the C-Runtime (CRT) by running objdump on the binary output:
 
@@ -29,48 +29,31 @@ Engine.cpp:58 - Renderer: AMD Radeon RX 7900 GRE
 Engine.cpp:59 - Vendor: ATI Technologies Inc.
 ```
 
-This project should be built on a Linux PC. The cross-compiled output binary for Windows can be found in `build-x86_64-w64-mingw32/bin` and the native output binary for Linux is `build-x86_64-linux-gnu/bin`.
+## Installing and launching the game from remote build server
 
-The project is configured to use VSCode remote extensions. This means you can run the build on a Linux PC from a Windows PC over SSH. You can build it natively from Linux if you wish but obviously if you want to test the cross-compiled windows binary you will need a Windows PC as well. Also note that this project is intended to be used from a Windows PC so of you run it directly in VSCode on Linux the task.json are not tested. 
+The cross-compiled output binary for Windows can be found in `build-x86_64-w64-mingw32-<CONFIG>/bin` and the native output binary for Linux is `build-x86_64-linux-gnu-<CONFIG>/bin`. Where `<CONFIG>` is either Debug or Release. 
 
-## Samba
+Note that the build script also copies game assets into the bin directory. If you change assets or configuration (JSON) files you will need to run the build script again to re-sync the bin directory; This doesn't rebuild the game. To do a clean rebuild just delete the build dir and run the build script again. 
 
-This lets you create a share on the Linux build host and run the executable from Windows explorer. Your `/etc/samba/smb.conf` should look like this:
-
-```
-[projects]
-        path = /home/chris/projects
-        browseable = yes
-        read only = no
-        writeable = yes
-        # Disable oplocks entirely for better executable performance
-        oplocks = no
-        level2 oplocks = no
-        kernel oplocks = no
-        strict locking = no
-        posix locking = no
-        map archive = no
-        map hidden = no
-        map system = no
-        # Add these for better performance
-        socket options = TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=131072 SO_SNDBUF=131072
-        min receivefile size = 16384
-```
-
-Note we are disabling oplocks to prevent errors - `the parameter is incorrect` - when you rebuild the executable.  (see https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html)
-
-
-If you still see this error, the last resort is to ssh into the build host and restart the samba server after each build(!)
+For the Windows build it is recommended to copy (install) the files onto the local windows workstation before launching the game. For performance reasons, it is not recommended to launch the game over a network/samba share. Using SCP can speed up this copy/install process:
 
 ```
-sudo systemctl restart smb
+del /q "C:\Users\chris\Desktop\TheShadesBelow\bin"
+mkdir "C:\Users\chris\Desktop\TheShadesBelow\bin"
+scp -r 192.168.1.106:/home/chris/projects/cpp/games/TheShadesBelow\build-x86_64-w64-mingw32\bin C:\Users\chris\Desktop\TheShadesBelow
+
+start /wait /b /d "C:\Users\chris\Desktop\TheShadesBelow\bin\" TheShadesBelow.exe
 ```
 
-## Running the build in a debugger
+## Troubleshooting
 
-In theory you can get windows to create a crash dump, but trying to use this windows-only crash dump with MinGW gcc symbols is a non-starter. Much simpler is to run the executable in GDB directly and observe the debugger when it crashes. Obviously this isn't much help after the fact.  
+The information below is for the debug build only. 
 
-1. install mingw and gdb on windows via msys - the version must be equal or higher than the mingw supplied by debian.
+Any exceptions are caught by the game engine and displayed before terminating. This will most likely be due to a bad configuration file or missing game assets. If there is an unexpected error it will display the stack trace. Always check the log file for more details. This can be found in the same directory as the executable. 
+
+You can also run the build in GDB:
+
+1. install mingw and gdb on windows via msys - the version must be equal or higher than the mingw version supplied by debian. At the time of writing this is GCC 14.2 with Debian Trixie.
 1. Download the bin folder to your Windows PC (or use the Samba mapping)
 
         - `cd /c/path/to/bin`
@@ -86,20 +69,21 @@ In theory you can get windows to create a crash dump, but trying to use this win
         - `gdb /x/cpp/games/top-down-maze-procedural/build/bin/ProceduralMaze.exe -ex "break Engine.cpp:30" -ex "run" -ex "next" -ex "next"`
         - `gdb /c/path/to/bin/ProceduralMaze.exe -ex "break Engine.cpp:30" -ex "run" -ex "next" -ex "next"`
 
-## Installing and launching the game from remote build server
-
-After building the exe on a remote Linux build server, it is recommended to copy (install) the files onto the local windows workstation before launching the game. For performance reasons, it is not recommended to launch the game over a network/samba share. Using SCP can speed up this copy/install process:
-
-```
-del /q "C:\Users\chris\Desktop\TheShadesBelow\bin"
-mkdir "C:\Users\chris\Desktop\TheShadesBelow\bin"
-scp -r 192.168.1.106:/home/chris/projects/cpp/games/TheShadesBelow\build-x86_64-w64-mingw32\bin C:\Users\chris\Desktop\TheShadesBelow
-
-start /wait /b /d "C:\Users\chris\Desktop\TheShadesBelow\bin\" TheShadesBelow.exe
-```
-
-
 # Design 
+
+## Entity Component System (ECS)
+
+The ganme is structured using [components](src/Components) that are owned by entities that are processed using [systems](src/Systems).  Systems query the ECS register to get views of entities with specific components. 
+
+## Scene Manager
+
+See [src/SceneControl](src/SceneControl)
+
+The [Scene Manager](src/SceneControl/SceneManager.hpp) allows the transition from one game scene to another. For example, TitleScene > GraveyardScene > CryptScene > GameOverScene > TitleScene.
+
+Scenes are managed using a [stack](src/SceneControl/SceneStack.hpp). The scene at the top of the stack is the active scene. When a scene is pushed onto the stack the SceneManager will run its `on_init` member function to initialise the scene. Depending on the type of scene it may also call `on_enter`. The engine will call `on_update` for the active scene every frame. When the player exits the scene (or dies) the scene is popped off the stack and the SceneManager can optionally call the `on_exit` function. 
+
+In order to provide some state persistence it is necessary to clone some ECS registry components when transitioning between scenes. This is done using the [RegistryTransfer](src/SceneControl/RegistryTransfer.cpp). This is done in the `RegistryTransfer::init_missing_cmp_storages` method. 
 
 ## Message Architecture
 
@@ -121,7 +105,7 @@ class CryptScene : public Scene<Events::ProcessCryptSceneInputEvent>
 
 This tells the base template class `Scene` to call the ProcessCryptSceneInputEvent handler registered in the `src/SceneControl/SceneInputRouter.cpp` constructor.
 
-## Sprite Factory
+## Sprite/Item/Npc Stores
 
 Sprite sheets are loaded using the [SpriteStore](src/Systems/Stores/SpriteStore.cpp) from [spritesheets.json](res/json/spritesheets.json). This supports both single block (16x16) and multi-block sprites (some multiple of 16x16). Each entry in the JSON file must have a unique name. This is used by the SpriteStore to create the sprite and serves as a key to retrieve the sprite later on. 
 
@@ -132,9 +116,10 @@ Sprite sheets are loaded using the [SpriteStore](src/Systems/Stores/SpriteStore.
 |sprite_indices|The 16x16 grid index location for each sprite that should be loaded from the texture file.|
 |zorder|Each sprite index can have an independent zorder value. If you set the value to zero then the y-axis position is used.|
 |grid_size|Multi-block setting. The width and height of the sprite in 16x16 grid size.|
-|indices_per_frame|The number of `sprite_indices` entries that make up one animation frame. Set this to 1, including for multi-block sprites: each `sprite_indices` entry already selects the whole `grid_size` area.|
 |collision_mask|Optional. Which cells of the sprite collide, one boolean per `grid_size` cell in row-major order. For NPCs these are the cells it stands on, used for collision and pathfinding clearance. A single entry (e.g. `[true]`) applies to every cell. If omitted, every cell collides. All `false` means the sprite does not collide.|
 |indices_per_sequence|Animation setting. To enable animation this should match the length of the `sprite_indices` field. To disable animation set it to 1.|
+
+Items carried by the player and NPCs are also loaded from JSON configurations files. These reference sprites from the spritesheet.json file. 
 
 ## Particle System
 
@@ -146,17 +131,9 @@ Pathfinding for NPCs uses the [A* search](https://en.wikipedia.org/wiki/A*_searc
 
 To avoid querying all positions in the ECS registry, the game level is tracked using a [spatial hash grid](src/PathFinding/SpatialHashGrid.hpp). This stores the valid positions for path finding, but is used elsewhere for O(1) lookup. The hash grid works by using the x/y coordinate as a key to store/lookup a bucket of entities at that position.  Finding the nearest neighbour to any game position then becomes a trivial operation. 
 
-## Scene Manager
+## Player stat and inventory system
 
-See [src/SceneControl](src/SceneControl)
-
-The [Scene Manager](src/SceneControl/SceneManager.hpp) allows the transition from one game scene to another. For example, TitleScene > GraveyardScene > CryptScene > GameOverScene > TitleScene.
-
-Scenes are managed using a [stack](src/SceneControl/SceneStack.hpp). The scene at the top of the stack is the active scene. When a scene is pushed onto the stack the SceneManager will run its `on_init` member function to initialise the scene. Depending on the type of scene it may also call `on_enter`. The engine will call `on_update` for the active scene every frame. When the player exits the scene (or dies) the scene is popped off the stack and the SceneManager can optionally call the `on_exit` function. 
-
-In order to provide some state persistence it is necessary to clone some ECS registry components when transitioning between scenes. This is done using the [RegistryTransfer](src/SceneControl/RegistryTransfer.cpp). This is done in the `RegistryTransfer::init_missing_cmp_storages` method. 
-
-## Player stat system
+The player has a single inventory slot.
 
 The player has a number of [stats](src/Components/Stats/PlayerStats.hpp) that can be positively or negatively affected during gameplay. These are
 
@@ -180,8 +157,7 @@ The randomly placed items within the game - obstacles, plants, etc... - are proc
 
 Implemtations can be found in [src/Systems/ProcGen](src/Systems/ProcGen)
 
-
----
+----
 
 Copyright (C) 2026 Chris Sutton. All Rights Reserved.
 
