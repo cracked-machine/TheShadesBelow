@@ -10,10 +10,12 @@
 #include <Components/Weapons/InFlight.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Factory/NpcFactory.hpp>
+#include <Factory/ParticleFactory.hpp>
 #include <SFML/System/Angle.hpp>
 #include <Systems/ArrowSystem.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
+#include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -153,6 +155,7 @@ void ArrowSystem::update_arrow_trajectory( sf::Time dt )
 
 void ArrowSystem::check_npc_arrow_collision()
 {
+  Cmp::Position cached_npc_pos_cmp( { -100.f, -100.f }, Constants::kGridSizePxF );
   for ( auto [arrow_entt, arrow_cmp, arrow_pos_cmp] : reg().view<Cmp::Weapons::Projectiles::Arrow, Cmp::Position>().each() )
   {
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position>().each() )
@@ -161,12 +164,22 @@ void ArrowSystem::check_npc_arrow_collision()
       if ( reg().any_of<Cmp::Npc::Ghost>( npc_entt ) ) continue;
       if ( not npc_pos_cmp.findIntersection( arrow_pos_cmp ) ) continue;
       get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt ) );
+      cached_npc_pos_cmp = npc_pos_cmp;
     }
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::Container, Cmp::Position>().each() )
     {
       if ( not npc_pos_cmp.findIntersection( arrow_pos_cmp ) ) continue;
       Factory::Npc::destroy_npc_container( reg(), npc_entt );
+      cached_npc_pos_cmp = npc_pos_cmp;
     }
+  }
+
+  if ( cached_npc_pos_cmp.position != sf::Vector2f{ -100.f, -100.f } )
+  {
+    m_sound_bank.get_effect( "rattling_bones" ).play();
+    auto skelebones_particle_uuid = Cmp::UUID::generate();
+    Factory::Particle::add_skelebones_ps( reg(), "graveyard.skele.particle.bones", 50, 2.f, 50.f, 14.f, skelebones_particle_uuid,
+                                          cached_npc_pos_cmp.getCenter(), cached_npc_pos_cmp.position.y );
   }
 }
 
