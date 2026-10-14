@@ -18,7 +18,7 @@ namespace Game::Factory::Toxicity
 // - this only works because the whole chain is one fixed sequence the
 // compiler can see end-to-end (e.g. initial entity construction, or a JSON
 // entry naming a single type). Toxidromes added later, from
-// runtime-conditional code, must go through Cmp::Toxicity::Toxidrome::add
+// runtime-conditional code, must go through Cmp::Toxicity::Toxidrome::apply
 // instead, which can only check exclusions at runtime.
 template <typename... Added>
 class ToxidromeBuilder
@@ -43,7 +43,8 @@ public:
   {
     Cmp::Toxicity::Toxidrome t;
     std::size_t i = 0;
-    ( t.template add<Added>( m_deltas[i++] ), ... );
+    // store the signed deltas verbatim; exclusions were already checked by add<T>()
+    ( t.template set<Added>( m_deltas[i++] ), ... );
     return t;
   }
 

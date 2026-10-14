@@ -30,35 +30,48 @@ public:
     return m_active.contains( entt::type_hash<T>::value() );
   }
 
-  //! @brief Adds T with the given toxicity contribution.
+  //! @brief Applies the given toxicity delta to T. See apply( entt::id_type, int ).
   //! @tparam T
   //! @param toxicity_delta
   //! @return true
   //! @return false
   template <typename T>
-  bool add( int toxicity_delta = 0 )
+  bool apply( int toxicity_delta )
   {
-    return add( entt::type_hash<T>::value(), toxicity_delta );
+    return apply( entt::type_hash<T>::value(), toxicity_delta );
   }
 
-  //! @brief Runtime-id counterpart of add<T>(), for merging in a set of toxidromes
-  //! whose concrete types aren't known until iteration (e.g. copying another
-  //! Toxidrome's active set element by element). Re-adding a type already active
-  //! accumulates onto its existing toxicity contribution (e.g. repeated venom
-  //! exposure keeps raising the venom meter), clamped to [0, 100] to match every
-  //! other player stat.
+  //! @brief Runtime-id counterpart of apply<T>(), for merging in a set of toxidrome
+  //! deltas whose concrete types aren't known until iteration (e.g. applying an
+  //! action's Toxidrome element by element).
   //!
-  //! If T is excluded by an already-active toxidrome, toxicity_delta is instead
-  //! spent fighting the excluding toxidrome(s) down towards zero (e.g. repeated
-  //! tachycardia exposure wears down an active bradycardia). Once they're driven
-  //! to zero and removed, the clash resolves and T takes over completely with
-  //! whatever toxicity_delta remains; while any excluding toxidrome is still
-  //! active, T stays out and this returns false.
+  //! A positive delta adds T, or accumulates onto its existing toxicity contribution
+  //! if already active (e.g. repeated venom exposure keeps raising the venom meter),
+  //! capped at 100 to match every other player stat. If T is excluded by an
+  //! already-active toxidrome, the delta is instead spent fighting the excluding
+  //! toxidrome(s) down towards zero (e.g. repeated tachycardia exposure wears down an
+  //! active bradycardia). Once they're driven to zero and removed, the clash resolves
+  //! and T takes over completely with whatever delta remains; while any excluding
+  //! toxidrome is still active, T stays out and this returns false.
+  //!
+  //! A negative delta only reduces an already-active T (e.g. a cure), removing it once
+  //! it reaches zero. It returns false if T isn't active. A zero delta is a no op.
   //! @param id
   //! @param toxicity_delta
-  //! @return true
+  //! @return true if the toxidrome set changed
   //! @return false
-  bool add( entt::id_type id, int toxicity_delta = 0 );
+  bool apply( entt::id_type id, int toxicity_delta );
+
+  //! @brief Stores T's toxicity verbatim, with no clamping or exclusion checks.
+  //! @details For building an action's signed toxicity deltas (see Factory::Toxicity::ToxidromeBuilder,
+  //! which checks exclusions at compile time), not for changing an entity's live toxidromes.
+  //! @tparam T
+  //! @param toxicity
+  template <typename T>
+  void set( int toxicity )
+  {
+    m_active.insert_or_assign( entt::type_hash<T>::value(), toxicity );
+  }
 
   //! @brief Remove the toxidrome effect from the list
   //! @tparam T

@@ -68,9 +68,9 @@ public:
   //! @brief Update the player stats with the BaseAction object.
   //! @note BaseAction: health, fear, despair, infamy, luck, toxidrome. Each toxidrome carried by the
   //! action is merged into the player's existing set individually (an excluded one instead fights the
-  //! opposing toxidrome down and takes over once it's gone, per Cmp::Toxicity::Toxidrome::add), rather
-  //! than replacing the player's whole set outright. The player's toxicity stat is bumped by exactly
-  //! the toxidromes that were actually added.
+  //! opposing toxidrome down and takes over once it's gone, per Cmp::Toxicity::Toxidrome::apply), rather
+  //! than replacing the player's whole set outright. A negative toxidrome delta reduces (cures) the
+  //! matching active toxidrome, removing it at zero.
   //! @param action The stat modifier to apply.
   void apply( const BaseAction &action );
 

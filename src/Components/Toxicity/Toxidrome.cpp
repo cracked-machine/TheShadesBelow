@@ -10,19 +10,31 @@
 namespace Game::Cmp::Toxicity
 {
 
-bool Toxidrome::add( entt::id_type id, int toxicity_delta )
+bool Toxidrome::apply( entt::id_type id, int toxicity_delta )
 {
+  if ( toxicity_delta == 0 ) return false;
+
+  // negative: only reduces an already active toxidrome, removing it at zero
+  if ( toxicity_delta < 0 )
+  {
+    auto it = m_active.find( id );
+    if ( it == m_active.end() ) return false;
+    it->second += toxicity_delta;
+    if ( it->second <= 0 ) m_active.erase( it );
+    return true;
+  }
+
+  // positive: fight down any excluding toxidromes first
   if ( is_excluded( id ) )
   {
-    if ( toxicity_delta <= 0 ) return false;
     toxicity_delta = fight_exclusion( id, toxicity_delta );
     if ( is_excluded( id ) ) return false;
   }
   auto it = m_active.find( id );
   if ( it == m_active.end() )
-    m_active.emplace( id, std::clamp( toxicity_delta, 0, 100 ) );
+    m_active.emplace( id, std::min( toxicity_delta, 100 ) );
   else
-    it->second = std::clamp( it->second + toxicity_delta, 0, 100 );
+    it->second = std::min( it->second + toxicity_delta, 100 );
   return true;
 }
 

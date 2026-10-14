@@ -5,7 +5,7 @@
   "patternProperties": {
     "^(item\\..+|ERROR_SPRITE)$": {
       "type": "object",
-      "required": ["sprite", "expiry", "wear_location", "actions"],
+      "required": ["sprite", "expiry", "wear_location", "sacrifice_output", "is_sacrificial", "actions"],
       "additionalProperties": false,
       "properties": {
         "sprite": {
@@ -20,6 +20,14 @@
           "type": "string",
           "enum": ["None", "World", "Inventory", "Both"],
           "description": "Where the item's wear level is active. None if the item does not wear."
+        },
+        "sacrifice_output": {
+          "type": "string",
+          "description": "The item that will spawn when this item is sacrificed. Must a valid item key if populated, else no op if empty string. Note, this will replace player inventory."
+        },
+        "is_sacrificial": {
+          "type": "boolean",
+          "description": "Whether this item can be sacrificed at an altar."
         },
         "actions": {
           "type": "array",

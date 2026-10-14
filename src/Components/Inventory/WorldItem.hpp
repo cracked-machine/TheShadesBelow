@@ -36,9 +36,12 @@ public:
   //! @param sprite_type The sprite used to render this item.
   //! @param expiry Time for the item to fully expire. Zero means this item does not expire.
   //! @param wear_location Where the item's wear level is active.
-  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, sf::Time expiry = sf::Time::Zero, Location wear_location = Location::NONE )
+  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, std::string sacrifice_output, bool is_sacrificial, sf::Time expiry = sf::Time::Zero,
+             Location wear_location = Location::NONE )
       : item_type( std::move( item_type ) ),
         sprite_type( std::move( sprite_type ) ),
+        m_sacrifice_output( std::move( sacrifice_output ) ),
+        m_is_sacrificial( is_sacrificial ),
         m_expiry( expiry ),
         m_wear_location( wear_location )
   {
@@ -80,7 +83,7 @@ public:
   auto end() { return actions.end(); }
 
   template <typename ActionT>
-  BaseAction get_action()
+  BaseAction get_action() const
   {
     return actions.at( std::type_index( typeid( ActionT ) ) ).action;
   }
@@ -94,9 +97,18 @@ public:
   //! @brief Whether the item's wear level is active while it is in the player inventory.
   bool wears_in_inventory() const { return m_wear_location == Location::INVENTORY or m_wear_location == Location::BOTH; }
 
+  Sys::ItemKey get_sacrifice_output() const { return m_sacrifice_output; }
+
+  bool is_sacrificial() const { return m_is_sacrificial; }
+
 private:
   //! @brief The action and its effects that can be applied to the player. Imported from items.json.
   std::unordered_map<std::type_index, ActionTimePair> actions;
+
+  //! @brief The item that will spawn when this item is sacrificed. Empty string is a no op.
+  Sys::ItemKey m_sacrifice_output;
+
+  bool m_is_sacrificial;
 
   //! @brief Expiry for the item. Zero means this item does not exire. Imported from items.json.
   sf::Time m_expiry;

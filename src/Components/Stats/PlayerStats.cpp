@@ -62,7 +62,7 @@ void PlayerStats::apply( const BaseAction &action )
   m_luck = std::clamp( m_luck + action.luck(), 0, 100 );
   for ( const auto &[id, toxicity_delta] : action.toxidrome() )
   {
-    if ( m_toxidrome->add( id, toxicity_delta ) ) { SPDLOG_INFO( "Added {} toxicity", toxicity_delta ); }
+    if ( m_toxidrome->apply( id, toxicity_delta ) ) { SPDLOG_INFO( "Applied {} toxicity", toxicity_delta ); }
   }
 }
 

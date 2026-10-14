@@ -61,7 +61,9 @@ void ItemStore::init_store()
     Sys::SpriteKey sprite_mtype( item_value.at( "sprite" ).get<std::string>() );
     auto expiry = item_value.at( "expiry" ).get<float>();
     auto wear_location = make_wear_location( item_value.at( "wear_location" ).get<std::string>() );
-    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, sf::seconds( expiry ), wear_location );
+    auto sacrifice_output = item_value.at( "sacrifice_output" ).get<std::string>();
+    auto is_sacrificial = item_value.at( "is_sacrificial" ).get<bool>();
+    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, sacrifice_output, is_sacrificial, sf::seconds( expiry ), wear_location );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )

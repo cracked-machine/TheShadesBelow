@@ -3,6 +3,8 @@
     "sprite": "sprite.item.pickaxe",
     "expiry": 0,
     "wear_location": "Inventory",
+    "sacrifice_output": "",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -17,6 +19,8 @@
     "sprite": "sprite.item.axe",
     "expiry": 0,
     "wear_location": "Inventory",
+    "sacrifice_output": "",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -31,6 +35,8 @@
     "sprite": "sprite.item.shovel",
     "expiry": 0,
     "wear_location": "Inventory",
+    "sacrifice_output": "",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -45,6 +51,8 @@
     "sprite": "sprite.item.bow",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -59,6 +67,8 @@
     "sprite": "sprite.item.dowsingrod",
     "expiry": 60,
     "wear_location": "Inventory",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": -1, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
@@ -73,6 +83,8 @@
     "sprite": "sprite.item.elderflute",
     "expiry": 60,
     "wear_location": "Inventory",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 10 }},
@@ -87,6 +99,8 @@
     "sprite": "sprite.item.rowanwine",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -101,6 +115,8 @@
     "sprite": "sprite.item.elderwine",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -115,6 +131,8 @@
     "sprite": "sprite.item.bomb",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -129,6 +147,8 @@
     "sprite": "sprite.item.exitkey",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -143,6 +163,8 @@
     "sprite": "sprite.item.cryptkey",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 10, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 1 }},
@@ -157,6 +179,8 @@
     "sprite": "sprite.item.rottenfood",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -171,6 +195,8 @@
     "sprite": "sprite.item.plant.rowan",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": -25, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -185,6 +211,8 @@
     "sprite": "sprite.item.plant.elder",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -199,6 +227,8 @@
     "sprite": "sprite.item.plant.yew",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "bradycardia", "toxicity": 10 }, "tick": 2 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -213,6 +243,8 @@
     "sprite": "sprite.item.plant.hawthorn",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -227,6 +259,8 @@
     "sprite": "sprite.item.plant.foxglove",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -241,6 +275,8 @@
     "sprite": "sprite.item.plant.nightshade",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -255,11 +291,13 @@
     "sprite": "sprite.item.plant.hogweed",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
-      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
+      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "phototoxia", "toxicity": 1 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
@@ -269,6 +307,8 @@
     "sprite": "sprite.item.plant.stjohnswort",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -283,6 +323,8 @@
     "sprite": "sprite.item.plant.nettle",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -297,6 +339,8 @@
     "sprite": "sprite.item.plant.burdock",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -311,6 +355,8 @@
     "sprite": "sprite.item.plant.redcampion",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -325,6 +371,8 @@
     "sprite": "sprite.item.plant.henbane",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1}, "tick": 1 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -339,6 +387,8 @@
     "sprite": "sprite.plant.rowan.forage",
     "expiry": 30,
     "wear_location": "Both",
+    "sacrifice_output": "item.rowanwine",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -353,6 +403,8 @@
     "sprite": "sprite.plant.elder.forage",
     "expiry": 30,
     "wear_location": "Both",
+    "sacrifice_output": "item.elderwine",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -367,6 +419,8 @@
     "sprite": "sprite.plant.yew.forage",
     "expiry": 30,
     "wear_location": "Both",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -381,6 +435,8 @@
     "sprite": "sprite.plant.hawthorn.forage",
     "expiry": 30,
     "wear_location": "Both",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -395,6 +451,8 @@
     "sprite": "sprite.plant.foxglove.forage",
     "expiry": 30,
     "wear_location": "Both",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -409,6 +467,8 @@
     "sprite": "sprite.plant.nightshade.forage",
     "expiry": 0,
     "wear_location": "Both",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -423,11 +483,13 @@
     "sprite": "sprite.plant.hogweed.forage",
     "expiry": 0,
     "wear_location": "Both",
+    "sacrifice_output": "",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "phototoxia", "toxicity": 1 }, "tick": 3 }},
-      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": -1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "phototoxia", "toxicity": 1 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "halucinogen", "toxicity": -100 }, "tick": 0 }}
@@ -437,6 +499,8 @@
     "sprite": "sprite.plant.stjohnswort.forage",
     "expiry": 30,
     "wear_location": "Both",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -451,6 +515,8 @@
     "sprite": "sprite.plant.nettle.forage",
     "expiry": 0,
     "wear_location": "Both",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
@@ -465,6 +531,8 @@
     "sprite": "sprite.plant.burdock.forage",
     "expiry": 0,
     "wear_location": "Both",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -479,6 +547,8 @@
     "sprite": "sprite.plant.henbane.forage",
     "expiry": 0,
     "wear_location": "Both",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -494,6 +564,8 @@
     "sprite": "sprite.plant.rowan.drop",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "item.dowsingrod",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -508,6 +580,8 @@
     "sprite": "sprite.plant.elder.drop",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "item.elderflute",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -522,6 +596,8 @@
     "sprite": "sprite.plant.yew.drop",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "item.bow",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "bradycardia", "toxicity": 1 }, "tick": 3 }},
@@ -536,6 +612,8 @@
     "sprite": "sprite.plant.hawthorn.drop",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -550,6 +628,8 @@
     "sprite": "sprite.plant.stjohnswort.drop",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -564,6 +644,8 @@
     "sprite": "sprite.plant.nettle.drop",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -578,6 +660,8 @@
     "sprite": "sprite.plant.burdock.drop",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -592,6 +676,8 @@
     "sprite": "sprite.plant.redcampion.drop",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -606,6 +692,8 @@
     "sprite": "sprite.plant.henbane.drop",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -620,6 +708,8 @@
     "sprite": "sprite.item.relic1",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
@@ -634,6 +724,8 @@
     "sprite": "sprite.item.relic2",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
@@ -648,6 +740,8 @@
     "sprite": "sprite.item.relic3",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
@@ -662,6 +756,8 @@
     "sprite": "sprite.item.relic4",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
@@ -676,6 +772,8 @@
     "sprite": "sprite.item.seeingstone",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -690,6 +788,8 @@
     "sprite": "sprite.item.cursetablet",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -704,6 +804,8 @@
     "sprite": "sprite.item.boots",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -718,6 +820,8 @@
     "sprite": "sprite.item.witchesjar",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -732,6 +836,8 @@
     "sprite": "sprite.item.preservedcat",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -746,6 +852,8 @@
     "sprite": "sprite.item.jewelry_sapphire_necklace",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -760,6 +868,8 @@
     "sprite": "sprite.item.jewelry_amephyst_ring",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -774,6 +884,8 @@
     "sprite": "sprite.item.jewelry_ruby_ring",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -788,6 +900,8 @@
     "sprite": "sprite.item.jewelry_emerald_necklace",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -802,6 +916,8 @@
     "sprite": "sprite.item.jewelry_emerald_gemstone",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -816,6 +932,8 @@
     "sprite": "sprite.item.jewelry_sapphire_gemstone",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -830,6 +948,8 @@
     "sprite": "sprite.item.jewelry_diamond_gemstone",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -844,6 +964,8 @@
     "sprite": "sprite.item.jewelry_amephyst_gemstone",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": true,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -858,6 +980,8 @@
     "sprite": "sprite.item.candle",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -872,6 +996,8 @@
     "sprite": "ERROR_SPRITE",
     "expiry": 0,
     "wear_location": "None",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
