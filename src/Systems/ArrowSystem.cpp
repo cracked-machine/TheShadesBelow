@@ -6,16 +6,19 @@
 #include <Components/Npc/Container.hpp>
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Persistent/WeaponDegradePerHit.hpp>
 #include <Components/Random.hpp>
 #include <Components/Weapons/Arrow.hpp>
 #include <Components/Weapons/InFlight.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
+#include <Events/UpdateDmgEvent.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <SFML/System/Angle.hpp>
 #include <Systems/ArrowSystem.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
@@ -55,6 +58,8 @@ void ArrowSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
     m_bow_drawing = false;
 
     create_player_arrow( charge_fraction );
+    float dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
+    get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
   }
 }
 

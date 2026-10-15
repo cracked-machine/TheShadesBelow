@@ -50,7 +50,7 @@
   "item.bow": {
     "sprite": "sprite.item.bow",
     "expiry": 0,
-    "wear_location": "None",
+    "wear_location": "Both",
     "sacrifice_output": "",
     "is_sacrificial": false,
     "actions": [

@@ -19,7 +19,7 @@
         "wear_location": {
           "type": "string",
           "enum": ["None", "World", "Inventory", "Both"],
-          "description": "Where the item's wear level is active. None if the item does not wear."
+          "description": "Where the item's wear level is active. World, Inventory or Both. None if the item does not wear."
         },
         "sacrifice_output": {
           "type": "string",
