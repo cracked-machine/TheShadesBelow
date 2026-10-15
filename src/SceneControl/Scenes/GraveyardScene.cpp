@@ -289,6 +289,7 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::BombSystem>().update() );
   PROFILED( m_sys.find<Sys::Store::Type::LootSystem>().check_loot_collision( dt ) );
+  PROFILED( m_sys.find<Sys::Store::Type::LootSystem>().update_loot_container_particles() );
   PROFILED( m_sys.find<Sys::Store::Type::NpcSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::WispSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::WispSystem>().spawn_wisp() );
@@ -336,6 +337,7 @@ void GraveyardScene::reinit_system_spatial_maps()
   m_sys.find<Sys::Store::Type::WispSystem>().init( m_open_navmesh );
   m_sys.find<Sys::Store::Type::BombSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::ActionSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::LootSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
   m_sys.find<Sys::Store::Type::WormholeSystem>().init( m_generic_npc_navmesh, m_reserved_sm );

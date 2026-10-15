@@ -8,21 +8,30 @@
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Loot.hpp>
+#include <Components/LootContainer.hpp>
+#include <Components/Obstacle.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
+#include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
+#include <Components/UUID.hpp>
 #include <Events/CryptRoomEvent.hpp>
 #include <Factory/LootFactory.hpp>
+#include <Factory/ParticleFactory.hpp>
+#include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/LootSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
+#include <Utils/Constants.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
+#include <Utils/Utils.hpp>
 
 namespace Game::Sys
 {
@@ -30,7 +39,68 @@ namespace Game::Sys
 LootSystem::LootSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
     : BaseSystem( reg, window, sound_bank )
 {
+  std::ignore = get_systems_event_queue()
+                    .sink<Events::DestroyLootContainerEvent>()
+                    .connect<&LootSystem::on_destroy_loot_container_event>( this );
   SPDLOG_DEBUG( "LootSystem initialized" );
+}
+
+void LootSystem::update_loot_container_particles()
+{
+  Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.pot.particle.dig" );
+}
+
+void LootSystem::on_destroy_loot_container_event( const Events::DestroyLootContainerEvent &event )
+{
+  auto loot_entity = event.m_loot_container_entity;
+  // already broken, e.g. hit by two arrows or caught in overlapping blasts in the same tick
+  if ( not reg().valid( loot_entity ) or not reg().all_of<Cmp::LootContainer, Cmp::Position>( loot_entity ) ) return;
+
+  // copy the position: destroy_loot_container removes components from this entity
+  Cmp::Position destroyed_pos_cmp = reg().get<Cmp::Position>( loot_entity );
+  auto reserved_sm = m_reserved_sm.lock();
+
+  m_sound_bank.get_effect( "break_pot" ).play();
+  Factory::Loot::destroy_loot_container( reg(), loot_entity, reserved_sm );
+
+  // add the position to the spatial grid so it can be used in pathfinding
+  if ( PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock() ) pathfinding_navmesh->insert( loot_entity, destroyed_pos_cmp );
+  if ( PathFinding::SpatialHashGridSharedPtr ghost_navmesh = m_ghost_navmesh.lock() ) ghost_navmesh->insert( loot_entity, destroyed_pos_cmp );
+  if ( PathFinding::SpatialHashGridSharedPtr player_navmesh = m_player_navmesh.lock() ) player_navmesh->remove( loot_entity, destroyed_pos_cmp );
+
+  auto pot_particle_uuid = Cmp::UUID::generate();
+  Factory::Particle::add_pot_ps( reg(), "graveyard.pot.particle.dig", 20, 2.f, 50.f, 10.f, pot_particle_uuid, destroyed_pos_cmp.position,
+                                 destroyed_pos_cmp.position.y );
+
+  // drop loot - 50% chance
+  auto loot_choices = std::vector<Sys::SpriteKey>{ "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" };
+  const auto &loot_ss = Sys::SpriteStore::instance().get_random( loot_choices );
+  Cmp::RandomInt do_drop( 0, 1 );
+  if ( do_drop.gen() == 0 )
+  {
+    // clang-format off
+    auto dropped_loot_entt = Factory::Loot::create_loot_drop(
+        reg(),
+        Cmp::AnimData(Cmp::AnimData::Config{ 
+          .sprite_type = loot_ss.type(), 
+          .frame_index_offset = loot_ss.get_random_texture_index(), 
+          .enabled = false 
+        } ),
+        sf::FloatRect( Utils::snap_to_grid( destroyed_pos_cmp.position ), Constants::kGridSizePxF ), 
+        Factory::IncludePack<>{},
+        Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 
+        // no spatial exclude for the player: they may be adjacent to the container's tile when it breaks
+        Factory::ExcludePack<Cmp::Obstacle>{},
+        /*zorder_offset=*/-8.f, 
+        reserved_sm.get() 
+    );
+    // clang-format on
+    if ( dropped_loot_entt != entt::null )
+    {
+      SPDLOG_DEBUG( "Loot was dropped at {},{}", destroyed_pos_cmp.position.x, destroyed_pos_cmp.position.y );
+      m_sound_bank.get_effect( "drop_loot" ).play();
+    }
+  }
 }
 
 void LootSystem::check_loot_collision( sf::Time dt )

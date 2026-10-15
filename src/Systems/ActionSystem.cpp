@@ -34,6 +34,7 @@
 #include <Components/UUID.hpp>
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
+#include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
@@ -41,7 +42,6 @@
 #include <Events/UpdateDmgEvent.hpp>
 #include <Events/UpdateNpcPositionEvent.hpp>
 #include <Factory/BombFactory.hpp>
-#include <Factory/LootFactory.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
@@ -56,13 +56,11 @@
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/NpcStore.hpp>
-#include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Systems/Threats/LightningSystem.hpp>
 #include <Systems/Threats/WormholeSystem.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
-#include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -91,7 +89,6 @@ void ActionSystem::update( [[maybe_unused]] sf::Time dt )
   Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.obstacle.particle.dig" );
   Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.plant.particle.leaves" );
   Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.plant.particle.twigs" );
-  Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.pot.particle.twigs" );
   Factory::Particle::delete_expired_particle_sprites( reg(), std::string( Cmp::Particle::EmberParticleSprite::kYewTag ) );
 
   update_burning_worlditems( dt );
@@ -415,12 +412,12 @@ void ActionSystem::check_player_smash_pot()
   if ( is_digging_on_cooldown() ) { return; }
 
   auto mouse_position_bounds = Utils::get_mouse_bounds_in_gameview( m_window, RenderSystem::get_world_view() );
-  auto loot_container_view = reg().view<Cmp::LootContainer, Cmp::Position, Cmp::AnimData>();
+  // Cmp::LootContainer is an empty tag type, so the view yields only the entity and its Cmp::Position
+  auto loot_container_view = reg().view<Cmp::LootContainer, Cmp::Position>();
 
-  sf::Vector2f cached_loot_container_pos;
-  bool loot_container_destroyed = false;
+  entt::entity smashed_loot_entity = entt::null;
 
-  for ( auto [loot_entity, loot_container, loot_container_pos, loot_container_anim] : loot_container_view.each() )
+  for ( auto [loot_entity, loot_container_pos] : loot_container_view.each() )
   {
     if ( mouse_position_bounds.findIntersection( loot_container_pos ) )
     {
@@ -433,79 +430,17 @@ void ActionSystem::check_player_smash_pot()
       if ( not Utils::Player::get_projected_position( reg() ).findIntersection( loot_container_pos ) ) continue;
 
       reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
-      loot_container.hp -= Utils::Maths::to_percent( 100.f, Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).get_value() );
 
       float dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
       get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 
-      if ( loot_container.hp > 0 )
-      {
-        loot_container_anim.m_enabled = true;
-
-        if ( m_sound_bank.get_effect( "hit_pot" ).getStatus() == sf::Sound::Status::Stopped ) m_sound_bank.get_effect( "hit_pot" ).play();
-      }
-      else
-      {
-        // wait until we're outside of the view loop to spawn the loot
-        cached_loot_container_pos = loot_container_pos.position;
-        loot_container_destroyed = true;
-
-        m_sound_bank.get_effect( "break_pot" ).play();
-        auto dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
-        get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
-
-        // copy the position: destroy_loot_container removes components from this entity
-        Cmp::Position destroyed_pos_cmp = loot_container_pos;
-        Factory::Loot::destroy_loot_container( reg(), loot_entity, m_reserved_sm.lock() );
-
-        // add the position to the spatial grid so it can be used in pathfinding
-        if ( PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock() )
-          pathfinding_navmesh->insert( loot_entity, destroyed_pos_cmp );
-        if ( PathFinding::SpatialHashGridSharedPtr ghost_navmesh = m_ghost_navmesh.lock() ) ghost_navmesh->insert( loot_entity, destroyed_pos_cmp );
-        if ( PathFinding::SpatialHashGridSharedPtr player_navmesh = m_player_navmesh.lock() )
-          player_navmesh->remove( loot_entity, destroyed_pos_cmp );
-
-        break;
-      }
+      // wait until we're outside of the view loop to break the container: LootSystem spawns loot with a Cmp::Position
+      smashed_loot_entity = loot_entity;
+      break;
     }
   }
 
-  if ( not loot_container_destroyed ) return;
-
-  auto pot_particle_uuid = Cmp::UUID::generate();
-  Factory::Particle::add_pot_ps( reg(), "graveyard.pot.particle.dig", 20, 2.f, 50.f, 10.f, pot_particle_uuid, cached_loot_container_pos,
-                                 cached_loot_container_pos.y );
-
-  // drop loot - 50% chance
-  auto loot_choices = std::vector<Sys::SpriteKey>{ "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" };
-  const auto &loot_ss = Sys::SpriteStore::instance().get_random( loot_choices );
-  Cmp::RandomInt do_drop( 0, 1 );
-  if ( do_drop.gen() == 0 )
-  {
-    auto reserved_sm = m_reserved_sm.lock();
-    // clang-format off
-    auto dropped_loot_entt = Factory::Loot::create_loot_drop(
-        reg(),
-        Cmp::AnimData(Cmp::AnimData::Config{ 
-          .sprite_type = loot_ss.type(), 
-          .frame_index_offset = loot_ss.get_random_texture_index(), 
-          .enabled = false 
-        } ),
-        sf::FloatRect( Utils::snap_to_grid( cached_loot_container_pos ), Constants::kGridSizePxF ), 
-        Factory::IncludePack<>{},
-        Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 
-        // no spatial exclude for the player: they are adjacent to the pot's tile when they smash it
-        Factory::ExcludePack<Cmp::Obstacle>{},
-        /*zorder_offset=*/-8.f, 
-        reserved_sm.get() 
-    );
-    // clang-format on
-    if ( dropped_loot_entt != entt::null )
-    {
-      SPDLOG_DEBUG( "Loot was dropped at {},{}", cached_loot_container_pos.x, cached_loot_container_pos.y );
-      m_sound_bank.get_effect( "drop_loot" ).play();
-    }
-  }
+  if ( smashed_loot_entity != entt::null ) get_systems_event_queue().trigger( Events::DestroyLootContainerEvent( smashed_loot_entity ) );
 }
 
 void ActionSystem::check_player_axe_npc_kill()

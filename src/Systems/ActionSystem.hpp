@@ -58,7 +58,8 @@ private:
   //! @brief Uses Cmp::SelectedPosition to mark the targetted Cmp::PlantMultiBlock then applies digging damage until the obstacle is destroyed.
   void player_plant_interact();
 
-  //! @brief Replace the targetted Cmp::LootContainer with loot item via Events::CreateItemEvent (see ItemSystem::on_create_item_event)
+  //! @brief Break the targetted Cmp::LootContainer with a tool via Events::DestroyLootContainerEvent (see
+  //! LootSystem::on_destroy_loot_container_event)
   void check_player_smash_pot();
 
   //! @brief If player is carry suitable weapon did the action event occur in NPC vicinity?

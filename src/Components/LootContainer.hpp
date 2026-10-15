@@ -4,11 +4,9 @@
 namespace Game::Cmp
 {
 
-//! @brief Mark entity that can be broken in order to drop loot
+//! @brief Mark entity that can be broken in order to drop loot. See LootSystem::on_destroy_loot_container_event
 struct LootContainer
 {
-  //! @brief Remaining hit points before the container breaks and drops its loot.
-  int hp{ 100 };
 };
 
 } // namespace Game::Cmp

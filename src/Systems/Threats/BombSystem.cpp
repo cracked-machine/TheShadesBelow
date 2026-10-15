@@ -21,20 +21,19 @@
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/PauseClocksEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/ResumeClocksEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/BombFactory.hpp>
-#include <Factory/LootFactory.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <Systems/PersistSystem.hpp>
-#include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Threats/BombSystem.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Maths.hpp>
@@ -112,16 +111,18 @@ void BombSystem::update()
       if ( auto ghost_navmesh = m_ghost_navmesh.lock() ) { ghost_navmesh->insert( obst_entity, obst_pos_cmp ); }
     } );
 
-    // detonate loot containers - component removal is handled by LootSystem
-    Utils::Collision::for_each_intersect<Cmp::LootContainer>( reg(), armed_pos_cmp,
-                                                              [&]( entt::entity loot_entt, Cmp::LootContainer &, Cmp::Position &loot_pos_cmp )
+    // detonate loot containers - breaking them is handled by LootSystem. Collect first and trigger afterwards:
+    // LootSystem spawns loot with a Cmp::Position, which must not happen while iterating the Position view.
+    std::vector<entt::entity> detonated_loot_containers;
+    // Cmp::LootContainer is an empty tag type, so it can't be used with Utils::Collision::for_each_intersect
+    for ( auto [loot_entt, loot_pos_cmp] : reg().view<Cmp::LootContainer, Cmp::Position>().each() )
     {
-      if ( loot_entt != entt::null ) { m_sound_bank.get_effect( "break_pot" ).play(); }
-      Factory::Loot::destroy_loot_container( reg(), loot_entt, reserved_sm );
-      pathfinding_navmesh->insert( loot_entt, loot_pos_cmp );
-      player_navmesh->remove( loot_entt, loot_pos_cmp );
-      if ( auto ghost_navmesh = m_ghost_navmesh.lock() ) { ghost_navmesh->insert( loot_entt, loot_pos_cmp ); }
-    } );
+      if ( armed_pos_cmp.findIntersection( loot_pos_cmp ) ) detonated_loot_containers.push_back( loot_entt );
+    }
+    for ( auto loot_entt : detonated_loot_containers )
+    {
+      get_systems_event_queue().trigger( Events::DestroyLootContainerEvent( loot_entt ) );
+    }
 
     // detonate npc containers - these are activated by proximity so just destroy them
     Utils::Collision::for_each_intersect<Cmp::Npc::Container>( reg(), armed_pos_cmp,
@@ -177,8 +178,7 @@ void BombSystem::update()
     }
 
     // Check if NPC was killed by explosion.
-    // Since the detonated NPC can drop loot, and that loot drop can also be detonated,
-    // we take a snapshot of the NPC view  to avoid updating it live (undefined behaviour).
+    // Take a snapshot of the NPC view to avoid updating it live (undefined behaviour).
     std::vector<entt::entity> exploded_npcs;
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp, npc_anim_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::AnimData>().each() )
     {
@@ -189,34 +189,10 @@ void BombSystem::update()
     for ( entt::entity npc_entt : exploded_npcs )
     {
       auto *npc_pos_cmp = reg().try_get<Cmp::Position>( npc_entt );
-      if ( not npc_pos_cmp ) continue;      // already processed (e.g. removed by an earlier entity's side effects)
-      Cmp::Position npc_pos = *npc_pos_cmp; // copy - the DestroyNpcEvent below removes the component
+      if ( not npc_pos_cmp ) continue; // already processed (e.g. removed by an earlier entity's side effects)
 
-      SPDLOG_INFO( "NPC entity {} exploded at {},{}", static_cast<int>( npc_entt ), npc_pos.position.x, npc_pos.position.y );
+      SPDLOG_INFO( "NPC entity {} exploded at {},{}", static_cast<int>( npc_entt ), npc_pos_cmp->position.x, npc_pos_cmp->position.y );
       get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, Sys::SpriteKey( "sprite.death.anim.explosion" ) ) );
-
-      const auto &loot_ss = Sys::SpriteStore::instance().get_random(
-          { "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" } );
-
-      Cmp::RandomInt do_drop( 0, 2 ); // 1 in 3 chance of no drop
-      if ( do_drop.gen() == 0 )
-      {
-        // clang-format off
-        auto dropped_loot_entt = Factory::Loot::create_loot_drop(
-          reg(),
-          Cmp::AnimData( Cmp::AnimData::Config{ .sprite_type = loot_ss.type(), .frame_index_offset = loot_ss.get_random_texture_index() } ),
-          sf::FloatRect{ npc_pos.position, npc_pos.size },
-          Factory::IncludePack<>{},
-          Factory::ExcludePack<Cmp::Player::Character>{}, Factory::ExcludePack<>{},
-          /*zorder_offset=*/-8.f, reserved_sm.get() );
-        // clang-format on
-
-        if ( dropped_loot_entt != entt::null )
-        {
-          SPDLOG_INFO( "NPC dropped loot." );
-          m_sound_bank.get_effect( "drop_loot" ).play();
-        }
-      }
     }
 
     // play sound effect if this armed component is epicenter

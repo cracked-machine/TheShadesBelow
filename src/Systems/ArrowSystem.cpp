@@ -2,12 +2,14 @@
 #include <Components/AbsoluteOffset.hpp>
 #include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AbsoluteRotation.hpp>
+#include <Components/LootContainer.hpp>
 #include <Components/Npc/Container.hpp>
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Random.hpp>
 #include <Components/Weapons/Arrow.hpp>
 #include <Components/Weapons/InFlight.hpp>
+#include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
@@ -37,7 +39,6 @@ void ArrowSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
   if ( ev.action == Game::Events::PlayerActionEvent::GameActions::DRAW_BOW )
   {
     // draw the bow
-
     if ( m_sound_bank.get_effect( "draw_bow" ).getStatus() != sf::Sound::Status::Playing ) m_sound_bank.get_effect( "draw_bow" ).play();
     m_bow_drawing = true;
     m_bow_draw_clock.restart();
@@ -156,6 +157,7 @@ void ArrowSystem::update_arrow_trajectory( sf::Time dt )
 void ArrowSystem::check_npc_arrow_collision()
 {
   Cmp::Position cached_npc_pos_cmp( { -100.f, -100.f }, Constants::kGridSizePxF );
+  std::vector<entt::entity> hit_loot_containers;
   for ( auto [arrow_entt, arrow_cmp, arrow_pos_cmp] : reg().view<Cmp::Weapons::Projectiles::Arrow, Cmp::Position>().each() )
   {
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position>().each() )
@@ -172,6 +174,18 @@ void ArrowSystem::check_npc_arrow_collision()
       Factory::Npc::destroy_npc_container( reg(), npc_entt );
       cached_npc_pos_cmp = npc_pos_cmp;
     }
+    for ( auto [loot_entt, loot_pos_cmp] : reg().view<Cmp::LootContainer, Cmp::Position>().each() )
+    {
+      if ( not reg().any_of<Cmp::Weapons::Projectiles::InFlight>( arrow_entt ) ) continue;
+      if ( not loot_pos_cmp.findIntersection( arrow_pos_cmp ) ) continue;
+      hit_loot_containers.push_back( loot_entt );
+    }
+  }
+
+  // break outside of the view loops: LootSystem spawns loot with a Cmp::Position
+  for ( auto loot_entt : hit_loot_containers )
+  {
+    get_systems_event_queue().trigger( Events::DestroyLootContainerEvent( loot_entt ) );
   }
 
   if ( cached_npc_pos_cmp.position != sf::Vector2f{ -100.f, -100.f } )
