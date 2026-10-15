@@ -41,7 +41,6 @@
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
-#include <Components/Persistent/WeaponDegradePerHit.hpp>
 #include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/Character.hpp>

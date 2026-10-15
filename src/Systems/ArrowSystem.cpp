@@ -6,7 +6,7 @@
 #include <Components/Npc/Container.hpp>
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/Npc.hpp>
-#include <Components/Persistent/WeaponDegradePerHit.hpp>
+#include <Components/Persistent/BowReleaseWear.hpp>
 #include <Components/Random.hpp>
 #include <Components/Weapons/Arrow.hpp>
 #include <Components/Weapons/InFlight.hpp>
@@ -58,7 +58,7 @@ void ArrowSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
     m_bow_drawing = false;
 
     create_player_arrow( charge_fraction );
-    float dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
+    float dmg = Sys::PersistSystem::get<Cmp::Persist::BowReleaseWear>( reg() ).get_value();
     get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
   }
 }

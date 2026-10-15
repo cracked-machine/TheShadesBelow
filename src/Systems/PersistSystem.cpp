@@ -5,9 +5,14 @@
 #include <Components/Persistent/ArmedBlockColourFill.hpp>
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
+#include <Components/Persistent/AxeGraveDigWear.hpp>
+#include <Components/Persistent/AxeObstacleDigWear.hpp>
+#include <Components/Persistent/AxePotSmashWear.hpp>
+#include <Components/Persistent/AxeSkeletonKillWear.hpp>
 #include <Components/Persistent/BlastRadius.hpp>
 #include <Components/Persistent/BombBonus.hpp>
 #include <Components/Persistent/BombDamage.hpp>
+#include <Components/Persistent/BowReleaseWear.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
 #include <Components/Persistent/CorruptionDamage.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
@@ -16,8 +21,8 @@
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
-#include <Components/Persistent/EmberDamage.hpp>
 #include <Components/Persistent/EffectsVolume.hpp>
+#include <Components/Persistent/EmberDamage.hpp>
 #include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/FuseDelay.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
@@ -50,6 +55,9 @@
 #include <Components/Persistent/NpcWatchmanSpawnMax.hpp>
 #include <Components/Persistent/NpcWatchmanSweepAmplitude.hpp>
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
+#include <Components/Persistent/PickaxeGraveDigWear.hpp>
+#include <Components/Persistent/PickaxeObstacleDigWear.hpp>
+#include <Components/Persistent/PickaxePotSmashWear.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerFootstepAddDelay.hpp>
@@ -69,8 +77,10 @@
 #include <Components/Persistent/ShopMaxItems.hpp>
 #include <Components/Persistent/ShopMaxPrice.hpp>
 #include <Components/Persistent/ShopMinPrice.hpp>
+#include <Components/Persistent/ShovelGraveDigWear.hpp>
+#include <Components/Persistent/ShovelObstacleDigWear.hpp>
+#include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
-#include <Components/Persistent/WeaponDegradePerHit.hpp>
 #include <Components/Persistent/WormholeSeed.hpp>
 #include <Events/LoadSettingsEvent.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -182,7 +192,17 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ShopMaxItems>();
   add_component<Cmp::Persist::ShopMinPrice>();
   add_component<Cmp::Persist::ShopMaxPrice>();
-  add_component<Cmp::Persist::WeaponDegradePerHit>();
+  add_component<Cmp::Persist::AxeGraveDigWear>();
+  add_component<Cmp::Persist::AxeObstacleDigWear>();
+  add_component<Cmp::Persist::AxePotSmashWear>();
+  add_component<Cmp::Persist::AxeSkeletonKillWear>();
+  add_component<Cmp::Persist::BowReleaseWear>();
+  add_component<Cmp::Persist::PickaxeGraveDigWear>();
+  add_component<Cmp::Persist::PickaxeObstacleDigWear>();
+  add_component<Cmp::Persist::PickaxePotSmashWear>();
+  add_component<Cmp::Persist::ShovelGraveDigWear>();
+  add_component<Cmp::Persist::ShovelObstacleDigWear>();
+  add_component<Cmp::Persist::ShovelPotSmashWear>();
 
   // Add serdes functions to each component
   for ( const auto &[name, config] : definitions->items() )

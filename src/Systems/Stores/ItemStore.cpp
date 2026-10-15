@@ -63,7 +63,13 @@ void ItemStore::init_store()
     auto wear_location = make_wear_location( item_value.at( "wear_location" ).get<std::string>() );
     auto sacrifice_output = item_value.at( "sacrifice_output" ).get<std::string>();
     auto is_sacrificial = item_value.at( "is_sacrificial" ).get<bool>();
-    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, sacrifice_output, is_sacrificial, sf::seconds( expiry ), wear_location );
+    auto weapon_damage = item_value.at( "weapon_damage" );
+    auto pickaxe_damage = weapon_damage.at( "pickaxe" ).get<int>();
+    auto axe_damage = weapon_damage.at( "axe" ).get<int>();
+    auto shovel_damage = weapon_damage.at( "shovel" ).get<int>();
+    auto bow_damage = weapon_damage.at( "bow" ).get<int>();
+    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, sacrifice_output, is_sacrificial, pickaxe_damage, axe_damage, shovel_damage,
+                              bow_damage, sf::seconds( expiry ), wear_location );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )

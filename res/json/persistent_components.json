@@ -541,12 +541,92 @@
     "detail": "Shop inventory max price",
     "format": "%d"
   },
-  "WeaponDegradePerHit": {
+  "AxeObstacleDigWear": {
     "type": "float",
     "value": 1.0,
-    "min_value": 0.01,
+    "min_value": 0.0,
     "max_value": 5.0,
-    "detail": "Weapon Degrade Per Hit",
-    "format": "%.1f pixels"
+    "detail": "Axe wear: digging obstacle",
+    "format": "%.1f"
+  },
+  "PickaxeObstacleDigWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Pickaxe wear: digging obstacle",
+    "format": "%.1f"
+  },
+  "ShovelObstacleDigWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Shovel wear: digging obstacle",
+    "format": "%.1f"
+  },
+  "AxePotSmashWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Axe wear: smashing pot",
+    "format": "%.1f"
+  },
+  "PickaxePotSmashWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Pickaxe wear: smashing pot",
+    "format": "%.1f"
+  },
+  "ShovelPotSmashWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Shovel wear: smashing pot",
+    "format": "%.1f"
+  },
+  "AxeSkeletonKillWear": {
+    "type": "float",
+    "value": 3.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Axe wear: killing skeleton",
+    "format": "%.1f"
+  },
+  "AxeGraveDigWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Axe wear: digging grave",
+    "format": "%.1f"
+  },
+  "PickaxeGraveDigWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Pickaxe wear: digging grave",
+    "format": "%.1f"
+  },
+  "ShovelGraveDigWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Shovel wear: digging grave",
+    "format": "%.1f"
+  },
+  "BowReleaseWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Bow wear: per arrow released",
+    "format": "%.1f"
   }
 }

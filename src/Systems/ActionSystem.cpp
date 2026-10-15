@@ -20,7 +20,13 @@
 #include <Components/Particle/EmberParticleSprite.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
-#include <Components/Persistent/WeaponDegradePerHit.hpp>
+#include <Components/Persistent/AxeObstacleDigWear.hpp>
+#include <Components/Persistent/AxePotSmashWear.hpp>
+#include <Components/Persistent/AxeSkeletonKillWear.hpp>
+#include <Components/Persistent/PickaxeObstacleDigWear.hpp>
+#include <Components/Persistent/PickaxePotSmashWear.hpp>
+#include <Components/Persistent/ShovelObstacleDigWear.hpp>
+#include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
@@ -181,7 +187,10 @@ void ActionSystem::check_player_dig_obstacle_collision()
       else if ( inventory_type.contains( "shovel" ) or inventory_type.contains( "axe" ) ) { damage_per_hit = damage_per_hit / 5; }
       obstacle_cmp.damage += damage_per_hit;
 
-      float dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
+      float dmg = 0.f;
+      if ( inventory_type == "item.pickaxe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::PickaxeObstacleDigWear>( reg() ).get_value(); }
+      else if ( inventory_type == "item.axe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::AxeObstacleDigWear>( reg() ).get_value(); }
+      else if ( inventory_type == "item.shovel" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::ShovelObstacleDigWear>( reg() ).get_value(); }
       get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 
       // Destroy the obstacle?
@@ -318,14 +327,16 @@ void ActionSystem::player_plant_interact()
       reg().emplace_or_replace<Cmp::SelectedPosition>( plant_entt, plant_mb_cmp.position );
       reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
-      float dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
-      get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
+      auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
+      if ( not plant_item ) continue;
+
+      get_systems_event_queue().trigger(
+          Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), static_cast<float>( plant_item->get_axe_damage() ) ) );
 
       auto inventory_wear_view = reg().view<Cmp::PlayerInventorySlot>();
       if ( inventory_wear_view->empty() )
       {
-        auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
-        if ( not plant_item ) continue;
+
         // no drop from foraging this plant
         if ( not plant_item->item_type.contains( "redcampion" ) )
         {
@@ -431,7 +442,10 @@ void ActionSystem::check_player_smash_pot()
 
       reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
-      float dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
+      float dmg = 0.f;
+      if ( inventory_slot_type == "item.pickaxe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::PickaxePotSmashWear>( reg() ).get_value(); }
+      else if ( inventory_slot_type == "item.axe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::AxePotSmashWear>( reg() ).get_value(); }
+      else if ( inventory_slot_type == "item.shovel" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::ShovelPotSmashWear>( reg() ).get_value(); }
       get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 
       // wait until we're outside of the view loop to break the container: LootSystem spawns loot with a Cmp::Position
@@ -493,7 +507,7 @@ void ActionSystem::check_player_axe_npc_kill()
       // Add a new SelectedPosition component to the entity
       reg().emplace_or_replace<Cmp::SelectedPosition>( npc_entity, npc_pos_cmp.position );
 
-      float dmg = Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).get_value();
+      float dmg = Sys::PersistSystem::get<Cmp::Persist::AxeSkeletonKillWear>( reg() ).get_value();
       get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 
       // select the final smash sound

@@ -5,9 +5,14 @@
 #include <Components/Persistent/ArmedBlockColourFill.hpp>
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
+#include <Components/Persistent/AxeGraveDigWear.hpp>
+#include <Components/Persistent/AxeObstacleDigWear.hpp>
+#include <Components/Persistent/AxePotSmashWear.hpp>
+#include <Components/Persistent/AxeSkeletonKillWear.hpp>
 #include <Components/Persistent/BlastRadius.hpp>
 #include <Components/Persistent/BombBonus.hpp>
 #include <Components/Persistent/BombDamage.hpp>
+#include <Components/Persistent/BowReleaseWear.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
 #include <Components/Persistent/CorruptionDamage.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
@@ -50,6 +55,9 @@
 #include <Components/Persistent/NpcWatchmanSpawnMax.hpp>
 #include <Components/Persistent/NpcWatchmanSweepAmplitude.hpp>
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
+#include <Components/Persistent/PickaxeGraveDigWear.hpp>
+#include <Components/Persistent/PickaxeObstacleDigWear.hpp>
+#include <Components/Persistent/PickaxePotSmashWear.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerFootstepAddDelay.hpp>
@@ -65,8 +73,10 @@
 #include <Components/Persistent/RuinProcGenInitChance.hpp>
 #include <Components/Persistent/RuinProcGenMaxIterations.hpp>
 #include <Components/Persistent/RuinProcGenSurvivalThreshold.hpp>
+#include <Components/Persistent/ShovelGraveDigWear.hpp>
+#include <Components/Persistent/ShovelObstacleDigWear.hpp>
+#include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
-#include <Components/Persistent/WeaponDegradePerHit.hpp>
 #include <Components/Persistent/WormholeSeed.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -199,10 +209,23 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::PlayerShortcutLerpSpeedModifier>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::DiggingCooldownThreshold>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::WeaponDegradePerHit>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::CameraSmoothSpeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerLerpInterruptThreshold>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PostPullMovementDelay>( reg() ).render_widget();
+
+    ImGui::SeparatorText( "Weapon Wear Settings" );
+
+    Sys::PersistSystem::get<Cmp::Persist::AxeObstacleDigWear>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::PickaxeObstacleDigWear>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::ShovelObstacleDigWear>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::AxePotSmashWear>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::PickaxePotSmashWear>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::ShovelPotSmashWear>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::AxeSkeletonKillWear>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::AxeGraveDigWear>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::PickaxeGraveDigWear>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::ShovelGraveDigWear>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::BowReleaseWear>( reg() ).render_widget();
 
     // Bomb Settings
     ImGui::SeparatorText( "Bomb Settings" );

@@ -36,12 +36,16 @@ public:
   //! @param sprite_type The sprite used to render this item.
   //! @param expiry Time for the item to fully expire. Zero means this item does not expire.
   //! @param wear_location Where the item's wear level is active.
-  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, std::string sacrifice_output, bool is_sacrificial, sf::Time expiry = sf::Time::Zero,
-             Location wear_location = Location::NONE )
+  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, std::string sacrifice_output, bool is_sacrificial, int pickaxe_dmg, int axe_dmg,
+             int shovel_dmg, int bow_dmg, sf::Time expiry = sf::Time::Zero, Location wear_location = Location::NONE )
       : item_type( std::move( item_type ) ),
         sprite_type( std::move( sprite_type ) ),
         m_sacrifice_output( std::move( sacrifice_output ) ),
         m_is_sacrificial( is_sacrificial ),
+        m_pickaxe_damage( pickaxe_dmg ),
+        m_axe_damage( axe_dmg ),
+        m_shovel_damage( shovel_dmg ),
+        m_bow_damage( bow_dmg ),
         m_expiry( expiry ),
         m_wear_location( wear_location )
   {
@@ -101,6 +105,11 @@ public:
 
   bool is_sacrificial() const { return m_is_sacrificial; }
 
+  int get_pickaxe_damage() const { return m_pickaxe_damage; }
+  int get_axe_damage() const { return m_axe_damage; }
+  int get_shovel_damage() const { return m_shovel_damage; }
+  int get_bow_damage() const { return m_bow_damage; }
+
 private:
   //! @brief The action and its effects that can be applied to the player. Imported from items.json.
   std::unordered_map<std::type_index, ActionTimePair> actions;
@@ -108,7 +117,20 @@ private:
   //! @brief The item that will spawn when this item is sacrificed. Empty string is a no op.
   Sys::ItemKey m_sacrifice_output;
 
+  //! @brief true if this item can be  sacrificed at the altar
   bool m_is_sacrificial;
+
+  //! @brief damage done to pickaxe by this item
+  int m_pickaxe_damage;
+
+  //! @brief damage done to axe by this item
+  int m_axe_damage;
+
+  //! @brief damage done to shovel by this item
+  int m_shovel_damage;
+
+  //! @brief damage done to bow by this item
+  int m_bow_damage;
 
   //! @brief Expiry for the item. Zero means this item does not exire. Imported from items.json.
   sf::Time m_expiry;
