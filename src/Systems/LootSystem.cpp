@@ -39,16 +39,11 @@ namespace Game::Sys
 LootSystem::LootSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
     : BaseSystem( reg, window, sound_bank )
 {
-  std::ignore = get_systems_event_queue()
-                    .sink<Events::DestroyLootContainerEvent>()
-                    .connect<&LootSystem::on_destroy_loot_container_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::DestroyLootContainerEvent>().connect<&LootSystem::on_destroy_loot_container_event>( this );
   SPDLOG_DEBUG( "LootSystem initialized" );
 }
 
-void LootSystem::update_loot_container_particles()
-{
-  Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.pot.particle.dig" );
-}
+void LootSystem::update_loot_container_particles() { Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.pot.particle.dig" ); }
 
 void LootSystem::on_destroy_loot_container_event( const Events::DestroyLootContainerEvent &event )
 {
@@ -64,7 +59,8 @@ void LootSystem::on_destroy_loot_container_event( const Events::DestroyLootConta
   Factory::Loot::destroy_loot_container( reg(), loot_entity, reserved_sm );
 
   // add the position to the spatial grid so it can be used in pathfinding
-  if ( PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock() ) pathfinding_navmesh->insert( loot_entity, destroyed_pos_cmp );
+  if ( PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock() )
+    pathfinding_navmesh->insert( loot_entity, destroyed_pos_cmp );
   if ( PathFinding::SpatialHashGridSharedPtr ghost_navmesh = m_ghost_navmesh.lock() ) ghost_navmesh->insert( loot_entity, destroyed_pos_cmp );
   if ( PathFinding::SpatialHashGridSharedPtr player_navmesh = m_player_navmesh.lock() ) player_navmesh->remove( loot_entity, destroyed_pos_cmp );
 
@@ -166,7 +162,7 @@ void LootSystem::check_loot_collision( sf::Time dt )
       for ( auto [weapons_entity, inventory_slot] : inventory_view.each() )
       {
         if ( inventory_slot.m_item.sprite_type.contains( "axe" ) or inventory_slot.m_item.sprite_type.contains( "pickaxe" ) or
-             inventory_slot.m_item.sprite_type.contains( "shovel" ) )
+             inventory_slot.m_item.sprite_type.contains( "shovel" ) or inventory_slot.m_item.sprite_type.contains( "bow" ) )
         {
           auto *wear_level_cmp = reg().try_get<Cmp::Inventory::WearLevel>( weapons_entity );
           if ( wear_level_cmp )
