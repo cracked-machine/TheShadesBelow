@@ -130,6 +130,9 @@ void ActionSystem::check_player_dig_obstacle_collision()
 
   if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) { return; }
 
+  auto [_, inventory_item, _] = Utils::Player::get_inventory( reg() );
+  if ( inventory_item != "item.pickaxe" and inventory_item != "item.axe" and inventory_item != "item.shovel" ) return;
+
   // abort if still in cooldown
   if ( is_digging_on_cooldown() ) { return; }
 
