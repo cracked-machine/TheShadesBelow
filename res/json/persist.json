@@ -291,7 +291,7 @@
   },
   "NpcWatchmanSpawnMax": {
     "type": "int",
-    "value": 3,
+    "value": 25,
     "min_value": 1,
     "max_value": 200,
     "detail": "NPC Watchman Spawn Max",
