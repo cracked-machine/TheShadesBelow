@@ -333,9 +333,6 @@ void ActionSystem::player_plant_interact()
       auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
       if ( not plant_item ) continue;
 
-      get_systems_event_queue().trigger(
-          Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), static_cast<float>( plant_item->get_axe_damage() ) ) );
-
       auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
       if ( inventory_type == "" )
       {
@@ -380,6 +377,10 @@ void ActionSystem::player_plant_interact()
 
         if ( inventory_type.contains( "item.shovel" ) )
         {
+          // damage the shovel before it is dropped
+          get_systems_event_queue().trigger(
+              Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), static_cast<float>( plant_item->get_shovel_damage() ) ) );
+
           // dig up the plant
           get_systems_event_queue().trigger( Events::DropInventoryEvent() );
           Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg(), plant_entt );
@@ -395,6 +396,10 @@ void ActionSystem::player_plant_interact()
           auto planttwigs_particle_uuid = Cmp::UUID::generate();
           Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, planttwigs_particle_uuid,
                                                 plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
+
+          // damage the axe before it is dropped
+          get_systems_event_queue().trigger(
+              Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), static_cast<float>( plant_item->get_axe_damage() ) ) );
 
           // no drops from chopping these plants
           auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
