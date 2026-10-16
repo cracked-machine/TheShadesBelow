@@ -13,7 +13,32 @@ Both Linux and Windows builds are supported.
 
 The project is built using GCC/[MinGW](https://packages.debian.org/search?keywords=g%2B%2B-mingw-w64-x86-64&searchon=names&suite=all&section=all) 14.2 and CMake. All builds should be run on Linux. Use the mingw32 target to cross-compile for Windows.
 
-The project is configured to use VSCode remote extension to run the build on a Linux PC remotely over SSH from a Windows PC. If you want to run the build on a local linux machine you can run the scripts/build.sh directly. See the .vscode/tasks.json for examples. The build environment runs within a [docker container](https://github.com/cracked-machine/TheShadesBelow/tree/main/.devcontainer/Dockerfile) using Debian. All third party libraries are built from source. 
+The project is configured to use VSCode remote extension to run the build on a Linux PC remotely over SSH from a Windows PC. If you want to run the build on a local linux machine you can run the scripts/build.sh directly. See the .vscode/tasks.json for examples. The build environment runs within a [docker container](https://github.com/cracked-machine/TheShadesBelow/tree/main/.devcontainer/debian-trixie/Dockerfile) using Debian. All third party libraries are built from source. 
+
+### Devcontainers
+
+There are two devcontainer configurations. VSCode asks which one to use on "Reopen in Container", and you can change at any time with the "Dev Containers: Switch Container" command. Both share the same workspace; the AlmaLinux 8 image sets `BUILD_DIR_SUFFIX=-el8` so its build directories never collide with the Debian ones.
+
+| | Debian trixie (default) | AlmaLinux 8 |
+|---|---|---|
+| Devcontainer | [.devcontainer/debian-trixie/](.devcontainer/debian-trixie/) | [.devcontainer/almalinux8/](.devcontainer/almalinux8/) |
+| Purpose | Day-to-day development, Windows cross-build | Portable Linux release build, troubleshooting old-glibc issues |
+| Base image | `debian:trixie` | `almalinux:8` |
+| glibc (minimum required on the target for Linux builds) | 2.41 | 2.28 (RHEL8+, Ubuntu 20.04+, Debian 10+, Steam Deck) |
+| GCC | 14 (distro) | 14 (`gcc-toolset-14`) |
+| Targets | `x86_64-linux-gnu`, `x86_64-w64-mingw32` | `x86_64-linux-gnu` |
+| Build dir | `build-<target>-<CONFIG>` | `build-<target>-el8-<CONFIG>` |
+| Linux runtime linking (Release) | libstdc++/libgcc static, glibc dynamic | libstdc++/libgcc static, glibc dynamic |
+| Windows runtime linking | Release: static. Debug: ships libstdc++/libgcc/winpthread DLLs ([GCC PR 110572](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=110572)) | n/a |
+| CI builds | `x86_64-w64-mingw32`, `x86_64-linux-gnu` | `x86_64-linux-gnu` |
+| CI artifacts (Actions run page, kept 7 days) | `build-x86_64-w64-mingw32-<type>`, `build-x86_64-linux-gnu-trixie-<type>` | `build-x86_64-linux-gnu-<type>` |
+| Published in GitHub Releases | `x86_64-w64-mingw32` | `x86_64-linux-gnu` |
+
+glibc cannot be statically linked (SFML needs the system's OpenGL, X11, udev and audio libraries), so Linux portability comes from building against an old glibc. To check the minimum glibc a Linux binary needs:
+
+```
+objdump -T build-x86_64-linux-gnu-el8-Release/bin/TheShadesBelow | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1
+```
 
 You can determine the C-Runtime (CRT) by running objdump on the binary output:
 

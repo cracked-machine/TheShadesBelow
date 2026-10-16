@@ -14,7 +14,7 @@
             "label": "List Available CMake Targets",
             "type": "shell",
             "command": [
-                "cmake --build build-${input:buildarch}-${input:buildType} --target help"
+                "cmake --build build-${input:buildarch}${env:BUILD_DIR_SUFFIX}-${input:buildType} --target help"
             ]
         },
         {
@@ -29,7 +29,7 @@
             "detail": "Shows occurrence counts (how many times each .o file is referenced in the map file)",
             "type": "shell",
             "command": [
-                "grep -oP '[^ ]+\\.o' build-${input:buildarch}-${input:buildType}/TheShadesBelow.map | sort | uniq -c | sort -rn | head -30"
+                "grep -oP '[^ ]+\\.o' build-${input:buildarch}${env:BUILD_DIR_SUFFIX}-${input:buildType}/TheShadesBelow.map | sort | uniq -c | sort -rn | head -30"
             ]
         },
         {
@@ -55,14 +55,18 @@
             "default": "Debug"
         },
         {
+            // only offers targets whose compiler is installed in this container (needs the
+            // augustocdias.tasks-shell-input extension, see .devcontainer/*/devcontainer.json)
             "id": "buildarch",
-            "type": "pickString",
-            "description": "Select build architecture",
-            "options": [
-                "x86_64-w64-mingw32",
-                "x86_64-linux-gnu"
-            ],
-            "default": "x86_64-w64-mingw32"
+            "type": "command",
+            "command": "shellCommand.execute",
+            "args": {
+                "command": "./scripts/list-targets.sh",
+                "cwd": "${workspaceFolder}",
+                "description": "Select build architecture",
+                // skip the picker when only one target is available (e.g. el8)
+                "useSingleResult": true
+            }
         }
     ]
 }

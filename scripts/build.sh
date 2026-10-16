@@ -1,7 +1,9 @@
 #!/bin/bash
 CONFIG="$1"
 ARCH="$2"
-BUILD_DIR="build-$2-$1"
+# BUILD_DIR_SUFFIX is set by the almalinux8 image so its build dirs don't collide
+# with the trixie image's when both devcontainers share the same workspace
+BUILD_DIR="build-$2${BUILD_DIR_SUFFIX}-$1"
 
 cmake -S . -B $BUILD_DIR -G Ninja \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
@@ -16,7 +18,7 @@ cmake --build $BUILD_DIR --parallel $(nproc)
 chmod 777 $BUILD_DIR/bin/*
 
 # update .clangd settings
-if [ -f ".clangd" ]; then
+if [ -f ".clangd" ] && command -v yq >/dev/null; then
     yq -y --in-place ".CompileFlags.CompilationDatabase = \"$BUILD_DIR\"" .clangd
     # Update all -isystem paths to use the current BUILD_DIR
     yq -y --in-place "

@@ -10,13 +10,22 @@ on:
 
 jobs:
   build:
+    name: ${{ matrix.config.target }} (${{ matrix.config.image }}) ${{ matrix.build_type }}
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         build_type: [debug, release]
-        target: [x86_64-linux-gnu, x86_64-w64-mingw32]
+        config:
+          # portable Linux build (glibc 2.28) - the one that ships in releases
+          - { target: x86_64-linux-gnu,   image: almalinux8,    build_dir_suffix: -el8, artifact_suffix: '' }
+          # Linux build from the default dev image (glibc 2.41) - CI coverage only, not released
+          - { target: x86_64-linux-gnu,   image: debian-trixie, build_dir_suffix: '',   artifact_suffix: -trixie }
+          - { target: x86_64-w64-mingw32, image: debian-trixie, build_dir_suffix: '',   artifact_suffix: '' }
       fail-fast: false
+
+    env:
+      BUILD_DIR: build-${{ matrix.config.target }}${{ matrix.config.build_dir_suffix }}-${{ matrix.build_type }}
 
     steps:
       - name: Check out code
@@ -29,20 +38,49 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: .devcontainer/Dockerfile
+          file: .devcontainer/${{ matrix.config.image }}/Dockerfile
           push: false
           load: true
-          tags: local:latest
+          tags: local-${{ matrix.config.image }}:latest
+          cache-from: type=gha,scope=${{ matrix.config.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.config.image }}
 
-      - name: Run build with ${{ matrix.build_type }} / ${{ matrix.target }}
+      - name: Run build with ${{ matrix.build_type }} / ${{ matrix.config.target }}
         run: |
-          docker run --rm -v ${{ github.workspace }}:/srv -w /srv local /srv/scripts/build.sh ${{ matrix.build_type }} ${{ matrix.target }}
+          docker run --rm -v ${{ github.workspace }}:/srv -w /srv local-${{ matrix.config.image }} /srv/scripts/build.sh ${{ matrix.build_type }} ${{ matrix.config.target }}
+
+      - name: Check Linux binary glibc version
+        if: matrix.config.image == 'almalinux8'
+        run: |
+          MAX_GLIBC=$(objdump -T "$BUILD_DIR/bin/TheShadesBelow" | grep -o 'GLIBC_[0-9.]*' | sed 's/GLIBC_//' | sort -uV | tail -1)
+          echo "Highest required glibc: $MAX_GLIBC"
+          if [ "$(printf '%s\n' "$MAX_GLIBC" 2.28 | sort -V | tail -1)" != "2.28" ]; then
+            echo "::error::Binary requires glibc $MAX_GLIBC (> 2.28)"; exit 1
+          fi
+
+      - name: Check Linux binary runtime linking
+        if: matrix.config.target == 'x86_64-linux-gnu'
+        run: |
+          BIN=$BUILD_DIR/bin/TheShadesBelow
+          objdump -p "$BIN" | grep NEEDED
+          if [ "${{ matrix.build_type }}" = "release" ] && objdump -p "$BIN" | grep -E 'NEEDED.*(libstdc\+\+|libgcc_s)'; then
+            echo "::error::Release binary dynamically links libstdc++/libgcc"; exit 1
+          fi
+
+      - name: Check Windows binary has no MinGW runtime DLLs
+        if: matrix.config.target == 'x86_64-w64-mingw32' && matrix.build_type == 'release'
+        run: |
+          EXE=$BUILD_DIR/bin/TheShadesBelow.exe
+          objdump -p "$EXE" | grep 'DLL Name'
+          if objdump -p "$EXE" | grep -iE 'DLL Name: (libstdc\+\+|libgcc|libwinpthread)'; then
+            echo "::error::Release exe depends on MinGW runtime DLLs"; exit 1
+          fi
 
       - name: Archive Build
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.target }}-${{ matrix.build_type }}
-          path: build-${{ matrix.target }}-${{ matrix.build_type }}/bin/*
+          name: build-${{ matrix.config.target }}${{ matrix.config.artifact_suffix }}-${{ matrix.build_type }}
+          path: ${{ env.BUILD_DIR }}/bin/*
           retention-days: 7
 
   release:
@@ -61,6 +99,8 @@ jobs:
       - name: Zip each build artifact
         run: |
           cd artifacts
+          # the trixie Linux build needs glibc 2.41+, only the portable el8 build is released
+          rm -rf ./*-trixie-*
           for dir in */; do
             zip -r "${dir%/}.zip" "$dir"
           done

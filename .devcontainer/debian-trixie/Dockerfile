@@ -1,3 +1,6 @@
+# Default dev image: day-to-day development and the Windows (mingw) cross-build.
+# Linux binaries built here need glibc 2.41+; portable Linux release builds use
+# ../almalinux8/Dockerfile instead.
 FROM debian:trixie
 
 ARG USER=user

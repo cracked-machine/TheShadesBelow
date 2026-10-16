@@ -2,6 +2,7 @@
 #include <Components/Hazard/SinkholeCell.hpp>
 #include <Components/Persistent/EffectsVolume.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
+#include <Debug/AssertHandler.hpp>
 #include <Engine.hpp>
 #include <Events/PauseClocksEvent.hpp>
 #include <Events/ResumeClocksEvent.hpp>
@@ -21,8 +22,6 @@
 #include <tracy/Tracy.hpp>
 
 #include <memory>
-#include <sstream>
-#include <stacktrace>
 
 namespace Game
 {
@@ -127,9 +126,7 @@ void Engine::init_systems()
 
 void Engine::show_error_screen( const std::string &error_msg )
 {
-  std::ostringstream stack_trace;
-  stack_trace << std::stacktrace::current();
-  SPDLOG_CRITICAL( "Stack trace:\n{}", stack_trace.str() );
+  Debug::stack_trace();
 
   sf::Font font;
   if ( !font.openFromFile( "res/fonts/tuffy.ttf" ) )

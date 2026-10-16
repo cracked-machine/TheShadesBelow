@@ -1564,9 +1564,9 @@
         }
       }
     },
-    "sprite.item.hawthornwine": {
+    "sprite.item.hawthorntea": {
       "spritesheet": {
-        "displayname": "Hawthorn Wine",
+        "displayname": "Hawthorn Tea",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
         "sprite_indices": [15 ],

@@ -6,8 +6,14 @@
 #include <cstdint>
 #include <cstdio>
 #include <fstream>
-#include <stacktrace>
 #include <string>
+
+#if defined( TSB_HAS_STD_STACKTRACE )
+#include <stacktrace>
+#elif __has_include( <execinfo.h> )
+#include <cstdlib>
+#include <execinfo.h>
+#endif
 
 namespace Debug
 {
@@ -16,6 +22,7 @@ void stack_trace()
 {
   SPDLOG_CRITICAL( "=== Stack Trace ===" );
 
+#if defined( TSB_HAS_STD_STACKTRACE )
   // skip this function's own frame
   auto trace = std::stacktrace::current( 1 );
   if ( trace.empty() )
@@ -35,6 +42,29 @@ void stack_trace()
     else { SPDLOG_CRITICAL( "[{:2}] {} at {:016X} (no line info)", i, name, static_cast<uintptr_t>( frame.native_handle() ) ); }
     i++;
   }
+#elif __has_include( <execinfo.h> )
+  // libstdc++exp unavailable (e.g. gcc-toolset on EL8), so use glibc. Names are mangled and there's
+  // no file:line; resolve with `addr2line -fC -e <exe> <addr>`
+  constexpr int kMaxFrames = 64;
+  void *frames[kMaxFrames];
+  const int count = backtrace( frames, kMaxFrames );
+  char **symbols = backtrace_symbols( frames, count );
+  if ( count <= 1 or symbols == nullptr )
+  {
+    SPDLOG_CRITICAL( "Stack trace unavailable" );
+    std::free( symbols );
+    return;
+  }
+
+  // skip this function's own frame
+  for ( int i = 1; i < count; i++ )
+  {
+    SPDLOG_CRITICAL( "[{:2}] {}", i - 1, symbols[i] );
+  }
+  std::free( symbols );
+#else
+  SPDLOG_CRITICAL( "Stack trace unavailable" );
+#endif
 }
 
 [[noreturn]] void assert_handler( const char *condition, const char *message, const char *file, const int line )

@@ -1,0 +1,31 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+    "name": "GameDevel (Debian trixie)",
+    "build": { "dockerfile": "Dockerfile" },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "llvm-vs-code-extensions.vscode-clangd",
+                "ms-vscode.cpptools",
+                "twxs.cmake",
+                "xaver.clang-format",
+                "ms-vscode.hexeditor",
+                "cschlosser.doxdocgen",
+                "remitafforeau.glsl-complete-support",
+                "mrjjot.vscode-glsl-linter",
+                "anthropic.claude-code",
+                "augustocdias.tasks-shell-input"
+
+            ],
+            "settings": {
+                "clangd.path": "/usr/bin/clangd",
+                "C_Cpp.intelliSenseEngine": "disabled"
+            }
+        }
+    },
+    "remoteUser": "user",
+    "containerUser": "user"
+    
+    
+}

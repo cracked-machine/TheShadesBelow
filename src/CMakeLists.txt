@@ -174,9 +174,31 @@ target_link_libraries(${TARGET} PRIVATE
     $<$<PLATFORM_ID:Windows>:dbghelp>
     ImGui-SFML::ImGui-SFML
     nlohmann_json::nlohmann_json
-    stdc++exp
     TracyClient
 )
+
+# std::stacktrace needs libstdc++exp, which gcc-toolset on EL8 (.devcontainer/almalinux8) doesn't ship.
+# Detect it here; without it, Debug::stack_trace() falls back to glibc backtrace() (see Debug/AssertHandler.cpp)
+include(CheckCXXSourceCompiles)
+set(CMAKE_REQUIRED_FLAGS "-std=c++2c")
+set(CMAKE_REQUIRED_LIBRARIES stdc++exp)
+check_cxx_source_compiles("
+    #include <stacktrace>
+    int main() { return static_cast<int>( std::stacktrace::current().size() ); }
+" TSB_HAS_STD_STACKTRACE)
+unset(CMAKE_REQUIRED_FLAGS)
+unset(CMAKE_REQUIRED_LIBRARIES)
+
+if(TSB_HAS_STD_STACKTRACE)
+    target_link_libraries(${TARGET} PRIVATE stdc++exp)
+    target_compile_definitions(${TARGET} PRIVATE TSB_HAS_STD_STACKTRACE=1)
+else()
+    message(STATUS "std::stacktrace unavailable (no libstdc++exp) - using fallback")
+    # export symbols so backtrace_symbols() can resolve function names
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        target_link_options(${TARGET} PRIVATE -rdynamic)
+    endif()
+endif()
 target_include_directories(${TARGET} SYSTEM PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${FETCHCONTENT_BASE_DIR}/imgui-src

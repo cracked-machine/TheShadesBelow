@@ -11,3 +11,12 @@ set(CMAKE_CXX_COMPILER g++)
 
 # # Ensure dbghelp is available
 # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ldbghelp")
+
+# Release: statically link libstdc++/libgcc so the binary only depends on the
+# target's glibc (not its libstdc++ version). glibc itself must stay dynamic -
+# portability comes from building against an old glibc (.devcontainer/almalinux8).
+# Debug is dev-only, so keep it dynamic to match the mingw toolchain file.
+string(TOLOWER "${CMAKE_BUILD_TYPE}" _build_type_lower)
+if(NOT _build_type_lower STREQUAL "debug")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+endif()
