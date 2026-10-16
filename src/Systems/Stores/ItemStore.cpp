@@ -16,19 +16,6 @@
 namespace
 {
 
-//! @brief Build a stat-modifier action of the given kind from a JSON action entry.
-template <typename Action>
-Action make_action( const nlohmann::json &j )
-{
-  using Game::Utils::JsonDeserializer;
-  // toxidrome fields may be nested under "toxidrome" or sit directly on the action entry
-  const auto &tox = j.contains( "toxidrome" ) ? j.at( "toxidrome" ) : j;
-  return Action(
-      { JsonDeserializer::get_int( j, "health" ) }, { JsonDeserializer::get_int( j, "fear" ) }, { JsonDeserializer::get_int( j, "despair" ) },
-      { JsonDeserializer::get_int( j, "infamy" ) }, { JsonDeserializer::get_int( j, "luck" ) }, { JsonDeserializer::get_float( j, "tick" ) },
-      Game::Factory::Toxicity::create_toxidrome( JsonDeserializer::get_string( tox, "type" ), JsonDeserializer::get_int( tox, "toxicity" ) ) );
-}
-
 //! @brief Convert the "wear_location" string of a JSON item entry.
 Game::Cmp::WorldItem::Location make_wear_location( const std::string &wear_location )
 {

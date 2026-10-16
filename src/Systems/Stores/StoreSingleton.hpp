@@ -2,10 +2,13 @@
 #define SRC_SYSTEMS_STORES_STORESINGLETON_HPP__
 
 #include <Components/Random.hpp>
+#include <Factory/ToxicityFactory.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
+#include <Utils/JsonDeserializer.hpp>
 #include <filesystem>
 #include <functional>
+#include <nlohmann/json_fwd.hpp>
 #include <source_location>
 #include <stdexcept>
 #include <string>
@@ -164,6 +167,19 @@ protected:
   {
     if ( s_instance ) throw std::runtime_error( "Store already initialized" );
     s_instance = static_cast<Derived *>( this );
+  }
+
+  //! @brief Build a stat-modifier action of the given kind from a JSON action entry.
+  template <typename Action>
+  Action make_action( const nlohmann::json &j )
+  {
+    using Game::Utils::JsonDeserializer;
+    // toxidrome fields may be nested under "toxidrome" or sit directly on the action entry
+    const auto &tox = j.contains( "toxidrome" ) ? j.at( "toxidrome" ) : j;
+    return Action(
+        { JsonDeserializer::get_int( j, "health" ) }, { JsonDeserializer::get_int( j, "fear" ) }, { JsonDeserializer::get_int( j, "despair" ) },
+        { JsonDeserializer::get_int( j, "infamy" ) }, { JsonDeserializer::get_int( j, "luck" ) }, { JsonDeserializer::get_float( j, "tick" ) },
+        Game::Factory::Toxicity::create_toxidrome( JsonDeserializer::get_string( tox, "type" ), JsonDeserializer::get_int( tox, "toxicity" ) ) );
   }
 
   //! @brief Filesystem path of the JSON file this store loads its data from.
