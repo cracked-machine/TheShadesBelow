@@ -1,6 +1,8 @@
 #include <Audio/SoundBank.hpp>
+#include <Components/AnimData.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
+#include <Components/Particle/LightningRodParticleSprite.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/TookDamage.hpp>
@@ -42,7 +44,7 @@ void LightningSystem::on_lightning_event( Events::LightningEvent ev )
   m_target_entt = ev.target_entt;
 }
 
-void LightningSystem::update()
+void LightningSystem::update( sf::Time dt )
 {
   if ( m_trigger_lightning and not lightning_strike_exists() )
   {
@@ -63,8 +65,15 @@ void LightningSystem::update()
         wearlevel->m_level = std::max( 0.f, wearlevel->m_level - lightning_dmg );
         if ( wearlevel->m_level <= 0 )
         {
-          // swap out "item.lightningrod" for "item.lightningrod.broken". Invalidates `wearlevel`.
-          get_systems_event_queue().trigger( Events::SwapWorldItemEvent( target_entt, "item.lightningrod.broken", "tool_break" ) );
+          // only one rod is tracked at a time: if another is still glowing, break it now
+          if ( m_breaking_rod_entt != entt::null ) break_lightning_rod( m_breaking_rod_entt );
+
+          // play the glowing animation once; the rod breaks in update() once kRodBreakDelay has elapsed
+          reg().emplace_or_replace<Cmp::AnimData>(
+              target_entt,
+              Cmp::AnimData::Config{ .sprite_type = "sprite.item.lightningrod.glowing", .enabled = true, .anim_type = Cmp::AnimType::ONESHOTHOLD } );
+          m_breaking_rod_entt = target_entt;
+          m_rod_break_elapsed = sf::Time::Zero;
         }
         create_lightning_strike( *worlditem_pos );
         auto uuid = Cmp::UUID::generate();
@@ -82,8 +91,37 @@ void LightningSystem::update()
     Factory::Particle::update_position( reg(), *m_player_smoke_uuid, sf::Vector2f( player_pos.x() + 8.f, player_pos.y() ) );
   }
 
+  if ( m_breaking_rod_entt != entt::null )
+  {
+    m_rod_break_elapsed += dt;
+    if ( m_rod_break_elapsed >= kRodBreakDelay ) break_lightning_rod( m_breaking_rod_entt );
+  }
+
   delete_expired_lightning_strikes();
   Factory::Particle::delete_expired_particle_sprites( reg(), "player.lightning.particle.smoke" );
+  Factory::Particle::delete_expired_particle_sprites( reg(), std::string( Cmp::Particle::LightningRodParticleSprite::kTag ) );
+}
+
+void LightningSystem::break_lightning_rod( entt::entity rod_entt )
+{
+  m_breaking_rod_entt = entt::null;
+
+  // the rod may have been picked up or destroyed while it was glowing
+  if ( not reg().valid( rod_entt ) or not reg().all_of<Cmp::WorldItem, Cmp::Position>( rod_entt ) ) return;
+  if ( reg().get<Cmp::WorldItem>( rod_entt ).item_type != "item.lightningrod" ) return;
+
+  // copy the position: the swap event replaces this entity's components
+  const Cmp::Position rod_pos = reg().get<Cmp::Position>( rod_entt );
+
+  // speed falls off as lifetime_ratio^4, so a particle travels speed * lifetime / 5:
+  // 160px/s over 2s reaches ~4 grid blocks (64px) for the longest-lived particles
+  auto rod_particle_uuid = Cmp::UUID::generate();
+  Factory::Particle::add_lightningrod_ps( reg(), std::string( Cmp::Particle::LightningRodParticleSprite::kTag ), 20, 2.f, 160.f, 20.f,
+                                          rod_particle_uuid, rod_pos.position, rod_pos.position.y );
+  m_sound_bank.get_effect( "bomb_detonate" ).play();
+
+  // swap out "item.lightningrod" for "item.lightningrod.broken"
+  get_systems_event_queue().trigger( Events::SwapWorldItemEvent( rod_entt, "item.lightningrod.broken", "tool_break" ) );
 }
 
 void LightningSystem::strike_player()

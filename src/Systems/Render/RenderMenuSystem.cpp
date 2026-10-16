@@ -21,8 +21,8 @@
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
-#include <Components/Persistent/EmberDamage.hpp>
 #include <Components/Persistent/EffectsVolume.hpp>
+#include <Components/Persistent/EmberDamage.hpp>
 #include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/FuseDelay.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
@@ -34,6 +34,7 @@
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
+#include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/MinNumAltars.hpp>
 #include <Components/Persistent/MinNumCrypts.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
@@ -246,6 +247,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::LightningDamage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::LavaFireballDamage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::EmberDamage>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::LightningRodDebrisDamage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::WormholeSeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::CorruptionSeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::SinkholeSeed>( reg() ).render_widget();

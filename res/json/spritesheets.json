@@ -1522,12 +1522,26 @@
         }
       }
     },
+    "sprite.item.lightningrod.glowing": {
+      "spritesheet": {
+        "displayname": "Lightning Rod",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [40,41,42,43],
+        "indices_per_sequence": 4,
+        "framerate": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
     "sprite.item.lightningrod.broken": {
       "spritesheet": {
         "displayname": "Lightning Rod",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [40],
+        "sprite_indices": [28],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {

@@ -2,6 +2,7 @@
 #define SRC_SYSTEMS_PLAYERSYSTEM_HPP__
 
 #include <Components/Direction.hpp>
+#include <Components/Player/Mortality.hpp>
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/BaseSystem.hpp>
 
@@ -15,7 +16,6 @@ namespace Game::Events { class DropInventoryEvent; class PlayerActionEvent; clas
 namespace Game::Sprites { class SpriteSheet; }
 namespace Game::Cmp { class LerpPosition; class Position; class AnimData; class RectBounds; class BaseAction; }
 namespace Game::Cmp::Npc { class Shockwave; }
-namespace Game::Cmp::Player { class Mortality; }
 namespace Game::Cmp::Peristent { class EffectsVolume; } 
 namespace Game::PathFinding { class SpatialHashGrid; }
 // clang-format on
@@ -116,7 +116,9 @@ private:
   //! @note Respects the player damage cooldown. The particle is destroyed by the hit.
   //! @param tag_suffix Particle sprites whose tag contains this are checked, e.g. Cmp::Particle::EmberParticleSprite::kTagSuffix
   //! @param damage Health removed from the player per hit
-  void check_burning_particle_collision( std::string_view tag_suffix, int damage );
+  //! @param death_state Mortality state the player is put into if the hit kills them
+  void check_burning_particle_collision( std::string_view tag_suffix, int damage,
+                                         Cmp::Player::Mortality::State death_state = Cmp::Player::Mortality::State::IGNITED );
 
   //! @brief Attempt to knock the player back one cell, away from the source of the particle that hit them.
   //! Does nothing if every candidate cell is blocked or hazardous.

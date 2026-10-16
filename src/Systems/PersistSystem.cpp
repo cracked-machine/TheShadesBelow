@@ -34,6 +34,7 @@
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
+#include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/MinNumAltars.hpp>
 #include <Components/Persistent/MinNumCrypts.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
@@ -140,6 +141,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::DiggingDamagePerHit>();
   add_component<Cmp::Persist::DisplayResolution>();
   add_component<Cmp::Persist::EmberDamage>();
+  add_component<Cmp::Persist::LightningRodDebrisDamage>();
   add_component<Cmp::Persist::EffectsVolume>();
   add_component<Cmp::Persist::ExitKeyRequirement>();
   add_component<Cmp::Persist::FuseDelay>();

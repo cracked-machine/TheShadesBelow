@@ -89,6 +89,14 @@
     "detail": "Ember Damage",
     "format": "%d"
   },
+  "LightningRodDebrisDamage": {
+    "type": "int",
+    "value": 5,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Lightning Rod Debris Damage",
+    "format": "%d"
+  },
   "LavaFireballDamage": {
     "type": "int",
     "value": 10,

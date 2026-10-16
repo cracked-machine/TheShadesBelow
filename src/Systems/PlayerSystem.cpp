@@ -30,11 +30,13 @@
 #include <Components/Particle/BlockParticle.hpp>
 #include <Components/Particle/EmberParticleSprite.hpp>
 #include <Components/Particle/LavaFireballParticleSprite.hpp>
+#include <Components/Particle/LightningRodParticleSprite.hpp>
 #include <Components/Particle/NoteParticleSprite.hpp>
 #include <Components/Particle/SpriteBase.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Persistent/EmberDamage.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
+#include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
@@ -189,6 +191,9 @@ void PlayerSystem::update( sf::Time dt )
                                       Sys::PersistSystem::get<Cmp::Persist::LavaFireballDamage>( reg() ).get_value() );
     check_burning_particle_collision( Cmp::Particle::EmberParticleSprite::kTagSuffix,
                                       Sys::PersistSystem::get<Cmp::Persist::EmberDamage>( reg() ).get_value() );
+    check_burning_particle_collision( Cmp::Particle::LightningRodParticleSprite::kTagSuffix,
+                                      Sys::PersistSystem::get<Cmp::Persist::LightningRodDebrisDamage>( reg() ).get_value(),
+                                      Cmp::Player::Mortality::State::SHOCKED );
     check_player_can_push( dt );
     check_player_can_pull( dt );
     update_player_position( dt );
@@ -834,7 +839,7 @@ void PlayerSystem::kill_player_if_stats_are_max()
   }
 }
 
-void PlayerSystem::check_burning_particle_collision( std::string_view tag_suffix, int damage )
+void PlayerSystem::check_burning_particle_collision( std::string_view tag_suffix, int damage, Cmp::Player::Mortality::State death_state )
 {
   if ( not Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled ) return;
 
@@ -866,7 +871,7 @@ void PlayerSystem::check_burning_particle_collision( std::string_view tag_suffix
 
   if ( Utils::Player::get_stats( reg() ).health() <= 0 )
   {
-    on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::IGNITED, player_pos_cmp ) );
+    on_player_mortality_event( Events::PlayerMortalityEvent( death_state, player_pos_cmp ) );
     return;
   }
 

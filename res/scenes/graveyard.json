@@ -1953,15 +1953,15 @@
                 {
                  "height":0,
                  "id":282,
-                 "name":"item.plant.hawthorn",
+                 "name":"item.lightningrod",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":720,
-                 "y":848
+                 "x":752,
+                 "y":800
                 }],
          "opacity":1,
          "type":"objectgroup",

@@ -7,6 +7,8 @@
 #include <Systems/BaseSystem.hpp>
 #include <entt/entity/fwd.hpp>
 
+#include <SFML/System/Time.hpp>
+
 #include <optional>
 
 namespace Game::Cmp
@@ -34,7 +36,8 @@ public:
   void on_lightning_event( Events::LightningEvent ev );
 
   //! @brief Called every frame by the Graveyard Scene
-  void update();
+  //! @param dt Time elapsed since the last frame. Advances the worn out lightning rod's break timer.
+  void update( sf::Time dt );
 
   //! @brief Checks if their is existing Cmp::LightningStrike entity in the entt registry
   //! @return true
@@ -63,6 +66,20 @@ private:
 
   //! @brief UUID of the smoke particles from the last player strike, so they follow the player. Empty if the last strike hit a lightning rod.
   std::optional<Cmp::UUID> m_player_smoke_uuid;
+
+  //! @brief Lightning rod that has been worn out and is playing its glowing animation before it breaks. entt::null if none.
+  entt::entity m_breaking_rod_entt{ entt::null };
+
+  //! @brief Time since m_breaking_rod_entt was struck; the rod breaks when this reaches kRodBreakDelay.
+  sf::Time m_rod_break_elapsed{ sf::Time::Zero };
+
+  //! @brief How long a worn out lightning rod glows before breaking (4 frames at 1FPS).
+  static constexpr sf::Time kRodBreakDelay = sf::seconds( 4.f );
+
+  //! @brief Break a worn out lightning rod: spawn the copper debris, play the sound and swap it for "item.lightningrod.broken".
+  //! @note Does nothing if `rod_entt` is no longer a lightning rod world item, e.g. it was picked up while glowing.
+  //! @param rod_entt The lightning rod world item entity.
+  void break_lightning_rod( entt::entity rod_entt );
 
   //! @brief Damage the player and create the lightning strike and smoke at the player position
   void strike_player();

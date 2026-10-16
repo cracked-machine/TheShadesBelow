@@ -6,6 +6,7 @@
 #include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Particle/GraveHaloParticleSprite.hpp>
 #include <Components/Particle/LavaFireballParticleSprite.hpp>
+#include <Components/Particle/LightningRodParticleSprite.hpp>
 #include <Components/Particle/NoteParticleSprite.hpp>
 #include <Components/Particle/ObstacleDigParticleSprite.hpp>
 #include <Components/Particle/PlantLeavesParticleSprite.hpp>
@@ -196,6 +197,26 @@ void add_pot_ps( entt::registry &reg, const std::string &tag, int particle_count
   SPDLOG_DEBUG( "Created obstacle ParticleSprite {}", static_cast<uint32_t>( entt ) );
 }
 
+void add_lightningrod_ps( entt::registry &reg, const std::string &tag, int particle_count, float lifetime_seconds, float speed, float size,
+                          Cmp::UUID &uuid_cmp, sf::Vector2f pos, float zorder )
+{
+  auto ps = Cmp::Particle::LightningRodParticleSprite( particle_count );
+  ps.set_tag( tag );
+  ps.set_generations( 1 );
+  ps.set_particle_size_range( std::uniform_real_distribution<float>( size, size ) );
+  ps.set_emitter_position( { pos.x + Cmp::RandomFloat( 4.f, 12.f ).gen(), pos.y + Cmp::RandomFloat( 4.f, 12.f ).gen() } );
+  ps.set_lifetime_ms( std::uniform_int_distribution<int>( 0, sf::seconds( lifetime_seconds ).asMilliseconds() ) );
+  ps.set_speed( std::uniform_real_distribution<float>( speed, speed ) );
+  ps.set_angle( std::uniform_real_distribution<float>( 1.f, 360.f ) );
+
+  auto entt = reg.create();
+  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>(
+      entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::LightningRodParticleSprite>( ps ) ) );
+  reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
+  reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
+  SPDLOG_DEBUG( "Created lightning rod ParticleSprite {}", static_cast<uint32_t>( entt ) );
+}
+
 void add_eatingcrumbs_ps( entt::registry &reg, const std::string &tag, int particle_count, float lifetime_seconds, float speed, float size,
                           Cmp::UUID &uuid_cmp, sf::Vector2f pos, sf::Vector2f facing_direction, float zorder )
 {
@@ -324,7 +345,8 @@ void add_ember_ps( entt::registry &reg, const std::string &tag, int particle_cou
   ps.set_angle( std::uniform_real_distribution<float>( kUpDegrees - kSpreadDegrees, kUpDegrees + kSpreadDegrees ) );
 
   auto entt = reg.create();
-  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::EmberParticleSprite>( ps ) ) );
+  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt,
+                                                      Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::EmberParticleSprite>( ps ) ) );
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
   reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
   SPDLOG_DEBUG( "Created ember ParticleSprite {}", static_cast<uint32_t>( entt ) );
