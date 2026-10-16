@@ -74,7 +74,10 @@ private:
   //! @brief True if the player's last dig action is still within its cooldown window
   bool is_digging_on_cooldown();
 
-  //! @brief
+  //! @brief Attempt to burn a plant
+  void try_burn_plant();
+
+  //! @brief Update the plant burning in progress
   //! @param dt
   void update_burning_worlditems( sf::Time dt );
 

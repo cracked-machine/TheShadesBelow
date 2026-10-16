@@ -18,11 +18,11 @@
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
 #include <Components/Particle/EmberParticleSprite.hpp>
-#include <Components/Persistent/DiggingCooldownThreshold.hpp>
-#include <Components/Persistent/DiggingDamagePerHit.hpp>
 #include <Components/Persistent/AxeObstacleDigWear.hpp>
 #include <Components/Persistent/AxePotSmashWear.hpp>
 #include <Components/Persistent/AxeSkeletonKillWear.hpp>
+#include <Components/Persistent/DiggingCooldownThreshold.hpp>
+#include <Components/Persistent/DiggingDamagePerHit.hpp>
 #include <Components/Persistent/PickaxeObstacleDigWear.hpp>
 #include <Components/Persistent/PickaxePotSmashWear.hpp>
 #include <Components/Persistent/ShovelObstacleDigWear.hpp>
@@ -113,6 +113,7 @@ void ActionSystem::on_player_action( const Events::PlayerActionEvent &event )
     player_plant_interact();
     check_player_smash_pot();
   }
+  else if ( event.action == Game::Events::PlayerActionEvent::GameActions::BURN ) { try_burn_plant(); }
   else if ( event.action == Game::Events::PlayerActionEvent::GameActions::ATTACK )
   {
     // axe attack?!
@@ -559,6 +560,21 @@ bool ActionSystem::is_digging_on_cooldown()
   auto digging_cooldown_amount = Sys::PersistSystem::get<Cmp::Persist::DiggingCooldownThreshold>( reg() ).get_value();
   auto *player_dig_cooldown = reg().try_get<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
   return ( player_dig_cooldown != nullptr ) and * player_dig_cooldown < sf::seconds( digging_cooldown_amount );
+}
+
+void ActionSystem::try_burn_plant()
+{
+  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+  if ( inventory_type.contains( "candle" ) )
+  {
+    for ( auto [plant_entt, plant_cmp] : reg().view<Cmp::PlantMultiBlock>().each() )
+    {
+      if ( not Utils::Player::is_player_near( reg(), plant_cmp ) ) continue;
+      if ( not Utils::Player::get_projected_position( reg() ).findIntersection( plant_cmp ) ) continue;
+
+      if ( not reg().any_of<Cmp::Plant::BurningTimer>( plant_entt ) ) { reg().emplace_or_replace<Cmp::Plant::BurningTimer>( plant_entt ); }
+    }
+  }
 }
 
 void ActionSystem::update_burning_worlditems( sf::Time dt )

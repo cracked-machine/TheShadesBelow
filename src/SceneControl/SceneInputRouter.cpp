@@ -29,7 +29,6 @@
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/SaveSettingsEvent.hpp>
 #include <Events/UnlockDoorEvent.hpp>
-#include <Factory/ActionFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <SceneControl/Events/ProcessCryptSceneInputEvent.hpp>
@@ -188,7 +187,7 @@ void SceneInputRouter::graveyard_scene_state_handler()
   if ( sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     // get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::DRAW_BOW ) );
-    Factory::Action::try_burn_worlditem( reg() );
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::BURN ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ATTACK ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::DIG ) );
   }

@@ -31,8 +31,10 @@ struct PlayerActionEvent
     DRAW_BOW,
     //! @brief Release the drawn bow, firing an arrow.
     RELEASE_BOW,
-    //! @brief Attempt to eat/drink the current inventory item
+    //! @brief Attempt to eat/drink the current inventory item.
     CONSUME,
+    //! @brief Attempt to burn the nearest/facing plant object.
+    BURN
   };
 
   //! @brief Construct a new PlayerActionEvent object
