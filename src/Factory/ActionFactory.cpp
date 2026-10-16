@@ -10,17 +10,6 @@
 namespace Game::Factory::Action
 {
 
-void try_eat_inventory( entt::registry &reg )
-{
-  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg );
-  if ( ( inventory_type.contains( ".forage" ) and Utils::Player::get_inventory_wear_level( reg ) > 0 ) or inventory_type.contains( ".rottenfood" ) or
-       inventory_type.contains( "wine" ) )
-  {
-    auto player_entt = Utils::Player::get_entity( reg );
-    if ( not reg.any_of<Cmp::Player::ConsumeTimer>( player_entt ) ) { reg.emplace_or_replace<Cmp::Player::ConsumeTimer>( player_entt ); }
-  }
-}
-
 void try_burn_worlditem( entt::registry &reg )
 {
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg );

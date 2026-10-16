@@ -77,6 +77,7 @@ void InventorySystem::update( sf::Time dt )
 void InventorySystem::on_player_action( const Events::PlayerActionEvent &event )
 {
   if ( event.action == Events::PlayerActionEvent::GameActions::SWAP_INVENTORY ) { swap_inventory(); }
+  else if ( event.action == Events::PlayerActionEvent::GameActions::CONSUME ) { try_consume_item(); }
 }
 
 void InventorySystem::on_add_inventory_event( Events::AddInventoryEvent ev ) { add_inventory_item( ev.m_item ); }
@@ -189,6 +190,17 @@ void InventorySystem::swap_inventory()
   }
   m_swap_item_cooldown_timer.restart();
   SPDLOG_DEBUG( "inventory_view: {} ", inventory_view.size() );
+}
+
+void InventorySystem::try_consume_item()
+{
+  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+  if ( ( inventory_type.contains( ".forage" ) and Utils::Player::get_inventory_wear_level( reg() ) > 0 ) or
+       inventory_type.contains( ".rottenfood" ) or inventory_type.contains( "wine" ) )
+  {
+    auto player_entt = Utils::Player::get_entity( reg() );
+    if ( not reg().any_of<Cmp::Player::ConsumeTimer>( player_entt ) ) { reg().emplace_or_replace<Cmp::Player::ConsumeTimer>( player_entt ); }
+  }
 }
 
 void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity inventory_slot_entt )
@@ -405,7 +417,6 @@ void InventorySystem::consume_inventory( sf::Time dt )
 {
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
 
-  // not chewing? See Factory::Action::try_eat_inventory()
   auto *consume_timer = Utils::Player::is_player_eating( reg() );
   if ( not consume_timer ) return;
 

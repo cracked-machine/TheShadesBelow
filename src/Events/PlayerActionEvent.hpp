@@ -30,7 +30,9 @@ struct PlayerActionEvent
     //! @brief Begin drawing/nocking the bow.
     DRAW_BOW,
     //! @brief Release the drawn bow, firing an arrow.
-    RELEASE_BOW
+    RELEASE_BOW,
+    //! @brief Attempt to eat/drink the current inventory item
+    CONSUME,
   };
 
   //! @brief Construct a new PlayerActionEvent object

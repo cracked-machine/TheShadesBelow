@@ -176,7 +176,10 @@ void SceneInputRouter::graveyard_scene_state_handler()
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::TOGGLE_GRIMOIRE ) );
   }
-  if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::F ) ) { Factory::Action::try_eat_inventory( reg() ); }
+  if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::F ) )
+  {
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::CONSUME ) );
+  }
   if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::E ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );

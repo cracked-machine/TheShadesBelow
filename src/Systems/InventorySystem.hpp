@@ -84,6 +84,8 @@ private:
   //! @brief Drop the inventory (if player has one) and pickup the nearest workd item into inventory
   void swap_inventory();
 
+  void try_consume_item();
+
   //! @brief Remove the CarryItem from player inventory and place it into the world
   //! @param pos the postion to place the item
   //! @param inventory_slot_entt the player inventory slot entt
