@@ -2,13 +2,18 @@
 #define SRC_SYSTEMS_THREATS_LIGHTNINGSYSTEM_HPP__
 
 #include <Components/FractalCurve.hpp>
+#include <Components/UUID.hpp>
 #include <Events/LightningEvent.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <entt/entity/fwd.hpp>
+
+#include <optional>
 
 namespace Game::Cmp
 {
 class LightningStrike;
-}
+class Position;
+} // namespace Game::Cmp
 
 namespace Game::Sys
 {
@@ -24,13 +29,12 @@ public:
   //! @param sound_bank
   LightningSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
-  //! @brief Sets `trigger_lightning` flag to true;
+  //! @brief Sets `m_trigger_lightning` flag to true and stores the strike target.
   //! @param ev
   void on_lightning_event( Events::LightningEvent ev );
 
   //! @brief Called every frame by the Graveyard Scene
-  //! @param dt
-  void update( sf::Time dt );
+  void update();
 
   //! @brief Checks if their is existing Cmp::LightningStrike entity in the entt registry
   //! @return true
@@ -52,11 +56,20 @@ public:
 
 private:
   //! @brief Set by on_lightning_event(); consumed by update() to trigger creation of a new lightning strike.
-  bool trigger_lightning{ false };
+  bool m_trigger_lightning{ false };
+
+  //! @brief The lightning target: the player or a lightning rod world item
+  entt::entity m_target_entt{ entt::null };
+
+  //! @brief UUID of the smoke particles from the last player strike, so they follow the player. Empty if the last strike hit a lightning rod.
+  std::optional<Cmp::UUID> m_player_smoke_uuid;
+
+  //! @brief Damage the player and create the lightning strike and smoke at the player position
+  void strike_player();
 
   //! @brief Create a lightning strike object
-  //! @param dt
-  void create_lightning_strike( sf::Time dt );
+  //! @param target_pos
+  void create_lightning_strike( const Cmp::Position &target_pos );
 
   //! @brief If the Cmp::LightningStrike timer has expired then delete the entity
   void delete_expired_lightning_strikes();

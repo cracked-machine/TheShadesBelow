@@ -1,5 +1,8 @@
 #include <Audio/SoundBank.hpp>
+#include <Components/Inventory/WearLevel.hpp>
+#include <Components/Inventory/WorldItem.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
+#include <Components/Player/Character.hpp>
 #include <Components/Player/TookDamage.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
@@ -7,6 +10,7 @@
 #include <Components/UUID.hpp>
 #include <Events/LightningEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
+#include <Events/SwapWorldItemEvent.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
@@ -19,6 +23,9 @@
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Vertex.hpp>
 
+#include <algorithm>
+#include <utility>
+
 namespace Game::Sys
 {
 
@@ -29,35 +36,72 @@ LightningSystem::LightningSystem( entt::registry &reg, sf::RenderWindow &window,
   std::ignore = get_systems_event_queue().sink<Events::LightningEvent>().connect<&Sys::LightningSystem::on_lightning_event>( this );
 }
 
-void LightningSystem::on_lightning_event( [[maybe_unused]] Events::LightningEvent ev ) { trigger_lightning = true; };
-
-void LightningSystem::update( sf::Time dt )
+void LightningSystem::on_lightning_event( Events::LightningEvent ev )
 {
-  if ( trigger_lightning and not lightning_strike_exists() )
+  m_trigger_lightning = true;
+  m_target_entt = ev.target_entt;
+}
+
+void LightningSystem::update()
+{
+  if ( m_trigger_lightning and not lightning_strike_exists() )
   {
-    create_lightning_strike( dt );
-    auto uuid = Cmp::UUID::generate();
-    Factory::Particle::add_smoke( reg(), "player.lightning.particle.smoke", uuid, Utils::Player::get_position( reg() ).getCenter(), 50000 );
-    trigger_lightning = false;
+    m_trigger_lightning = false;
+    const auto target_entt = std::exchange( m_target_entt, entt::null );
 
-    int lightning_dmg = Sys::PersistSystem::get<Cmp::Persist::LightningDamage>( reg() ).get_value();
-    Cmp::BaseAction lightning_action( Cmp::Stats::Health{ -lightning_dmg }, {}, {}, {}, {}, {} );
-    Utils::Player::get_stats( reg() ).apply( lightning_action );
-    reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
-
-    if ( Utils::Player::get_stats( reg() ).health() <= 0 )
+    if ( reg().valid( target_entt ) and reg().any_of<Cmp::Player::Character>( target_entt ) ) { strike_player(); }
+    else if ( reg().valid( target_entt ) and reg().any_of<Cmp::WorldItem>( target_entt ) )
     {
-      get_systems_event_queue().trigger(
-          Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::SHOCKED, Utils::Player::get_position( reg() ) ) );
+      auto *worlditem_pos = reg().try_get<Cmp::Position>( target_entt );
+      auto *wearlevel = reg().try_get<Cmp::Inventory::WearLevel>( target_entt );
+      const bool is_lightning_rod = reg().get<Cmp::WorldItem>( target_entt ).item_type == "item.lightningrod";
+
+      // a worn out lightning rod is no longer a valid target, so the player takes the strike instead
+      if ( is_lightning_rod and worlditem_pos and wearlevel and wearlevel->m_level > 0 )
+      {
+        float lightning_dmg = Sys::PersistSystem::get<Cmp::Persist::LightningDamage>( reg() ).get_value();
+        wearlevel->m_level = std::max( 0.f, wearlevel->m_level - lightning_dmg );
+        if ( wearlevel->m_level <= 0 )
+        {
+          // swap out "item.lightningrod" for "item.lightningrod.broken". Invalidates `wearlevel`.
+          get_systems_event_queue().trigger( Events::SwapWorldItemEvent( target_entt, "item.lightningrod.broken", "tool_break" ) );
+        }
+        create_lightning_strike( *worlditem_pos );
+        auto uuid = Cmp::UUID::generate();
+        Factory::Particle::add_smoke( reg(), "player.lightning.particle.smoke", uuid, worlditem_pos->getCenter(), 50000 );
+        m_player_smoke_uuid.reset();
+      }
+      else if ( is_lightning_rod ) { strike_player(); }
     }
+  }
+
+  // update the position so that it follows player, but only if the player was struck
+  if ( m_player_smoke_uuid )
+  {
+    const auto player_pos = Utils::Player::get_position( reg() );
+    Factory::Particle::update_position( reg(), *m_player_smoke_uuid, sf::Vector2f( player_pos.x() + 8.f, player_pos.y() ) );
   }
 
   delete_expired_lightning_strikes();
   Factory::Particle::delete_expired_particle_sprites( reg(), "player.lightning.particle.smoke" );
+}
 
-  // update the position so that it follows player
-  sf::Vector2f new_pos( Utils::Player::get_position( reg() ).x() + 8.f, Utils::Player::get_position( reg() ).y() );
-  Factory::Particle::update_position( reg(), "player.lightning.particle.smoke", new_pos );
+void LightningSystem::strike_player()
+{
+  const auto player_pos = Utils::Player::get_position( reg() );
+  int lightning_dmg = Sys::PersistSystem::get<Cmp::Persist::LightningDamage>( reg() ).get_value();
+  Cmp::BaseAction lightning_action( Cmp::Stats::Health{ -lightning_dmg }, {}, {}, {}, {}, {} );
+  Utils::Player::get_stats( reg() ).apply( lightning_action );
+  reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+
+  if ( Utils::Player::get_stats( reg() ).health() <= 0 )
+  {
+    get_systems_event_queue().trigger( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::SHOCKED, player_pos ) );
+  }
+
+  create_lightning_strike( player_pos );
+  m_player_smoke_uuid = Cmp::UUID::generate();
+  Factory::Particle::add_smoke( reg(), "player.lightning.particle.smoke", *m_player_smoke_uuid, player_pos.getCenter(), 50000 );
 }
 
 bool LightningSystem::lightning_strike_exists()
@@ -66,12 +110,10 @@ bool LightningSystem::lightning_strike_exists()
   return not ls_view.empty();
 }
 
-void LightningSystem::create_lightning_strike( [[maybe_unused]] sf::Time dt )
+void LightningSystem::create_lightning_strike( const Cmp::Position &target_pos )
 {
-  auto player_position = Utils::Player::get_position( reg() );
-
   // make sure the origin is within the game view (not world y=0!)
-  auto origin_pos = sf::Vector2f( player_position.getCenter().x, player_position.y() - ( RenderSystem::get_world_view().getSize().y / 2 ) );
+  auto origin_pos = sf::Vector2f( target_pos.getCenter().x, target_pos.y() - ( RenderSystem::get_world_view().getSize().y / 2 ) );
 
   auto lightning_strikes_count = 5;
   auto lightning_segment_divisor = 5; // 1 = 2 segments, 2 = 4 segment, 3 = 8 segments, 4 = 16 segments
@@ -81,7 +123,7 @@ void LightningSystem::create_lightning_strike( [[maybe_unused]] sf::Time dt )
 
   for ( auto _ : std::views::iota( 0, lightning_strikes_count ) )
   {
-    Cmp::LightningStrike ls_cmp_main( origin_pos, player_position.getCenter(), angle_deviations, strike_duration );
+    Cmp::LightningStrike ls_cmp_main( origin_pos, target_pos.getCenter(), angle_deviations, strike_duration );
 
     for ( auto _ : std::views::iota( 0, lightning_segment_divisor ) )
     {

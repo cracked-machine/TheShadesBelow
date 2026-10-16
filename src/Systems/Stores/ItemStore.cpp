@@ -28,6 +28,16 @@ Game::Cmp::WorldItem::Location make_wear_location( const std::string &wear_locat
   return Location::NONE;
 }
 
+Game::Cmp::WorldItem::Consumable make_consumable_property( const std::string &consumable )
+{
+  using Consumable = Game::Cmp::WorldItem::Consumable;
+  if ( consumable == "none" ) return Consumable::NONE;
+  if ( consumable == "drinkable" ) return Consumable::DRINKABLE;
+  if ( consumable == "edible" ) return Consumable::EDIBLE;
+  SPDLOG_WARN( "Unknown consumable type: {}", consumable );
+  return Consumable::NONE;
+}
+
 } // namespace
 
 namespace Game::Sys
@@ -55,8 +65,9 @@ void ItemStore::init_store()
     auto axe_damage = weapon_damage.at( "axe" ).get<int>();
     auto shovel_damage = weapon_damage.at( "shovel" ).get<int>();
     auto bow_damage = weapon_damage.at( "bow" ).get<int>();
+    auto consumable = make_consumable_property( item_value.at( "consumable" ).get<std::string>() );
     Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, sacrifice_output, is_sacrificial, pickaxe_damage, axe_damage, shovel_damage,
-                              bow_damage, sf::seconds( expiry ), wear_location );
+                              bow_damage, sf::seconds( expiry ), wear_location, consumable );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )

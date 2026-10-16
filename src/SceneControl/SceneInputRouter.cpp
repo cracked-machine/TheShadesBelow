@@ -140,7 +140,10 @@ void SceneInputRouter::graveyard_scene_state_handler()
         enqueue( Events::SceneManagerEvent::Type::ENTER_RUIN_LOWER );
       }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::F8 ) { enqueue( Events::SceneManagerEvent::Type::ENTER_SHOP ); }
-      else if ( keyReleased->scancode == sf::Keyboard::Scancode::F12 ) { get_systems_event_queue().trigger( Events::LightningEvent() ); }
+      else if ( keyReleased->scancode == sf::Keyboard::Scancode::F12 )
+      {
+        get_systems_event_queue().trigger( Events::LightningEvent( Utils::Player::get_entity( reg() ) ) );
+      }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Home ) { toggle_particle_test( true ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::End ) { toggle_particle_test( false ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Escape ) { queue_quit_game_event(); }

@@ -84,8 +84,6 @@ private:
   //! @brief Drop the inventory (if player has one) and pickup the nearest workd item into inventory
   void swap_inventory();
 
-  void try_consume_item();
-
   //! @brief Remove the CarryItem from player inventory and place it into the world
   //! @param pos the postion to place the item
   //! @param inventory_slot_entt the player inventory slot entt
@@ -100,6 +98,8 @@ private:
   //! @param reg
   //! @param world_item_entt
   void pickup_world_item( entt::registry &reg, entt::entity world_item_entt );
+
+  void try_consume_item();
 
   //! @brief Eat the inventory item if its a ".forage" item.
   //! @param dt Update the EatingTimeAccumulator with the delta time.

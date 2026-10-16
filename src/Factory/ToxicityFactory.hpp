@@ -54,6 +54,7 @@ private:
 
 //! @brief Build a single-affliction Toxidrome from a data-driven type name (e.g. loaded from JSON).
 //! @param type Toxidrome type name; "none" yields an empty Toxidrome, unknown names are logged and treated as "none".
+//!             "all" with a negative toxicity reduces every active toxidrome (a cure); a positive "all" is logged and ignored.
 //! @param toxicity The toxidrome's toxicity contribution while active.
 //! @return The constructed Cmp::Toxicity::Toxidrome.
 Cmp::Toxicity::Toxidrome create_toxidrome( const std::string &type, int toxicity );

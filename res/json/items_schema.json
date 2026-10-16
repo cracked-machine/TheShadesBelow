@@ -21,6 +21,11 @@
           "enum": ["None", "World", "Inventory", "Both"],
           "description": "Where the item's wear level is active. World, Inventory or Both. None if the item does not wear."
         },
+        "consumable": {
+          "type": "string",
+          "enum": ["none", "edible", "drinkable"],
+          "description": "Can the item be eaten or drunk."
+        },
         "sacrifice_output": {
           "type": "string",
           "description": "The item that will spawn when this item is sacrificed. Must a valid item key if populated, else no op if empty string. Note, this will replace player inventory."
@@ -113,7 +118,7 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["none", "tachycardia", "bradycardia", "halucinogen", "hypoxia", "phototoxia", "venom", "vertigo"]
+              "enum": ["none", "tachycardia", "bradycardia", "halucinogen", "hypoxia", "phototoxia", "venom", "vertigo", "all"]
             },
             "toxicity": { "type": "number" }
           }

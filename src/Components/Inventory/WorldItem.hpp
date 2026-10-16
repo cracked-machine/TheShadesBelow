@@ -29,6 +29,16 @@ public:
     BOTH
   };
 
+  //! @brief Determines if the item can be eaten, drunk or neither.
+  enum class Consumable {
+    //! @brief The item cannot be consumed.
+    NONE,
+    //! @brief The item can be eaten by the player.
+    EDIBLE,
+    //! @brief The item can be drunk by the player.
+    DRINKABLE
+  };
+
   //! @brief Construct a new, empty World Item object.
   WorldItem() = default;
   //! @brief Construct a new World Item object.
@@ -37,7 +47,8 @@ public:
   //! @param expiry Time for the item to fully expire. Zero means this item does not expire.
   //! @param wear_location Where the item's wear level is active.
   WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, std::string sacrifice_output, bool is_sacrificial, int pickaxe_dmg, int axe_dmg,
-             int shovel_dmg, int bow_dmg, sf::Time expiry = sf::Time::Zero, Location wear_location = Location::NONE )
+             int shovel_dmg, int bow_dmg, sf::Time expiry = sf::Time::Zero, Location wear_location = Location::NONE,
+             Consumable consumable = Consumable::NONE )
       : item_type( std::move( item_type ) ),
         sprite_type( std::move( sprite_type ) ),
         m_sacrifice_output( std::move( sacrifice_output ) ),
@@ -47,7 +58,8 @@ public:
         m_shovel_damage( shovel_dmg ),
         m_bow_damage( bow_dmg ),
         m_expiry( expiry ),
-        m_wear_location( wear_location )
+        m_wear_location( wear_location ),
+        m_consumable( consumable )
   {
   }
 
@@ -110,6 +122,8 @@ public:
   int get_shovel_damage() const { return m_shovel_damage; }
   int get_bow_damage() const { return m_bow_damage; }
 
+  Consumable consumable_type() { return m_consumable; }
+
 private:
   //! @brief The action and its effects that can be applied to the player. Imported from items.json.
   std::unordered_map<std::type_index, ActionTimePair> actions;
@@ -137,6 +151,8 @@ private:
 
   //! @brief Where the item's wear level is active. Imported from items.json.
   Location m_wear_location{ Location::NONE };
+
+  Consumable m_consumable{ Consumable::NONE };
 };
 
 } // namespace Game::Cmp

@@ -25,10 +25,12 @@ ItemSystem::ItemSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
 {
   SPDLOG_DEBUG( "ItemSystem initialized" );
   std::ignore = get_systems_event_queue().sink<Events::CreateItemEvent>().connect<&ItemSystem::on_create_item_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::SwapWorldItemEvent>().connect<&ItemSystem::on_swap_world_item_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::UpdateDmgEvent>().connect<&ItemSystem::on_update_dmg_event>( this );
 }
 
 void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev ) { create_world_item( ev.m_pos, ev.m_item, ev.m_sfx, ev.m_zorder ); }
+void ItemSystem::on_swap_world_item_event( const Events::SwapWorldItemEvent &ev ) { swap_world_item( ev.m_entt, ev.m_new_item, ev.m_sfx ); }
 void ItemSystem::on_update_dmg_event( const Events::UpdateDmgEvent &ev )
 {
   // don't assume the item has a wear level
@@ -45,13 +47,7 @@ void ItemSystem::on_update_dmg_event( const Events::UpdateDmgEvent &ev )
         break;
     }
 
-    if ( wearlevel_cmp.m_level <= 0 )
-    {
-      const auto &rotten_item = Sys::ItemStore::instance().get( "item.rottenfood" );
-      reg().emplace_or_replace<Cmp::WorldItem>( ev.m_item_entt, rotten_item );
-      reg().emplace_or_replace<Cmp::AnimData>( ev.m_item_entt, Cmp::AnimData::Config{ .sprite_type = rotten_item.sprite_type, .enabled = false } );
-      reg().remove<Cmp::Inventory::WearLevel>( ev.m_item_entt );
-    }
+    if ( wearlevel_cmp.m_level <= 0 ) { swap_world_item( ev.m_item_entt, "item.rottenfood" ); }
   }
 }
 
@@ -91,6 +87,24 @@ void ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKey &item,
 
   SPDLOG_INFO( "Placed {} at {},{}", item, pos.position.x, pos.position.y );
   if ( world_item_entt != entt::null and not sfx.empty() ) { m_sound_bank.get_effect( sfx ).play(); }
+}
+
+void ItemSystem::swap_world_item( entt::entity entt, const Sys::ItemKey &item, const std::string &sfx )
+{
+  if ( not reg().valid( entt ) or not reg().any_of<Cmp::WorldItem>( entt ) )
+  {
+    SPDLOG_WARN( "Cannot swap to {}: entity {} is not a world item", item, static_cast<uint32_t>( entt ) );
+    return;
+  }
+
+  const auto &new_item = Sys::ItemStore::instance().get( item );
+  SPDLOG_INFO( "Swapped {} for {}", reg().get<Cmp::WorldItem>( entt ).item_type, item );
+  reg().emplace_or_replace<Cmp::WorldItem>( entt, new_item );
+  reg().emplace_or_replace<Cmp::AnimData>( entt, Cmp::AnimData::Config{ .sprite_type = new_item.sprite_type, .enabled = false } );
+  if ( new_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( entt, 100.f ); }
+  else { reg().remove<Cmp::Inventory::WearLevel>( entt ); }
+
+  if ( not sfx.empty() ) { m_sound_bank.get_effect( sfx ).play(); }
 }
 
 void ItemSystem::create_explosive( Cmp::Position pos, const Sys::ItemKey &item, float zorder )

@@ -366,7 +366,8 @@ void apply_action_from_world_item( entt::registry &reg, entt::entity world_item_
                               std::to_string( static_cast<uint32_t>( world_item_entt ) ) + ". Entity is " +
                               std::string( reg.valid( world_item_entt ) ? "valid" : "invalid" ) );
   }
-  Utils::Player::get_stats( reg ).apply( plant_item->at<ActionT>().action );
+  auto action = plant_item->at<ActionT>().action;
+  Utils::Player::get_stats( reg ).apply( action );
 }
 
 // Explicit instantiations for every Cmp::BaseAction subclass (see src/Components/Stats) - keeps the
@@ -394,8 +395,8 @@ void apply_action_from_inventory_item( entt::registry &reg )
   {
     auto &player_stats = Utils::Player::get_stats( reg );
     auto action = inventory_cmp.m_item.at<ActionT>().action;
-    player_stats.apply( action );
     if ( action.health() < 0 ) reg.emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg ) );
+    player_stats.apply( action );
   }
 }
 
@@ -415,7 +416,8 @@ template <typename ActionT>
 void apply_action_from_item_store( entt::registry &reg, const Sys::ItemKey &item_type )
 {
   const auto &item = Sys::ItemStore::instance().get( item_type );
-  Utils::Player::get_stats( reg ).apply( item.at<ActionT>().action );
+  auto action = item.at<ActionT>().action;
+  Utils::Player::get_stats( reg ).apply( action );
 }
 
 // Explicit instantiations for every Cmp::BaseAction subclass (see src/Components/Stats) - keeps the

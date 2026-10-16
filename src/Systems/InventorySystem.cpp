@@ -33,6 +33,7 @@
 #include <SFML/Audio/Music.hpp>
 #include <SFML/Audio/SoundChannel.hpp>
 #include <Systems/InventorySystem.hpp>
+#include <Systems/ItemSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
@@ -190,17 +191,6 @@ void InventorySystem::swap_inventory()
   }
   m_swap_item_cooldown_timer.restart();
   SPDLOG_DEBUG( "inventory_view: {} ", inventory_view.size() );
-}
-
-void InventorySystem::try_consume_item()
-{
-  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-  if ( ( inventory_type.contains( ".forage" ) and Utils::Player::get_inventory_wear_level( reg() ) > 0 ) or
-       inventory_type.contains( ".rottenfood" ) or inventory_type.contains( "wine" ) )
-  {
-    auto player_entt = Utils::Player::get_entity( reg() );
-    if ( not reg().any_of<Cmp::Player::ConsumeTimer>( player_entt ) ) { reg().emplace_or_replace<Cmp::Player::ConsumeTimer>( player_entt ); }
-  }
 }
 
 void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity inventory_slot_entt )
@@ -413,23 +403,40 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
   if ( inventory_entity != entt::null ) { m_sound_bank.get_effect( "equip_inventory" ).play(); }
 }
 
+void InventorySystem::try_consume_item()
+{
+  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+  if ( inventory_type == "" ) return;
+
+  auto item_type = Sys::ItemStore::instance().get( inventory_type );
+  if ( item_type.consumable_type() == Cmp::WorldItem::Consumable::NONE ) return;
+
+  auto player_entt = Utils::Player::get_entity( reg() );
+  if ( not reg().any_of<Cmp::Player::ConsumeTimer>( player_entt ) ) { reg().emplace_or_replace<Cmp::Player::ConsumeTimer>( player_entt ); }
+}
+
 void InventorySystem::consume_inventory( sf::Time dt )
 {
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+  if ( inventory_type == "" ) return;
+
+  auto item_type = Sys::ItemStore::instance().get( inventory_type );
+  if ( item_type.consumable_type() == Cmp::WorldItem::Consumable::NONE ) return;
 
   auto *consume_timer = Utils::Player::is_player_eating( reg() );
   if ( not consume_timer ) return;
 
+  const auto &consumable_type = item_type.consumable_type();
   if ( *consume_timer < consume_timer->timeout() )
   {
     *consume_timer += dt;
 
     // stll consuming
-    if ( inventory_type.contains( "wine" ) )
+    if ( consumable_type == Cmp::WorldItem::Consumable::DRINKABLE )
     {
       if ( m_sound_bank.get_effect( "drinking" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "drinking" ).play(); }
     }
-    else
+    else if ( consumable_type == Cmp::WorldItem::Consumable::EDIBLE )
     {
       if ( m_sound_bank.get_effect( "eating" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "eating" ).play(); }
 
@@ -468,7 +475,7 @@ void InventorySystem::consume_inventory( sf::Time dt )
   {
     // all done
     m_sound_bank.get_effect( "eating" ).stop();
-    if ( inventory_type.contains( "wine" ) )
+    if ( consumable_type == Cmp::WorldItem::Consumable::DRINKABLE )
     {
       m_sound_bank.get_effect( "drinking" ).stop();
       if ( m_sound_bank.get_effect( "drinking_end" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "drinking_end" ).play(); }

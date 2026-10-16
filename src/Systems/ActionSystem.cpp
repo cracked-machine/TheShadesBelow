@@ -73,6 +73,8 @@
 
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/System/Time.hpp>
+#include <entt/entity/entity.hpp>
+#include <entt/entity/fwd.hpp>
 #include <numbers>
 #include <spdlog/spdlog.h>
 #include <unordered_map>
@@ -334,11 +336,11 @@ void ActionSystem::player_plant_interact()
       get_systems_event_queue().trigger(
           Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), static_cast<float>( plant_item->get_axe_damage() ) ) );
 
-      auto inventory_wear_view = reg().view<Cmp::PlayerInventorySlot>();
-      if ( inventory_wear_view->empty() )
+      auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+      if ( inventory_type == "" )
       {
 
-        // no drop from foraging this plant
+        // no drop from foraging redcampion plant
         if ( not plant_item->item_type.contains( "redcampion" ) )
         {
           auto plantleaves_particle_uuid = Cmp::UUID::generate();
@@ -348,11 +350,29 @@ void ActionSystem::player_plant_interact()
           Utils::Player::apply_action_from_inventory_item<Cmp::SpawnAction>( reg() );
           m_sound_bank.get_effect( "chopping_final" ).play();
         }
+        if ( plant_item->item_type == "item.plant.hawthorn" )
+        {
+          // 50% chance of a lightning strike. A working lightning rod on screen takes the strike, otherwise the player is struck.
+          Cmp::RandomInt lightning_chance( 0, 1 );
+          if ( lightning_chance.gen() == 0 )
+          {
+            entt::entity lightning_target_entt = Utils::Player::get_entity( reg() );
+            for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>().each() )
+            {
+              if ( worlditem_cmp.item_type != "item.lightningrod" ) continue;
+              if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), worlditem_pos_cmp ) ) continue;
+              auto *wearlevel = reg().try_get<Cmp::Inventory::WearLevel>( worlditem_entt );
+              if ( not wearlevel or wearlevel->m_level <= 0 ) continue;
+              lightning_target_entt = worlditem_entt;
+              break;
+            }
+            get_systems_event_queue().trigger( Events::LightningEvent( lightning_target_entt ) );
+          }
+        }
       }
       else
       {
         if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) { return; }
-        auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
 
         // Prevent digging/chopping a plant on fire
         auto *burning_accum = reg().try_get<Cmp::Plant::BurningTimer>( plant_entt );
@@ -389,7 +409,7 @@ void ActionSystem::player_plant_interact()
 
           // 50% chance that chopping down an eldertree spawn/relocate the eldermother
           Cmp::RandomInt elderspawn( 0, 1 );
-          if ( plant_item and plant_item->item_type.contains( "elder" ) and elderspawn.gen() == 1 )
+          if ( ( plant_item != nullptr ) and plant_item->item_type == "item.plant.elder" and elderspawn.gen() == 1 )
           {
             if ( reg().view<Cmp::Npc::ElderMother>().empty() )
               Factory::Npc::create_npc( reg(), plant_entt, "npc.eldermother" );

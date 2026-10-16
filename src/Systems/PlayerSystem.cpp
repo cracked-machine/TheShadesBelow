@@ -728,6 +728,7 @@ void PlayerSystem::apply_npc_modifiers( sf::Time dt )
 
     if ( not Utils::is_visible_in_view( half_view.getBounds(), npc_pos_cmp ) ) continue;
     if ( proximity_timer.asSeconds() < proximity_action.interval() ) continue;
+    if ( proximity_action.health() < 0 ) reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     Utils::Player::get_stats( reg() ).apply( proximity_action );
     proximity_timer = sf::Time::Zero;
   }
@@ -742,6 +743,7 @@ void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
     if ( carry_action.interval() == 0.f ) continue;
     carry_timer += dt;
     if ( carry_timer.asSeconds() < carry_action.interval() ) continue;
+    if ( carry_action.health() < 0 ) reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     Utils::Player::get_stats( reg() ).apply( carry_action );
     carry_timer = sf::Time::Zero;
   }

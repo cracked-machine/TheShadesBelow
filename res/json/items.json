@@ -5,6 +5,7 @@
     "wear_location": "Inventory",
     "sacrifice_output": "",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -22,6 +23,7 @@
     "wear_location": "Inventory",
     "sacrifice_output": "",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -39,6 +41,7 @@
     "wear_location": "Inventory",
     "sacrifice_output": "",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -56,6 +59,7 @@
     "wear_location": "Both",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -73,6 +77,7 @@
     "wear_location": "Inventory",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -90,6 +95,7 @@
     "wear_location": "Inventory",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -104,9 +110,28 @@
   "item.lightningrod": {
     "sprite": "sprite.item.lightningrod",
     "expiry": 0,
+    "wear_location": "Both",
+    "sacrifice_output": "",
+    "is_sacrificial": false,
+    "consumable": "none",
+    "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
+    "actions": [
+      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+    ]
+  },
+  "item.lightningrod.broken": {
+    "sprite": "sprite.item.lightningrod.broken",
+    "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -124,6 +149,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "drinkable",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -141,6 +167,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "drinkable",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -158,11 +185,12 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "drinkable",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "consume_action":     { "health": 20, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": -20, "infamy": 0, "luck": 0, "toxidrome": { "type": "all", "toxicity": -20 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -175,6 +203,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -192,6 +221,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -209,6 +239,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -226,6 +257,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -243,6 +275,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": -25, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -260,6 +293,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -277,6 +311,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "bradycardia", "toxicity": 10 }, "tick": 2 }},
@@ -294,14 +329,15 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
-    "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 0, "bow": 0 },
+    "consumable": "none",
+    "weapon_damage": { "pickaxe": 0, "axe": 25, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "proximity_action":   { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
@@ -311,6 +347,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
@@ -328,6 +365,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
@@ -345,6 +383,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -362,6 +401,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
@@ -379,6 +419,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
@@ -396,6 +437,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
@@ -413,6 +455,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1 }, "tick": 1 }},
@@ -430,6 +473,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 1}, "tick": 1 }},
@@ -447,6 +491,7 @@
     "wear_location": "Both",
     "sacrifice_output": "item.rowanwine",
     "is_sacrificial": true,
+    "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -464,6 +509,7 @@
     "wear_location": "Both",
     "sacrifice_output": "item.elderwine",
     "is_sacrificial": true,
+    "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -481,6 +527,7 @@
     "wear_location": "Both",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -496,13 +543,14 @@
     "sprite": "sprite.plant.hawthorn.forage",
     "expiry": 30,
     "wear_location": "Both",
-    "sacrifice_output": "item.hawthornwine",
+    "sacrifice_output": "item.hawthorntea",
     "is_sacrificial": true,
+    "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
-      { "consume_action":     { "health": 0, "fear": -1, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "consume_action":     { "health": 0, "fear": -1, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "all", "toxicity": -1 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": -1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -515,6 +563,7 @@
     "wear_location": "Both",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -532,6 +581,7 @@
     "wear_location": "Both",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -549,6 +599,7 @@
     "wear_location": "Both",
     "sacrifice_output": "",
     "is_sacrificial": true,
+    "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -566,6 +617,7 @@
     "wear_location": "Both",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -583,6 +635,7 @@
     "wear_location": "Both",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -600,11 +653,12 @@
     "wear_location": "Both",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "consume_action":     { "health": -1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -617,6 +671,7 @@
     "wear_location": "Both",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -635,6 +690,7 @@
     "wear_location": "None",
     "sacrifice_output": "item.dowsingrod",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -652,6 +708,7 @@
     "wear_location": "None",
     "sacrifice_output": "item.elderflute",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -669,6 +726,7 @@
     "wear_location": "None",
     "sacrifice_output": "item.bow",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -686,13 +744,14 @@
     "wear_location": "None",
     "sacrifice_output": "item.lightningrod",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "carry_action":       { "health": -1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "hypoxia", "toxicity": 5 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
@@ -703,6 +762,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -720,6 +780,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -737,6 +798,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -754,6 +816,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -771,6 +834,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -788,6 +852,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -805,6 +870,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -822,6 +888,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -839,6 +906,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -850,29 +918,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.seeingstone": {
-    "sprite": "sprite.item.seeingstone",
-    "expiry": 0,
-    "wear_location": "None",
-    "sacrifice_output": "",
-    "is_sacrificial": false,
-    "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
-    "actions": [
-      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
-    ]
-  },
   "item.cursetablet": {
     "sprite": "sprite.item.cursetablet",
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -890,6 +942,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -907,6 +960,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -924,6 +978,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -941,6 +996,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -958,6 +1014,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -975,6 +1032,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -992,6 +1050,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1009,6 +1068,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1026,6 +1086,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1043,6 +1104,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1060,6 +1122,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": true,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1077,6 +1140,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1094,6 +1158,7 @@
     "wear_location": "None",
     "sacrifice_output": "",
     "is_sacrificial": false,
+    "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
