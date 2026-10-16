@@ -6,6 +6,7 @@
 #include <Components/Npc/Container.hpp>
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Npc/Wisp.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
 #include <Components/Random.hpp>
 #include <Components/Weapons/Arrow.hpp>
@@ -168,7 +169,7 @@ void ArrowSystem::check_npc_arrow_collision()
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position>().each() )
     {
       if ( not reg().any_of<Cmp::Weapons::Projectiles::InFlight>( arrow_entt ) ) continue;
-      if ( reg().any_of<Cmp::Npc::Ghost>( npc_entt ) ) continue;
+      if ( reg().any_of<Cmp::Npc::Ghost, Cmp::Npc::Wisp>( npc_entt ) ) continue;
       if ( not npc_pos_cmp.findIntersection( arrow_pos_cmp ) ) continue;
       get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt ) );
       cached_npc_pos_cmp = npc_pos_cmp;
