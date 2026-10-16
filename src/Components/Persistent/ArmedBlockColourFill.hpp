@@ -41,7 +41,7 @@ public:
     }
   }
 
-  //! @brief Deserialise this colour from json (res/json/persistent_components.json).
+  //! @brief Deserialise this colour from json (res/json/persist.json).
   //! @param json_data json object expected to contain a "value" object with r/g/b/a keys
   void deserialize( const nlohmann::json &json_data )
   {
@@ -54,7 +54,7 @@ public:
     }
   }
 
-  //! @brief Serialise this colour to json (res/json/persistent_components.json).
+  //! @brief Serialise this colour to json (res/json/persist.json).
   //! @return nlohmann::json json object containing the type and r/g/b/a value
   [[nodiscard]] virtual nlohmann::json serialize() const
   {

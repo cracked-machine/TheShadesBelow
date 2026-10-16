@@ -67,12 +67,12 @@ public:
   //! @return std::string* pointer to the format string
   std::string *get_format_ptr() { return &format; };
 
-  //! @brief serialise from peristent component object to json (res/json/persistent_components.json)
+  //! @brief serialise from peristent component object to json (res/json/persist.json)
   //! Declarations only - defined in .cpp
   //! @return nlohmann::json
   virtual nlohmann::json serialize() const override;
 
-  //! @brief deserialise from json (res/json/persistent_components.json) to peristent component object
+  //! @brief deserialise from json (res/json/persist.json) to peristent component object
   //! Declarations only - defined in .cpp
   //! @param json_data
   virtual void deserialize( const nlohmann::json &json_data ) override;

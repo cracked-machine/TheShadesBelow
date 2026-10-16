@@ -1,7 +1,7 @@
 {
   "sprites": "res/json/sprite_metadata.json",
   "items": "res/json/inventory_items.json",
-  "persistent": "res/json/persistent_components.json",
+  "persistent": "res/json/persist.json",
   "ui": [
     "res/ui/main.json",
     "res/ui/debug.json",

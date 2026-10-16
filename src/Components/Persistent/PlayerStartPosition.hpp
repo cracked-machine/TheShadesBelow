@@ -24,11 +24,11 @@ public:
   //! @return std::string& Reference to a static formatted string.
   std::string &get_value();
 
-  //! @brief Deserialise this setting from JSON (res/json/persistent_components.json).
+  //! @brief Deserialise this setting from JSON (res/json/persist.json).
   //! @param json_data The JSON object to read from.
   void deserialize( const nlohmann::json &json_data );
 
-  //! @brief Serialise this setting to JSON (res/json/persistent_components.json).
+  //! @brief Serialise this setting to JSON (res/json/persist.json).
   //! @return nlohmann::json The serialised representation.
   nlohmann::json serialize() const;
 

@@ -87,9 +87,9 @@
     },
     {
       "fileMatch": [
-        "**/persistent_components.json"
+        "**/persist.json"
       ],
-      "url": "./res/json/persistent_components_schema.json"
+      "url": "./res/json/persist_schema.json"
     },
     {
       "fileMatch": [

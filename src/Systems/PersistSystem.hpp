@@ -87,7 +87,7 @@ public:
 
 private:
   //! @brief Path to the JSON file used to load and save persistent component state.
-  static constexpr const char *kPersistFilePath = "res/json/persistent_components.json";
+  static constexpr const char *kPersistFilePath = "res/json/persist.json";
 
   //! @brief Reads and parses kPersistFilePath, logging and returning std::nullopt on failure.
   static std::optional<nlohmann::json> load_json_file( const std::string &path );

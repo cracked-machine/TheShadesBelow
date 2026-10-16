@@ -37,7 +37,7 @@ public:
     return str;
   };
 
-  //! @brief Deserialize the resolution from json (res/json/persistent_components.json), falling back
+  //! @brief Deserialize the resolution from json (res/json/persist.json), falling back
   //! to a low default resolution if the stored value is unreasonably small.
   //! @param json_data the json object to read the "value" field from
   void deserialize( const nlohmann::json &json_data )
@@ -62,7 +62,7 @@ public:
     }
   }
 
-  //! @brief Serialize the resolution to json (res/json/persistent_components.json).
+  //! @brief Serialize the resolution to json (res/json/persist.json).
   //! @return nlohmann::json object with "type" set to "sf::Vector2u" and "value" holding x/y
   virtual nlohmann::json serialize() const
   {
