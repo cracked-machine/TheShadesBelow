@@ -41,6 +41,38 @@
     "detail": "Armed Detonation Delay Increment",
     "format": "%.3f"
   },
+  "AxeGraveDigWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Axe wear: digging grave",
+    "format": "%.1f"
+  },
+  "AxeObstacleDigWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Axe wear: digging obstacle",
+    "format": "%.1f"
+  },
+  "AxePotSmashWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Axe wear: smashing pot",
+    "format": "%.1f"
+  },
+  "AxeSkeletonKillWear": {
+    "type": "float",
+    "value": 3.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Axe wear: killing skeleton",
+    "format": "%.1f"
+  },
   "BlastRadius": {
     "type": "int",
     "value": 2,
@@ -65,6 +97,14 @@
     "detail": "Bomb Damage",
     "format": "%d"
   },
+  "BowReleaseWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Bow wear: per arrow released",
+    "format": "%.1f"
+  },
   "CameraSmoothSpeed": {
     "type": "float",
     "value": 8.0,
@@ -79,38 +119,6 @@
     "min_value": 0,
     "max_value": 10,
     "detail": "Corruption Damage",
-    "format": "%d"
-  },
-  "EmberDamage": {
-    "type": "int",
-    "value": 5,
-    "min_value": 0,
-    "max_value": 100,
-    "detail": "Ember Damage",
-    "format": "%d"
-  },
-  "LightningRodDebrisDamage": {
-    "type": "int",
-    "value": 5,
-    "min_value": 0,
-    "max_value": 100,
-    "detail": "Lightning Rod Debris Damage",
-    "format": "%d"
-  },
-  "LavaFireballDamage": {
-    "type": "int",
-    "value": 10,
-    "min_value": 0,
-    "max_value": 100,
-    "detail": "Lava Fireball Damage",
-    "format": "%d"
-  },
-  "LightningDamage": {
-    "type": "int",
-    "value": 25,
-    "min_value": 0,
-    "max_value": 100,
-    "detail": "Lightning Damage",
     "format": "%d"
   },
   "CryptNpcSpawnCount": {
@@ -160,6 +168,14 @@
     "detail": "Effects Volume",
     "format": "%.1f"
   },
+  "EmberDamage": {
+    "type": "int",
+    "value": 5,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Ember Damage",
+    "format": "%d"
+  },
   "ExitKeyRequirement": {
     "type": "int",
     "value": 3,
@@ -184,6 +200,14 @@
     "detail": "Grave Number Multiplier",
     "format": "%d"
   },
+  "GraveyardProcGenBirthThreshold": {
+    "type": "int",
+    "value": 2,
+    "min_value": 0,
+    "max_value": 10,
+    "detail": "GraveyardProcGenBirthThreshold",
+    "format": "%d"
+  },
   "GraveyardProcGenInitChance": {
     "type": "float",
     "value": 0.5,
@@ -191,21 +215,13 @@
     "max_value": 1.0,
     "detail": "GraveyardProcGenInitChance",
     "format": "%.1f"
-  },  
+  },
   "GraveyardProcGenMaxIterations": {
     "type": "int",
     "value": 5,
     "min_value": 1,
     "max_value": 100,
     "detail": "GraveyardProcGenMaxIterations",
-    "format": "%d"
-  },
-  "GraveyardProcGenBirthThreshold": {
-    "type": "int",
-    "value": 2,
-    "min_value": 0,
-    "max_value": 10,
-    "detail": "GraveyardProcGenBirthThreshold",
     "format": "%d"
   },
   "GraveyardProcGenSurvivalThreshold": {
@@ -230,6 +246,30 @@
     "min_value": 1,
     "max_value": 50,
     "detail": "Health Bonus",
+    "format": "%d"
+  },
+  "LavaFireballDamage": {
+    "type": "int",
+    "value": 10,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Lava Fireball Damage",
+    "format": "%d"
+  },
+  "LightningDamage": {
+    "type": "int",
+    "value": 25,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Lightning Damage",
+    "format": "%d"
+  },
+  "LightningRodDebrisDamage": {
+    "type": "int",
+    "value": 5,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Lightning Rod Debris Damage",
     "format": "%d"
   },
   "MinNumAltars": {
@@ -266,7 +306,7 @@
   },
   "MusicVolume": {
     "type": "float",
-    "value": 0.0,
+    "value": 100.0,
     "min_value": 0.0,
     "max_value": 100.0,
     "detail": "Music Volume",
@@ -281,89 +321,6 @@
     "format": "%.1f pixels"
     },
   
-  "NpcWatchmanGunFireRate": {
-    "type": "float",
-    "value": 2.0,
-    "min_value": 1.0,
-    "max_value": 200.0,
-    "detail": "NPC Watchman Gun Fire Rate",
-    "format": "%.1f"
-  },
-  "NpcWatchmanGunReloadRate": {
-    "type": "float",
-    "value": 1.0,
-    "min_value": 0.1,
-    "max_value": 200.0,
-    "detail": "NPC Watchman Gun Reload Rate (fire to next cock, sec)",
-    "format": "%.1f"
-  },
-  "NpcWatchmanSpawnMax": {
-    "type": "int",
-    "value": 25,
-    "min_value": 1,
-    "max_value": 200,
-    "detail": "NPC Watchman Spawn Max",
-    "format": "%d"
-  },
-    "NpcWatchmanSpawnCooldown": {
-    "type": "float",
-    "value": 60.0,
-    "min_value": 1.0,
-    "max_value": 900.0,
-    "detail": "NPC Watchman Spawn Cooldown (sec)",
-    "format": "%.1f"
-  },
-
-    "NpcWatchmanSpawnInfamy": {
-    "type": "int",
-    "value": 50,
-    "min_value": 1,
-    "max_value": 100,
-    "detail": "NPC Watchman Spawn Infamy",
-    "format": "%d"
-  },
-
-  "NpcWatchmanConeHalfAngle": {
-    "type": "float",
-    "value": 0.4,
-    "min_value": 0.05,
-    "max_value": 1.5,
-    "detail": "NPC Watchman Cone Half Angle (radians)",
-    "format": "%.2f"
-  },
-  "NpcWatchmanConeLength": {
-    "type": "float",
-    "value": 75.0,
-    "min_value": 32.0,
-    "max_value": 2000.0,
-    "detail": "NPC Watchman Cone Length (px)",
-    "format": "%.1f"
-  },
-  "NpcWatchmanSweepSpeed": {
-    "type": "float",
-    "value": 1.2,
-    "min_value": 0.0,
-    "max_value": 10.0,
-    "detail": "NPC Watchman Cone Sweep Speed (rad/s)",
-    "format": "%.2f"
-  },
-  "NpcWatchmanSweepAmplitude": {
-    "type": "float",
-    "value": 0.6,
-    "min_value": 0.0,
-    "max_value": 3.14,
-    "detail": "NPC Watchman Cone Sweep Amplitude (rad)",
-    "format": "%.2f"
-  },
-  "NpcWatchmanIdleDirectionChangeInterval": {
-    "type": "float",
-    "value": 10.0,
-    "min_value": 1.0,
-    "max_value": 120.0,
-    "detail": "NPC Watchman Idle Direction Change Interval (sec)",
-    "format": "%.1f"
-  },
-
   "NpcPushBack": {
     "type": "float",
     "value": 16.0,
@@ -371,7 +328,7 @@
     "max_value": 64.0,
     "detail": "NPC Push Back Distance",
     "format": "%.1f pixels"
-  },  
+  },
   "NpcShockwaveFreq": {
     "type":"int",
     "value": 5000,
@@ -403,6 +360,113 @@
     "max_value": 1000,
     "detail": "NPC Shockwave Speed",
     "format": "%d"
+  },
+  "NpcWatchmanConeHalfAngle": {
+    "type": "float",
+    "value": 0.4,
+    "min_value": 0.05,
+    "max_value": 1.5,
+    "detail": "NPC Watchman Cone Half Angle (radians)",
+    "format": "%.2f"
+  },
+  "NpcWatchmanConeLength": {
+    "type": "float",
+    "value": 75.0,
+    "min_value": 32.0,
+    "max_value": 2000.0,
+    "detail": "NPC Watchman Cone Length (px)",
+    "format": "%.1f"
+  },
+  "NpcWatchmanGunFireRate": {
+    "type": "float",
+    "value": 2.0,
+    "min_value": 1.0,
+    "max_value": 200.0,
+    "detail": "NPC Watchman Gun Fire Rate",
+    "format": "%.1f"
+  },
+  "NpcWatchmanGunReloadRate": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.1,
+    "max_value": 200.0,
+    "detail": "NPC Watchman Gun Reload Rate (fire to next cock, sec)",
+    "format": "%.1f"
+  },
+  "NpcWatchmanIdleDirectionChangeInterval": {
+    "type": "float",
+    "value": 10.0,
+    "min_value": 1.0,
+    "max_value": 120.0,
+    "detail": "NPC Watchman Idle Direction Change Interval (sec)",
+    "format": "%.1f"
+  },
+
+  "NpcWatchmanSpawnMax": {
+    "type": "int",
+    "value": 25,
+    "min_value": 1,
+    "max_value": 200,
+    "detail": "NPC Watchman Spawn Max",
+    "format": "%d"
+  },
+    "NpcWatchmanSpawnCooldown": {
+    "type": "float",
+    "value": 60.0,
+    "min_value": 1.0,
+    "max_value": 900.0,
+    "detail": "NPC Watchman Spawn Cooldown (sec)",
+    "format": "%.1f"
+  },
+
+    "NpcWatchmanSpawnInfamy": {
+    "type": "int",
+    "value": 50,
+    "min_value": 1,
+    "max_value": 100,
+    "detail": "NPC Watchman Spawn Infamy",
+    "format": "%d"
+  },
+
+  "NpcWatchmanSweepAmplitude": {
+    "type": "float",
+    "value": 0.6,
+    "min_value": 0.0,
+    "max_value": 3.14,
+    "detail": "NPC Watchman Cone Sweep Amplitude (rad)",
+    "format": "%.2f"
+  },
+  "NpcWatchmanSweepSpeed": {
+    "type": "float",
+    "value": 1.2,
+    "min_value": 0.0,
+    "max_value": 10.0,
+    "detail": "NPC Watchman Cone Sweep Speed (rad/s)",
+    "format": "%.2f"
+  },
+  "PickaxeGraveDigWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Pickaxe wear: digging grave",
+    "format": "%.1f"
+  },
+  "PickaxeObstacleDigWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Pickaxe wear: digging obstacle",
+    "format": "%.1f"
+  },
+  "PickaxePotSmashWear": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Pickaxe wear: smashing pot",
+    "format": "%.1f"
   },
   "PlayerAnimStrideLength": {
     "type": "float",
@@ -493,6 +557,14 @@
     "detail": "RuinMaxSpiders",
     "format": "%d"
   },
+  "RuinProcGenBirthThreshold": {
+    "type": "int",
+    "value": 2,
+    "min_value": 0,
+    "max_value": 10,
+    "detail": "RuinProcGenBirthThreshold",
+    "format": "%d"
+  },
   "RuinProcGenInitChance": {
     "type": "float",
     "value": 1.0,
@@ -500,7 +572,7 @@
     "max_value": 1.0,
     "detail": "RuinProcGenInitChance",
     "format": "%.1f"
-  },  
+  },
   "RuinProcGenMaxIterations": {
     "type": "int",
     "value": 120,
@@ -517,28 +589,12 @@
     "detail": "RuinProcGenSurvivalThreshold",
     "format": "%d"
   },
-  "RuinProcGenBirthThreshold": {
-    "type": "int",
-    "value": 2,
-    "min_value": 0,
-    "max_value": 10,
-    "detail": "RuinProcGenBirthThreshold",
-    "format": "%d"
-  },
   "ShopMaxItems": {
     "type": "int",
     "value": 3,
     "min_value": 3,
     "max_value": 3,
     "detail": "Shop inventory maximum size",
-    "format": "%d"
-  },
-  "ShopMinPrice": {
-    "type": "int",
-    "value": 5,
-    "min_value": 5,
-    "max_value": 5,
-    "detail": "Shop inventory min price",
     "format": "%d"
   },
   "ShopMaxPrice": {
@@ -549,20 +605,20 @@
     "detail": "Shop inventory max price",
     "format": "%d"
   },
-  "AxeObstacleDigWear": {
-    "type": "float",
-    "value": 1.0,
-    "min_value": 0.0,
-    "max_value": 5.0,
-    "detail": "Axe wear: digging obstacle",
-    "format": "%.1f"
+  "ShopMinPrice": {
+    "type": "int",
+    "value": 5,
+    "min_value": 5,
+    "max_value": 5,
+    "detail": "Shop inventory min price",
+    "format": "%d"
   },
-  "PickaxeObstacleDigWear": {
+  "ShovelGraveDigWear": {
     "type": "float",
     "value": 1.0,
     "min_value": 0.0,
     "max_value": 5.0,
-    "detail": "Pickaxe wear: digging obstacle",
+    "detail": "Shovel wear: digging grave",
     "format": "%.1f"
   },
   "ShovelObstacleDigWear": {
@@ -573,68 +629,12 @@
     "detail": "Shovel wear: digging obstacle",
     "format": "%.1f"
   },
-  "AxePotSmashWear": {
-    "type": "float",
-    "value": 1.0,
-    "min_value": 0.0,
-    "max_value": 5.0,
-    "detail": "Axe wear: smashing pot",
-    "format": "%.1f"
-  },
-  "PickaxePotSmashWear": {
-    "type": "float",
-    "value": 1.0,
-    "min_value": 0.0,
-    "max_value": 5.0,
-    "detail": "Pickaxe wear: smashing pot",
-    "format": "%.1f"
-  },
   "ShovelPotSmashWear": {
     "type": "float",
     "value": 1.0,
     "min_value": 0.0,
     "max_value": 5.0,
     "detail": "Shovel wear: smashing pot",
-    "format": "%.1f"
-  },
-  "AxeSkeletonKillWear": {
-    "type": "float",
-    "value": 3.0,
-    "min_value": 0.0,
-    "max_value": 5.0,
-    "detail": "Axe wear: killing skeleton",
-    "format": "%.1f"
-  },
-  "AxeGraveDigWear": {
-    "type": "float",
-    "value": 1.0,
-    "min_value": 0.0,
-    "max_value": 5.0,
-    "detail": "Axe wear: digging grave",
-    "format": "%.1f"
-  },
-  "PickaxeGraveDigWear": {
-    "type": "float",
-    "value": 1.0,
-    "min_value": 0.0,
-    "max_value": 5.0,
-    "detail": "Pickaxe wear: digging grave",
-    "format": "%.1f"
-  },
-  "ShovelGraveDigWear": {
-    "type": "float",
-    "value": 1.0,
-    "min_value": 0.0,
-    "max_value": 5.0,
-    "detail": "Shovel wear: digging grave",
-    "format": "%.1f"
-  },
-  "BowReleaseWear": {
-    "type": "float",
-    "value": 1.0,
-    "min_value": 0.0,
-    "max_value": 5.0,
-    "detail": "Bow wear: per arrow released",
     "format": "%.1f"
   }
 }

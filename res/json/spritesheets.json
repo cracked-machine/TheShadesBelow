@@ -1,908 +1,5 @@
 {
   "sprites": {
-    "sprite.graveyard.exit.locked": {
-      "spritesheet": {
-        "displayname": "exit.locked",
-        "zorder": [
-          48,48,48,48,48,
-          48,48,48,48,48,
-          48,48,48,48,48,
-          48,48,48,48,48,
-          48,48,48,48,48,
-          -16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16
-        ],
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [80],
-        "collision_mask": [
-          false,false,false,false,false,
-          false,false,false,false,false,
-          false,false,false,false,false,
-          false,false,false,false,false,
-          true,true,true,true,true,
-          true,true,true,true,true,
-          false,false,false,false,false
-        ],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 5,
-          "y": 7
-        },
-        "door_position" :
-        {
-          "x": 2,
-          "y": 4
-        }
-      }
-    },
-    "sprite.graveyard.exit.unlocked": {
-      "spritesheet": {
-        "displayname": "exit.unlocked",
-        "zorder": [
-          48,48,48,48,48,
-          48,48,48,48,48,
-          48,48,48,48,48,
-          48,48,48,48,48,
-          48,48,-16,48,48,
-          -16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16
-        ],
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [85],
-        "collision_mask": [
-          false,false,false,false,false,
-          false,false,false,false,false,
-          false,false,false,false,false,
-          false,false,false,false,false,
-          true,true,true,true,true,
-          true,true,false,true,true,
-          false,false,false,false,false
-        ],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 5,
-          "y": 7
-        }
-      }
-    },
-    "sprite.graveyard.wall.int.main": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.wall.int.main",
-        "zorder": [0,0,0,0,0,0,0,0,0],
-        "texture_path": "res/textures/graveyard.png",
-        "sprite_indices": [40,41,42,43,44,45,46,47],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.graveyard.wall.int.cap": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.wall.int.cap",
-        "zorder": [0,0,0,0,0,0,0,0,0],
-        "texture_path": "res/textures/graveyard.png",
-        "sprite_indices": [30,31,32,33,34,35,36,37],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.graveyard.wall.ext": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.wall.ext",
-        "zorder": [10000],
-        "texture_path": "res/textures/graveyardwall.png",
-        "sprite_indices": [0,1,2,3,4,5,6,7],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.graveyard.bones": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.bones",
-        "zorder": [0, 0],
-        "texture_path": "res/textures/graveyard.png",
-        "sprite_indices": [13, 14],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.graveyard.pots": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.pots",
-        "zorder": [0, 0, 0],
-        "texture_path": "res/textures/graveyard.png",
-        "sprite_indices": [10,11,12],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.graveyard.loot.health": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.loot.health",
-        "zorder": [0],
-        "texture_path": "res/textures/graveyard.png",
-        "sprite_indices": [15],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.graveyard.loot.blast": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.loot.blast",
-        "zorder": [0],
-        "texture_path": "res/textures/graveyard.png",
-        "sprite_indices": [17],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.graveyard.loot.repair": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.loot.repair",
-        "zorder": [0],
-        "texture_path": "res/textures/graveyard.png",
-        "sprite_indices": [16],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.rowan.forage": {
-      "spritesheet": {
-        "displayname": "Rowan Berry",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [0],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.elder.forage": {
-      "spritesheet": {
-        "displayname": "Elder Berry",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [1],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.yew.forage": {
-      "spritesheet": {
-        "displayname": "Yew Berry",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [2],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.hawthorn.forage": {
-      "spritesheet": {
-        "displayname": "Hawthorn Flower",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [3],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.foxglove.forage": {
-      "spritesheet": {
-        "displayname": "Foxglove Flower",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [4],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.nightshade.forage": {
-      "spritesheet": {
-        "displayname": "Nightshade Flower",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [5],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.hogweed.forage": {
-      "spritesheet": {
-        "displayname": "Hogweed Seeds",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [6],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.stjohnswort.forage": {
-      "spritesheet": {
-        "displayname": "StJohnsWort Flower",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [7],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.nettle.forage": {
-      "spritesheet": {
-        "displayname": "Nettle Leaves",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [8],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.burdock.forage": {
-      "spritesheet": {
-        "displayname": "Burdock thistle",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [9],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.henbane.forage": {
-      "spritesheet": {
-        "displayname": "Henbane Seed",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [11],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.rowan.drop": {
-      "spritesheet": {
-        "displayname": "Rowan Stick",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [24],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.elder.drop": {
-      "spritesheet": {
-        "displayname": "Elder Stick",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [25],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.yew.drop": {
-      "spritesheet": {
-        "displayname": "Yew Stick",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [26],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.hawthorn.drop": {
-      "spritesheet": {
-        "displayname": "Hawthorn Stick",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [27],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.stjohnswort.drop": {
-      "spritesheet": {
-        "displayname": "Blood Oil",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [19],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.nettle.drop": {
-      "spritesheet": {
-        "displayname": "Nettle Fiber",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [32],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.burdock.drop": {
-      "spritesheet": {
-        "displayname": "Burdock thistle",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [33],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.redcampion.drop": {
-      "spritesheet": {
-        "displayname": "AntiVenom",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [22],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.henbane.drop": {
-      "spritesheet": {
-        "displayname": "Henbane Stick",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [35],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.plant.witchesbroom": {
-      "spritesheet": {
-        "displayname": "Witches Broom",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [47],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-
-    "sprite.graveyard.hazard.sinkhole": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.hazard.sinkhole",
-        "zorder": [0],
-        "texture_path": "res/textures/graveyard.png",
-        "sprite_indices": [20],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.graveyard.hazard.corruption": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.hazard.corruption",
-        "zorder": [0],
-        "texture_path": "res/textures/graveyard.png",
-        "sprite_indices": [21],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.graveyard.hazard.wormhole": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.hazard.wormhole",
-        "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "texture_path": "res/textures/wormhole-Sheet.png",
-        "sprite_indices": [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33],
-        "framerate": 10,
-        "indices_per_sequence": 12,
-        "grid_size": {
-          "x": 3,
-          "y": 3
-        }
-      }
-    },
-    "sprite.graveyard.arrow": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.arrow",
-        "zorder": [0],
-        "texture_path": "res/textures/graveyard.png",
-        "sprite_indices": [22],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.graveyard.detonated": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.detonated",
-        "zorder": [0],
-        "texture_path": "res/textures/graveyardfloor.png",
-        "sprite_indices": [4],
-        "framerate": 0,
-        "indices_per_sequence": 1,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.graveyard.playerspawn": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.playerspawn",
-        "zorder": [0],
-        "texture_path": "res/textures/graveyard_runes.png",
-        "sprite_indices": [
-          0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,
-          28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,
-          56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,
-          84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,
-          112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,
-          140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,
-          168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,
-          196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223
-        ],
-        "framerate": 0,
-        "indices_per_sequence": 1,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.graveyard.altar.inactive": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.altar.inactive",
-        "zorder": [1,1,1,1],
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [0],
-        "collision_mask": [true, true, true, true],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 2,
-          "y": 2
-        }
-      }
-    },
-
-    "sprite.graveyard.altar.relic.anim": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.altar.relic.anim",
-        "zorder": [0, 0, 0, 0, 0],
-        "texture_path": "res/textures/fire_effect_and_bullet_16x16.png",
-        "sprite_indices": [387, 386, 385, 384, 383],
-        "indices_per_sequence": 5,
-        "framerate": 5,
-        "grid_size": {
-          "x": 1,
-          "y": 3
-        }
-      }
-    },
-    "sprite.graveyard.altar.key.anim": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.altar.key.anim",
-        "zorder": [0, 0, 0, 0, 0],
-        "texture_path": "res/textures/water_effect_and_bullet_16x16.png",
-        "sprite_indices": [387, 386, 385, 384, 383],
-        "indices_per_sequence": 5,
-        "framerate": 5,
-        "grid_size": {
-          "x": 1,
-          "y": 3
-        }
-      }
-    },
-    "sprite.graveyard.crypt.closed": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.crypt.closed",
-        "zorder": [
-          -16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16
-        ],
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [20],
-        "collision_mask": [
-          true, true, true, true, true,
-          true, true, true, true, true,
-          true, true, true, true, true,
-          true, false, false, false, true,
-          true, false, false, false, true,
-          false, false, false, false, false
-        ],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 5,
-          "y": 6
-        },
-        "door_position" :
-        {
-          "x": 2,
-          "y": 2
-        }
-      }
-    },
-    "sprite.graveyard.crypt.opened": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.crypt.opened",
-        "zorder": [
-          -16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16
-        ],
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [25],
-        "collision_mask": [
-          true, true, true, true, true,
-          true, true, true, true, true,
-          true, true, false, true, true,
-          true, false, false, false, true,
-          true, false, false, false, true,
-          false, false, false, false, false
-        ],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 5,
-          "y": 6
-        }
-      }
-    },
-    "sprite.graveyard.building.healingspring": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.building.healingspring",
-        "zorder": [
-          48, 48, 48, 48, 48,
-          -16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16
-        ],
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [160],
-        "collision_mask": [
-          false,false,false,false,false,
-          true, true, true, true, true, 
-          true, true, true, true, true,
-          true, true, false, true, true
-        ],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 5,
-          "y": 4
-        },
-        "door_position" :
-        {
-          "x": 2,
-          "y": 3
-        }
-      }
-    },
-    "sprite.graveyard.ruin": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.ruin",
-        "zorder": [
-          48,48,48,48,48,48,48,48,
-          48,48,48,48,48,48,48,48,
-          -16,-16,-16,-16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16,-16,-16,-16,
-          -16,-16,-16,-16,-16,-16,-16,-16
-        ],
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [200],
-        "collision_mask": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, false, true, true, true, true, true, false, true, false, false, true, true, true, false, false, false, false],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 8,
-          "y": 5
-        },
-        "door_position" :
-        {
-          "x": 5,
-          "y": 3
-        }
-      }
-    },
-    "sprite.graveyard.graves.small.closed": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.graves.small.closed",
-        "zorder": [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [260, 280, 300, 320, 340, 360, 380, 400],
-        "collision_mask": [
-          false, true, false, true, 
-          false, true, false, true, 
-          false, true, false, true, 
-          false, true, false, true
-        ],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 2
-        }
-      }
-    }, 
-    "sprite.graveyard.graves.small.opened": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.graves.small.opened",
-        "zorder": [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [261, 281, 301, 321, 341, 361, 381, 401],
-        "collision_mask": [
-          false, true, false, true, 
-          false, true, false, true, 
-          false, true, false, true, 
-          false, true, false, true
-        ],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 2
-        }
-      }
-    },    
-    "sprite.graveyard.graves.large.closed": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.graves.large.closed",
-        "zorder": [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [420, 440, 460, 480],
-        "collision_mask": [
-          false, false, true, true, 
-          false, false, true, true, 
-          false, false, true, true, 
-          false, false, true, true
-        ],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 2,
-          "y": 2
-        }
-      }
-    },
-    "sprite.graveyard.graves.large.opened": {
-      "spritesheet": {
-        "displayname": "sprite.graveyard.graves.large.opened",
-        "zorder": [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [422, 442, 462, 482],
-        "collision_mask": [
-          false, false, true, true, 
-          false, false, true, true, 
-          false, false, true, true, 
-          false, false, true, true
-        ],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 2,
-          "y": 2
-        }
-      }
-    },
-
-    "sprite.crypt.exit": {
-      "spritesheet": {
-        "displayname": "crypt.exit",
-        "zorder": [0],
-        "texture_path": "res/textures/crypt.png",
-        "sprite_indices": [1],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.crypt.wall.int.main": {
-      "spritesheet": {
-        "displayname": "crypt.wall.int.main",
-        "zorder": [-5,5],
-        "texture_path": "res/textures/crypt.png",
-        "sprite_indices": [18,19],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.crypt.wall.int.cap": {
-      "spritesheet": {
-        "displayname": "crypt.wall.int.cap",
-        "zorder": [-5,5],
-        "texture_path": "res/textures/crypt.png",
-        "sprite_indices": [8,9],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.crypt.wall.ext": {
-      "spritesheet": {
-        "displayname": "sprite.crypt.wall.ext",
-        "zorder": [
-          0, 0, 0, 
-          0, -10, 0, 
-          0, 0, 0, 
-          -10, 0, -10, 
-          0, 0, 0, 
-          0, 0, 0, 
-          0, 0, 0, 
-          -10, -10, 0, 
-          0
-        ],
-        "texture_path": "res/textures/cryptwall.png",
-        "sprite_indices": [
-          0, 1, 2, 
-          3, 4, 5, 
-          6, 7, 8, 
-          9, 10, 11, 
-          12, 13, 14, 
-          15, 16, 17, 
-          18, 19, 20, 
-          21, 22, 23, 
-          24
-        ],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-
-    "sprite.crypt.altar.inactive": {
-      "spritesheet": {
-        "displayname": "sprite.crypt.altar.inactive",
-        "zorder": [0],
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [2],
-        "collision_mask": [false, true],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 2
-        }
-      }
-    },
     "sprite.crypt.altar.active": {
       "spritesheet": {
         "displayname": "sprite.crypt.altar.active",
@@ -918,31 +15,18 @@
         }
       }
     },
-    "sprite.crypt.lava": {
+    "sprite.crypt.altar.inactive": {
       "spritesheet": {
-        "displayname": "sprite.crypt.lava",
+        "displayname": "sprite.crypt.altar.inactive",
         "zorder": [0],
-        "texture_path": "res/textures/crypt.png",
-        "sprite_indices": [4],
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [2],
+        "collision_mask": [false, true],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
           "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.crypt.spikes": {
-      "spritesheet": {
-        "displayname": "sprite.crypt.spikes",
-        "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "texture_path": "res/textures/crypt.png",
-        "sprite_indices": [30, 31, 32, 33, 34, 35, 36, 37, 38, 39],
-        "indices_per_sequence": 10,
-        "framerate": 5,
-        "grid_size": {
-          "x": 1,
-          "y": 1
+          "y": 2
         }
       }
     },
@@ -960,12 +44,26 @@
         }
       }
     },
-    "sprite.crypt.switch": {
+    "sprite.crypt.exit": {
       "spritesheet": {
-        "displayname": "sprite.crypt.switch",
-        "zorder": [0, 0],
+        "displayname": "crypt.exit",
+        "zorder": [0],
         "texture_path": "res/textures/crypt.png",
-        "sprite_indices": [40, 41],
+        "sprite_indices": [1],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.crypt.lava": {
+      "spritesheet": {
+        "displayname": "sprite.crypt.lava",
+        "zorder": [0],
+        "texture_path": "res/textures/crypt.png",
+        "sprite_indices": [4],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1050,43 +148,26 @@
         }
       }
     },
-    "sprite.wisp.east": {
+    "sprite.crypt.spikes": {
       "spritesheet": {
-        "displayname": "sprite.wisp.east",
-        "zorder": [100000],
-        "texture_path": "res/textures/npcwisp_east.png",
-        "sprite_indices": [0,1,2,3],
-        "collision_mask": [true],
-        "indices_per_sequence": 4,
-        "framerate": 3,
+        "displayname": "sprite.crypt.spikes",
+        "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "texture_path": "res/textures/crypt.png",
+        "sprite_indices": [30, 31, 32, 33, 34, 35, 36, 37, 38, 39],
+        "indices_per_sequence": 10,
+        "framerate": 5,
         "grid_size": {
           "x": 1,
           "y": 1
         }
       }
     },
-    "sprite.wisp.west": {
+    "sprite.crypt.switch": {
       "spritesheet": {
-        "displayname": "sprite.wisp.west",
-        "zorder": [100000],
-        "texture_path": "res/textures/npcwisp_west.png",
-        "sprite_indices": [0,1,2,3],
-        "collision_mask": [true],
-        "indices_per_sequence": 4,
-        "framerate": 3,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.priest": {
-      "spritesheet": {
-        "displayname": "sprite.priest",
-        "zorder": [0],
-        "texture_path": "res/textures/npcpriest.png",
-        "sprite_indices": [0],
-        "collision_mask": [true],
+        "displayname": "sprite.crypt.switch",
+        "zorder": [0, 0],
+        "texture_path": "res/textures/crypt.png",
+        "sprite_indices": [40, 41],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1095,13 +176,118 @@
         }
       }
     },
-    "sprite.witch": {
+    "sprite.crypt.wall.ext": {
       "spritesheet": {
-        "displayname": "sprite.witch",
+        "displayname": "sprite.crypt.wall.ext",
+        "zorder": [
+          0, 0, 0, 
+          0, -10, 0, 
+          0, 0, 0, 
+          -10, 0, -10, 
+          0, 0, 0, 
+          0, 0, 0, 
+          0, 0, 0, 
+          -10, -10, 0, 
+          0
+        ],
+        "texture_path": "res/textures/cryptwall.png",
+        "sprite_indices": [
+          0, 1, 2, 
+          3, 4, 5, 
+          6, 7, 8, 
+          9, 10, 11, 
+          12, 13, 14, 
+          15, 16, 17, 
+          18, 19, 20, 
+          21, 22, 23, 
+          24
+        ],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+
+    "sprite.crypt.wall.int.cap": {
+      "spritesheet": {
+        "displayname": "crypt.wall.int.cap",
+        "zorder": [-5,5],
+        "texture_path": "res/textures/crypt.png",
+        "sprite_indices": [8,9],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.crypt.wall.int.main": {
+      "spritesheet": {
+        "displayname": "crypt.wall.int.main",
+        "zorder": [-5,5],
+        "texture_path": "res/textures/crypt.png",
+        "sprite_indices": [18,19],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.death.anim.banish": {
+      "spritesheet": {
+        "displayname": "sprite.death.anim.banish",
         "zorder": [0, 0, 0, 0],
-        "texture_path": "res/textures/npcwitch.png",
-        "sprite_indices": [0, 1, 2, 3],
-        "collision_mask": [true],
+        "texture_path": "res/textures/water_effect_and_bullet_16x16.png",
+        "sprite_indices": [101,102,103,104,105],
+        "indices_per_sequence": 5,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+
+    "sprite.death.anim.bloodsplat": {
+      "spritesheet": {
+        "displayname": "sprite.death.anim.bloodsplat",
+        "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "texture_path": "res/textures/blood_splash_3.png",
+        "sprite_indices": [0, 3, 6, 9, 36, 39, 42, 45, 72, 75, 78, 81, 108, 111, 114, 117],
+        "indices_per_sequence": 16,
+        "framerate": 10,
+        "grid_size": {
+          "x": 3,
+          "y": 3
+        }
+      }
+    },
+    "sprite.death.anim.explosion": {
+      "spritesheet": {
+        "displayname": "sprite.death.anim.explosion",
+        "zorder": [0, 0, 0, 0, 0, 0],
+        "texture_path": "res/textures/fire_effect_and_bullet_16x16.png",
+        "sprite_indices": [66, 67, 68, 69, 70, 71],
+        "indices_per_sequence": 6,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.death.anim.flames": {
+      "spritesheet": {
+        "displayname": "sprite.death.anim.flames",
+        "zorder": [0, 0, 0, 0],
+        "texture_path": "res/textures/fire_effect_and_bullet_16x16.png",
+        "sprite_indices": [10, 11, 12, 13],
         "indices_per_sequence": 4,
         "framerate": 10,
         "grid_size": {
@@ -1110,15 +296,15 @@
         }
       }
     },
-    "sprite.spider": {
+    "sprite.drknox": {
       "spritesheet": {
-        "displayname": "sprite.spider",
-        "zorder": [0, 0, 0, 0],
-        "texture_path": "res/textures/npcspider.png",
-        "sprite_indices": [0, 1, 2, 3],
+        "displayname": "sprite.drknox",
+        "zorder": [0],
+        "texture_path": "res/textures/npcdrknox.png",
+        "sprite_indices": [0],
         "collision_mask": [true],
-        "indices_per_sequence": 4,
-        "framerate": 3,
+        "indices_per_sequence": 1,
+        "framerate": 0,
         "grid_size": {
           "x": 1,
           "y": 1
@@ -1144,24 +330,9 @@
         }
       }
     },
-    "sprite.drknox": {
+    "sprite.ghost.walk.east": {
       "spritesheet": {
-        "displayname": "sprite.drknox",
-        "zorder": [0],
-        "texture_path": "res/textures/npcdrknox.png",
-        "sprite_indices": [0],
-        "collision_mask": [true],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.ghost.walk.south": {
-      "spritesheet": {
-        "displayname": "sprite.ghost.walk.south",
+        "displayname": "sprite.ghost.walk.east",
         "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         "texture_path": "res/textures/npcghost.png",
         "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -1189,9 +360,9 @@
         }
       }
     },
-    "sprite.ghost.walk.east": {
+    "sprite.ghost.walk.south": {
       "spritesheet": {
-        "displayname": "sprite.ghost.walk.east",
+        "displayname": "sprite.ghost.walk.south",
         "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         "texture_path": "res/textures/npcghost.png",
         "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -1219,217 +390,56 @@
         }
       }
     },
-    "sprite.skeleton.walk.south": {
+    "sprite.graveyard.altar.inactive": {
       "spritesheet": {
-        "displayname": "sprite.skeleton.walk.south",
-        "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "texture_path": "res/textures/npcskele.png",
-        "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        "collision_mask": [true],
-        "indices_per_sequence": 10,
-        "framerate": 10,
+        "displayname": "sprite.graveyard.altar.inactive",
+        "zorder": [1,1,1,1],
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [0],
+        "collision_mask": [true, true, true, true],
+        "indices_per_sequence": 1,
+        "framerate": 0,
         "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.skeleton.walk.north": {
-      "spritesheet": {
-        "displayname": "sprite.skeleton.walk.north",
-        "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "texture_path": "res/textures/npcskele.png",
-        "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        "collision_mask": [true],
-        "indices_per_sequence": 10,
-        "framerate": 10,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.skeleton.walk.east": {
-      "spritesheet": {
-        "displayname": "sprite.skeleton.walk.east",
-        "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "texture_path": "res/textures/npcskele.png",
-        "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        "collision_mask": [true],
-        "indices_per_sequence": 10,
-        "framerate": 10,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.skeleton.walk.west": {
-      "spritesheet": {
-        "displayname": "sprite.skeleton.walk.west",
-        "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "texture_path": "res/textures/npcskele.png",
-        "sprite_indices": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
-        "collision_mask": [true],
-        "indices_per_sequence": 10,
-        "framerate": 10,
-        "grid_size": {
-          "x": 1,
-          "y": 1
+          "x": 2,
+          "y": 2
         }
       }
     },
 
-    "sprite.player.footsteps": {
+    "sprite.graveyard.altar.key.anim": {
       "spritesheet": {
-        "displayname": "sprite.player.footsteps",
-        "zorder": [0, 0, 0, 0],
-        "texture_path": "res/textures/footsteps.png",
-        "sprite_indices": [0, 1, 2, 3],
-        "indices_per_sequence": 1,
-        "framerate": 0,
+        "displayname": "sprite.graveyard.altar.key.anim",
+        "zorder": [0, 0, 0, 0, 0],
+        "texture_path": "res/textures/water_effect_and_bullet_16x16.png",
+        "sprite_indices": [387, 386, 385, 384, 383],
+        "indices_per_sequence": 5,
+        "framerate": 5,
         "grid_size": {
           "x": 1,
-          "y": 1
+          "y": 3
         }
       }
     },
-    "sprite.nightwatchman.walk.south": {
+    "sprite.graveyard.altar.relic.anim": {
       "spritesheet": {
-        "displayname": "sprite.player.walk.south",
-        "zorder": [0, 0, 0],
-        "texture_path": "res/textures/npcwatchman.png",
-        "sprite_indices": [0, 1, 2],
-        "collision_mask": [true],
-        "indices_per_sequence": 3,
-        "framerate": 3,
+        "displayname": "sprite.graveyard.altar.relic.anim",
+        "zorder": [0, 0, 0, 0, 0],
+        "texture_path": "res/textures/fire_effect_and_bullet_16x16.png",
+        "sprite_indices": [387, 386, 385, 384, 383],
+        "indices_per_sequence": 5,
+        "framerate": 5,
         "grid_size": {
           "x": 1,
-          "y": 1
+          "y": 3
         }
       }
     },
-    "sprite.nightwatchman.walk.north": {
+    "sprite.graveyard.arrow": {
       "spritesheet": {
-        "displayname": "sprite.player.walk.north",
-        "zorder": [0, 0, 0],
-        "texture_path": "res/textures/npcwatchman.png",
-        "sprite_indices": [3, 4, 5],
-        "collision_mask": [true],
-        "indices_per_sequence": 3,
-        "framerate": 3,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.nightwatchman.walk.east": {
-      "spritesheet": {
-        "displayname": "sprite.player.walk.east",
-        "zorder": [0, 0, 0],
-        "texture_path": "res/textures/npcwatchman.png",
-        "sprite_indices": [6, 7, 8],
-        "collision_mask": [true],
-        "indices_per_sequence": 3,
-        "framerate": 3,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.nightwatchman.walk.west": {
-      "spritesheet": {
-        "displayname": "sprite.player.walk.west",
-        "zorder": [0, 0, 0],
-        "texture_path": "res/textures/npcwatchman.png",
-        "sprite_indices": [9, 10, 11],
-        "collision_mask": [true],
-        "indices_per_sequence": 3,
-        "framerate": 3,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.player.walk.south": {
-      "spritesheet": {
-        "displayname": "sprite.player.walk.south",
-        "zorder": [0, 0, 0],
-        "texture_path": "res/textures/player2.png",
-        "sprite_indices": [0, 1, 2],
-        "indices_per_sequence": 3,
-        "framerate": 10,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.player.walk.north": {
-      "spritesheet": {
-        "displayname": "sprite.player.walk.north",
-        "zorder": [0, 0, 0],
-        "texture_path": "res/textures/player2.png",
-        "sprite_indices": [3, 4, 5],
-        "indices_per_sequence": 3,
-        "framerate": 10,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.player.walk.east": {
-      "spritesheet": {
-        "displayname": "sprite.player.walk.east",
-        "zorder": [0, 0, 0],
-        "texture_path": "res/textures/player2.png",
-        "sprite_indices": [6, 7, 8],
-        "indices_per_sequence": 3,
-        "framerate": 10,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.player.walk.west": {
-      "spritesheet": {
-        "displayname": "sprite.player.walk.west",
-        "zorder": [0, 0, 0],
-        "texture_path": "res/textures/player2.png",
-        "sprite_indices": [9, 10, 11],
-        "indices_per_sequence": 3,
-        "framerate": 10,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.ui.icons": {
-      "spritesheet": {
-        "displayname": "sprite.ui.icons",
-        "zorder": [0, 0, 0, 0, 0, 0, 0, 0],
-        "texture_path": "res/textures/icons.png",
-        "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.item.pickaxe": {
-      "spritesheet": {
-        "displayname": "Pickaxe",
+        "displayname": "sprite.graveyard.arrow",
         "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [0],
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [22],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1438,12 +448,12 @@
         }
       }
     },
-    "sprite.item.axe": {
+    "sprite.graveyard.bones": {
       "spritesheet": {
-        "displayname": "Axe",
-        "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [10],
+        "displayname": "sprite.graveyard.bones",
+        "zorder": [0, 0],
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [13, 14],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1452,12 +462,457 @@
         }
       }
     },
-    "sprite.item.shovel": {
+    "sprite.graveyard.building.healingspring": {
       "spritesheet": {
-        "displayname": "Shovel",
-        "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
+        "displayname": "sprite.graveyard.building.healingspring",
+        "zorder": [
+          48, 48, 48, 48, 48,
+          -16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16
+        ],
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [160],
+        "collision_mask": [
+          false,false,false,false,false,
+          true, true, true, true, true, 
+          true, true, true, true, true,
+          true, true, false, true, true
+        ],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 5,
+          "y": 4
+        },
+        "door_position" :
+        {
+          "x": 2,
+          "y": 3
+        }
+      }
+    },
+    "sprite.graveyard.crypt.closed": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.crypt.closed",
+        "zorder": [
+          -16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16
+        ],
+        "texture_path": "res/textures/landmarks.png",
         "sprite_indices": [20],
+        "collision_mask": [
+          true, true, true, true, true,
+          true, true, true, true, true,
+          true, true, true, true, true,
+          true, false, false, false, true,
+          true, false, false, false, true,
+          false, false, false, false, false
+        ],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 5,
+          "y": 6
+        },
+        "door_position" :
+        {
+          "x": 2,
+          "y": 2
+        }
+      }
+    },
+    "sprite.graveyard.crypt.opened": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.crypt.opened",
+        "zorder": [
+          -16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16
+        ],
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [25],
+        "collision_mask": [
+          true, true, true, true, true,
+          true, true, true, true, true,
+          true, true, false, true, true,
+          true, false, false, false, true,
+          true, false, false, false, true,
+          false, false, false, false, false
+        ],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 5,
+          "y": 6
+        }
+      }
+    },
+    "sprite.graveyard.detonated": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.detonated",
+        "zorder": [0],
+        "texture_path": "res/textures/graveyardfloor.png",
+        "sprite_indices": [4],
+        "framerate": 0,
+        "indices_per_sequence": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.exit.locked": {
+      "spritesheet": {
+        "displayname": "exit.locked",
+        "zorder": [
+          48,48,48,48,48,
+          48,48,48,48,48,
+          48,48,48,48,48,
+          48,48,48,48,48,
+          48,48,48,48,48,
+          -16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16
+        ],
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [80],
+        "collision_mask": [
+          false,false,false,false,false,
+          false,false,false,false,false,
+          false,false,false,false,false,
+          false,false,false,false,false,
+          true,true,true,true,true,
+          true,true,true,true,true,
+          false,false,false,false,false
+        ],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 5,
+          "y": 7
+        },
+        "door_position" :
+        {
+          "x": 2,
+          "y": 4
+        }
+      }
+    },
+    "sprite.graveyard.exit.unlocked": {
+      "spritesheet": {
+        "displayname": "exit.unlocked",
+        "zorder": [
+          48,48,48,48,48,
+          48,48,48,48,48,
+          48,48,48,48,48,
+          48,48,48,48,48,
+          48,48,-16,48,48,
+          -16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16
+        ],
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [85],
+        "collision_mask": [
+          false,false,false,false,false,
+          false,false,false,false,false,
+          false,false,false,false,false,
+          false,false,false,false,false,
+          true,true,true,true,true,
+          true,true,false,true,true,
+          false,false,false,false,false
+        ],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 5,
+          "y": 7
+        }
+      }
+    },
+    "sprite.graveyard.graves.large.closed": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.graves.large.closed",
+        "zorder": [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [420, 440, 460, 480],
+        "collision_mask": [
+          false, false, true, true, 
+          false, false, true, true, 
+          false, false, true, true, 
+          false, false, true, true
+        ],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 2,
+          "y": 2
+        }
+      }
+    },
+    "sprite.graveyard.graves.large.opened": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.graves.large.opened",
+        "zorder": [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [422, 442, 462, 482],
+        "collision_mask": [
+          false, false, true, true, 
+          false, false, true, true, 
+          false, false, true, true, 
+          false, false, true, true
+        ],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 2,
+          "y": 2
+        }
+      }
+    },
+
+    "sprite.graveyard.graves.small.closed": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.graves.small.closed",
+        "zorder": [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [260, 280, 300, 320, 340, 360, 380, 400],
+        "collision_mask": [
+          false, true, false, true, 
+          false, true, false, true, 
+          false, true, false, true, 
+          false, true, false, true
+        ],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 2
+        }
+      }
+    },
+    "sprite.graveyard.graves.small.opened": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.graves.small.opened",
+        "zorder": [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [261, 281, 301, 321, 341, 361, 381, 401],
+        "collision_mask": [
+          false, true, false, true, 
+          false, true, false, true, 
+          false, true, false, true, 
+          false, true, false, true
+        ],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 2
+        }
+      }
+    },
+    "sprite.graveyard.hazard.corruption": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.corruption",
+        "zorder": [0],
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [21],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "zorder": [0],
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [20],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.wormhole": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.wormhole",
+        "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "texture_path": "res/textures/wormhole-Sheet.png",
+        "sprite_indices": [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33],
+        "framerate": 10,
+        "indices_per_sequence": 12,
+        "grid_size": {
+          "x": 3,
+          "y": 3
+        }
+      }
+    },
+    "sprite.graveyard.healingspring": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.healingspring",
+        "zorder": [0, 0, 0, 0],
+        "texture_path": "res/textures/wellfountain.png",
+        "sprite_indices": [0, 3, 6, 9],
+        "collision_mask": [false, false, false, true, true, true, true, true, true, true, true, true],
+        "indices_per_sequence": 4,
+        "framerate": 10,
+        "grid_size": {
+          "x": 3,
+          "y": 4
+        }
+      }
+    },
+    "sprite.graveyard.loot.blast": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.loot.blast",
+        "zorder": [0],
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [17],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.loot.health": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.loot.health",
+        "zorder": [0],
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [15],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.loot.repair": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.loot.repair",
+        "zorder": [0],
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [16],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.playerspawn": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.playerspawn",
+        "zorder": [0],
+        "texture_path": "res/textures/graveyard_runes.png",
+        "sprite_indices": [
+          0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,
+          28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,
+          56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,
+          84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,
+          112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,
+          140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,
+          168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,
+          196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223
+        ],
+        "framerate": 0,
+        "indices_per_sequence": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.pots": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.pots",
+        "zorder": [0, 0, 0],
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [10,11,12],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.ruin": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.ruin",
+        "zorder": [
+          48,48,48,48,48,48,48,48,
+          48,48,48,48,48,48,48,48,
+          -16,-16,-16,-16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16,-16,-16,-16,
+          -16,-16,-16,-16,-16,-16,-16,-16
+        ],
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [200],
+        "collision_mask": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, false, true, true, true, true, true, false, true, false, false, true, true, true, false, false, false, false],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 8,
+          "y": 5
+        },
+        "door_position" :
+        {
+          "x": 5,
+          "y": 3
+        }
+      }
+    },
+    "sprite.graveyard.wall.ext": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.wall.ext",
+        "zorder": [10000],
+        "texture_path": "res/textures/graveyardwall.png",
+        "sprite_indices": [0,1,2,3,4,5,6,7],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.wall.int.cap": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.wall.int.cap",
+        "zorder": [0,0,0,0,0,0,0,0,0],
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [30,31,32,33,34,35,36,37],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.wall.int.main": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.wall.int.main",
+        "zorder": [0,0,0,0,0,0,0,0,0],
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [40,41,42,43,44,45,46,47],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1480,12 +935,40 @@
         }
       }
     },
-    "sprite.item.dowsingrod": {
+    "sprite.item.axe": {
       "spritesheet": {
-        "displayname": "Dowsing Rod",
+        "displayname": "Axe",
         "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [36],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [10],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.bomb": {
+      "spritesheet": {
+        "displayname": "Dynamite",
+        "zorder": [0],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [30],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.boots": {
+      "spritesheet": {
+        "displayname": "Dead Man's Boots",
+        "zorder": [0],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [240],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1508,12 +991,12 @@
         }
       }
     },
-    "sprite.item.lightningrod": {
+    "sprite.item.candle": {
       "spritesheet": {
-        "displayname": "Lightning Rod",
+        "displayname": "Candle",
         "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [39],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [350],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1522,26 +1005,16 @@
         }
       }
     },
-    "sprite.item.lightningrod.glowing": {
+
+
+
+
+    "sprite.item.cryptkey": {
       "spritesheet": {
-        "displayname": "Lightning Rod",
+        "displayname": "Crypt Key",
         "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [40,41,42,43],
-        "indices_per_sequence": 4,
-        "framerate": 1,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.item.lightningrod.broken": {
-      "spritesheet": {
-        "displayname": "Lightning Rod",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [28],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [50],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1550,12 +1023,26 @@
         }
       }
     },
-    "sprite.item.rowanwine": {
+    "sprite.item.cursetablet": {
       "spritesheet": {
-        "displayname": "Rowan Wine",
+        "displayname": "Curse Tablet",
+        "zorder": [0],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [230],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.dowsingrod": {
+      "spritesheet": {
+        "displayname": "Dowsing Rod",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [12],
+        "sprite_indices": [36],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1592,34 +1079,6 @@
         }
       }
     },
-    "sprite.item.hawthorntea": {
-      "spritesheet": {
-        "displayname": "Hawthorn Tea",
-        "zorder": [0],
-        "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [15 ],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.item.bomb": {
-      "spritesheet": {
-        "displayname": "Dynamite",
-        "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [30],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
     "sprite.item.exitkey": {
       "spritesheet": {
         "displayname": "Exit Key",
@@ -1634,12 +1093,12 @@
         }
       }
     },
-    "sprite.item.cryptkey": {
+    "sprite.item.hawthorntea": {
       "spritesheet": {
-        "displayname": "Crypt Key",
+        "displayname": "Hawthorn Tea",
         "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [50],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [15 ],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1648,12 +1107,12 @@
         }
       }
     },
-    "sprite.item.rottenfood": {
+    "sprite.item.jewelry_amephyst_gemstone": {
       "spritesheet": {
-        "displayname": "Rotten Substance",
+        "displayname": "Amephyst Gemstone",
         "zorder": [0],
         "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [60],
+        "sprite_indices": [340],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1662,12 +1121,166 @@
         }
       }
     },
-    "sprite.item.plant.rowan": {
+    "sprite.item.jewelry_amephyst_ring": {
       "spritesheet": {
-        "displayname": "Plant: Rowan",
+        "displayname": "Amephyst Ring",
+        "zorder": [0],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [280],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.jewelry_diamond_gemstone": {
+      "spritesheet": {
+        "displayname": "Diamond Gemstone",
+        "zorder": [0],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [330],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.jewelry_emerald_gemstone": {
+      "spritesheet": {
+        "displayname": "Emerald Gemstone",
+        "zorder": [0],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [310],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.jewelry_emerald_necklace": {
+      "spritesheet": {
+        "displayname": "Emerald Necklace",
+        "zorder": [0],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [300],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.jewelry_ruby_ring": {
+      "spritesheet": {
+        "displayname": "Ruby Ring",
+        "zorder": [0],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [290],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.jewelry_sapphire_gemstone": {
+      "spritesheet": {
+        "displayname": "Sapphire Gemstone",
+        "zorder": [0],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [320],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.jewelry_sapphire_necklace": {
+      "spritesheet": {
+        "displayname": "Sapphire Necklace",
+        "zorder": [0],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [270],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.lightningrod": {
+      "spritesheet": {
+        "displayname": "Lightning Rod",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [39],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.lightningrod.broken": {
+      "spritesheet": {
+        "displayname": "Lightning Rod",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [28],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.lightningrod.glowing": {
+      "spritesheet": {
+        "displayname": "Lightning Rod",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [40,41,42,43],
+        "indices_per_sequence": 4,
+        "framerate": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.pickaxe": {
+      "spritesheet": {
+        "displayname": "Pickaxe",
+        "zorder": [0],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [0],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.plant.burdock": {
+      "spritesheet": {
+        "displayname": "Plant: Burdock",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
-        "sprite_indices": [0,1],
+        "sprite_indices": [18,19],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1692,12 +1305,12 @@
         "collision_mask": [false, true]
       }
     },
-    "sprite.item.plant.yew": {
+    "sprite.item.plant.foxglove": {
       "spritesheet": {
-        "displayname": "Plant: Yew",
+        "displayname": "Plant: Foxglove",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
-        "sprite_indices": [4,5],
+        "sprite_indices": [8,9],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1722,27 +1335,12 @@
         "collision_mask": [false, true]
       }
     },
-    "sprite.item.plant.foxglove": {
+    "sprite.item.plant.henbane": {
       "spritesheet": {
-        "displayname": "Plant: Foxglove",
+        "displayname": "Plant: Henbane",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
-        "sprite_indices": [8,9],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 2
-        },
-        "collision_mask": [false, true]
-      }
-    },
-    "sprite.item.plant.nightshade": {
-      "spritesheet": {
-        "displayname": "Plant: Nightshade",
-        "zorder": [2,0],
-        "texture_path": "res/textures/plants.png",
-        "sprite_indices": [10,11],
+        "sprite_indices": [22,23],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1767,21 +1365,6 @@
         "collision_mask": [false, true]
       }
     },
-    "sprite.item.plant.stjohnswort": {
-      "spritesheet": {
-        "displayname": "Plant: StJohnsWort",
-        "zorder": [2,0],
-        "texture_path": "res/textures/plants.png",
-        "sprite_indices": [14,15],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 2
-        },
-        "collision_mask": [false, true]
-      }
-    },
     "sprite.item.plant.nettle": {
       "spritesheet": {
         "displayname": "Plant: Nettle",
@@ -1797,12 +1380,12 @@
         "collision_mask": [false, true]
       }
     },
-    "sprite.item.plant.burdock": {
+    "sprite.item.plant.nightshade": {
       "spritesheet": {
-        "displayname": "Plant: Burdock",
+        "displayname": "Plant: Nightshade",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
-        "sprite_indices": [18,19],
+        "sprite_indices": [10,11],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1827,12 +1410,12 @@
         "collision_mask": [false, true]
       }
     },
-    "sprite.item.plant.henbane": {
+    "sprite.item.plant.rowan": {
       "spritesheet": {
-        "displayname": "Plant: Henbane",
+        "displayname": "Plant: Rowan",
         "zorder": [2,0],
         "texture_path": "res/textures/plants.png",
-        "sprite_indices": [22,23],
+        "sprite_indices": [0,1],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1840,6 +1423,50 @@
           "y": 2
         },
         "collision_mask": [false, true]
+      }
+    },
+    "sprite.item.plant.stjohnswort": {
+      "spritesheet": {
+        "displayname": "Plant: StJohnsWort",
+        "zorder": [2,0],
+        "texture_path": "res/textures/plants.png",
+        "sprite_indices": [14,15],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 2
+        },
+        "collision_mask": [false, true]
+      }
+    },
+    "sprite.item.plant.yew": {
+      "spritesheet": {
+        "displayname": "Plant: Yew",
+        "zorder": [2,0],
+        "texture_path": "res/textures/plants.png",
+        "sprite_indices": [4,5],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 2
+        },
+        "collision_mask": [false, true]
+      }
+    },
+    "sprite.item.preservedcat": {
+      "spritesheet": {
+        "displayname": "Preserved Cat",
+        "zorder": [0, 0, 0, 0, 0],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [260, 261, 262, 263, 264],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
       }
     },
     "sprite.item.relic1": {
@@ -1898,6 +1525,34 @@
         }
       }
     },
+    "sprite.item.rottenfood": {
+      "spritesheet": {
+        "displayname": "Rotten Substance",
+        "zorder": [0],
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [60],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.rowanwine": {
+      "spritesheet": {
+        "displayname": "Rowan Wine",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [12],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
     "sprite.item.seeingstone": {
       "spritesheet": {
         "displayname": "Seeing Stone",
@@ -1912,26 +1567,12 @@
         }
       }
     },
-    "sprite.item.cursetablet": {
+    "sprite.item.shovel": {
       "spritesheet": {
-        "displayname": "Curse Tablet",
+        "displayname": "Shovel",
         "zorder": [0],
         "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [230],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.item.boots": {
-      "spritesheet": {
-        "displayname": "Dead Man's Boots",
-        "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [240],
+        "sprite_indices": [20],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1954,26 +1595,72 @@
         }
       }
     },
-    "sprite.item.preservedcat": {
+    "sprite.nightwatchman.walk.east": {
       "spritesheet": {
-        "displayname": "Preserved Cat",
-        "zorder": [0, 0, 0, 0, 0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [260, 261, 262, 263, 264],
-        "indices_per_sequence": 1,
-        "framerate": 0,
+        "displayname": "sprite.player.walk.east",
+        "zorder": [0, 0, 0],
+        "texture_path": "res/textures/npcwatchman.png",
+        "sprite_indices": [6, 7, 8],
+        "collision_mask": [true],
+        "indices_per_sequence": 3,
+        "framerate": 3,
         "grid_size": {
           "x": 1,
           "y": 1
         }
       }
     },
-    "sprite.item.jewelry_sapphire_necklace": {
+    "sprite.nightwatchman.walk.north": {
       "spritesheet": {
-        "displayname": "Sapphire Necklace",
+        "displayname": "sprite.player.walk.north",
+        "zorder": [0, 0, 0],
+        "texture_path": "res/textures/npcwatchman.png",
+        "sprite_indices": [3, 4, 5],
+        "collision_mask": [true],
+        "indices_per_sequence": 3,
+        "framerate": 3,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.nightwatchman.walk.south": {
+      "spritesheet": {
+        "displayname": "sprite.player.walk.south",
+        "zorder": [0, 0, 0],
+        "texture_path": "res/textures/npcwatchman.png",
+        "sprite_indices": [0, 1, 2],
+        "collision_mask": [true],
+        "indices_per_sequence": 3,
+        "framerate": 3,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.nightwatchman.walk.west": {
+      "spritesheet": {
+        "displayname": "sprite.player.walk.west",
+        "zorder": [0, 0, 0],
+        "texture_path": "res/textures/npcwatchman.png",
+        "sprite_indices": [9, 10, 11],
+        "collision_mask": [true],
+        "indices_per_sequence": 3,
+        "framerate": 3,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.burdock.drop": {
+      "spritesheet": {
+        "displayname": "Burdock thistle",
         "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [270],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [33],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1982,12 +1669,12 @@
         }
       }
     },
-    "sprite.item.jewelry_amephyst_ring": {
+    "sprite.plant.burdock.forage": {
       "spritesheet": {
-        "displayname": "Amephyst Ring",
+        "displayname": "Burdock thistle",
         "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [280],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [9],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1996,12 +1683,12 @@
         }
       }
     },
-    "sprite.item.jewelry_ruby_ring": {
+    "sprite.plant.elder.drop": {
       "spritesheet": {
-        "displayname": "Ruby Ring",
+        "displayname": "Elder Stick",
         "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [290],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [25],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2010,12 +1697,12 @@
         }
       }
     },
-    "sprite.item.jewelry_emerald_necklace": {
+    "sprite.plant.elder.forage": {
       "spritesheet": {
-        "displayname": "Emerald Necklace",
+        "displayname": "Elder Berry",
         "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [300],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [1],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2024,12 +1711,12 @@
         }
       }
     },
-    "sprite.item.jewelry_emerald_gemstone": {
+    "sprite.plant.foxglove.forage": {
       "spritesheet": {
-        "displayname": "Emerald Gemstone",
+        "displayname": "Foxglove Flower",
         "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [310],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [4],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2038,12 +1725,12 @@
         }
       }
     },
-    "sprite.item.jewelry_sapphire_gemstone": {
+    "sprite.plant.hawthorn.drop": {
       "spritesheet": {
-        "displayname": "Sapphire Gemstone",
+        "displayname": "Hawthorn Stick",
         "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [320],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [27],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2052,12 +1739,12 @@
         }
       }
     },
-    "sprite.item.jewelry_diamond_gemstone": {
+    "sprite.plant.hawthorn.forage": {
       "spritesheet": {
-        "displayname": "Diamond Gemstone",
+        "displayname": "Hawthorn Flower",
         "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [330],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [3],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2066,12 +1753,12 @@
         }
       }
     },
-    "sprite.item.jewelry_amephyst_gemstone": {
+    "sprite.plant.henbane.drop": {
       "spritesheet": {
-        "displayname": "Amephyst Gemstone",
+        "displayname": "Henbane Stick",
         "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [340],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [35],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2080,12 +1767,12 @@
         }
       }
     },
-    "sprite.item.candle": {
+    "sprite.plant.henbane.forage": {
       "spritesheet": {
-        "displayname": "Candle",
+        "displayname": "Henbane Seed",
         "zorder": [0],
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [350],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [11],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2094,83 +1781,12 @@
         }
       }
     },
-
-
-
-
-    "sprite.death.anim.explosion": {
+    "sprite.plant.hogweed.forage": {
       "spritesheet": {
-        "displayname": "sprite.death.anim.explosion",
-        "zorder": [0, 0, 0, 0, 0, 0],
-        "texture_path": "res/textures/fire_effect_and_bullet_16x16.png",
-        "sprite_indices": [66, 67, 68, 69, 70, 71],
-        "indices_per_sequence": 6,
-        "framerate": 10,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.death.anim.bloodsplat": {
-      "spritesheet": {
-        "displayname": "sprite.death.anim.bloodsplat",
-        "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "texture_path": "res/textures/blood_splash_3.png",
-        "sprite_indices": [0, 3, 6, 9, 36, 39, 42, 45, 72, 75, 78, 81, 108, 111, 114, 117],
-        "indices_per_sequence": 16,
-        "framerate": 10,
-        "grid_size": {
-          "x": 3,
-          "y": 3
-        }
-      }
-    },
-    "sprite.death.anim.flames": {
-      "spritesheet": {
-        "displayname": "sprite.death.anim.flames",
-        "zorder": [0, 0, 0, 0],
-        "texture_path": "res/textures/fire_effect_and_bullet_16x16.png",
-        "sprite_indices": [10, 11, 12, 13],
-        "indices_per_sequence": 4,
-        "framerate": 10,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.death.anim.banish": {
-      "spritesheet": {
-        "displayname": "sprite.death.anim.banish",
-        "zorder": [0, 0, 0, 0],
-        "texture_path": "res/textures/water_effect_and_bullet_16x16.png",
-        "sprite_indices": [101,102,103,104,105],
-        "indices_per_sequence": 5,
-        "framerate": 10,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-
-    "sprite.shop.wall.int": {
-      "spritesheet": {
-        "displayname": "sprite.shop.wall.int",
-        "zorder": [
-          0, 0, 0, 
-          0, -10, 0, 
-          0, 0, 0, 
-          -10, 0, -10          
-        ],
-        "texture_path": "res/textures/shopwall.png",
-        "sprite_indices": [
-          0, 1, 2, 
-          3, 4, 5, 
-          6, 7, 8, 
-          9, 10, 11
-        ],
+        "displayname": "Hogweed Seeds",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [6],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2179,23 +1795,12 @@
         }
       }
     },
-
-    "sprite.ruin.wall.ext": {
+    "sprite.plant.nettle.drop": {
       "spritesheet": {
-        "displayname": "sprite.ruin.wall.ext",
-        "zorder": [
-          0, 0, 0, 
-          0, -10, 0, 
-          0, 0, 0, 
-          -10, 0, -10          
-        ],
-        "texture_path": "res/textures/ruinwall.png",
-        "sprite_indices": [
-          0, 1, 2, 
-          3, 4, 5, 
-          6, 7, 8, 
-          9, 10, 11
-        ],
+        "displayname": "Nettle Fiber",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [32],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2204,13 +1809,12 @@
         }
       }
     },
-
-    "sprite.ruin.wall.int.main": {
+    "sprite.plant.nettle.forage": {
       "spritesheet": {
-        "displayname": "sprite.ruin.wall.int",
-        "zorder": [100],
-        "texture_path": "res/textures/ruin.png",
-        "sprite_indices": [17],
+        "displayname": "Nettle Leaves",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [8],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2219,12 +1823,81 @@
         }
       }
     },
-
-    "sprite.ruin.wall.int.cap": {
+    "sprite.plant.nightshade.forage": {
       "spritesheet": {
-        "displayname": "sprite.ruin.wall.int",
-        "zorder": [100],
-        "texture_path": "res/textures/ruin.png",
+        "displayname": "Nightshade Flower",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [5],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.redcampion.drop": {
+      "spritesheet": {
+        "displayname": "AntiVenom",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [22],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.rowan.drop": {
+      "spritesheet": {
+        "displayname": "Rowan Stick",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [24],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.rowan.forage": {
+      "spritesheet": {
+        "displayname": "Rowan Berry",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [0],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.stjohnswort.drop": {
+      "spritesheet": {
+        "displayname": "Blood Oil",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [19],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.plant.stjohnswort.forage": {
+      "spritesheet": {
+        "displayname": "StJohnsWort Flower",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
         "sprite_indices": [7],
         "indices_per_sequence": 1,
         "framerate": 0,
@@ -2234,24 +1907,14 @@
         }
       }
     },
-
-    "sprite.ruin.runemarking.inactive": {
+    "sprite.plant.witchesbroom": {
       "spritesheet": {
-        "displayname": "sprite.ruin.runemarking.inactive",
-        "zorder": [20],
-        "texture_path": "res/textures/graveyard_runes.png",
-        "sprite_indices": [
-          0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,
-          28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,
-          56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,
-          84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,
-          112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,
-          140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,
-          168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,
-          196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223
-        ],
-        "framerate": 0,
+        "displayname": "Witches Broom",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [47],
         "indices_per_sequence": 1,
+        "framerate": 0,
         "grid_size": {
           "x": 1,
           "y": 1
@@ -2259,115 +1922,111 @@
       }
     },
 
-    "sprite.ruin.runemarking.active": {
+    "sprite.plant.yew.drop": {
       "spritesheet": {
-        "displayname": "sprite.ruin.runemarking.active",
-        "zorder": [1000],
-        "texture_path": "res/textures/graveyard_runes.png",
-        "sprite_indices": [
-          448,449,450,451,452,453,454,455,456,457,458,459,460,461,462,463,464,465,466,467,468,469,470,471,472,473,474,475,
-          476,477,478,479,480,481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497,498,499,500,501,502,503,
-          504,505,506,507,508,509,510,511,512,513,514,515,516,517,518,519,520,521,522,523,524,525,526,527,528,529,530,531,
-          532,533,534,535,536,537,538,539,540,541,542,543,544,545,546,547,548,549,550,551,552,553,554,555,556,557,558,559,
-          560,561,562,563,564,565,566,567,568,569,570,571,572,573,574,575,576,577,578,579,580,581,582,583,584,585,586,587,
-          588,589,590,591,592,593,594,595,596,597,598,599,600,601,602,603,604,605,606,607,608,609,610,611,612,613,614,615,
-          616,617,618,619,620,621,622,623,624,625,626,627,628,629,630,631,632,633,634,635,636,637,638,639,640,641,642,643,
-          644,645,646,647,648,649,650,651,652,653,654,655,656,657,658,659,660,661,662,663,664,665,666,667,668,669,670,671
-        ],
-        "framerate": 0,
+        "displayname": "Yew Stick",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [26],
         "indices_per_sequence": 1,
+        "framerate": 0,
         "grid_size": {
           "x": 1,
           "y": 1
         }
       }
     },
-
-    "sprite.ruin.stairs.down": {
+    "sprite.plant.yew.forage": {
       "spritesheet": {
-        "displayname": "sprite.ruin.stairs.down",
-        "zorder": [-5],
-        "texture_path": "res/textures/ruin.png",
-        "sprite_indices": [53],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 3,
-          "y": 8
-        },
-        "collision_mask": [
-          false,false,false,
-          false,false,false,
-          false,false,false,
-          false,false,false,
-          false,false,false,
-          false,false,false,
-          false,false,false,
-          false,false,false,
-          false,false,false
-        ]
-      }
-    },
-    "sprite.ruin.stairs.up": {
-      "spritesheet": {
-        "displayname": "sprite.ruin.stairs.up",
-        "zorder": [-5],
-        "texture_path": "res/textures/ruin.png",
-        "sprite_indices": [50],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 3,
-          "y": 9
-        },
-        "collision_mask": [
-          false,false,false,
-          false,false,false,
-          false,false,false,
-          false,false,false,
-          false,false,false,
-          false,false,false,
-          false,false,false,
-          false,false,false,
-          false,false,false
-        ]
-      }
-    },
-    "sprite.ruin.stairs.balustrade": {
-      "spritesheet": {
-        "displayname": "sprite.ruin.stairs.balustrade",
-        "zorder": [-4],
-        "texture_path": "res/textures/ruin.png",
-        "sprite_indices": [56],
+        "displayname": "Yew Berry",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [2],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
           "x": 1,
-          "y": 8
+          "y": 1
         }
       }
     },
-    "sprite.ruin.stairs.gate": {
+    "sprite.player.footsteps": {
       "spritesheet": {
-        "displayname": "sprite.ruin.stairs.gate",
-        "collision_mask": [true, true],
-        "zorder": [120],
-        "texture_path": "res/textures/ruin.png",
-        "sprite_indices": [36, 46],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 2
-        }
-      }
-    },
-    "sprite.ruin.cobweb": {
-      "spritesheet": {
-        "displayname": "sprite.ruin.cobweb",
+        "displayname": "sprite.player.footsteps",
         "zorder": [0, 0, 0, 0],
-        "texture_path": "res/textures/ruin.png",
-        "sprite_indices": [40, 41, 42, 43],
+        "texture_path": "res/textures/footsteps.png",
+        "sprite_indices": [0, 1, 2, 3],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.player.walk.east": {
+      "spritesheet": {
+        "displayname": "sprite.player.walk.east",
+        "zorder": [0, 0, 0],
+        "texture_path": "res/textures/player2.png",
+        "sprite_indices": [6, 7, 8],
+        "indices_per_sequence": 3,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.player.walk.north": {
+      "spritesheet": {
+        "displayname": "sprite.player.walk.north",
+        "zorder": [0, 0, 0],
+        "texture_path": "res/textures/player2.png",
+        "sprite_indices": [3, 4, 5],
+        "indices_per_sequence": 3,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.player.walk.south": {
+      "spritesheet": {
+        "displayname": "sprite.player.walk.south",
+        "zorder": [0, 0, 0],
+        "texture_path": "res/textures/player2.png",
+        "sprite_indices": [0, 1, 2],
+        "indices_per_sequence": 3,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.player.walk.west": {
+      "spritesheet": {
+        "displayname": "sprite.player.walk.west",
+        "zorder": [0, 0, 0],
+        "texture_path": "res/textures/player2.png",
+        "sprite_indices": [9, 10, 11],
+        "indices_per_sequence": 3,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.priest": {
+      "spritesheet": {
+        "displayname": "sprite.priest",
+        "zorder": [0],
+        "texture_path": "res/textures/npcpriest.png",
+        "sprite_indices": [0],
+        "collision_mask": [true],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2418,20 +2077,17 @@
         }
       }
     },
-    "sprite.shadowhand": {
+    "sprite.ruin.cobweb": {
       "spritesheet": {
-        "displayname": "ShadowHand",
-        "zorder": [1000],
-        "texture_path": "res/textures/npcshadowhand.png",
-        "sprite_indices": [
-          0
-        ],
-        "collision_mask": [true],
+        "displayname": "sprite.ruin.cobweb",
+        "zorder": [0, 0, 0, 0],
+        "texture_path": "res/textures/ruin.png",
+        "sprite_indices": [40, 41, 42, 43],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
-          "x": 21,
-          "y": 8
+          "x": 1,
+          "y": 1
         }
       }
     },
@@ -2451,18 +2107,317 @@
       }
     },
 
-    "sprite.graveyard.healingspring": {
+    "sprite.ruin.runemarking.active": {
       "spritesheet": {
-        "displayname": "sprite.graveyard.healingspring",
-        "zorder": [0, 0, 0, 0],
-        "texture_path": "res/textures/wellfountain.png",
-        "sprite_indices": [0, 3, 6, 9],
-        "collision_mask": [false, false, false, true, true, true, true, true, true, true, true, true],
-        "indices_per_sequence": 4,
-        "framerate": 10,
+        "displayname": "sprite.ruin.runemarking.active",
+        "zorder": [1000],
+        "texture_path": "res/textures/graveyard_runes.png",
+        "sprite_indices": [
+          448,449,450,451,452,453,454,455,456,457,458,459,460,461,462,463,464,465,466,467,468,469,470,471,472,473,474,475,
+          476,477,478,479,480,481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497,498,499,500,501,502,503,
+          504,505,506,507,508,509,510,511,512,513,514,515,516,517,518,519,520,521,522,523,524,525,526,527,528,529,530,531,
+          532,533,534,535,536,537,538,539,540,541,542,543,544,545,546,547,548,549,550,551,552,553,554,555,556,557,558,559,
+          560,561,562,563,564,565,566,567,568,569,570,571,572,573,574,575,576,577,578,579,580,581,582,583,584,585,586,587,
+          588,589,590,591,592,593,594,595,596,597,598,599,600,601,602,603,604,605,606,607,608,609,610,611,612,613,614,615,
+          616,617,618,619,620,621,622,623,624,625,626,627,628,629,630,631,632,633,634,635,636,637,638,639,640,641,642,643,
+          644,645,646,647,648,649,650,651,652,653,654,655,656,657,658,659,660,661,662,663,664,665,666,667,668,669,670,671
+        ],
+        "framerate": 0,
+        "indices_per_sequence": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+
+    "sprite.ruin.runemarking.inactive": {
+      "spritesheet": {
+        "displayname": "sprite.ruin.runemarking.inactive",
+        "zorder": [20],
+        "texture_path": "res/textures/graveyard_runes.png",
+        "sprite_indices": [
+          0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,
+          28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,
+          56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,
+          84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,
+          112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,
+          140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,
+          168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,
+          196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223
+        ],
+        "framerate": 0,
+        "indices_per_sequence": 1,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+
+    "sprite.ruin.stairs.balustrade": {
+      "spritesheet": {
+        "displayname": "sprite.ruin.stairs.balustrade",
+        "zorder": [-4],
+        "texture_path": "res/textures/ruin.png",
+        "sprite_indices": [56],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 8
+        }
+      }
+    },
+    "sprite.ruin.stairs.down": {
+      "spritesheet": {
+        "displayname": "sprite.ruin.stairs.down",
+        "zorder": [-5],
+        "texture_path": "res/textures/ruin.png",
+        "sprite_indices": [53],
+        "indices_per_sequence": 1,
+        "framerate": 0,
         "grid_size": {
           "x": 3,
-          "y": 4
+          "y": 8
+        },
+        "collision_mask": [
+          false,false,false,
+          false,false,false,
+          false,false,false,
+          false,false,false,
+          false,false,false,
+          false,false,false,
+          false,false,false,
+          false,false,false,
+          false,false,false
+        ]
+      }
+    },
+    "sprite.ruin.stairs.gate": {
+      "spritesheet": {
+        "displayname": "sprite.ruin.stairs.gate",
+        "collision_mask": [true, true],
+        "zorder": [120],
+        "texture_path": "res/textures/ruin.png",
+        "sprite_indices": [36, 46],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 2
+        }
+      }
+    },
+    "sprite.ruin.stairs.up": {
+      "spritesheet": {
+        "displayname": "sprite.ruin.stairs.up",
+        "zorder": [-5],
+        "texture_path": "res/textures/ruin.png",
+        "sprite_indices": [50],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 3,
+          "y": 9
+        },
+        "collision_mask": [
+          false,false,false,
+          false,false,false,
+          false,false,false,
+          false,false,false,
+          false,false,false,
+          false,false,false,
+          false,false,false,
+          false,false,false,
+          false,false,false
+        ]
+      }
+    },
+    "sprite.ruin.wall.ext": {
+      "spritesheet": {
+        "displayname": "sprite.ruin.wall.ext",
+        "zorder": [
+          0, 0, 0, 
+          0, -10, 0, 
+          0, 0, 0, 
+          -10, 0, -10          
+        ],
+        "texture_path": "res/textures/ruinwall.png",
+        "sprite_indices": [
+          0, 1, 2, 
+          3, 4, 5, 
+          6, 7, 8, 
+          9, 10, 11
+        ],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+
+    "sprite.ruin.wall.int.cap": {
+      "spritesheet": {
+        "displayname": "sprite.ruin.wall.int",
+        "zorder": [100],
+        "texture_path": "res/textures/ruin.png",
+        "sprite_indices": [7],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+
+    "sprite.ruin.wall.int.main": {
+      "spritesheet": {
+        "displayname": "sprite.ruin.wall.int",
+        "zorder": [100],
+        "texture_path": "res/textures/ruin.png",
+        "sprite_indices": [17],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+
+    "sprite.shadowhand": {
+      "spritesheet": {
+        "displayname": "ShadowHand",
+        "zorder": [1000],
+        "texture_path": "res/textures/npcshadowhand.png",
+        "sprite_indices": [
+          0
+        ],
+        "collision_mask": [true],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 21,
+          "y": 8
+        }
+      }
+    },
+    "sprite.shop.wall.int": {
+      "spritesheet": {
+        "displayname": "sprite.shop.wall.int",
+        "zorder": [
+          0, 0, 0, 
+          0, -10, 0, 
+          0, 0, 0, 
+          -10, 0, -10          
+        ],
+        "texture_path": "res/textures/shopwall.png",
+        "sprite_indices": [
+          0, 1, 2, 
+          3, 4, 5, 
+          6, 7, 8, 
+          9, 10, 11
+        ],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+
+    "sprite.skeleton.walk.east": {
+      "spritesheet": {
+        "displayname": "sprite.skeleton.walk.east",
+        "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "texture_path": "res/textures/npcskele.png",
+        "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        "collision_mask": [true],
+        "indices_per_sequence": 10,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.skeleton.walk.north": {
+      "spritesheet": {
+        "displayname": "sprite.skeleton.walk.north",
+        "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "texture_path": "res/textures/npcskele.png",
+        "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        "collision_mask": [true],
+        "indices_per_sequence": 10,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.skeleton.walk.south": {
+      "spritesheet": {
+        "displayname": "sprite.skeleton.walk.south",
+        "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "texture_path": "res/textures/npcskele.png",
+        "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        "collision_mask": [true],
+        "indices_per_sequence": 10,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.skeleton.walk.west": {
+      "spritesheet": {
+        "displayname": "sprite.skeleton.walk.west",
+        "zorder": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "texture_path": "res/textures/npcskele.png",
+        "sprite_indices": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+        "collision_mask": [true],
+        "indices_per_sequence": 10,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+
+    "sprite.spider": {
+      "spritesheet": {
+        "displayname": "sprite.spider",
+        "zorder": [0, 0, 0, 0],
+        "texture_path": "res/textures/npcspider.png",
+        "sprite_indices": [0, 1, 2, 3],
+        "collision_mask": [true],
+        "indices_per_sequence": 4,
+        "framerate": 3,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.ui.icons": {
+      "spritesheet": {
+        "displayname": "sprite.ui.icons",
+        "zorder": [0, 0, 0, 0, 0, 0, 0, 0],
+        "texture_path": "res/textures/icons.png",
+        "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
         }
       }
     },
@@ -2483,6 +2438,51 @@
           9, 10, 11],
         "indices_per_sequence": 1,
         "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.wisp.east": {
+      "spritesheet": {
+        "displayname": "sprite.wisp.east",
+        "zorder": [100000],
+        "texture_path": "res/textures/npcwisp_east.png",
+        "sprite_indices": [0,1,2,3],
+        "collision_mask": [true],
+        "indices_per_sequence": 4,
+        "framerate": 3,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.wisp.west": {
+      "spritesheet": {
+        "displayname": "sprite.wisp.west",
+        "zorder": [100000],
+        "texture_path": "res/textures/npcwisp_west.png",
+        "sprite_indices": [0,1,2,3],
+        "collision_mask": [true],
+        "indices_per_sequence": 4,
+        "framerate": 3,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.witch": {
+      "spritesheet": {
+        "displayname": "sprite.witch",
+        "zorder": [0, 0, 0, 0],
+        "texture_path": "res/textures/npcwitch.png",
+        "sprite_indices": [0, 1, 2, 3],
+        "collision_mask": [true],
+        "indices_per_sequence": 4,
+        "framerate": 10,
         "grid_size": {
           "x": 1,
           "y": 1
