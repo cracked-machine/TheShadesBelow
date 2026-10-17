@@ -81,6 +81,9 @@ private:
   //! @param dt
   void update_burning_worlditems( sf::Time dt );
 
+  //! @brief Pick player or lightning rod as target and spawn lightning (via LightningSystem)
+  void spawn_lightning();
+
   //! @brief all grid positions that block NPC pathfinding
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;
 

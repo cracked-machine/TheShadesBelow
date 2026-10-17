@@ -356,17 +356,18 @@ void ActionSystem::player_plant_interact()
           Cmp::RandomInt lightning_chance( 0, 1 );
           if ( lightning_chance.gen() == 0 )
           {
-            entt::entity lightning_target_entt = Utils::Player::get_entity( reg() );
-            for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>().each() )
-            {
-              if ( worlditem_cmp.item_type != "item.lightningrod" ) continue;
-              if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), worlditem_pos_cmp ) ) continue;
-              auto *wearlevel = reg().try_get<Cmp::Inventory::WearLevel>( worlditem_entt );
-              if ( not wearlevel or wearlevel->m_level <= 0 ) continue;
-              lightning_target_entt = worlditem_entt;
-              break;
-            }
-            get_systems_event_queue().trigger( Events::LightningEvent( lightning_target_entt ) );
+            // entt::entity lightning_target_entt = Utils::Player::get_entity( reg() );
+            // for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>().each() )
+            // {
+            //   if ( worlditem_cmp.item_type != "item.lightningrod" ) continue;
+            //   if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), worlditem_pos_cmp ) ) continue;
+            //   auto *wearlevel = reg().try_get<Cmp::Inventory::WearLevel>( worlditem_entt );
+            //   if ( not wearlevel or wearlevel->m_level <= 0 ) continue;
+            //   lightning_target_entt = worlditem_entt;
+            //   break;
+            // }
+            // get_systems_event_queue().trigger( Events::LightningEvent( lightning_target_entt ) );
+            spawn_lightning();
           }
         }
       }
@@ -718,21 +719,40 @@ void ActionSystem::update_burning_worlditems( sf::Time dt )
 
       // 100% chance that burning down an eldertree spawn/relocate the eldermother
       auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
-      if ( plant_item and plant_item->item_type.contains( "elder" ) )
+      if ( plant_item )
       {
-        if ( reg().view<Cmp::Npc::ElderMother>().empty() )
-          Factory::Npc::create_npc( reg(), plant_entt, "npc.eldermother" );
-        else
+        if ( plant_item->item_type == "item.plant.elder" )
         {
-          for ( auto em_entt : reg().view<Cmp::Npc::ElderMother, Cmp::Position>() )
+          if ( reg().view<Cmp::Npc::ElderMother>().empty() )
+            Factory::Npc::create_npc( reg(), plant_entt, "npc.eldermother" );
+          else
           {
-            get_systems_event_queue().trigger( Events::UpdateNpcPositionEvent( em_entt, plant_cmp.position ) );
+            for ( auto em_entt : reg().view<Cmp::Npc::ElderMother, Cmp::Position>() )
+            {
+              get_systems_event_queue().trigger( Events::UpdateNpcPositionEvent( em_entt, plant_cmp.position ) );
+            }
           }
         }
+        else if ( plant_item->item_type == "item.plant.hawthorn" ) { spawn_lightning(); }
       }
       Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
     }
   }
+}
+
+void ActionSystem::spawn_lightning()
+{
+  entt::entity lightning_target_entt = Utils::Player::get_entity( reg() );
+  for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>().each() )
+  {
+    if ( worlditem_cmp.item_type != "item.lightningrod" ) continue;
+    if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), worlditem_pos_cmp ) ) continue;
+    auto *wearlevel = reg().try_get<Cmp::Inventory::WearLevel>( worlditem_entt );
+    if ( not wearlevel or wearlevel->m_level <= 0 ) continue;
+    lightning_target_entt = worlditem_entt;
+    break;
+  }
+  get_systems_event_queue().trigger( Events::LightningEvent( lightning_target_entt ) );
 }
 
 } // namespace Game::Sys
