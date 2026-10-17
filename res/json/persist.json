@@ -105,6 +105,14 @@
     "detail": "Bow wear: per arrow released",
     "format": "%.1f"
   },
+  "BradycardiaHealthDmgPerSec": {
+    "type": "int",
+    "value": 5,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Bradycardia Health Dmg Per Sec",
+    "format": "%d"
+  },
   "CameraSmoothSpeed": {
     "type": "float",
     "value": 8.0,
@@ -136,6 +144,14 @@
     "max_value": 40.0,
     "detail": "Crypt Shuffke Timeout",
     "format": "%.1f"
+  },
+  "DespairHealthDmgPerSec": {
+    "type": "int",
+    "value": 1,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Despair Health Dmg Per Sec",
+    "format": "%d"
   },
   "DiggingCooldownThreshold":{
     "type": "float",
@@ -182,6 +198,14 @@
     "min_value": 1,
     "max_value": 10,
     "detail": "Exit Key Requirement",
+    "format": "%d"
+  },
+  "FearHealthDmgPerSec": {
+    "type": "int",
+    "value": 1,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Fear Health Dmg Per Sec",
     "format": "%d"
   },
   "FuseDelay": {
@@ -246,6 +270,14 @@
     "min_value": 1,
     "max_value": 50,
     "detail": "Health Bonus",
+    "format": "%d"
+  },
+  "HypoxiaHealthDmgPerSec": {
+    "type": "int",
+    "value": 5,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Hypoxia Health Dmg Per Sec",
     "format": "%d"
   },
   "LavaFireballDamage": {
@@ -320,7 +352,6 @@
     "detail": "NPC Activation Bounding Box Scale Factor",
     "format": "%.1f pixels"
     },
-  
   "NpcPushBack": {
     "type": "float",
     "value": 16.0,
@@ -401,7 +432,6 @@
     "detail": "NPC Watchman Idle Direction Change Interval (sec)",
     "format": "%.1f"
   },
-
   "NpcWatchmanSpawnMax": {
     "type": "int",
     "value": 25,
@@ -427,7 +457,6 @@
     "detail": "NPC Watchman Spawn Infamy",
     "format": "%d"
   },
-
   "NpcWatchmanSweepAmplitude": {
     "type": "float",
     "value": 0.6,
@@ -524,7 +553,14 @@
     "detail": "Player Movement Speed",
     "format": "%.1f"
   },
-
+  "PlayerOnFireHealthDmgPerSec": {
+    "type": "int",
+    "value": 5,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Player On Fire Health Dmg Per Sec",
+    "format": "%d"
+  },
   "PlayerShortcutLerpSpeedModifier": {
     "type": "float",
     "value": 0,
@@ -636,5 +672,29 @@
     "max_value": 5.0,
     "detail": "Shovel wear: smashing pot",
     "format": "%.1f"
+  },
+  "TachycardiaHealthDmgPerSec": {
+    "type": "int",
+    "value": 5,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Tachycardia Health Dmg Per Sec",
+    "format": "%d"
+  },
+  "VenomHealthDmgPerSec": {
+    "type": "int",
+    "value": 5,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Venom Health Dmg Per Sec",
+    "format": "%d"
+  },
+  "VertigoHealthDmgPerSec": {
+    "type": "int",
+    "value": 5,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Vertigo Health Dmg Per Sec",
+    "format": "%d"
   }
 }

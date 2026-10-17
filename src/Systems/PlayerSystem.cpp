@@ -34,15 +34,23 @@
 #include <Components/Particle/NoteParticleSprite.hpp>
 #include <Components/Particle/SpriteBase.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
+#include <Components/Persistent/BradycardiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/DespairHealthDmgPerSec.hpp>
 #include <Components/Persistent/EmberDamage.hpp>
+#include <Components/Persistent/FearHealthDmgPerSec.hpp>
+#include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
+#include <Components/Persistent/PlayerOnFireHealthDmgPerSec.hpp>
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
+#include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/VenomHealthDmgPerSec.hpp>
+#include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
 #include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/Character.hpp>
@@ -643,53 +651,53 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
   if ( m_timed_action_sync_clock.asSeconds() >= kTimedActionSyncClockMax )
   {
     // health effect decrease per toxidrome
-    const Cmp::BaseAction max_fear_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
-    const Cmp::BaseAction max_despair_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
-    const Cmp::BaseAction max_hypoxia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
-    const Cmp::BaseAction max_tachycardia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
-    const Cmp::BaseAction max_bradycardia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
-    const Cmp::BaseAction max_venom_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
-    const Cmp::BaseAction max_vertigo_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
-    const Cmp::BaseAction player_onfire_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {} );
-
+    auto health_dmg_action = []( int dmg ) { return Cmp::BaseAction( Cmp::Stats::Health{ -dmg }, {}, {}, {}, {}, {} ); };
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Hypoxia>() == 100 )
     {
-      player_stats.apply( max_hypoxia_modifier );
+      const auto hypoxia_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::HypoxiaHealthDmgPerSec>( reg() ).get_value() );
+      player_stats.apply( hypoxia_health_dmg );
       reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Tachycardia>() == 100 )
     {
-      player_stats.apply( max_tachycardia_modifier );
+      const auto tachycardia_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::TachycardiaHealthDmgPerSec>( reg() ).get_value() );
+      player_stats.apply( tachycardia_health_dmg );
       reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Bradycardia>() == 100 )
     {
-      player_stats.apply( max_bradycardia_modifier );
+      const auto bradycardia_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::BradycardiaHealthDmgPerSec>( reg() ).get_value() );
+      player_stats.apply( bradycardia_health_dmg );
       reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Venom>() == 100 )
     {
-      player_stats.apply( max_venom_modifier );
+      const auto venom_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::VenomHealthDmgPerSec>( reg() ).get_value() );
+      player_stats.apply( venom_health_dmg );
       reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Vertigo>() == 100 )
     {
-      player_stats.apply( max_vertigo_modifier );
+      const auto vertigo_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::VertigoHealthDmgPerSec>( reg() ).get_value() );
+      player_stats.apply( vertigo_health_dmg );
       reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     }
     if ( player_stats.fear() == 100 )
     {
-      player_stats.apply( max_fear_modifier );
+      const auto fear_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::FearHealthDmgPerSec>( reg() ).get_value() );
+      player_stats.apply( fear_health_dmg );
       reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     }
     if ( player_stats.despair() == 100 )
     {
-      player_stats.apply( max_despair_modifier );
+      const auto despair_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::DespairHealthDmgPerSec>( reg() ).get_value() );
+      player_stats.apply( despair_health_dmg );
       reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     }
     if ( m_player_is_on_fire )
     {
-      player_stats.apply( player_onfire_modifier );
+      const auto onfire_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::PlayerOnFireHealthDmgPerSec>( reg() ).get_value() );
+      player_stats.apply( onfire_health_dmg );
       reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     }
     apply_healing_spring_modifiers();

@@ -13,17 +13,20 @@
 #include <Components/Persistent/BombBonus.hpp>
 #include <Components/Persistent/BombDamage.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
+#include <Components/Persistent/BradycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
 #include <Components/Persistent/CorruptionDamage.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
+#include <Components/Persistent/DespairHealthDmgPerSec.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/EffectsVolume.hpp>
 #include <Components/Persistent/EmberDamage.hpp>
 #include <Components/Persistent/ExitKeyRequirement.hpp>
+#include <Components/Persistent/FearHealthDmgPerSec.hpp>
 #include <Components/Persistent/FuseDelay.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
@@ -32,6 +35,7 @@
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
+#include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
@@ -66,6 +70,7 @@
 #include <Components/Persistent/PlayerFootstepSfxStrideLength.hpp>
 #include <Components/Persistent/PlayerLerpInterruptThreshold.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
+#include <Components/Persistent/PlayerOnFireHealthDmgPerSec.hpp>
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
@@ -82,6 +87,9 @@
 #include <Components/Persistent/ShovelObstacleDigWear.hpp>
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
+#include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/VenomHealthDmgPerSec.hpp>
+#include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
 #include <Components/Persistent/WormholeSeed.hpp>
 #include <Events/LoadSettingsEvent.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -198,6 +206,14 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::AxeObstacleDigWear>();
   add_component<Cmp::Persist::AxePotSmashWear>();
   add_component<Cmp::Persist::AxeSkeletonKillWear>();
+  add_component<Cmp::Persist::FearHealthDmgPerSec>();
+  add_component<Cmp::Persist::DespairHealthDmgPerSec>();
+  add_component<Cmp::Persist::HypoxiaHealthDmgPerSec>();
+  add_component<Cmp::Persist::TachycardiaHealthDmgPerSec>();
+  add_component<Cmp::Persist::BradycardiaHealthDmgPerSec>();
+  add_component<Cmp::Persist::VenomHealthDmgPerSec>();
+  add_component<Cmp::Persist::VertigoHealthDmgPerSec>();
+  add_component<Cmp::Persist::PlayerOnFireHealthDmgPerSec>();
   add_component<Cmp::Persist::BowReleaseWear>();
   add_component<Cmp::Persist::PickaxeGraveDigWear>();
   add_component<Cmp::Persist::PickaxeObstacleDigWear>();
