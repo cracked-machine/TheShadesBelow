@@ -631,6 +631,7 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
 
   auto &player_stats = Utils::Player::get_stats( reg() );
 
+  // health effect decrease per toxidrome
   const Cmp::BaseAction max_fear_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
   const Cmp::BaseAction max_hypoxia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
   const Cmp::BaseAction max_tachycardia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
@@ -645,6 +646,7 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
   // NPC/inventory modifiers keep their own per-action timers, so they are updated every frame
   apply_npc_modifiers( dt );
   apply_inventory_modifiers( dt );
+  apply_plant_proximity_modifiers( dt );
 
   // Now apply the various stat modifiers if their conditions are met
   static constexpr float kTimedActionSyncClockMax = 1.0;
@@ -751,6 +753,20 @@ void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
     if ( carry_action.health() < 0 ) reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     Utils::Player::get_stats( reg() ).apply( carry_action );
     carry_timer = sf::Time::Zero;
+  }
+}
+
+void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
+{
+  for ( auto [plant_entt, plant_mb_cmp, plant_worlditem_cmp] : reg().view<Cmp::PlantMultiBlock, Cmp::WorldItem>().each() )
+  {
+    if ( not Utils::Player::is_player_near( reg(), plant_mb_cmp ) ) continue;
+    auto &[proximity_action, proximity_timer] = plant_worlditem_cmp.at<Cmp::ProximityAction>();
+    proximity_timer += dt;
+    if ( proximity_timer.asSeconds() < proximity_action.interval() ) continue;
+    if ( proximity_action.health() < 0 ) reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+    Utils::Player::apply_action_from_world_item<Cmp::ProximityAction>( reg(), plant_entt );
+    proximity_timer = sf::Time::Zero;
   }
 }
 

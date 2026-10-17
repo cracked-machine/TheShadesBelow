@@ -93,8 +93,14 @@ private:
   //! @note Cmp::CollisionAction and Cmp::ProjectileAction are excluded. See NpcSystem.
   //! @param dt
   void apply_timed_action_side_effects( sf::Time dt );
+
+  //! @brief Update the player hearbeat based on their tachycardia/bradycardia toxicity.
+  //! @param dt
   void update_heartbeat( sf::Time dt );
 
+  //! @brief Is player position illuminated by a light source.
+  //! @return true
+  //! @return false
   bool is_player_in_light();
 
   //! @brief Apply the stat modifiers for the healing spring
@@ -107,6 +113,10 @@ private:
   //! @brief Update the carry action timers and apply the stat modifiers for inventory item
   //! @param dt
   void apply_inventory_modifiers( sf::Time dt );
+
+  //! @brief Update the proximity action timers and apply the stat modifiers for proximity to plant life.
+  //! @param dt
+  void apply_plant_proximity_modifiers( sf::Time dt );
 
   //! @brief Set the player on fire if Cmp::Toxicity::Phototoxia is 100%
   void set_player_on_fire();
