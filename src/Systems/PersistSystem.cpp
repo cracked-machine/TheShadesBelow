@@ -28,6 +28,7 @@
 #include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/FearHealthDmgPerSec.hpp>
 #include <Components/Persistent/FuseDelay.hpp>
+#include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
@@ -63,6 +64,7 @@
 #include <Components/Persistent/PickaxeGraveDigWear.hpp>
 #include <Components/Persistent/PickaxeObstacleDigWear.hpp>
 #include <Components/Persistent/PickaxePotSmashWear.hpp>
+#include <Components/Persistent/PlantWearPerForage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerFootstepAddDelay.hpp>
@@ -215,6 +217,8 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::VertigoHealthDmgPerSec>();
   add_component<Cmp::Persist::PlayerOnFireHealthDmgPerSec>();
   add_component<Cmp::Persist::BowReleaseWear>();
+  add_component<Cmp::Persist::PlantWearPerForage>();
+  add_component<Cmp::Persist::GlovesWearPerForage>();
   add_component<Cmp::Persist::PickaxeGraveDigWear>();
   add_component<Cmp::Persist::PickaxeObstacleDigWear>();
   add_component<Cmp::Persist::PickaxePotSmashWear>();

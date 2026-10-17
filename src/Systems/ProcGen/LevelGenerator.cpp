@@ -17,6 +17,7 @@
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Grave/Segment.hpp>
+#include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Moveable.hpp>
@@ -595,7 +596,10 @@ bool LevelGenerator::gen_plant( const Sys::ItemKey &plant_type, sf::Vector2f pos
                                                                                                                     m_reserved_sm.get() );
 
     // Add the worlditem now so we don't have to look it up later when digging up the plant
-    reg().emplace_or_replace<Cmp::WorldItem>( mb_entt, Sys::ItemStore::instance().get( plant_type ) );
+    const auto &plant_item = Sys::ItemStore::instance().get( plant_type );
+    reg().emplace_or_replace<Cmp::WorldItem>( mb_entt, plant_item );
+    // the wear level limits how many items can be foraged from the plant
+    if ( plant_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( mb_entt, 100.f ); }
 
     // Protect every cell covered by this plant: segment entities carry the UUID and
     // are at each tile position. Insert them so subsequent placement calls see them

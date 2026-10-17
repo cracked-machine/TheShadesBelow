@@ -119,6 +119,12 @@ void InventorySystem::update_dmg( entt::entity entt, float amount, Events::Updat
         reg().destroy( entt );
         add_inventory_item( "item.rottenfood" );
       }
+      else if ( inventory_type == "item.gloves" )
+      {
+        // worn out gloves fall apart
+        reg().destroy( entt );
+        m_sound_bank.get_effect( "drop_inventory" ).play();
+      }
       else
       {
         // dead tools remain in inventory for altar sacrifice
@@ -223,6 +229,9 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
       // on_player_action_event) can hand it back via the normal pickup_world_item path instead of
       // having to re-derive an item id from the multiblock's sprite.
       reg().emplace_or_replace<Cmp::WorldItem>( mb_entt, inventory_slot_cmp->m_item );
+      // keep the remaining forage count when the plant is replanted
+      auto *plant_wearlevel_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inventory_slot_entt );
+      if ( plant_wearlevel_cmp ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( mb_entt, plant_wearlevel_cmp->m_level ); }
 
       // rebuild the m_player_navmesh here
       if ( auto player_navmesh = m_player_navmesh.lock() )

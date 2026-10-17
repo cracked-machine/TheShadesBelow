@@ -23,8 +23,10 @@
 #include <Components/Persistent/AxeSkeletonKillWear.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
+#include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/PickaxeObstacleDigWear.hpp>
 #include <Components/Persistent/PickaxePotSmashWear.hpp>
+#include <Components/Persistent/PlantWearPerForage.hpp>
 #include <Components/Persistent/ShovelObstacleDigWear.hpp>
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Plant/BurningTimer.hpp>
@@ -74,6 +76,7 @@
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/System/Time.hpp>
 #include <entt/entity/entity.hpp>
+#include <algorithm>
 #include <entt/entity/fwd.hpp>
 #include <numbers>
 #include <spdlog/spdlog.h>
@@ -337,38 +340,57 @@ void ActionSystem::player_plant_interact()
       if ( not plant_item ) continue;
 
       auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+
+      // copy the type: creating items or removing the plant below can invalidate plant_item
+      const auto plant_type = plant_item->item_type;
+
+      // each forage wears the plant down
+      auto wear_plant = [&]()
+      {
+        auto wear = Sys::PersistSystem::get<Cmp::Persist::PlantWearPerForage>( reg() ).get_value();
+        get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, wear ) );
+      };
+      // a fully foraged plant withers away - no drops
+      auto remove_if_depleted = [&]()
+      {
+        if ( not Utils::is_plant_depleted( reg(), plant_entt ) ) return;
+        Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
+      };
+
       if ( inventory_type == "" )
       {
 
         // no drop from foraging redcampion plant
-        if ( not plant_item->item_type.contains( "redcampion" ) )
+        if ( not plant_type.contains( "redcampion" ) )
         {
           auto plantleaves_particle_uuid = Cmp::UUID::generate();
           Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
                                                  plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
-          get_systems_event_queue().trigger( Events::AddInventoryEvent( Sys::ItemKey( plant_item->item_type.str() + ".forage" ) ) );
+          get_systems_event_queue().trigger( Events::AddInventoryEvent( Sys::ItemKey( plant_type.str() + ".forage" ) ) );
           Utils::Player::apply_action_from_inventory_item<Cmp::SpawnAction>( reg() );
           m_sound_bank.get_effect( "chopping_final" ).play();
+          wear_plant();
         }
-        if ( plant_item->item_type == "item.plant.hawthorn" )
+        // A working lightning rod on screen takes the strike, otherwise the player is struck.
+        if ( plant_type == "item.plant.hawthorn" ) { spawn_lightning( 0.5f ); }
+        remove_if_depleted();
+      }
+      else if ( inventory_type == "item.gloves" )
+      {
+        // Gloves stay equipped: the forage is dropped next to the plant and the plant's action modifiers are deliberately
+        // skipped. They don't protect against hawthorn lightning though.
+        if ( plant_type == "item.plant.nettle" or plant_type == "item.plant.hawthorn" )
         {
-          // 50% chance of a lightning strike. A working lightning rod on screen takes the strike, otherwise the player is struck.
-          Cmp::RandomInt lightning_chance( 0, 1 );
-          if ( lightning_chance.gen() == 0 )
-          {
-            // entt::entity lightning_target_entt = Utils::Player::get_entity( reg() );
-            // for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>().each() )
-            // {
-            //   if ( worlditem_cmp.item_type != "item.lightningrod" ) continue;
-            //   if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), worlditem_pos_cmp ) ) continue;
-            //   auto *wearlevel = reg().try_get<Cmp::Inventory::WearLevel>( worlditem_entt );
-            //   if ( not wearlevel or wearlevel->m_level <= 0 ) continue;
-            //   lightning_target_entt = worlditem_entt;
-            //   break;
-            // }
-            // get_systems_event_queue().trigger( Events::LightningEvent( lightning_target_entt ) );
-            spawn_lightning();
-          }
+          auto plantleaves_particle_uuid = Cmp::UUID::generate();
+          Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
+                                                 plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
+          get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( find_forage_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
+                                                                      Sys::ItemKey( plant_type.str() + ".forage" ), "drop_loot" ) );
+          wear_plant();
+          auto gloves_wear = Sys::PersistSystem::get<Cmp::Persist::GlovesWearPerForage>( reg() ).get_value();
+          get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), gloves_wear ) );
+          if ( plant_type == "item.plant.hawthorn" ) { spawn_lightning( 0.5f ); }
+          remove_if_depleted();
         }
       }
       else
@@ -740,8 +762,10 @@ void ActionSystem::update_burning_worlditems( sf::Time dt )
   }
 }
 
-void ActionSystem::spawn_lightning()
+void ActionSystem::spawn_lightning( float odds )
 {
+  if ( Cmp::RandomFloat( 0.f, 1.f ).gen() >= odds ) return;
+
   entt::entity lightning_target_entt = Utils::Player::get_entity( reg() );
   for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>().each() )
   {
@@ -753,6 +777,54 @@ void ActionSystem::spawn_lightning()
     break;
   }
   get_systems_event_queue().trigger( Events::LightningEvent( lightning_target_entt ) );
+}
+
+sf::Vector2f ActionSystem::find_forage_drop_pos( const Cmp::PlantMultiBlock &plant_mb_cmp )
+{
+  const auto grid = Constants::kGridSizePxF;
+  const auto plant_pos = Utils::snap_to_grid( plant_mb_cmp.position );
+
+  // the plant's base cell is the bottom row of its footprint
+  const sf::Vector2f base_cell( plant_pos.x, plant_pos.y + plant_mb_cmp.size.y - grid.y );
+
+  // collect every cell in the ring around the plant footprint
+  const int cols = static_cast<int>( std::round( plant_mb_cmp.size.x / grid.x ) );
+  const int rows = static_cast<int>( std::round( plant_mb_cmp.size.y / grid.y ) );
+  std::vector<sf::Vector2f> candidates;
+  for ( int gy = -1; gy <= rows; ++gy )
+  {
+    for ( int gx = -1; gx <= cols; ++gx )
+    {
+      bool inside_footprint = gx >= 0 and gx < cols and gy >= 0 and gy < rows;
+      if ( inside_footprint ) continue;
+      candidates.emplace_back( plant_pos.x + ( static_cast<float>( gx ) * grid.x ), plant_pos.y + ( static_cast<float>( gy ) * grid.y ) );
+    }
+  }
+  // scatter the drops rather than always filling the same cell first
+  Cmp::RandomInt rng( 0, 1 );
+  std::shuffle( candidates.begin(), candidates.end(), rng );
+
+  auto reserved_sm = m_reserved_sm.lock();
+  auto is_free = [&]( const sf::Vector2f &cell )
+  {
+    // shrink the hitbox slightly so neighbouring cells sharing an edge don't count as overlapping
+    Cmp::Position cell_pos( cell + sf::Vector2f{ 1.f, 1.f }, grid - sf::Vector2f{ 2.f, 2.f } );
+    if ( Utils::get_world_pos_entt( reg(), cell_pos ) == entt::null ) return false;
+    if ( reserved_sm and not reserved_sm->at( cell_pos ).empty() ) return false;
+    for ( auto [entt, worlditem_cmp, pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>().each() )
+    {
+      if ( pos_cmp.findIntersection( cell_pos ) ) return false;
+    }
+    for ( auto [entt, obstacle_cmp, pos_cmp] : reg().view<Cmp::Obstacle, Cmp::Position>().each() )
+    {
+      if ( obstacle_cmp.m_enabled and pos_cmp.findIntersection( cell_pos ) ) return false;
+    }
+    return true;
+  };
+
+  auto free_cell = std::ranges::find_if( candidates, is_free );
+  // no free cell around the plant so overlap at the base of the plant
+  return free_cell != candidates.end() ? *free_cell : base_cell;
 }
 
 } // namespace Game::Sys

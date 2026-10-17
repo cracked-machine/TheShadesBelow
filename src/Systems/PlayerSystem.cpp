@@ -750,6 +750,9 @@ void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
 
 void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
 {
+  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+  if ( inventory_type == "item.gloves" ) return;
+
   for ( auto [plant_entt, plant_mb_cmp, plant_worlditem_cmp] : reg().view<Cmp::PlantMultiBlock, Cmp::WorldItem>().each() )
   {
     if ( not Utils::Player::is_player_near( reg(), plant_mb_cmp ) ) continue;

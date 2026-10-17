@@ -28,6 +28,7 @@
 #include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/FearHealthDmgPerSec.hpp>
 #include <Components/Persistent/FuseDelay.hpp>
+#include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
@@ -63,6 +64,7 @@
 #include <Components/Persistent/PickaxeGraveDigWear.hpp>
 #include <Components/Persistent/PickaxeObstacleDigWear.hpp>
 #include <Components/Persistent/PickaxePotSmashWear.hpp>
+#include <Components/Persistent/PlantWearPerForage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerFootstepAddDelay.hpp>
@@ -235,6 +237,8 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::PickaxeGraveDigWear>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ShovelGraveDigWear>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::BowReleaseWear>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::PlantWearPerForage>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::GlovesWearPerForage>( reg() ).render_widget();
 
     // Bomb Settings
     ImGui::SeparatorText( "Bomb Settings" );

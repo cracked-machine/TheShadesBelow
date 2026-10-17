@@ -105,6 +105,22 @@
     "detail": "Bow wear: per arrow released",
     "format": "%.1f"
   },
+  "PlantWearPerForage": {
+    "type": "float",
+    "value": 10.0,
+    "min_value": 1.0,
+    "max_value": 100.0,
+    "detail": "Plant wear: per item foraged",
+    "format": "%.1f"
+  },
+  "GlovesWearPerForage": {
+    "type": "float",
+    "value": 3.0,
+    "min_value": 0.0,
+    "max_value": 100.0,
+    "detail": "Gloves wear: per item foraged",
+    "format": "%.1f"
+  },
   "BradycardiaHealthDmgPerSec": {
     "type": "int",
     "value": 5,

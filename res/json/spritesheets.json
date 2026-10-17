@@ -1093,6 +1093,20 @@
         }
       }
     },
+    "sprite.item.gloves": {
+      "spritesheet": {
+        "displayname": "Proective Gloves",
+        "zorder": [0],
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [44],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
     "sprite.item.hawthorntea": {
       "spritesheet": {
         "displayname": "Hawthorn Tea",

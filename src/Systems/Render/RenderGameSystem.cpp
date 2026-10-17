@@ -327,14 +327,15 @@ void RenderGameSystem::render_wear_level( float wearlevel, const Cmp::Position &
   float icon_border = 0.f;
   float padding = 1.f;
   float icon_height = 2.f;
-  float icon_width = Constants::kGridSizePxF.x - ( padding * 2 );
+  float icon_width = pos.size.x - ( padding * 2 );
 
   sf::RectangleShape icon( { ( icon_width / 100.f ) * wearlevel, icon_height } );
   icon.setOutlineColor( sf::Color::Black );
   icon.setOutlineThickness( icon_border );
   icon.setFillColor( sf::Color( 255, 0, 0, 224 ) );
 
-  icon.setPosition( { pos.position.x + ( padding ), pos.position.y + Constants::kGridSizePxF.y - icon_height - ( padding ) } );
+  // anchor to the bottom of the entity so multi-cell sprites (e.g. plants) show the bar at their base
+  icon.setPosition( { pos.position.x + ( padding ), pos.position.y + pos.size.y - icon_height - ( padding ) } );
 
   draw_world( icon );
 }

@@ -9,6 +9,11 @@ namespace Game::PathFinding
 class SpatialHashGrid;
 }
 
+namespace Game::Cmp
+{
+class PlantMultiBlock;
+}
+
 namespace Game::Sys
 {
 
@@ -82,7 +87,13 @@ private:
   void update_burning_worlditems( sf::Time dt );
 
   //! @brief Pick player or lightning rod as target and spawn lightning (via LightningSystem)
-  void spawn_lightning();
+  //! @param odds Probability (0-1) that the strike happens; 1 = guaranteed
+  void spawn_lightning( float odds = 1.f );
+
+  //! @brief Find a free grid cell around the plant to drop a foraged item into.
+  //! @param plant_mb_cmp The plant being foraged.
+  //! @return sf::Vector2f The free cell, or the plant's base cell if every surrounding cell is occupied.
+  sf::Vector2f find_forage_drop_pos( const Cmp::PlantMultiBlock &plant_mb_cmp );
 
   //! @brief all grid positions that block NPC pathfinding
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;

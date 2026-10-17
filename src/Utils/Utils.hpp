@@ -93,6 +93,13 @@ sf::FloatRect get_mouse_bounds_in_gameview( const sf::RenderWindow &window, cons
 //! @return entt::entity The first matching entity, or entt::null if none intersects.
 entt::entity get_world_pos_entt( entt::registry &reg, Cmp::Position match );
 
+//! @brief True if the plant has a Cmp::Inventory::WearLevel and it has been fully foraged.
+//! @note Depleted plants are removed from the world (see ActionSystem::player_plant_interact).
+//! @param reg reference to the entt registry
+//! @param plant_entt The plant multiblock entity.
+//! @return bool True if the plant's wear level is at or below zero.
+bool is_plant_depleted( entt::registry &reg, entt::entity plant_entt );
+
 //! @brief Word-wraps text to fit within max_chars_per_line, preserving existing newlines as hard breaks.
 //! @note Approximate (assumes roughly-uniform character width) - fine for a fatal-error debug screen.
 //! @param text The text to wrap.

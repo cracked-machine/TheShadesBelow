@@ -203,6 +203,12 @@ entt::entity get_world_pos_entt( entt::registry &reg, Cmp::Position match )
   return entt::null;
 }
 
+bool is_plant_depleted( entt::registry &reg, entt::entity plant_entt )
+{
+  const auto *wearlevel_cmp = reg.try_get<Cmp::Inventory::WearLevel>( plant_entt );
+  return wearlevel_cmp and wearlevel_cmp->m_level <= 0;
+}
+
 std::string wrap_text_to_width( const std::string &text, std::size_t max_chars_per_line )
 {
   std::string result;

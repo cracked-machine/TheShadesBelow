@@ -1,6 +1,7 @@
 
 #include <Audio/SoundBank.hpp>
 #include <Components/AnimData.hpp>
+#include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
@@ -47,7 +48,11 @@ void ItemSystem::on_update_dmg_event( const Events::UpdateDmgEvent &ev )
         break;
     }
 
-    if ( wearlevel_cmp.m_level <= 0 ) { swap_world_item( ev.m_item_entt, "item.rottenfood" ); }
+    // depleted plants stay in the world, they just can't be foraged any more
+    if ( wearlevel_cmp.m_level <= 0 and not reg().all_of<Cmp::PlantMultiBlock>( ev.m_item_entt ) )
+    {
+      swap_world_item( ev.m_item_entt, "item.rottenfood" );
+    }
   }
 }
 
