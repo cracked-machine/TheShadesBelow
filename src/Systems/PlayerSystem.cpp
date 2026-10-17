@@ -651,55 +651,35 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
   if ( m_timed_action_sync_clock.asSeconds() >= kTimedActionSyncClockMax )
   {
     // health effect decrease per toxidrome
-    auto health_dmg_action = []( int dmg ) { return Cmp::BaseAction( Cmp::Stats::Health{ -dmg }, {}, {}, {}, {}, {} ); };
+    auto apply_health_dmg = [&]( int dmg )
+    {
+      const auto modifier = Cmp::BaseAction( Cmp::Stats::Health{ -dmg }, {}, {}, {}, {}, {} );
+      player_stats.apply( modifier );
+      reg().emplace_or_replace<Cmp::Player::TookDamage>( player_entt );
+    };
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Hypoxia>() == 100 )
     {
-      const auto hypoxia_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::HypoxiaHealthDmgPerSec>( reg() ).get_value() );
-      player_stats.apply( hypoxia_health_dmg );
-      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::HypoxiaHealthDmgPerSec>( reg() ).get_value() );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Tachycardia>() == 100 )
     {
-      const auto tachycardia_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::TachycardiaHealthDmgPerSec>( reg() ).get_value() );
-      player_stats.apply( tachycardia_health_dmg );
-      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::TachycardiaHealthDmgPerSec>( reg() ).get_value() );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Bradycardia>() == 100 )
     {
-      const auto bradycardia_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::BradycardiaHealthDmgPerSec>( reg() ).get_value() );
-      player_stats.apply( bradycardia_health_dmg );
-      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::BradycardiaHealthDmgPerSec>( reg() ).get_value() );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Venom>() == 100 )
     {
-      const auto venom_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::VenomHealthDmgPerSec>( reg() ).get_value() );
-      player_stats.apply( venom_health_dmg );
-      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::VenomHealthDmgPerSec>( reg() ).get_value() );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Vertigo>() == 100 )
     {
-      const auto vertigo_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::VertigoHealthDmgPerSec>( reg() ).get_value() );
-      player_stats.apply( vertigo_health_dmg );
-      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::VertigoHealthDmgPerSec>( reg() ).get_value() );
     }
-    if ( player_stats.fear() == 100 )
-    {
-      const auto fear_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::FearHealthDmgPerSec>( reg() ).get_value() );
-      player_stats.apply( fear_health_dmg );
-      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
-    }
-    if ( player_stats.despair() == 100 )
-    {
-      const auto despair_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::DespairHealthDmgPerSec>( reg() ).get_value() );
-      player_stats.apply( despair_health_dmg );
-      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
-    }
-    if ( m_player_is_on_fire )
-    {
-      const auto onfire_health_dmg = health_dmg_action( Sys::PersistSystem::get<Cmp::Persist::PlayerOnFireHealthDmgPerSec>( reg() ).get_value() );
-      player_stats.apply( onfire_health_dmg );
-      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
-    }
+    if ( player_stats.fear() == 100 ) { apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::FearHealthDmgPerSec>( reg() ).get_value() ); }
+    if ( player_stats.despair() == 100 ) { apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::DespairHealthDmgPerSec>( reg() ).get_value() ); }
+    if ( m_player_is_on_fire ) { apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::PlayerOnFireHealthDmgPerSec>( reg() ).get_value() ); }
     apply_healing_spring_modifiers();
 
     m_timed_action_sync_clock = sf::Time::Zero;
