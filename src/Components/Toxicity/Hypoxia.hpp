@@ -6,7 +6,7 @@
 
 namespace Game::Cmp::Toxicity
 {
-
+//! @brief Tag component - inability to breathe
 struct Hypoxia
 {
 };

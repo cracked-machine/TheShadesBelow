@@ -6,7 +6,7 @@
 
 namespace Game::Cmp::Toxicity
 {
-
+//! @brief Tag component - chemically induced skin damage
 struct Phototoxia
 {
 };

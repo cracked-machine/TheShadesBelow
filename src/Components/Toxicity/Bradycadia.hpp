@@ -6,7 +6,7 @@
 
 namespace Game::Cmp::Toxicity
 {
-
+//! @brief Tag component - decreased heartbeat
 struct Bradycardia
 {
 };

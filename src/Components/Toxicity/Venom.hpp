@@ -6,7 +6,7 @@
 
 namespace Game::Cmp::Toxicity
 {
-
+//! @brief Tag component - poisoned by animals or plants
 struct Venom
 {
 };

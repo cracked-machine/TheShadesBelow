@@ -5,7 +5,7 @@
 
 namespace Game::Cmp::Toxicity
 {
-
+//! @brief Tag component - sensation of spinning/swaying surroundings
 struct Vertigo
 {
 };
