@@ -628,18 +628,7 @@ void PlayerSystem::update_heartbeat( sf::Time dt )
 
 void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
 {
-
   auto &player_stats = Utils::Player::get_stats( reg() );
-
-  // health effect decrease per toxidrome
-  const Cmp::BaseAction max_fear_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
-  const Cmp::BaseAction max_hypoxia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
-  const Cmp::BaseAction max_tachycardia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
-  const Cmp::BaseAction max_bradycardia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
-  const Cmp::BaseAction max_venom_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
-  const Cmp::BaseAction max_vertigo_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
-  const Cmp::BaseAction player_onfire_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {} );
-
   auto player_entt = Utils::Player::get_entity( reg() );
   if ( auto *suppress_timer = reg().try_get<Cmp::Player::MovementSuppressTimer>( player_entt ) ) *suppress_timer += dt;
 
@@ -653,6 +642,16 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
   m_timed_action_sync_clock += dt;
   if ( m_timed_action_sync_clock.asSeconds() >= kTimedActionSyncClockMax )
   {
+    // health effect decrease per toxidrome
+    const Cmp::BaseAction max_fear_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
+    const Cmp::BaseAction max_despair_modifier( Cmp::Stats::Health{ -1 }, {}, {}, {}, {}, {}, {} );
+    const Cmp::BaseAction max_hypoxia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
+    const Cmp::BaseAction max_tachycardia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
+    const Cmp::BaseAction max_bradycardia_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
+    const Cmp::BaseAction max_venom_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
+    const Cmp::BaseAction max_vertigo_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {}, {} );
+    const Cmp::BaseAction player_onfire_modifier( Cmp::Stats::Health{ -5 }, {}, {}, {}, {}, {} );
+
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Hypoxia>() == 100 )
     {
       player_stats.apply( max_hypoxia_modifier );
@@ -681,6 +680,11 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
     if ( player_stats.fear() == 100 )
     {
       player_stats.apply( max_fear_modifier );
+      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+    }
+    if ( player_stats.despair() == 100 )
+    {
+      player_stats.apply( max_despair_modifier );
       reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     }
     if ( m_player_is_on_fire )
@@ -827,7 +831,7 @@ void PlayerSystem::kill_player_if_stats_are_max()
   {
     on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::TERRIFIED, Utils::Player::get_position( reg() ) ) );
   }
-  else if ( Utils::Player::get_stats( reg() ).despair() == 100 )
+  else if ( Utils::Player::get_stats( reg() ).despair() >= 100 )
   {
     on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::SUICIDE, Utils::Player::get_position( reg() ) ) );
   }
