@@ -5,44 +5,103 @@
   "patternProperties": {
     "^(item\\..+|ERROR_SPRITE)$": {
       "type": "object",
-      "required": ["sprite", "expiry", "wear_location", "sacrifice_output", "forage_output", "axe_output", "is_sacrificial", "weapon_damage", "actions"],
+      "required": ["sprite", "wear", "sacrifice", "forage", "chop", "damage_to_weapon", "actions"],
       "additionalProperties": false,
       "properties": {
         "sprite": {
           "type": "string",
           "description": "The sprite identifier for the item"
         },
-        "expiry": {
-          "type": "number",
-          "description": "The expiry for this item in seconds. Zero if no expiry."
-        },
-        "wear_location": {
-          "type": "string",
-          "enum": ["None", "World", "Inventory", "Both"],
-          "description": "Where the item's wear level is active. World, Inventory or Both. None if the item does not wear."
+        "wear": {
+          "type": "object",
+          "required": ["location", "expiryseconds"],
+          "additionalProperties": false,
+          "properties": {
+            "location": {
+              "type": "string",
+              "enum": ["none", "world", "inventory", "both"],
+              "description": "Where the item's wear level is active. World, Inventory or Both. None if the item does not wear."
+            },
+            "expiryseconds": {
+              "type": "number",
+              "description": "The expiry for this item in seconds. Zero if no expiry."
+            }
+          }
         },
         "consumable": {
           "type": "string",
           "enum": ["none", "edible", "drinkable"],
           "description": "Can the item be eaten or drunk."
         },
-        "sacrifice_output": {
-          "type": "string",
-          "description": "The item that will spawn when this item is sacrificed. Must a valid item key if populated, else no op if empty string. Note, this will replace player inventory."
+        "sacrifice": {
+          "type": "object",
+          "required": ["enabled", "reward"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether this item can be sacrificed at an altar. If true, exactly one of reward.item, reward.wealth or reward.special must be set. If false, none may be set."
+            },
+            "reward": {
+              "type": "object",
+              "required": ["item", "wealth", "special"],
+              "additionalProperties": false,
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "description": "The item that will spawn when this item is sacrificed. Must be a valid item key if populated, else empty string. Note, this will replace player inventory."
+                },
+                "wealth": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "The wealth gained when this item is sacrificed. Zero if unused. Tools (axe, pickaxe, shovel) can only be sacrificed once spent."
+                },
+                "special": {
+                  "type": "string",
+                  "enum": ["none", "altar", "banish", "crypt"],
+                  "description": "A special altar effect. altar: light an altar candle (relics). banish: banish ghosts or gain an extra life at a crypt altar (witches jar). crypt: unlock the crypt key (exit key). none if unused."
+                }
+              }
+            }
+          }
         },
-        "forage_output": {
-          "type": "string",
-          "description": "The item gained when this plant is foraged with an empty hand (added to inventory) or gloves (dropped next to the plant). Must be a valid item key if populated, else no op if empty string."
+        "forage": {
+          "type": "object",
+          "required": ["reward"],
+          "additionalProperties": false,
+          "properties": {
+            "reward": {
+              "type": "object",
+              "required": ["item"],
+              "additionalProperties": false,
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "description": "The item gained when this plant is foraged with an empty hand (added to inventory) or gloves (dropped next to the plant). Must be a valid item key if populated, else no op if empty string."
+                }
+              }
+            }
+          }
         },
-        "axe_output": {
-          "type": "string",
-          "description": "The item dropped when this plant is chopped down with an axe. Must be a valid item key if populated, else no op if empty string."
+        "chop": {
+          "type": "object",
+          "required": ["reward"],
+          "additionalProperties": false,
+          "properties": {
+            "reward": {
+              "type": "object",
+              "required": ["item"],
+              "additionalProperties": false,
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "description": "The item dropped when this plant is chopped down with an axe. Must be a valid item key if populated, else no op if empty string."
+                }
+              }
+            }
+          }
         },
-        "is_sacrificial": {
-          "type": "boolean",
-          "description": "Whether this item can be sacrificed at an altar."
-        },
-        "weapon_damage": {
+        "damage_to_weapon": {
           "type": "object",
           "description": "Wear damage this item inflicts on each weapon when the weapon is used against it.",
           "required": ["pickaxe", "axe", "shovel", "bow"],

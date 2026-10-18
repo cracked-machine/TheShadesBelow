@@ -108,37 +108,41 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
            item.item_type.contains( "item.dowsingrod" );
   };
 
-  if ( item.is_sacrificial() )
-  {
-    Utils::Player::get_stats( reg() ).apply( item.at<Cmp::SacrificeAction>().action );
-    SPDLOG_INFO( "Player made an offering: {} -> {}", item.item_type, item.get_sacrifice_output() );
-    Factory::Player::destroy_inventory( reg(), item.item_type );
+  if ( not item.is_sacrificial() ) return;
 
-    // Each offering is handled by exactly one handler, first match wins
-    if ( not item.get_sacrifice_output().empty() ) { sacrifice_for_output( altar_cmp, item ); }
-    else if ( item.item_type.contains( "item.jewelry" ) ) { sacrifice_for_wealth( altar_cmp ); }
-    else if ( is_tool() )
+  // only spent tools can be sacrificed - check before the tool is consumed
+  if ( is_tool() and Utils::Player::get_inventory_wear_level( reg() ) > 0 ) return;
+
+  Utils::Player::get_stats( reg() ).apply( item.at<Cmp::SacrificeAction>().action );
+  SPDLOG_INFO( "Player made an offering: {} -> {}", item.item_type, item.get_sacrifice_item() );
+  Factory::Player::destroy_inventory( reg(), item.item_type );
+
+  // Each offering has exactly one reward (enforced by ItemStore), see "sacrifice.reward" in items.json
+  using SacrificeSpecial = Cmp::WorldItem::SacrificeSpecial;
+  if ( not item.get_sacrifice_item().empty() ) { sacrifice_for_item( altar_cmp, item ); }
+  else if ( item.get_sacrifice_wealth() > 0 ) { sacrifice_for_wealth( altar_cmp, item.get_sacrifice_wealth() ); }
+  else
+  {
+    switch ( item.get_sacrifice_special() )
     {
-      // only spent tools can be sacrificed
-      if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) sacrifice_for_wealth( altar_cmp );
+      case SacrificeSpecial::ALTAR: sacrifice_relic( altar_entity, altar_cmp, *altar_uuid_cmp ); break;
+      case SacrificeSpecial::BANISH: sacrifice_witches_jar( altar_entity, altar_cmp, *altar_uuid_cmp, item ); break;
+      case SacrificeSpecial::CRYPT: sacrifice_exitkey( altar_entity, altar_cmp, *altar_uuid_cmp ); break;
+      case SacrificeSpecial::NONE: play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT ); break;
     }
-    else if ( item.item_type.contains( "item.witchesjar" ) ) { sacrifice_witches_jar( altar_entity, altar_cmp, *altar_uuid_cmp, item ); }
-    else if ( item.item_type.contains( "item.relic" ) ) { sacrifice_relic( altar_entity, altar_cmp, *altar_uuid_cmp ); }
-    else if ( item.item_type.contains( "item.exitkey" ) ) { sacrifice_exitkey( altar_entity, altar_cmp, *altar_uuid_cmp ); }
-    else { play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT ); }
   }
 }
 
-void AltarSystem::sacrifice_for_output( const Cmp::Altar::MultiBlock &altar_cmp, const Cmp::WorldItem &item )
+void AltarSystem::sacrifice_for_item( const Cmp::Altar::MultiBlock &altar_cmp, const Cmp::WorldItem &item )
 {
   play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
-  get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), item.get_sacrifice_output(), "drop_loot" ) );
+  get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), item.get_sacrifice_item(), "drop_loot" ) );
 }
 
-void AltarSystem::sacrifice_for_wealth( const Cmp::Altar::MultiBlock &altar_cmp )
+void AltarSystem::sacrifice_for_wealth( const Cmp::Altar::MultiBlock &altar_cmp, int wealth )
 {
   play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
-  Utils::Player::get_wealth( reg() ).wealth += 2;
+  Utils::Player::get_wealth( reg() ).wealth += wealth;
   m_sound_bank.get_effect( "get_loot" ).play();
   // signal UI to flash
   reg().emplace_or_replace<Cmp::FlashUIWealth>( reg().create() );

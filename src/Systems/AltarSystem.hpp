@@ -43,10 +43,10 @@ private:
   //! @brief The animation played above the altar following a sacrifice
   enum class SacrificeAnimType { DEFAULT, KEY };
 
-  //! @brief Swap the item for its "sacrifice_output" (see items.json)
-  void sacrifice_for_output( const Cmp::Altar::MultiBlock &altar_cmp, const Cmp::WorldItem &item );
-  //! @brief Swap jewelry or worn out tools for wealth
-  void sacrifice_for_wealth( const Cmp::Altar::MultiBlock &altar_cmp );
+  //! @brief Swap the item for its "sacrifice.reward.item" (see items.json)
+  void sacrifice_for_item( const Cmp::Altar::MultiBlock &altar_cmp, const Cmp::WorldItem &item );
+  //! @brief Swap the item for its "sacrifice.reward.wealth" (see items.json), e.g. jewelry or worn out tools
+  void sacrifice_for_wealth( const Cmp::Altar::MultiBlock &altar_cmp, int wealth );
   //! @brief Crypt altar: grants an extra life. Graveyard altar: banishes all ghosts.
   void sacrifice_witches_jar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid, const Cmp::WorldItem &item );
   //! @brief Light an altar flame per relic. Drops an exitkey once the exitkey threshold is reached.
