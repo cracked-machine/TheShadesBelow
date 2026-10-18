@@ -1921,7 +1921,7 @@
         }
       }
     },
-    "sprite.plant.witchesbroom": {
+    "sprite.item.witchesbroom": {
       "spritesheet": {
         "displayname": "Witches Broom",
         "zorder": [0],
