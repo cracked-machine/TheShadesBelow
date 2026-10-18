@@ -68,7 +68,8 @@ void create_cobweb( entt::registry &reg, entt::entity selected_entt, sf::Vector2
   });
   // clang-format on
   reserved_sm.insert( selected_entt, new_pos );
-  reg.emplace_or_replace<Cmp::ZOrderValue>( selected_entt, spawn_position.y );
+  // json zorder is relative to y, so a small positive value draws it in front of an obstacle pushed into its cell
+  reg.emplace_or_replace<Cmp::ZOrderValue>( selected_entt, spawn_position.y + cobweb_ms.zorder( sprite_idx ) );
   reg.emplace_or_replace<Cmp::Ruin::Cobweb>( selected_entt, 100 );
 }
 

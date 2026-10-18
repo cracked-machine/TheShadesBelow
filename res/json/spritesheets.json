@@ -33,7 +33,7 @@
     "sprite.crypt.chest": {
       "spritesheet": {
         "displayname": "sprite.crypt.chest",
-        "zorder": [100, 100, 100],
+        "zorder": [0],
         "texture_path": "res/textures/crypt.png",
         "sprite_indices": [20,21,22],
         "indices_per_sequence": 3,
@@ -2135,7 +2135,7 @@
     "sprite.ruin.cobweb": {
       "spritesheet": {
         "displayname": "sprite.ruin.cobweb",
-        "zorder": [0, 0, 0, 0],
+        "zorder": [1, 1, 1, 1],
         "texture_path": "res/textures/ruin.png",
         "sprite_indices": [40, 41, 42, 43],
         "indices_per_sequence": 1,
@@ -2317,7 +2317,7 @@
     "sprite.ruin.wall.int.cap": {
       "spritesheet": {
         "displayname": "sprite.ruin.wall.int",
-        "zorder": [100],
+        "zorder": [0],
         "texture_path": "res/textures/ruin.png",
         "sprite_indices": [7],
         "indices_per_sequence": 1,
@@ -2332,7 +2332,7 @@
     "sprite.ruin.wall.int.main": {
       "spritesheet": {
         "displayname": "sprite.ruin.wall.int",
-        "zorder": [100],
+        "zorder": [0],
         "texture_path": "res/textures/ruin.png",
         "sprite_indices": [17],
         "indices_per_sequence": 1,

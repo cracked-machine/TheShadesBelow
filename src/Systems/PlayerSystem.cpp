@@ -331,6 +331,7 @@ void PlayerSystem::move_obstacle( const sf::FloatRect &target_position )
       // move the obstacle
       const Cmp::Position vacated_pos = selected_pos_cmp;
       selected_pos_cmp.position += player_velocity.position();
+      if ( auto *zorder_cmp = reg().try_get<Cmp::ZOrderValue>( selected_entt ) ) { zorder_cmp->set( zorder_cmp->get() + player_velocity.position().y ); }
 
       // keep the NPC navmesh in sync: the cell the block was placed on lost its whole bucket when the navmesh was
       // built (NoPathFinding), so give the vacated cell a floor entity again, and close off the destination cell.
@@ -349,6 +350,7 @@ void PlayerSystem::move_obstacle( const sf::FloatRect &target_position )
       {
         if ( cap_search_uuid_cmp != selected_uuid_cmp ) continue;
         cap_search_pos_cmp.position += player_velocity.position();
+        if ( auto *zorder_cmp = reg().try_get<Cmp::ZOrderValue>( cap_search_entt ) ) { zorder_cmp->set( zorder_cmp->get() + player_velocity.position().y ); }
       }
 
       // if we moved obstacle into cobweb it is now stuck :'(
