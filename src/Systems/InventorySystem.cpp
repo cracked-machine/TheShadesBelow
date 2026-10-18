@@ -172,6 +172,9 @@ void InventorySystem::swap_inventory()
   auto *eating_time = Utils::Player::is_player_eating( reg() );
   if ( eating_time ) return;
 
+  // can't let go of the broom mid-flight (including the descent to the landing cell)
+  if ( Utils::Player::is_flying( reg() ) ) return;
+
   if ( m_swap_item_cooldown_timer.getElapsedTime() < sf::milliseconds( 750.f ) ) return;
 
   auto player_pos = Cmp::RectBounds::scaled( Utils::Player::get_position( reg() ), 0.5 );
