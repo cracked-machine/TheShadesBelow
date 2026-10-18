@@ -378,7 +378,8 @@ void NpcSystem::update_pathfinding_for( PathFinding::SpatialHashGrid &navmesh, c
                                         bool target_illuminated, const Utils::Collision::LightSources &lights )
 {
   // No spawn-boundary stop for player-chasing NPCs: light sources now provide the player's protection.
-  auto result = Utils::Npc::pathfind_toward( reg(), navmesh, target_pos, npc_entity, false, target_illuminated, false, &lights );
+  // An unreachable player (e.g. flying over an obstacle) is approached as closely as possible rather than given up on.
+  auto result = Utils::Npc::pathfind_toward( reg(), navmesh, target_pos, npc_entity, false, target_illuminated, false, &lights, true );
   if ( result == Utils::Npc::PathfindResult::NoPath ) { reg().emplace_or_replace<Cmp::Direction>( npc_entity, Cmp::Direction( { 0.0, 0.0 } ) ); }
 }
 

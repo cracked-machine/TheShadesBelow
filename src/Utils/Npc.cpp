@@ -76,7 +76,8 @@ std::optional<sf::FloatRect> collision_bounds( entt::registry &reg, entt::entity
 }
 
 PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGrid &navmesh, const Cmp::Position &target_pos, entt::entity npc_entity,
-                                bool target_in_spawn, bool target_illuminated, bool always_pathfind, const Utils::Collision::LightSources *lights )
+                                bool target_in_spawn, bool target_illuminated, bool always_pathfind, const Utils::Collision::LightSources *lights,
+                                bool closest_if_unreachable )
 {
   auto *npc_anim_cmp = reg.try_get<Cmp::AnimData>( npc_entity );
   if ( not npc_anim_cmp ) return PathfindResult::Blocked;
@@ -125,9 +126,9 @@ PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGri
     // light can still step out to an unlit neighbour, but it can't walk deeper through it.
     auto is_lit = [&]( const Cmp::Position &pos )
     { return lights->blocks( pos, target_illuminated ? std::span( &target_pos, 1 ) : std::span<const Cmp::Position>() ); };
-    path = PathFinding::astar( reg, navmesh, start_pos, grid_target, query_compass, is_lit, footprint.cells() );
+    path = PathFinding::astar( reg, navmesh, start_pos, grid_target, query_compass, is_lit, footprint.cells(), closest_if_unreachable );
   }
-  else { path = PathFinding::astar( reg, navmesh, start_pos, grid_target, query_compass, {}, footprint.cells() ); }
+  else { path = PathFinding::astar( reg, navmesh, start_pos, grid_target, query_compass, {}, footprint.cells(), closest_if_unreachable ); }
 
   SPDLOG_DEBUG( "{} pathsize: {}", static_cast<uint32_t>( npc_entity ), path.size() );
   if ( path.size() <= 1 ) return PathfindResult::NoPath;

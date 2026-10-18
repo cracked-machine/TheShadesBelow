@@ -74,10 +74,12 @@ enum class PathfindResult {
 //! @param always_pathfind skip the "only pathfind when on-screen" check — wisps must always pathfind
 //! @param lights Optional light snapshot. When given, lit cells are treated as obstacles (except lights illuminating
 //! the target), so a light placed across a passage cuts the NPC off from the player.
+//! @param closest_if_unreachable If the target can't be reached, step towards the closest reachable cell instead of
+//! returning PathfindResult::NoPath (which is still returned once the NPC is on that cell).
 //! @return PathfindResult Whether the NPC moved, was blocked, or no path was found.
 PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGrid &navmesh, const Cmp::Position &target_pos, entt::entity npc_entity,
                                 bool target_in_spawn, bool target_illuminated, bool always_pathfind = false,
-                                const Utils::Collision::LightSources *lights = nullptr );
+                                const Utils::Collision::LightSources *lights = nullptr, bool closest_if_unreachable = false );
 
 } // namespace Game::Utils::Npc
 

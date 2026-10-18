@@ -21,7 +21,7 @@ using ClosedList = std::unordered_map<Cmp::Position, PathNode, PathNode::PosHash
 
 std::vector<PathNode> astar( entt::registry &reg, const PathFinding::SpatialHashGrid &grid, Cmp::Position start, Cmp::Position goal,
                              PathFinding::QueryCompass query_compass, const std::function<bool( const Cmp::Position & )> &is_blocked,
-                             std::span<const sf::Vector2i> footprint_cells )
+                             std::span<const sf::Vector2i> footprint_cells, bool closest_if_unreachable )
 {
   const bool multiblock = footprint_cells.size() > 1;
   const sf::Vector2f goal_cell_centre = goal.position + Constants::kGridSizePxF * 0.5f;
@@ -36,12 +36,16 @@ std::vector<PathNode> astar( entt::registry &reg, const PathFinding::SpatialHash
                           Constants::kGridSizePxF );
   };
 
-  // A cell is walkable if the navmesh still has a non-NPC entry for it: blocked cells have their whole bucket removed.
+  // A cell is walkable if the navmesh still has a static entry for it: blocked cells have their whole bucket removed.
+  // Movers (NPCs and the player) don't count: a flying player re-creates the bucket of the obstacle cell below them.
   auto is_walkable = [&]( const Cmp::Position &cell )
   {
     if ( is_blocked && is_blocked( cell ) ) return false;
     return std::ranges::any_of( grid.at( cell ), [&]( entt::entity cell_entt )
-    { return reg.valid( cell_entt ) and reg.all_of<Cmp::Position>( cell_entt ) and not reg.any_of<Cmp::Npc::NPC>( cell_entt ); } );
+    {
+      return reg.valid( cell_entt ) and reg.all_of<Cmp::Position>( cell_entt ) and
+             not reg.any_of<Cmp::Npc::NPC, Cmp::Player::Character>( cell_entt );
+    } );
   };
 
   // A multiblock footprint anchored on `node` needs every other cell it covers to be walkable. The anchor cell
@@ -111,8 +115,9 @@ std::vector<PathNode> astar( entt::registry &reg, const PathFinding::SpatialHash
       const sf::Vector2f step = neighbour_pos->position - current.pos.position;
       if ( std::abs( step.x ) > Constants::kGridSizePxF.x or std::abs( step.y ) > Constants::kGridSizePxF.y ) continue;
 
-      // Skip other NPCs so they don't block each other's pathfinding
-      if ( reg.any_of<Cmp::Npc::NPC>( neighbour_entt ) ) continue;
+      // Skip movers: other NPCs so they don't block each other's pathfinding, and the player so a flying player
+      // over an obstacle (whose navmesh entry re-creates that cell's removed bucket) doesn't make it walkable
+      if ( reg.any_of<Cmp::Npc::NPC, Cmp::Player::Character>( neighbour_entt ) ) continue;
 
       if ( is_blocked && is_blocked( *neighbour_pos ) ) continue;
       if ( multiblock and not has_clearance( *neighbour_pos ) ) continue;
@@ -135,6 +140,14 @@ std::vector<PathNode> astar( entt::registry &reg, const PathFinding::SpatialHash
         openList.push_back( new_neighbor );
       }
     }
+  }
+
+  // Goal unreachable: settle for the explored node nearest to it. Ties go to the lowest g, so an NPC already
+  // on a closest node keeps the start node and stays put rather than shuffling between equally close nodes.
+  if ( not endNode and closest_if_unreachable and not closedList.empty() )
+  {
+    endNode = &std::ranges::min_element( closedList, []( const auto &a, const auto &b )
+    { return a.second.h < b.second.h or ( a.second.h == b.second.h and a.second.g < b.second.g ); } )->second;
   }
 
   // Reconstruct path

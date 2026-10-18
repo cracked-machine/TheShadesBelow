@@ -92,11 +92,13 @@ struct PathNode
 //! index zero is the anchor cell, which is what `start` and each path node refer to. Empty or one cell for a
 //! single-block entity. A node is only expanded if the other cells are walkable too, and the goal is reached once
 //! any of the cells is the goal cell. See Cmp::Npc::Footprint.
+//! @param closest_if_unreachable If the goal can't be reached, return the path to the explored node closest to it
+//! (ties go to the node nearest the start) instead of an empty path, e.g. the goal is an obstacle under a flying player.
 //! @return The path from start to goal as an ordered list of PathNode, or an empty vector if no path was found.
 std::vector<PathNode> astar( entt::registry &reg, const PathFinding::SpatialHashGrid &grid, Cmp::Position start, Cmp::Position goal,
                              PathFinding::QueryCompass query_compass = PathFinding::QueryCompass::CARDINAL,
                              const std::function<bool( const Cmp::Position & )> &is_blocked = {},
-                             std::span<const sf::Vector2i> footprint_cells = {} );
+                             std::span<const sf::Vector2i> footprint_cells = {}, bool closest_if_unreachable = false );
 
 } // namespace Game::PathFinding
 
