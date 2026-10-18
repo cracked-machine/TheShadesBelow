@@ -9,6 +9,8 @@
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Hazard/CollisionResist.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Obstacle.hpp>
+#include <Components/ObstacleCap.hpp>
 #include <Components/Persistent/FlyingLandingOverlap.hpp>
 #include <Components/Persistent/FlyingLiftOffset.hpp>
 #include <Components/Persistent/FlyingOscillationAmplitude.hpp>
@@ -130,7 +132,7 @@ void FlyingSystem::on_player_action( Events::PlayerActionEvent ev )
 
 void FlyingSystem::update( sf::Time dt )
 {
-  // the input router re-raises FLY every frame the key is held
+  // read and clear the flag.
   const bool fly_requested = std::exchange( m_fly_requested, false );
 
   // dying mid-flight doesn't land - the death animation plays at the frozen lift offset until game over
@@ -178,10 +180,7 @@ void FlyingSystem::update( sf::Time dt )
   update_render_offset( dt );
 }
 
-sf::Vector2f FlyingSystem::resting_render_offset()
-{
-  return { 0.f, Sys::PersistSystem::get<Cmp::Persist::PlayerRenderOffset>( reg() ).get_value() };
-}
+sf::Vector2f FlyingSystem::resting_render_offset() { return { 0.f, Sys::PersistSystem::get<Cmp::Persist::PlayerRenderOffset>( reg() ).get_value() }; }
 
 float FlyingSystem::transition_seconds()
 {
@@ -277,8 +276,8 @@ void FlyingSystem::update_render_offset( sf::Time dt )
   auto player_entt = Utils::Player::get_entity( reg() );
   // scaled by the lift fraction so the lift and oscillation ease in/out on take-off and landing,
   // on top of the player's resting render offset
-  reg().emplace_or_replace<Cmp::AbsoluteRenderOffset>(
-      player_entt, resting_render_offset() + sf::Vector2f{ 0.f, ( -lift + m_displacement ) * m_lift_fraction } );
+  reg().emplace_or_replace<Cmp::AbsoluteRenderOffset>( player_entt,
+                                                       resting_render_offset() + sf::Vector2f{ 0.f, ( -lift + m_displacement ) * m_lift_fraction } );
 
   // only draw the player in front of obstacles once the sprite has cleared their (1x1) height
   if ( auto *flying_cmp = reg().try_get<Cmp::Player::Flying>( player_entt ) )
@@ -348,6 +347,44 @@ float FlyingSystem::elevated_zorder( entt::registry &reg )
     // honour the explicit zorder: where the player's ground ordering puts them behind it, the flight boost doesn't
     // lift them in front of it
     if ( player_pos.position.y >= zorder_cmp.get() ) continue;
+    zorder = std::min( zorder, zorder_cmp.get() - 0.01f );
+  }
+  return zorder;
+}
+
+sf::FloatRect FlyingSystem::shadow_bounds( entt::registry &reg )
+{
+  const auto &player_pos = Utils::Player::get_position( reg );
+  const float render_offset_y = Sys::PersistSystem::get<Cmp::Persist::PlayerRenderOffset>( reg ).get_value();
+  // flattened circle: full radius wide, half radius tall
+  const sf::Vector2f size{ kFlightShadowRadiusPx * 2.f, kFlightShadowRadiusPx };
+  const sf::Vector2f centre{ player_pos.getCenter().x,
+                             player_pos.position.y + player_pos.size.y - ( kFlightShadowRadiusPx * 0.5f ) + render_offset_y };
+  return { centre - ( size / 2.f ), size };
+}
+
+float FlyingSystem::shadow_zorder( entt::registry &reg )
+{
+  // just before the player, so it is drawn in front of the same obstacles the player is
+  float zorder = Utils::Player::get_zorder( reg ).get() - 0.01f;
+
+  // the cap occupies the cell above its obstacle main. It only hides the shadow on open ground: where another
+  // obstacle main shares the cap's cell (e.g. stacked walls) the shadow is cast on top of that obstacle.
+  auto obstacle_main_under = [&reg]( const Cmp::Position &cap_pos )
+  {
+    for ( auto [obstacle_entt, obstacle_cmp, obstacle_pos_cmp] : reg.view<Cmp::Obstacle, Cmp::Position>().each() )
+    {
+      if ( obstacle_cmp.m_enabled and cap_pos.findIntersection( obstacle_pos_cmp ) ) return true;
+    }
+    return false;
+  };
+
+  const sf::FloatRect bounds = shadow_bounds( reg );
+  for ( auto [entity, cap_cmp, pos_cmp, zorder_cmp] : reg.view<Cmp::ObstacleCap, Cmp::Position, Cmp::ZOrderValue>().each() )
+  {
+    if ( not cap_cmp.m_enabled ) continue;
+    if ( not bounds.findIntersection( pos_cmp ) ) continue;
+    if ( obstacle_main_under( pos_cmp ) ) continue;
     zorder = std::min( zorder, zorder_cmp.get() - 0.01f );
   }
   return zorder;

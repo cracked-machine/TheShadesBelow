@@ -4,6 +4,7 @@
 #include <Events/PlayerActionEvent.hpp>
 #include <Systems/BaseSystem.hpp>
 
+#include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
 
@@ -65,6 +66,18 @@ public:
   //! @param reg
   //! @return float
   static float elevated_zorder( entt::registry &reg );
+
+  //! @brief World bounds of the ground shadow drawn under the flying player: centred on the bottom edge of the
+  //! player's logical (ground) position, shifted by the resting render offset so it sits under the grounded sprite's feet.
+  //! @param reg
+  //! @return sf::FloatRect
+  static sf::FloatRect shadow_bounds( entt::registry &reg );
+
+  //! @brief Z-order for the flight shadow: just behind the player, but behind any obstacle cap it overlaps that
+  //! has no obstacle main in its cell, so the cap hides the shadow on the ground behind it.
+  //! @param reg
+  //! @return float
+  static float shadow_zorder( entt::registry &reg );
 
 private:
   //! @brief Record that the fly key was held this frame.

@@ -128,9 +128,20 @@ void RenderGameSystem::render_zorder_queue()
 {
   const bool shaders_enabled = Utils::scene_setting<Cmp::SceneSettings::Shaders>( reg() ).enabled;
 
+  // the flying player's sprite is lifted by AbsoluteRenderOffset, so mark their real ground position underneath.
+  // It has its own zorder so obstacle caps can hide it.
+  std::optional<float> shadow_z;
+  if ( Utils::Player::is_flying( reg() ) ) shadow_z = FlyingSystem::shadow_zorder( reg() );
+
   // render anything with a ZOrderValue component in lowest value first order
   for ( const auto &[z, entity] : s_zorder_queue )
   {
+    if ( shadow_z and z > *shadow_z )
+    {
+      render_flight_shadow();
+      shadow_z.reset();
+    }
+
     if ( reg().all_of<Cmp::Position, Cmp::AnimData>( entity ) ) { draw_animated_sprite( entity ); }
     else if ( auto *shader_owner = reg().try_get<Cmp::Shader::SpriteOwner>( entity ) )
     {
@@ -141,6 +152,7 @@ void RenderGameSystem::render_zorder_queue()
     // the inventory slot holding the dowsing rod: draws the chevrons above the floor and below sprites
     else if ( reg().all_of<Cmp::Inventory::DowsingTarget>( entity ) ) { draw_world( Utils::Player::get_doglegs( reg() ).m_markers ); }
   }
+  if ( shadow_z ) render_flight_shadow();
 }
 
 void RenderGameSystem::update_camera( sf::Time deltaTime )
@@ -180,9 +192,6 @@ void RenderGameSystem::update_camera( sf::Time deltaTime )
 void RenderGameSystem::draw_animated_sprite( entt::entity entity )
 {
   const auto &[pos_cmp, anim_cmp] = reg().get<Cmp::Position, Cmp::AnimData>( entity );
-
-  // the flying player's sprite is lifted by AbsoluteRenderOffset, so mark their real ground position underneath
-  if ( reg().all_of<Cmp::Player::Flying>( entity ) ) render_flight_shadow( pos_cmp );
 
   const auto *alpha_cmp = reg().try_get<Cmp::AbsoluteAlpha>( entity );
   const auto *offset_cmp = reg().try_get<Cmp::AbsoluteOffset>( entity );
@@ -358,16 +367,14 @@ void RenderGameSystem::render_wear_level( float wearlevel, const Cmp::Position &
   draw_world( icon );
 }
 
-void RenderGameSystem::render_flight_shadow( const Cmp::Position &pos_cmp )
+void RenderGameSystem::render_flight_shadow()
 {
-  // a flattened circle centred on the bottom edge of the player's logical (ground) position
+  // a flattened circle filling the shadow bounds
   const float radius = FlyingSystem::kFlightShadowRadiusPx;
   sf::CircleShape shadow( radius );
   shadow.setOrigin( { radius, radius } );
   shadow.setScale( { 1.f, 0.5f } );
-  // shifted by the resting render offset so it sits under the grounded sprite's feet
-  shadow.setPosition( sf::Vector2f{ pos_cmp.getCenter().x, pos_cmp.position.y + pos_cmp.size.y - ( radius * 0.5f ) } +
-                      sf::Vector2f{ 0.f, Sys::PersistSystem::get<Cmp::Persist::PlayerRenderOffset>( reg() ).get_value() } );
+  shadow.setPosition( FlyingSystem::shadow_bounds( reg() ).getCenter() );
   shadow.setFillColor( sf::Color( 0, 0, 0, FlyingSystem::kFlightShadowAlpha ) );
   draw_world( shadow );
 }
