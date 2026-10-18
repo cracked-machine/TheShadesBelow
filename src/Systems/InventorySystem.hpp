@@ -101,7 +101,7 @@ private:
 
   void try_consume_item();
 
-  //! @brief Eat the inventory item if its a ".forage" item.
+  //! @brief Eat the inventory item if it is edible or drinkable.
   //! @param dt Update the EatingTimeAccumulator with the delta time.
   void consume_inventory( sf::Time dt );
 

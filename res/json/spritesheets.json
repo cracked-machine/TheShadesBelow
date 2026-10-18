@@ -1669,9 +1669,9 @@
         }
       }
     },
-    "sprite.plant.burdock.drop": {
+    "sprite.burdockroot": {
       "spritesheet": {
-        "displayname": "Burdock thistle",
+        "displayname": "Burdock Root",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
         "sprite_indices": [33],
@@ -1683,9 +1683,9 @@
         }
       }
     },
-    "sprite.plant.burdock.forage": {
+    "sprite.burr": {
       "spritesheet": {
-        "displayname": "Burdock thistle",
+        "displayname": "Sticky Burr",
         "zorder": [0],
         "texture_path": "res/textures/plants_loot.png",
         "sprite_indices": [9],
@@ -1697,7 +1697,7 @@
         }
       }
     },
-    "sprite.plant.elder.drop": {
+    "sprite.elderstick": {
       "spritesheet": {
         "displayname": "Elder Stick",
         "zorder": [0],
@@ -1711,7 +1711,7 @@
         }
       }
     },
-    "sprite.plant.elder.forage": {
+    "sprite.elderberries": {
       "spritesheet": {
         "displayname": "Elder Berry",
         "zorder": [0],
@@ -1725,7 +1725,7 @@
         }
       }
     },
-    "sprite.plant.foxglove.forage": {
+    "sprite.foxgloveflower": {
       "spritesheet": {
         "displayname": "Foxglove Flower",
         "zorder": [0],
@@ -1739,7 +1739,7 @@
         }
       }
     },
-    "sprite.plant.hawthorn.drop": {
+    "sprite.hawthornstick": {
       "spritesheet": {
         "displayname": "Hawthorn Stick",
         "zorder": [0],
@@ -1753,7 +1753,7 @@
         }
       }
     },
-    "sprite.plant.hawthorn.forage": {
+    "sprite.hawthornflower": {
       "spritesheet": {
         "displayname": "Hawthorn Flower",
         "zorder": [0],
@@ -1767,7 +1767,7 @@
         }
       }
     },
-    "sprite.plant.henbane.drop": {
+    "sprite.henbanestick": {
       "spritesheet": {
         "displayname": "Henbane Stick",
         "zorder": [0],
@@ -1781,7 +1781,7 @@
         }
       }
     },
-    "sprite.plant.henbane.forage": {
+    "sprite.henbaneseed": {
       "spritesheet": {
         "displayname": "Henbane Seed",
         "zorder": [0],
@@ -1795,7 +1795,7 @@
         }
       }
     },
-    "sprite.plant.hogweed.forage": {
+    "sprite.hogweedseed": {
       "spritesheet": {
         "displayname": "Hogweed Seeds",
         "zorder": [0],
@@ -1809,7 +1809,7 @@
         }
       }
     },
-    "sprite.plant.nettle.drop": {
+    "sprite.nettlefiber": {
       "spritesheet": {
         "displayname": "Nettle Fiber",
         "zorder": [0],
@@ -1823,7 +1823,7 @@
         }
       }
     },
-    "sprite.plant.nettle.forage": {
+    "sprite.nettleleaf": {
       "spritesheet": {
         "displayname": "Nettle Leaves",
         "zorder": [0],
@@ -1837,7 +1837,7 @@
         }
       }
     },
-    "sprite.plant.nightshade.forage": {
+    "sprite.nightshadeflower": {
       "spritesheet": {
         "displayname": "Nightshade Flower",
         "zorder": [0],
@@ -1851,7 +1851,7 @@
         }
       }
     },
-    "sprite.plant.redcampion.drop": {
+    "sprite.antivenom": {
       "spritesheet": {
         "displayname": "AntiVenom",
         "zorder": [0],
@@ -1865,7 +1865,7 @@
         }
       }
     },
-    "sprite.plant.rowan.drop": {
+    "sprite.rowanstick": {
       "spritesheet": {
         "displayname": "Rowan Stick",
         "zorder": [0],
@@ -1879,7 +1879,7 @@
         }
       }
     },
-    "sprite.plant.rowan.forage": {
+    "sprite.rowanberries": {
       "spritesheet": {
         "displayname": "Rowan Berry",
         "zorder": [0],
@@ -1893,7 +1893,7 @@
         }
       }
     },
-    "sprite.plant.stjohnswort.drop": {
+    "sprite.bloodoil": {
       "spritesheet": {
         "displayname": "Blood Oil",
         "zorder": [0],
@@ -1907,7 +1907,7 @@
         }
       }
     },
-    "sprite.plant.stjohnswort.forage": {
+    "sprite.stjohnswortflower": {
       "spritesheet": {
         "displayname": "StJohnsWort Flower",
         "zorder": [0],
@@ -1936,7 +1936,7 @@
       }
     },
 
-    "sprite.plant.yew.drop": {
+    "sprite.yewstick": {
       "spritesheet": {
         "displayname": "Yew Stick",
         "zorder": [0],
@@ -1950,7 +1950,7 @@
         }
       }
     },
-    "sprite.plant.yew.forage": {
+    "sprite.yewberry": {
       "spritesheet": {
         "displayname": "Yew Berry",
         "zorder": [0],

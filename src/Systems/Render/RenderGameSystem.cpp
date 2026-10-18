@@ -308,7 +308,18 @@ void RenderGameSystem::render_arrow_compass()
     // single slot inventory; read the item type by reference to avoid a per-frame string copy
     auto inv_view = reg().view<Cmp::PlayerInventorySlot>();
     const auto *inv_slot = inv_view.empty() ? nullptr : &inv_view.get<Cmp::PlayerInventorySlot>( inv_view.front() );
-    compass.update_mode( inv_slot ? inv_slot->m_item.item_type : kNoItem );
+    bool can_sacrifice = ( inv_slot != nullptr ) and inv_slot->m_item.is_sacrificial();
+    if ( can_sacrifice )
+    {
+      // tools can only be sacrificed once spent (see AltarSystem::check_player_altar_activation)
+      const auto &type = inv_slot->m_item.item_type;
+      if ( type == "item.axe" or type == "item.pickaxe" or type == "item.shovel" )
+      {
+        const auto *wear_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inv_view.front() );
+        can_sacrifice = ( wear_cmp != nullptr ) and wear_cmp->m_level <= 0;
+      }
+    }
+    compass.update_mode( inv_slot ? inv_slot->m_item.item_type : kNoItem, can_sacrifice );
     if ( compass.mode() == Cmp::Player::ArrowCompass::Mode::NONE ) return;
 
     const sf::Vector2f player_center = pc_pos_cmp.getCenter();

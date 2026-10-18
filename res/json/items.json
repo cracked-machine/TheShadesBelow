@@ -4,6 +4,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -23,6 +25,8 @@
     "expiry": 0,
     "wear_location": "Inventory",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -41,6 +45,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -59,6 +65,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -77,6 +85,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -95,6 +105,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -113,6 +125,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -131,6 +145,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -149,6 +165,8 @@
     "expiry": 60,
     "wear_location": "Inventory",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -167,6 +185,8 @@
     "expiry": 60,
     "wear_location": "Inventory",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -185,6 +205,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "drinkable",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -203,6 +225,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -221,6 +245,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -239,6 +265,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "drinkable",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -257,6 +285,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -275,6 +305,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -293,6 +325,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -311,6 +345,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -329,6 +365,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -347,6 +385,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -365,6 +405,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -383,6 +425,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -401,6 +445,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -419,6 +465,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -437,6 +485,8 @@
     "expiry": 0,
     "wear_location": "Inventory",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -455,6 +505,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "item.burr",
+    "axe_output": "item.burdockroot",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 0 },
@@ -468,11 +520,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.burdock.drop": {
-    "sprite": "sprite.plant.burdock.drop",
+  "item.burdockroot": {
+    "sprite": "sprite.burdockroot",
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -486,11 +540,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.burdock.forage": {
-    "sprite": "sprite.plant.burdock.forage",
+  "item.burr": {
+    "sprite": "sprite.burr",
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -509,6 +565,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "item.elderberries",
+    "axe_output": "item.elderstick",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 10, "bow": 0 },
@@ -522,11 +580,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.elder.drop": {
-    "sprite": "sprite.plant.elder.drop",
+  "item.elderstick": {
+    "sprite": "sprite.elderstick",
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "item.elderflute",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -540,11 +600,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.elder.forage": {
-    "sprite": "sprite.plant.elder.forage",
+  "item.elderberries": {
+    "sprite": "sprite.elderberries",
     "expiry": 30,
     "wear_location": "Both",
     "sacrifice_output": "item.elderwine",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -563,6 +625,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "item.foxgloveflower",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 0 },
@@ -576,11 +640,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.foxglove.forage": {
-    "sprite": "sprite.plant.foxglove.forage",
+  "item.foxgloveflower": {
+    "sprite": "sprite.foxgloveflower",
     "expiry": 30,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -599,6 +665,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "item.hawthornflower",
+    "axe_output": "item.hawthornstick",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 25, "shovel": 10, "bow": 0 },
@@ -612,11 +680,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.hawthorn.drop": {
-    "sprite": "sprite.plant.hawthorn.drop",
+  "item.hawthornstick": {
+    "sprite": "sprite.hawthornstick",
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "item.lightningrod",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -630,11 +700,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.hawthorn.forage": {
-    "sprite": "sprite.plant.hawthorn.forage",
+  "item.hawthornflower": {
+    "sprite": "sprite.hawthornflower",
     "expiry": 30,
     "wear_location": "Both",
     "sacrifice_output": "item.hawthorntea",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -653,6 +725,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "item.henbaneseed",
+    "axe_output": "item.henbanestick",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 10, "bow": 0 },
@@ -666,11 +740,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.henbane.drop": {
-    "sprite": "sprite.plant.henbane.drop",
+  "item.henbanestick": {
+    "sprite": "sprite.henbanestick",
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "item.witchesbroom",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -684,11 +760,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.henbane.forage": {
-    "sprite": "sprite.plant.henbane.forage",
+  "item.henbaneseed": {
+    "sprite": "sprite.henbaneseed",
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -708,6 +786,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "item.hogweedseed",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 0 },
@@ -721,11 +801,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.hogweed.forage": {
-    "sprite": "sprite.plant.hogweed.forage",
+  "item.hogweedseed": {
+    "sprite": "sprite.hogweedseed",
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -744,6 +826,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "item.nettleleaf",
+    "axe_output": "item.nettlefiber",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 0 },
@@ -757,11 +841,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.nettle.drop": {
-    "sprite": "sprite.plant.nettle.drop",
+  "item.nettlefiber": {
+    "sprite": "sprite.nettlefiber",
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "item.gloves",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -775,11 +861,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.nettle.forage": {
-    "sprite": "sprite.plant.nettle.forage",
+  "item.nettleleaf": {
+    "sprite": "sprite.nettleleaf",
     "expiry": 30,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -798,6 +886,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "item.nightshadeflower",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 0 },
@@ -811,11 +901,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.nightshade.forage": {
-    "sprite": "sprite.plant.nightshade.forage",
+  "item.nightshadeflower": {
+    "sprite": "sprite.nightshadeflower",
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -834,6 +926,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "item.antivenom",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 0 },
@@ -847,11 +941,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.redcampion.drop": {
-    "sprite": "sprite.plant.redcampion.drop",
+  "item.antivenom": {
+    "sprite": "sprite.antivenom",
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -870,6 +966,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "item.rowanberries",
+    "axe_output": "item.rowanstick",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 10, "bow": 0 },
@@ -883,11 +981,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.rowan.drop": {
-    "sprite": "sprite.plant.rowan.drop",
+  "item.rowanstick": {
+    "sprite": "sprite.rowanstick",
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "item.dowsingrod",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -901,11 +1001,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.rowan.forage": {
-    "sprite": "sprite.plant.rowan.forage",
+  "item.rowanberries": {
+    "sprite": "sprite.rowanberries",
     "expiry": 30,
     "wear_location": "Both",
     "sacrifice_output": "item.rowanwine",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -924,6 +1026,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "item.stjohnswortflower",
+    "axe_output": "item.bloodoil",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 0 },
@@ -937,11 +1041,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.stjohnswort.drop": {
-    "sprite": "sprite.plant.stjohnswort.drop",
+  "item.bloodoil": {
+    "sprite": "sprite.bloodoil",
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -955,11 +1061,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.stjohnswort.forage": {
-    "sprite": "sprite.plant.stjohnswort.forage",
+  "item.stjohnswortflower": {
+    "sprite": "sprite.stjohnswortflower",
     "expiry": 30,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -978,6 +1086,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "item.yewberry",
+    "axe_output": "item.yewstick",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 10, "shovel": 10, "bow": 0 },
@@ -991,11 +1101,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.yew.drop": {
-    "sprite": "sprite.plant.yew.drop",
+  "item.yewstick": {
+    "sprite": "sprite.yewstick",
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "item.bow",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -1009,11 +1121,13 @@
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
-  "item.plant.yew.forage": {
-    "sprite": "sprite.plant.yew.forage",
+  "item.yewberry": {
+    "sprite": "sprite.yewberry",
     "expiry": 30,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -1032,6 +1146,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -1050,7 +1166,9 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
-    "is_sacrificial": false,
+    "forage_output": "",
+    "axe_output": "",
+    "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
@@ -1068,7 +1186,9 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
-    "is_sacrificial": false,
+    "forage_output": "",
+    "axe_output": "",
+    "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
@@ -1086,7 +1206,9 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
-    "is_sacrificial": false,
+    "forage_output": "",
+    "axe_output": "",
+    "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
@@ -1104,7 +1226,9 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
-    "is_sacrificial": false,
+    "forage_output": "",
+    "axe_output": "",
+    "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
@@ -1122,6 +1246,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "edible",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -1140,6 +1266,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "drinkable",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -1158,6 +1286,8 @@
     "expiry": 0,
     "wear_location": "Inventory",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -1176,6 +1306,8 @@
     "expiry": 0,
     "wear_location": "Both",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": false,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
@@ -1194,6 +1326,8 @@
     "expiry": 0,
     "wear_location": "None",
     "sacrifice_output": "",
+    "forage_output": "",
+    "axe_output": "",
     "is_sacrificial": true,
     "consumable": "none",
     "weapon_damage": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },

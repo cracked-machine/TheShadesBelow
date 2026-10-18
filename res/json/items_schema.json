@@ -5,7 +5,7 @@
   "patternProperties": {
     "^(item\\..+|ERROR_SPRITE)$": {
       "type": "object",
-      "required": ["sprite", "expiry", "wear_location", "sacrifice_output", "is_sacrificial", "weapon_damage", "actions"],
+      "required": ["sprite", "expiry", "wear_location", "sacrifice_output", "forage_output", "axe_output", "is_sacrificial", "weapon_damage", "actions"],
       "additionalProperties": false,
       "properties": {
         "sprite": {
@@ -29,6 +29,14 @@
         "sacrifice_output": {
           "type": "string",
           "description": "The item that will spawn when this item is sacrificed. Must a valid item key if populated, else no op if empty string. Note, this will replace player inventory."
+        },
+        "forage_output": {
+          "type": "string",
+          "description": "The item gained when this plant is foraged with an empty hand (added to inventory) or gloves (dropped next to the plant). Must be a valid item key if populated, else no op if empty string."
+        },
+        "axe_output": {
+          "type": "string",
+          "description": "The item dropped when this plant is chopped down with an axe. Must be a valid item key if populated, else no op if empty string."
         },
         "is_sacrificial": {
           "type": "boolean",

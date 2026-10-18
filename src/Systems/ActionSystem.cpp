@@ -75,8 +75,8 @@
 
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/System/Time.hpp>
-#include <entt/entity/entity.hpp>
 #include <algorithm>
+#include <entt/entity/entity.hpp>
 #include <entt/entity/fwd.hpp>
 #include <numbers>
 #include <spdlog/spdlog.h>
@@ -192,8 +192,8 @@ void ActionSystem::check_player_dig_obstacle_collision()
       // calculate new alpha value and apply to the current obstacle and any obstacle with matching UUID (cap sprite obstacles)
       auto damage_per_hit = Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).get_value();
       auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-      if ( inventory_type.contains( "pickaxe" ) ) { damage_per_hit = damage_per_hit / 2; }
-      else if ( inventory_type.contains( "shovel" ) or inventory_type.contains( "axe" ) ) { damage_per_hit = damage_per_hit / 5; }
+      if ( inventory_type == "item.pickaxe" ) { damage_per_hit = damage_per_hit / 2; }
+      else if ( inventory_type == "item.shovel" or inventory_type == "item.axe" ) { damage_per_hit = damage_per_hit / 5; }
       obstacle_cmp.damage += damage_per_hit;
 
       float dmg = 0.f;
@@ -341,8 +341,10 @@ void ActionSystem::player_plant_interact()
 
       auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
 
-      // copy the type: creating items or removing the plant below can invalidate plant_item
+      // copy the type and outputs: creating items or removing the plant below can invalidate plant_item
       const auto plant_type = plant_item->item_type;
+      const auto forage_output = plant_item->get_forage_output();
+      const auto axe_output = plant_item->get_axe_output();
 
       // each forage wears the plant down
       auto wear_plant = [&]()
@@ -359,14 +361,13 @@ void ActionSystem::player_plant_interact()
 
       if ( inventory_type == "" )
       {
-
-        // no drop from foraging redcampion plant
-        if ( not plant_type.contains( "redcampion" ) )
+        // plants without a forage_output (see items.json) give nothing
+        if ( not forage_output.empty() )
         {
           auto plantleaves_particle_uuid = Cmp::UUID::generate();
           Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
                                                  plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
-          get_systems_event_queue().trigger( Events::AddInventoryEvent( Sys::ItemKey( plant_type.str() + ".forage" ) ) );
+          get_systems_event_queue().trigger( Events::AddInventoryEvent( forage_output ) );
           Utils::Player::apply_action_from_inventory_item<Cmp::SpawnAction>( reg() );
           m_sound_bank.get_effect( "chopping_final" ).play();
           wear_plant();
@@ -379,13 +380,13 @@ void ActionSystem::player_plant_interact()
       {
         // Gloves stay equipped: the forage is dropped next to the plant and the plant's action modifiers are deliberately
         // skipped. They don't protect against hawthorn lightning though.
-        if ( plant_type == "item.plant.nettle" or plant_type == "item.plant.hawthorn" )
+        if ( ( plant_type == "item.plant.nettle" or plant_type == "item.plant.hawthorn" ) and not forage_output.empty() )
         {
           auto plantleaves_particle_uuid = Cmp::UUID::generate();
           Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
                                                  plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
-          get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( find_forage_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
-                                                                      Sys::ItemKey( plant_type.str() + ".forage" ), "drop_loot" ) );
+          get_systems_event_queue().trigger(
+              Events::CreateItemEvent( Cmp::Position( find_forage_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ), forage_output, "drop_loot" ) );
           wear_plant();
           auto gloves_wear = Sys::PersistSystem::get<Cmp::Persist::GlovesWearPerForage>( reg() ).get_value();
           get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), gloves_wear ) );
@@ -401,7 +402,7 @@ void ActionSystem::player_plant_interact()
         auto *burning_accum = reg().try_get<Cmp::Plant::BurningTimer>( plant_entt );
         if ( burning_accum ) continue;
 
-        if ( inventory_type.contains( "item.shovel" ) )
+        if ( inventory_type == "item.shovel" )
         {
           // damage the shovel before it is dropped
           get_systems_event_queue().trigger(
@@ -413,7 +414,7 @@ void ActionSystem::player_plant_interact()
           get_systems_event_queue().trigger( Events::PickupWorldItemEvent( plant_entt ) );
           m_sound_bank.get_effect( "digging_earth" ).play();
         }
-        else if ( inventory_type.contains( "item.axe" ) )
+        else if ( inventory_type == "item.axe" )
         {
           // destroy the plant
           auto plantleaves_particle_uuid = Cmp::UUID::generate();
@@ -427,20 +428,17 @@ void ActionSystem::player_plant_interact()
           get_systems_event_queue().trigger(
               Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), static_cast<float>( plant_item->get_axe_damage() ) ) );
 
-          // no drops from chopping these plants
-          auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
-          if ( not plant_item->item_type.contains( "nightshade" ) and not plant_item->item_type.contains( "foxglove" ) and
-               not plant_item->item_type.contains( "hogweed" ) )
+          // plants without an axe_output (see items.json) drop nothing
+          if ( not axe_output.empty() )
           {
-            if ( not plant_item ) continue;
-            get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( plant_mb_cmp.position, Constants::kGridSizePxF ),
-                                                                        Sys::ItemKey( plant_item->item_type.str() + ".drop" ), "drop_loot" ) );
+            get_systems_event_queue().trigger(
+                Events::CreateItemEvent( Cmp::Position( plant_mb_cmp.position, Constants::kGridSizePxF ), axe_output, "drop_loot" ) );
           }
           Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
 
           // 50% chance that chopping down an eldertree spawn/relocate the eldermother
           Cmp::RandomInt elderspawn( 0, 1 );
-          if ( ( plant_item != nullptr ) and plant_item->item_type == "item.plant.elder" and elderspawn.gen() == 1 )
+          if ( plant_type == "item.plant.elder" and elderspawn.gen() == 1 )
           {
             if ( reg().view<Cmp::Npc::ElderMother>().empty() )
               Factory::Npc::create_npc( reg(), plant_entt, "npc.eldermother" );
@@ -464,10 +462,7 @@ void ActionSystem::check_player_smash_pot()
 {
 
   auto [_, inventory_slot_type, _] = Utils::Player::get_inventory( reg() );
-  if ( not inventory_slot_type.contains( "pickaxe" ) and not inventory_slot_type.contains( "axe" ) and not inventory_slot_type.contains( "shovel" ) )
-  {
-    return;
-  }
+  if ( inventory_slot_type != "item.pickaxe" and inventory_slot_type != "item.axe" and inventory_slot_type != "item.shovel" ) { return; }
 
   if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) { return; }
 
@@ -616,7 +611,7 @@ bool ActionSystem::is_digging_on_cooldown()
 void ActionSystem::try_burn_plant()
 {
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-  if ( inventory_type.contains( "candle" ) )
+  if ( inventory_type == "item.candle" )
   {
     for ( auto [plant_entt, plant_cmp] : reg().view<Cmp::PlantMultiBlock>().each() )
     {
@@ -703,7 +698,8 @@ void ActionSystem::update_burning_worlditems( sf::Time dt )
 
       // burning yew trees throw off embers. Skip trees that are off screen: their particle sprites
       // aren't simulated, so the embers would pile up unlaunched.
-      if ( plant_item and plant_item->item_type.contains( "yew" ) and Utils::is_visible_in_view( RenderSystem::get_world_view(), plant_cmp ) )
+      if ( ( plant_item != nullptr ) and plant_item->item_type == "item.plant.yew" and
+           Utils::is_visible_in_view( RenderSystem::get_world_view(), plant_cmp ) )
       {
         constexpr float kEmberInterval = 0.4f;
         const float elapsed_before = burn_timer->asSeconds();

@@ -49,21 +49,23 @@ struct ArrowCompass
   //! @brief Inset from the view edge at which the arrow is placed
   static constexpr float kEdgeMargin{ 32.f };
 
-  //! @brief Recompute the mode if the inventory item type has changed since the last call.
+  //! @brief Recompute the mode if the inventory item type or its sacrifice eligibility has changed since the last call.
   //! @param item_type The item type currently in the player's inventory slot (empty if none)
+  //! @param can_sacrifice Whether the inventory item can currently be sacrificed at the altar (tools only once spent)
   //! @return true if the mode was recomputed (forces a retarget on the next refresh_target())
-  bool update_mode( const Sys::ItemKey &item_type )
+  bool update_mode( const Sys::ItemKey &item_type, bool can_sacrifice )
   {
-    if ( item_type == m_cached_item_type ) return false;
+    if ( item_type == m_cached_item_type and can_sacrifice == m_cached_can_sacrifice ) return false;
     m_cached_item_type = item_type;
+    m_cached_can_sacrifice = can_sacrifice;
 
-    // precedence matches the original render order: relic > cryptkey > exitkey
-    if ( item_type.contains( "relic" ) or item_type.contains( ".drop" ) or item_type.contains( ".forage" ) )
-      m_mode = Mode::ALTAR;
-    else if ( item_type.contains( "cryptkey" ) )
+    // keys take precedence so the (sacrificial) exitkey still points at the exit
+    if ( item_type.contains( "cryptkey" ) )
       m_mode = Mode::CRYPT;
     else if ( item_type.contains( "exitkey" ) )
       m_mode = Mode::EXIT;
+    else if ( can_sacrifice or item_type.contains( "relic" ) )
+      m_mode = Mode::ALTAR;
     else
       m_mode = Mode::NONE;
 
@@ -196,6 +198,7 @@ private:
 
   Mode m_mode{ Mode::NONE };
   Sys::ItemKey m_cached_item_type;
+  bool m_cached_can_sacrifice{ false };
   std::optional<Cmp::Position> m_target;
   bool m_retarget_pending{ true };
 

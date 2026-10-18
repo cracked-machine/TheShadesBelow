@@ -59,6 +59,8 @@ void ItemStore::init_store()
     auto expiry = item_value.at( "expiry" ).get<float>();
     auto wear_location = make_wear_location( item_value.at( "wear_location" ).get<std::string>() );
     auto sacrifice_output = item_value.at( "sacrifice_output" ).get<std::string>();
+    auto forage_output = item_value.at( "forage_output" ).get<std::string>();
+    auto axe_output = item_value.at( "axe_output" ).get<std::string>();
     auto is_sacrificial = item_value.at( "is_sacrificial" ).get<bool>();
     auto weapon_damage = item_value.at( "weapon_damage" );
     auto pickaxe_damage = weapon_damage.at( "pickaxe" ).get<int>();
@@ -66,8 +68,8 @@ void ItemStore::init_store()
     auto shovel_damage = weapon_damage.at( "shovel" ).get<int>();
     auto bow_damage = weapon_damage.at( "bow" ).get<int>();
     auto consumable = make_consumable_property( item_value.at( "consumable" ).get<std::string>() );
-    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, sacrifice_output, is_sacrificial, pickaxe_damage, axe_damage, shovel_damage,
-                              bow_damage, sf::seconds( expiry ), wear_location, consumable );
+    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, sacrifice_output, forage_output, axe_output, is_sacrificial, pickaxe_damage,
+                              axe_damage, shovel_damage, bow_damage, sf::seconds( expiry ), wear_location, consumable );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )
@@ -90,6 +92,18 @@ void ItemStore::init_store()
     }
     m_store.emplace( key_type( item_key ), std::move( worlditem ) );
     SPDLOG_DEBUG( "Loaded item: {} ({})", item_key, sprite_mtype );
+  }
+
+  // output properties must reference items that exist, otherwise the forage/chop/sacrifice silently spawns nothing
+  for ( const auto &[item_key, item] : m_store )
+  {
+    for ( const auto &[property, output] :
+          { std::pair{ "sacrifice_output", item.get_sacrifice_output() }, std::pair{ "forage_output", item.get_forage_output() },
+            std::pair{ "axe_output", item.get_axe_output() } } )
+    {
+      if ( output.empty() or m_store.contains( output ) ) continue;
+      throw std::runtime_error( "Item '" + item_key.str() + "' has unknown " + property + " '" + output.str() + "' in " + m_json_file_path.string() );
+    }
   }
   SPDLOG_DEBUG( "Item store loaded with {} items", m_store.size() );
 }

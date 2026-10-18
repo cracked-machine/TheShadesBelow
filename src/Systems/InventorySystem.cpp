@@ -215,57 +215,51 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
     // multiblocks are top-left anchored, so offset the y-axis so that plant base is at players feet
     auto plant_pos = Utils::snap_to_grid( { pos.x, pos.y - Constants::kGridSizePxF.y } );
 
-    // for plant drops fall through to the rest of the function that creates normal world items
-    auto inventory_item_type = inventory_slot_cmp->m_item.sprite_type;
-    if ( not inventory_item_type.contains( ".forage" ) and not inventory_item_type.contains( ".drop" ) )
+    // don't allow plants to be dropped at all in the player spawn area
+    if ( Utils::Player::is_in_spawn( reg(), Utils::Player::get_position( reg() ) ) ) return;
+
+    auto [mb_entt, segment_entt_list] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>(
+        reg(), plant_pos, Sys::SpriteStore::instance().get( inventory_slot_cmp->m_item.sprite_type ), 0, 0, m_reserved_sm.lock().get() );
+    // Preserve the item this plant was grown from, so digging it back up (see the DIG handler in
+    // on_player_action_event) can hand it back via the normal pickup_world_item path instead of
+    // having to re-derive an item id from the multiblock's sprite.
+    reg().emplace_or_replace<Cmp::WorldItem>( mb_entt, inventory_slot_cmp->m_item );
+    // keep the remaining forage count when the plant is replanted
+    auto *plant_wearlevel_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inventory_slot_entt );
+    if ( plant_wearlevel_cmp ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( mb_entt, plant_wearlevel_cmp->m_level ); }
+
+    // rebuild the m_player_navmesh here
+    if ( auto player_navmesh = m_player_navmesh.lock() )
     {
-
-      // don't allow plants to be dropped at all in the player spawn area
-      if ( Utils::Player::is_in_spawn( reg(), Utils::Player::get_position( reg() ) ) ) return;
-
-      auto [mb_entt, segment_entt_list] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>(
-          reg(), plant_pos, Sys::SpriteStore::instance().get( inventory_slot_cmp->m_item.sprite_type ), 0, 0, m_reserved_sm.lock().get() );
-      // Preserve the item this plant was grown from, so digging it back up (see the DIG handler in
-      // on_player_action_event) can hand it back via the normal pickup_world_item path instead of
-      // having to re-derive an item id from the multiblock's sprite.
-      reg().emplace_or_replace<Cmp::WorldItem>( mb_entt, inventory_slot_cmp->m_item );
-      // keep the remaining forage count when the plant is replanted
-      auto *plant_wearlevel_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inventory_slot_entt );
-      if ( plant_wearlevel_cmp ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( mb_entt, plant_wearlevel_cmp->m_level ); }
-
-      // rebuild the m_player_navmesh here
-      if ( auto player_navmesh = m_player_navmesh.lock() )
+      player_navmesh->clear();
+      for ( auto [entt, pos_cmp] : reg().view<Cmp::Player::NoPath, Cmp::Position>().each() )
       {
-        player_navmesh->clear();
-        for ( auto [entt, pos_cmp] : reg().view<Cmp::Player::NoPath, Cmp::Position>().each() )
-        {
-          player_navmesh->insert( entt, pos_cmp );
-        }
+        player_navmesh->insert( entt, pos_cmp );
       }
-
-      // The NPC navmesh is built once at scene setup, so evict the tiles the new plant
-      // now blocks. Keep the player entity - PlayerSystem::update re-inserts it every
-      // frame and NPCs need it to path towards the player.
-      if ( auto npc_navmesh = m_npc_navmesh.lock() )
-      {
-        for ( auto seg_entt : segment_entt_list )
-        {
-          if ( not reg().any_of<Cmp::Npc::NoPathFinding>( seg_entt ) ) continue;
-          auto *seg_pos_cmp = reg().try_get<Cmp::Position>( seg_entt );
-          if ( not seg_pos_cmp ) continue;
-          for ( auto blocked_entt : npc_navmesh->at( *seg_pos_cmp ) )
-          {
-            if ( reg().any_of<Cmp::Player::Character>( blocked_entt ) ) continue;
-            npc_navmesh->remove( blocked_entt, *seg_pos_cmp );
-          }
-        }
-      }
-
-      // clear player inevntory
-      reg().destroy( inventory_slot_entt );
-      m_sound_bank.get_effect( "chopping_final" ).play();
-      return;
     }
+
+    // The NPC navmesh is built once at scene setup, so evict the tiles the new plant
+    // now blocks. Keep the player entity - PlayerSystem::update re-inserts it every
+    // frame and NPCs need it to path towards the player.
+    if ( auto npc_navmesh = m_npc_navmesh.lock() )
+    {
+      for ( auto seg_entt : segment_entt_list )
+      {
+        if ( not reg().any_of<Cmp::Npc::NoPathFinding>( seg_entt ) ) continue;
+        auto *seg_pos_cmp = reg().try_get<Cmp::Position>( seg_entt );
+        if ( not seg_pos_cmp ) continue;
+        for ( auto blocked_entt : npc_navmesh->at( *seg_pos_cmp ) )
+        {
+          if ( reg().any_of<Cmp::Player::Character>( blocked_entt ) ) continue;
+          npc_navmesh->remove( blocked_entt, *seg_pos_cmp );
+        }
+      }
+    }
+
+    // clear player inevntory
+    reg().destroy( inventory_slot_entt );
+    m_sound_bank.get_effect( "chopping_final" ).play();
+    return;
   }
 
   // otherwise just drop it as a world item
