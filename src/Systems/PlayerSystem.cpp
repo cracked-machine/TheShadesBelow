@@ -45,6 +45,7 @@
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
 #include <Components/Persistent/PlayerOnFireHealthDmgPerSec.hpp>
+#include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
@@ -190,6 +191,14 @@ void PlayerSystem::update( sf::Time dt )
 
   fade_player_on_wormhole_jump();
   blink_player();
+
+  // resting render offset, refreshed every frame so tuning applies immediately in every scene.
+  // FlyingSystem owns the offset while flying (it adds the lift on top of this)
+  if ( not Utils::Player::is_flying( reg() ) )
+  {
+    const float render_offset_y = Sys::PersistSystem::get<Cmp::Persist::PlayerRenderOffset>( reg() ).get_value();
+    reg().emplace_or_replace<Cmp::AbsoluteRenderOffset>( Utils::Player::get_entity( reg() ), sf::Vector2f{ 0.f, render_offset_y } );
+  }
 
   auto *post_death_timer = reg().try_get<Cmp::Player::PostDeathTimer>( Utils::Player::get_entity( reg() ) );
   if ( post_death_timer ) { *post_death_timer += dt; }

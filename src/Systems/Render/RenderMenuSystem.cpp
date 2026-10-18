@@ -77,6 +77,7 @@
 #include <Components/Persistent/PlayerLerpInterruptThreshold.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
 #include <Components/Persistent/PlayerOnFireHealthDmgPerSec.hpp>
+#include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
 #include <Components/Persistent/RuinMaxCobwebs.hpp>
@@ -217,6 +218,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
 
     Sys::PersistSystem::get<Cmp::Persist::BlastRadius>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerAnimStrideLength>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::PlayerRenderOffset>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerMovementSpeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerDiagonalLerpSpeedModifier>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerFootstepAddDelay>( reg() ).render_widget();

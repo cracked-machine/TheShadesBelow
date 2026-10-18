@@ -137,6 +137,14 @@
     "detail": "Broom flight: take-off/landing transition time (s)",
     "format": "%.2f"
   },
+  "PlayerRenderOffset": {
+    "type": "float",
+    "value": -4.0,
+    "min_value": -8.0,
+    "max_value": 0.0,
+    "detail": "Vertical render offset of the player sprite (px, negative is up)",
+    "format": "%1f"
+  },
   "FlyingLiftOffset": {
     "type": "float",
     "value": 16.0,

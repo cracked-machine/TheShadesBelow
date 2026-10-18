@@ -13,6 +13,7 @@
 #include <Components/Persistent/FlyingLiftOffset.hpp>
 #include <Components/Persistent/FlyingOscillationAmplitude.hpp>
 #include <Components/Persistent/FlyingTransitionTime.hpp>
+#include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/CrashLanding.hpp>
 #include <Components/Player/Flying.hpp>
@@ -177,6 +178,11 @@ void FlyingSystem::update( sf::Time dt )
   update_render_offset( dt );
 }
 
+sf::Vector2f FlyingSystem::resting_render_offset()
+{
+  return { 0.f, Sys::PersistSystem::get<Cmp::Persist::PlayerRenderOffset>( reg() ).get_value() };
+}
+
 float FlyingSystem::transition_seconds()
 {
   return std::max( 0.01f, Sys::PersistSystem::get<Cmp::Persist::FlyingTransitionTime>( reg() ).get_value() );
@@ -244,7 +250,8 @@ void FlyingSystem::advance_descent( sf::Time dt )
 
   // touchdown - normal collision resumes
   auto player_entt = Utils::Player::get_entity( reg() );
-  reg().remove<Cmp::Player::Flying, Cmp::Player::CrashLanding, Cmp::AbsoluteRenderOffset>( player_entt );
+  reg().remove<Cmp::Player::Flying, Cmp::Player::CrashLanding>( player_entt );
+  reg().emplace_or_replace<Cmp::AbsoluteRenderOffset>( player_entt, resting_render_offset() );
   m_lift_fraction = 0.f;
   SPDLOG_DEBUG( "Player landed at {},{}", m_land_target.x, m_land_target.y );
 }
@@ -268,8 +275,10 @@ void FlyingSystem::update_render_offset( sf::Time dt )
 
   // negative y is "up" - the lift is visual only, Cmp::Position stays on the ground
   auto player_entt = Utils::Player::get_entity( reg() );
-  // scaled by the lift fraction so the lift and oscillation ease in/out on take-off and landing
-  reg().emplace_or_replace<Cmp::AbsoluteRenderOffset>( player_entt, sf::Vector2f{ 0.f, ( -lift + m_displacement ) * m_lift_fraction } );
+  // scaled by the lift fraction so the lift and oscillation ease in/out on take-off and landing,
+  // on top of the player's resting render offset
+  reg().emplace_or_replace<Cmp::AbsoluteRenderOffset>(
+      player_entt, resting_render_offset() + sf::Vector2f{ 0.f, ( -lift + m_displacement ) * m_lift_fraction } );
 
   // only draw the player in front of obstacles once the sprite has cleared their (1x1) height
   if ( auto *flying_cmp = reg().try_get<Cmp::Player::Flying>( player_entt ) )

@@ -88,6 +88,10 @@ private:
   //! @param dt
   void advance_descent( sf::Time dt );
 
+  //! @brief The player's resting render offset from Cmp::Persist::PlayerRenderOffset; flight lift is applied on top of it.
+  //! @return sf::Vector2f offset in pixels
+  sf::Vector2f resting_render_offset();
+
   //! @brief Take-off/landing duration from Cmp::Persist::FlyingTransitionTime, guarded against zero.
   float transition_seconds();
 

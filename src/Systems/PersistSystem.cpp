@@ -77,6 +77,7 @@
 #include <Components/Persistent/PlayerLerpInterruptThreshold.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
 #include <Components/Persistent/PlayerOnFireHealthDmgPerSec.hpp>
+#include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
@@ -224,6 +225,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::BowReleaseWear>();
   add_component<Cmp::Persist::FlyingOscillationAmplitude>();
   add_component<Cmp::Persist::FlyingLiftOffset>();
+  add_component<Cmp::Persist::PlayerRenderOffset>();
   add_component<Cmp::Persist::FlyingTransitionTime>();
   add_component<Cmp::Persist::FlyingLandingOverlap>();
   add_component<Cmp::Persist::WormholeAbortThreshold>();

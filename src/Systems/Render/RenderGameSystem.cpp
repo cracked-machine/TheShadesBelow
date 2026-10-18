@@ -30,6 +30,7 @@
 #include <Components/Persistent/ArmedBlinkFreq.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
+#include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/BlastRadius.hpp>
@@ -364,7 +365,9 @@ void RenderGameSystem::render_flight_shadow( const Cmp::Position &pos_cmp )
   sf::CircleShape shadow( radius );
   shadow.setOrigin( { radius, radius } );
   shadow.setScale( { 1.f, 0.5f } );
-  shadow.setPosition( { pos_cmp.getCenter().x, pos_cmp.position.y + pos_cmp.size.y - ( radius * 0.5f ) } );
+  // shifted by the resting render offset so it sits under the grounded sprite's feet
+  shadow.setPosition( sf::Vector2f{ pos_cmp.getCenter().x, pos_cmp.position.y + pos_cmp.size.y - ( radius * 0.5f ) } +
+                      sf::Vector2f{ 0.f, Sys::PersistSystem::get<Cmp::Persist::PlayerRenderOffset>( reg() ).get_value() } );
   shadow.setFillColor( sf::Color( 0, 0, 0, FlyingSystem::kFlightShadowAlpha ) );
   draw_world( shadow );
 }

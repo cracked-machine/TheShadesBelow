@@ -1,4 +1,5 @@
 #include <Components/AbsoluteAlpha.hpp>
+#include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AbsoluteRotation.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Armable.hpp>
@@ -262,6 +263,7 @@ void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
 {
   // Force storage creation by accessing storage for each known component type
   registry.storage<Cmp::AbsoluteAlpha>();
+  registry.storage<Cmp::AbsoluteRenderOffset>();
   registry.storage<Cmp::AbsoluteRotation>();
   registry.storage<Cmp::Direction>();
   registry.storage<Cmp::LastDirection>();

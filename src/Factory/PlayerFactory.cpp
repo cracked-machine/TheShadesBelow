@@ -1,5 +1,6 @@
 #include <Components/AbsoluteAlpha.hpp>
 #include <Components/AbsoluteOffset.hpp>
+#include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AbsoluteRotation.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
@@ -13,6 +14,7 @@
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Particle/SpriteBase.hpp>
 #include <Components/Persistent/BlastRadius.hpp>
+#include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
@@ -100,6 +102,8 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   reg.emplace_or_replace<Cmp::ZOrderValue>( entity, start_pos.y ); // z-order based on y-position
   reg.emplace_or_replace<Cmp::AbsoluteAlpha>( entity, 255 );       // fully opaque
   reg.emplace_or_replace<Cmp::AbsoluteRotation>( entity, 0 );
+  reg.emplace_or_replace<Cmp::AbsoluteRenderOffset>( entity,
+                                                      sf::Vector2f{ 0.f, Sys::PersistSystem::get<Cmp::Persist::PlayerRenderOffset>( reg ).get_value() } );
   reg.emplace_or_replace<Cmp::Player::HeartBeat>( entity );
   reg.emplace_or_replace<Cmp::Player::Doglegs>( entity );
 }
