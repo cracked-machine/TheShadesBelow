@@ -179,7 +179,16 @@ protected:
     return Action(
         { JsonDeserializer::get_int( j, "health" ) }, { JsonDeserializer::get_int( j, "fear" ) }, { JsonDeserializer::get_int( j, "despair" ) },
         { JsonDeserializer::get_int( j, "infamy" ) }, { JsonDeserializer::get_int( j, "luck" ) }, { JsonDeserializer::get_float( j, "tick" ) },
-        Game::Factory::Toxicity::create_toxidrome( JsonDeserializer::get_string( tox, "type" ), JsonDeserializer::get_int( tox, "toxicity" ) ) );
+        Game::Factory::Toxicity::create_toxidrome( JsonDeserializer::get_string_or_list( tox, "type" ), JsonDeserializer::get_int( tox, "toxicity" ) ) );
+  }
+
+  //! @brief Rethrow an error raised while loading an action, prefixed with the JSON file, owning entry, action key and
+  //!        the offending action object, so the bad config can be located.
+  //! @throws std::runtime_error always.
+  [[noreturn]] void rethrow_with_context( const std::string &owner_key, const std::string &action_key, const nlohmann::json &j,
+                                          const std::exception &e ) const
+  {
+    throw std::runtime_error( m_json_file_path.string() + ": '" + owner_key + "' " + action_key + " " + j.dump() + ": " + e.what() );
   }
 
   //! @brief Filesystem path of the JSON file this store loads its data from.

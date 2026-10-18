@@ -117,8 +117,21 @@
           "additionalProperties": false,
           "properties": {
             "type": {
-              "type": "string",
-              "enum": ["none", "tachycardia", "bradycardia", "halucinogen", "hypoxia", "phototoxia", "venom", "vertigo", "all"]
+              "oneOf": [
+                {
+                  "type": "string",
+                  "enum": ["none", "tachycardia", "bradycardia", "halucinogen", "hypoxia", "phototoxia", "venom", "vertigo", "all"]
+                },
+                {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "enum": ["tachycardia", "bradycardia", "halucinogen", "hypoxia", "phototoxia", "venom", "vertigo"]
+                  }
+                }
+              ]
             },
             "toxicity": { "type": "number" }
           }

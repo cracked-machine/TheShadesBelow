@@ -32,6 +32,15 @@ public:
   //! @throws std::runtime_error if the field is missing or not a string.
   static std::string get_string( const nlohmann::json &j, const std::string &field, std::source_location loc = std::source_location::current() );
 
+  //! @brief Get a required field that is either a single string or an array of strings.
+  //! @param j The JSON object to read from.
+  //! @param field The field name.
+  //! @param loc Caller location, used in error messages (defaults to the call site).
+  //! @return std::vector<std::string> The values; a single string yields a one-element list.
+  //! @throws std::runtime_error if the field is missing, or is neither a string nor an array of strings.
+  static std::vector<std::string> get_string_or_list( const nlohmann::json &j, const std::string &field,
+                                                      std::source_location loc = std::source_location::current() );
+
   //! @brief Get a required numeric field as a float.
   //! @param j The JSON object to read from.
   //! @param field The field name.

@@ -53,11 +53,23 @@ private:
 };
 
 //! @brief Build a single-affliction Toxidrome from a data-driven type name (e.g. loaded from JSON).
-//! @param type Toxidrome type name; "none" yields an empty Toxidrome, unknown names are logged and treated as "none".
-//!             "all" with a negative toxicity reduces every active toxidrome (a cure); a positive "all" is logged and ignored.
+//! @param type Toxidrome type name; "none" yields an empty Toxidrome.
+//!             "all" with a negative toxicity reduces every active toxidrome (a cure).
 //! @param toxicity The toxidrome's toxicity contribution while active.
 //! @return The constructed Cmp::Toxicity::Toxidrome.
+//! @throws std::runtime_error on an invalid or no-op configuration: an unknown type, "none" with non-zero toxicity,
+//!         a named type with zero toxicity, or "all" with non-negative toxicity.
 Cmp::Toxicity::Toxidrome create_toxidrome( const std::string &type, int toxicity );
+
+//! @brief Build a Toxidrome from a list of data-driven type names (e.g. a JSON "type" array).
+//! @param types Toxidrome type names; a single name behaves exactly like create_toxidrome( const std::string &, int ).
+//!              Several names only support a negative toxicity (a cure applied to each listed toxidrome), since the
+//!              list may contain mutually exclusive toxidromes.
+//! @param toxicity The toxicity delta applied to each listed toxidrome.
+//! @return The constructed Cmp::Toxicity::Toxidrome.
+//! @throws std::runtime_error on an invalid or no-op configuration: an empty list, a multi-type list with non-negative
+//!         toxicity, or one containing "none", "all", an unknown or a duplicated type.
+Cmp::Toxicity::Toxidrome create_toxidrome( const std::vector<std::string> &types, int toxicity );
 
 } // namespace Game::Factory::Toxicity
 

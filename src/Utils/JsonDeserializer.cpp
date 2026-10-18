@@ -45,6 +45,23 @@ std::string JsonDeserializer::get_string( const nlohmann::json &j, const std::st
   return j.at( field ).get<std::string>();
 }
 
+std::vector<std::string> JsonDeserializer::get_string_or_list( const nlohmann::json &j, const std::string &field, std::source_location loc )
+{
+  check_contains( j, field, loc );
+  const auto &value = j.at( field );
+  if ( value.is_string() ) return { value.get<std::string>() };
+  if ( not value.is_array() )
+    throw std::runtime_error( make_loc_string( loc ) + "JSON field '" + field + "' is not a string or array, got: " + value.type_name() );
+  std::vector<std::string> results;
+  for ( const auto &element : value )
+  {
+    if ( not element.is_string() )
+      throw std::runtime_error( make_loc_string( loc ) + "JSON field '" + field + "' contains a non-string element: " + element.type_name() );
+    results.push_back( element.get<std::string>() );
+  }
+  return results;
+}
+
 float JsonDeserializer::get_float( const nlohmann::json &j, const std::string &field, std::source_location loc )
 {
   check_contains( j, field, loc );
