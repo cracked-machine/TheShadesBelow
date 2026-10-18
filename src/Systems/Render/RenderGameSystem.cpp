@@ -36,6 +36,7 @@
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Curse.hpp>
+#include <Components/Player/Flying.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
@@ -49,6 +50,7 @@
 #include <Components/Wormhole/MultiBlock.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
+#include <SFML/Graphics/CircleShape.hpp>
 #include <Shaders/BaseShaderSprite.hpp>
 #include <Shaders/DarkModeShader.hpp>
 #include <Shaders/DrippingBloodShader.hpp>
@@ -58,6 +60,7 @@
 #include <Sprites/SpriteSheet.hpp>
 #include <Sprites/VertexFloor.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Systems/FlyingSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
@@ -176,6 +179,9 @@ void RenderGameSystem::update_camera( sf::Time deltaTime )
 void RenderGameSystem::draw_animated_sprite( entt::entity entity )
 {
   const auto &[pos_cmp, anim_cmp] = reg().get<Cmp::Position, Cmp::AnimData>( entity );
+
+  // the flying player's sprite is lifted by AbsoluteRenderOffset, so mark their real ground position underneath
+  if ( reg().all_of<Cmp::Player::Flying>( entity ) ) render_flight_shadow( pos_cmp );
 
   const auto *alpha_cmp = reg().try_get<Cmp::AbsoluteAlpha>( entity );
   const auto *offset_cmp = reg().try_get<Cmp::AbsoluteOffset>( entity );
@@ -349,6 +355,18 @@ void RenderGameSystem::render_wear_level( float wearlevel, const Cmp::Position &
   icon.setPosition( { pos.position.x + ( padding ), pos.position.y + pos.size.y - icon_height - ( padding ) } );
 
   draw_world( icon );
+}
+
+void RenderGameSystem::render_flight_shadow( const Cmp::Position &pos_cmp )
+{
+  // a flattened circle centred on the bottom edge of the player's logical (ground) position
+  const float radius = FlyingSystem::kFlightShadowRadiusPx;
+  sf::CircleShape shadow( radius );
+  shadow.setOrigin( { radius, radius } );
+  shadow.setScale( { 1.f, 0.5f } );
+  shadow.setPosition( { pos_cmp.getCenter().x, pos_cmp.position.y + pos_cmp.size.y - ( radius * 0.5f ) } );
+  shadow.setFillColor( sf::Color( 0, 0, 0, FlyingSystem::kFlightShadowAlpha ) );
+  draw_world( shadow );
 }
 
 void RenderGameSystem::render_armed_indicator( const Cmp::Armed &armed_cmp, const Cmp::Position &pos_cmp )

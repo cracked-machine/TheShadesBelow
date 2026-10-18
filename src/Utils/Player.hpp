@@ -167,6 +167,26 @@ bool is_in_spawn( entt::registry &reg, const Cmp::Position &player_pos_cmp );
 //! @return bool true if the player is in the graveyard with an ElderFlute in the inventory slot that has not worn out.
 bool is_elderflute_active( entt::registry &reg );
 
+//! @brief Check whether the player is currently flying on the witchesbroom.
+//! @param reg reference to the entt registry
+//! @return bool true if the player has the Cmp::Player::Flying tag.
+bool is_flying( entt::registry &reg );
+
+//! @brief Check whether the player is descending from flight to their landing cell.
+//! @param reg reference to the entt registry
+//! @return bool true if the player has Cmp::Player::Flying with landing set.
+bool is_landing( entt::registry &reg );
+
+//! @brief Check whether the flying player's sprite has risen above 1x1 obstacles, so is drawn in front of them.
+//! @param reg reference to the entt registry
+//! @return bool true if the player has Cmp::Player::Flying with elevated set.
+bool is_flying_elevated( entt::registry &reg );
+
+//! @brief Check whether the item in the inventory slot is actively in use. Used for items whose wear is "active_only".
+//! @param reg reference to the entt registry
+//! @return bool true if the ElderFlute is playing or the witchesbroom is flying.
+bool is_inventory_item_active( entt::registry &reg );
+
 bool is_illuminated( entt::registry &reg );
 
 //! @brief True if the player's hitbox (scaled 1.5x the grid size) intersects the given bounds

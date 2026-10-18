@@ -44,6 +44,17 @@ public:
   //! cooldown has elapsed, teleport them all to new random locations and respawn the wormhole.
   void check_player_wormhole_collision();
 
+  //! @brief Time since the current jump sequence started (the oldest Cmp::Wormhole::Jump clock), zero if none.
+  //! @param reg
+  //! @return sf::Time
+  static sf::Time jump_sequence_elapsed( entt::registry &reg );
+
+  //! @brief Whether the player is a jump candidate and the sequence has passed Cmp::Persist::WormholeAbortThreshold.
+  //! The player is then committed to the teleport and cannot take off. See Sys::FlyingSystem.
+  //! @param reg
+  //! @return bool
+  static bool is_player_committed_to_jump( entt::registry &reg );
+
   //! @brief Find a valid spawn position, remove any obstacle/loot/NPC container occupying it, and
   //! attach the wormhole's Singularity/MultiBlock/AnimData components there.
   //! @param phase InitialSpawn uses the persisted seeded position; Respawn picks a fresh random one
@@ -55,6 +66,11 @@ public:
   void on_resume() override;
 
 private:
+  //! @brief A player flying over the singularity aborts the whole jump sequence (all candidates, no teleport,
+  //! no wormhole respawn) unless it has passed Cmp::Persist::WormholeAbortThreshold.
+  //! @return bool true if the player is flying over the singularity before the threshold - skip this frame's jump processing.
+  bool abort_jump_if_flying_over();
+
   //! @brief Remove all entities within the `bounds` and replace with new Position/Armable entities.
   //! @param bounds The world-space rect to sweep for occupying entities.
   void clear_footprint( const sf::FloatRect &bounds );

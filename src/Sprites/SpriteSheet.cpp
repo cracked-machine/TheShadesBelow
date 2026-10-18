@@ -13,13 +13,15 @@ namespace Game::Sprites
 
 SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list,
                           const std::filesystem::path &spritesheet_png, const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size,
-                          unsigned int indices_per_sequence, std::vector<bool> collision_mask, sf::Vector2i door_position, float framerate )
+                          unsigned int indices_per_sequence, std::vector<bool> walking_collision_mask, std::vector<bool> flying_collision_mask,
+                          sf::Vector2i door_position, float framerate )
     : m_sprite_type{ std::move( type ) },
       m_display_name( std::move( display_name ) ),
       m_zorder_list( zorder_list ),
       m_grid_size{ grid_size },
       m_indices_per_sequence{ indices_per_sequence },
-      m_collision_mask{ normalise_collision_mask( std::move( collision_mask ), grid_size, m_sprite_type ) },
+      m_walking_collision_mask{ normalise_collision_mask( std::move( walking_collision_mask ), grid_size, m_sprite_type, "walking_collision_mask" ) },
+      m_flying_collision_mask{ normalise_collision_mask( std::move( flying_collision_mask ), grid_size, m_sprite_type, "flying_collision_mask" ) },
       m_door_position( door_position ),
       m_framerate{ normalise_framerate( framerate, indices_per_sequence, m_sprite_type ) }
 {
@@ -40,14 +42,15 @@ SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const s
 
 SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list, sf::Texture tilemap_texture,
                           const std::vector<uint32_t> &tilemap_picks, sf::Vector2i grid_size,
-                          unsigned int indices_per_sequence, std::vector<bool> collision_mask, sf::Vector2i door_position,
-                          float framerate )
+                          unsigned int indices_per_sequence, std::vector<bool> walking_collision_mask, std::vector<bool> flying_collision_mask,
+                          sf::Vector2i door_position, float framerate )
     : m_sprite_type{ std::move( type ) },
       m_display_name( std::move( display_name ) ),
       m_zorder_list( zorder_list ),
       m_grid_size{ grid_size },
       m_indices_per_sequence{ indices_per_sequence },
-      m_collision_mask{ normalise_collision_mask( std::move( collision_mask ), grid_size, m_sprite_type ) },
+      m_walking_collision_mask{ normalise_collision_mask( std::move( walking_collision_mask ), grid_size, m_sprite_type, "walking_collision_mask" ) },
+      m_flying_collision_mask{ normalise_collision_mask( std::move( flying_collision_mask ), grid_size, m_sprite_type, "flying_collision_mask" ) },
       m_door_position( door_position ),
       m_framerate{ normalise_framerate( framerate, indices_per_sequence, m_sprite_type ) }
 {
@@ -78,11 +81,12 @@ float SpriteSheet::normalise_framerate( float framerate, unsigned int indices_pe
   return framerate;
 }
 
-std::vector<bool> SpriteSheet::normalise_collision_mask( std::vector<bool> collision_mask, sf::Vector2i grid_size, const Sys::SpriteKey &type )
+std::vector<bool> SpriteSheet::normalise_collision_mask( std::vector<bool> collision_mask, sf::Vector2i grid_size, const Sys::SpriteKey &type,
+                                                       std::string_view field )
 {
   const auto cell_count = static_cast<std::size_t>( grid_size.x * grid_size.y );
 
-  // omitted: every cell collides. Readers treat an empty mask that way.
+  // omitted: readers decide what an empty mask means (walking: every cell collides)
   if ( collision_mask.empty() ) return collision_mask;
 
   // shortcut: a single entry applies to every cell
@@ -94,8 +98,8 @@ std::vector<bool> SpriteSheet::normalise_collision_mask( std::vector<bool> colli
 
   if ( collision_mask.size() < cell_count )
   {
-    SPDLOG_ERROR( "{} collision_mask has {} entries, expected 1 or at least {}", type.str(), collision_mask.size(), cell_count );
-    throw std::runtime_error( "Invalid collision_mask for " + type.str() + ": expected 1 or at least " + std::to_string( cell_count ) +
+    SPDLOG_ERROR( "{} {} has {} entries, expected 1 or at least {}", type.str(), field, collision_mask.size(), cell_count );
+    throw std::runtime_error( "Invalid " + std::string( field ) + " for " + type.str() + ": expected 1 or at least " + std::to_string( cell_count ) +
                               " entries, got " + std::to_string( collision_mask.size() ) );
   }
   return collision_mask;

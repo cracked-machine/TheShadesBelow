@@ -77,7 +77,7 @@ template <typename MULTIBLOCK, typename MBSEGMENT>
   requires IsMB<MULTIBLOCK> && IsMBSegment<MBSEGMENT>
 void update_segments( entt::registry &reg, const Sprites::SpriteSheet &ss, [[maybe_unused]] entt::entity mb_entt, MULTIBLOCK mb_cmp )
 {
-  auto collision_masks = ss.collision_mask();
+  auto collision_masks = ss.walking_collision_mask();
 
   for ( auto [entity, segment_cmp, pos_cmp] : reg.view<MBSEGMENT, Cmp::Position>().each() )
   {

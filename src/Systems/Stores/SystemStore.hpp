@@ -29,6 +29,7 @@ class CryptSystem;
 class ExitSystem;
 class FootstepSystem;
 class GraveSystem;
+class FlyingSystem;
 class GrimoireSystem;
 class HealingSpringSystem;
 class InventorySystem;
@@ -90,6 +91,8 @@ public:
     FootstepSystem,
     //! @brief Key for GraveSystem.
     GraveSystem,
+    //! @brief Key for FlyingSystem.
+    FlyingSystem,
     //! @brief Key for GrimoireSystem.
     GrimoireSystem,
     //! @brief Key for HealingSpringSystem.
@@ -225,6 +228,7 @@ template<> struct Store::SystemTraits<Store::Type::DoglegSystem>           { usi
 template<> struct Store::SystemTraits<Store::Type::ExitSystem>             { using type = ExitSystem; };
 template<> struct Store::SystemTraits<Store::Type::FootstepSystem>         { using type = FootstepSystem; };
 template<> struct Store::SystemTraits<Store::Type::GraveSystem>            { using type = GraveSystem; };
+template<> struct Store::SystemTraits<Store::Type::FlyingSystem>           { using type = FlyingSystem; };
 template<> struct Store::SystemTraits<Store::Type::GrimoireSystem>         { using type = GrimoireSystem; };
 template<> struct Store::SystemTraits<Store::Type::HealingSpringSystem>    { using type = HealingSpringSystem; };
 template<> struct Store::SystemTraits<Store::Type::InventorySystem>        { using type = InventorySystem; };

@@ -14,8 +14,10 @@
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Obstacle.hpp>
+#include <Components/Persistent/WormholeAbortThreshold.hpp>
 #include <Components/Persistent/WormholeSeed.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/Flying.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
@@ -38,6 +40,7 @@
 #include <Systems/Threats/WormholeSystem.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
+#include <Utils/Player.hpp>
 #include <Utils/Random.hpp>
 #include <Utils/Utils.hpp>
 
@@ -62,6 +65,9 @@ void WormholeSystem::check_player_wormhole_collision()
 {
   auto wormhole_view = reg().view<Cmp::Wormhole::Singularity, Cmp::Position>();
   auto all_actors_view = reg().view<Cmp::Direction, Cmp::Position>();
+
+  // a flying player over the singularity aborts the whole sequence before the point of no return
+  if ( abort_jump_if_flying_over() ) return;
 
   // First, check for any entities with Jump that are NOT colliding
   auto jump_view = reg().view<Cmp::Wormhole::Jump>();
@@ -98,6 +104,9 @@ void WormholeSystem::check_player_wormhole_collision()
   // Now check for new/ongoing collisions and collect entities ready to teleport
   for ( auto [actor_entity, actor_dir_cmp, actor_pos_cmp] : all_actors_view.each() )
   {
+    // a flying player past the point of no return is unaffected - they hover over the wormhole
+    if ( reg().all_of<Cmp::Player::Flying>( actor_entity ) ) continue;
+
     for ( auto [wormhole_entity, wormhole_cmp, wh_pos_cmp] : wormhole_view.each() )
     {
 
@@ -166,6 +175,48 @@ void WormholeSystem::check_player_wormhole_collision()
     despawn_wormhole();
     spawn_wormhole( WormholeSystem::SpawnPhase::Respawn );
   }
+}
+
+sf::Time WormholeSystem::jump_sequence_elapsed( entt::registry &reg )
+{
+  sf::Time elapsed = sf::Time::Zero;
+  for ( auto [entity, jump_cmp] : reg.view<Cmp::Wormhole::Jump>().each() )
+  {
+    elapsed = std::max( elapsed, jump_cmp.jump_clock.getElapsedTime() );
+  }
+  return elapsed;
+}
+
+bool WormholeSystem::is_player_committed_to_jump( entt::registry &reg )
+{
+  if ( not reg.all_of<Cmp::Wormhole::Jump>( Utils::Player::get_entity( reg ) ) ) return false;
+  const float threshold = Sys::PersistSystem::get<Cmp::Persist::WormholeAbortThreshold>( reg ).get_value();
+  return jump_sequence_elapsed( reg ).asSeconds() >= threshold;
+}
+
+bool WormholeSystem::abort_jump_if_flying_over()
+{
+  if ( not Utils::Player::is_flying( reg() ) ) return false;
+
+  const auto &player_pos = Utils::Player::get_position( reg() );
+  bool over_singularity = false;
+  for ( auto [wormhole_entity, wormhole_cmp, wh_pos_cmp] : reg().view<Cmp::Wormhole::Singularity, Cmp::Position>().each() )
+  {
+    if ( player_pos.findIntersection( wh_pos_cmp ) ) over_singularity = true;
+  }
+  if ( not over_singularity ) return false;
+
+  // past the point of no return the sequence carries on without the player
+  const float threshold = Sys::PersistSystem::get<Cmp::Persist::WormholeAbortThreshold>( reg() ).get_value();
+  if ( jump_sequence_elapsed( reg() ).asSeconds() >= threshold ) return false;
+
+  if ( reg().view<Cmp::Wormhole::Jump>().size() > 0 )
+  {
+    SPDLOG_INFO( "Flying player aborted the wormhole jump sequence" );
+    reg().clear<Cmp::Wormhole::Jump>();
+    m_sound_bank.get_effect( "wormhole_jump" ).stop();
+  }
+  return true;
 }
 
 void WormholeSystem::spawn_wormhole( SpawnPhase phase )
@@ -248,6 +299,8 @@ void WormholeSystem::clear_footprint( const sf::FloatRect &bounds )
   for ( auto [entity, occupant_pos] : reg().view<Cmp::Position>().each() )
   {
     if ( not occupant_pos.findIntersection( bounds ) ) continue;
+    // never destroy actors - e.g. a player flying over the wormhole isn't teleported, so can still be inside the footprint
+    if ( reg().any_of<Cmp::Player::Character, Cmp::Npc::NPC>( entity ) ) continue;
     SPDLOG_DEBUG( "WH: #{}: {},{}", static_cast<uint32_t>( entity ), occupant_pos.x(), occupant_pos.y() );
     kill_list.emplace_back( entity, occupant_pos.position );
     SPDLOG_DEBUG( "Wormhole: clearing item at ({}, {})", occupant_pos.position.x, occupant_pos.position.y );

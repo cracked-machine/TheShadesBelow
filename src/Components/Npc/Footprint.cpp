@@ -11,7 +11,7 @@ Footprint::Footprint( const Sprites::SpriteSheet &ss )
 {
   const auto grid = ss.get_grid_size();
   // the sprite sheet guarantees the mask is either empty (every cell collides) or has at least one entry per cell
-  const auto &collision_mask = ss.collision_mask();
+  const auto &collision_mask = ss.walking_collision_mask();
 
   m_cells.clear();
   for ( int gy = 0; gy < grid.y; ++gy )
@@ -26,7 +26,7 @@ Footprint::Footprint( const Sprites::SpriteSheet &ss )
   if ( m_cells.empty() )
   {
     // an all-false mask is valid: the NPC doesn't collide. Pathfinding still needs a cell to route.
-    SPDLOG_WARN( "{} has no true entries in its collision_mask: NPC will not collide", ss.type().str() );
+    SPDLOG_WARN( "{} has no true entries in its walking_collision_mask: NPC will not collide", ss.type().str() );
     m_cells.emplace_back( 0, 0 );
     m_collides = false;
   }

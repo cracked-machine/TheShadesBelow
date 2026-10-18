@@ -9,6 +9,7 @@
 #include <Systems/ExitSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/GraveSystem.hpp>
+#include <Systems/FlyingSystem.hpp>
 #include <Systems/GrimoireSystem.hpp>
 #include <Systems/HealingSpringSystem.hpp>
 #include <Systems/InventorySystem.hpp>
@@ -63,6 +64,7 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
   emplace<Type::ExitSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );
   emplace<Type::FootstepSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::GraveSystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::FlyingSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::GrimoireSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::HealingSpringSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );
   emplace<Type::InventorySystem>( m_initial_reg, window, sound_bank );

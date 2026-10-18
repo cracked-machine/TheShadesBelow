@@ -1,7 +1,7 @@
 {
   "ERROR_SPRITE": {
     "sprite": "ERROR_SPRITE",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -20,7 +20,7 @@
 
   "item.axe": {
     "sprite": "sprite.item.axe",
-    "wear": { "location": "inventory", "expiryseconds": 0 },
+    "wear": { "location": "inventory", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 2, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -38,7 +38,7 @@
   },
   "item.bomb": {
     "sprite": "sprite.item.bomb",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -56,7 +56,7 @@
   },
   "item.boots": {
     "sprite": "sprite.item.boots",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -74,7 +74,7 @@
   },
   "item.bow": {
     "sprite": "sprite.item.bow",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -92,7 +92,7 @@
   },
   "item.candle": {
     "sprite": "sprite.item.candle",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -110,7 +110,7 @@
   },
   "item.cryptkey": {
     "sprite": "sprite.item.cryptkey",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -128,7 +128,7 @@
   },
   "item.cursetablet": {
     "sprite": "sprite.item.cursetablet",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -146,7 +146,7 @@
   },
   "item.dowsingrod": {
     "sprite": "sprite.item.dowsingrod",
-    "wear": { "location": "inventory", "expiryseconds": 60 },
+    "wear": { "location": "inventory", "expiryseconds": 60, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -164,7 +164,7 @@
   },
   "item.elderflute": {
     "sprite": "sprite.item.elderflute",
-    "wear": { "location": "inventory", "expiryseconds": 60 },
+    "wear": { "location": "inventory", "expiryseconds": 60, "active_only": true },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -182,7 +182,7 @@
   },
   "item.elderwine": {
     "sprite": "sprite.item.elderwine",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -200,7 +200,7 @@
   },
   "item.exitkey": {
     "sprite": "sprite.item.exitkey",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 0, "special": "crypt" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -218,7 +218,7 @@
   },
   "item.gloves": {
     "sprite": "sprite.item.gloves",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -236,7 +236,7 @@
   },
   "item.hawthorntea": {
     "sprite": "sprite.item.hawthorntea",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -254,7 +254,7 @@
   },
   "item.jewelry_amephyst_gemstone": {
     "sprite": "sprite.item.jewelry_amephyst_gemstone",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 2, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -272,7 +272,7 @@
   },
   "item.jewelry_amephyst_ring": {
     "sprite": "sprite.item.jewelry_amephyst_ring",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 2, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -290,7 +290,7 @@
   },
   "item.jewelry_diamond_gemstone": {
     "sprite": "sprite.item.jewelry_diamond_gemstone",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 2, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -308,7 +308,7 @@
   },
   "item.jewelry_emerald_gemstone": {
     "sprite": "sprite.item.jewelry_emerald_gemstone",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 2, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -326,7 +326,7 @@
   },
   "item.jewelry_emerald_necklace": {
     "sprite": "sprite.item.jewelry_emerald_necklace",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 2, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -344,7 +344,7 @@
   },
   "item.jewelry_ruby_ring": {
     "sprite": "sprite.item.jewelry_ruby_ring",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 2, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -362,7 +362,7 @@
   },
   "item.jewelry_sapphire_gemstone": {
     "sprite": "sprite.item.jewelry_sapphire_gemstone",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 2, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -380,7 +380,7 @@
   },
   "item.jewelry_sapphire_necklace": {
     "sprite": "sprite.item.jewelry_sapphire_necklace",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 2, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -398,7 +398,7 @@
   },
   "item.lightningrod": {
     "sprite": "sprite.item.lightningrod",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -416,7 +416,7 @@
   },
   "item.lightningrod.broken": {
     "sprite": "sprite.item.lightningrod.broken",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -434,7 +434,7 @@
   },
   "item.pickaxe": {
     "sprite": "sprite.item.pickaxe",
-    "wear": { "location": "inventory", "expiryseconds": 0 },
+    "wear": { "location": "inventory", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 2, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -452,7 +452,7 @@
   },
   "item.plant.burdock": {
     "sprite": "sprite.item.plant.burdock",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "item.burr" } },
     "chop": { "reward": { "item": "item.burdockroot" } },
@@ -470,7 +470,7 @@
   },
   "item.burdockroot": {
     "sprite": "sprite.burdockroot",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -488,7 +488,7 @@
   },
   "item.burr": {
     "sprite": "sprite.burr",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -506,7 +506,7 @@
   },
   "item.plant.elder": {
     "sprite": "sprite.item.plant.elder",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "item.elderberries" } },
     "chop": { "reward": { "item": "item.elderstick" } },
@@ -524,7 +524,7 @@
   },
   "item.elderstick": {
     "sprite": "sprite.elderstick",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "item.elderflute", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -542,7 +542,7 @@
   },
   "item.elderberries": {
     "sprite": "sprite.elderberries",
-    "wear": { "location": "both", "expiryseconds": 30 },
+    "wear": { "location": "both", "expiryseconds": 30, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "item.elderwine", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -560,7 +560,7 @@
   },
   "item.plant.foxglove": {
     "sprite": "sprite.item.plant.foxglove",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "item.foxgloveflower" } },
     "chop": { "reward": { "item": "" } },
@@ -578,7 +578,7 @@
   },
   "item.foxgloveflower": {
     "sprite": "sprite.foxgloveflower",
-    "wear": { "location": "both", "expiryseconds": 30 },
+    "wear": { "location": "both", "expiryseconds": 30, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -596,7 +596,7 @@
   },
   "item.plant.hawthorn": {
     "sprite": "sprite.item.plant.hawthorn",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "item.hawthornflower" } },
     "chop": { "reward": { "item": "item.hawthornstick" } },
@@ -614,7 +614,7 @@
   },
   "item.hawthornstick": {
     "sprite": "sprite.hawthornstick",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "item.lightningrod", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -632,7 +632,7 @@
   },
   "item.hawthornflower": {
     "sprite": "sprite.hawthornflower",
-    "wear": { "location": "both", "expiryseconds": 30 },
+    "wear": { "location": "both", "expiryseconds": 30, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "item.hawthorntea", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -650,7 +650,7 @@
   },
   "item.plant.henbane": {
     "sprite": "sprite.item.plant.henbane",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "item.henbaneseed" } },
     "chop": { "reward": { "item": "item.henbanestick" } },
@@ -668,7 +668,7 @@
   },
   "item.henbanestick": {
     "sprite": "sprite.henbanestick",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "item.witchesbroom", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -686,7 +686,7 @@
   },
   "item.henbaneseed": {
     "sprite": "sprite.henbaneseed",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -705,7 +705,7 @@
 
   "item.plant.hogweed": {
     "sprite": "sprite.item.plant.hogweed",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "item.hogweedseed" } },
     "chop": { "reward": { "item": "" } },
@@ -723,7 +723,7 @@
   },
   "item.hogweedseed": {
     "sprite": "sprite.hogweedseed",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -741,7 +741,7 @@
   },
   "item.plant.nettle": {
     "sprite": "sprite.item.plant.nettle",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "item.nettleleaf" } },
     "chop": { "reward": { "item": "item.nettlefiber" } },
@@ -759,7 +759,7 @@
   },
   "item.nettlefiber": {
     "sprite": "sprite.nettlefiber",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "item.gloves", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -777,7 +777,7 @@
   },
   "item.nettleleaf": {
     "sprite": "sprite.nettleleaf",
-    "wear": { "location": "both", "expiryseconds": 30 },
+    "wear": { "location": "both", "expiryseconds": 30, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -795,7 +795,7 @@
   },
   "item.plant.nightshade": {
     "sprite": "sprite.item.plant.nightshade",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "item.nightshadeflower" } },
     "chop": { "reward": { "item": "" } },
@@ -813,7 +813,7 @@
   },
   "item.nightshadeflower": {
     "sprite": "sprite.nightshadeflower",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -831,7 +831,7 @@
   },
   "item.plant.redcampion": {
     "sprite": "sprite.item.plant.redcampion",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "item.antivenom" } },
@@ -849,7 +849,7 @@
   },
   "item.antivenom": {
     "sprite": "sprite.antivenom",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -867,7 +867,7 @@
   },
   "item.plant.rowan": {
     "sprite": "sprite.item.plant.rowan",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "item.rowanberries" } },
     "chop": { "reward": { "item": "item.rowanstick" } },
@@ -885,7 +885,7 @@
   },
   "item.rowanstick": {
     "sprite": "sprite.rowanstick",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "item.dowsingrod", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -903,7 +903,7 @@
   },
   "item.rowanberries": {
     "sprite": "sprite.rowanberries",
-    "wear": { "location": "both", "expiryseconds": 30 },
+    "wear": { "location": "both", "expiryseconds": 30, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "item.rowanwine", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -921,7 +921,7 @@
   },
   "item.plant.stjohnswort": {
     "sprite": "sprite.item.plant.stjohnswort",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "item.stjohnswortflower" } },
     "chop": { "reward": { "item": "item.bloodoil" } },
@@ -939,7 +939,7 @@
   },
   "item.bloodoil": {
     "sprite": "sprite.bloodoil",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -957,7 +957,7 @@
   },
   "item.stjohnswortflower": {
     "sprite": "sprite.stjohnswortflower",
-    "wear": { "location": "both", "expiryseconds": 30 },
+    "wear": { "location": "both", "expiryseconds": 30, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -975,7 +975,7 @@
   },
   "item.plant.yew": {
     "sprite": "sprite.item.plant.yew",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "item.yewberry" } },
     "chop": { "reward": { "item": "item.yewstick" } },
@@ -993,7 +993,7 @@
   },
   "item.yewstick": {
     "sprite": "sprite.yewstick",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "item.bow", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -1011,7 +1011,7 @@
   },
   "item.yewberry": {
     "sprite": "sprite.yewberry",
-    "wear": { "location": "both", "expiryseconds": 30 },
+    "wear": { "location": "both", "expiryseconds": 30, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -1029,7 +1029,7 @@
   },
   "item.preservedcat": {
     "sprite": "sprite.item.preservedcat",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -1047,7 +1047,7 @@
   },
   "item.relic1": {
     "sprite": "sprite.item.relic1",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 0, "special": "altar" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -1065,7 +1065,7 @@
   },
   "item.relic2": {
     "sprite": "sprite.item.relic2",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 0, "special": "altar" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -1083,7 +1083,7 @@
   },
   "item.relic3": {
     "sprite": "sprite.item.relic3",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 0, "special": "altar" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -1101,7 +1101,7 @@
   },
   "item.relic4": {
     "sprite": "sprite.item.relic4",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 0, "special": "altar" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -1119,7 +1119,7 @@
   },
   "item.rottenfood": {
     "sprite": "sprite.item.rottenfood",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -1137,7 +1137,7 @@
   },
   "item.rowanwine": {
     "sprite": "sprite.item.rowanwine",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -1155,7 +1155,7 @@
   },
   "item.shovel": {
     "sprite": "sprite.item.shovel",
-    "wear": { "location": "inventory", "expiryseconds": 0 },
+    "wear": { "location": "inventory", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 2, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -1173,7 +1173,7 @@
   },
   "item.witchesbroom": {
     "sprite": "sprite.item.witchesbroom",
-    "wear": { "location": "both", "expiryseconds": 0 },
+    "wear": { "location": "inventory", "expiryseconds": 120, "active_only": true },
     "sacrifice": { "enabled": false, "reward": { "item": "", "wealth": 0, "special": "none" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },
@@ -1191,7 +1191,7 @@
   },
   "item.witchesjar": {
     "sprite": "sprite.item.witchesjar",
-    "wear": { "location": "none", "expiryseconds": 0 },
+    "wear": { "location": "none", "expiryseconds": 0, "active_only": false },
     "sacrifice": { "enabled": true, "reward": { "item": "", "wealth": 0, "special": "banish" } },
     "forage": { "reward": { "item": "" } },
     "chop": { "reward": { "item": "" } },

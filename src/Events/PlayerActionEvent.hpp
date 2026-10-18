@@ -34,7 +34,9 @@ struct PlayerActionEvent
     //! @brief Attempt to eat/drink the current inventory item.
     CONSUME,
     //! @brief Attempt to burn the nearest/facing plant object.
-    BURN
+    BURN,
+    //! @brief Fly key is held this frame (witchesbroom). See Sys::FlyingSystem.
+    FLY
   };
 
   //! @brief Construct a new PlayerActionEvent object

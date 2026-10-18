@@ -207,6 +207,9 @@ void HazardFieldSystem<HazardType>::check_player_hazard_field_collision()
       reg().template emplace_or_replace<Cmp::Player::Footstep>( Utils::Player::get_entity( m_reg ), Cmp::Player::Footstep::Type::GRASS );
     }
 
+    // flying over hazards - no falling/decay/damage
+    if ( Utils::Player::is_flying( reg() ) ) continue;
+
     for ( auto [hazard_entt, hazard_cmp, hazard_pos_cmp] : hazard_view.each() )
     {
 

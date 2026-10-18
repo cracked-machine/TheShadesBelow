@@ -27,6 +27,10 @@
 #include <Components/Persistent/EmberDamage.hpp>
 #include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/FearHealthDmgPerSec.hpp>
+#include <Components/Persistent/FlyingLandingOverlap.hpp>
+#include <Components/Persistent/FlyingLiftOffset.hpp>
+#include <Components/Persistent/FlyingOscillationAmplitude.hpp>
+#include <Components/Persistent/FlyingTransitionTime.hpp>
 #include <Components/Persistent/FuseDelay.hpp>
 #include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
@@ -92,6 +96,7 @@
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/VenomHealthDmgPerSec.hpp>
 #include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
+#include <Components/Persistent/WormholeAbortThreshold.hpp>
 #include <Components/Persistent/WormholeSeed.hpp>
 #include <Events/LoadSettingsEvent.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -217,6 +222,11 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::VertigoHealthDmgPerSec>();
   add_component<Cmp::Persist::PlayerOnFireHealthDmgPerSec>();
   add_component<Cmp::Persist::BowReleaseWear>();
+  add_component<Cmp::Persist::FlyingOscillationAmplitude>();
+  add_component<Cmp::Persist::FlyingLiftOffset>();
+  add_component<Cmp::Persist::FlyingTransitionTime>();
+  add_component<Cmp::Persist::FlyingLandingOverlap>();
+  add_component<Cmp::Persist::WormholeAbortThreshold>();
   add_component<Cmp::Persist::PlantWearPerForage>();
   add_component<Cmp::Persist::GlovesWearPerForage>();
   add_component<Cmp::Persist::PickaxeGraveDigWear>();

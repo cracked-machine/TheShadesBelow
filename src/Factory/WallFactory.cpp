@@ -5,6 +5,7 @@
 #include <Components/Particle/BlockParticle.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>
+#include <Components/Player/SolidBoundary.hpp>
 #include <Components/Position.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
@@ -56,6 +57,7 @@ void add_solid_player( entt::registry &reg, sf::FloatRect rect, PathFinding::Spa
     {
       reserved_sm.insert( entt, pos_cmp );
       reg.emplace_or_replace<Cmp::Player::NoPath>( entt );
+      reg.emplace_or_replace<Cmp::Player::SolidBoundary>( entt );
       reg.emplace_or_replace<Cmp::Particle::BlockParticle>( entt );
     }
   }

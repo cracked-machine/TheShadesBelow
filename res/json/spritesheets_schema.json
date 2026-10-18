@@ -71,9 +71,18 @@
               "description": "Path to the texture file",
               "pattern": "^res/textures/.*\\.(png|jpg|jpeg|bmp|tga)$"
             },
-            "collision_mask": {
+            "walking_collision_mask": {
               "type": "array",
               "description": "Which cells of the sprite collide, one boolean per 'grid_size' cell in row-major order (left to right, top to bottom). For NPCs these are the cells it stands on, used for collision and pathfinding clearance. Shortcut: a single entry (e.g. [true]) applies that value to every cell, whatever the 'grid_size'. Otherwise there must be at least one entry per cell. If omitted, every cell collides. All false is valid: the sprite does not collide (an NPC then logs a warning at spawn and cannot touch the player).",
+              "items": {
+                "type": "boolean"
+              },
+              "minItems": 1,
+              "uniqueItems": false
+            },
+            "flying_collision_mask": {
+              "type": "array",
+              "description": "Which cells block the player while flying on the witchesbroom. Same format as walking_collision_mask: one boolean per grid_size cell in row-major order, or a single entry applied to every cell. If omitted, flight blocking falls back to the size-based rule (walls and multiblocks larger than 1x1 block, other sprites can be flown over).",
               "items": {
                 "type": "boolean"
               },

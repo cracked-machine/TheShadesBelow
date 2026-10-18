@@ -99,6 +99,11 @@ private:
   //! @brief Banish the ElderMother when she comes within range of a player carrying a usable ElderFlute.
   void check_elderflute_banish();
 
+  //! @brief Whether the player is flying over an NPC too small (1x1) to reach them.
+  //! @param npc_bounds The NPC's collision bounds.
+  //! @return bool true if the NPC can't touch the flying player.
+  bool is_flying_over( const sf::FloatRect &npc_bounds );
+
   //! @brief Check Player/NPC collision for Cmp::CollisionActions with zero tick.
   //! @note Player cooldown and knockback are ENABLED.
   void check_once_collision();

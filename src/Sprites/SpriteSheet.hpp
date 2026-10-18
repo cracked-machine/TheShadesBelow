@@ -5,10 +5,12 @@
 #include <Systems/Stores/StoreKey.hpp>
 
 #include <Utils/Constants.hpp>
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <filesystem>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace Game::Sprites
@@ -29,13 +31,15 @@ public:
   //! @param spritesheet_selections
   //! @param grid_size
   //! @param indices_per_sequence
-  //! @param collision_mask
+  //! @param walking_collision_mask
+  //! @param flying_collision_mask
   //! @param door_position
   //! @param framerate Animation framerate in frames per second. Forced to 0 for single-frame sheets.
   explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list,
                         const std::filesystem::path &spritesheet_png, const std::vector<uint32_t> &spritesheet_selections,
                         sf::Vector2i grid_size = { 1, 1 }, unsigned int indices_per_sequence = 1,
-                        std::vector<bool> collision_mask = {}, sf::Vector2i door_position = {},
+                        std::vector<bool> walking_collision_mask = {}, std::vector<bool> flying_collision_mask = {},
+                        sf::Vector2i door_position = {},
                         float framerate = 0.f );
 
   //! @brief Construct a new Multi Sprite object using texture object
@@ -46,12 +50,14 @@ public:
   //! @param spritesheet_selections
   //! @param grid_size
   //! @param indices_per_sequence
-  //! @param collision_mask
+  //! @param walking_collision_mask
+  //! @param flying_collision_mask
   //! @param door_position
   //! @param framerate Animation framerate in frames per second. Forced to 0 for single-frame sheets.
   explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list, sf::Texture spritesheet_texture,
                         const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size = { 1, 1 },
-                        unsigned int indices_per_sequence = 1, std::vector<bool> collision_mask = {}, sf::Vector2i door_position = {},
+                        unsigned int indices_per_sequence = 1, std::vector<bool> walking_collision_mask = {},
+                        std::vector<bool> flying_collision_mask = {}, sf::Vector2i door_position = {},
                         float framerate = 0.f );
 
   SpriteSheet( SpriteSheet && ) = default;
@@ -92,9 +98,14 @@ public:
   //! @return float Frames per second. 0 = not animated, which is always the case for single-frame sheets.
   [[nodiscard]] float framerate() const { return m_framerate; }
 
-  //! @brief Which cells of the sprite collide, one bool per grid cell in row-major order.
+  //! @brief Which cells of the sprite collide with walking actors, one bool per grid cell in row-major order.
   //! @return Either empty, meaning every cell collides, or at least one entry per `grid_size` cell.
-  [[nodiscard]] const std::vector<bool> &collision_mask() const { return m_collision_mask; }
+  [[nodiscard]] const std::vector<bool> &walking_collision_mask() const { return m_walking_collision_mask; }
+
+  //! @brief Which cells of the sprite block the player while flying, one bool per grid cell in row-major order.
+  //! @return Either empty, meaning not specified (see Sys::FlyingSystem::blocks_flight for the fallback), or at
+  //! least one entry per `grid_size` cell.
+  [[nodiscard]] const std::vector<bool> &flying_collision_mask() const { return m_flying_collision_mask; }
 
   //! @brief Get the door tile position within the sprite grid.
   //! @return sf::Vector2i
@@ -107,6 +118,12 @@ public:
   //! @brief Get the display name for the spritesheet
   //! @return std::string
   [[nodiscard]] std::string display_name() const { return m_display_name; }
+
+  //! @brief Whether spritesheets.json gives this sheet an explicit (non-zero) zorder for any sprite.
+  [[nodiscard]] bool has_zorder() const
+  {
+    return std::ranges::any_of( m_zorder_list, []( float z ) { return z != 0.f; } );
+  }
 
   //! @brief Get the zorder value for a specific sprite in this sheet.
   //! @note This will return zero if the sprite sheet is missing an entry at `idx`
@@ -141,14 +158,16 @@ private:
   //! @return false otherwise
   bool add_sprite( const std::vector<uint32_t> &spritesheet_selections );
 
-  //! @brief Apply the collision mask rules from spritesheets.json: an omitted mask stays empty (every cell
-  //! collides), and a single entry is expanded to that value for every grid cell.
+  //! @brief Apply the collision mask rules from spritesheets.json: an omitted mask stays empty, and a single
+  //! entry is expanded to that value for every grid cell.
   //! @param collision_mask The mask as loaded.
   //! @param grid_size The sprite's grid size.
   //! @param type The sprite sheet's type, for the error message.
+  //! @param field The JSON property name, for the error message.
   //! @return The mask to store.
   //! @throws std::runtime_error if the mask has more than one entry but fewer than one per grid cell.
-  static std::vector<bool> normalise_collision_mask( std::vector<bool> collision_mask, sf::Vector2i grid_size, const Sys::SpriteKey &type );
+  static std::vector<bool> normalise_collision_mask( std::vector<bool> collision_mask, sf::Vector2i grid_size, const Sys::SpriteKey &type,
+                                                     std::string_view field );
 
   //! @brief Apply the framerate rules from spritesheets.json: a sheet with a single animation frame never
   //! animates, so its framerate is 0 whatever was loaded, and a negative framerate is treated as 0.
@@ -173,8 +192,11 @@ private:
   //! @brief Number of `sprite_indices` entries in a full animation sequence. See indices_per_sequence().
   unsigned int m_indices_per_sequence{ 1 };
 
-  //! @brief Which grid cells of the sprite collide, in row-major order. See collision_mask().
-  std::vector<bool> m_collision_mask;
+  //! @brief Which grid cells of the sprite collide with walking actors, in row-major order. See walking_collision_mask().
+  std::vector<bool> m_walking_collision_mask;
+
+  //! @brief Which grid cells of the sprite block flight, in row-major order. See flying_collision_mask().
+  std::vector<bool> m_flying_collision_mask;
 
   //! @brief Door tile position within the sprite grid, if this sheet represents a structure with a door.
   sf::Vector2i m_door_position;

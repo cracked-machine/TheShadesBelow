@@ -37,6 +37,7 @@
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/NoPath.hpp>
 #include <Components/Player/TookDamage.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
@@ -58,6 +59,7 @@
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Systems/FlyingSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
@@ -464,6 +466,12 @@ void NpcSystem::check_elderflute_banish()
   }
 }
 
+bool NpcSystem::is_flying_over( const sf::FloatRect &npc_bounds )
+{
+  if ( not Utils::Player::is_flying( reg() ) ) return false;
+  return npc_bounds.size.x <= Constants::kGridSizePxF.x and npc_bounds.size.y <= Constants::kGridSizePxF.y;
+}
+
 void NpcSystem::check_once_collision()
 {
   auto player_collision_view = reg().view<Cmp::Player::Character>();
@@ -507,6 +515,9 @@ void NpcSystem::check_once_collision()
           }
         }
       }
+
+      // a flying player is out of reach of 1x1 NPCs
+      if ( is_flying_over( npc_bounds ) ) continue;
 
       if ( not player_cmp.skip_damage_cooldown_once && player_cmp.m_damage_cooldown_timer < player_cmp.damage_cooldown_timeout() ) continue;
 
@@ -553,6 +564,8 @@ void NpcSystem::check_timed_collision( sf::Time dt )
     // only the cells a multiblock NPC stands on collide: the rows above them are off the ground
     const auto npc_collision_bounds = Utils::Npc::collision_bounds( reg(), npc_entity );
     if ( not npc_collision_bounds or not player_pos.findIntersection( *npc_collision_bounds ) ) continue;
+    // a flying player is out of reach of 1x1 NPCs
+    if ( is_flying_over( *npc_collision_bounds ) ) continue;
 
     Utils::Player::get_stats( reg() ).apply( npc_action );
     reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
@@ -614,6 +627,15 @@ void NpcSystem::find_pushback_position( const Cmp::Direction &npc_direction, con
   // returns the name of the component blocking `rect`, or an empty string if it's clear
   auto blocking_component_name = [&]( const Cmp::RectBounds &rect ) -> std::string
   {
+    // a flying player is knocked back over 1x1 obstacles - only walls, boundaries and large multiblocks stop them
+    if ( Utils::Player::is_flying( reg() ) )
+    {
+      for ( auto [nopath_entt, nopath_pos] : reg().view<Cmp::Player::NoPath, Cmp::Position>().each() )
+      {
+        if ( rect.findIntersection( nopath_pos ) and FlyingSystem::blocks_flight( reg(), nopath_entt ) ) return "FlightBlocker";
+      }
+      return {};
+    }
     if ( Utils::Collision::any_intersects<Cmp::Obstacle>( reg(), rect ) ) return "Obstacle";
     if ( Utils::Collision::any_intersects<Cmp::PlantSegment>( reg(), rect ) ) return "PlantSegment";
     if ( Utils::Collision::any_intersects<Cmp::Wall>( reg(), rect ) ) return "Wall";

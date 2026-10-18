@@ -55,6 +55,7 @@
 #include <Systems/BaseSystem.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/ExitSystem.hpp>
+#include <Systems/FlyingSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/GraveSystem.hpp>
 #include <Systems/GrimoireSystem.hpp>
@@ -275,6 +276,8 @@ void GraveyardScene::do_update( sf::Time dt )
   }
 
   PROFILED( m_sys.find<Sys::Store::Type::AnimSystem>().update( dt ) );
+  // before anything that checks Utils::Player::is_flying() this frame
+  PROFILED( m_sys.find<Sys::Store::Type::FlyingSystem>().update( dt ) );
   {
     ZoneScopedN( "SinkHoleHazardSystem::update" );
     if ( auto pos = m_sys.find<Sys::Store::Type::SinkHoleHazardSystem>().update( dt ); pos != sf::Vector2f{ 0, 0 } )

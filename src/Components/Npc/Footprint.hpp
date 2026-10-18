@@ -19,28 +19,28 @@ namespace Game::Cmp::Npc
 
 //! @brief The grid cells an NPC stands on, which is what pathfinding moves around the navmesh and what collides
 //! with the player. A single-block NPC stands on its own cell. A multiblock NPC stands on the cells its sprite
-//! sheet marks in `collision_mask` (e.g. the bottom row of a tall sprite, so the rest of it can overhang obstacles),
+//! sheet marks in `walking_collision_mask` (e.g. the bottom row of a tall sprite, so the rest of it can overhang obstacles),
 //! or on every cell if it has no mask. If the mask has no `true` cell the NPC does not collide: see collides().
 //! @details Cells are stored as grid pos (column, row) within the sprite's grid. Every other member converts
 //! them to world space, given the NPC's top-left world position (its Cmp::Position).
 //! @note Built once, when the NPC is created, from its first sprite sheet, so every sprite sheet of an NPC
-//! (e.g. one per walk direction) must share the same `grid_size` and `collision_mask`.
+//! (e.g. one per walk direction) must share the same `grid_size` and `walking_collision_mask`.
 class Footprint
 {
 public:
-  //! @brief Build the footprint from a sprite sheet's `grid_size` and `collision_mask`.
+  //! @brief Build the footprint from a sprite sheet's `grid_size` and `walking_collision_mask`.
   //! @param ss The NPC's sprite sheet.
   explicit Footprint( const Sprites::SpriteSheet &ss );
 
   //! @brief The grid pos (column, row) of every cell in the footprint: one per `true` entry of the sprite sheet's
-  //! `collision_mask`, in row-major order. `{0, 0}` is the NPC's top-left.
+  //! `walking_collision_mask`, in row-major order. `{0, 0}` is the NPC's top-left.
   //! @return Never empty. Index zero is always the anchor cell for pathfinding: A* paths are computed for that
   //! cell, and the other cells are checked for clearance relative to it. A non-colliding footprint holds only
   //! the top-left cell, so the NPC can still be pathfound.
   [[nodiscard]] std::span<const sf::Vector2i> cells() const { return m_cells; }
 
   //! @brief Whether the NPC collides with the player.
-  //! @return false if the sprite sheet's `collision_mask` has no `true` cell.
+  //! @return false if the sprite sheet's `walking_collision_mask` has no `true` cell.
   [[nodiscard]] bool collides() const { return m_collides; }
 
   //! @brief Get the world rect covering every cell of the footprint.

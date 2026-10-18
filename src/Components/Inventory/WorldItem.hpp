@@ -91,10 +91,11 @@ public:
   //! @param bow_dmg Damage done to a bow by this item.
   //! @param expiry Time for the item to fully expire. Zero means this item does not expire.
   //! @param wear_location Where the item's wear level is active.
+  //! @param wear_active_only Whether the item only wears while actively in use (e.g. flute playing, broom flying).
   //! @param consumable Whether the item can be eaten, drunk or neither.
   WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, Sacrifice sacrifice, std::string forage_output, std::string axe_output, int pickaxe_dmg,
              int axe_dmg, int shovel_dmg, int bow_dmg, sf::Time expiry = sf::Time::Zero, Location wear_location = Location::NONE,
-             Consumable consumable = Consumable::NONE )
+             bool wear_active_only = false, Consumable consumable = Consumable::NONE )
       : item_type( std::move( item_type ) ),
         sprite_type( std::move( sprite_type ) ),
         m_sacrifice( std::move( sacrifice ) ),
@@ -106,6 +107,7 @@ public:
         m_bow_damage( bow_dmg ),
         m_expiry( expiry ),
         m_wear_location( wear_location ),
+        m_wear_active_only( wear_active_only ),
         m_consumable( consumable )
   {
   }
@@ -154,6 +156,9 @@ public:
 
   //! @brief Whether the item's wear level is active while it is in the player inventory.
   bool wears_in_inventory() const { return m_wear_location == Location::INVENTORY or m_wear_location == Location::BOTH; }
+
+  //! @brief Whether the item only wears while it is actively in use (e.g. flute playing, broom flying).
+  bool wears_only_when_active() const { return m_wear_active_only; }
 
   //! @brief The item that spawns when this item is sacrificed. Empty string if unused.
   Sys::ItemKey get_sacrifice_item() const { return m_sacrifice.item; }
@@ -218,6 +223,9 @@ private:
 
   //! @brief Where the item's wear level is active. Imported from items.json.
   Location m_wear_location{ Location::NONE };
+
+  //! @brief Whether the item only wears while actively in use. Imported from items.json.
+  bool m_wear_active_only{ false };
 
   //! @brief Whether the item can be eaten, drunk or neither. Imported from items.json.
   Consumable m_consumable{ Consumable::NONE };

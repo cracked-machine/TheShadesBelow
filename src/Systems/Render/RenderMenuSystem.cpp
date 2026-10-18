@@ -27,6 +27,10 @@
 #include <Components/Persistent/EmberDamage.hpp>
 #include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/FearHealthDmgPerSec.hpp>
+#include <Components/Persistent/FlyingLandingOverlap.hpp>
+#include <Components/Persistent/FlyingLiftOffset.hpp>
+#include <Components/Persistent/FlyingOscillationAmplitude.hpp>
+#include <Components/Persistent/FlyingTransitionTime.hpp>
 #include <Components/Persistent/FuseDelay.hpp>
 #include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
@@ -88,6 +92,7 @@
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/VenomHealthDmgPerSec.hpp>
 #include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
+#include <Components/Persistent/WormholeAbortThreshold.hpp>
 #include <Components/Persistent/WormholeSeed.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -240,6 +245,13 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::PlantWearPerForage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GlovesWearPerForage>( reg() ).render_widget();
 
+    ImGui::SeparatorText( "Broom Flight Settings" );
+
+    Sys::PersistSystem::get<Cmp::Persist::FlyingLiftOffset>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::FlyingOscillationAmplitude>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::FlyingTransitionTime>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::FlyingLandingOverlap>( reg() ).render_widget();
+
     // Bomb Settings
     ImGui::SeparatorText( "Bomb Settings" );
 
@@ -261,6 +273,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::EmberDamage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::LightningRodDebrisDamage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::WormholeSeed>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::WormholeAbortThreshold>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::CorruptionSeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::SinkholeSeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RuinMaxCobwebs>( reg() ).render_widget();

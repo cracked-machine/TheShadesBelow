@@ -154,6 +154,8 @@ void ExitSystem::update_exit_zorder()
 
 void ExitSystem::check_exit_collision()
 {
+  // no scene transitions mid-flight - the player must land and walk in
+  if ( Utils::Player::is_flying( reg() ) ) return;
 
   auto exit_view = reg().view<Cmp::Exit, Cmp::Position>();
   for ( auto [entity, exit_cmp, exit_pos_cmp] : exit_view.each() )

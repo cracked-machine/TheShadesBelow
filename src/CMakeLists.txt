@@ -83,6 +83,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/RuinSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ShopSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ItemSystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/FlyingSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/GrimoireSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Stores/ItemStore.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Stores/NpcStore.cpp

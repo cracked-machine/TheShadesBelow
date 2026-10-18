@@ -52,6 +52,8 @@ void HealingSpringSystem::update_building_zorder()
 
 void HealingSpringSystem::check_entrance_collision()
 {
+  // no scene transitions mid-flight - the player must land and walk in
+  if ( Utils::Player::is_flying( reg() ) ) return;
   auto player_pos = Utils::Player::get_position( reg() );
   auto door_view = reg().view<Cmp::HealingSpringEntrance, Cmp::Position>();
   const auto view_bounds = Utils::calculate_view_bounds( RenderSystem::get_world_view() );

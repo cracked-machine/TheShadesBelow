@@ -105,6 +105,46 @@
     "detail": "Bow wear: per arrow released",
     "format": "%.1f"
   },
+  "FlyingOscillationAmplitude": {
+    "type": "float",
+    "value": 2.0,
+    "min_value": 0.0,
+    "max_value": 8.0,
+    "detail": "Broom flight: max vertical oscillation amplitude (px)",
+    "format": "%.1f"
+  },
+  "WormholeAbortThreshold": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 2.0,
+    "detail": "Wormhole: seconds into a jump after which flying can no longer abort it",
+    "format": "%.1f"
+  },
+  "FlyingLandingOverlap": {
+    "type": "float",
+    "value": 0.1,
+    "min_value": 0.0,
+    "max_value": 0.4,
+    "detail": "Broom flight: fraction of the player (per side) allowed to overlap an obstacle when landing",
+    "format": "%.2f"
+  },
+  "FlyingTransitionTime": {
+    "type": "float",
+    "value": 0.3,
+    "min_value": 0.05,
+    "max_value": 2.0,
+    "detail": "Broom flight: take-off/landing transition time (s)",
+    "format": "%.2f"
+  },
+  "FlyingLiftOffset": {
+    "type": "float",
+    "value": 16.0,
+    "min_value": 0.0,
+    "max_value": 48.0,
+    "detail": "Broom flight: vertical lift of the player sprite (px)",
+    "format": "%.1f"
+  },
   "PlantWearPerForage": {
     "type": "float",
     "value": 10.0,

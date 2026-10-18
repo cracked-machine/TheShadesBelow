@@ -172,7 +172,9 @@ void SceneInputRouter::graveyard_scene_state_handler()
 
   if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::Space ) )
   {
+    // no conflict: bombs need item.bomb in the inventory slot, flight needs item.witchesbroom
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::PLACE_BOMB ) );
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::FLY ) );
   }
   if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::G ) )
   {

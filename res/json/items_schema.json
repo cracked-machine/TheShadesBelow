@@ -14,7 +14,7 @@
         },
         "wear": {
           "type": "object",
-          "required": ["location", "expiryseconds"],
+          "required": ["location", "expiryseconds", "active_only"],
           "additionalProperties": false,
           "properties": {
             "location": {
@@ -25,6 +25,10 @@
             "expiryseconds": {
               "type": "number",
               "description": "The expiry for this item in seconds. Zero if no expiry."
+            },
+            "active_only": {
+              "type": "boolean",
+              "description": "If true the item only wears while it is actively being used (e.g. flute playing, broom flying)."
             }
           }
         },

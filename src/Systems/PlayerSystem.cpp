@@ -102,6 +102,7 @@
 #include <Factory/PlayerFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>
+#include <Systems/FlyingSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PlayerSystem.hpp>
@@ -204,10 +205,17 @@ void PlayerSystem::update( sf::Time dt )
                                       Cmp::Player::Mortality::State::SHOCKED );
     check_player_can_push( dt );
     check_player_can_pull( dt );
-    update_player_position( dt );
+    // FlyingSystem owns the player position while descending to the landing cell, and a taking-off player
+    // can't move until they have risen above the obstacle (1x1 cell) height
+    const bool grounded_by_flight = Utils::Player::is_landing( reg() ) or
+                                    ( Utils::Player::is_flying( reg() ) and not Utils::Player::is_flying_elevated( reg() ) );
+    if ( not grounded_by_flight ) { update_player_position( dt ); }
     update_player_animation();
 
-    Utils::Player::get_zorder( reg() ).set( Utils::Player::get_position( reg() ).position.y );
+    // once the flying player's sprite clears the obstacle height it is drawn in front of obstacles, except
+    // sprites with an explicit spritesheets.json zorder (see FlyingSystem::elevated_zorder)
+    const float player_y = Utils::Player::get_position( reg() ).position.y;
+    Utils::Player::get_zorder( reg() ).set( Utils::Player::is_flying_elevated( reg() ) ? FlyingSystem::elevated_zorder( reg() ) : player_y );
   }
 
   check_player_mortality();
@@ -1037,6 +1045,10 @@ bool PlayerSystem::is_valid_move( const sf::FloatRect &target_position )
 {
   auto search_bounds = Cmp::RectBounds::scaled( target_position.position, target_position.size, 1 );
 
+  // while flying only walls, level boundaries and multiblocks larger than 1x1 block the player
+  const bool flying = Utils::Player::is_flying( reg() );
+  auto blocks = [&]( entt::entity candidate_entt ) { return not flying or FlyingSystem::blocks_flight( reg(), candidate_entt ); };
+
   // Use the spatial hash to check only the ~5 adjacent cells instead of scanning all
   // NoPath entities (walls + obstacles). Without this, the open spawn area causes
   // a full O(N) scan every frame because no entity triggers an early exit.
@@ -1048,16 +1060,19 @@ bool PlayerSystem::is_valid_move( const sf::FloatRect &target_position )
       if ( not reg().all_of<Cmp::Player::NoPath>( candidate_entt ) ) continue;
       auto *pos_cmp = reg().try_get<Cmp::Position>( candidate_entt );
       if ( not pos_cmp ) continue;
-      if ( search_bounds.findIntersection( *pos_cmp ) ) return false;
+      if ( search_bounds.findIntersection( *pos_cmp ) and blocks( candidate_entt ) ) return false;
     }
   }
   else
   {
     for ( auto [candidate_entt, candidate_pos] : reg().view<Cmp::Player::NoPath, Cmp::Position>().each() )
     {
-      if ( search_bounds.findIntersection( candidate_pos ) ) return false;
+      if ( search_bounds.findIntersection( candidate_pos ) and blocks( candidate_entt ) ) return false;
     }
   }
+
+  // flying over hazards (lava etc) - no pushback
+  if ( flying ) return true;
 
   // update_player_position() calls is_valid_move() for both axes every frame, even the axis with
   // zero direction (its target is just the player's current tile). Skip the hazard pushback state

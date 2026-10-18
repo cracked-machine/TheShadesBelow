@@ -333,8 +333,8 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
   for ( auto [inventory_entt, inventory_cmp, wearlevel_cmp] : reg().view<Cmp::PlayerInventorySlot, Cmp::Inventory::WearLevel>().each() )
   {
     if ( wearlevel_cmp.m_level <= 0 ) continue;
-    // the elderflute only wears while it is playing
-    if ( inventory_cmp.m_item.item_type == "item.elderflute" and not Utils::Player::is_elderflute_active( reg() ) ) break;
+    // "active_only" items (e.g. elderflute, witchesbroom) only wear while they are in use
+    if ( inventory_cmp.m_item.wears_only_when_active() and not Utils::Player::is_inventory_item_active( reg() ) ) break;
     // the slot entity has no Cmp::WorldItem of its own - the item lives inside the slot component.
     // Tools have no expiry; they only wear through use.
     if ( inventory_cmp.m_item.wears_in_inventory() and inventory_cmp.m_item.expiry() != sf::Time::Zero )

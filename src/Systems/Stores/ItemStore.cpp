@@ -71,6 +71,7 @@ void ItemStore::init_store()
     const auto &wear = item_value.at( "wear" );
     auto expiry = wear.at( "expiryseconds" ).get<float>();
     auto wear_location = make_wear_location( wear.at( "location" ).get<std::string>() );
+    auto wear_active_only = wear.at( "active_only" ).get<bool>();
     const auto &sacrifice_json = item_value.at( "sacrifice" );
     const auto &reward_json = sacrifice_json.at( "reward" );
     Cmp::WorldItem::Sacrifice sacrifice{ .enabled = sacrifice_json.at( "enabled" ).get<bool>(),
@@ -94,7 +95,8 @@ void ItemStore::init_store()
     auto bow_damage = damage_to_weapon.at( "bow" ).get<int>();
     auto consumable = make_consumable_property( item_value.at( "consumable" ).get<std::string>() );
     Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, std::move( sacrifice ), forage_output, axe_output, pickaxe_damage, axe_damage,
-                              shovel_damage, bow_damage, sf::seconds( expiry ), wear_location, consumable );
+                              shovel_damage, bow_damage, sf::seconds( expiry ), wear_location, wear_active_only,
+                              consumable );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )

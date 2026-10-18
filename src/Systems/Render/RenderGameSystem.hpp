@@ -107,6 +107,10 @@ private:
   //! @param pos
   void render_wear_level( float wearlevel, const Cmp::Position &pos );
 
+  //! @brief Draw a semi-transparent ground shadow at the flying player's logical position.
+  //! @param pos_cmp The player's (ground) position.
+  void render_flight_shadow( const Cmp::Position &pos_cmp );
+
   //! @brief Renders the flashing warning square over an armed obstacle in the game world
   void render_armed_indicator( const Cmp::Armed &armed_cmp, const Cmp::Position &pos_cmp );
 

@@ -20,6 +20,7 @@
 #include <Components/Player/Curse.hpp>
 #include <Components/Player/Doglegs.hpp>
 #include <Components/Player/ExtraLife.hpp>
+#include <Components/Player/Flying.hpp>
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/Illuminated.hpp>
@@ -269,6 +270,32 @@ bool is_elderflute_active( entt::registry &reg )
   if ( not Utils::is_current_scene( reg, Cmp::SceneSettings::SceneId::GRAVEYARD ) ) return false;
   auto [_, inventory_type, _] = get_inventory( reg );
   return inventory_type == "item.elderflute" and get_inventory_wear_level( reg ) > 0;
+}
+
+bool is_flying( entt::registry &reg )
+{
+  for ( [[maybe_unused]] auto entt : reg.view<Cmp::Player::Character, Cmp::Player::Flying>() ) { return true; }
+  return false;
+}
+
+bool is_landing( entt::registry &reg )
+{
+  const auto *flying_cmp = reg.try_get<Cmp::Player::Flying>( get_entity( reg ) );
+  return flying_cmp and flying_cmp->landing;
+}
+
+bool is_flying_elevated( entt::registry &reg )
+{
+  const auto *flying_cmp = reg.try_get<Cmp::Player::Flying>( get_entity( reg ) );
+  return flying_cmp and flying_cmp->elevated;
+}
+
+bool is_inventory_item_active( entt::registry &reg )
+{
+  auto [_, inventory_type, _] = get_inventory( reg );
+  if ( inventory_type == "item.elderflute" ) return is_elderflute_active( reg );
+  if ( inventory_type == "item.witchesbroom" ) return is_flying( reg );
+  return false;
 }
 
 bool is_in_spawn( entt::registry &reg, const Cmp::Position &player_pos_cmp )
