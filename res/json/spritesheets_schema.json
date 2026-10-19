@@ -60,19 +60,35 @@
             },
             "grid_size": {
               "type": "object",
-              "description": "width and height grid size for the multi-sprite",
+              "description": "Width (x) and height (y) of the sprite, in grid cells",
               "properties": {
-                "width": {
-                  "type": "number",
+                "x": {
+                  "type": "integer",
                   "minimum": 1
                 },
-                "height": {
-                  "type": "number",
+                "y": {
+                  "type": "integer",
                   "minimum": 1
                 }
               },
-              "minItems": 2,
-              "maxItems": 2
+              "required": ["x", "y"],
+              "additionalProperties": false
+            },
+            "door_position": {
+              "type": "object",
+              "description": "Grid cell of the multiblock's door, as a column (x) and row (y) within 'grid_size', counted from the top-left cell (0, 0). If omitted, defaults to (0, 0).",
+              "properties": {
+                "x": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "y": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": ["x", "y"],
+              "additionalProperties": false
             },
             "texture_path": {
               "type": "string",

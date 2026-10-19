@@ -413,7 +413,7 @@ std::optional<sf::Vector2f> FlyingSystem::find_landing_cell()
   auto distance_sq = [&]( const sf::Vector2f &cell ) { return ( ( cell + grid / 2.f ) - player_centre ).lengthSquared(); };
   std::ranges::stable_sort( candidates, {}, distance_sq );
 
-  auto is_free = [this]( const sf::Vector2f &cell ) { return is_free_landing_cell( cell ); };
+  auto is_free = [this]( const sf::Vector2f &cell ) { return is_free_landing_cell( cell, /*allow_hazards=*/false ); };
   if ( auto it = std::ranges::find_if( candidates, is_free ); it != candidates.end() ) return *it;
   return std::nullopt;
 }
@@ -422,33 +422,34 @@ std::optional<sf::Vector2f> FlyingSystem::landing_spot_below()
 {
   const auto &player_pos = Utils::Player::get_position( reg() );
   // fully clear - land exactly where the player is
-  if ( is_free_landing_area( player_pos ) ) return player_pos.position;
+  if ( is_free_landing_area( player_pos, /*allow_hazards=*/true ) ) return player_pos.position;
 
   // only slightly overlapping an obstacle edge (e.g. hovering over a 16x16 gap) - land on the nearest grid cell
   const float overlap = Sys::PersistSystem::get<Cmp::Persist::FlyingLandingOverlap>( reg() ).get_value();
   const sf::Vector2f inset = player_pos.size * overlap;
   const sf::FloatRect tolerant_area( player_pos.position + inset, player_pos.size - ( inset * 2.f ) );
-  if ( not is_free_landing_area( tolerant_area ) ) return std::nullopt;
+  if ( not is_free_landing_area( tolerant_area, /*allow_hazards=*/true ) ) return std::nullopt;
 
   const sf::Vector2f cell = Utils::snap_to_grid( player_pos.position );
-  if ( is_free_landing_cell( cell ) ) return cell;
+  if ( is_free_landing_cell( cell, /*allow_hazards=*/true ) ) return cell;
   return std::nullopt;
 }
 
-bool FlyingSystem::is_free_landing_cell( const sf::Vector2f &cell )
+bool FlyingSystem::is_free_landing_cell( const sf::Vector2f &cell, bool allow_hazards )
 {
   // shrink the hitbox slightly so neighbouring cells sharing an edge don't count as overlapping
-  return is_free_landing_area( Cmp::RectBounds::scaled( cell, Constants::kGridSizePxF, 0.9f ).getBounds() );
+  return is_free_landing_area( Cmp::RectBounds::scaled( cell, Constants::kGridSizePxF, 0.9f ).getBounds(), allow_hazards );
 }
 
-bool FlyingSystem::is_free_landing_area( const sf::FloatRect &area )
+bool FlyingSystem::is_free_landing_area( const sf::FloatRect &area, bool allow_hazards )
 {
   const Cmp::RectBounds cell_bounds = Cmp::RectBounds::scaled( area.position, area.size, 1.f );
   // must be a walkable world position, i.e. not void/out of bounds
   if ( not any_overlaps<Cmp::Armable>( reg(), cell_bounds ) ) return false;
   if ( any_overlaps<Cmp::Player::NoPath>( reg(), cell_bounds ) ) return false;
   if ( any_overlaps<Cmp::Player::PendingNoPath>( reg(), cell_bounds ) ) return false;
-  if ( any_overlaps<Cmp::Hazard::CollisionResist>( reg(), cell_bounds ) ) return false;
+  // sinkholes: the hazard system makes a landed player fall in
+  if ( not allow_hazards and any_overlaps<Cmp::Hazard::CollisionResist>( reg(), cell_bounds ) ) return false;
   for ( auto npc_entt : reg().view<Cmp::Npc::NPC>() )
   {
     const auto npc_bounds = Utils::Npc::collision_bounds( reg(), npc_entt );

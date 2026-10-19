@@ -112,22 +112,26 @@ private:
   //! @param dt
   void update_render_offset( sf::Time dt );
 
-  //! @brief Find the nearest grid cell the player can land on, searching outwards in rings.
+  //! @brief Find the nearest grid cell the player can land on, searching outwards in rings. Hazard cells are
+  //! skipped so a crash landing never relocates the player into a sinkhole.
   //! @return std::optional<sf::Vector2f> top-left of the cell, or nullopt if none was found.
   std::optional<sf::Vector2f> find_landing_cell();
 
-  //! @brief Whether the player can land on `cell`: a world position free of blockers, hazards and NPCs.
+  //! @brief Whether the player can land on `cell`: a world position free of blockers and NPCs.
   //! @param cell Top-left of the grid cell.
-  bool is_free_landing_cell( const sf::Vector2f &cell );
+  //! @param allow_hazards true to accept hazard cells (e.g. sinkholes), false to treat them as blocked.
+  bool is_free_landing_cell( const sf::Vector2f &cell, bool allow_hazards );
 
   //! @brief Where the player can land from their current position, if anywhere.
   //! Fully clear of obstacles: in place. Overlapping an obstacle edge by no more than Cmp::Persist::FlyingLandingOverlap
   //! (per side): the nearest grid cell, if free. Otherwise nullopt - keep flying.
+  //! Hazard cells count as free: the player chose to land there, and falls in once landed.
   std::optional<sf::Vector2f> landing_spot_below();
 
-  //! @brief Whether the player can land on `area` exactly: on the world, free of blockers, hazards and NPCs.
+  //! @brief Whether the player can land on `area` exactly: on the world, free of blockers and NPCs.
   //! @param area World-space rect, e.g. the player's current position.
-  bool is_free_landing_area( const sf::FloatRect &area );
+  //! @param allow_hazards true to accept hazard cells (e.g. sinkholes), false to treat them as blocked.
+  bool is_free_landing_area( const sf::FloatRect &area, bool allow_hazards );
 
   //! @brief Set by on_player_action() when the fly key is held, consumed by each update().
   bool m_fly_requested{ false };
