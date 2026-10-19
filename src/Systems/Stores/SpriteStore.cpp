@@ -31,10 +31,24 @@ void SpriteStore::init_store()
   {
     if ( not ms_object.contains( "spritesheet" ) ) throw std::runtime_error( "Missing 'spritesheet' from " + json_path.string() );
     const auto &spritesheet_json = ms_object.at( "spritesheet" );
+
+    // "AbsoluteZOrder" and "RelativeZOrder" are mutually exclusive; neither means sort by y-position
+    const bool has_absolute = spritesheet_json.contains( "AbsoluteZOrder" );
+    const bool has_relative = spritesheet_json.contains( "RelativeZOrder" );
+    if ( has_absolute and has_relative )
+    {
+      throw std::runtime_error( "Sprite '" + ms_type + "' sets both 'AbsoluteZOrder' and 'RelativeZOrder' in " + json_path.string() );
+    }
+    auto zorder_mode = Sprites::ZOrderMode::None;
+    if ( has_absolute ) zorder_mode = Sprites::ZOrderMode::Absolute;
+    else if ( has_relative ) zorder_mode = Sprites::ZOrderMode::Relative;
+    const char *zorder_field = has_absolute ? "AbsoluteZOrder" : "RelativeZOrder";
+
     // Sprites::SpriteSheet new_ms = spritesheet_json.get<SpriteSheet>();
     Sprites::SpriteSheet new_ss{ SpriteKey( ms_type ),
                                  Utils::JsonDeserializer::get_string( spritesheet_json, "displayname" ),
-                                 Utils::JsonDeserializer::get_float_array( spritesheet_json, "zorder" ),
+                                 zorder_mode,
+                                 Utils::JsonDeserializer::get_float_array( spritesheet_json, zorder_field ),
                                  Utils::JsonDeserializer::get_string( spritesheet_json, "texture_path" ),
                                  Utils::JsonDeserializer::get_u32_array( spritesheet_json, "sprite_indices" ),
                                  sf::Vector2i( Utils::JsonDeserializer::get_vector2i( spritesheet_json, "grid_size" ) ),

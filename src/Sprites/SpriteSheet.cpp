@@ -11,13 +11,14 @@
 namespace Game::Sprites
 {
 
-SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list,
+SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderMode zorder_mode, std::vector<float> zorder_list,
                           const std::filesystem::path &spritesheet_png, const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size,
                           unsigned int indices_per_sequence, std::vector<bool> walking_collision_mask, std::vector<bool> flying_collision_mask,
                           sf::Vector2i door_position, float framerate )
     : m_sprite_type{ std::move( type ) },
       m_display_name( std::move( display_name ) ),
-      m_zorder_list( zorder_list ),
+      m_zorder_mode( zorder_mode ),
+      m_zorder_list( std::move( zorder_list ) ),
       m_grid_size{ grid_size },
       m_indices_per_sequence{ indices_per_sequence },
       m_walking_collision_mask{ normalise_collision_mask( std::move( walking_collision_mask ), grid_size, m_sprite_type, "walking_collision_mask" ) },
@@ -40,13 +41,14 @@ SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const s
   }
 }
 
-SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list, sf::Texture tilemap_texture,
+SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderMode zorder_mode, std::vector<float> zorder_list, sf::Texture tilemap_texture,
                           const std::vector<uint32_t> &tilemap_picks, sf::Vector2i grid_size,
                           unsigned int indices_per_sequence, std::vector<bool> walking_collision_mask, std::vector<bool> flying_collision_mask,
                           sf::Vector2i door_position, float framerate )
     : m_sprite_type{ std::move( type ) },
       m_display_name( std::move( display_name ) ),
-      m_zorder_list( zorder_list ),
+      m_zorder_mode( zorder_mode ),
+      m_zorder_list( std::move( zorder_list ) ),
       m_grid_size{ grid_size },
       m_indices_per_sequence{ indices_per_sequence },
       m_walking_collision_mask{ normalise_collision_mask( std::move( walking_collision_mask ), grid_size, m_sprite_type, "walking_collision_mask" ) },

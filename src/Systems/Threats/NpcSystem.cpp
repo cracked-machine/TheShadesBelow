@@ -115,8 +115,8 @@ void NpcSystem::on_update_npc_position_event( const Events::UpdateNpcPositionEve
   // update_movement_for only refreshes the zorder while the NPC is stepping
   if ( reg().all_of<Cmp::ZOrderValue>( npc_entity ) )
   {
-    const float zorder_augment = Sys::SpriteStore::instance().get( Utils::Npc::get_sprite_type( reg(), npc_entity ) ).zorder( 0 );
-    reg().patch<Cmp::ZOrderValue>( npc_entity, [&]( auto &zorder_cmp ) { zorder_cmp.set( pos_cmp->position.y + zorder_augment ); } );
+    const float zorder = Sys::SpriteStore::instance().get( Utils::Npc::get_sprite_type( reg(), npc_entity ) ).zorder( 0, pos_cmp->position.y );
+    reg().patch<Cmp::ZOrderValue>( npc_entity, [&]( auto &zorder_cmp ) { zorder_cmp.set( zorder ); } );
   }
 }
 
@@ -445,10 +445,10 @@ void NpcSystem::update_movement_for( PathFinding::SpatialHashGrid &navmesh, entt
     pos_cmp->position.y = one_minus_t * lerp_pos_cmp->m_start.y + t * lerp_pos_cmp->m_target.y;
   }
 
-  // y-axis position plus the sprite's json zorder offset, same as multiblocks: wisps use it to float above
-  // everything, multiblock NPCs use it to move their sorting line down from the top-left anchor to their feet
-  const float zorder_augment = Sys::SpriteStore::instance().get( Utils::Npc::get_sprite_type( reg(), npc_entity ) ).zorder( 0 );
-  reg().patch<Cmp::ZOrderValue>( npc_entity, [&]( auto &zorder_cmp ) { zorder_cmp.set( pos_cmp->position.y + zorder_augment ); } );
+  // the sprite's json zorder resolved against the y-axis position: wisps use it to float above everything,
+  // multiblock NPCs use a RelativeZOrder to move their sorting line down from the top-left anchor to their feet
+  const float zorder = Sys::SpriteStore::instance().get( Utils::Npc::get_sprite_type( reg(), npc_entity ) ).zorder( 0, pos_cmp->position.y );
+  reg().patch<Cmp::ZOrderValue>( npc_entity, [&]( auto &zorder_cmp ) { zorder_cmp.set( zorder ); } );
 }
 
 void NpcSystem::check_elderflute_banish()

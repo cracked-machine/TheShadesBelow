@@ -96,11 +96,10 @@
         {
          "draworder":"topdown",
          "id":4,
-         "locked":true,
          "name":"solid",
          "objects":[
                 {
-                 "height":16,
+                 "height":32,
                  "id":1,
                  "name":"solid",
                  "opacity":1,

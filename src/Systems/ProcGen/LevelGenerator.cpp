@@ -363,7 +363,7 @@ void LevelGenerator::add_ruin_rune_markers()
     m_reserved_sm->insert( rnd_entt, rnd_pos );
     const auto &rune_ss = Sys::SpriteStore::instance().get( "sprite.ruin.runemarking.inactive" );
     auto idx = rune_ss.get_random_texture_index();
-    float zorder = rune_ss.zorder( 0 );
+    float zorder = rune_ss.zorder( 0, rnd_pos.y() );
     auto rune_entt = Factory::Ruin::create_rune_marker( reg(), rnd_pos, zorder, idx, *m_reserved_sm );
 
     SPDLOG_DEBUG( "Added rune to {},{}", rnd_pos.x(), rnd_pos.y() );

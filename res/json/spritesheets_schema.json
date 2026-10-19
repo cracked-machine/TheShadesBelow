@@ -32,9 +32,17 @@
               "description": "Human-readable sprite name",
               "minLength": 1
             },
-            "zorder": {
+            "AbsoluteZOrder": {
               "type": "array",
-              "description": "Render order (draw lowest first). By default an entity's zorder is its y-position, so sprites lower on screen draw in front. A value of 0 means 'no explicit zorder': use that default.\n\nIndexing:\n- Obstacles and walls: one entry per sprite variant (indexed by the sprite index / frame_index_offset).\n- Multiblocks: one entry per grid cell, row-major (index = row * grid_size.x + col). Each segment gets y + zorder[cell]; the root uses the entry for its sprite index.\n- Everything else (NPCs, runes, gates, chests, etc.) only reads zorder[0].\n- An index past the end of the list falls back to 0 (debug log only). So [0] is a valid 'use defaults everywhere'.\n\nHow a value is applied depends on who creates the entity:\n- Obstacles (decorate_obstacle): an explicit zorder passed by code wins, then a non-zero json value, then the y-position. A non-zero json value is ABSOLUTE (it replaces y). Crypt and passage obstacles instead pass y + zorder[idx], making the value RELATIVE.\n- Walls: a non-zero value is ABSOLUTE, otherwise y + sprite height.\n- Multiblock roots: an explicit code value wins, then y + a non-zero json value (RELATIVE), then y.\n- Multiblock segments and NPCs: always y + value (RELATIVE).\n- Rune markers, ruin stairs gate, shadow hand: ABSOLUTE zorder[0].\n\nRelative values are small offsets around y (e.g. -5, 2, 64). Absolute values are large (e.g. 10000, 100000) to always draw above or below the y-sorted world. Any non-zero entry makes the sheet count as having an explicit zorder (SpriteSheet::has_zorder), which flight honours: a flying player stays behind it where their ground ordering would.",
+              "description": "Absolute render order (draw lowest first): a non-zero entry replaces the sprite's base y entirely. Use large values (e.g. 10000, 100000) to always draw above or below the y-sorted world. Mutually exclusive with RelativeZOrder.\n\nA value of 0, or an index past the end of the list, means 'no explicit zorder' for that sprite: it sorts at its base y. Omit both AbsoluteZOrder and RelativeZOrder to sort every sprite by its base y. The base y is the sprite's y-position, except walls which use their bottom edge (y + sprite height).\n\nIndexing: one entry per sprite variant for obstacles and walls (the sprite index), one entry per grid cell for multiblocks (row-major: index = row * grid_size.x + col), and only entry [0] for everything else (NPCs, runes, gates, chests, etc.).\n\nAny non-zero entry makes the sheet count as having an explicit zorder (SpriteSheet::has_zorder), which flight honours: a flying player stays behind it where their ground ordering would. Walls are always honoured in flight, whatever their zorder.",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1
+            },
+            "RelativeZOrder": {
+              "type": "array",
+              "description": "Relative render order (draw lowest first): a non-zero entry is added to the sprite's base y. Use small offsets (e.g. -16, 2, 48) to nudge a sprite's sorting line. Mutually exclusive with AbsoluteZOrder.\n\nA value of 0, or an index past the end of the list, means 'no explicit zorder' for that sprite: it sorts at its base y. Omit both AbsoluteZOrder and RelativeZOrder to sort every sprite by its base y. The base y is the sprite's y-position, except walls which use their bottom edge (y + sprite height).\n\nIndexing: one entry per sprite variant for obstacles and walls (the sprite index), one entry per grid cell for multiblocks (row-major: index = row * grid_size.x + col), and only entry [0] for everything else (NPCs, runes, gates, chests, etc.).\n\nAny non-zero entry makes the sheet count as having an explicit zorder (SpriteSheet::has_zorder), which flight honours: a flying player stays behind it where their ground ordering would. Walls are always honoured in flight, whatever their zorder.",
               "items": {
                 "type": "number"
               },
@@ -100,7 +108,8 @@
               "uniqueItems": true
             }
           },
-          "required": ["displayname", "zorder", "texture_path", "sprite_indices", "grid_size", "indices_per_sequence", "framerate"],
+          "required": ["displayname", "texture_path", "sprite_indices", "grid_size", "indices_per_sequence", "framerate"],
+          "not": { "required": ["AbsoluteZOrder", "RelativeZOrder"] },
           "additionalProperties": false
         }
       },

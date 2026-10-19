@@ -222,7 +222,7 @@ void PlayerSystem::update( sf::Time dt )
     update_player_animation();
 
     // once the flying player's sprite clears the obstacle height it is drawn in front of obstacles, except
-    // sprites with an explicit spritesheets.json zorder (see FlyingSystem::elevated_zorder)
+    // walls and sprites with an explicit spritesheets.json zorder (see FlyingSystem::elevated_zorder)
     const float player_y = Utils::Player::get_position( reg() ).position.y;
     Utils::Player::get_zorder( reg() ).set( Utils::Player::is_flying_elevated( reg() ) ? FlyingSystem::elevated_zorder( reg() ) : player_y );
   }
@@ -403,7 +403,7 @@ void PlayerSystem::move_obstacle( const sf::FloatRect &target_position )
           if ( any_obstacle_on_rune ) { rune_pos_cmp.position.y -= 8.f; }
           else { rune_pos_cmp.position.y += 8.f; }
 
-          float zorder = Sys::SpriteStore::instance().get( sprite_type ).zorder( 0 );
+          float zorder = Sys::SpriteStore::instance().get( sprite_type ).zorder( 0, rune_pos_cmp.position.y );
           rune_zorder_cmp.set( zorder );
           rune_anim_cmp.m_sprite_type = sprite_type;
           rune_cmp.active = any_obstacle_on_rune;

@@ -61,7 +61,7 @@ public:
   static bool blocks_flight( entt::registry &reg, entt::entity entity );
 
   //! @brief Z-order for the elevated flying player: kFlyingZOrder + y, so they are drawn in front of obstacles,
-  //! except sprites whose spritesheets.json entry has an explicit zorder. Where the lifted sprite overlaps one of
+  //! except walls and sprites whose spritesheets.json entry has an explicit zorder. Where the lifted sprite overlaps one of
   //! those and the player's ground ordering (y) is behind it, the player is kept just behind it.
   //! @param reg
   //! @return float

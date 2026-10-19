@@ -54,12 +54,8 @@ void decorate_obstacle( entt::registry &reg, entt::entity entity, Cmp::Position 
     throw std::runtime_error( "Unable to get index " + std::to_string( sprite_tile_idx ) + " in " + ms.type().str() +
                               " ( size: " + std::to_string( ms.sheet_size() ) + " )" );
   }
-  Cmp::ZOrderValue zorder_cmp( 0 );
-
-  // Use the non-zero function arg, or the non-zero json value, or fallback to the sprite y-axis
-  if ( zorder != 0 ) { zorder_cmp.set( zorder ); }
-  else if ( ms.zorder( sprite_tile_idx ) != 0 ) { zorder_cmp.set( ms.zorder( sprite_tile_idx ) ); }
-  else { zorder_cmp.set( pos_cmp.position.y ); }
+  // Use the non-zero function arg, otherwise the json zorder resolved against the sprite y-axis
+  Cmp::ZOrderValue zorder_cmp( zorder != 0 ? zorder : ms.zorder( sprite_tile_idx, pos_cmp.position.y ) );
 
   if ( reg.any_of<Cmp::Player::Character>( entity ) ) { return; }
   if ( ( reserved_sm != nullptr ) && not reserved_sm->at( pos_cmp ).empty() ) { return; }

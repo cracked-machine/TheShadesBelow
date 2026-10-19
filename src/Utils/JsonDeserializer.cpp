@@ -117,9 +117,10 @@ std::vector<uint32_t> JsonDeserializer::get_u32_array( const nlohmann::json &j, 
   return j.at( field ).get<std::vector<uint32_t>>();
 }
 
-std::vector<float> JsonDeserializer::get_float_array( const nlohmann::json &j, std::string field, std::source_location loc )
+std::vector<float> JsonDeserializer::get_float_array( const nlohmann::json &j, std::string field, [[maybe_unused]] std::source_location loc )
 {
-  check_contains( j, field, loc );
+  // optional
+  if ( not j.contains( field ) ) return {};
   return j.at( field ).get<std::vector<float>>();
 }
 

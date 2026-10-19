@@ -124,7 +124,7 @@ entt::entity create_npc( entt::registry &reg, entt::entity position_entity, cons
   reg.emplace_or_replace<Cmp::Position>( new_pos_entity, pos_cmp->position, npc_ss.sprite_size() );
   reg.emplace_or_replace<Cmp::Npc::Footprint>( new_pos_entity, npc_ss );
   reg.emplace_or_replace<Cmp::Armable>( new_pos_entity );
-  reg.emplace_or_replace<Cmp::ZOrderValue>( new_pos_entity, pos_cmp->position.y + npc_ss.zorder( 0 ) );
+  reg.emplace_or_replace<Cmp::ZOrderValue>( new_pos_entity, npc_ss.zorder( 0, pos_cmp->position.y ) );
   reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 0, 0 } );
   reg.emplace_or_replace<Cmp::UUID>( new_pos_entity, Cmp::UUID::generate() );
   reg.emplace_or_replace<Cmp::Npc::NPC>( new_pos_entity, npc_cmp );

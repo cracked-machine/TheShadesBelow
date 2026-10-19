@@ -111,12 +111,11 @@ public:
   static std::vector<uint32_t> get_u32_array( const nlohmann::json &j, std::string field,
                                               std::source_location loc = std::source_location::current() );
 
-  //! @brief Get a required array field as a list of floats.
+  //! @brief Get an optional array field as a list of floats.
   //! @param j The JSON object to read from.
   //! @param field The field name.
-  //! @param loc Caller location, used in error messages (defaults to the call site).
-  //! @return std::vector<float> The array's values.
-  //! @throws std::runtime_error if the field is missing.
+  //! @param loc Unused (kept for signature consistency with the other array getters).
+  //! @return std::vector<float> The array's values, or an empty vector if the field is absent.
   static std::vector<float> get_float_array( const nlohmann::json &j, std::string field, std::source_location loc = std::source_location::current() );
 
   //! @brief Get a required string value from a Tiled-style "properties" array, by property name.

@@ -9,6 +9,8 @@
     { "name": "bomb_detonate", "path": "res/audio/detonate.wav" },
     { "name": "bomb_fuse", "path": "res/audio/fuse.wav" },
     { "name": "break_pot", "path": "res/audio/break_pot.mp3" },
+    { "name": "broom_landing", "path": "res/audio/broom_landing.mp3" },
+    { "name": "broom_takeoff", "path": "res/audio/broom_takeoff.mp3" },
     { "name": "bubbling_lava", "path": "res/audio/lava.mp3" },
     { "name": "burning", "path": "res/audio/burning.mp3" },
     { "name": "chopping", "path": "res/audio/chopping.mp3" },

@@ -19,6 +19,10 @@
 namespace Game::Factory::Wall
 {
 
+//! @brief Walls sort this far above their bottom edge, so anything whose y-position equals that edge (the player
+//! standing flush against the wall to their north, or an obstacle in the row below) always draws in front of the wall.
+constexpr float kWallZOrderEpsilon = 0.01f;
+
 entt::entity add_wall_entity( entt::registry &reg, const sf::Vector2f &pos, const Sprites::SpriteSheet &ms, std::size_t sprite_index )
 {
   auto entity = reg.create();
@@ -31,10 +35,8 @@ entt::entity add_wall_entity( entt::registry &reg, const sf::Vector2f &pos, cons
       .enabled = true
   });
   // clang-format on
-  Cmp::ZOrderValue zorder_cmp( 0 );
-  if ( ms.zorder( sprite_index ) != 0 ) { zorder_cmp.set( ms.zorder( sprite_index ) ); }
-  else { zorder_cmp.set( pos.y + ms.sprite_size().y ); }
-  reg.emplace_or_replace<Cmp::ZOrderValue>( entity, zorder_cmp );
+  // walls sort from (just above) their bottom edge rather than their top-left y
+  reg.emplace_or_replace<Cmp::ZOrderValue>( entity, ms.zorder( sprite_index, pos.y + ms.sprite_size().y - kWallZOrderEpsilon ) );
   return entity;
 }
 

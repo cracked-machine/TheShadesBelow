@@ -95,9 +95,9 @@ void update_segments( entt::registry &reg, const Sprites::SpriteSheet &ss, [[may
     if ( not collision_masks.empty() && collision_masks.size() > calculated_grid_index ) { new_collision_mask = collision_masks.at( calculated_grid_index ); }
 
     segment_cmp.set_collision_mask( new_collision_mask );
-    reg.emplace_or_replace<Cmp::ZOrderValue>( entity, pos_cmp.position.y + ss.zorder( calculated_grid_index ) );
-    SPDLOG_DEBUG( "{} {} Zorder is set {} for y {}", static_cast<uint32_t>( entity ), ss.get_sprite_type(),
-                  pos_cmp.position.y + ss.get_zorder( calculated_grid_index ), pos_cmp.position.y );
+    reg.emplace_or_replace<Cmp::ZOrderValue>( entity, ss.zorder( calculated_grid_index, pos_cmp.position.y ) );
+    SPDLOG_DEBUG( "{} {} Zorder is set {} for y {}", static_cast<uint32_t>( entity ), ss.type(),
+                  ss.zorder( calculated_grid_index, pos_cmp.position.y ), pos_cmp.position.y );
 
     if ( new_collision_mask )
     {
@@ -250,21 +250,8 @@ std::pair<entt::entity, std::vector<entt::entity>> add_multiblock_with_segments(
 
   for ( auto [mb_entt, mb_cmp, mb_zorder_cmp] : reg.view<MULTIBLOCK, Cmp::ZOrderValue>().each() )
   {
-    if ( zorder != 0 )
-    {
-      // Use the function param if explicitly set
-      mb_zorder_cmp.set( zorder );
-    }
-    else if ( ss.zorder( ss_index ) != 0 )
-    {
-      // Use the y-axis position plus the json zorder value
-      mb_zorder_cmp.set( static_cast<sf::FloatRect>( mb_cmp ).position.y + ss.zorder( ss_index ) );
-    }
-    else
-    {
-      // fallback to the y-axis position only
-      mb_zorder_cmp.set( static_cast<sf::FloatRect>( mb_cmp ).position.y );
-    }
+    // Use the function param if explicitly set, otherwise the json zorder resolved against the y-axis position
+    mb_zorder_cmp.set( zorder != 0 ? zorder : ss.zorder( ss_index, static_cast<sf::FloatRect>( mb_cmp ).position.y ) );
   }
   return { mb_entt, segment_entt_list };
 }

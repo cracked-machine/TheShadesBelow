@@ -1,3 +1,4 @@
+#include <Audio/SoundBank.hpp>
 #include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
@@ -36,6 +37,7 @@
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
+#include <SFML/Audio/Sound.hpp>
 #include <Systems/FlyingSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
@@ -211,6 +213,7 @@ void FlyingSystem::take_off()
   m_displacement_elapsed = sf::Time::Zero;
   update_render_offset( sf::Time::Zero );
   SPDLOG_DEBUG( "Player took off on the witchesbroom" );
+  if ( m_sound_bank.get_effect( "broom_takeoff" ).getStatus() != sf::Sound::Status::Playing ) m_sound_bank.get_effect( "broom_takeoff" ).play();
 }
 
 void FlyingSystem::begin_landing( std::optional<sf::Vector2f> target )
@@ -229,6 +232,7 @@ void FlyingSystem::begin_landing( std::optional<sf::Vector2f> target )
   m_descent_start_fraction = m_lift_fraction;
   m_descent_progress = 0.f;
   SPDLOG_DEBUG( "Player landing at {},{}", m_land_target.x, m_land_target.y );
+  if ( m_sound_bank.get_effect( "broom_landing" ).getStatus() != sf::Sound::Status::Playing ) m_sound_bank.get_effect( "broom_landing" ).play();
 }
 
 void FlyingSystem::advance_descent( sf::Time dt )
@@ -343,8 +347,8 @@ float FlyingSystem::elevated_zorder( entt::registry &reg )
         reg.view<Cmp::AnimData, Cmp::Position, Cmp::ZOrderValue>( entt::exclude<Cmp::Player::Character> ).each() )
   {
     if ( not drawn_bounds.findIntersection( pos_cmp ) ) continue;
-    if ( not Sys::SpriteStore::instance().get( anim_cmp.m_sprite_type ).has_zorder() ) continue;
-    // honour the explicit zorder: where the player's ground ordering puts them behind it, the flight boost doesn't
+    if ( not Sys::SpriteStore::instance().get( anim_cmp.m_sprite_type ).has_zorder() and not reg.all_of<Cmp::Wall>( entity ) ) continue;
+    // honour the explicit zorder or wall: where the player's ground ordering puts them behind it, the flight boost doesn't
     // lift them in front of it
     if ( player_pos.position.y >= zorder_cmp.get() ) continue;
     zorder = std::min( zorder, zorder_cmp.get() - 0.01f );

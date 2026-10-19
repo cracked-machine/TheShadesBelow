@@ -179,7 +179,7 @@ void RuinSystem::check_puzzle_status()
     for ( auto [gate_entt, gate_cmp, gate_zorder_cmp] : reg().view<Cmp::Ruin::StairsGateMultiBlock, Cmp::ZOrderValue>().each() )
     {
       const auto &gate_sprite_sheet = Sys::SpriteStore::instance().get( "sprite.ruin.stairs.gate" );
-      gate_zorder_cmp.set( gate_sprite_sheet.zorder( 0 ) );
+      gate_zorder_cmp.set( gate_sprite_sheet.zorder( 0, static_cast<sf::FloatRect>( gate_cmp ).position.y ) );
       reg().emplace_or_replace<Cmp::Npc::NoPathFinding>( gate_entt );
       reg().emplace_or_replace<Cmp::Player::NoPath>( gate_entt );
       reg().emplace_or_replace<Cmp::Particle::BlockParticle>( gate_entt );

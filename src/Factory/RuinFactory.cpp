@@ -68,8 +68,8 @@ void create_cobweb( entt::registry &reg, entt::entity selected_entt, sf::Vector2
   });
   // clang-format on
   reserved_sm.insert( selected_entt, new_pos );
-  // json zorder is relative to y, so a small positive value draws it in front of an obstacle pushed into its cell
-  reg.emplace_or_replace<Cmp::ZOrderValue>( selected_entt, spawn_position.y + cobweb_ms.zorder( sprite_idx ) );
+  // a small positive RelativeZOrder draws it in front of an obstacle pushed into its cell
+  reg.emplace_or_replace<Cmp::ZOrderValue>( selected_entt, cobweb_ms.zorder( sprite_idx, spawn_position.y ) );
   reg.emplace_or_replace<Cmp::Ruin::Cobweb>( selected_entt, 100 );
 }
 
@@ -92,7 +92,7 @@ void create_shadow_hand( entt::registry &reg, sf::Vector2f scene_dimensions, con
           .enabled = true
     });
     // clang-format on
-    reg.emplace_or_replace<Cmp::ZOrderValue>( shadowhand_entt, hand_ms.zorder( 0 ) ); // above everythign
+    reg.emplace_or_replace<Cmp::ZOrderValue>( shadowhand_entt, hand_ms.zorder( 0, starting_pos.y ) ); // above everythign
     reg.emplace_or_replace<Cmp::AbsoluteAlpha>( shadowhand_entt, 200 );
     reg.emplace_or_replace<Cmp::Npc::NPC>( shadowhand_entt, npc_shadowhand_cmp );
     reg.emplace_or_replace<Cmp::Npc::ShadowHand>( shadowhand_entt );

@@ -6,7 +6,6 @@
 
 #include <Utils/Constants.hpp>
 #include <algorithm>
-#include <cassert>
 #include <cstdint>
 #include <filesystem>
 #include <string>
@@ -15,6 +14,17 @@
 
 namespace Game::Sprites
 {
+
+//! @brief How a sprite sheet's zorder list is applied, set by the property used in spritesheets.json.
+enum class ZOrderMode
+{
+  //! @brief No zorder property: every sprite sorts at its base y.
+  None,
+  //! @brief `AbsoluteZOrder`: a non-zero entry is the zorder itself.
+  Absolute,
+  //! @brief `RelativeZOrder`: a non-zero entry is added to the base y.
+  Relative
+};
 
 //! @brief Non-mutable container for multiple sprites loaded from a single tile sheet.
 class SpriteSheet
@@ -26,6 +36,7 @@ public:
   //! @brief Construct a new Multi Sprite object using path to texture file
   //! @param type
   //! @param display_name
+  //! @param zorder_mode Whether zorder_list holds absolute or relative values.
   //! @param zorder_list
   //! @param spritesheet_path
   //! @param spritesheet_selections
@@ -35,7 +46,7 @@ public:
   //! @param flying_collision_mask
   //! @param door_position
   //! @param framerate Animation framerate in frames per second. Forced to 0 for single-frame sheets.
-  explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list,
+  explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderMode zorder_mode, std::vector<float> zorder_list,
                         const std::filesystem::path &spritesheet_png, const std::vector<uint32_t> &spritesheet_selections,
                         sf::Vector2i grid_size = { 1, 1 }, unsigned int indices_per_sequence = 1,
                         std::vector<bool> walking_collision_mask = {}, std::vector<bool> flying_collision_mask = {},
@@ -45,6 +56,7 @@ public:
   //! @brief Construct a new Multi Sprite object using texture object
   //! @param type
   //! @param display_name
+  //! @param zorder_mode Whether zorder_list holds absolute or relative values.
   //! @param zorder_list
   //! @param spritesheet_texture
   //! @param spritesheet_selections
@@ -54,7 +66,7 @@ public:
   //! @param flying_collision_mask
   //! @param door_position
   //! @param framerate Animation framerate in frames per second. Forced to 0 for single-frame sheets.
-  explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, const std::vector<float> &zorder_list, sf::Texture spritesheet_texture,
+  explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderMode zorder_mode, std::vector<float> zorder_list, sf::Texture spritesheet_texture,
                         const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size = { 1, 1 },
                         unsigned int indices_per_sequence = 1, std::vector<bool> walking_collision_mask = {},
                         std::vector<bool> flying_collision_mask = {}, sf::Vector2i door_position = {},
@@ -125,19 +137,22 @@ public:
     return std::ranges::any_of( m_zorder_list, []( float z ) { return z != 0.f; } );
   }
 
-  //! @brief Get the zorder value for a specific sprite in this sheet.
-  //! @note This will return zero if the sprite sheet is missing an entry at `idx`
-  //! @param idx
-  //! @return float
-  [[nodiscard]] float zorder( size_t idx ) const
+  //! @brief Resolve the draw order for sprite `idx` positioned at `base_y`.
+  //! @note A zero entry, a missing entry at `idx` or ZOrderMode::None all resolve to `base_y`.
+  //! @param idx Sprite index (or multiblock grid cell) into the zorder list.
+  //! @param base_y The y-axis value the sprite sorts at by default.
+  //! @return float `base_y` + entry if relative, the entry if absolute, or `base_y` if unset.
+  [[nodiscard]] float zorder( size_t idx, float base_y ) const
   {
-    assert( not m_zorder_list.empty() );
+    if ( m_zorder_mode == ZOrderMode::None ) return base_y;
     if ( idx >= m_zorder_list.size() )
     {
-      SPDLOG_DEBUG( "Could not find zorder for {} at index {}, defaulting to 0 index.", m_sprite_type.str(), std::to_string( idx ) );
-      return 0;
+      SPDLOG_DEBUG( "Could not find zorder for {} at index {}, defaulting to base y.", m_sprite_type.str(), std::to_string( idx ) );
+      return base_y;
     }
-    return m_zorder_list.at( idx );
+    const float value = m_zorder_list.at( idx );
+    if ( value == 0.f ) return base_y;
+    return m_zorder_mode == ZOrderMode::Absolute ? value : base_y + value;
   }
 
   //! @brief Get the unique identifier for this sprite sheet
@@ -182,6 +197,9 @@ private:
 
   //! @brief Human-readable name for this sprite sheet, e.g. shown in editor/debug UI.
   std::string m_display_name;
+
+  //! @brief Whether m_zorder_list holds absolute or relative values. See zorder().
+  ZOrderMode m_zorder_mode{ ZOrderMode::None };
 
   //! @brief Draw-order value per sprite index, indexed the same way as m_va_list.
   std::vector<float> m_zorder_list;

@@ -755,7 +755,7 @@ void CryptSystem::decorate_interior_wall( entt::entity main_entt, const Cmp::Pos
 
   int tile_idx = static_cast<int>( room_wall_type );
   Factory::Obstacle::add_obstacle( reg(), main_entt );
-  Factory::Obstacle::decorate_obstacle( reg(), main_entt, main_pos_cmp, ss_main, tile_idx, main_pos_cmp.y() + ss_main.zorder( tile_idx ) );
+  Factory::Obstacle::decorate_obstacle( reg(), main_entt, main_pos_cmp, ss_main, tile_idx, ss_main.zorder( tile_idx, main_pos_cmp.y() ) );
   reg().emplace_or_replace<Cmp::UUID>( main_entt, uuid );
 
   // We place the room borders on top of the regular interior wall block so to prevent z-fighting,
@@ -763,7 +763,7 @@ void CryptSystem::decorate_interior_wall( entt::entity main_entt, const Cmp::Pos
   auto cap_entt = reg().create();
   Cmp::Position cap_position( { main_pos_cmp.x(), main_pos_cmp.y() - main_pos_cmp.size.y }, main_pos_cmp.size );
   reg().emplace_or_replace<Cmp::Position>( cap_entt, cap_position );
-  Factory::Obstacle::decorate_obstacle( reg(), cap_entt, cap_position, ss_cap, tile_idx, main_pos_cmp.y() + ss_cap.zorder( tile_idx ), false );
+  Factory::Obstacle::decorate_obstacle( reg(), cap_entt, cap_position, ss_cap, tile_idx, ss_cap.zorder( tile_idx, main_pos_cmp.y() ), false );
   if ( auto reserved_sm = m_reserved_sm.lock() ) reserved_sm->insert( cap_entt, cap_position );
   reg().emplace_or_replace<Cmp::UUID>( cap_entt, uuid );
   Factory::Obstacle::add_obstacle_cap( reg(), cap_entt );
@@ -1126,7 +1126,7 @@ void CryptSystem::add_chest_to_open_rooms( const Cmp::Position &player_pos_cmp )
       iterations++;
       if ( invalid_pos_found ) { continue; }
 
-      float zorder = selected_pos.y() + Sys::SpriteStore::instance().get( "sprite.crypt.chest" ).zorder( 0 );
+      float zorder = Sys::SpriteStore::instance().get( "sprite.crypt.chest" ).zorder( 0, selected_pos.y() );
 
       Factory::Obstacle::remove_obstacle( reg(), selected_entt, Factory::Obstacle::DeleteExtras::Yes, m_reserved_sm.lock() );
       auto chest_entt = Factory::Crypt::create_crypt_chest( reg(), selected_pos.position, "sprite.crypt.chest", 0, zorder );
