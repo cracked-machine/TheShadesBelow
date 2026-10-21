@@ -80,6 +80,7 @@
 #include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
+#include <Components/Persistent/ResetTutorial.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
 #include <Components/Persistent/RuinMaxCobwebs.hpp>
 #include <Components/Persistent/RuinMaxSpiders.hpp>
@@ -95,6 +96,7 @@
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/TooltipsSeen.hpp>
 #include <Components/Persistent/VenomHealthDmgPerSec.hpp>
 #include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
 #include <Components/Persistent/WormholeAbortThreshold.hpp>
@@ -237,12 +239,21 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ShovelGraveDigWear>();
   add_component<Cmp::Persist::ShovelObstacleDigWear>();
   add_component<Cmp::Persist::ShovelPotSmashWear>();
+  add_component<Cmp::Persist::TooltipsSeen>();
+  add_component<Cmp::Persist::ResetTutorial>();
 
   // Add serdes functions to each component
   for ( const auto &[name, config] : definitions->items() )
   {
     if ( m_components.contains( name ) ) { m_components.at( name ).initialise( config ); }
     else { SPDLOG_WARN( "Unknown component type in definitions: {}", name ); }
+  }
+
+  // Player progress components may be missing from a persist.json installed by an older version,
+  // so create them with their defaults. The key is written to the file on the next save.
+  for ( const auto *name : { "TooltipsSeen", "ResetTutorial" } )
+  {
+    if ( not definitions->contains( name ) ) { m_components.at( name ).initialise( nlohmann::json::object() ); }
   }
 
   // Add components not stored in JSON (runtime-only seeds)
@@ -305,14 +316,19 @@ void PersistSystem::save_state()
     }
   }
 
-  std::ofstream outputFile( kPersistFilePath );
+  write_json_file( kPersistFilePath, jsonData );
+}
+
+/* static */ void PersistSystem::write_json_file( const std::string &path, const nlohmann::json &json_data )
+{
+  std::ofstream outputFile( path );
   if ( outputFile.is_open() )
   {
-    outputFile << jsonData.dump( 4 );
+    outputFile << json_data.dump( 4 );
     outputFile.close();
     SPDLOG_DEBUG( "Persistent state saved successfully" );
   }
-  else { SPDLOG_ERROR( "Failed to open file for saving persistent state" ); }
+  else { SPDLOG_ERROR( "Failed to open {} for saving persistent state", path ); }
 }
 
 } // namespace Game::Sys

@@ -8,7 +8,7 @@
       "properties": {
         "type": {
           "type": "string",
-          "enum": ["float", "int", "bool", "string", "sf::Color", "sf::Vector2f", "sf::Vector2u"],
+          "enum": ["float", "int", "bool", "string", "sf::Color", "sf::Vector2f", "sf::Vector2u", "std::set<std::string>"],
           "description": "The C++ data type of the persistent component"
         },
         "value": {
@@ -24,6 +24,12 @@
             {
               "type": "string",
               "description": "String value for string type"
+            },
+            {
+              "type": "array",
+              "items": {"type": "string"},
+              "uniqueItems": true,
+              "description": "Array of unique strings for std::set<std::string> type"
             },
             {
               "type": "object",
@@ -151,6 +157,18 @@
           "then": {
             "properties": {
               "value": {"type": "string"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {"const": "std::set<std::string>"}
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
             }
           }
         },

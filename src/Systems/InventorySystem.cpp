@@ -22,6 +22,7 @@
 #include <Components/ZOrderValue.hpp>
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
+#include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
@@ -362,6 +363,9 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
     throw std::runtime_error( "InventorySystem::pickup_world_item - Unable to get world item component from " +
                               std::to_string( static_cast<uint32_t>( world_item_entt ) ) );
 
+  // copy the item key now, the world item entt is destroyed below
+  const Sys::ItemKey picked_up_item = world_item_cmp->item_type;
+
   // create the basic inventory slot entt
   auto inventory_entity = reg.create();
   reg.emplace_or_replace<Cmp::PlayerInventorySlot>( inventory_entity, *world_item_cmp );
@@ -406,7 +410,12 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
     reg.destroy( world_item_entt );
   }
 
-  if ( inventory_entity != entt::null ) { m_sound_bank.get_effect( "equip_inventory" ).play(); }
+  if ( inventory_entity != entt::null )
+  {
+    m_sound_bank.get_effect( "equip_inventory" ).play();
+    // enqueued rather than triggered, as callers may still be iterating registry views
+    get_systems_event_queue().enqueue( Events::ItemPickedUpEvent( picked_up_item ) );
+  }
 }
 
 void InventorySystem::try_consume_item()

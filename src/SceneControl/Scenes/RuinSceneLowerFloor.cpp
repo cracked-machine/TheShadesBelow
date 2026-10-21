@@ -50,6 +50,7 @@
 #include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderOverlaySystem.hpp>
+#include <Systems/Render/TooltipSystem.hpp>
 #include <Systems/RuinSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
@@ -252,6 +253,8 @@ void RuinSceneLowerFloor::do_update( [[maybe_unused]] sf::Time dt )
   m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
   m_sys.find<Store::Type::RenderGameSystem>().render_game( dt );
   m_sys.find<Store::Type::RenderOverlaySystem>().render_overlay( dt );
+  m_sys.find<Store::Type::TooltipSystem>().update( dt );
+  m_sys.find<Store::Type::TooltipSystem>().render();
   m_sys.find<Store::Type::RenderDebugSystem>().render_debug();
 }
 

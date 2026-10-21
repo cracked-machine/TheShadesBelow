@@ -74,6 +74,7 @@
 #include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderOverlaySystem.hpp>
+#include <Systems/Render/TooltipSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/RuinSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
@@ -331,6 +332,8 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_overlay( dt ) );
+  PROFILED( m_sys.find<Sys::Store::Type::TooltipSystem>().update( dt ) );
+  PROFILED( m_sys.find<Sys::Store::Type::TooltipSystem>().render() );
   PROFILED( m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug() );
 }
 

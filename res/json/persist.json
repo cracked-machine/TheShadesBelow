@@ -760,5 +760,14 @@
     "max_value": 100,
     "detail": "Vertigo Health Dmg Per Sec",
     "format": "%d"
+  },
+  "ResetTutorial": {
+    "type": "bool",
+    "value": false,
+    "detail": "Reset Tutorial (show all tips again)"
+  },
+  "TooltipsSeen": {
+    "type": "std::set<std::string>",
+    "value": []
   }
 }

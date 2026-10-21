@@ -80,6 +80,14 @@ public:
   template <typename T>
   static T &get( entt::registry &reg );
 
+  //! @brief Write a single persistent component to storage, leaving every other key in the file untouched.
+  //! @note Use this instead of `save_state()` when only one value has changed, so that unsaved
+  //! in-memory settings changes are not written to disk as a side effect.
+  //! @tparam T
+  //! @param reg
+  template <typename T>
+  static void save_component( entt::registry &reg );
+
   //! @brief event handlers for pausing system clocks
   void on_pause() override {}
   //! @brief event handlers for resuming system clocks
@@ -91,6 +99,9 @@ private:
 
   //! @brief Reads and parses kPersistFilePath, logging and returning std::nullopt on failure.
   static std::optional<nlohmann::json> load_json_file( const std::string &path );
+
+  //! @brief Writes json to path, logging on failure.
+  static void write_json_file( const std::string &path, const nlohmann::json &json_data );
 
   //! @brief Adds the uninitialised component to the registry and sets the serdes initialise function for the component T.
   //! @note  The component `initialise` functions are called by `initialize_component_registry()`.

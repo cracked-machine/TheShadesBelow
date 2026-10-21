@@ -105,6 +105,12 @@
     },
     {
       "fileMatch": [
+        "**/tooltips.json"
+      ],
+      "url": "./res/json/tooltips_schema.json"
+    },
+    {
+      "fileMatch": [
         "**/npc.json"
       ],
       "url": "./res/json/npc_schema.json"

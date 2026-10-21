@@ -26,6 +26,14 @@ template <typename T>
 nlohmann::json BasePersistent<T>::serialize() const
 {
   nlohmann::json json_data;
+  if constexpr ( std::is_same_v<T, bool> )
+  {
+    // booleans have no range or format, only a value and a label
+    json_data["type"] = "bool";
+    json_data["value"] = value;
+    json_data["detail"] = detail;
+    return json_data;
+  }
   if constexpr ( std::is_floating_point_v<T> ) { json_data["type"] = "float"; }
   else if constexpr ( std::is_integral_v<T> ) { json_data["type"] = "int"; }
   json_data["value"] = value;
@@ -39,6 +47,14 @@ nlohmann::json BasePersistent<T>::serialize() const
 template <typename T>
 void BasePersistent<T>::deserialize( const nlohmann::json &json_data )
 {
+  if constexpr ( std::is_same_v<T, bool> )
+  {
+    // booleans have no range or format, only a value and a label
+    if ( json_data.contains( "value" ) && json_data["value"].is_boolean() ) value = json_data["value"].get<bool>();
+    if ( json_data.contains( "detail" ) && json_data["detail"].is_string() ) { detail = json_data["detail"].get<std::string>(); }
+    if ( detail.empty() ) { log_msg( "InvalidJSONField: 'details' for " + class_name() ); }
+    return;
+  }
 
   if ( json_data.contains( "value" ) && json_data["value"].is_number() ) value = json_data["value"].get<T>();
 
@@ -69,7 +85,8 @@ void BasePersistent<T>::render_widget()
 
   const char *label = detail.empty() ? "<Invalid Label>" : detail.c_str();
 
-  if constexpr ( std::is_same_v<T, float> )
+  if constexpr ( std::is_same_v<T, bool> ) { ImGui::Checkbox( label, get_value_ptr() ); }
+  else if constexpr ( std::is_same_v<T, float> )
   {
     const char *fmt = format.empty() ? "%.3f" : format.c_str();
     ImGui::SliderScalar( label, ImGuiDataType_Float, get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt );
@@ -120,6 +137,7 @@ void BasePersistent<T>::render_widget()
 }
 
 // Explicit instantiations
+template class BasePersistent<bool>;
 template class BasePersistent<float>;
 template class BasePersistent<int>;
 template class BasePersistent<int64_t>;

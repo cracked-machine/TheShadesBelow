@@ -80,6 +80,7 @@
 #include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
+#include <Components/Persistent/ResetTutorial.hpp>
 #include <Components/Persistent/RuinMaxCobwebs.hpp>
 #include <Components/Persistent/RuinMaxSpiders.hpp>
 #include <Components/Persistent/RuinProcGenBirthThreshold.hpp>
@@ -334,6 +335,10 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
 
     Sys::PersistSystem::get<Cmp::Persist::MusicVolume>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::EffectsVolume>( reg() ).render_widget();
+
+    ImGui::SeparatorText( "Tutorial" );
+
+    Sys::PersistSystem::get<Cmp::Persist::ResetTutorial>( reg() ).render_widget();
 
     // Procedural Generation
     ImGui::SeparatorText( "Procedural Generation" );

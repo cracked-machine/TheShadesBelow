@@ -1,0 +1,69 @@
+{
+  "title": "Tooltips Configuration",
+  "description": "Schema for the data-driven help tooltips displayed by TooltipSystem",
+  "type": "object",
+  "definitions": {
+    "colour": {
+      "type": "object",
+      "properties": {
+        "r": {"type": "integer", "minimum": 0, "maximum": 255},
+        "g": {"type": "integer", "minimum": 0, "maximum": 255},
+        "b": {"type": "integer", "minimum": 0, "maximum": 255},
+        "a": {"type": "integer", "minimum": 0, "maximum": 255}
+      },
+      "required": ["r", "g", "b"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "enabled": {
+      "type": "boolean",
+      "description": "Global switch. false disables all tooltips regardless of their frequency"
+    },
+    "panel": {
+      "type": "object",
+      "description": "Style of the screen-space tooltip panel",
+      "properties": {
+        "position": {
+          "type": "object",
+          "description": "Panel centre as a fraction of the display resolution",
+          "properties": {
+            "x": {"type": "number", "minimum": 0, "maximum": 1},
+            "y": {"type": "number", "minimum": 0, "maximum": 1}
+          },
+          "required": ["x", "y"],
+          "additionalProperties": false
+        },
+        "font_size": {"type": "integer", "minimum": 1},
+        "padding": {"type": "number", "minimum": 0},
+        "fill_colour": {"$ref": "#/definitions/colour"},
+        "line_colour": {"$ref": "#/definitions/colour"},
+        "text_colour": {"$ref": "#/definitions/colour"}
+      },
+      "additionalProperties": false
+    },
+    "tooltips": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "description": "Unique id, stored in persist.json TooltipsSeen"},
+          "trigger": {"type": "string", "enum": ["AddInventoryEvent", "ItemPickedUpEvent"], "description": "Event that triggers the tooltip"},
+          "condition": {
+            "type": "object",
+            "properties": {
+              "item": {"type": "string", "pattern": "^item\\.", "description": "Item key the event must carry, see items.json"}
+            },
+            "additionalProperties": false
+          },
+          "text": {"type": "string", "description": "Message to display"},
+          "frequency": {"type": "string", "enum": ["once", "always", "disabled"]},
+          "duration_s": {"type": "number", "exclusiveMinimum": 0, "description": "Seconds the tooltip is displayed for"}
+        },
+        "required": ["id", "trigger", "text"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

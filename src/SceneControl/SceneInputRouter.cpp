@@ -22,6 +22,7 @@
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <Events/BuyShopItemEvent.hpp>
 #include <Events/CryptRoomEvent.hpp>
+#include <Events/DismissTooltipEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/LightningEvent.hpp>
 #include <Events/LoadSettingsEvent.hpp>
@@ -120,6 +121,7 @@ void SceneInputRouter::graveyard_scene_state_handler()
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       if ( try_handle_debug_key( keyReleased->scancode ) ) {}
+      else if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::F5 )
       {
         Factory::Player::add_player_last_graveyard_pos( reg(), Utils::Player::get_position( reg() ), { 0.f, 0.f } );
@@ -208,6 +210,7 @@ void SceneInputRouter::crypt_scene_state_handler()
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       if ( try_handle_debug_key( keyReleased->scancode ) ) {}
+      else if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Escape )
       {
         // Prevent skipping the death animation and leaving the game in a bad state
@@ -256,6 +259,7 @@ void SceneInputRouter::healing_spring_scene_state_handler()
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       if ( try_handle_debug_key( keyReleased->scancode ) ) {}
+      else if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Escape ) { queue_quit_game_event(); }
     }
     else if ( const auto *keyPressed = event->getIf<sf::Event::KeyPressed>() )
@@ -287,6 +291,7 @@ void SceneInputRouter::shop_scene_state_handler()
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       if ( try_handle_debug_key( keyReleased->scancode ) ) {}
+      else if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Escape ) { queue_quit_game_event(); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Num1 ) { queue_buy_item_event( 1 ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Num2 ) { queue_buy_item_event( 2 ); }
@@ -323,6 +328,7 @@ void SceneInputRouter::ruin_scene_state_handler()
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       if ( try_handle_debug_key( keyReleased->scancode ) ) {}
+      else if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Escape ) { queue_quit_game_event(); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Space )
       {

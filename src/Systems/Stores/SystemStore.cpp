@@ -26,6 +26,7 @@
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderMenuSystem.hpp>
 #include <Systems/Render/RenderOverlaySystem.hpp>
+#include <Systems/Render/TooltipSystem.hpp>
 #include <Systems/RuinSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
 #include <Systems/ShopSystem.hpp>
@@ -87,6 +88,7 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
   emplace<Type::ShockwaveSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::ShopSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );
   emplace<Type::SinkHoleHazardSystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::TooltipSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::WatchmanSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::WispSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::WormholeSystem>( m_initial_reg, window, sound_bank );

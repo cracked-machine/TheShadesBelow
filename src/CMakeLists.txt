@@ -58,6 +58,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderGameSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderMenuSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderOverlaySystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/TooltipSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/UiData.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/ZOrderQueue.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/AnimSystem.cpp
