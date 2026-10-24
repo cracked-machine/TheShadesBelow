@@ -63,8 +63,6 @@ void RenderOverlaySystem::render_overlay( sf::Time dt )
   PROFILED( render_ui_particles() );
 
   PROFILED( render_shop_inventory_overlay() );
-  PROFILED( render_grimoire_inventory_overlay() );
-
   PROFILED( render_ui_outlines() );
   PROFILED( render_ui_icons() );
   PROFILED( render_ui_inventory_icon() );
@@ -502,31 +500,6 @@ void RenderOverlaySystem::render_shop_inventory_overlay()
       else if ( ui_label.name.contains( desc_key ) ) { draw_label_text_at( slot_desc_txt, ui_label.rect.position, ui_label.align ); }
       else if ( ui_label.name.contains( price_key ) ) { draw_label_text_at( slot_price_txt, ui_label.rect.position, ui_label.align ); }
     }
-  }
-}
-
-void RenderOverlaySystem::render_grimoire_inventory_overlay()
-{
-  // only draw the shop if its enabled
-  auto grimoire_view = reg().view<Cmp::Grimoire>();
-  if ( grimoire_view.empty() ) { return; }
-  auto &grimoire_cmp = grimoire_view.get<Cmp::Grimoire>( grimoire_view.front() );
-  if ( not grimoire_cmp.is_enabled ) return;
-
-  sf::Vector2f rect_position( 600.f, 400.f );
-  auto rect = sf::RectangleShape( rect_position );
-  rect.setPosition( { 500.f, 300.f } );
-  rect.setFillColor( sf::Color::Black );
-  rect.setOutlineColor( sf::Color::White );
-  rect.setOutlineThickness( 2.f );
-  draw_screen( rect );
-
-  TextColumn draw_line{ *this, "grimoire", rect_position, 18, 22.f };
-
-  // Draw all UI outlines
-  for ( const auto &[item, is_enabled] : grimoire_cmp.contents )
-  {
-    draw_line( item.str() + " - " + ( is_enabled ? "Shown" : "Hidden" ) );
   }
 }
 

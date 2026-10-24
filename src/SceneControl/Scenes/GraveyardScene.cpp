@@ -58,7 +58,6 @@
 #include <Systems/FlyingSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/GraveSystem.hpp>
-#include <Systems/GrimoireSystem.hpp>
 #include <Systems/HealingSpringSystem.hpp>
 #include <Systems/InventorySystem.hpp>
 #include <Systems/ItemSystem.hpp>
@@ -71,11 +70,12 @@
 #include <Systems/ProcGen/DLASystem.hpp>
 #include <Systems/ProcGen/DoglegSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
+#include <Systems/Render/GrimoireSystem.hpp>
 #include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderOverlaySystem.hpp>
-#include <Systems/Render/TooltipSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Render/TooltipSystem.hpp>
 #include <Systems/RuinSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
@@ -319,7 +319,7 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::LightningSystem>().update( dt ) );
-  PROFILED( m_sys.find<Sys::Store::Type::GrimoireSystem>().update( dt ) );
+
   PROFILED( m_sys.find<Sys::Store::Type::ExitSystem>().update_exit_zorder() );
   PROFILED( m_sys.find<Sys::Store::Type::ExitSystem>().check_exit_collision() );
   PROFILED( m_sys.find<Sys::Store::Type::ArrowSystem>().update( dt ) );
@@ -334,6 +334,8 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_overlay( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::TooltipSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::TooltipSystem>().render() );
+  PROFILED( m_sys.find<Sys::Store::Type::GrimoireSystem>().update( dt ) );
+  PROFILED( m_sys.find<Sys::Store::Type::GrimoireSystem>().render() );
   PROFILED( m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug() );
 }
 

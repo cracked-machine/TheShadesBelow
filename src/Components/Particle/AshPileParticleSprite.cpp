@@ -7,6 +7,9 @@
 #include <cmath>
 #include <stdexcept>
 
+namespace Game::Cmp::Particle
+{
+
 namespace
 {
 //! @brief Base greyscale channel value ash particles are drawn with, before per-particle variation.
@@ -14,9 +17,6 @@ constexpr int kAshColorBase = 20;
 //! @brief Exclusive upper bound of the random colour variation added on top of kAshColorBase.
 constexpr int kAshColorVariationMax = 20;
 } // namespace
-
-namespace Game::Cmp::Particle
-{
 
 //! @brief Implementation detail — do not use externally
 namespace detail

@@ -76,10 +76,6 @@ private:
   //! @brief Render the shop UI overlay (outlines, item icons and slot labels) if a Cmp::Shop::Inventory is enabled in the registry.
   void render_shop_inventory_overlay();
 
-  //! @brief Render the grimoire UI overlay listing spell entries and their shown/hidden state, if a Cmp::Grimoire is enabled in the
-  //! registry.
-  void render_grimoire_inventory_overlay();
-
   //! @brief Render the halo effect around the graves that are marked as ghost spawners. Only active when player is carrying ElderFlute.
   void render_ghost_grave_halos();
 

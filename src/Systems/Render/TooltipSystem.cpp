@@ -22,8 +22,8 @@ namespace
 sf::Color get_colour( const nlohmann::json &json_data, const sf::Color &fallback )
 {
   if ( not json_data.is_object() ) { return fallback; }
-  return sf::Color( json_data.value( "r", fallback.r ), json_data.value( "g", fallback.g ), json_data.value( "b", fallback.b ),
-                    json_data.value( "a", fallback.a ) );
+  return { json_data.value( "r", fallback.r ), json_data.value( "g", fallback.g ), json_data.value( "b", fallback.b ),
+           json_data.value( "a", fallback.a ) };
 }
 
 } // namespace

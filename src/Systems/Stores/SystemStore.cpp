@@ -7,10 +7,9 @@
 #include <Systems/BaseSystem.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/ExitSystem.hpp>
+#include <Systems/FlyingSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/GraveSystem.hpp>
-#include <Systems/FlyingSystem.hpp>
-#include <Systems/GrimoireSystem.hpp>
 #include <Systems/HealingSpringSystem.hpp>
 #include <Systems/InventorySystem.hpp>
 #include <Systems/ItemSystem.hpp>
@@ -22,6 +21,7 @@
 #include <Systems/ProcGen/DoglegSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/ProcGen/PassageSystem.hpp>
+#include <Systems/Render/GrimoireSystem.hpp>
 #include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderMenuSystem.hpp>

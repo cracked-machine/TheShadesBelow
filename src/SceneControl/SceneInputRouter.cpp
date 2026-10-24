@@ -180,7 +180,15 @@ void SceneInputRouter::graveyard_scene_state_handler()
   }
   if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::G ) )
   {
-    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::TOGGLE_GRIMOIRE ) );
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::GRIMOIRE_TOGGLE ) );
+  }
+  if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::Left ) )
+  {
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::GRIMOIRE_PREV ) );
+  }
+  if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::Right ) )
+  {
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::GRIMOIRE_NEXT ) );
   }
   if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::F ) )
   {

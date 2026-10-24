@@ -6,9 +6,9 @@
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/Segment.hpp>
 #include <Components/Particle/GraveHaloParticleSprite.hpp>
+#include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
-#include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/PickaxeGraveDigWear.hpp>
 #include <Components/Persistent/ShovelGraveDigWear.hpp>
 #include <Components/Player/Character.hpp>
@@ -32,7 +32,6 @@
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
-#include <Systems/Stores/ItemStore.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>

@@ -61,6 +61,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/TooltipSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/UiData.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/ZOrderQueue.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/GrimoireSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/AnimSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/BaseSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ActionSystem.cpp
@@ -85,7 +86,6 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/ShopSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ItemSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/FlyingSystem.cpp
-    ${CMAKE_SOURCE_DIR}/src/Systems/GrimoireSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Stores/ItemStore.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Stores/NpcStore.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Stores/SpriteStore.cpp

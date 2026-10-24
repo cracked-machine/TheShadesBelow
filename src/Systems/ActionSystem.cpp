@@ -62,7 +62,6 @@
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
-#include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Systems/Threats/LightningSystem.hpp>
