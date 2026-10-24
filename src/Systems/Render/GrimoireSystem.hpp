@@ -1,20 +1,16 @@
 #ifndef SRC_SYSTEMS_GRIMOIRESYSTEM_HPP__
 #define SRC_SYSTEMS_GRIMOIRESYSTEM_HPP__
 
+#include <Components/Inventory/Grimoire.hpp>
+#include <Events/AddInventoryEvent.hpp>
+#include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Render/UiData.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
-#include <cstddef>
 #include <memory>
-#include <vector>
-
-namespace Game::Cmp
-{
-class Grimoire;
-} // namespace Game::Cmp
 
 namespace Game::Sys
 {
@@ -49,9 +45,18 @@ private:
   //! @param ev
   void on_player_action( Events::PlayerActionEvent ev );
 
+  //! @brief
+  //! @param event
+  void on_item_pickup_event( const Events::ItemPickedUpEvent &ev );
+
   //! @brief Get the grimoire component.
   //! @return Pointer to the component, or nullptr if no grimoire entity exists.
   Cmp::Grimoire *find_grimoire();
+
+  //! @brief Get the page currently shown.
+  //! @param grimoire
+  //! @return Iterator to the page for m_item_key, or the first page if m_item_key is empty or not found.
+  [[nodiscard]] Cmp::Grimoire::PageMap::const_iterator current_page( const Cmp::Grimoire &grimoire ) const;
 
   //! @brief Time since the overlay was last toggled, used to debounce rapid toggling.
   sf::Time m_toggle_debounce;
@@ -61,10 +66,8 @@ private:
   //! @brief Layout data object for the main UI
   std::unique_ptr<Render::UiData> m_ui_data;
 
-  //! @brief The plant items shown in the grimoire, one per page, sorted by key.
-  std::vector<ItemKey> m_all_items;
-  //! @brief Index into m_all_items of the page currently shown.
-  std::size_t m_current_idx{ 0 };
+  //! @brief Key of the page currently shown; empty means the first page.
+  Sys::ItemKey m_item_key;
 };
 
 } // namespace Game::Sys

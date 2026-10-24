@@ -2,8 +2,11 @@
 #define SRC_COMPONENTS_INVENTORY_GRIMOIRE_HPP__
 
 #include <Components/Inventory/WorldItem.hpp>
+#include <Components/Stats/BaseAction.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
+
+#include <map>
 
 namespace Game::Cmp
 {
@@ -13,45 +16,31 @@ namespace Game::Cmp
 class Grimoire
 {
 public:
+  using ActionMap = std::map<std::string, BaseAction>;
   struct Page
   {
     Sys::SpriteKey sprite_key;
+    ActionMap action_map;
   };
 
-  //! @brief Construct a new Grimoire object, pre-populating all known plant spell entries as disabled.
+  //! @brief Page map type, ordered by item key so pages have a stable order.
+  using PageMap = std::map<Sys::ItemKey, Page>;
+
+  //! @brief Construct a new Grimoire object, populating one page per plant item in Sys::ItemStore.
   Grimoire()
   {
-    contents.emplace( "item.plant1", false );
-    contents.emplace( "item.plant2", false );
-    contents.emplace( "item.plant3", false );
-    contents.emplace( "item.plant4", false );
-    contents.emplace( "item.plant5", false );
-    contents.emplace( "item.plant6", false );
-
-    pages.emplace( "item.plant.rowan", Page{ .sprite_key = "sprite.item.plant.rowan" } );
-    pages.emplace( "item.plant.elder", Page{ .sprite_key = "sprite.item.plant.elder" } );
-    pages.emplace( "item.plant.yew", Page{ .sprite_key = "sprite.item.plant.yew" } );
-    pages.emplace( "item.plant.hawthorn", Page{ .sprite_key = "sprite.item.plant.hawthorn" } );
-    pages.emplace( "item.plant.foxglove", Page{ .sprite_key = "sprite.item.plant.foxglove" } );
-    pages.emplace( "item.plant.nightshade", Page{ .sprite_key = "sprite.item.plant.nightshade" } );
-    pages.emplace( "item.plant.hogweed", Page{ .sprite_key = "sprite.item.plant.hogweed" } );
-    pages.emplace( "item.plant.stjohnswort", Page{ .sprite_key = "sprite.item.plant.stjohnswort" } );
-    pages.emplace( "item.plant.nettle", Page{ .sprite_key = "sprite.item.plant.nettle" } );
-    pages.emplace( "item.plant.burdock", Page{ .sprite_key = "sprite.item.plant.burdock" } );
-    pages.emplace( "item.plant.redcampion", Page{ .sprite_key = "sprite.item.plant.redcampion" } );
-    pages.emplace( "item.plant.henbane", Page{ .sprite_key = "sprite.item.plant.henbane" } );
+    const auto &item_store = Sys::ItemStore::instance();
+    for ( const auto &item_key : item_store.get_pattern( "^item\\.plant\\." ) )
+    {
+      pages.emplace( item_key, Page{ .sprite_key = "", .action_map = {} } );
+    }
   }
 
-  //! @brief Item identifier key for a grimoire entry, e.g. "item.plant1".
-  using ItemKey = Sys::ItemKey;
-  //! @brief Whether a grimoire entry has been discovered/enabled.
-  using Enabled = bool;
-  //! @brief The grimoire's spell entries and whether each has been discovered/enabled.
-  std::map<ItemKey, Enabled> contents;
   //! @brief Whether the grimoire overlay is currently enabled/shown.
   bool is_enabled{ false };
 
-  std::unordered_map<ItemKey, Page> pages;
+  //! @brief The grimoire's pages, keyed by item.
+  PageMap pages;
 };
 
 } // namespace Game::Cmp

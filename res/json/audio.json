@@ -44,6 +44,7 @@
     { "name": "hit_grave", "path": "res/audio/hit_grave.mp3" },
     { "name": "hit_pot", "path": "res/audio/hit_pot.mp3" },
     { "name": "lightning_strike", "path": "res/audio/lightning_strike.mp3" },
+    { "name": "page_turn", "path": "res/audio/page_turn.mp3" },
     { "name": "pickaxe1", "path": "res/audio/pickaxe1.wav" },
     { "name": "pickaxe2", "path": "res/audio/pickaxe2.wav" },
     { "name": "pickaxe3", "path": "res/audio/pickaxe3.wav" },
