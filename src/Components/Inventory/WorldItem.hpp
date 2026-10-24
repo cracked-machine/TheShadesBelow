@@ -126,6 +126,13 @@ public:
     return m_actions.at( std::type_index( typeid( ActionT ) ) );
   }
 
+  //! @brief Whether the item has an action keyed by ActionT.
+  template <typename ActionT>
+  [[nodiscard]] bool has_action() const
+  {
+    return m_actions.contains( std::type_index( typeid( ActionT ) ) );
+  }
+
   //! @brief Get a copy of the action keyed by ActionT. Throws std::out_of_range if absent.
   template <typename ActionT>
   BaseAction get_action() const

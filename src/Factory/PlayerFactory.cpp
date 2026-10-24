@@ -9,6 +9,7 @@
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
+#include <Components/Inventory/Grimoire.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
@@ -102,10 +103,11 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   reg.emplace_or_replace<Cmp::ZOrderValue>( entity, start_pos.y ); // z-order based on y-position
   reg.emplace_or_replace<Cmp::AbsoluteAlpha>( entity, 255 );       // fully opaque
   reg.emplace_or_replace<Cmp::AbsoluteRotation>( entity, 0 );
-  reg.emplace_or_replace<Cmp::AbsoluteRenderOffset>( entity,
-                                                      sf::Vector2f{ 0.f, Sys::PersistSystem::get<Cmp::Persist::PlayerRenderOffset>( reg ).get_value() } );
+  reg.emplace_or_replace<Cmp::AbsoluteRenderOffset>(
+      entity, sf::Vector2f{ 0.f, Sys::PersistSystem::get<Cmp::Persist::PlayerRenderOffset>( reg ).get_value() } );
   reg.emplace_or_replace<Cmp::Player::HeartBeat>( entity );
   reg.emplace_or_replace<Cmp::Player::Doglegs>( entity );
+  reg.emplace_or_replace<Cmp::Grimoire>( entity );
 }
 
 entt::entity add_spawn_area( entt::registry &reg, entt::entity entity, float zorder )

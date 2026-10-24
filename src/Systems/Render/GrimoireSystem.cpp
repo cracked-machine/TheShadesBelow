@@ -7,6 +7,7 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <Systems/Render/GrimoireSystem.hpp>
 
+#include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <entt/entity/registry.hpp>
@@ -14,6 +15,7 @@
 #include <format>
 #include <iterator>
 #include <spdlog/spdlog.h>
+#include <string_view>
 
 namespace Game::Sys
 {
@@ -61,18 +63,19 @@ Cmp::Grimoire::PageMap::const_iterator GrimoireSystem::current_page( const Cmp::
 
 void GrimoireSystem::on_item_pickup_event( const Events::ItemPickedUpEvent &ev )
 {
-  if ( ev.m_item.contains( "item.plant" ) )
-  {
-    auto *grimoire_cmp = find_grimoire();
-    if ( not grimoire_cmp ) { return; }
+  auto *grimoire_cmp = find_grimoire();
+  if ( not grimoire_cmp ) { return; }
 
-    const auto &item = Sys::ItemStore::instance().get( ev.m_item );
-    grimoire_cmp->pages[item.item_type] = Cmp::Grimoire::Page{
-        .sprite_key = item.sprite_type,
-        .action_map = Cmp::Grimoire::ActionMap{ { std::string( "carry_action" ), item.get_action<Cmp::CarryAction>() } } };
+  // only items that have a grimoire page can be discovered
+  auto page_it = grimoire_cmp->pages.find( ev.m_item );
+  if ( page_it == grimoire_cmp->pages.end() ) { return; }
 
-    SPDLOG_INFO( "ItemPickedUpEvent: {} ", ev.m_item );
-  }
+  const auto &item = Sys::ItemStore::instance().get( ev.m_item );
+  auto &page = page_it->second;
+  page.sprite_key = item.sprite_type;
+  if ( item.has_action<Cmp::CarryAction>() ) { page.action_map.insert_or_assign( "carry_action", item.get_action<Cmp::CarryAction>() ); }
+
+  SPDLOG_DEBUG( "Grimoire page discovered: {}", ev.m_item );
 }
 
 void GrimoireSystem::on_player_action( Events::PlayerActionEvent ev )
@@ -132,16 +135,9 @@ void GrimoireSystem::render()
   {
     if ( icon.name == "plant_icon" )
     {
-      if ( page.sprite_key.empty() )
-      {
-        RenderSystem::safe_render_sprite_screen( "sprite.plant.unknown", { icon.rect.position, Constants::kGridSizePxF }, 0,
-                                                 { static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) } );
-      }
-      else
-      {
-        RenderSystem::safe_render_sprite_screen( page.sprite_key, { icon.rect.position, Constants::kGridSizePxF }, 0,
-                                                 { static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) } );
-      }
+      const Sys::SpriteKey sprite_key = page.sprite_key.empty() ? Sys::SpriteKey( "sprite.plant.unknown" ) : page.sprite_key;
+      RenderSystem::safe_render_sprite_screen( sprite_key, { icon.rect.position, Constants::kGridSizePxF }, 0,
+                                               { static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) } );
     }
   }
   for ( const auto &label : m_ui_data->m_labels )
@@ -157,27 +153,38 @@ void GrimoireSystem::render()
     else if ( label.name.contains( "action" ) )
     {
       TextColumn draw_line{ .self = *this,
-                            .cache_key = "grimoire_action",
+                            .cache_key = "grimoire_" + label.name,
                             .origin = label.rect.position,
                             .font_size = static_cast<unsigned int>( label.font_size ),
                             .line_height = label.font_size * 1.2f };
-      if ( page.action_map.contains( label.name ) )
+      const auto action_it = page.action_map.find( label.name );
+      if ( action_it == page.action_map.end() )
       {
-        const Cmp::BaseAction &action = page.action_map.at( label.name );
-        if ( action.health() != 0 ) { draw_line( std::format( "health: {}", action.health() ), sf::Color::Black ); }
-        else if ( action.fear() != 0 ) { draw_line( std::format( "fear: {}", action.fear() ), sf::Color::Black ); }
-        else if ( action.despair() != 0 ) { draw_line( std::format( "despair: {}", action.despair() ), sf::Color::Black ); }
-        else if ( action.infamy() != 0 ) { draw_line( std::format( "infamy: {}", action.infamy() ), sf::Color::Black ); }
-        else if ( action.luck() != 0 ) { draw_line( std::format( "luck: {}", action.luck() ), sf::Color::Black ); }
-        else { draw_line( "?????", sf::Color::Black ); }
+        draw_line( "?????", sf::Color::Black );
+        continue;
       }
-      else { draw_line( "?????", sf::Color::Black ); }
+
+      // one line per non-zero stat, or "none" if the action is discovered but has no effect
+      const Cmp::BaseAction &action = action_it->second;
+      bool has_effect = false;
+      const auto draw_stat = [&]( std::string_view stat_name, int value )
+      {
+        if ( value == 0 ) { return; }
+        draw_line( std::format( "{}: {}", stat_name, value ), sf::Color::Black );
+        has_effect = true;
+      };
+      draw_stat( "health", action.health() );
+      draw_stat( "fear", action.fear() );
+      draw_stat( "despair", action.despair() );
+      draw_stat( "infamy", action.infamy() );
+      draw_stat( "luck", action.luck() );
+      if ( not has_effect ) { draw_line( "none", sf::Color::Black ); }
     }
   }
   for ( const auto &text : m_ui_data->m_texts )
   {
     TextColumn draw_line{ .self = *this,
-                          .cache_key = "grimoire_text",
+                          .cache_key = "grimoire_" + text.name,
                           .origin = text.rect.position,
                           .font_size = static_cast<unsigned int>( text.font_size ),
                           .line_height = text.font_size * 1.2f };

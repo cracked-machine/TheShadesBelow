@@ -2,7 +2,6 @@
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Direction.hpp>
 #include <Components/Grave/MultiBlock.hpp>
-#include <Components/Inventory/Grimoire.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
@@ -110,9 +109,6 @@ void GraveyardScene::on_init()
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowDebugStats>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::Shaders>( scene_settings_entt, true );
   m_reg.emplace_or_replace<Cmp::SceneSettings::Footsteps>( scene_settings_entt, true );
-
-  auto grimoire_entt = m_reg.create();
-  m_reg.emplace_or_replace<Cmp::Grimoire>( grimoire_entt );
 
   m_scene_data = std::make_shared<SceneData>( "res/scenes/graveyard.json" );
 
