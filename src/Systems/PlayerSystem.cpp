@@ -92,6 +92,7 @@
 #include <Components/Wall.hpp>
 #include <Components/Wormhole/Jump.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/GrimoireUpdateEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
@@ -763,6 +764,7 @@ void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
     if ( carry_timer.asSeconds() < carry_action.interval() ) continue;
     if ( carry_action.health() < 0 ) reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     Utils::Player::get_stats( reg() ).apply( carry_action );
+    get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( slot_cmp.m_item.item_type, Cmp::CarryAction::kKey, carry_action ) );
     carry_timer = sf::Time::Zero;
   }
 }

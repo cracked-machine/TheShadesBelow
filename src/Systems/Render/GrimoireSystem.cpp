@@ -14,9 +14,9 @@
 #include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
+#include <algorithm>
 #include <entt/entity/registry.hpp>
 #include <entt/entity/view.hpp>
-#include <algorithm>
 #include <format>
 #include <optional>
 #include <spdlog/spdlog.h>
@@ -56,6 +56,7 @@ GrimoireSystem::GrimoireSystem( entt::registry &reg, sf::RenderWindow &window, A
 {
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&GrimoireSystem::on_player_action>( this );
   std::ignore = get_systems_event_queue().sink<Events::ItemPickedUpEvent>().connect<&GrimoireSystem::on_item_pickup_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::AddInventoryEvent>().connect<&GrimoireSystem::on_add_inventory_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::GrimoireUpdateEvent>().connect<&GrimoireSystem::on_grimoire_update_event>( this );
 
   m_ui_data = std::make_unique<Render::UiData>( "res/ui/grimoire.json" );
@@ -97,10 +98,14 @@ void GrimoireSystem::for_each_subpage( const Sys::ItemKey &item_key, const std::
   }
 }
 
-void GrimoireSystem::on_item_pickup_event( const Events::ItemPickedUpEvent &ev )
+void GrimoireSystem::on_item_pickup_event( const Events::ItemPickedUpEvent &ev ) { discover_item( ev.m_item ); }
+
+void GrimoireSystem::on_add_inventory_event( const Events::AddInventoryEvent &ev ) { discover_item( ev.m_item ); }
+
+void GrimoireSystem::discover_item( const Sys::ItemKey &item_key )
 {
-  const auto &item = Sys::ItemStore::instance().get( ev.m_item );
-  for_each_subpage( ev.m_item, [&]( std::size_t page_idx, Cmp::Grimoire::SubPage &sub_page )
+  const auto &item = Sys::ItemStore::instance().get( item_key );
+  for_each_subpage( item_key, [&]( std::size_t page_idx, Cmp::Grimoire::SubPage &sub_page )
   {
     sub_page.sprite_key = item.sprite_type;
     if ( item.has_action<Cmp::CarryAction>() )
@@ -256,7 +261,10 @@ void GrimoireSystem::render()
       draw_line( std::format( "{}: {:.0f}%", label, probability * 100.f ), sf::Color::Black );
       has_effect = true;
     };
-    if ( effects.spawn_npc ) { draw_effect( std::format( "summons {}", npc_display_name( effects.spawn_npc->npc_type ) ), effects.spawn_npc->probability ); }
+    if ( effects.spawn_npc )
+    {
+      draw_effect( std::format( "summons {}", npc_display_name( effects.spawn_npc->npc_type ) ), effects.spawn_npc->probability );
+    }
     if ( effects.lightning ) { draw_effect( "lightning", effects.lightning->probability ); }
     if ( effects.movement ) { draw_effect( effects.movement->type, effects.movement->probability ); }
     if ( not has_effect ) { draw_line( "none", sf::Color::Black ); }

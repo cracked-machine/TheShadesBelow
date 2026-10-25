@@ -2,6 +2,7 @@
 #define SRC_SYSTEMS_GRIMOIRESYSTEM_HPP__
 
 #include <Components/Inventory/Grimoire.hpp>
+#include <Events/AddInventoryEvent.hpp>
 #include <Events/GrimoireUpdateEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
@@ -49,6 +50,14 @@ private:
   //! @brief Discover the grimoire page for a picked-up plant: reveal its sprite, name and carry action.
   //! @param ev
   void on_item_pickup_event( const Events::ItemPickedUpEvent &ev );
+
+  //! @brief Discover the grimoire page for an item added directly to the inventory (e.g. foraged by hand).
+  //! @param ev
+  void on_add_inventory_event( const Events::AddInventoryEvent &ev );
+
+  //! @brief Reveal the sprite and carry action on every grimoire subpage belonging to the item.
+  //! @param item_key
+  void discover_item( const Sys::ItemKey &item_key );
 
   //! @brief Discover an action on a plant's grimoire page once it has been applied to the player.
   //! @param ev
