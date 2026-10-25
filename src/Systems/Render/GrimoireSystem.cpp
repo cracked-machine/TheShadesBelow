@@ -287,21 +287,22 @@ bool GrimoireSystem::render_action_stats( TextColumn &draw_line, const Cmp::Base
   draw_stat( "despair", action.despair() );
   draw_stat( "infamy", action.infamy() );
   draw_stat( "luck", action.luck() );
-  // only the toxidromes this action changes; a multi-type list (cures) shares one toxicity, so show it as "all"
+  // only the toxidromes this action changes; when it changes every toxidrome (a "type": "all" cure, which shares one
+  // toxicity) show a single "all" line instead
   const Cmp::Toxicity::Toxidrome &toxidrome = action.toxidrome();
+  const std::pair<std::string_view, std::optional<int>> all_toxidromes[] = { { "tachycardia", toxidrome.at<Cmp::Toxicity::Tachycardia>() },
+                                                                             { "bradycardia", toxidrome.at<Cmp::Toxicity::Bradycardia>() },
+                                                                             { "hallucinogen", toxidrome.at<Cmp::Toxicity::Hallucinogen>() },
+                                                                             { "hypoxia", toxidrome.at<Cmp::Toxicity::Hypoxia>() },
+                                                                             { "phototoxia", toxidrome.at<Cmp::Toxicity::Phototoxia>() },
+                                                                             { "venom", toxidrome.at<Cmp::Toxicity::Venom>() },
+                                                                             { "vertigo", toxidrome.at<Cmp::Toxicity::Vertigo>() } };
   std::vector<std::pair<std::string_view, int>> toxidrome_stats;
-  const auto add_toxidrome = [&]( std::string_view name, std::optional<int> value )
+  for ( const auto &[name, value] : all_toxidromes )
   {
     if ( value.value_or( 0 ) != 0 ) { toxidrome_stats.emplace_back( name, *value ); }
-  };
-  add_toxidrome( "tachycardia", toxidrome.at<Cmp::Toxicity::Tachycardia>() );
-  add_toxidrome( "bradycardia", toxidrome.at<Cmp::Toxicity::Bradycardia>() );
-  add_toxidrome( "hallucinogen", toxidrome.at<Cmp::Toxicity::Hallucinogen>() );
-  add_toxidrome( "hypoxia", toxidrome.at<Cmp::Toxicity::Hypoxia>() );
-  add_toxidrome( "phototoxia", toxidrome.at<Cmp::Toxicity::Phototoxia>() );
-  add_toxidrome( "venom", toxidrome.at<Cmp::Toxicity::Venom>() );
-  add_toxidrome( "vertigo", toxidrome.at<Cmp::Toxicity::Vertigo>() );
-  if ( toxidrome_stats.size() > 1 ) { draw_stat( "all", toxidrome_stats.front().second ); }
+  }
+  if ( toxidrome_stats.size() == std::size( all_toxidromes ) ) { draw_stat( "all", toxidrome_stats.front().second ); }
   else
   {
     for ( const auto &[name, value] : toxidrome_stats )

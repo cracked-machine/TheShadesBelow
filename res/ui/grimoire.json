@@ -5,10 +5,11 @@
         {
          "draworder":"topdown",
          "id":3,
+         "locked":true,
          "name":"MainOverlay",
          "objects":[
                 {
-                 "height":750,
+                 "height":770,
                  "id":64,
                  "name":"main_outline",
                  "opacity":1,
@@ -68,6 +69,7 @@
         {
          "draworder":"topdown",
          "id":6,
+         "locked":true,
          "name":"SpecialOverlay",
          "objects":[
                 {
@@ -537,6 +539,7 @@
         {
          "draworder":"topdown",
          "id":2,
+         "locked":true,
          "name":"DropOverlay",
          "objects":[
                 {
@@ -801,6 +804,7 @@
         {
          "draworder":"topdown",
          "id":5,
+         "locked":true,
          "name":"ForageOverlay",
          "objects":[
                 {
@@ -1161,6 +1165,7 @@
         {
          "draworder":"topdown",
          "id":4,
+         "locked":true,
          "name":"PlantOverlay",
          "objects":[
                 {
@@ -1517,9 +1522,132 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":7,
+         "name":"ArrowOverlay",
+         "objects":[
+                {
+                 "height":20,
+                 "id":156,
+                 "name":"",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#ffcb5537"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ffaaaa7f"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":120,
+                 "x":1240,
+                 "y":700
+                }, 
+                {
+                 "height":20,
+                 "id":157,
+                 "name":"",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#ffcb5537"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ffaaaa7f"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":120,
+                 "x":1240,
+                 "y":360
+                }, 
+                {
+                 "height":20,
+                 "id":158,
+                 "name":"",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#ffcb5537"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ffaaaa7f"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":100,
+                 "x":800,
+                 "y":660
+                }, 
+                {
+                 "height":20,
+                 "id":159,
+                 "name":"",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#ffcb5537"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ffaaaa7f"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":100,
+                 "x":800,
+                 "y":390
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":7,
- "nextobjectid":151,
+ "nextlayerid":8,
+ "nextobjectid":169,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",
