@@ -2,9 +2,13 @@
 #define SRC_COMPONENTS_INVENTORY_WORLDITEM_HPP__
 
 #include <Components/Stats/BaseAction.hpp>
+#include <Components/Stats/DestroyAction.hpp>
+#include <Components/Stats/ForageAction.hpp>
+#include <Components/Stats/SacrificeAction.hpp>
 #include <SFML/System/Time.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
+#include <optional>
 #include <string>
 #include <typeindex>
 #include <typeinfo>
@@ -41,32 +45,6 @@ public:
     DRINKABLE
   };
 
-  //! @brief A special altar effect triggered by sacrificing the item.
-  enum class SacrificeSpecial {
-    //! @brief No special effect.
-    NONE,
-    //! @brief Light an altar candle (relics).
-    ALTAR,
-    //! @brief Banish ghosts, or gain an extra life at a crypt altar (witches jar).
-    BANISH,
-    //! @brief Unlock the crypt key (exit key).
-    CRYPT
-  };
-
-  //! @brief Whether the item can be sacrificed and what it is exchanged for. When enabled, exactly one of
-  //!        item, wealth or special is set.
-  struct Sacrifice
-  {
-    //! @brief Whether the item can be sacrificed at an altar.
-    bool enabled{ false };
-    //! @brief The item that spawns when this item is sacrificed. Empty string if unused.
-    Sys::ItemKey item;
-    //! @brief The wealth gained when this item is sacrificed. Zero if unused.
-    int wealth{ 0 };
-    //! @brief The special altar effect. NONE if unused.
-    SacrificeSpecial special{ SacrificeSpecial::NONE };
-  };
-
   //! @brief Pairs a stat-modifier action with the timestamp/duration used to schedule its re-application.
   struct ActionTimePair
   {
@@ -82,9 +60,6 @@ public:
   //! @brief Construct a new World Item object.
   //! @param item_type Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
   //! @param sprite_type The sprite used to render this item.
-  //! @param sacrifice Whether this item can be sacrificed at the altar, and its reward.
-  //! @param forage_output The item gained when this plant is foraged (empty hand or gloves). Empty string is a no op.
-  //! @param axe_output The item dropped when this plant is chopped with an axe. Empty string is a no op.
   //! @param pickaxe_dmg Damage done to a pickaxe by this item.
   //! @param axe_dmg Damage done to an axe by this item.
   //! @param shovel_dmg Damage done to a shovel by this item.
@@ -93,14 +68,11 @@ public:
   //! @param wear_location Where the item's wear level is active.
   //! @param wear_active_only Whether the item only wears while actively in use (e.g. flute playing, broom flying).
   //! @param consumable Whether the item can be eaten, drunk or neither.
-  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, Sacrifice sacrifice, std::string forage_output, std::string axe_output, int pickaxe_dmg,
-             int axe_dmg, int shovel_dmg, int bow_dmg, sf::Time expiry = sf::Time::Zero, Location wear_location = Location::NONE,
-             bool wear_active_only = false, Consumable consumable = Consumable::NONE )
+  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, int pickaxe_dmg, int axe_dmg, int shovel_dmg, int bow_dmg,
+             sf::Time expiry = sf::Time::Zero, Location wear_location = Location::NONE, bool wear_active_only = false,
+             Consumable consumable = Consumable::NONE )
       : item_type( std::move( item_type ) ),
         sprite_type( std::move( sprite_type ) ),
-        m_sacrifice( std::move( sacrifice ) ),
-        m_forage_output( std::move( forage_output ) ),
-        m_axe_output( std::move( axe_output ) ),
         m_pickaxe_damage( pickaxe_dmg ),
         m_axe_damage( axe_dmg ),
         m_shovel_damage( shovel_dmg ),
@@ -140,6 +112,15 @@ public:
     return m_actions.at( std::type_index( typeid( ActionT ) ) ).action;
   }
 
+  //! @brief Get the reward of the action keyed by ActionT.
+  //! @return The reward, or std::nullopt if the item has no such action or the action has no reward.
+  template <typename ActionT>
+  [[nodiscard]] std::optional<ActionReward> get_reward() const
+  {
+    if ( not has_action<ActionT>() ) return std::nullopt;
+    return at<ActionT>().action.reward();
+  }
+
   //! @brief Add an action keyed by its concrete type. Must be a template: taking BaseAction by value would slice
   //! the argument and key every action under typeid(BaseAction).
   template <typename ActionT>
@@ -167,23 +148,28 @@ public:
   //! @brief Whether the item only wears while it is actively in use (e.g. flute playing, broom flying).
   bool wears_only_when_active() const { return m_wear_active_only; }
 
-  //! @brief The item that spawns when this item is sacrificed. Empty string if unused.
-  Sys::ItemKey get_sacrifice_item() const { return m_sacrifice.item; }
+  //! @brief The reward for sacrificing this item at the altar ("sacrifice_action.reward" in items.json).
+  //! @return The reward, or std::nullopt if the item can't be sacrificed.
+  std::optional<ActionReward> get_sacrifice_reward() const { return get_reward<SacrificeAction>(); }
 
-  //! @brief The wealth gained when this item is sacrificed. Zero if unused.
-  int get_sacrifice_wealth() const { return m_sacrifice.wealth; }
+  //! @brief Whether this item can be sacrificed at the altar, i.e. its sacrifice_action has a reward.
+  bool is_sacrificial() const { return get_sacrifice_reward().has_value(); }
 
-  //! @brief The special altar effect triggered when this item is sacrificed. NONE if unused.
-  SacrificeSpecial get_sacrifice_special() const { return m_sacrifice.special; }
+  //! @brief The item gained when this plant is foraged (empty hand or gloves), see "forage_action.reward.item" in
+  //! items.json. Empty string is a no op.
+  Sys::ItemKey get_forage_output() const
+  {
+    const auto reward = get_reward<ForageAction>();
+    return reward ? reward->item : Sys::ItemKey();
+  }
 
-  //! @brief The item gained when this plant is foraged (empty hand or gloves). Empty string is a no op.
-  Sys::ItemKey get_forage_output() const { return m_forage_output; }
-
-  //! @brief The item dropped when this plant is chopped with an axe. Empty string is a no op.
-  Sys::ItemKey get_axe_output() const { return m_axe_output; }
-
-  //! @brief Whether this item can be sacrificed at the altar.
-  bool is_sacrificial() const { return m_sacrifice.enabled; }
+  //! @brief The item dropped when this plant is chopped with an axe, see "destroy_action.reward.item" in items.json.
+  //! Empty string is a no op.
+  Sys::ItemKey get_axe_output() const
+  {
+    const auto reward = get_reward<DestroyAction>();
+    return reward ? reward->item : Sys::ItemKey();
+  }
 
   //! @brief Damage done to the corresponding tool by this item.
   int get_pickaxe_damage() const { return m_pickaxe_damage; }
@@ -203,15 +189,6 @@ public:
 private:
   //! @brief The actions and their effects that can be applied to the player. Imported from items.json.
   std::unordered_map<std::type_index, ActionTimePair> m_actions;
-
-  //! @brief Whether this item can be sacrificed at the altar, and its reward. Imported from items.json.
-  Sacrifice m_sacrifice;
-
-  //! @brief The item gained when this plant is foraged (empty hand or gloves). Empty string is a no op.
-  Sys::ItemKey m_forage_output;
-
-  //! @brief The item dropped when this plant is chopped with an axe. Empty string is a no op.
-  Sys::ItemKey m_axe_output;
 
   //! @brief Damage done to a pickaxe by this item.
   int m_pickaxe_damage{ 0 };

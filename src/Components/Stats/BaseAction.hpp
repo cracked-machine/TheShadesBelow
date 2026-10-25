@@ -1,6 +1,8 @@
 #ifndef SRC_COMPONENTS_STATS_BASEACTION_HPP__
 #define SRC_COMPONENTS_STATS_BASEACTION_HPP__
 
+#include <Systems/Stores/StoreKey.hpp>
+
 #include <memory>
 #include <optional>
 #include <string>
@@ -118,13 +120,46 @@ struct SideEffects
   [[nodiscard]] bool empty() const { return not spawn_npc and not lightning and not movement; }
 };
 
+//! @brief Optional reward granted when an action is applied. See the "reward" object of the sacrifice_action,
+//! forage_action and destroy_action entries in res/json/items.json.
+//! @details A sacrifice_action reward sets exactly one of item, wealth or special. A forage_action/destroy_action
+//! reward only sets item.
+struct ActionReward
+{
+  //! @brief A special altar effect triggered by sacrificing the item.
+  enum class Special {
+    //! @brief No special effect.
+    NONE,
+    //! @brief Light an altar candle (relics).
+    ALTAR,
+    //! @brief Banish ghosts, or gain an extra life at a crypt altar (witches jar).
+    BANISH,
+    //! @brief Unlock the crypt key (exit key).
+    CRYPT
+  };
+
+  //! @brief The item gained. Empty string if unused.
+  Sys::ItemKey item;
+  //! @brief The wealth gained. Zero if unused.
+  int wealth{ 0 };
+  //! @brief The special altar effect. NONE if unused.
+  Special special{ Special::NONE };
+  //! @brief The number of reward fields that are set.
+  //! @return int Count of item, wealth and special that are not their unused value.
+  [[nodiscard]] int count() const
+  {
+    return static_cast<int>( not item.empty() ) + static_cast<int>( wealth > 0 ) + static_cast<int>( special != Special::NONE );
+  }
+};
+
 //! @brief Base class for a player-stat modifier applied when a particular kind of gameplay action
 //! occurs (e.g. burying, carrying, colliding with, consuming, destroying, or being hit by something).
 //! @details Holds the health/fear/despair/infamy/toxicity deltas, an optional toxidrome affliction, and
-//! the tick interval at which the modifier re-applies, plus optional side effects (see SideEffects).
+//! the tick interval at which the modifier re-applies, plus optional side effects (see SideEffects) and an
+//! optional reward (see ActionReward).
 //! Derived classes (BurnAction, CarryAction, CollisionAction, ConsumeAction, DestroyAction, ForageAction,
-//! ProjectileAction, ProximityAction, SacrificeAction, SpawnAction) add no behaviour of their own - they exist purely so that Cmp::WorldItem::actions and
-//! NPC action maps can key modifiers by the std::type_index of the triggering action kind.
+//! ProjectileAction, ProximityAction, SacrificeAction, SpawnAction) add no behaviour of their own - they exist purely so that Cmp::WorldItem::actions
+//! and NPC action maps can key modifiers by the std::type_index of the triggering action kind.
 class BaseAction
 {
 public:
@@ -146,8 +181,9 @@ public:
   //! @param toxidrome toxidrome affliction applied alongside the stat changes, if any. Each active
   //! toxidrome carries its own toxicity contribution (see Cmp::Toxicity::Toxidrome).
   //! @param side_effects Optional side effects (NPC spawn, lightning, movement), each with its own probability.
+  //! @param reward Optional reward granted when the action is applied (e.g. forage/chop/sacrifice output).
   BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Tick tick,
-              Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects = {} );
+              Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects = {}, std::optional<ActionReward> reward = {} );
   //! @brief Destroy the Base Action object.
   ~BaseAction();
 
@@ -180,12 +216,16 @@ public:
   //! @brief Get the optional side effects of this action.
   //! @return const SideEffects& The NPC spawn/lightning/movement effects.
   [[nodiscard]] const SideEffects &side_effects() const { return m_side_effects; }
-  //! @brief Whether this action has no effect, i.e. every stat delta is zero, it applies no toxidrome and has no side effects.
+  //! @brief Get the optional reward of this action.
+  //! @return const std::optional<ActionReward>& The reward, or std::nullopt if the action grants none.
+  [[nodiscard]] const std::optional<ActionReward> &reward() const { return m_reward; }
+  //! @brief Whether this action has no effect, i.e. every stat delta is zero, it applies no toxidrome and has no side effects
+  //! or reward.
   //! @return true if applying this action would change nothing.
   [[nodiscard]] bool is_zero() const;
 
   //! @brief Accumulate another action's stat deltas into this one.
-  //! @note Does not accumulate toxidrome or side effects.
+  //! @note Does not accumulate toxidrome, side effects or reward.
   //! @param rhs The action whose deltas are added to this one.
   //! @return BaseAction& Reference to this action, after accumulation.
   BaseAction &operator+=( const BaseAction &rhs )
@@ -216,6 +256,8 @@ private:
   std::unique_ptr<Cmp::Toxicity::Toxidrome> m_toxidrome;
   //! @brief Optional side effects (NPC spawn, lightning, movement).
   SideEffects m_side_effects;
+  //! @brief Optional reward granted when the action is applied.
+  std::optional<ActionReward> m_reward;
   //! @brief How often (seconds) the action re-applies, or 0 for a one-shot.
   float m_tick{ 0 };
 };

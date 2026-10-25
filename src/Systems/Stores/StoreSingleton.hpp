@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <functional>
 #include <nlohmann/json_fwd.hpp>
+#include <optional>
 #include <source_location>
 #include <stdexcept>
 #include <string>
@@ -177,11 +178,40 @@ protected:
     using Game::Utils::JsonDeserializer;
     // toxidrome fields may be nested under "toxidrome" or sit directly on the action entry
     const auto &tox = j.contains( "toxidrome" ) ? j.at( "toxidrome" ) : j;
-    return Action(
-        { JsonDeserializer::get_int( j, "health" ) }, { JsonDeserializer::get_int( j, "fear" ) }, { JsonDeserializer::get_int( j, "despair" ) },
-        { JsonDeserializer::get_int( j, "infamy" ) }, { JsonDeserializer::get_int( j, "luck" ) }, { JsonDeserializer::get_float( j, "tick" ) },
-        Game::Factory::Toxicity::create_toxidrome( JsonDeserializer::get_string_or_list( tox, "type" ), JsonDeserializer::get_int( tox, "toxicity" ) ),
-        make_side_effects( j ) );
+    return Action( { JsonDeserializer::get_int( j, "health" ) }, { JsonDeserializer::get_int( j, "fear" ) },
+                   { JsonDeserializer::get_int( j, "despair" ) }, { JsonDeserializer::get_int( j, "infamy" ) },
+                   { JsonDeserializer::get_int( j, "luck" ) }, { JsonDeserializer::get_float( j, "tick" ) },
+                   Game::Factory::Toxicity::create_toxidrome( JsonDeserializer::get_string_or_list( tox, "type" ),
+                                                              JsonDeserializer::get_int( tox, "toxicity" ) ),
+                   make_side_effects( j ), make_reward( j ) );
+  }
+
+  //! @brief Convert the "reward.special" string of a JSON action entry.
+  //! @throws std::runtime_error on an unknown value, so an invalid config can't silently disable the altar effect.
+  static Cmp::ActionReward::Special make_reward_special( const std::string &special )
+  {
+    using Special = Cmp::ActionReward::Special;
+    if ( special == "none" ) return Special::NONE;
+    if ( special == "altar" ) return Special::ALTAR;
+    if ( special == "banish" ) return Special::BANISH;
+    if ( special == "crypt" ) return Special::CRYPT;
+    throw std::runtime_error( "Unknown reward special: '" + special + "'" );
+  }
+
+  //! @brief Build the optional reward of a JSON action entry from its optional "reward" object.
+  //! @throws std::runtime_error if the "reward" object sets none of item, wealth or special.
+  static std::optional<Cmp::ActionReward> make_reward( const nlohmann::json &j )
+  {
+    using Game::Utils::JsonDeserializer;
+    if ( not j.contains( "reward" ) ) return std::nullopt;
+    const auto &rw = j.at( "reward" );
+
+    Cmp::ActionReward reward;
+    if ( rw.contains( "item" ) ) { reward.item = Sys::ItemKey( JsonDeserializer::get_string( rw, "item" ) ); }
+    if ( rw.contains( "wealth" ) ) { reward.wealth = JsonDeserializer::get_int( rw, "wealth" ); }
+    if ( rw.contains( "special" ) ) { reward.special = make_reward_special( JsonDeserializer::get_string( rw, "special" ) ); }
+    if ( reward.count() == 0 ) throw std::runtime_error( "reward must set at least one of item, wealth or special" );
+    return reward;
   }
 
   //! @brief Build the optional side effects of a JSON action entry from its optional "side_effects" object.

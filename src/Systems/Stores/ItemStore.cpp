@@ -39,18 +39,6 @@ Game::Cmp::WorldItem::Consumable make_consumable_property( const std::string &co
   return Consumable::NONE;
 }
 
-//! @brief Convert the "sacrifice.reward.special" string of a JSON item entry.
-//! @throws std::runtime_error on an unknown value, so an invalid config can't silently disable the altar effect.
-Game::Cmp::WorldItem::SacrificeSpecial make_sacrifice_special( const std::string &special )
-{
-  using SacrificeSpecial = Game::Cmp::WorldItem::SacrificeSpecial;
-  if ( special == "none" ) return SacrificeSpecial::NONE;
-  if ( special == "altar" ) return SacrificeSpecial::ALTAR;
-  if ( special == "banish" ) return SacrificeSpecial::BANISH;
-  if ( special == "crypt" ) return SacrificeSpecial::CRYPT;
-  throw std::runtime_error( "Unknown sacrifice special: '" + special + "'" );
-}
-
 } // namespace
 
 namespace Game::Sys
@@ -73,31 +61,14 @@ void ItemStore::init_store()
     auto expiry = wear.at( "expiryseconds" ).get<float>();
     auto wear_location = make_wear_location( wear.at( "location" ).get<std::string>() );
     auto wear_active_only = wear.at( "active_only" ).get<bool>();
-    const auto &sacrifice_json = item_value.at( "sacrifice" );
-    const auto &reward_json = sacrifice_json.at( "reward" );
-    Cmp::WorldItem::Sacrifice sacrifice{ .enabled = sacrifice_json.at( "enabled" ).get<bool>(),
-                                         .item = Sys::ItemKey( reward_json.at( "item" ).get<std::string>() ),
-                                         .wealth = reward_json.at( "wealth" ).get<int>(),
-                                         .special = make_sacrifice_special( reward_json.at( "special" ).get<std::string>() ) };
-    // enabled sacrifices have exactly one reward, disabled ones have none
-    const int reward_count = static_cast<int>( not sacrifice.item.empty() ) + static_cast<int>( sacrifice.wealth > 0 ) +
-                             static_cast<int>( sacrifice.special != Cmp::WorldItem::SacrificeSpecial::NONE );
-    if ( reward_count != ( sacrifice.enabled ? 1 : 0 ) )
-    {
-      throw std::runtime_error( "Item '" + item_key + "' sacrifice.reward must set " + ( sacrifice.enabled ? "exactly one" : "none" ) +
-                                " of item, wealth or special in " + m_json_file_path.string() );
-    }
-    auto forage_output = item_value.at( "forage" ).at( "reward" ).at( "item" ).get<std::string>();
-    auto axe_output = item_value.at( "chop" ).at( "reward" ).at( "item" ).get<std::string>();
     auto damage_to_weapon = item_value.at( "damage_to_weapon" );
     auto pickaxe_damage = damage_to_weapon.at( "pickaxe" ).get<int>();
     auto axe_damage = damage_to_weapon.at( "axe" ).get<int>();
     auto shovel_damage = damage_to_weapon.at( "shovel" ).get<int>();
     auto bow_damage = damage_to_weapon.at( "bow" ).get<int>();
     auto consumable = make_consumable_property( item_value.at( "consumable" ).get<std::string>() );
-    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, std::move( sacrifice ), forage_output, axe_output, pickaxe_damage, axe_damage,
-                              shovel_damage, bow_damage, sf::seconds( expiry ), wear_location, wear_active_only,
-                              consumable );
+    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, pickaxe_damage, axe_damage, shovel_damage, bow_damage, sf::seconds( expiry ),
+                              wear_location, wear_active_only, consumable );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )
@@ -119,6 +90,18 @@ void ItemStore::init_store()
         }
       }
     }
+    // a sacrifice reward is exactly one of item, wealth or special; forage/chop rewards are an item only
+    if ( const auto reward = worlditem.get_sacrifice_reward(); reward and reward->count() != 1 )
+    {
+      throw std::runtime_error( "Item '" + item_key + "' sacrifice_action.reward must set exactly one of item, wealth or special in " +
+                                m_json_file_path.string() );
+    }
+    for ( const auto &[property, reward] : { std::pair{ "forage_action.reward", worlditem.get_reward<Cmp::ForageAction>() },
+                                             std::pair{ "destroy_action.reward", worlditem.get_reward<Cmp::DestroyAction>() } } )
+    {
+      if ( not reward or ( reward->wealth == 0 and reward->special == Cmp::ActionReward::Special::NONE ) ) continue;
+      throw std::runtime_error( "Item '" + item_key + "' " + property + " must only set item in " + m_json_file_path.string() );
+    }
     m_store.emplace( key_type( item_key ), std::move( worlditem ) );
     SPDLOG_DEBUG( "Loaded item: {} ({})", item_key, sprite_mtype );
   }
@@ -127,8 +110,8 @@ void ItemStore::init_store()
   for ( const auto &[item_key, item] : m_store )
   {
     for ( const auto &[property, output] :
-          { std::pair{ "sacrifice.reward.item", item.get_sacrifice_item() }, std::pair{ "forage.reward.item", item.get_forage_output() },
-            std::pair{ "chop.reward.item", item.get_axe_output() } } )
+          { std::pair{ "sacrifice_action.reward.item", item.get_sacrifice_reward().value_or( Cmp::ActionReward{} ).item },
+            std::pair{ "forage_action.reward.item", item.get_forage_output() }, std::pair{ "destroy_action.reward.item", item.get_axe_output() } } )
     {
       if ( output.empty() or m_store.contains( output ) ) continue;
       throw std::runtime_error( "Item '" + item_key.str() + "' has unknown " + property + " '" + output.str() + "' in " + m_json_file_path.string() );

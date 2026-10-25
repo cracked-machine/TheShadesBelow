@@ -47,7 +47,11 @@ public:
   {
     const auto &item_store = Sys::ItemStore::instance();
     const auto sacrifice_reward = [&]( const Sys::ItemKey &key )
-    { return key.empty() ? Sys::ItemKey( "" ) : item_store.get( key ).get_sacrifice_item(); };
+    {
+      if ( key.empty() ) return Sys::ItemKey( "" );
+      const auto reward = item_store.get( key ).get_sacrifice_reward();
+      return reward ? reward->item : Sys::ItemKey( "" );
+    };
     for ( const Sys::ItemKey &item_key : item_store.get_pattern( "^item\\.plant\\." ) )
     {
       const auto &item = item_store.get( item_key );

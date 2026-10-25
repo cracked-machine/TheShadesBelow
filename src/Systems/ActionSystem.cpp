@@ -370,7 +370,7 @@ void ActionSystem::player_plant_interact()
 
       if ( inventory_type == "" )
       {
-        // plants without a forage.reward.item (see items.json) give nothing
+        // plants without a forage_action.reward.item (see items.json) give nothing
         if ( not forage_output.empty() )
         {
           auto plantleaves_particle_uuid = Cmp::UUID::generate();
@@ -438,7 +438,7 @@ void ActionSystem::player_plant_interact()
           get_systems_event_queue().trigger(
               Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), static_cast<float>( plant_item->get_axe_damage() ) ) );
 
-          // plants without a chop.reward.item (see items.json) drop nothing
+          // plants without a destroy_action.reward.item (see items.json) drop nothing
           if ( not axe_output.empty() )
           {
             get_systems_event_queue().trigger(

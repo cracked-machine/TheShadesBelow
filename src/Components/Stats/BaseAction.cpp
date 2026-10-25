@@ -16,7 +16,7 @@ BaseAction::BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair d
 }
 
 BaseAction::BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Tick tick,
-                         Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects )
+                        Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects, std::optional<ActionReward> reward )
     : m_health( health.value ),
       m_fear( fear.value ),
       m_despair( despair.value ),
@@ -24,6 +24,7 @@ BaseAction::BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair d
       m_luck( luck.value ),
       m_toxidrome( std::make_unique<Cmp::Toxicity::Toxidrome>( std::move( toxidrome ) ) ),
       m_side_effects( std::move( side_effects ) ),
+      m_reward( std::move( reward ) ),
       m_tick( tick.value )
 {
 }
@@ -38,6 +39,7 @@ BaseAction::BaseAction( const BaseAction &other )
       m_luck( other.m_luck ),
       m_toxidrome( std::make_unique<Cmp::Toxicity::Toxidrome>( *other.m_toxidrome ) ),
       m_side_effects( other.m_side_effects ),
+      m_reward( other.m_reward ),
       m_tick( other.m_tick )
 {
 }
@@ -52,6 +54,7 @@ BaseAction &BaseAction::operator=( const BaseAction &other )
   m_luck = other.m_luck;
   m_toxidrome = std::make_unique<Cmp::Toxicity::Toxidrome>( *other.m_toxidrome );
   m_side_effects = other.m_side_effects;
+  m_reward = other.m_reward;
   m_tick = other.m_tick;
   return *this;
 }
@@ -64,7 +67,7 @@ const Cmp::Toxicity::Toxidrome &BaseAction::toxidrome() const { return *m_toxidr
 bool BaseAction::is_zero() const
 {
   return m_health == 0 and m_fear == 0 and m_despair == 0 and m_infamy == 0 and m_luck == 0 and m_toxidrome->begin() == m_toxidrome->end() and
-         m_side_effects.empty();
+         m_side_effects.empty() and not m_reward;
 }
 
 } // namespace Game::Cmp

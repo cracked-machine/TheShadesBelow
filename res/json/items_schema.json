@@ -5,7 +5,7 @@
   "patternProperties": {
     "^(item\\..+|ERROR_SPRITE)$": {
       "type": "object",
-      "required": ["sprite", "wear", "sacrifice", "forage", "chop", "damage_to_weapon", "actions"],
+      "required": ["sprite", "wear", "damage_to_weapon", "actions"],
       "additionalProperties": false,
       "properties": {
         "sprite": {
@@ -36,74 +36,6 @@
           "type": "string",
           "enum": ["none", "edible", "drinkable"],
           "description": "Can the item be eaten or drunk."
-        },
-        "sacrifice": {
-          "type": "object",
-          "required": ["enabled", "reward"],
-          "additionalProperties": false,
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "description": "Whether this item can be sacrificed at an altar. If true, exactly one of reward.item, reward.wealth or reward.special must be set. If false, none may be set."
-            },
-            "reward": {
-              "type": "object",
-              "required": ["item", "wealth", "special"],
-              "additionalProperties": false,
-              "properties": {
-                "item": {
-                  "type": "string",
-                  "description": "The item that will spawn when this item is sacrificed. Must be a valid item key if populated, else empty string. Note, this will replace player inventory."
-                },
-                "wealth": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "description": "The wealth gained when this item is sacrificed. Zero if unused. Tools (axe, pickaxe, shovel) can only be sacrificed once spent."
-                },
-                "special": {
-                  "type": "string",
-                  "enum": ["none", "altar", "banish", "crypt"],
-                  "description": "A special altar effect. altar: light an altar candle (relics). banish: banish ghosts or gain an extra life at a crypt altar (witches jar). crypt: unlock the crypt key (exit key). none if unused."
-                }
-              }
-            }
-          }
-        },
-        "forage": {
-          "type": "object",
-          "required": ["reward"],
-          "additionalProperties": false,
-          "properties": {
-            "reward": {
-              "type": "object",
-              "required": ["item"],
-              "additionalProperties": false,
-              "properties": {
-                "item": {
-                  "type": "string",
-                  "description": "The item gained when this plant is foraged with an empty hand (added to inventory) or gloves (dropped next to the plant). Must be a valid item key if populated, else no op if empty string."
-                }
-              }
-            }
-          }
-        },
-        "chop": {
-          "type": "object",
-          "required": ["reward"],
-          "additionalProperties": false,
-          "properties": {
-            "reward": {
-              "type": "object",
-              "required": ["item"],
-              "additionalProperties": false,
-              "properties": {
-                "item": {
-                  "type": "string",
-                  "description": "The item dropped when this plant is chopped down with an axe. Must be a valid item key if populated, else no op if empty string."
-                }
-              }
-            }
-          }
         },
         "damage_to_weapon": {
           "type": "object",
@@ -148,12 +80,12 @@
                 "allOf": [{ "$ref": "#/definitions/action_effect" }]
               },
               "destroy_action": {
-                "description": "Applied when the item's world entity is destroyed/removed.",
-                "allOf": [{ "$ref": "#/definitions/action_effect" }]
+                "description": "Applied when the item's world entity is destroyed/removed. Optional reward.item: the item dropped when this plant is chopped down with an axe.",
+                "allOf": [{ "$ref": "#/definitions/action_effect" }, { "$ref": "#/definitions/item_only_reward" }]
               },
               "forage_action": {
-                "description": "Optional. Applied when the player forages the plant. With gloves only its side effects apply, not its stat changes.",
-                "allOf": [{ "$ref": "#/definitions/action_effect" }]
+                "description": "Optional. Applied when the player forages the plant. With gloves only its side effects apply, not its stat changes. Optional reward.item: the item gained when this plant is foraged with an empty hand (added to inventory) or gloves (dropped next to the plant).",
+                "allOf": [{ "$ref": "#/definitions/action_effect" }, { "$ref": "#/definitions/item_only_reward" }]
               },
               "spawn_action": {
                 "description": "Applied when the item spawns (e.g. loot dropped by a destroyed grave or NPC).",
@@ -164,8 +96,8 @@
                 "allOf": [{ "$ref": "#/definitions/action_effect" }]
               },
               "sacrifice_action": {
-                "description": "Applied when the item is sacrificed at an altar.",
-                "allOf": [{ "$ref": "#/definitions/action_effect" }]
+                "description": "Applied when the item is sacrificed at an altar. The item can only be sacrificed if this action has a reward, which must set exactly one of item, wealth or special.",
+                "allOf": [{ "$ref": "#/definitions/action_effect" }, { "properties": { "reward": { "maxProperties": 1 } } }]
               }
             },
             "additionalProperties": false
@@ -214,6 +146,7 @@
         "tick": {
           "type": "number"
         },
+        "reward": { "$ref": "#/definitions/reward" },
         "side_effects": {
           "type": "object",
           "description": "Optional side effects of the action, each rolled independently every time the action is applied.",
@@ -252,6 +185,32 @@
           }
         }
       }
+    },
+    "reward": {
+      "type": "object",
+      "description": "Optional reward granted when the action is applied.",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "item": {
+          "type": "string",
+          "pattern": "^item\\.",
+          "description": "The item gained. Must be a valid item key. For sacrifice_action, the spawned item will replace player inventory."
+        },
+        "wealth": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The wealth gained (sacrifice_action only). Tools (axe, pickaxe, shovel) can only be sacrificed once spent."
+        },
+        "special": {
+          "type": "string",
+          "enum": ["altar", "banish", "crypt"],
+          "description": "A special altar effect (sacrifice_action only). altar: light an altar candle (relics). banish: banish ghosts or gain an extra life at a crypt altar (witches jar). crypt: unlock the crypt key (exit key)."
+        }
+      }
+    },
+    "item_only_reward": {
+      "properties": { "reward": { "required": ["item"], "maxProperties": 1 } }
     },
     "probability": {
       "type": "number",
