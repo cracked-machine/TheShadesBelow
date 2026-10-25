@@ -68,6 +68,45 @@ private:
   //! @return std::string The NPC's display name, or `npc_type` itself if it is not in the NpcStore.
   static std::string npc_display_name( const std::string &npc_type );
 
+  //! @brief Get the display text of an action's reward for the grimoire.
+  //! @param reward The item, wealth or special altar effect granted by the action.
+  //! @return std::string The reward item's display name, the wealth gained, or a description of the special effect.
+  static std::string reward_display_name( const Cmp::ActionReward &reward );
+
+  //! @brief Draw the page's outline boxes.
+  void render_outlines();
+
+  //! @brief Draw each subpage's sprite icon.
+  //! @param current_page The page currently shown.
+  void render_icons( const Cmp::Grimoire::Page &current_page );
+
+  //! @brief Draw the page number and, for each discovered action, its reward, stat changes and side effects.
+  //! @param current_page The page currently shown.
+  //! @param page_count Total number of pages, for the page label.
+  void render_labels( const Cmp::Grimoire::Page &current_page, std::size_t page_count );
+
+  //! @brief Draw an action's reward, in brackets, e.g. "(Elder Flute)".
+  //! @param draw_line The label's text column.
+  //! @param action The discovered action.
+  //! @return true if a line was drawn.
+  bool render_action_reward( TextColumn &draw_line, const Cmp::BaseAction &action );
+
+  //! @brief Draw one line per non-zero stat and toxidrome change of an action.
+  //! @param draw_line The label's text column.
+  //! @param action The discovered action.
+  //! @return true if a line was drawn.
+  bool render_action_stats( TextColumn &draw_line, const Cmp::BaseAction &action );
+
+  //! @brief Draw one line per side effect of an action, with its chance of firing.
+  //! @param draw_line The label's text column.
+  //! @param action The discovered action.
+  //! @return true if a line was drawn.
+  bool render_action_side_effects( TextColumn &draw_line, const Cmp::BaseAction &action );
+
+  //! @brief Draw the static texts and each subpage's item name.
+  //! @param current_page The page currently shown.
+  void render_texts( const Cmp::Grimoire::Page &current_page );
+
   //! @brief Get the grimoire component.
   //! @return Pointer to the component (held by the player entity), or nullptr if no player exists.
   Cmp::Grimoire *find_grimoire();

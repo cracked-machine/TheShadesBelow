@@ -167,6 +167,27 @@ std::string GrimoireSystem::npc_display_name( const std::string &npc_type )
   return Sys::SpriteStore::instance().get( npc.sprite_type_list.front() ).display_name();
 }
 
+std::string GrimoireSystem::reward_display_name( const Cmp::ActionReward &reward )
+{
+  if ( not reward.item.empty() )
+  {
+    return Sys::SpriteStore::instance().get( Sys::ItemStore::instance().get( reward.item ).sprite_type ).display_name();
+  }
+  if ( reward.wealth > 0 ) { return std::format( "+{} wealth", reward.wealth ); }
+  switch ( reward.special )
+  {
+    case Cmp::ActionReward::Special::ALTAR:
+      return "lights altar";
+    case Cmp::ActionReward::Special::BANISH:
+      return "banishes ghosts";
+    case Cmp::ActionReward::Special::CRYPT:
+      return "unlocks crypt";
+    case Cmp::ActionReward::Special::NONE:
+      break;
+  }
+  return "none";
+}
+
 void GrimoireSystem::render()
 {
   // only draw the grimoire if its enabled
@@ -174,7 +195,14 @@ void GrimoireSystem::render()
   if ( not grimoire_cmp or not grimoire_cmp->is_enabled or grimoire_cmp->pages.empty() ) return;
 
   const Cmp::Grimoire::Page &current_page = grimoire_cmp->pages.at( m_current_page_idx );
+  render_outlines();
+  render_icons( current_page );
+  render_labels( current_page, grimoire_cmp->pages.size() );
+  render_texts( current_page );
+}
 
+void GrimoireSystem::render_outlines()
+{
   for ( const auto &outline : m_ui_data->m_outlines )
   {
     auto rect = sf::RectangleShape( outline.rect.size );
@@ -184,6 +212,10 @@ void GrimoireSystem::render()
     rect.setOutlineThickness( static_cast<float>( outline.line_thickness ) );
     draw_screen( rect );
   }
+}
+
+void GrimoireSystem::render_icons( const Cmp::Grimoire::Page &current_page )
+{
   for ( const auto &icon : m_ui_data->m_icons )
   {
     const auto [sub_page, suffix] = resolve_subpage( current_page, icon.name );
@@ -193,6 +225,10 @@ void GrimoireSystem::render()
     RenderSystem::safe_render_sprite_screen( sprite_key, { icon.rect.position, Constants::kGridSizePxF }, 0,
                                              { static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) } );
   }
+}
+
+void GrimoireSystem::render_labels( const Cmp::Grimoire::Page &current_page, std::size_t page_count )
+{
   // Tiled point y is the text baseline; sf::Text draws its baseline ~font_size below its position, so shift up by font_size
   // so that texts/labels of different font sizes at the same y line up
   for ( const auto &label : m_ui_data->m_labels )
@@ -204,7 +240,7 @@ void GrimoireSystem::render()
                           .line_height = static_cast<float>( label.font_size ) * 1.2f };
     if ( label.name == "page_label" )
     {
-      draw_line( std::format( "{} of {}", m_current_page_idx + 1, grimoire_cmp->pages.size() ), sf::Color::Black );
+      draw_line( std::format( "{} of {}", m_current_page_idx + 1, page_count ), sf::Color::Black );
       continue;
     }
 
@@ -217,58 +253,82 @@ void GrimoireSystem::render()
       draw_line( "?????", sf::Color::Black );
       continue;
     }
-    // one line per non-zero stat, or "none" if the action is discovered but has no effect
+    // reward, stats then side effects, or "none" if the action is discovered but has no effect
     const Cmp::BaseAction &action = action_it->second;
-    const std::string tick_suffix = action.interval() > 0.f ? std::format( "pt/{:g}s", action.interval() ) : "";
-    bool has_effect = false;
-    const auto draw_stat = [&]( std::string_view stat_name, int value )
-    {
-      if ( value == 0 ) { return; }
-      draw_line( std::format( "{}: {}{}", stat_name, value, tick_suffix ), sf::Color::Black );
-      has_effect = true;
-    };
-    draw_stat( "health", action.health() );
-    draw_stat( "fear", action.fear() );
-    draw_stat( "despair", action.despair() );
-    draw_stat( "infamy", action.infamy() );
-    draw_stat( "luck", action.luck() );
-    // only the toxidromes this action changes; a multi-type list (cures) shares one toxicity, so show it as "all"
-    const Cmp::Toxicity::Toxidrome &toxidrome = action.toxidrome();
-    std::vector<std::pair<std::string_view, int>> toxidrome_stats;
-    const auto add_toxidrome = [&]( std::string_view name, std::optional<int> value )
-    {
-      if ( value.value_or( 0 ) != 0 ) { toxidrome_stats.emplace_back( name, *value ); }
-    };
-    add_toxidrome( "tachycardia", toxidrome.at<Cmp::Toxicity::Tachycardia>() );
-    add_toxidrome( "bradycardia", toxidrome.at<Cmp::Toxicity::Bradycardia>() );
-    add_toxidrome( "hallucinogen", toxidrome.at<Cmp::Toxicity::Hallucinogen>() );
-    add_toxidrome( "hypoxia", toxidrome.at<Cmp::Toxicity::Hypoxia>() );
-    add_toxidrome( "phototoxia", toxidrome.at<Cmp::Toxicity::Phototoxia>() );
-    add_toxidrome( "venom", toxidrome.at<Cmp::Toxicity::Venom>() );
-    add_toxidrome( "vertigo", toxidrome.at<Cmp::Toxicity::Vertigo>() );
-    if ( toxidrome_stats.size() > 1 ) { draw_stat( "all", toxidrome_stats.front().second ); }
-    else
-    {
-      for ( const auto &[name, value] : toxidrome_stats )
-      {
-        draw_stat( name, value );
-      }
-    }
-    // side effects, with their chance of firing
-    const Cmp::SideEffects &effects = action.side_effects();
-    const auto draw_effect = [&]( std::string_view label, float probability )
-    {
-      draw_line( std::format( "{}: {:.0f}%", label, probability * 100.f ), sf::Color::Black );
-      has_effect = true;
-    };
-    if ( effects.spawn_npc )
-    {
-      draw_effect( std::format( "summons {}", npc_display_name( effects.spawn_npc->npc_type ) ), effects.spawn_npc->probability );
-    }
-    if ( effects.lightning ) { draw_effect( "lightning", effects.lightning->probability ); }
-    if ( effects.movement ) { draw_effect( effects.movement->type, effects.movement->probability ); }
-    if ( not has_effect ) { draw_line( "none", sf::Color::Black ); }
+    const bool has_reward = render_action_reward( draw_line, action );
+    const bool has_stats = render_action_stats( draw_line, action );
+    const bool has_side_effects = render_action_side_effects( draw_line, action );
+    if ( not has_reward and not has_stats and not has_side_effects ) { draw_line( "none", sf::Color::Black ); }
   }
+}
+
+bool GrimoireSystem::render_action_reward( TextColumn &draw_line, const Cmp::BaseAction &action )
+{
+  // the reward goes first so it sits alongside the action's header text, e.g. "Sacrifice: (Elder Flute)"
+  const auto &reward = action.reward();
+  if ( not reward ) { return false; }
+  draw_line( std::format( "({})", reward_display_name( *reward ) ), sf::Color::Black );
+  return true;
+}
+
+bool GrimoireSystem::render_action_stats( TextColumn &draw_line, const Cmp::BaseAction &action )
+{
+  // one line per non-zero stat
+  const std::string tick_suffix = action.interval() > 0.f ? std::format( "pt/{:g}s", action.interval() ) : "";
+  bool has_effect = false;
+  const auto draw_stat = [&]( std::string_view stat_name, int value )
+  {
+    if ( value == 0 ) { return; }
+    draw_line( std::format( "{}: {}{}", stat_name, value, tick_suffix ), sf::Color::Black );
+    has_effect = true;
+  };
+  draw_stat( "health", action.health() );
+  draw_stat( "fear", action.fear() );
+  draw_stat( "despair", action.despair() );
+  draw_stat( "infamy", action.infamy() );
+  draw_stat( "luck", action.luck() );
+  // only the toxidromes this action changes; a multi-type list (cures) shares one toxicity, so show it as "all"
+  const Cmp::Toxicity::Toxidrome &toxidrome = action.toxidrome();
+  std::vector<std::pair<std::string_view, int>> toxidrome_stats;
+  const auto add_toxidrome = [&]( std::string_view name, std::optional<int> value )
+  {
+    if ( value.value_or( 0 ) != 0 ) { toxidrome_stats.emplace_back( name, *value ); }
+  };
+  add_toxidrome( "tachycardia", toxidrome.at<Cmp::Toxicity::Tachycardia>() );
+  add_toxidrome( "bradycardia", toxidrome.at<Cmp::Toxicity::Bradycardia>() );
+  add_toxidrome( "hallucinogen", toxidrome.at<Cmp::Toxicity::Hallucinogen>() );
+  add_toxidrome( "hypoxia", toxidrome.at<Cmp::Toxicity::Hypoxia>() );
+  add_toxidrome( "phototoxia", toxidrome.at<Cmp::Toxicity::Phototoxia>() );
+  add_toxidrome( "venom", toxidrome.at<Cmp::Toxicity::Venom>() );
+  add_toxidrome( "vertigo", toxidrome.at<Cmp::Toxicity::Vertigo>() );
+  if ( toxidrome_stats.size() > 1 ) { draw_stat( "all", toxidrome_stats.front().second ); }
+  else
+  {
+    for ( const auto &[name, value] : toxidrome_stats )
+    {
+      draw_stat( name, value );
+    }
+  }
+  return has_effect;
+}
+
+bool GrimoireSystem::render_action_side_effects( TextColumn &draw_line, const Cmp::BaseAction &action )
+{
+  // side effects, with their chance of firing
+  const Cmp::SideEffects &effects = action.side_effects();
+  const auto draw_effect = [&]( std::string_view label, float probability )
+  { draw_line( std::format( "{}: {:.0f}%", label, probability * 100.f ), sf::Color::Black ); };
+  if ( effects.spawn_npc )
+  {
+    draw_effect( std::format( "summons {}", npc_display_name( effects.spawn_npc->npc_type ) ), effects.spawn_npc->probability );
+  }
+  if ( effects.lightning ) { draw_effect( "lightning", effects.lightning->probability ); }
+  if ( effects.movement ) { draw_effect( effects.movement->type, effects.movement->probability ); }
+  return not effects.empty();
+}
+
+void GrimoireSystem::render_texts( const Cmp::Grimoire::Page &current_page )
+{
   for ( const auto &text : m_ui_data->m_texts )
   {
     TextColumn draw_line{ .self = *this,
@@ -281,5 +341,4 @@ void GrimoireSystem::render()
     else { draw_line( text.value, sf::Color::Black ); }
   }
 }
-
 } // namespace Game::Sys

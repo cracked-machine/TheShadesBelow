@@ -5,7 +5,6 @@
         {
          "draworder":"topdown",
          "id":3,
-         "locked":true,
          "name":"MainOverlay",
          "objects":[
                 {
@@ -33,8 +32,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":1400,
-                 "x":200,
-                 "y":200
+                 "x":400,
+                 "y":180
                 }, 
                 {
                  "height":0,
@@ -57,8 +56,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":230,
-                 "y":930
+                 "x":430,
+                 "y":910
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -69,7 +68,6 @@
         {
          "draworder":"topdown",
          "id":6,
-         "locked":true,
          "name":"SpecialOverlay",
          "objects":[
                 {
@@ -97,8 +95,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":340,
-                 "x":1160,
-                 "y":600
+                 "x":1360,
+                 "y":580
                 }, 
                 {
                  "height":0,
@@ -121,8 +119,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":1180,
-                 "y":810
+                 "x":1380,
+                 "y":790
                 }, 
                 {
                  "height":0,
@@ -145,8 +143,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":1180,
-                 "y":860
+                 "x":1380,
+                 "y":840
                 }, 
                 {
                  "height":0,
@@ -169,8 +167,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":1280,
-                 "y":810
+                 "x":1480,
+                 "y":790
                 }, 
                 {
                  "height":0,
@@ -193,8 +191,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":1280,
-                 "y":860
+                 "x":1480,
+                 "y":840
                 }, 
                 {
                  "height":0,
@@ -222,8 +220,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":1390,
-                 "y":630
+                 "x":1590,
+                 "y":610
                 }, 
                 {
                  "height":0,
@@ -246,8 +244,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":1180,
-                 "y":630
+                 "x":1380,
+                 "y":610
                 }, 
                 {
                  "height":280,
@@ -274,8 +272,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":340,
-                 "x":1160,
-                 "y":240
+                 "x":1360,
+                 "y":220
                 }, 
                 {
                  "height":0,
@@ -298,8 +296,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":1180,
-                 "y":450
+                 "x":1380,
+                 "y":430
                 }, 
                 {
                  "height":0,
@@ -322,8 +320,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":1180,
-                 "y":500
+                 "x":1380,
+                 "y":480
                 }, 
                 {
                  "height":0,
@@ -346,8 +344,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":1280,
-                 "y":450
+                 "x":1480,
+                 "y":430
                 }, 
                 {
                  "height":0,
@@ -370,8 +368,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":1280,
-                 "y":500
+                 "x":1480,
+                 "y":480
                 }, 
                 {
                  "height":0,
@@ -399,8 +397,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":1390,
-                 "y":270
+                 "x":1590,
+                 "y":250
                 }, 
                 {
                  "height":0,
@@ -423,8 +421,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":1180,
-                 "y":270
+                 "x":1380,
+                 "y":250
                 }, 
                 {
                  "height":0,
@@ -447,8 +445,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":1180,
-                 "y":400
+                 "x":1380,
+                 "y":380
                 }, 
                 {
                  "height":0,
@@ -471,8 +469,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":1280,
-                 "y":400
+                 "x":1480,
+                 "y":380
                 }, 
                 {
                  "height":100,
@@ -499,8 +497,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":100,
-                 "x":1380,
-                 "y":260
+                 "x":1580,
+                 "y":240
                 }, 
                 {
                  "height":100,
@@ -527,8 +525,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":100,
-                 "x":1380,
-                 "y":620
+                 "x":1580,
+                 "y":600
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -566,8 +564,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":340,
-                 "x":700,
-                 "y":600
+                 "x":900,
+                 "y":580
                 }, 
                 {
                  "height":0,
@@ -590,8 +588,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":720,
-                 "y":760
+                 "x":920,
+                 "y":740
                 }, 
                 {
                  "height":0,
@@ -614,8 +612,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":720,
-                 "y":810
+                 "x":920,
+                 "y":790
                 }, 
                 {
                  "height":0,
@@ -638,8 +636,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":720,
-                 "y":860
+                 "x":920,
+                 "y":840
                 }, 
                 {
                  "height":0,
@@ -662,8 +660,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":820,
-                 "y":760
+                 "x":1020,
+                 "y":740
                 }, 
                 {
                  "height":0,
@@ -686,8 +684,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":820,
-                 "y":810
+                 "x":1020,
+                 "y":790
                 }, 
                 {
                  "height":0,
@@ -710,8 +708,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":820,
-                 "y":860
+                 "x":1020,
+                 "y":840
                 }, 
                 {
                  "height":0,
@@ -739,8 +737,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":930,
-                 "y":630
+                 "x":1130,
+                 "y":610
                 }, 
                 {
                  "height":0,
@@ -763,8 +761,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":720,
-                 "y":630
+                 "x":920,
+                 "y":610
                 }, 
                 {
                  "height":100,
@@ -791,8 +789,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":100,
-                 "x":920,
-                 "y":620
+                 "x":1120,
+                 "y":600
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -830,8 +828,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":340,
-                 "x":700,
-                 "y":240
+                 "x":900,
+                 "y":220
                 }, 
                 {
                  "height":0,
@@ -854,8 +852,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":720,
-                 "y":390
+                 "x":920,
+                 "y":370
                 }, 
                 {
                  "height":0,
@@ -878,8 +876,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":720,
-                 "y":440
+                 "x":920,
+                 "y":420
                 }, 
                 {
                  "height":0,
@@ -902,8 +900,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":720,
-                 "y":490
+                 "x":920,
+                 "y":470
                 }, 
                 {
                  "height":0,
@@ -926,8 +924,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":720,
-                 "y":540
+                 "x":920,
+                 "y":520
                 }, 
                 {
                  "height":0,
@@ -950,8 +948,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":820,
-                 "y":390
+                 "x":1020,
+                 "y":370
                 }, 
                 {
                  "height":0,
@@ -974,8 +972,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":820,
-                 "y":440
+                 "x":1020,
+                 "y":420
                 }, 
                 {
                  "height":0,
@@ -998,8 +996,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":820,
-                 "y":490
+                 "x":1020,
+                 "y":470
                 }, 
                 {
                  "height":0,
@@ -1022,8 +1020,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":820,
-                 "y":540
+                 "x":1020,
+                 "y":520
                 }, 
                 {
                  "height":0,
@@ -1051,8 +1049,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":930,
-                 "y":270
+                 "x":1130,
+                 "y":250
                 }, 
                 {
                  "height":0,
@@ -1075,8 +1073,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":720,
-                 "y":270
+                 "x":920,
+                 "y":250
                 }, 
                 {
                  "height":100,
@@ -1103,8 +1101,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":100,
-                 "x":920,
-                 "y":260
+                 "x":1120,
+                 "y":240
                 }, 
                 {
                  "height":0,
@@ -1127,8 +1125,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":720,
-                 "y":910
+                 "x":920,
+                 "y":890
                 }, 
                 {
                  "height":0,
@@ -1151,8 +1149,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":820,
-                 "y":910
+                 "x":1020,
+                 "y":890
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1163,7 +1161,6 @@
         {
          "draworder":"topdown",
          "id":4,
-         "locked":true,
          "name":"PlantOverlay",
          "objects":[
                 {
@@ -1192,8 +1189,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":490,
-                 "y":270
+                 "x":690,
+                 "y":250
                 }, 
                 {
                  "height":540,
@@ -1220,8 +1217,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":350,
-                 "x":250,
-                 "y":240
+                 "x":450,
+                 "y":220
                 }, 
                 {
                  "height":0,
@@ -1244,8 +1241,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":270,
-                 "y":270
+                 "x":470,
+                 "y":250
                 }, 
                 {
                  "height":0,
@@ -1268,8 +1265,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":280,
-                 "y":510
+                 "x":480,
+                 "y":490
                 }, 
                 {
                  "height":0,
@@ -1292,8 +1289,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":280,
-                 "y":570
+                 "x":480,
+                 "y":550
                 }, 
                 {
                  "height":0,
@@ -1316,8 +1313,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":280,
-                 "y":630
+                 "x":480,
+                 "y":610
                 }, 
                 {
                  "height":0,
@@ -1340,8 +1337,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":280,
-                 "y":690
+                 "x":480,
+                 "y":670
                 }, 
                 {
                  "height":0,
@@ -1364,8 +1361,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":380,
-                 "y":510
+                 "x":580,
+                 "y":490
                 }, 
                 {
                  "height":0,
@@ -1388,8 +1385,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":380,
-                 "y":570
+                 "x":580,
+                 "y":550
                 }, 
                 {
                  "height":0,
@@ -1412,8 +1409,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":380,
-                 "y":630
+                 "x":580,
+                 "y":610
                 }, 
                 {
                  "height":0,
@@ -1436,8 +1433,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":380,
-                 "y":690
+                 "x":580,
+                 "y":670
                 }, 
                 {
                  "height":0,
@@ -1460,8 +1457,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":280,
-                 "y":750
+                 "x":480,
+                 "y":730
                 }, 
                 {
                  "height":0,
@@ -1484,8 +1481,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":380,
-                 "y":750
+                 "x":580,
+                 "y":730
                 }, 
                 {
                  "height":180,
@@ -1512,8 +1509,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":100,
-                 "x":480,
-                 "y":260
+                 "x":680,
+                 "y":240
                 }],
          "opacity":1,
          "type":"objectgroup",
