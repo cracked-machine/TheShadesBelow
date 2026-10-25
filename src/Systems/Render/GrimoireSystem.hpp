@@ -54,6 +54,11 @@ private:
   //! @param ev
   void on_grimoire_update_event( const Events::GrimoireUpdateEvent &ev );
 
+  //! @brief Get the display name of an NPC for the grimoire, from its first sprite.
+  //! @param npc_type See res/json/npc.json.
+  //! @return std::string The NPC's display name, or `npc_type` itself if it is not in the NpcStore.
+  static std::string npc_display_name( const std::string &npc_type );
+
   //! @brief Get the grimoire component.
   //! @return Pointer to the component (held by the player entity), or nullptr if no player exists.
   Cmp::Grimoire *find_grimoire();

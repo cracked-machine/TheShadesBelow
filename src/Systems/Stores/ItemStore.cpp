@@ -2,6 +2,7 @@
 #include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/ConsumeAction.hpp>
 #include <Components/Stats/DestroyAction.hpp>
+#include <Components/Stats/ForageAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/SacrificeAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
@@ -107,6 +108,7 @@ void ItemStore::init_store()
           else if ( action_key == Cmp::CarryAction::kKey ) { worlditem.emplace( make_action<Cmp::CarryAction>( action_value ) ); }
           else if ( action_key == Cmp::ConsumeAction::kKey ) { worlditem.emplace( make_action<Cmp::ConsumeAction>( action_value ) ); }
           else if ( action_key == Cmp::DestroyAction::kKey ) { worlditem.emplace( make_action<Cmp::DestroyAction>( action_value ) ); }
+          else if ( action_key == Cmp::ForageAction::kKey ) { worlditem.emplace( make_action<Cmp::ForageAction>( action_value ) ); }
           else if ( action_key == Cmp::SpawnAction::kKey ) { worlditem.emplace( make_action<Cmp::SpawnAction>( action_value ) ); }
           else if ( action_key == Cmp::ProximityAction::kKey ) { worlditem.emplace( make_action<Cmp::ProximityAction>( action_value ) ); }
           else if ( action_key == Cmp::SacrificeAction::kKey ) { worlditem.emplace( make_action<Cmp::SacrificeAction>( action_value ) ); }

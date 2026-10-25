@@ -38,13 +38,13 @@
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/CreateNpcEvent.hpp>
 #include <Events/CryptRoomEvent.hpp>
 #include <Events/PassageEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/CryptFactory.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Factory/MultiblockFactory.hpp>
-#include <Factory/NpcFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
@@ -1256,10 +1256,7 @@ void CryptSystem::spawn_npc_in_open_rooms()
 
     // Spawn NPC in the selected room
     auto spawn_position = Utils::snap_to_grid( extracted_open_room_cmp.getCenter() );
-    auto position_entity = reg().create();
-    const auto &position_cmp = reg().emplace<Cmp::Position>( position_entity, spawn_position, Constants::kGridSizePxF );
-    [[maybe_unused]] const auto &zorder_cmp = reg().emplace<Cmp::ZOrderValue>( position_entity, position_cmp.position.y );
-    Factory::Npc::create_npc( reg(), position_entity, "npc.priest" );
+    get_systems_event_queue().trigger( Events::CreateNpcEvent( "npc.priest", Cmp::Position( spawn_position, Constants::kGridSizePxF ) ) );
 
     SPDLOG_DEBUG( "Spawned NPC {} at position ({}, {})", r + 1, spawn_position.x, spawn_position.y );
   }

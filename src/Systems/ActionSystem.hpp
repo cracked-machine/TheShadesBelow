@@ -86,10 +86,6 @@ private:
   //! @param dt
   void update_burning_worlditems( sf::Time dt );
 
-  //! @brief Pick player or lightning rod as target and spawn lightning (via LightningSystem)
-  //! @param odds Probability (0-1) that the strike happens; 1 = guaranteed
-  void spawn_lightning( float odds = 1.f );
-
   //! @brief Find a free grid cell around the plant to drop a foraged item into.
   //! @param plant_mb_cmp The plant being foraged.
   //! @return sf::Vector2f The free cell, or the plant's base cell if every surrounding cell is occupied.

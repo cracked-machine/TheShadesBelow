@@ -4,6 +4,7 @@
 #include <Components/Stats/CollisionAction.hpp>
 #include <Components/Stats/ConsumeAction.hpp>
 #include <Components/Stats/DestroyAction.hpp>
+#include <Components/Stats/ForageAction.hpp>
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/SacrificeAction.hpp>
@@ -39,6 +40,7 @@ void NpcStore::init_store()
     auto lerp_speed = item_value.at( "lerpspeed" );
 
     Cmp::Npc::NPC npc( mtype_list, lerp_speed );
+    npc.npc_type = key_type( item_key );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )
@@ -49,6 +51,7 @@ void NpcStore::init_store()
           else if ( action_key == Cmp::CarryAction::kKey ) { npc.emplace( make_action<Cmp::CarryAction>( action_value ) ); }
           else if ( action_key == Cmp::ConsumeAction::kKey ) { npc.emplace( make_action<Cmp::ConsumeAction>( action_value ) ); }
           else if ( action_key == Cmp::DestroyAction::kKey ) { npc.emplace( make_action<Cmp::DestroyAction>( action_value ) ); }
+          else if ( action_key == Cmp::ForageAction::kKey ) { npc.emplace( make_action<Cmp::ForageAction>( action_value ) ); }
           else if ( action_key == Cmp::SpawnAction::kKey ) { npc.emplace( make_action<Cmp::SpawnAction>( action_value ) ); }
           else if ( action_key == Cmp::ProximityAction::kKey ) { npc.emplace( make_action<Cmp::ProximityAction>( action_value ) ); }
           else if ( action_key == Cmp::SacrificeAction::kKey ) { npc.emplace( make_action<Cmp::SacrificeAction>( action_value ) ); }

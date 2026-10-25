@@ -14,16 +14,17 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
 #include <Components/Player/KeysCount.hpp>
+#include <Components/Position.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/SelectedPosition.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Events/CreateItemEvent.hpp>
+#include <Events/CreateNpcEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/BombFactory.hpp>
 #include <Factory/LootFactory.hpp>
-#include <Factory/NpcFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
@@ -212,7 +213,7 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
   {
     case Cmp::Grave::Consequence::Type::NPC_TRAP:
       SPDLOG_DEBUG( "Grave activated NPC trap." );
-      Factory::Npc::create_npc( reg(), grave_entity, "npc.ghost" );
+      get_systems_event_queue().trigger( Events::CreateNpcEvent( "npc.ghost", reg().get<Cmp::Position>( grave_entity ) ) );
       m_sound_bank.get_effect( "spawn_ghost" ).play();
       break;
     case Cmp::Grave::Consequence::Type::BOMB_TRAP:
@@ -239,7 +240,8 @@ void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool )
   const auto &selected_item_type = loot_pool.at( static_cast<std::size_t>( loot_picker.gen() ) );
 
   get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), selected_item_type, "drop_loot" ) );
-  Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), selected_item_type );
+  const auto spawn_action = Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), selected_item_type );
+  trigger_side_effects( spawn_action, Utils::Player::get_position( reg() ) );
 }
 
 void GraveSystem::on_player_action( const Events::PlayerActionEvent &event )

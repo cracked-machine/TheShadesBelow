@@ -1,5 +1,6 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Inventory/Grimoire.hpp>
+#include <Components/Npc/Npc.hpp>
 #include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
@@ -10,10 +11,12 @@
 #include <Systems/Render/GrimoireSystem.hpp>
 
 #include <Systems/Stores/ItemStore.hpp>
+#include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <entt/entity/registry.hpp>
 #include <entt/entity/view.hpp>
+#include <algorithm>
 #include <format>
 #include <optional>
 #include <spdlog/spdlog.h>
@@ -151,6 +154,14 @@ void GrimoireSystem::on_player_action( Events::PlayerActionEvent ev )
   }
 }
 
+std::string GrimoireSystem::npc_display_name( const std::string &npc_type )
+{
+  const auto npc_types = Sys::NpcStore::instance().get_all();
+  if ( std::ranges::find( npc_types, Sys::NpcKey( npc_type ) ) == npc_types.end() ) { return npc_type; }
+  const auto &npc = Sys::NpcStore::instance().get( Sys::NpcKey( npc_type ) );
+  return Sys::SpriteStore::instance().get( npc.sprite_type_list.front() ).display_name();
+}
+
 void GrimoireSystem::render()
 {
   // only draw the grimoire if its enabled
@@ -238,6 +249,16 @@ void GrimoireSystem::render()
         draw_stat( name, value );
       }
     }
+    // side effects, with their chance of firing
+    const Cmp::SideEffects &effects = action.side_effects();
+    const auto draw_effect = [&]( std::string_view label, float probability )
+    {
+      draw_line( std::format( "{}: {:.0f}%", label, probability * 100.f ), sf::Color::Black );
+      has_effect = true;
+    };
+    if ( effects.spawn_npc ) { draw_effect( std::format( "summons {}", npc_display_name( effects.spawn_npc->npc_type ) ), effects.spawn_npc->probability ); }
+    if ( effects.lightning ) { draw_effect( "lightning", effects.lightning->probability ); }
+    if ( effects.movement ) { draw_effect( effects.movement->type, effects.movement->probability ); }
     if ( not has_effect ) { draw_line( "none", sf::Color::Black ); }
   }
   for ( const auto &text : m_ui_data->m_texts )

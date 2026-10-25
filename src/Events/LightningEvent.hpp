@@ -10,6 +10,7 @@ namespace Game::Events
 //! system to fire on its next update.
 struct LightningEvent
 {
+  //! @brief The strike target. If entt::null, LightningSystem picks a working lightning rod in view, otherwise the player.
   entt::entity target_entt{ entt::null };
 };
 

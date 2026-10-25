@@ -36,6 +36,9 @@ public:
   }
   // bool active = true;
 
+  //! @brief The NPC's type key in res/json/npc.json, e.g. "npc.eldermother". Set by Sys::NpcStore.
+  Sys::NpcKey npc_type;
+
   //! @brief The associated sprite. Supports multiple sprites for animation. See res/json/npc.json.
   std::vector<Sys::SpriteKey> sprite_type_list;
 

@@ -32,14 +32,14 @@ void create_npc_container( entt::registry &registry, entt::entity entt, Cmp::Pos
 void destroy_npc_container( entt::registry &registry, entt::entity npc_container_entity,
                             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr );
 
-//! @brief Create a new NPC. Creates a new entity at `position_entity`. Returns the new entity.
+//! @brief Create a new NPC entity at `pos_cmp`. Returns the new entity.
+//! @note Only NpcSystem may call this, as it keeps the NPC's navmesh in sync. Trigger an Events::CreateNpcEvent instead.
+//! Hatching from a container does not remove the container: call destroy_npc_container() for that.
 //! @param registry
-//! @param position_entity The position reference for the new entity. Note this entity is not reused so it is safe to destroy.
+//! @param pos_cmp The spawn position. The size is replaced by the NPC sprite's size.
 //! @param npc_type See npc.json
-//! @param reserved_sm If provided, un-reserves the container's position when hatching from a container (nightwatchman/skeleton).
 //! @return entt::entity
-entt::entity create_npc( entt::registry &registry, entt::entity position_entity, const Sys::NpcKey &npc_type,
-                         const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr );
+entt::entity create_npc( entt::registry &registry, Cmp::Position pos_cmp, const Sys::NpcKey &npc_type );
 
 //! @brief Remove an NPC's components (applying its DestroyAction stat modifiers to the player first).
 //! @note Only NpcSystem may call this, as it keeps the NPC's navmesh in sync. Trigger an Events::DestroyNpcEvent instead.

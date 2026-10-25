@@ -121,7 +121,7 @@
           "type": "array",
           "description": "List of actions available for this item",
           "minItems": 7,
-          "maxItems": 7,
+          "maxItems": 8,
           "allOf": [
             { "contains": { "required": ["burn_action"] } },
             { "contains": { "required": ["carry_action"] } },
@@ -149,6 +149,10 @@
               },
               "destroy_action": {
                 "description": "Applied when the item's world entity is destroyed/removed.",
+                "allOf": [{ "$ref": "#/definitions/action_effect" }]
+              },
+              "forage_action": {
+                "description": "Optional. Applied when the player forages the plant. With gloves only its side effects apply, not its stat changes.",
                 "allOf": [{ "$ref": "#/definitions/action_effect" }]
               },
               "spawn_action": {
@@ -209,8 +213,50 @@
         },
         "tick": {
           "type": "number"
+        },
+        "side_effects": {
+          "type": "object",
+          "description": "Optional side effects of the action, each rolled independently every time the action is applied.",
+          "additionalProperties": false,
+          "properties": {
+            "spawn_npc": {
+              "type": "object",
+              "description": "Spawn an NPC at the action's source position.",
+              "required": ["type", "probability"],
+              "additionalProperties": false,
+              "properties": {
+                "type": { "type": "string", "pattern": "^npc\\." },
+                "probability": { "$ref": "#/definitions/probability" },
+                "unique": { "type": "boolean", "description": "If true and NPCs of this type already exist, relocate them instead of spawning another." }
+              }
+            },
+            "lightning": {
+              "type": "object",
+              "description": "Lightning strike on a working lightning rod in view, otherwise the player.",
+              "required": ["probability"],
+              "additionalProperties": false,
+              "properties": {
+                "probability": { "$ref": "#/definitions/probability" }
+              }
+            },
+            "movement": {
+              "type": "object",
+              "description": "Affect player movement/NPC pathfinding. Placeholder: not yet executed.",
+              "required": ["type", "probability"],
+              "additionalProperties": false,
+              "properties": {
+                "type": { "type": "string" },
+                "probability": { "$ref": "#/definitions/probability" }
+              }
+            }
+          }
         }
       }
+    },
+    "probability": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
     }
   }
 }

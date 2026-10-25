@@ -354,7 +354,8 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
 void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world_item_entt )
 {
 
-  Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg, world_item_entt );
+  const auto spawn_action = Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg, world_item_entt );
+  if ( const auto *world_item_pos_cmp = reg.try_get<Cmp::Position>( world_item_entt ) ) { trigger_side_effects( spawn_action, *world_item_pos_cmp ); }
 
   auto *anim_data_cmp = reg.try_get<Cmp::AnimData>( world_item_entt );
   if ( not anim_data_cmp ) return;
@@ -497,7 +498,8 @@ void InventorySystem::consume_inventory( sf::Time dt )
       if ( m_sound_bank.get_effect( "drinking_end" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "drinking_end" ).play(); }
     }
     reg().remove<Cmp::Player::ConsumeTimer>( Utils::Player::get_entity( reg() ) );
-    Utils::Player::apply_action_from_inventory_item<Cmp::ConsumeAction>( reg() );
+    const auto consume_action = Utils::Player::apply_action_from_inventory_item<Cmp::ConsumeAction>( reg() );
+    trigger_side_effects( consume_action, Utils::Player::get_position( reg() ) );
     auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
     Factory::Player::destroy_inventory( reg(), inventory_type );
   }

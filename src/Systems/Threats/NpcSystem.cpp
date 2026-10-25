@@ -51,6 +51,7 @@
 #include <Components/Wall.hpp>
 #include <Components/Wormhole/Jump.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/CreateNpcEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/UpdateNpcPositionEvent.hpp>
@@ -90,6 +91,25 @@ NpcSystem::NpcSystem( entt::registry &reg, sf::RenderWindow &window, Audio::Soun
   SPDLOG_DEBUG( "NpcSystem initialized" );
   std::ignore = get_systems_event_queue().sink<Events::UpdateNpcPositionEvent>().connect<&NpcSystem::on_update_npc_position_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::DestroyNpcEvent>().connect<&NpcSystem::on_destroy_npc_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::CreateNpcEvent>().connect<&NpcSystem::on_create_npc_event>( this );
+}
+
+void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
+{
+  if ( event.m_unique )
+  {
+    bool relocated = false;
+    for ( auto [npc_entt, npc_cmp] : reg().view<Cmp::Npc::NPC>().each() )
+    {
+      if ( npc_cmp.npc_type != event.m_npc_type ) continue;
+      on_update_npc_position_event( Events::UpdateNpcPositionEvent( npc_entt, event.m_position.position ) );
+      relocated = true;
+    }
+    if ( relocated ) return;
+  }
+
+  auto npc_entt = Factory::Npc::create_npc( reg(), event.m_position, event.m_npc_type );
+  if ( npc_entt != entt::null and event.m_on_created ) { event.m_on_created( npc_entt ); }
 }
 
 void NpcSystem::on_update_npc_position_event( const Events::UpdateNpcPositionEvent &event )
@@ -229,7 +249,8 @@ void NpcSystem::check_npc_container_collision()
 
     if ( player_pos.findIntersection( npc_activate_bounds.getBounds() ) )
     {
-      Factory::Npc::create_npc( reg(), npccontainer_entt, "npc.skeleton", m_reserved_sm.lock() );
+      Factory::Npc::create_npc( reg(), npccontainer_pos_cmp, "npc.skeleton" );
+      Factory::Npc::destroy_npc_container( reg(), npccontainer_entt, m_reserved_sm.lock() );
     }
   }
 }

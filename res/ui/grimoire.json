@@ -1440,6 +1440,54 @@
                  "y":690
                 }, 
                 {
+                 "height":0,
+                 "id":149,
+                 "name":"forage_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Forage:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":280,
+                 "y":750
+                }, 
+                {
+                 "height":0,
+                 "id":150,
+                 "name":"plant_forage_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":380,
+                 "y":750
+                }, 
+                {
                  "height":180,
                  "id":146,
                  "name":"",
@@ -1474,7 +1522,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":149,
+ "nextobjectid":151,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

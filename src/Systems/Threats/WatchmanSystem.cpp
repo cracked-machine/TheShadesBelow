@@ -22,12 +22,13 @@
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/UUID.hpp>
+#include <Events/CreateNpcEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
-#include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
+#include <PathFinding/SpatialHashGrid.hpp>
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/System/Angle.hpp>
 #include <Systems/ParticleSystem.hpp>
@@ -224,9 +225,9 @@ void WatchmanSystem::spawn_watchman()
        Utils::Player::get_stats( reg() ).infamy() >= Sys::PersistSystem::get<Cmp::Persist::NpcWatchmanSpawnInfamy>( reg() ).get_value() )
   {
     auto reserved_sm = m_reserved_sm.lock();
-    auto [rnd_entt, rnd_pos_cmp] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 0 );
+    auto [_, rnd_pos_cmp] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 0 );
     if ( reserved_sm && not reserved_sm->at( rnd_pos_cmp ).empty() ) return;
-    Factory::Npc::create_npc( reg(), rnd_entt, "npc.nightwatchman", reserved_sm );
+    get_systems_event_queue().trigger( Events::CreateNpcEvent( "npc.nightwatchman", rnd_pos_cmp ) );
     SPDLOG_INFO( "Spawned Watchman at {},{}", rnd_pos_cmp.x(), rnd_pos_cmp.y() );
   }
 }
@@ -262,7 +263,8 @@ void WatchmanSystem::check_gunfire_player_collision()
     }
     if ( not hit ) continue;
 
-    Utils::Player::apply_action_from_npc_store<Cmp::ProjectileAction>( reg(), "npc.nightwatchman" );
+    const auto projectile_action = Utils::Player::apply_action_from_npc_store<Cmp::ProjectileAction>( reg(), "npc.nightwatchman" );
+    trigger_side_effects( projectile_action, player_pos_cmp );
     player_cmp.skip_damage_cooldown_once = false;
     m_sound_bank.get_effect( "damage_player" ).play();
     player_cmp.m_damage_cooldown_timer = sf::Time::Zero;

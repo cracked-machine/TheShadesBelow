@@ -107,8 +107,50 @@
         "tick": {
           "description": "Zero for instant dmg using knockback with cooldown, Non-zero for damage every tick.",
           "type": "number"
+        },
+        "side_effects": {
+          "type": "object",
+          "description": "Optional side effects of the action, each rolled independently every time the action is applied.",
+          "additionalProperties": false,
+          "properties": {
+            "spawn_npc": {
+              "type": "object",
+              "description": "Spawn an NPC at the action's source position.",
+              "required": ["type", "probability"],
+              "additionalProperties": false,
+              "properties": {
+                "type": { "type": "string", "pattern": "^npc\\." },
+                "probability": { "$ref": "#/definitions/probability" },
+                "unique": { "type": "boolean", "description": "If true and NPCs of this type already exist, relocate them instead of spawning another." }
+              }
+            },
+            "lightning": {
+              "type": "object",
+              "description": "Lightning strike on a working lightning rod in view, otherwise the player.",
+              "required": ["probability"],
+              "additionalProperties": false,
+              "properties": {
+                "probability": { "$ref": "#/definitions/probability" }
+              }
+            },
+            "movement": {
+              "type": "object",
+              "description": "Affect player movement/NPC pathfinding. Placeholder: not yet executed.",
+              "required": ["type", "probability"],
+              "additionalProperties": false,
+              "properties": {
+                "type": { "type": "string" },
+                "probability": { "$ref": "#/definitions/probability" }
+              }
+            }
+          }
         }
       }
+    },
+    "probability": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
     }
   }
 }

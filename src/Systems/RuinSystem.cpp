@@ -34,10 +34,10 @@
 
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/CreateNpcEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/MultiblockFactory.hpp>
-#include <Factory/NpcFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <Factory/RuinFactory.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>
@@ -556,10 +556,7 @@ void RuinSystem::create_spiders( sf::FloatRect scene_boundary )
       if ( has_collision( Cmp::RectBounds::scaled( rnd_pos_cmp.position, rnd_pos_cmp.size, 1 ) ) ) continue;
       SPDLOG_INFO( "Spawning spider {},{}", rnd_pos_cmp.position.x, rnd_pos_cmp.position.y );
 
-      auto new_spider_entity = reg().create();
-      const auto &position_cmp = reg().emplace<Cmp::Position>( new_spider_entity, rnd_pos_cmp.position, rnd_pos_cmp.size );
-      [[maybe_unused]] const auto &zorder_cmp = reg().emplace<Cmp::ZOrderValue>( new_spider_entity, position_cmp.position.y );
-      Factory::Npc::create_npc( reg(), new_spider_entity, "npc.spider" );
+      get_systems_event_queue().trigger( Events::CreateNpcEvent( "npc.spider", rnd_pos_cmp ) );
     }
   }
 }

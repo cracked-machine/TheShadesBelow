@@ -103,28 +103,19 @@ bool create_shockwave( entt::registry &registry, entt::entity npc_entt )
   return false;
 }
 
-entt::entity create_npc( entt::registry &reg, entt::entity position_entity, const Sys::NpcKey &npc_type,
-                         const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
+entt::entity create_npc( entt::registry &reg, Cmp::Position pos_cmp, const Sys::NpcKey &npc_type )
 {
-
-  auto *pos_cmp = reg.try_get<Cmp::Position>( position_entity );
-  if ( not pos_cmp )
-  {
-    SPDLOG_ERROR( "Cannot add NPC entity {} without a Position component", static_cast<int>( position_entity ) );
-    return entt::null;
-  }
-
   const auto &npc_cmp = Sys::NpcStore::instance().get( npc_type );
   // the NPC's footprint and z-order offset come from its sprite sheet, so multiblock NPCs (grid_size > 1x1)
   // are top-left anchored at the spawn position, same as multiblock structures
   const auto &npc_ss = Sys::SpriteStore::instance().get( npc_cmp.sprite_type_list.front() );
 
-  // create a new entity for the NPC using the existing position
+  // create a new entity for the NPC at the spawn position
   auto new_pos_entity = reg.create();
-  reg.emplace_or_replace<Cmp::Position>( new_pos_entity, pos_cmp->position, npc_ss.sprite_size() );
+  reg.emplace_or_replace<Cmp::Position>( new_pos_entity, pos_cmp.position, npc_ss.sprite_size() );
   reg.emplace_or_replace<Cmp::Npc::Footprint>( new_pos_entity, npc_ss );
   reg.emplace_or_replace<Cmp::Armable>( new_pos_entity );
-  reg.emplace_or_replace<Cmp::ZOrderValue>( new_pos_entity, npc_ss.zorder( 0, pos_cmp->position.y ) );
+  reg.emplace_or_replace<Cmp::ZOrderValue>( new_pos_entity, npc_ss.zorder( 0, pos_cmp.position.y ) );
   reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 0, 0 } );
   reg.emplace_or_replace<Cmp::UUID>( new_pos_entity, Cmp::UUID::generate() );
   reg.emplace_or_replace<Cmp::Npc::NPC>( new_pos_entity, npc_cmp );
@@ -136,7 +127,7 @@ entt::entity create_npc( entt::registry &reg, entt::entity position_entity, cons
   });
   // clang-format on
 
-  SPDLOG_DEBUG( "Spawned NPC {} ({}) at position ({}, {})", static_cast<int>( new_pos_entity ), npc_type, pos_cmp->position.x, pos_cmp->position.y );
+  SPDLOG_DEBUG( "Spawned NPC {} ({}) at position ({}, {})", static_cast<int>( new_pos_entity ), npc_type, pos_cmp.position.x, pos_cmp.position.y );
 
   if ( npc_type == "npc.ghost" )
   {
@@ -155,13 +146,11 @@ entt::entity create_npc( entt::registry &reg, entt::entity position_entity, cons
         new_pos_entity,
         Cmp::Npc::WatchmanSearchlight{ .sweep_phase = sweep_phase_rng.gen(),
                                        .idle_direction = Utils::Cardinal( static_cast<Utils::Cardinal::Value>( idle_direction_rng.gen() ) ) } );
-    Factory::Npc::destroy_npc_container( reg, position_entity, reserved_sm );
   }
   else if ( npc_type == "npc.skeleton" )
   {
     reg.emplace_or_replace<Cmp::Npc::Skeleton>( new_pos_entity );
     reg.emplace_or_replace<Cmp::Npc::LerpSpeed>( new_pos_entity, npc_cmp.m_lerp_speed );
-    Factory::Npc::destroy_npc_container( reg, position_entity, reserved_sm );
   }
   else if ( npc_type == "npc.priest" )
   {

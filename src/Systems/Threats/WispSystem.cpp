@@ -2,7 +2,7 @@
 #include <Components/Npc/Target.hpp>
 #include <Components/Npc/Wisp.hpp>
 #include <Components/Position.hpp>
-#include <Factory/NpcFactory.hpp>
+#include <Events/CreateNpcEvent.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/Threats/WispSystem.hpp>
 #include <Utils/Maths.hpp>
@@ -58,9 +58,8 @@ void WispSystem::spawn_wisp()
   }
   if ( wisp_count >= MAX_WISP_COUNT ) return;
 
-  // find a random start position in the game area and create a new npc at that position
+  // find a random start position in the game area
   auto [spawn_entt, spawn_pos] = Utils::Rnd::get_random_position( reg(), {}, {} );
-  auto npc_entt = Factory::Npc::create_npc( reg(), spawn_entt, "npc.wisp" );
 
   // find a random target position in the game area that is distant from the spawn_pos
   static constexpr float kMinTargetDistance = 100.f;
@@ -71,17 +70,23 @@ void WispSystem::spawn_wisp()
     target_entt = new_target_entt;
     target_pos = new_target_pos;
   }
-  reg().emplace_or_replace<Cmp::Npc::Target>( target_entt, npc_entt );
 
-  // register the wisp in the open navmesh so A* can find a valid start cell
-  if ( auto open_navmesh = m_open_navmesh.lock() )
+  // create a new npc at the spawn position, then give it the target
+  auto on_created = [this, spawn_pos, target_entt, target_pos]( entt::entity npc_entt )
   {
-    open_navmesh->insert( npc_entt, spawn_pos );
-    open_navmesh->insert( target_entt, target_pos );
-  }
+    reg().emplace_or_replace<Cmp::Npc::Target>( target_entt, npc_entt );
 
-  SPDLOG_INFO( "Add npc.wisp to {},{}. Target is {},{}", static_cast<uint32_t>( npc_entt ), spawn_pos.x(), spawn_pos.y(), target_pos.x(),
-               target_pos.y() );
+    // register the wisp in the open navmesh so A* can find a valid start cell
+    if ( auto open_navmesh = m_open_navmesh.lock() )
+    {
+      open_navmesh->insert( npc_entt, spawn_pos );
+      open_navmesh->insert( target_entt, target_pos );
+    }
+
+    SPDLOG_INFO( "Add npc.wisp to {},{}. Target is {},{}", static_cast<uint32_t>( npc_entt ), spawn_pos.x(), spawn_pos.y(), target_pos.x(),
+                 target_pos.y() );
+  };
+  get_systems_event_queue().trigger( Events::CreateNpcEvent( "npc.wisp", spawn_pos, false, on_created ) );
 }
 
 void WispSystem::reset_wisp_target( entt::entity wisp_entt )

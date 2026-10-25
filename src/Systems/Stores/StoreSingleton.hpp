@@ -2,6 +2,7 @@
 #define SRC_SYSTEMS_STORES_STORESINGLETON_HPP__
 
 #include <Components/Random.hpp>
+#include <Components/Stats/BaseAction.hpp>
 #include <Factory/ToxicityFactory.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
@@ -179,7 +180,39 @@ protected:
     return Action(
         { JsonDeserializer::get_int( j, "health" ) }, { JsonDeserializer::get_int( j, "fear" ) }, { JsonDeserializer::get_int( j, "despair" ) },
         { JsonDeserializer::get_int( j, "infamy" ) }, { JsonDeserializer::get_int( j, "luck" ) }, { JsonDeserializer::get_float( j, "tick" ) },
-        Game::Factory::Toxicity::create_toxidrome( JsonDeserializer::get_string_or_list( tox, "type" ), JsonDeserializer::get_int( tox, "toxicity" ) ) );
+        Game::Factory::Toxicity::create_toxidrome( JsonDeserializer::get_string_or_list( tox, "type" ), JsonDeserializer::get_int( tox, "toxicity" ) ),
+        make_side_effects( j ) );
+  }
+
+  //! @brief Build the optional side effects of a JSON action entry from its optional "side_effects" object.
+  //! @throws std::runtime_error if an effect's probability is outside [0, 1].
+  static Cmp::SideEffects make_side_effects( const nlohmann::json &j )
+  {
+    using Game::Utils::JsonDeserializer;
+    Cmp::SideEffects effects;
+    if ( not j.contains( "side_effects" ) ) return effects;
+    const auto &fx = j.at( "side_effects" );
+
+    const auto get_probability = []( const nlohmann::json &effect )
+    {
+      const float probability = JsonDeserializer::get_float( effect, "probability" );
+      if ( probability < 0.f or probability > 1.f ) throw std::runtime_error( "effect probability must be in range [0, 1]" );
+      return probability;
+    };
+    if ( fx.contains( "spawn_npc" ) )
+    {
+      const auto &spawn_npc = fx.at( "spawn_npc" );
+      effects.spawn_npc = Cmp::SpawnNpcEffect{ .npc_type = JsonDeserializer::get_string( spawn_npc, "type" ),
+                                               .probability = get_probability( spawn_npc ),
+                                               .unique = spawn_npc.contains( "unique" ) and JsonDeserializer::get_bool( spawn_npc, "unique" ) };
+    }
+    if ( fx.contains( "lightning" ) ) { effects.lightning = Cmp::LightningEffect{ .probability = get_probability( fx.at( "lightning" ) ) }; }
+    if ( fx.contains( "movement" ) )
+    {
+      const auto &movement = fx.at( "movement" );
+      effects.movement = Cmp::MovementEffect{ .type = JsonDeserializer::get_string( movement, "type" ), .probability = get_probability( movement ) };
+    }
+    return effects;
   }
 
   //! @brief Rethrow an error raised while loading an action, prefixed with the JSON file, owning entry, action key and

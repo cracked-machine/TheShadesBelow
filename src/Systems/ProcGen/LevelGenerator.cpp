@@ -51,6 +51,7 @@
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateItemEvent.hpp>
+#include <Events/CreateNpcEvent.hpp>
 #include <Factory/CryptFactory.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Factory/MultiblockFactory.hpp>
@@ -220,18 +221,17 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
     // allow "npc." markers in the multiblock layer
     if ( ms_type.contains( "npc." ) )
     {
-      auto npc_entt = reg().create();
-      reg().emplace_or_replace<Cmp::Position>( npc_entt, pos, Constants::kGridSizePxF );
-      auto new_npc_entt = Factory::Npc::create_npc( reg(), npc_entt, Sys::NpcKey( ms_type ), m_reserved_sm );
       // keep level generation from placing obstacles under the NPC - released again in cleanup_reserved()
-      if ( new_npc_entt != entt::null )
+      auto reserve_npc_cells = [this]( entt::entity new_npc_entt )
       {
         const auto &[npc_footprint_cmp, npc_pos_cmp] = reg().get<Cmp::Npc::Footprint, Cmp::Position>( new_npc_entt );
         for ( const auto &cell_pos : npc_footprint_cmp.world_cells( npc_pos_cmp.position ) )
         {
           m_reserved_sm->insert( new_npc_entt, cell_pos );
         }
-      }
+      };
+      get_systems_event_queue().trigger(
+          Events::CreateNpcEvent( Sys::NpcKey( ms_type ), Cmp::Position( pos, Constants::kGridSizePxF ), false, reserve_npc_cells ) );
       continue;
     }
 

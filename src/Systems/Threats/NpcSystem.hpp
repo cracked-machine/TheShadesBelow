@@ -12,7 +12,7 @@
 // clang-format off
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
-namespace Game::Events { class UpdateNpcPositionEvent; class DestroyNpcEvent; }
+namespace Game::Events { class UpdateNpcPositionEvent; class DestroyNpcEvent; struct CreateNpcEvent; }
 namespace Game::Cmp { class Position; }
 namespace Game::Cmp { class Direction; class LerpPosition; } 
 namespace Game::Cmp::Player { class Mortality; } 
@@ -68,6 +68,11 @@ private:
   //! the only place allowed to call Factory::Npc::destroy_npc. Everything else must trigger an Events::DestroyNpcEvent.
   //! @param event
   void on_destroy_npc_event( const Game::Events::DestroyNpcEvent &event );
+
+  //! @brief Spawn an NPC, or relocate the existing NPCs of that type if the event is `unique`. This is the only place
+  //! allowed to call Factory::Npc::create_npc. Everything else must trigger an Events::CreateNpcEvent.
+  //! @param event
+  void on_create_npc_event( const Game::Events::CreateNpcEvent &event );
 
   //! @brief Create the death animation entity played when an NPC dies.
   //! @param npc_pos_cmp The dying NPC's position.

@@ -13,7 +13,6 @@
 #include <Components/LastDirection.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Moveable.hpp>
-#include <Components/Npc/ElderMother.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
@@ -38,6 +37,7 @@
 #include <Components/Stats/BurnAction.hpp>
 #include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/DestroyAction.hpp>
+#include <Components/Stats/ForageAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Events/AddInventoryEvent.hpp>
@@ -45,12 +45,11 @@
 #include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
+#include <Events/GrimoireUpdateEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
-#include <Events/UpdateNpcPositionEvent.hpp>
 #include <Factory/BombFactory.hpp>
-#include <Factory/NpcFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlantFactory.hpp>
@@ -352,6 +351,17 @@ void ActionSystem::player_plant_interact()
         get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, wear ) );
       };
       // a fully foraged plant withers away - no drops
+      // forage_action is optional (see items.json). With gloves only its side effects apply, not its stat changes.
+      const Cmp::Position plant_pos_cmp( plant_mb_cmp.position, Constants::kGridSizePxF );
+      auto apply_forage_action = [&]( bool apply_stats )
+      {
+        const auto &world_item = reg().get<Cmp::WorldItem>( plant_entt );
+        if ( not world_item.has_action<Cmp::ForageAction>() ) return;
+        const auto forage_action = apply_stats ? Utils::Player::apply_action_from_world_item<Cmp::ForageAction>( reg(), plant_entt )
+                                               : world_item.get_action<Cmp::ForageAction>();
+        trigger_side_effects( forage_action, plant_pos_cmp );
+      };
+
       auto remove_if_depleted = [&]()
       {
         if ( not Utils::is_plant_depleted( reg(), plant_entt ) ) return;
@@ -367,12 +377,12 @@ void ActionSystem::player_plant_interact()
           Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
                                                  plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
           get_systems_event_queue().trigger( Events::AddInventoryEvent( forage_output ) );
-          Utils::Player::apply_action_from_inventory_item<Cmp::SpawnAction>( reg() );
+          const auto spawn_action = Utils::Player::apply_action_from_inventory_item<Cmp::SpawnAction>( reg() );
+          trigger_side_effects( spawn_action, Utils::Player::get_position( reg() ) );
           m_sound_bank.get_effect( "chopping_final" ).play();
           wear_plant();
         }
-        // A working lightning rod on screen takes the strike, otherwise the player is struck.
-        if ( plant_type == "item.plant.hawthorn" ) { spawn_lightning( 0.5f ); }
+        apply_forage_action( true );
         remove_if_depleted();
       }
       else if ( inventory_type == "item.gloves" )
@@ -389,7 +399,7 @@ void ActionSystem::player_plant_interact()
           wear_plant();
           auto gloves_wear = Sys::PersistSystem::get<Cmp::Persist::GlovesWearPerForage>( reg() ).get_value();
           get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), gloves_wear ) );
-          if ( plant_type == "item.plant.hawthorn" ) { spawn_lightning( 0.5f ); }
+          apply_forage_action( false );
           remove_if_depleted();
         }
       }
@@ -409,6 +419,7 @@ void ActionSystem::player_plant_interact()
 
           // dig up the plant
           get_systems_event_queue().trigger( Events::DropInventoryEvent() );
+          // spawn_action side effects are triggered by InventorySystem when it handles the pickup
           Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg(), plant_entt );
           get_systems_event_queue().trigger( Events::PickupWorldItemEvent( plant_entt ) );
           m_sound_bank.get_effect( "digging_earth" ).play();
@@ -433,22 +444,8 @@ void ActionSystem::player_plant_interact()
             get_systems_event_queue().trigger(
                 Events::CreateItemEvent( Cmp::Position( plant_mb_cmp.position, Constants::kGridSizePxF ), axe_output, "drop_loot" ) );
           }
-          Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
-
-          // 50% chance that chopping down an eldertree spawn/relocate the eldermother
-          Cmp::RandomInt elderspawn( 0, 1 );
-          if ( plant_type == "item.plant.elder" and elderspawn.gen() == 1 )
-          {
-            if ( reg().view<Cmp::Npc::ElderMother>().empty() )
-              Factory::Npc::create_npc( reg(), plant_entt, "npc.eldermother" );
-            else
-            {
-              for ( auto em_entt : reg().view<Cmp::Npc::ElderMother, Cmp::Position>() )
-              {
-                get_systems_event_queue().trigger( Events::UpdateNpcPositionEvent( em_entt, plant_mb_cmp.position ) );
-              }
-            }
-          }
+          const auto destroy_action = Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
+          trigger_side_effects( destroy_action, plant_pos_cmp );
           Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
           m_sound_bank.get_effect( "chopping_final" ).play();
         }
@@ -734,44 +731,19 @@ void ActionSystem::update_burning_worlditems( sf::Time dt )
       auto burnt_uuid = Cmp::UUID::generate();
       Factory::Particle::add_smoke( reg(), kPlantSmokeTag, burnt_uuid, emitter_pos, plant_cmp.position.y );
 
-      // 100% chance that burning down an eldertree spawn/relocate the eldermother
-      auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
-      if ( plant_item )
+      // burn_action side effects fire once when the plant has burnt out, whether or not the player is near
+      if ( auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt ) )
       {
-        if ( plant_item->item_type == "item.plant.elder" )
+        const auto burn_action = plant_item->get_action<Cmp::BurnAction>();
+        if ( not burn_action.side_effects().empty() )
         {
-          if ( reg().view<Cmp::Npc::ElderMother>().empty() )
-            Factory::Npc::create_npc( reg(), plant_entt, "npc.eldermother" );
-          else
-          {
-            for ( auto em_entt : reg().view<Cmp::Npc::ElderMother, Cmp::Position>() )
-            {
-              get_systems_event_queue().trigger( Events::UpdateNpcPositionEvent( em_entt, plant_cmp.position ) );
-            }
-          }
+          get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_item->item_type, Cmp::BurnAction::kKey, burn_action ) );
+          trigger_side_effects( burn_action, Cmp::Position( plant_cmp.position, Constants::kGridSizePxF ) );
         }
-        else if ( plant_item->item_type == "item.plant.hawthorn" ) { spawn_lightning(); }
       }
       Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
     }
   }
-}
-
-void ActionSystem::spawn_lightning( float odds )
-{
-  if ( Cmp::RandomFloat( 0.f, 1.f ).gen() >= odds ) return;
-
-  entt::entity lightning_target_entt = Utils::Player::get_entity( reg() );
-  for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>().each() )
-  {
-    if ( worlditem_cmp.item_type != "item.lightningrod" ) continue;
-    if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), worlditem_pos_cmp ) ) continue;
-    auto *wearlevel = reg().try_get<Cmp::Inventory::WearLevel>( worlditem_entt );
-    if ( not wearlevel or wearlevel->m_level <= 0 ) continue;
-    lightning_target_entt = worlditem_entt;
-    break;
-  }
-  get_systems_event_queue().trigger( Events::LightningEvent( lightning_target_entt ) );
 }
 
 sf::Vector2f ActionSystem::find_forage_drop_pos( const Cmp::PlantMultiBlock &plant_mb_cmp )

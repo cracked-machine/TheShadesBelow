@@ -20,6 +20,7 @@
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Threats/LightningSystem.hpp>
 #include <Utils/Maths.hpp>
+#include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 
 #include <SFML/Graphics/Color.hpp>
@@ -41,7 +42,21 @@ LightningSystem::LightningSystem( entt::registry &reg, sf::RenderWindow &window,
 void LightningSystem::on_lightning_event( Events::LightningEvent ev )
 {
   m_trigger_lightning = true;
-  m_target_entt = ev.target_entt;
+  m_target_entt = ev.target_entt == entt::null ? find_lightning_target() : ev.target_entt;
+}
+
+entt::entity LightningSystem::find_lightning_target()
+{
+  // A working lightning rod on screen takes the strike, otherwise the player is struck.
+  for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>().each() )
+  {
+    if ( worlditem_cmp.item_type != "item.lightningrod" ) continue;
+    if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), worlditem_pos_cmp ) ) continue;
+    auto *wearlevel = reg().try_get<Cmp::Inventory::WearLevel>( worlditem_entt );
+    if ( not wearlevel or wearlevel->m_level <= 0 ) continue;
+    return worlditem_entt;
+  }
+  return Utils::Player::get_entity( reg() );
 }
 
 void LightningSystem::update( sf::Time dt )

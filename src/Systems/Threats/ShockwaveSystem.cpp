@@ -157,7 +157,8 @@ void ShockwaveSystem::check_shockwave_player_collision()
       if ( intersects_with_visible_segments( shockwave, player_pos ) )
       {
         reg().emplace_or_replace<Cmp::Player::TookDamage>( player_entity );
-        Utils::Player::apply_action_from_npc_store<Cmp::ProjectileAction>( reg(), "npc.priest" );
+        const auto projectile_action = Utils::Player::apply_action_from_npc_store<Cmp::ProjectileAction>( reg(), "npc.priest" );
+        trigger_side_effects( projectile_action, player_pos );
         player_cmp.skip_damage_cooldown_once = false;
         m_sound_bank.get_effect( "damage_player" ).play();
         player_cmp.m_damage_cooldown_timer = sf::Time::Zero;

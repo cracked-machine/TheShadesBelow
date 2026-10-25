@@ -2,6 +2,8 @@
 #define SRC_COMPONENTS_STATS_BASEACTION_HPP__
 
 #include <memory>
+#include <optional>
+#include <string>
 
 namespace Game::Cmp::Toxicity
 {
@@ -64,12 +66,64 @@ struct Tick
 
 } // namespace Stats
 
+//! @brief Optional side effect of an action: spawn an NPC at the action's source position.
+struct SpawnNpcEffect
+{
+  //! @brief The NPC to spawn, see res/json/npc.json.
+  std::string npc_type;
+  //! @brief Chance [0, 1] that the effect fires each time the action is applied.
+  float probability{ 0.f };
+  //! @brief If true and NPCs of this type already exist, relocate them instead of spawning another.
+  bool unique{ false };
+  //! @brief Roll this effect's probability.
+  //! @return true if the effect should fire.
+  [[nodiscard]] bool roll() const;
+};
+
+//! @brief Optional side effect of an action: a lightning strike (on a working lightning rod in view, else the player).
+struct LightningEffect
+{
+  //! @brief Chance [0, 1] that the effect fires each time the action is applied.
+  float probability{ 0.f };
+  //! @brief Roll this effect's probability.
+  //! @return true if the effect should fire.
+  [[nodiscard]] bool roll() const;
+};
+
+//! @brief Optional side effect of an action affecting player movement/NPC pathfinding.
+//! @note Placeholder: parsed and shown in the grimoire, but not yet executed.
+struct MovementEffect
+{
+  //! @brief Free-form effect type, e.g. "slow".
+  std::string type;
+  //! @brief Chance [0, 1] that the effect fires each time the action is applied.
+  float probability{ 0.f };
+  //! @brief Roll this effect's probability.
+  //! @return true if the effect should fire.
+  [[nodiscard]] bool roll() const;
+};
+
+//! @brief The optional side effects of an action, each rolled independently. See the "side_effects" object in
+//! res/json/items.json and res/json/npc.json.
+struct SideEffects
+{
+  //! @brief Spawn (or relocate) an NPC.
+  std::optional<SpawnNpcEffect> spawn_npc;
+  //! @brief Lightning strike.
+  std::optional<LightningEffect> lightning;
+  //! @brief Movement/pathfinding effect.
+  std::optional<MovementEffect> movement;
+  //! @brief Whether there are no effects at all.
+  //! @return true if no effect is set.
+  [[nodiscard]] bool empty() const { return not spawn_npc and not lightning and not movement; }
+};
+
 //! @brief Base class for a player-stat modifier applied when a particular kind of gameplay action
 //! occurs (e.g. burying, carrying, colliding with, consuming, destroying, or being hit by something).
 //! @details Holds the health/fear/despair/infamy/toxicity deltas, an optional toxidrome affliction, and
-//! the tick interval at which the modifier re-applies. Derived classes (BuryAction, CarryAction,
-//! CollisionAction, ConsumeAction, DestroyAction, ProjectileAction, ProximityAction, SacrificeAction,
-//! SpawnAction) add no behaviour of their own - they exist purely so that Cmp::WorldItem::actions and
+//! the tick interval at which the modifier re-applies, plus optional side effects (see SideEffects).
+//! Derived classes (BurnAction, CarryAction, CollisionAction, ConsumeAction, DestroyAction, ForageAction,
+//! ProjectileAction, ProximityAction, SacrificeAction, SpawnAction) add no behaviour of their own - they exist purely so that Cmp::WorldItem::actions and
 //! NPC action maps can key modifiers by the std::type_index of the triggering action kind.
 class BaseAction
 {
@@ -91,8 +145,9 @@ public:
   //! @param tick How often (seconds) the action re-applies, or 0 for a one-shot.
   //! @param toxidrome toxidrome affliction applied alongside the stat changes, if any. Each active
   //! toxidrome carries its own toxicity contribution (see Cmp::Toxicity::Toxidrome).
+  //! @param side_effects Optional side effects (NPC spawn, lightning, movement), each with its own probability.
   BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Tick tick,
-              Cmp::Toxicity::Toxidrome toxidrome );
+              Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects = {} );
   //! @brief Destroy the Base Action object.
   ~BaseAction();
 
@@ -122,12 +177,15 @@ public:
   //! @brief Get the toxidrome affliction associated with this action.
   //! @return Stats::toxidrome The toxidrome type and its own tick interval.
   [[nodiscard]] const Cmp::Toxicity::Toxidrome &toxidrome() const;
-  //! @brief Whether this action has no effect, i.e. every stat delta is zero and it applies no toxidrome.
+  //! @brief Get the optional side effects of this action.
+  //! @return const SideEffects& The NPC spawn/lightning/movement effects.
+  [[nodiscard]] const SideEffects &side_effects() const { return m_side_effects; }
+  //! @brief Whether this action has no effect, i.e. every stat delta is zero, it applies no toxidrome and has no side effects.
   //! @return true if applying this action would change nothing.
   [[nodiscard]] bool is_zero() const;
 
   //! @brief Accumulate another action's stat deltas into this one.
-  //! @note Does not accumulate toxidrome.
+  //! @note Does not accumulate toxidrome or side effects.
   //! @param rhs The action whose deltas are added to this one.
   //! @return BaseAction& Reference to this action, after accumulation.
   BaseAction &operator+=( const BaseAction &rhs )
@@ -156,6 +214,8 @@ private:
   //! a pointer only so this header need not include Toxidrome.hpp. Copy/move are hand-written in the
   //! .cpp (deep-copy for copy, pointer-steal for move) to keep BaseAction copy-constructible.
   std::unique_ptr<Cmp::Toxicity::Toxidrome> m_toxidrome;
+  //! @brief Optional side effects (NPC spawn, lightning, movement).
+  SideEffects m_side_effects;
   //! @brief How often (seconds) the action re-applies, or 0 for a one-shot.
   float m_tick{ 0 };
 };

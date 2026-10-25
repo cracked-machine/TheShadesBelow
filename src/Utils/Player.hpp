@@ -236,28 +236,32 @@ bool player_has_extra_life( entt::registry &reg );
 //! in src/Components/Stats are explicitly instantiated in Player.cpp - using any other type is a link error.
 //! @param reg reference to the entt registry
 //! @param world_item_entt entity carrying the Cmp::WorldItem component to look the action up on
+//! @return Cmp::BaseAction The applied action, so the calling system can trigger its side effects (see Cmp::SideEffects).
 //! @throws std::runtime_error if world_item_entt has no Cmp::WorldItem.
 //! @throws std::out_of_range if the world item has no ActionT registered.
 template <typename ActionT>
-void apply_action_from_world_item( entt::registry &reg, entt::entity world_item_entt,
-                                   const std::source_location &loc = std::source_location::current() );
+Cmp::BaseAction apply_action_from_world_item( entt::registry &reg, entt::entity world_item_entt,
+                                              const std::source_location &loc = std::source_location::current() );
 
 //! @brief Lookup up and apply the ActionT stat-modifier from the item in player's current inventory
 //! @tparam ActionT  The Cmp::BaseAction subclass to apply (e.g. Cmp::DestroyAction). Only the subclasses
 //! in src/Components/Stats are explicitly instantiated in Player.cpp - using any other type is a link error.
 //! @param reg reference to the entt registry
+//! @return Cmp::BaseAction The applied action (a zero action if there is no inventory), so the calling system can trigger its
+//! side effects (see Cmp::SideEffects).
 //! @throws std::out_of_range if the player inventory item has no ActionT registered.
 template <typename ActionT>
-void apply_action_from_inventory_item( entt::registry &reg );
+Cmp::BaseAction apply_action_from_inventory_item( entt::registry &reg );
 
 //! @brief Lookup up and apply the ActionT stat-modifier from the item store.
 //! @tparam ActionT The Cmp::BaseAction subclass to apply (e.g. Cmp::DestroyAction). Only the subclasses
 //! in src/Components/Stats are explicitly instantiated in Player.cpp - using any other type is a link error.
 //! @param reg reference to the entt registry
 //! @param item_type string identifier (see item.json)
+//! @return Cmp::BaseAction The applied action, so the calling system can trigger its side effects (see Cmp::SideEffects).
 //! @throws std::runtime_error if the key is not present in the store.
 template <typename ActionT>
-void apply_action_from_item_store( entt::registry &reg, const Sys::ItemKey &item_type );
+Cmp::BaseAction apply_action_from_item_store( entt::registry &reg, const Sys::ItemKey &item_type );
 
 //! @brief Look up the ActionT stat-modifier from the item store, without applying it.
 //! @tparam ActionT The Cmp::BaseAction subclass to look up (e.g. Cmp::DestroyAction). Only the subclasses
@@ -274,9 +278,10 @@ Cmp::BaseAction get_action_from_item_store( const Sys::ItemKey &item_type );
 //! in src/Components/Stats are explicitly instantiated in Player.cpp - using any other type is a link error.
 //! @param reg reference to the entt registry
 //! @param npc_type string identifier (see npc.json)
+//! @return Cmp::BaseAction The applied action, so the calling system can trigger its side effects (see Cmp::SideEffects).
 //! @throws std::runtime_error if the key is not present in the store.
 template <typename ActionT>
-void apply_action_from_npc_store( entt::registry &reg, const Sys::NpcKey &npc_type );
+Cmp::BaseAction apply_action_from_npc_store( entt::registry &reg, const Sys::NpcKey &npc_type );
 
 //! @brief Get the heartbeat object
 //! @param reg

@@ -32,7 +32,7 @@ public:
   LightningSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief Sets `m_trigger_lightning` flag to true and stores the strike target.
-  //! @param ev
+  //! @param ev If `ev.target_entt` is entt::null, the target is picked by find_lightning_target().
   void on_lightning_event( Events::LightningEvent ev );
 
   //! @brief Called every frame by the Graveyard Scene
@@ -58,6 +58,10 @@ public:
                                          int lines_per_strike );
 
 private:
+  //! @brief Pick the strike target: the first working lightning rod in view, otherwise the player.
+  //! @return entt::entity The lightning rod world item or the player entity.
+  entt::entity find_lightning_target();
+
   //! @brief Set by on_lightning_event(); consumed by update() to trigger creation of a new lightning strike.
   bool m_trigger_lightning{ false };
 

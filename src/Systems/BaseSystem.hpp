@@ -12,6 +12,7 @@
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
 namespace Game::PathFinding{ class SpatialHashGrid; }
+namespace Game::Cmp { class BaseAction; class Position; }
 // clang-format on
 
 namespace Game::Sys
@@ -67,6 +68,12 @@ public:
   void reg( entt::registry &reg ) { m_reg = std::ref( reg ); }
 
 protected:
+  //! @brief Roll and trigger the side effects of an applied action (see Cmp::SideEffects): NPC spawns via
+  //! Events::CreateNpcEvent and lightning strikes via Events::LightningEvent. Movement effects are not yet executed.
+  //! @param action The applied action, e.g. as returned by the Utils::Player::apply_action_from_* helpers.
+  //! @param pos_cmp The action's source position (e.g. the world item, or the player for inventory/store actions).
+  void trigger_side_effects( const Cmp::BaseAction &action, const Cmp::Position &pos_cmp );
+
   //! @brief Entity registry: non-owning, re-assignable reference (by SceneManager).
   //! The registry is owned by the current Scene.
   std::reference_wrapper<entt::registry> m_reg;
