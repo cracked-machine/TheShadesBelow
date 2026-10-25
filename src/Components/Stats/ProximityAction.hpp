@@ -3,6 +3,7 @@
 
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
+#include <string_view>
 #include <utility>
 
 namespace Game::Cmp
@@ -13,6 +14,9 @@ namespace Game::Cmp
 class ProximityAction : public BaseAction
 {
 public:
+  //! @brief Key identifying this action in res/json/items.json and res/json/npc.json.
+  static constexpr std::string_view kKey = "proximity_action";
+
   //! @brief Construct a new Proximity Action object.
   //! @param health Change applied to the health stat.
   //! @param fear Change applied to the fear stat.

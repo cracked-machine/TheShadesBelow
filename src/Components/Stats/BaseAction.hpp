@@ -122,6 +122,9 @@ public:
   //! @brief Get the toxidrome affliction associated with this action.
   //! @return Stats::toxidrome The toxidrome type and its own tick interval.
   [[nodiscard]] const Cmp::Toxicity::Toxidrome &toxidrome() const;
+  //! @brief Whether this action has no effect, i.e. every stat delta is zero and it applies no toxidrome.
+  //! @return true if applying this action would change nothing.
+  [[nodiscard]] bool is_zero() const;
 
   //! @brief Accumulate another action's stat deltas into this one.
   //! @note Does not accumulate toxidrome.

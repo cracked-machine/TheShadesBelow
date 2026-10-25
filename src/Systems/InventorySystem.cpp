@@ -115,7 +115,8 @@ void InventorySystem::update_dmg( entt::entity entt, float amount, Events::Updat
     if ( wearlevel_cmp.m_level <= 0 )
     {
       auto inventory_type = reg().get<Cmp::PlayerInventorySlot>( entt ).m_item.item_type;
-      if ( inventory_type.contains( "forage" ) )
+      auto item = Sys::ItemStore::instance().get( inventory_type );
+      if ( item.consumable_type() == Cmp::WorldItem::Consumable::EDIBLE )
       {
         reg().destroy( entt );
         add_inventory_item( "item.rottenfood" );

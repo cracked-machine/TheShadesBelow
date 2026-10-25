@@ -111,9 +111,9 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
   if ( not item.is_sacrificial() ) return;
 
   // only spent tools can be sacrificed - check before the tool is consumed
-  if ( is_tool() and Utils::Player::get_inventory_wear_level( reg() ) > 0 ) return;
+  if ( is_tool() and Utils::Player::get_inventory_wear_level( reg() ) > 0 ) { return; }
 
-  Utils::Player::get_stats( reg() ).apply( item.at<Cmp::SacrificeAction>().action );
+  Utils::Player::apply_action_from_item_store<Cmp::SacrificeAction>( reg(), item.item_type );
   SPDLOG_INFO( "Player made an offering: {} -> {}", item.item_type, item.get_sacrifice_item() );
   Factory::Player::destroy_inventory( reg(), item.item_type );
 
@@ -125,10 +125,18 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
   {
     switch ( item.get_sacrifice_special() )
     {
-      case SacrificeSpecial::ALTAR: sacrifice_relic( altar_entity, altar_cmp, *altar_uuid_cmp ); break;
-      case SacrificeSpecial::BANISH: sacrifice_witches_jar( altar_entity, altar_cmp, *altar_uuid_cmp, item ); break;
-      case SacrificeSpecial::CRYPT: sacrifice_exitkey( altar_entity, altar_cmp, *altar_uuid_cmp ); break;
-      case SacrificeSpecial::NONE: play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT ); break;
+      case SacrificeSpecial::ALTAR:
+        sacrifice_relic( altar_entity, altar_cmp, *altar_uuid_cmp );
+        break;
+      case SacrificeSpecial::BANISH:
+        sacrifice_witches_jar( altar_entity, altar_cmp, *altar_uuid_cmp, item );
+        break;
+      case SacrificeSpecial::CRYPT:
+        sacrifice_exitkey( altar_entity, altar_cmp, *altar_uuid_cmp );
+        break;
+      case SacrificeSpecial::NONE:
+        play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
+        break;
     }
   }
 }

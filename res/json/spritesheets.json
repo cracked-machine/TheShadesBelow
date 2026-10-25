@@ -1452,7 +1452,6 @@
     "sprite.plant.unknown": {
       "spritesheet": {
         "displayname": "Unknown",
-        "RelativeZOrder": [2,0],
         "texture_path": "res/textures/plants.png",
         "sprite_indices": [24,25],
         "indices_per_sequence": 1,
@@ -1460,6 +1459,20 @@
         "grid_size": {
           "x": 1,
           "y": 2
+        },
+        "walking_collision_mask": [false, true]
+      }
+    },
+    "sprite.item.unknown": {
+      "spritesheet": {
+        "displayname": "Unknown",
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [46],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
         },
         "walking_collision_mask": [false, true]
       }
@@ -1897,6 +1910,7 @@
         }
       }
     },
+  
 
     "sprite.yewstick": {
       "spritesheet": {

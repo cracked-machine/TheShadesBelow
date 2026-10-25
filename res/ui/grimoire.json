@@ -4,12 +4,13 @@
  "layers":[
         {
          "draworder":"topdown",
-         "id":2,
-         "name":"overlay",
+         "id":3,
+         "locked":true,
+         "name":"MainOverlay",
          "objects":[
                 {
-                 "height":600,
-                 "id":1,
+                 "height":750,
+                 "id":64,
                  "name":"main_outline",
                  "opacity":1,
                  "properties":[
@@ -31,13 +32,1143 @@
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
-                 "width":1300,
-                 "x":290,
-                 "y":250
+                 "width":1400,
+                 "x":200,
+                 "y":200
                 }, 
                 {
                  "height":0,
-                 "id":4,
+                 "id":65,
+                 "name":"page_label",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"center"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":30
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":230,
+                 "y":930
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":6,
+         "locked":true,
+         "name":"SpecialOverlay",
+         "objects":[
+                {
+                 "height":280,
+                 "id":95,
+                 "name":"special_effects_outline",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#ffaaaa7f"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ff555500"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":340,
+                 "x":1160,
+                 "y":600
+                }, 
+                {
+                 "height":0,
+                 "id":97,
+                 "name":"carry_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Carry:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":1180,
+                 "y":810
+                }, 
+                {
+                 "height":0,
+                 "id":100,
+                 "name":"spawn_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Spawn:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":1180,
+                 "y":860
+                }, 
+                {
+                 "height":0,
+                 "id":104,
+                 "name":"drop_special_carry_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":1280,
+                 "y":810
+                }, 
+                {
+                 "height":0,
+                 "id":107,
+                 "name":"drop_special_spawn_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":1280,
+                 "y":860
+                }, 
+                {
+                 "height":0,
+                 "id":124,
+                 "name":"drop_special_icon",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"sprite_index",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"sprite_scale",
+                         "type":"int",
+                         "value":5
+                        }, 
+                        {
+                         "name":"sprite_type",
+                         "type":"string",
+                         "value":""
+                        }],
+                 "rotation":0,
+                 "type":"ui_icon",
+                 "visible":true,
+                 "width":0,
+                 "x":1390,
+                 "y":630
+                }, 
+                {
+                 "height":0,
+                 "id":125,
+                 "name":"drop_special_name",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":25
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"?????"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":1180,
+                 "y":630
+                }, 
+                {
+                 "height":280,
+                 "id":126,
+                 "name":"special_effects_outline",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#ffaaaa7f"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ff555500"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":340,
+                 "x":1160,
+                 "y":240
+                }, 
+                {
+                 "height":0,
+                 "id":127,
+                 "name":"carry_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Carry:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":1180,
+                 "y":450
+                }, 
+                {
+                 "height":0,
+                 "id":128,
+                 "name":"spawn_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Spawn:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":1180,
+                 "y":500
+                }, 
+                {
+                 "height":0,
+                 "id":129,
+                 "name":"forage_special_carry_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":1280,
+                 "y":450
+                }, 
+                {
+                 "height":0,
+                 "id":130,
+                 "name":"forage_special_spawn_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":1280,
+                 "y":500
+                }, 
+                {
+                 "height":0,
+                 "id":131,
+                 "name":"forage_special_icon",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"sprite_index",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"sprite_scale",
+                         "type":"int",
+                         "value":5
+                        }, 
+                        {
+                         "name":"sprite_type",
+                         "type":"string",
+                         "value":""
+                        }],
+                 "rotation":0,
+                 "type":"ui_icon",
+                 "visible":true,
+                 "width":0,
+                 "x":1390,
+                 "y":270
+                }, 
+                {
+                 "height":0,
+                 "id":132,
+                 "name":"forage_special_name",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":25
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"?????"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":1180,
+                 "y":270
+                }, 
+                {
+                 "height":0,
+                 "id":133,
+                 "name":"consume_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Consume:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":1180,
+                 "y":400
+                }, 
+                {
+                 "height":0,
+                 "id":134,
+                 "name":"forage_special_consume_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":1280,
+                 "y":400
+                }, 
+                {
+                 "height":100,
+                 "id":141,
+                 "name":"",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#ffaaaa7f"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ff555500"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":100,
+                 "x":1380,
+                 "y":260
+                }, 
+                {
+                 "height":100,
+                 "id":142,
+                 "name":"",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#ffaaaa7f"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ff555500"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":100,
+                 "x":1380,
+                 "y":620
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":2,
+         "name":"DropOverlay",
+         "objects":[
+                {
+                 "height":330,
+                 "id":34,
+                 "name":"drop_effects_outline",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#ffaaaa7f"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ff555500"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":340,
+                 "x":700,
+                 "y":600
+                }, 
+                {
+                 "height":0,
+                 "id":50,
+                 "name":"carry_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Carry:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":720,
+                 "y":760
+                }, 
+                {
+                 "height":0,
+                 "id":51,
+                 "name":"consume_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Consume:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":720,
+                 "y":810
+                }, 
+                {
+                 "height":0,
+                 "id":53,
+                 "name":"spawn_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Spawn:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":720,
+                 "y":860
+                }, 
+                {
+                 "height":0,
+                 "id":57,
+                 "name":"drop_carry_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":820,
+                 "y":760
+                }, 
+                {
+                 "height":0,
+                 "id":58,
+                 "name":"drop_consume_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":820,
+                 "y":810
+                }, 
+                {
+                 "height":0,
+                 "id":60,
+                 "name":"drop_spawn_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":820,
+                 "y":860
+                }, 
+                {
+                 "height":0,
+                 "id":120,
+                 "name":"drop_icon",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"sprite_index",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"sprite_scale",
+                         "type":"int",
+                         "value":5
+                        }, 
+                        {
+                         "name":"sprite_type",
+                         "type":"string",
+                         "value":""
+                        }],
+                 "rotation":0,
+                 "type":"ui_icon",
+                 "visible":true,
+                 "width":0,
+                 "x":930,
+                 "y":630
+                }, 
+                {
+                 "height":0,
+                 "id":121,
+                 "name":"drop_name",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":25
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"?????"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":720,
+                 "y":630
+                }, 
+                {
+                 "height":100,
+                 "id":139,
+                 "name":"",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#ffaaaa7f"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ff555500"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":100,
+                 "x":920,
+                 "y":620
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":5,
+         "name":"ForageOverlay",
+         "objects":[
+                {
+                 "height":320,
+                 "id":80,
+                 "name":"forage_effects_outline",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#ffaaaa7f"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ff555500"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":340,
+                 "x":700,
+                 "y":240
+                }, 
+                {
+                 "height":0,
+                 "id":82,
+                 "name":"carry_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Carry:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":720,
+                 "y":390
+                }, 
+                {
+                 "height":0,
+                 "id":83,
+                 "name":"consume_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Consume:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":720,
+                 "y":440
+                }, 
+                {
+                 "height":0,
+                 "id":85,
+                 "name":"spawn_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Spawn:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":720,
+                 "y":490
+                }, 
+                {
+                 "height":0,
+                 "id":87,
+                 "name":"sacrifice_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Sacrifice:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":720,
+                 "y":540
+                }, 
+                {
+                 "height":0,
+                 "id":89,
+                 "name":"forage_carry_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":820,
+                 "y":390
+                }, 
+                {
+                 "height":0,
+                 "id":90,
+                 "name":"forage_consume_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":820,
+                 "y":440
+                }, 
+                {
+                 "height":0,
+                 "id":92,
+                 "name":"forage_spawn_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":820,
+                 "y":490
+                }, 
+                {
+                 "height":0,
+                 "id":94,
+                 "name":"forage_sacrifice_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":820,
+                 "y":540
+                }, 
+                {
+                 "height":0,
+                 "id":114,
+                 "name":"forage_icon",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"sprite_index",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"sprite_scale",
+                         "type":"int",
+                         "value":5
+                        }, 
+                        {
+                         "name":"sprite_type",
+                         "type":"string",
+                         "value":""
+                        }],
+                 "rotation":0,
+                 "type":"ui_icon",
+                 "visible":true,
+                 "width":0,
+                 "x":930,
+                 "y":270
+                }, 
+                {
+                 "height":0,
+                 "id":115,
+                 "name":"forage_name",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":25
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"?????"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":720,
+                 "y":270
+                }, 
+                {
+                 "height":100,
+                 "id":137,
+                 "name":"",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#ffaaaa7f"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ff555500"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":100,
+                 "x":920,
+                 "y":260
+                }, 
+                {
+                 "height":0,
+                 "id":147,
+                 "name":"sacrifice_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Sacrifice:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":720,
+                 "y":910
+                }, 
+                {
+                 "height":0,
+                 "id":148,
+                 "name":"drop_sacrifice_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":820,
+                 "y":910
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":4,
+         "locked":true,
+         "name":"PlantOverlay",
+         "objects":[
+                {
+                 "height":0,
+                 "id":67,
                  "name":"plant_icon",
                  "opacity":1,
                  "point":true,
@@ -61,37 +1192,13 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":310,
-                 "y":340
+                 "x":490,
+                 "y":270
                 }, 
                 {
-                 "height":0,
-                 "id":5,
-                 "name":"page_label",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"align",
-                         "type":"string",
-                         "value":"center"
-                        }, 
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":30
-                        }],
-                 "rotation":0,
-                 "type":"ui_label",
-                 "visible":true,
-                 "width":0,
-                 "x":1440,
-                 "y":770
-                }, 
-                {
-                 "height":460,
-                 "id":9,
-                 "name":"effects_outline",
+                 "height":540,
+                 "id":68,
+                 "name":"plant_effects_outline",
                  "opacity":1,
                  "properties":[
                         {
@@ -112,13 +1219,13 @@
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
-                 "width":510,
-                 "x":490,
-                 "y":340
+                 "width":350,
+                 "x":250,
+                 "y":240
                 }, 
                 {
                  "height":0,
-                 "id":17,
+                 "id":69,
                  "name":"plant_name",
                  "opacity":1,
                  "point":true,
@@ -126,7 +1233,7 @@
                         {
                          "name":"font_size",
                          "type":"int",
-                         "value":20
+                         "value":25
                         }, 
                         {
                          "name":"value",
@@ -137,36 +1244,12 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":330,
-                 "y":290
+                 "x":270,
+                 "y":270
                 }, 
                 {
                  "height":0,
-                 "id":18,
-                 "name":"effects_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"Effects:"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":490,
-                 "y":290
-                }, 
-                {
-                 "height":0,
-                 "id":19,
+                 "id":70,
                  "name":"burn_txt",
                  "opacity":1,
                  "point":true,
@@ -185,12 +1268,12 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":530,
-                 "y":360
+                 "x":280,
+                 "y":510
                 }, 
                 {
                  "height":0,
-                 "id":20,
+                 "id":71,
                  "name":"carry_txt",
                  "opacity":1,
                  "point":true,
@@ -209,36 +1292,12 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":530,
-                 "y":430
+                 "x":280,
+                 "y":570
                 }, 
                 {
                  "height":0,
-                 "id":21,
-                 "name":"consume_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"Consume:"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":530,
-                 "y":500
-                }, 
-                {
-                 "height":0,
-                 "id":22,
+                 "id":72,
                  "name":"destroy_txt",
                  "opacity":1,
                  "point":true,
@@ -257,36 +1316,12 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":530,
-                 "y":570
-                }, 
-                {
-                 "height":0,
-                 "id":23,
-                 "name":"spawn_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"Spawn:"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":530,
+                 "x":280,
                  "y":630
                 }, 
                 {
                  "height":0,
-                 "id":24,
+                 "id":73,
                  "name":"proximity_txt",
                  "opacity":1,
                  "point":true,
@@ -305,109 +1340,37 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":530,
+                 "x":280,
                  "y":690
                 }, 
                 {
                  "height":0,
-                 "id":25,
-                 "name":"sacrifice_txt",
+                 "id":75,
+                 "name":"plant_burn_action",
                  "opacity":1,
                  "point":true,
                  "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
                         {
                          "name":"font_size",
                          "type":"int",
                          "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"Sacrifice:"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":530,
-                 "y":750
-                }, 
-                {
-                 "height":0,
-                 "id":26,
-                 "name":"burn_action",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"align",
-                         "type":"string",
-                         "value":"left"
-                        }, 
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":15
                         }],
                  "rotation":0,
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":630,
-                 "y":370
-                }, 
-                {
-                 "height":0,
-                 "id":27,
-                 "name":"carry_action",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"align",
-                         "type":"string",
-                         "value":"left"
-                        }, 
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":15
-                        }],
-                 "rotation":0,
-                 "type":"ui_label",
-                 "visible":true,
-                 "width":0,
-                 "x":630,
-                 "y":440
-                }, 
-                {
-                 "height":0,
-                 "id":28,
-                 "name":"consume_action",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"align",
-                         "type":"string",
-                         "value":"left"
-                        }, 
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":15
-                        }],
-                 "rotation":0,
-                 "type":"ui_label",
-                 "visible":true,
-                 "width":0,
-                 "x":630,
+                 "x":380,
                  "y":510
                 }, 
                 {
                  "height":0,
-                 "id":29,
-                 "name":"destroy_action",
+                 "id":76,
+                 "name":"plant_carry_action",
                  "opacity":1,
                  "point":true,
                  "properties":[
@@ -419,19 +1382,19 @@
                         {
                          "name":"font_size",
                          "type":"int",
-                         "value":15
+                         "value":20
                         }],
                  "rotation":0,
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":630,
-                 "y":580
+                 "x":380,
+                 "y":570
                 }, 
                 {
                  "height":0,
-                 "id":30,
-                 "name":"spawn_action",
+                 "id":77,
+                 "name":"plant_destroy_action",
                  "opacity":1,
                  "point":true,
                  "properties":[
@@ -443,19 +1406,19 @@
                         {
                          "name":"font_size",
                          "type":"int",
-                         "value":15
+                         "value":20
                         }],
                  "rotation":0,
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":630,
-                 "y":640
+                 "x":380,
+                 "y":630
                 }, 
                 {
                  "height":0,
-                 "id":31,
-                 "name":"proximity_action",
+                 "id":78,
+                 "name":"plant_proximity_action",
                  "opacity":1,
                  "point":true,
                  "properties":[
@@ -467,38 +1430,42 @@
                         {
                          "name":"font_size",
                          "type":"int",
-                         "value":15
+                         "value":20
                         }],
                  "rotation":0,
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":630,
-                 "y":700
+                 "x":380,
+                 "y":690
                 }, 
                 {
-                 "height":0,
-                 "id":32,
-                 "name":"sacrifice_action",
+                 "height":180,
+                 "id":146,
+                 "name":"",
                  "opacity":1,
-                 "point":true,
                  "properties":[
                         {
-                         "name":"align",
-                         "type":"string",
-                         "value":"left"
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#ffaaaa7f"
                         }, 
                         {
-                         "name":"font_size",
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ff555500"
+                        }, 
+                        {
+                         "name":"line_thickness",
                          "type":"int",
-                         "value":15
+                         "value":5
                         }],
                  "rotation":0,
-                 "type":"ui_label",
+                 "type":"ui_outline",
                  "visible":true,
-                 "width":0,
-                 "x":630,
-                 "y":760
+                 "width":100,
+                 "x":480,
+                 "y":260
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -506,8 +1473,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":3,
- "nextobjectid":33,
+ "nextlayerid":7,
+ "nextobjectid":149,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

@@ -48,6 +48,7 @@
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/GrimoireUpdateEvent.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/NpcStore.hpp>
@@ -395,6 +396,7 @@ void apply_action_from_world_item( entt::registry &reg, entt::entity world_item_
   }
   auto action = plant_item->at<ActionT>().action;
   Utils::Player::get_stats( reg ).apply( action );
+  Sys::BaseSystem::get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_item->item_type, ActionT::kKey, action ) );
 }
 
 // Explicit instantiations for every Cmp::BaseAction subclass (see src/Components/Stats) - keeps the
@@ -424,6 +426,7 @@ void apply_action_from_inventory_item( entt::registry &reg )
     auto action = inventory_cmp.m_item.at<ActionT>().action;
     if ( action.health() < 0 ) reg.emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg ) );
     player_stats.apply( action );
+    Sys::BaseSystem::get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( inventory_cmp.m_item.item_type, ActionT::kKey, action ) );
   }
 }
 
@@ -445,6 +448,7 @@ void apply_action_from_item_store( entt::registry &reg, const Sys::ItemKey &item
   const auto &item = Sys::ItemStore::instance().get( item_type );
   auto action = item.at<ActionT>().action;
   Utils::Player::get_stats( reg ).apply( action );
+  Sys::BaseSystem::get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( item_type, ActionT::kKey, action ) );
 }
 
 // Explicit instantiations for every Cmp::BaseAction subclass (see src/Components/Stats) - keeps the

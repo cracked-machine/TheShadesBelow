@@ -2,6 +2,7 @@
 #define SRC_SYSTEMS_GRIMOIRESYSTEM_HPP__
 
 #include <Components/Inventory/Grimoire.hpp>
+#include <Events/GrimoireUpdateEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -9,6 +10,7 @@
 #include <Systems/Render/UiData.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
+#include <functional>
 #include <memory>
 
 namespace Game::Sys
@@ -48,14 +50,18 @@ private:
   //! @param ev
   void on_item_pickup_event( const Events::ItemPickedUpEvent &ev );
 
+  //! @brief Discover an action on a plant's grimoire page once it has been applied to the player.
+  //! @param ev
+  void on_grimoire_update_event( const Events::GrimoireUpdateEvent &ev );
+
   //! @brief Get the grimoire component.
   //! @return Pointer to the component (held by the player entity), or nullptr if no player exists.
   Cmp::Grimoire *find_grimoire();
 
-  //! @brief Get the page currently shown.
-  //! @param grimoire
-  //! @return Iterator to the page for m_item_key, or the first page if m_item_key is empty or not found.
-  [[nodiscard]] Cmp::Grimoire::PageMap::const_iterator current_page( const Cmp::Grimoire &grimoire ) const;
+  //! @brief Call fn on every grimoire subpage (across all pages) that belongs to the given item.
+  //! @param item_key
+  //! @param fn Called with the index of the page holding the subpage, and the subpage itself.
+  void for_each_subpage( const Sys::ItemKey &item_key, const std::function<void( std::size_t, Cmp::Grimoire::SubPage & )> &fn );
 
   //! @brief Time since the overlay was last toggled, used to debounce rapid toggling.
   sf::Time m_toggle_debounce;
@@ -65,8 +71,8 @@ private:
   //! @brief Layout data object for the main UI
   std::unique_ptr<Render::UiData> m_ui_data;
 
-  //! @brief Key of the page currently shown; empty means the first page.
-  Sys::ItemKey m_item_key;
+  //! @brief Index of the page currently shown.
+  std::size_t m_current_page_idx{ 0 };
 };
 
 } // namespace Game::Sys

@@ -103,13 +103,13 @@ void ItemStore::init_store()
       {
         try
         {
-          if ( action_key == "burn_action" ) { worlditem.emplace( make_action<Cmp::BurnAction>( action_value ) ); }
-          else if ( action_key == "carry_action" ) { worlditem.emplace( make_action<Cmp::CarryAction>( action_value ) ); }
-          else if ( action_key == "consume_action" ) { worlditem.emplace( make_action<Cmp::ConsumeAction>( action_value ) ); }
-          else if ( action_key == "destroy_action" ) { worlditem.emplace( make_action<Cmp::DestroyAction>( action_value ) ); }
-          else if ( action_key == "spawn_action" ) { worlditem.emplace( make_action<Cmp::SpawnAction>( action_value ) ); }
-          else if ( action_key == "proximity_action" ) { worlditem.emplace( make_action<Cmp::ProximityAction>( action_value ) ); }
-          else if ( action_key == "sacrifice_action" ) { worlditem.emplace( make_action<Cmp::SacrificeAction>( action_value ) ); }
+          if ( action_key == Cmp::BurnAction::kKey ) { worlditem.emplace( make_action<Cmp::BurnAction>( action_value ) ); }
+          else if ( action_key == Cmp::CarryAction::kKey ) { worlditem.emplace( make_action<Cmp::CarryAction>( action_value ) ); }
+          else if ( action_key == Cmp::ConsumeAction::kKey ) { worlditem.emplace( make_action<Cmp::ConsumeAction>( action_value ) ); }
+          else if ( action_key == Cmp::DestroyAction::kKey ) { worlditem.emplace( make_action<Cmp::DestroyAction>( action_value ) ); }
+          else if ( action_key == Cmp::SpawnAction::kKey ) { worlditem.emplace( make_action<Cmp::SpawnAction>( action_value ) ); }
+          else if ( action_key == Cmp::ProximityAction::kKey ) { worlditem.emplace( make_action<Cmp::ProximityAction>( action_value ) ); }
+          else if ( action_key == Cmp::SacrificeAction::kKey ) { worlditem.emplace( make_action<Cmp::SacrificeAction>( action_value ) ); }
           else { SPDLOG_WARN( "Unknown action key: {}", action_key ); }
         } catch ( const std::exception &e )
         {

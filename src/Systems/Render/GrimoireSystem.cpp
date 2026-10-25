@@ -1,6 +1,8 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Inventory/Grimoire.hpp>
 #include <Components/Stats/CarryAction.hpp>
+#include <Components/Stats/ProximityAction.hpp>
+#include <Components/Toxicity/Toxidrome.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <SFML/Graphics/Color.hpp>
@@ -13,9 +15,11 @@
 #include <entt/entity/registry.hpp>
 #include <entt/entity/view.hpp>
 #include <format>
-#include <iterator>
+#include <optional>
 #include <spdlog/spdlog.h>
 #include <string_view>
+#include <utility>
+#include <vector>
 
 namespace Game::Sys
 {
@@ -24,6 +28,24 @@ namespace
 {
 constexpr float kToggleDebounceThreshold = 1.f;
 constexpr float kNavigateDebounceThreshold = 0.5f;
+
+//! @brief Map a grimoire.json object name (e.g. "forage_carry_action") to the page's subpage for its
+//! prefix and the remainder of the name (e.g. "carry_action").
+//! @return The subpage, or nullptr if the name has no subpage prefix.
+std::pair<const Cmp::Grimoire::SubPage *, std::string_view> resolve_subpage( const Cmp::Grimoire::Page &page, std::string_view name )
+{
+  // the *_special_ prefixes must come before forage_/drop_ as the first matching prefix wins
+  const std::pair<std::string_view, const Cmp::Grimoire::SubPage *> prefixes[] = { { "forage_special_", &page.forage_special_subpage },
+                                                                                   { "drop_special_", &page.drop_special_subpage },
+                                                                                   { "plant_", &page.plant_subpage },
+                                                                                   { "forage_", &page.forage_subpage },
+                                                                                   { "drop_", &page.drop_subpage } };
+  for ( const auto &[prefix, sub_page] : prefixes )
+  {
+    if ( name.starts_with( prefix ) ) { return { sub_page, name.substr( prefix.size() ) }; }
+  }
+  return { nullptr, name };
+}
 } // namespace
 
 GrimoireSystem::GrimoireSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
@@ -31,6 +53,7 @@ GrimoireSystem::GrimoireSystem( entt::registry &reg, sf::RenderWindow &window, A
 {
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&GrimoireSystem::on_player_action>( this );
   std::ignore = get_systems_event_queue().sink<Events::ItemPickedUpEvent>().connect<&GrimoireSystem::on_item_pickup_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::GrimoireUpdateEvent>().connect<&GrimoireSystem::on_grimoire_update_event>( this );
 
   m_ui_data = std::make_unique<Render::UiData>( "res/ui/grimoire.json" );
 }
@@ -55,27 +78,46 @@ Cmp::Grimoire *GrimoireSystem::find_grimoire()
   return &grimoire_view.get<Cmp::Grimoire>( grimoire_view.front() );
 }
 
-Cmp::Grimoire::PageMap::const_iterator GrimoireSystem::current_page( const Cmp::Grimoire &grimoire ) const
+void GrimoireSystem::for_each_subpage( const Sys::ItemKey &item_key, const std::function<void( std::size_t, Cmp::Grimoire::SubPage & )> &fn )
 {
-  auto it = grimoire.pages.find( m_item_key );
-  return it != grimoire.pages.end() ? it : grimoire.pages.begin();
+  auto *grimoire_cmp = find_grimoire();
+  if ( not grimoire_cmp or item_key.empty() ) { return; }
+
+  for ( std::size_t page_idx = 0; page_idx < grimoire_cmp->pages.size(); ++page_idx )
+  {
+    Cmp::Grimoire::Page &page = grimoire_cmp->pages[page_idx];
+    for ( Cmp::Grimoire::SubPage *sub_page :
+          { &page.plant_subpage, &page.forage_subpage, &page.drop_subpage, &page.forage_special_subpage, &page.drop_special_subpage } )
+    {
+      if ( sub_page->item_key == item_key ) { fn( page_idx, *sub_page ); }
+    }
+  }
 }
 
 void GrimoireSystem::on_item_pickup_event( const Events::ItemPickedUpEvent &ev )
 {
-  auto *grimoire_cmp = find_grimoire();
-  if ( not grimoire_cmp ) { return; }
-
-  // only items that have a grimoire page can be discovered
-  auto page_it = grimoire_cmp->pages.find( ev.m_item );
-  if ( page_it == grimoire_cmp->pages.end() ) { return; }
-
   const auto &item = Sys::ItemStore::instance().get( ev.m_item );
-  auto &page = page_it->second;
-  page.sprite_key = item.sprite_type;
-  if ( item.has_action<Cmp::CarryAction>() ) { page.action_map.insert_or_assign( "carry_action", item.get_action<Cmp::CarryAction>() ); }
+  for_each_subpage( ev.m_item, [&]( std::size_t page_idx, Cmp::Grimoire::SubPage &sub_page )
+  {
+    sub_page.sprite_key = item.sprite_type;
+    if ( item.has_action<Cmp::CarryAction>() )
+    {
+      sub_page.action_map.insert_or_assign( std::string( Cmp::CarryAction::kKey ), item.get_action<Cmp::CarryAction>() );
+    }
+    if ( not is_grimoire_overlay_open() ) { m_current_page_idx = page_idx; }
+  } );
+}
 
-  SPDLOG_DEBUG( "Grimoire page discovered: {}", ev.m_item );
+void GrimoireSystem::on_grimoire_update_event( const Events::GrimoireUpdateEvent &ev )
+{
+  if ( ev.m_action_key == Cmp::ProximityAction::kKey and ev.m_action.is_zero() ) { return; }
+  const auto &item = Sys::ItemStore::instance().get( ev.m_item );
+  for_each_subpage( ev.m_item, [&]( std::size_t page_idx, Cmp::Grimoire::SubPage &sub_page )
+  {
+    sub_page.sprite_key = item.sprite_type;
+    sub_page.action_map.insert_or_assign( ev.m_action_key, ev.m_action );
+    if ( not is_grimoire_overlay_open() ) { m_current_page_idx = page_idx; }
+  } );
 }
 
 void GrimoireSystem::on_player_action( Events::PlayerActionEvent ev )
@@ -93,20 +135,17 @@ void GrimoireSystem::on_player_action( Events::PlayerActionEvent ev )
   if ( not grimoire_cmp->is_enabled or grimoire_cmp->pages.empty() ) { return; }
   if ( m_navigate_debounce.asSeconds() < kNavigateDebounceThreshold ) { return; }
 
-  const auto &pages = grimoire_cmp->pages;
   if ( ev.action == Events::PlayerActionEvent::GameActions::GRIMOIRE_PREV )
   {
-    auto it = current_page( *grimoire_cmp );
-    it = ( it == pages.begin() ) ? std::prev( pages.end() ) : std::prev( it );
-    m_item_key = it->first;
+    // step backwards and wrap around
+    m_current_page_idx = ( m_current_page_idx - 1 + grimoire_cmp->pages.size() ) % grimoire_cmp->pages.size();
     m_navigate_debounce = sf::Time::Zero;
     m_sound_bank.get_effect( "page_turn" ).play();
   }
   else if ( ev.action == Events::PlayerActionEvent::GameActions::GRIMOIRE_NEXT )
   {
-    auto it = std::next( current_page( *grimoire_cmp ) );
-    if ( it == pages.end() ) { it = pages.begin(); }
-    m_item_key = it->first;
+    // step forwards and wrap around
+    m_current_page_idx = ( m_current_page_idx + 1 ) % grimoire_cmp->pages.size();
     m_navigate_debounce = sf::Time::Zero;
     m_sound_bank.get_effect( "page_turn" ).play();
   }
@@ -118,9 +157,7 @@ void GrimoireSystem::render()
   const auto *grimoire_cmp = find_grimoire();
   if ( not grimoire_cmp or not grimoire_cmp->is_enabled or grimoire_cmp->pages.empty() ) return;
 
-  const auto page_it = current_page( *grimoire_cmp );
-  const auto &page = page_it->second;
-  const auto page_num = std::distance( grimoire_cmp->pages.begin(), page_it ) + 1;
+  const Cmp::Grimoire::Page &current_page = grimoire_cmp->pages.at( m_current_page_idx );
 
   for ( const auto &outline : m_ui_data->m_outlines )
   {
@@ -133,65 +170,85 @@ void GrimoireSystem::render()
   }
   for ( const auto &icon : m_ui_data->m_icons )
   {
-    if ( icon.name == "plant_icon" )
-    {
-      const Sys::SpriteKey sprite_key = page.sprite_key.empty() ? Sys::SpriteKey( "sprite.plant.unknown" ) : page.sprite_key;
-      RenderSystem::safe_render_sprite_screen( sprite_key, { icon.rect.position, Constants::kGridSizePxF }, 0,
-                                               { static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) } );
-    }
+    const auto [sub_page, suffix] = resolve_subpage( current_page, icon.name );
+    if ( not sub_page or suffix != "icon" ) { continue; }
+
+    Sys::SpriteKey sprite_key = sub_page->sprite_key;
+    RenderSystem::safe_render_sprite_screen( sprite_key, { icon.rect.position, Constants::kGridSizePxF }, 0,
+                                             { static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) } );
   }
+  // Tiled point y is the text baseline; sf::Text draws its baseline ~font_size below its position, so shift up by font_size
+  // so that texts/labels of different font sizes at the same y line up
   for ( const auto &label : m_ui_data->m_labels )
   {
+    TextColumn draw_line{ .self = *this,
+                          .cache_key = "grimoire_" + label.name,
+                          .origin = label.rect.position - sf::Vector2f{ 0.f, static_cast<float>( label.font_size ) },
+                          .font_size = static_cast<unsigned int>( label.font_size ),
+                          .line_height = static_cast<float>( label.font_size ) * 1.2f };
     if ( label.name == "page_label" )
     {
-      const auto font_size = static_cast<unsigned int>( label.font_size );
-      const auto line_height = static_cast<float>( label.font_size ) * 1.2f;
-      TextColumn draw_line{
-          .self = *this, .cache_key = "grimoire_page_num", .origin = label.rect.position, .font_size = font_size, .line_height = line_height };
-      draw_line( std::format( "{} of {}", page_num, grimoire_cmp->pages.size() ), sf::Color::Black );
+      draw_line( std::format( "{} of {}", m_current_page_idx + 1, grimoire_cmp->pages.size() ), sf::Color::Black );
+      continue;
     }
-    else if ( label.name.contains( "action" ) )
-    {
-      TextColumn draw_line{ .self = *this,
-                            .cache_key = "grimoire_" + label.name,
-                            .origin = label.rect.position,
-                            .font_size = static_cast<unsigned int>( label.font_size ),
-                            .line_height = label.font_size * 1.2f };
-      const auto action_it = page.action_map.find( label.name );
-      if ( action_it == page.action_map.end() )
-      {
-        draw_line( "?????", sf::Color::Black );
-        continue;
-      }
 
-      // one line per non-zero stat, or "none" if the action is discovered but has no effect
-      const Cmp::BaseAction &action = action_it->second;
-      bool has_effect = false;
-      const auto draw_stat = [&]( std::string_view stat_name, int value )
-      {
-        if ( value == 0 ) { return; }
-        draw_line( std::format( "{}: {}", stat_name, value ), sf::Color::Black );
-        has_effect = true;
-      };
-      draw_stat( "health", action.health() );
-      draw_stat( "fear", action.fear() );
-      draw_stat( "despair", action.despair() );
-      draw_stat( "infamy", action.infamy() );
-      draw_stat( "luck", action.luck() );
-      if ( not has_effect ) { draw_line( "none", sf::Color::Black ); }
+    const auto [sub_page, action_key] = resolve_subpage( current_page, label.name );
+    if ( not sub_page or not action_key.ends_with( "_action" ) ) { continue; }
+
+    const auto action_it = sub_page->action_map.find( std::string( action_key ) );
+    if ( action_it == sub_page->action_map.end() )
+    {
+      draw_line( "?????", sf::Color::Black );
+      continue;
     }
+    // one line per non-zero stat, or "none" if the action is discovered but has no effect
+    const Cmp::BaseAction &action = action_it->second;
+    const std::string tick_suffix = action.interval() > 0.f ? std::format( "pt/{:g}s", action.interval() ) : "";
+    bool has_effect = false;
+    const auto draw_stat = [&]( std::string_view stat_name, int value )
+    {
+      if ( value == 0 ) { return; }
+      draw_line( std::format( "{}: {}{}", stat_name, value, tick_suffix ), sf::Color::Black );
+      has_effect = true;
+    };
+    draw_stat( "health", action.health() );
+    draw_stat( "fear", action.fear() );
+    draw_stat( "despair", action.despair() );
+    draw_stat( "infamy", action.infamy() );
+    draw_stat( "luck", action.luck() );
+    // only the toxidromes this action changes; a multi-type list (cures) shares one toxicity, so show it as "all"
+    const Cmp::Toxicity::Toxidrome &toxidrome = action.toxidrome();
+    std::vector<std::pair<std::string_view, int>> toxidrome_stats;
+    const auto add_toxidrome = [&]( std::string_view name, std::optional<int> value )
+    {
+      if ( value.value_or( 0 ) != 0 ) { toxidrome_stats.emplace_back( name, *value ); }
+    };
+    add_toxidrome( "tachycardia", toxidrome.at<Cmp::Toxicity::Tachycardia>() );
+    add_toxidrome( "bradycardia", toxidrome.at<Cmp::Toxicity::Bradycardia>() );
+    add_toxidrome( "hallucinogen", toxidrome.at<Cmp::Toxicity::Hallucinogen>() );
+    add_toxidrome( "hypoxia", toxidrome.at<Cmp::Toxicity::Hypoxia>() );
+    add_toxidrome( "phototoxia", toxidrome.at<Cmp::Toxicity::Phototoxia>() );
+    add_toxidrome( "venom", toxidrome.at<Cmp::Toxicity::Venom>() );
+    add_toxidrome( "vertigo", toxidrome.at<Cmp::Toxicity::Vertigo>() );
+    if ( toxidrome_stats.size() > 1 ) { draw_stat( "all", toxidrome_stats.front().second ); }
+    else
+    {
+      for ( const auto &[name, value] : toxidrome_stats )
+      {
+        draw_stat( name, value );
+      }
+    }
+    if ( not has_effect ) { draw_line( "none", sf::Color::Black ); }
   }
   for ( const auto &text : m_ui_data->m_texts )
   {
     TextColumn draw_line{ .self = *this,
                           .cache_key = "grimoire_" + text.name,
-                          .origin = text.rect.position,
+                          .origin = text.rect.position - sf::Vector2f{ 0.f, static_cast<float>( text.font_size ) },
                           .font_size = static_cast<unsigned int>( text.font_size ),
-                          .line_height = text.font_size * 1.2f };
-    if ( text.name == "plant_name" and not page.sprite_key.empty() )
-    {
-      draw_line( Sys::SpriteStore::instance().get( page.sprite_key ).display_name(), sf::Color::Black );
-    }
+                          .line_height = static_cast<float>( text.font_size ) * 1.2f };
+    const auto [sub_page, suffix] = resolve_subpage( current_page, text.name );
+    if ( sub_page and suffix == "name" ) { draw_line( Sys::SpriteStore::instance().get( sub_page->sprite_key ).display_name(), sf::Color::Black ); }
     else { draw_line( text.value, sf::Color::Black ); }
   }
 }

@@ -53,4 +53,9 @@ BaseAction &BaseAction::operator=( BaseAction &&other ) noexcept = default;
 
 const Cmp::Toxicity::Toxidrome &BaseAction::toxidrome() const { return *m_toxidrome; }
 
+bool BaseAction::is_zero() const
+{
+  return m_health == 0 and m_fear == 0 and m_despair == 0 and m_infamy == 0 and m_luck == 0 and m_toxidrome->begin() == m_toxidrome->end();
+}
+
 } // namespace Game::Cmp
