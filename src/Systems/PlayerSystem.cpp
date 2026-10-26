@@ -1030,7 +1030,7 @@ void PlayerSystem::fade_player_on_wormhole_jump()
   if ( wormhole_jump )
   {
     // Calculate fade based on elapsed time vs total cooldown
-    float elapsed = wormhole_jump->jump_clock.getElapsedTime().asSeconds();
+    float elapsed = wormhole_jump->jump_elapsed.asSeconds();
     float cooldown = wormhole_jump->jump_cooldown.asSeconds();
     float progress = std::min( elapsed / cooldown, 1.0f ); // 0.0 to 1.0
     Utils::Player::get_alpha( reg() ).setAlpha( static_cast<uint8_t>( 255 * ( 1.0f - progress ) ) );

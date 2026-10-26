@@ -30,11 +30,6 @@ public:
   //! @param dt Delta time since last update call
   void update( sf::Time dt );
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief Rate-limit the spawning of Watchman NPCs
   sf::Time m_watchman_spawn_timer;

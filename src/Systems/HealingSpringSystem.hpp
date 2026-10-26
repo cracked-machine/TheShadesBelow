@@ -40,11 +40,6 @@ public:
   //! @brief Deposit the player's curse tablet at the spring for wealth, if they are carrying one and standing near it.
   void check_inventory_deposit();
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief Dispatcher reference for scene management events
   entt::dispatcher &m_scenemanager_event_dispatcher;

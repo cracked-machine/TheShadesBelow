@@ -61,11 +61,6 @@ public:
   //! @brief Force the player's very next damage check to land regardless of the damage cooldown timer.
   void force_expire_damage_cooldown();
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief True while a recent push/pull obstacle move is still suppressing player movement.
   bool movement_suppressed();

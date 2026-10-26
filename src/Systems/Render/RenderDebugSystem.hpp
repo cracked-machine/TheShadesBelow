@@ -47,11 +47,6 @@ public:
   //! the z-order queue (`s_zorder_queue`) that call refreshes.
   void render_debug();
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief Debug-draw the spatial hash grid navmesh: the neighbour bucket size and cell edges at every position in view.
   void render_navmesh();

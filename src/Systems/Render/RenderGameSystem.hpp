@@ -133,11 +133,6 @@ private:
   //! @param color
   void render_screen_flash( sf::Color color );
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
   //! @brief Smoothed camera position, lerped towards the player's position each frame.
   sf::Vector2f m_camera_position{ 0.f, 0.f };
 

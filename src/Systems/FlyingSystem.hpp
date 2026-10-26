@@ -47,11 +47,6 @@ public:
   //! @param dt
   void update( sf::Time dt );
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
   //! @brief Whether `entity` still blocks the player while flying.
   //! Uses the sprite sheet's flying_collision_mask (per cell for multiblocks) when specified. Otherwise walls, level
   //! boundaries and segments of multiblocks larger than 1x1 block; everything else can be flown over.

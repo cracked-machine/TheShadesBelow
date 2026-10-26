@@ -40,11 +40,6 @@ public:
   //! @brief polymorphic destructor for derived classes
   virtual ~RenderSystem();
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
   //! @brief Get the current view of the game world. See RenderSystem::kWorldViewSize.
   //! @return const sf::View&
   static const sf::View &get_world_view() { return s_world_view; }

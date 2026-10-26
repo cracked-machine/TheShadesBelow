@@ -18,7 +18,9 @@
 #include <SceneControl/Scenes/SettingsMenuScene.hpp>
 #include <SceneControl/Scenes/ShopScene.hpp>
 #include <SceneControl/Scenes/TitleScene.hpp>
+#include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Stores/SystemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 
 namespace Game::Scene
@@ -125,11 +127,12 @@ void SceneManager::pop( RegCopyMode mode )
   }
 }
 
-void SceneManager::pop_no_exit( RegCopyMode mode )
+void SceneManager::pop_no_enter( RegCopyMode mode )
 {
   if ( m_scene_stack.size() == 1 ) return;
 
   RegistryTransfer::RegCopy reg_copy = m_reg_xfer.copy_reg( m_scene_stack.current(), mode );
+  loading_screen( [&]() { m_scene_stack.current().on_exit(); }, m_splash_texture );
 
   m_scene_stack.pop();
   m_scene_stack.print_stack();
@@ -143,7 +146,8 @@ void SceneManager::pop_no_exit( RegCopyMode mode )
     m_reg_xfer.xfer_component_entt<Cmp::Ruin::ObjectiveType>( *reg_copy, m_scene_stack.current().registry() );
   }
 
-  loading_screen( [&]() { m_scene_stack.current().on_enter(); }, m_splash_texture );
+  // the overlay may have changed persistent settings (e.g. volume), so refresh the revealed scene's copy
+  m_system_store.find<Sys::Store::Type::PersistSystem>().load_state();
 }
 
 void SceneManager::replace( std::unique_ptr<IScene> new_scene, RegCopyMode mode )
@@ -299,7 +303,7 @@ void SceneManager::handle_events( const Events::SceneManagerEvent &event )
     }
     case Events::SceneManagerEvent::Type::RESUME_GAME: {
       SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::RESUME_GAME requested" );
-      pop_no_exit();
+      pop_no_enter();
       break;
     }
     case Events::SceneManagerEvent::Type::GAME_OVER: {

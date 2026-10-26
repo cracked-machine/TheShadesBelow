@@ -41,11 +41,6 @@ public:
   //! @return std::vector<Sprites::IShaderSprite *>
   [[nodiscard]] static std::vector<Sprites::IShaderSprite *> find_post_process_chain( entt::registry &reg );
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {};
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {};
-
 private:
   //! @brief Add a wrapped shader sprite and zorder component to the registry
   //! @param owner

@@ -59,9 +59,10 @@ public:
   //! @brief Pop the current scene
   //! @param mode Which components (if any) to copy from the popped scene's registry into the scene beneath it
   void pop( RegCopyMode mode = RegCopyMode::NONE );
-  //! @brief Pop the current overlay scene - do not call on_enter() for the scene below this on the stack
+  //! @brief Pop the current overlay scene, calling its on_exit() - do not call on_enter() for the scene below
+  //! this on the stack. Persistent state is reloaded into the revealed scene's registry instead.
   //! @param mode Which components (if any) to copy from the popped scene's registry into the scene beneath it
-  void pop_no_exit( RegCopyMode mode = RegCopyMode::NONE );
+  void pop_no_enter( RegCopyMode mode = RegCopyMode::NONE );
 
   //! @brief Replace the current scene with a new one
   //! @param scene The scene to replace the current scene with

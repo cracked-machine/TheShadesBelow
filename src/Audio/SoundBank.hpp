@@ -32,6 +32,12 @@ public:
 
   void stop_all();
 
+  //! @brief Pauses every sound effect that is currently playing.
+  void pause_effects();
+
+  //! @brief Resumes every sound effect that was paused (e.g. by pause_effects()).
+  void resume_effects();
+
   //! @brief Returns a reference to the pooled sf::Sound instance for `name`.
   //! Bind with `auto &`/`const auto &` - copying into a local (`auto`) creates a
   //! disconnected sf::Sound with its own OpenAL source, so calls like .play()/.stop()

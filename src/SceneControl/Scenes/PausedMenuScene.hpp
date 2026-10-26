@@ -12,8 +12,9 @@ namespace Game::Audio { class SoundBank; }
 namespace Game::Scene
 {
 
-//! @brief The pause menu overlay: freezes gameplay clocks, renders the pause menu, and persists
-//! volume settings while paused.
+//! @brief The pause menu overlay: renders the pause menu and persists volume settings while paused.
+//! Gameplay is frozen because SceneManager only updates the top scene, so the gameplay scene beneath
+//! receives no dt while this scene is active.
 class PausedMenuScene : public Scene<Events::ProcessPausedMenuSceneInputEvent>
 {
 public:
@@ -31,10 +32,10 @@ public:
   //! @brief Logs scene initialization; no world entities are created for this scene
   void on_init() override;
 
-  //! @brief Reloads persistent state and triggers Events::PauseClocksEvent to freeze gameplay clocks
+  //! @brief Reloads persistent state and pauses any playing sound effects
   void on_enter() override;
 
-  //! @brief Saves persistent state (volume settings changed via UI) and triggers Events::ResumeClocksEvent
+  //! @brief Saves persistent state (volume settings changed via UI) and resumes paused sound effects
   void on_exit() override;
 
   //! @brief Get the name of the scene

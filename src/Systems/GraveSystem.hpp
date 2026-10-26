@@ -31,11 +31,6 @@ public:
   //! @brief Use Cmp::SelectedPosition to mark targetted graves and destroy them when appropriate tool is equipped.
   void update();
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief handler for Events::PlayerActionEvent::GameActions::DIG
   //! @param event

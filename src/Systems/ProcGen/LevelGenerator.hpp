@@ -122,11 +122,6 @@ public:
   //! @brief Post-levelgen Cmp::Obstacle/Cmp::ObstacleCap entities are no longer needed in the reserved spatial map
   void cleanup_reserved();
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief Roll `init_chance` for `entity`/`pos_cmp` and, if it succeeds, register it as an obstacle in
   //!        both `m_obstacle_sm` and `reserved_sm`.

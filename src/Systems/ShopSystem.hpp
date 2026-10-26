@@ -50,11 +50,6 @@ public:
   //! @param ev
   void on_buy_shop_item( const Events::BuyShopItemEvent &ev ) { buy_shop_item( ev.m_item_idx ); }
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
   // const Cmp::Shop::Inventory::Config &get_inventory_config() { return m_shop_inventory_config; }
 
 private:

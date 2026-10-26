@@ -34,11 +34,6 @@ public:
   //! @brief Create a wisp NPC at a random location. Uses `m_open_navmesh` to pathfind freely around the scene.
   void spawn_wisp();
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief Add a new pathfinding target for the wisp NPC.
   //! @param wisp_entt

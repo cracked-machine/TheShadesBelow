@@ -81,11 +81,6 @@ public:
   //! @return std::vector<ParticleSystem::entt_ps_pair>
   [[nodiscard]] static std::vector<entt_ps_pair> find( entt::registry &reg, const std::string &tag );
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {};
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {};
-
 private:
   //! @brief Add a wrapped particle sprite and zorder component to the registry
   //! @param owner

@@ -55,11 +55,6 @@ public:
   SceneInputRouter( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::dispatcher &nav_event_dispatcher,
                     entt::dispatcher &scenemanager_event_dispatcher );
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
   //! @brief Process input while the title scene is active.
   void title_scene_input_handler();
   //! @brief Process input while the settings menu scene is active.

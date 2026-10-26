@@ -147,7 +147,7 @@ void HealingSpringScene::do_update( sf::Time dt )
 {
   m_sys.find<Sys::Store::Type::AnimSystem>().update( dt );
   m_sys.find<Sys::Store::Type::NpcSystem>().update( dt );
-  m_sys.find<Sys::Store::Type::FootstepSystem>().update();
+  m_sys.find<Sys::Store::Type::FootstepSystem>().update( dt );
   m_sys.find<Sys::Store::Type::LootSystem>().check_loot_collision( dt );
   m_sys.find<Sys::Store::Type::HealingSpringSystem>().check_exit_collision();
   m_sys.find<Sys::Store::Type::InventorySystem>().update( dt );

@@ -61,6 +61,22 @@ void SoundBank::stop_all()
   }
 }
 
+void SoundBank::pause_effects()
+{
+  for ( auto &[name, effects_data] : sounds )
+  {
+    if ( effects_data.control.getStatus() == sf::Sound::Status::Playing ) effects_data.control.pause();
+  }
+}
+
+void SoundBank::resume_effects()
+{
+  for ( auto &[name, effects_data] : sounds )
+  {
+    if ( effects_data.control.getStatus() == sf::Sound::Status::Paused ) effects_data.control.play();
+  }
+}
+
 sf::Sound &SoundBank::get_effect( const std::string &name )
 {
   if ( sounds.find( name ) != sounds.end() ) { return sounds.at( name ).control; }

@@ -66,11 +66,6 @@ public:
   //! @param zorder
   void create_explosive( Cmp::Position pos, const Sys::ItemKey &item, float zorder );
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;

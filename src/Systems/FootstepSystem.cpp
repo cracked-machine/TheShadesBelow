@@ -55,7 +55,7 @@ std::optional<FootstepVariant> footstep_variant_for( const sf::Vector2f &dir )
 namespace Game::Sys
 {
 
-void FootstepSystem::update()
+void FootstepSystem::update( sf::Time dt )
 {
 
   // add new footstep for player
@@ -70,7 +70,8 @@ void FootstepSystem::update()
   auto view = reg().view<Cmp::FootStepTimer, Cmp::FootStepAlpha>();
   for ( auto [entity, timer, alpha] : view.each() )
   {
-    if ( timer.m_clock.getElapsedTime() > sf::seconds( Sys::PersistSystem::get<Cmp::Persist::PlayerFootstepFadeDelay>( reg() ).get_value() ) )
+    timer.m_elapsed += dt;
+    if ( timer.m_elapsed > sf::seconds( Sys::PersistSystem::get<Cmp::Persist::PlayerFootstepFadeDelay>( reg() ).get_value() ) )
     {
       alpha.m_alpha -= kFootstepFadeFactor;
       if ( alpha.m_alpha <= 0 )
@@ -92,26 +93,6 @@ void FootstepSystem::update()
   {
     play_footsteps_sound();
     m_footstep_sfx_distance -= footstep_sfx_stride_length;
-  }
-}
-
-void FootstepSystem::on_pause()
-{
-  auto footstep_timer_view = reg().view<Cmp::FootStepTimer>();
-  for ( auto [entity, timer] : footstep_timer_view.each() )
-  {
-    // pause each footstep timer clock
-    timer.m_clock.stop();
-  }
-}
-
-void FootstepSystem::on_resume()
-{
-  auto footstep_timer_view = reg().view<Cmp::FootStepTimer>();
-  for ( auto [entity, timer] : footstep_timer_view.each() )
-  {
-    // resume each footstep timer clock
-    timer.m_clock.start();
   }
 }
 

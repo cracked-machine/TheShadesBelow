@@ -36,20 +36,6 @@ public:
   BaseSystem &operator=( const BaseSystem & ) = delete;
   BaseSystem &operator=( BaseSystem && ) = delete;
 
-  //! @brief Event handler for pausing system clocks. Must be implemented by derived classes.
-  //! @note If you register this handler with the event dispatcher, this function is automcatically
-  //! called when the game is paused.
-  /// For example:
-  /// `std::ignore = getEventDispatcher().sink<Events::PauseClocksEvent>().connect<&Sys::DerivedSystem::onPause>(this);`
-  virtual void on_pause() = 0;
-
-  //! @brief Event handler for resuming system clocks. Must be implemented by derived classes.
-  //! @note If you register this handler with the event dispatcher, this function is automcatically
-  //! called when the game is resumed.
-  /// For example:
-  /// `std::ignore = getEventDispatcher().sink<Events::ResumeClocksEvent>().connect<&Sys::DerivedSystem::onResume>(this);`
-  virtual void on_resume() = 0;
-
   //! @brief Singleton event dispatcher shared by all systems.
   //! @note Use this to get temporary access to the dispatcher to register event handlers.
   static entt::dispatcher &get_systems_event_queue()

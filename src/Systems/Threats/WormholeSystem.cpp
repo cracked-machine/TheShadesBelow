@@ -25,8 +25,6 @@
 #include <Components/Wormhole/MultiBlock.hpp>
 #include <Components/Wormhole/Singularity.hpp>
 #include <Components/ZOrderValue.hpp>
-#include <Events/PauseClocksEvent.hpp>
-#include <Events/ResumeClocksEvent.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
@@ -53,15 +51,10 @@ namespace Game::Sys
 WormholeSystem::WormholeSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
     : BaseSystem( reg, window, sound_bank )
 {
-
-  // The entt::dispatcher is independent of the registry, so it is safe to bind event handlers in the constructor
-  get_systems_event_queue().sink<Events::PauseClocksEvent>().connect<&Sys::WormholeSystem::on_pause>( this );
-  get_systems_event_queue().sink<Events::ResumeClocksEvent>().connect<&Sys::WormholeSystem::on_resume>( this );
-
   SPDLOG_DEBUG( "WormholeSystem initialized" );
 }
 
-void WormholeSystem::check_player_wormhole_collision()
+void WormholeSystem::check_player_wormhole_collision( sf::Time dt )
 {
   auto wormhole_view = reg().view<Cmp::Wormhole::Singularity, Cmp::Position>();
   auto all_actors_view = reg().view<Cmp::Direction, Cmp::Position>();
@@ -73,6 +66,7 @@ void WormholeSystem::check_player_wormhole_collision()
   auto jump_view = reg().view<Cmp::Wormhole::Jump>();
   for ( auto [entity, jump_cmp] : jump_view.each() )
   {
+    jump_cmp.jump_elapsed += dt;
     bool still_colliding = false;
 
     auto *jump_pos_cmp = reg().try_get<Cmp::Position>( entity );
@@ -132,7 +126,7 @@ void WormholeSystem::check_player_wormhole_collision()
   for ( auto [entity, jump_cmp] : jump_view.each() )
   {
     // Check if cooldown complete
-    float elapsed = jump_cmp.jump_clock.getElapsedTime().asSeconds();
+    float elapsed = jump_cmp.jump_elapsed.asSeconds();
     float cooldown = jump_cmp.jump_cooldown.asSeconds();
 
     if ( elapsed >= cooldown ) { teleport_ready_count++; }
@@ -182,7 +176,7 @@ sf::Time WormholeSystem::jump_sequence_elapsed( entt::registry &reg )
   sf::Time elapsed = sf::Time::Zero;
   for ( auto [entity, jump_cmp] : reg.view<Cmp::Wormhole::Jump>().each() )
   {
-    elapsed = std::max( elapsed, jump_cmp.jump_clock.getElapsedTime() );
+    elapsed = std::max( elapsed, jump_cmp.jump_elapsed );
   }
   return elapsed;
 }
@@ -268,28 +262,6 @@ void WormholeSystem::spawn_wormhole( SpawnPhase phase )
 
   SPDLOG_INFO( "Added {} to ({}, {}) with zorder: {}", wormhole_ss.type(), multiblock_pos.position.x, multiblock_pos.position.y,
                multiblock_pos.position.y - multiblock_pos.size.y );
-}
-
-void WormholeSystem::on_pause()
-{
-  if ( m_sound_bank.get_effect( "wormhole_jump" ).getStatus() == sf::Sound::Status::Playing ) m_sound_bank.get_effect( "wormhole_jump" ).pause();
-
-  auto jump_view = reg().view<Cmp::Wormhole::Jump>();
-  for ( auto [entity, jump_cmp] : jump_view.each() )
-  {
-    jump_cmp.jump_clock.stop();
-  }
-}
-
-void WormholeSystem::on_resume()
-{
-  if ( m_sound_bank.get_effect( "wormhole_jump" ).getStatus() == sf::Sound::Status::Paused ) m_sound_bank.get_effect( "wormhole_jump" ).play();
-
-  auto jump_view = reg().view<Cmp::Wormhole::Jump>();
-  for ( auto [entity, jump_cmp] : jump_view.each() )
-  {
-    jump_cmp.jump_clock.start();
-  }
 }
 
 void WormholeSystem::clear_footprint( const sf::FloatRect &bounds )

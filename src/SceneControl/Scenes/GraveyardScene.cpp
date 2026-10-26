@@ -287,16 +287,16 @@ void GraveyardScene::do_update( sf::Time dt )
   }
 
   PROFILED( m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().update( dt ) );
-  PROFILED( m_sys.find<Sys::Store::Type::BombSystem>().update() );
+  PROFILED( m_sys.find<Sys::Store::Type::BombSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::LootSystem>().check_loot_collision( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::LootSystem>().update_loot_container_particles() );
   PROFILED( m_sys.find<Sys::Store::Type::NpcSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::WispSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::WispSystem>().spawn_wisp() );
   PROFILED( m_sys.find<Sys::Store::Type::WatchmanSystem>().update( dt ) );
-  PROFILED( m_sys.find<Sys::Store::Type::WormholeSystem>().check_player_wormhole_collision() );
+  PROFILED( m_sys.find<Sys::Store::Type::WormholeSystem>().check_player_wormhole_collision( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::ActionSystem>().update( dt ) );
-  PROFILED( m_sys.find<Sys::Store::Type::FootstepSystem>().update() );
+  PROFILED( m_sys.find<Sys::Store::Type::FootstepSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::DoglegSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::GraveSystem>().update() );
 

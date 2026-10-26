@@ -39,11 +39,6 @@ public:
   //! @param dt Frame delta, advances the pulse
   void update( sf::Time dt );
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief Add single L-shaped dogleg to the component
   //! @param source_pos

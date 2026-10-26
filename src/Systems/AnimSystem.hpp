@@ -1,8 +1,6 @@
 #ifndef SRC_SYSTEMS_ANIMSYSTEM_HPP__
 #define SRC_SYSTEMS_ANIMSYSTEM_HPP__
 
-#include <Events/PauseClocksEvent.hpp>
-#include <Events/ResumeClocksEvent.hpp>
 #include <SFML/System/Time.hpp>
 
 #include <Components/AnimData.hpp>
@@ -25,16 +23,8 @@ public:
   AnimSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
       : BaseSystem( reg, window, sound_bank )
   {
-    // The entt::dispatcher is independent of the registry, so it is safe to bind event handlers in the constructor
-    std::ignore = get_systems_event_queue().sink<Events::PauseClocksEvent>().connect<&Sys::AnimSystem::on_pause>( this );
-    std::ignore = get_systems_event_queue().sink<Events::ResumeClocksEvent>().connect<&Sys::AnimSystem::on_resume>( this );
     SPDLOG_DEBUG( "AnimSystem initialized" );
   }
-
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
 
   //! @brief Update frames on all SpriteAnimation components
   //! @param dt

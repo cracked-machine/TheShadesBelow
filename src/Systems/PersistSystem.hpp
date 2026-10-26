@@ -88,11 +88,6 @@ public:
   template <typename T>
   static void save_component( entt::registry &reg );
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief Path to the JSON file used to load and save persistent component state.
   static constexpr const char *kPersistFilePath = "res/json/persist.json";

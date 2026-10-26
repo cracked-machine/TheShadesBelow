@@ -49,11 +49,6 @@ public:
   //! @brief Destroy the Render Menu System object
   ~RenderMenuSystem();
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
   //! @brief Render the title screen: background shaders plus the title and prompt text.
   void render_title();
 

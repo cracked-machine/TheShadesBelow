@@ -26,11 +26,6 @@ public:
   //! @brief Per-frame tidy up
   void update( sf::Time dt );
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief Capture Events::PlayerActionEvent::GameActions::ACTIVATE. Calls check_player_altar_activation().
   void on_player_action( Events::PlayerActionEvent ev );

@@ -24,11 +24,6 @@ public:
   {
   }
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
   //! @brief DLA here works by removing obstacles (carving space) rather than adding them.
   //! @details Carves the seed cell, then repeatedly spawns a particle at a random grid cell and
   //!          lets it random-walk until it lands adjacent to an already-carved cell, at which point

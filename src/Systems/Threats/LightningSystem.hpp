@@ -44,11 +44,6 @@ public:
   //! @return false
   bool lightning_strike_exists();
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {};
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {};
-
   //! @brief Used to create the lightning strike "zig-zag" sections. Called N times by LightningSystem::create_lightning_strike().
   //! @note It takes each existing segment and divides into two segments. The dividing vertex point is then offset at perpendicular distance
   //! @param ls_seq

@@ -23,9 +23,7 @@
 #include <Components/ZOrderValue.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
-#include <Events/PauseClocksEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
-#include <Events/ResumeClocksEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/BombFactory.hpp>
 #include <Factory/NpcFactory.hpp>
@@ -55,13 +53,13 @@ BombSystem::BombSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
   // The entt::dispatcher is independent of the registry, so it is safe to bind event handlers in
   // the constructor
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&Sys::BombSystem::on_bomb_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::PauseClocksEvent>().connect<&Sys::BombSystem::on_pause>( this );
-  std::ignore = get_systems_event_queue().sink<Events::ResumeClocksEvent>().connect<&Sys::BombSystem::on_resume>( this );
   SPDLOG_DEBUG( "BombSystem initialized" );
 }
 
-void BombSystem::update()
+void BombSystem::update( sf::Time dt )
 {
+  for ( auto [armed_entt, armed_cmp] : reg().view<Cmp::Armed>().each() )
+    armed_cmp.m_elapsed += dt;
 
   PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock();
   if ( not pathfinding_navmesh )
@@ -223,29 +221,6 @@ void BombSystem::update()
 
   auto remaining_armed_view = reg().view<Cmp::Armed>();
   if ( remaining_armed_view->empty() ) { Utils::Player::get_global_bomb_flash_clk( reg() ).reset(); }
-}
-
-void BombSystem::on_pause()
-{
-  if ( m_sound_bank.get_effect( "bomb_fuse" ).getStatus() == sf::Sound::Status::Playing ) m_sound_bank.get_effect( "bomb_fuse" ).pause();
-  if ( m_sound_bank.get_effect( "bomb_detonate" ).getStatus() == sf::Sound::Status::Playing ) m_sound_bank.get_effect( "bomb_detonate" ).pause();
-  auto armed_view = reg().view<Cmp::Armed>();
-  for ( auto [entt, armed_cmp] : armed_view.each() )
-  {
-    if ( armed_cmp.m_fuse_delay_clock.isRunning() ) armed_cmp.m_fuse_delay_clock.stop();
-    if ( armed_cmp.m_warning_delay_clock.isRunning() ) armed_cmp.m_warning_delay_clock.stop();
-  }
-}
-void BombSystem::on_resume()
-{
-  if ( m_sound_bank.get_effect( "bomb_fuse" ).getStatus() == sf::Sound::Status::Paused ) m_sound_bank.get_effect( "bomb_fuse" ).play();
-  if ( m_sound_bank.get_effect( "bomb_detonate" ).getStatus() == sf::Sound::Status::Paused ) m_sound_bank.get_effect( "bomb_detonate" ).play();
-  auto armed_view = reg().view<Cmp::Armed>();
-  for ( auto [entt, armed_cmp] : armed_view.each() )
-  {
-    if ( not armed_cmp.m_fuse_delay_clock.isRunning() ) armed_cmp.m_fuse_delay_clock.start();
-    if ( not armed_cmp.m_warning_delay_clock.isRunning() ) armed_cmp.m_warning_delay_clock.start();
-  }
 }
 
 void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_entity, const int blast_radius )

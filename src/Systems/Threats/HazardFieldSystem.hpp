@@ -68,21 +68,17 @@ public:
   //! @return The position of the newly spawned hazard cell, or an empty vector if one already exists or no valid position was found.
   sf::Vector2f init_hazard_field();
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override;
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override;
-
 private:
   //! @brief Update the hazard field by spreading it to adjacent positions.
-  //! 1. Check if the update interval has elapsed using m_clock.
+  //! 1. Accumulate dt and check if the update interval has elapsed.
   //! 2. Get a view of all entities with the hazard field component and position.
   //! 3. For each hazard field entity:
   //!   a. Check adjacent positions for obstacles without hazard components.
   //!   b. Use a random chance (1 in 8) to convert an adjacent obstacle into a new hazard cell.
   //!   c. Count adjacent hazard fields; if surrounded by 2 or more, mark as inactive to stop
   //!   further spreading.
-  sf::Vector2f update_hazard_field();
+  //! @param dt Frame delta, accumulated into m_spread_update_timer
+  sf::Vector2f update_hazard_field( sf::Time dt );
 
   //! @brief Check for player collision with hazard fields.
   //! If a collision is detected, apply damage or instant death based on hazard type.
@@ -99,9 +95,9 @@ private:
   //! @param reserved_sm The locked reserved-positions grid, or nullptr if it has expired.
   void promote_to_hazard_cell( entt::entity entity, const Cmp::Position &pos, const PathFinding::SpatialHashGridSharedPtr &reserved_sm );
 
-  //! @brief Clock used to track time for hazard field updates.
+  //! @brief Gameplay time elapsed since the last hazard field update.
   //!
-  sf::Clock m_spread_update_clock;
+  sf::Time m_spread_update_timer{ sf::Time::Zero };
 
   //! @brief Time period for updating hazard fields.
   //!

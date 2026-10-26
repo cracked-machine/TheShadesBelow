@@ -26,11 +26,6 @@ public:
   //! @param reserved_sm
   void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm ) { m_reserved_sm = reserved_sm; }
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
   //! @brief Event handler for unlocking the exit
   //! @param ev
   void on_player_action( Events::PlayerActionEvent ev );

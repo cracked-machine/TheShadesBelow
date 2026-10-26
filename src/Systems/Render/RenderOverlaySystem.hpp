@@ -38,11 +38,6 @@ public:
   //! @param dt
   void render_overlay( sf::Time dt );
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief Draw the screen-space particle sprites, i.e. the candle flame flickering over the UI inventory icon.
   void render_ui_particles();

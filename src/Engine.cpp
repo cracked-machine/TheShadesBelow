@@ -4,8 +4,6 @@
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Debug/AssertHandler.hpp>
 #include <Engine.hpp>
-#include <Events/PauseClocksEvent.hpp>
-#include <Events/ResumeClocksEvent.hpp>
 #include <SFML/OpenGL.hpp>
 #include <SFML/Window/WindowEnums.hpp>
 #include <SceneControl/SceneManager.hpp>

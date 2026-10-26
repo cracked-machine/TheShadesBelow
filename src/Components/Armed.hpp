@@ -2,7 +2,6 @@
 #define SRC_COMPONENTS_ARMED_HPP__
 
 #include <SFML/Graphics/Color.hpp>
-#include <SFML/System/Clock.hpp>
 #include <SFML/System/Time.hpp>
 
 namespace Game::Cmp
@@ -23,7 +22,7 @@ public:
     NO
   };
 
-  //! @brief Construct an Armed component and start its fuse/warning clocks immediately.
+  //! @brief Construct an Armed component and start its fuse/warning timers at zero.
   //! @param fuse_delay Time until the entity detonates.
   //! @param warning_delay Time before detonation to start showing the armed warning colours.
   //! @param display_bomb_sprite Whether the bomb sprite should be displayed on this entity.
@@ -41,8 +40,6 @@ public:
         m_index( index ),
         m_epicenter( epicenter )
   {
-    m_fuse_delay_clock.restart();
-    m_warning_delay_clock.restart();
   }
 
   //! @brief Time until the entity detonates.
@@ -60,14 +57,12 @@ public:
 
   //! @brief Get elapsed time since arming, for comparison against m_fuse_delay.
   //! @return sf::Time Elapsed fuse time.
-  sf::Time getElapsedFuseTime() const { return m_fuse_delay_clock.getElapsedTime(); }
-  //! @brief Clock tracking elapsed time since arming, used by getElapsedFuseTime().
-  sf::Clock m_fuse_delay_clock;
+  sf::Time getElapsedFuseTime() const { return m_elapsed; }
   //! @brief Get elapsed time since arming, for comparison against m_warning_delay.
   //! @return sf::Time Elapsed warning time.
-  sf::Time getElapsedWarningTime() const { return m_warning_delay_clock.getElapsedTime(); }
-  //! @brief Clock tracking elapsed time since arming, used by getElapsedWarningTime().
-  sf::Clock m_warning_delay_clock;
+  sf::Time getElapsedWarningTime() const { return m_elapsed; }
+  //! @brief Gameplay time elapsed since arming. Accumulated by BombSystem::update().
+  sf::Time m_elapsed{};
 
   //! @brief Whether this entity is the blast epicenter or a linked/chained block.
   EpiCenter m_epicenter = EpiCenter::NO;

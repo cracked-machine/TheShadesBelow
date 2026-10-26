@@ -44,11 +44,6 @@ public:
   //! @param dt
   void update( sf::Time dt );
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief Event handler for player actions; only responds to GameActions::DROP_INVENTORY
   //! @param event

@@ -79,11 +79,6 @@ public:
   //! @brief Add spike traps along each already-carved passage, one per passage ID.
   void add_spike_traps();
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief Removes all Cmp::Crypt::PassageBlock entities
   void remove_all_passage_blocks();

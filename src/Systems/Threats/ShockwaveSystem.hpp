@@ -33,11 +33,6 @@ public:
   //! @brief Entrypoint for collision checking
   void check_shockwave_player_collision();
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {};
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {};
-
 private:
   //! @brief Tracks time since the last shockwave radius/collision update.
   sf::Clock shockwave_update_clock;

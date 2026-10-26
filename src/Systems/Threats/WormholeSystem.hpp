@@ -42,9 +42,10 @@ public:
   //! @brief Track actors colliding with the wormhole via Cmp::Wormhole::Jump, drop the component if
   //! an actor stops colliding before its jump cooldown completes, and once every jump candidate's
   //! cooldown has elapsed, teleport them all to new random locations and respawn the wormhole.
-  void check_player_wormhole_collision();
+  //! @param dt Frame delta, accumulated into each Cmp::Wormhole::Jump
+  void check_player_wormhole_collision( sf::Time dt );
 
-  //! @brief Time since the current jump sequence started (the oldest Cmp::Wormhole::Jump clock), zero if none.
+  //! @brief Time since the current jump sequence started (the oldest Cmp::Wormhole::Jump timer), zero if none.
   //! @param reg
   //! @return sf::Time
   static sf::Time jump_sequence_elapsed( entt::registry &reg );
@@ -59,11 +60,6 @@ public:
   //! attach the wormhole's Singularity/MultiBlock/AnimData components there.
   //! @param phase InitialSpawn uses the persisted seeded position; Respawn picks a fresh random one
   void spawn_wormhole( SpawnPhase phase );
-
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override;
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override;
 
 private:
   //! @brief A player flying over the singularity aborts the whole jump sequence (all candidates, no teleport,

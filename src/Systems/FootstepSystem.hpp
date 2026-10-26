@@ -27,13 +27,8 @@ public:
   }
 
   //! @brief Update all FootstepAlpha based on their FootstepTimer, remove any entities with FootstepAlpha
-  //! @param footstep_sfx
-  void update();
-
-  //! @brief event handlers for pausing footstep clocks
-  void on_pause() override;
-  //! @brief event handlers for resuming footstep clocks
-  void on_resume() override;
+  //! @param dt Frame delta, accumulated into each Cmp::FootStepTimer
+  void update( sf::Time dt );
 
   //! @brief Stop the currently playing footstep sound.
   void stop_footsteps_sound();

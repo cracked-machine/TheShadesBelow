@@ -27,11 +27,6 @@ public:
   {
   }
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
   //! @brief Run the cellular-automata birth/survival rule over every non-reserved position for the given
   //!        number of iterations, adding or removing obstacles depending on live-neighbour counts.
   //! @param levelgen_spatialgrid Spatial grid of level-gen obstacles to read/update

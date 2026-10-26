@@ -51,11 +51,6 @@ public:
   //! @param event
   void on_dismiss_tooltip_event( [[maybe_unused]] const Events::DismissTooltipEvent &event ) { m_active.reset(); }
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief How often a tooltip may be shown
   enum class Frequency {

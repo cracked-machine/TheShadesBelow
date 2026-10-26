@@ -1,8 +1,6 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Persistent/EffectsVolume.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
-#include <Events/PauseClocksEvent.hpp>
-#include <Events/ResumeClocksEvent.hpp>
 #include <SceneControl/Events/ProcessPausedMenuSceneInputEvent.hpp>
 #include <SceneControl/Scenes/PausedMenuScene.hpp>
 #include <Systems/PersistSystem.hpp>
@@ -22,7 +20,7 @@ void PausedMenuScene::on_enter()
   persistent_sys.initialize_component_registry();
   persistent_sys.load_state();
 
-  Sys::PersistSystem::get_systems_event_queue().trigger( Events::PauseClocksEvent() );
+  m_sound_bank.pause_effects();
 }
 
 void PausedMenuScene::on_exit()
@@ -33,7 +31,7 @@ void PausedMenuScene::on_exit()
   // save the state because there are UI controls for volume.
   persistent_sys.save_state();
 
-  Sys::PersistSystem::get_systems_event_queue().trigger( Events::ResumeClocksEvent() );
+  m_sound_bank.resume_effects();
 }
 
 void PausedMenuScene::do_update( [[maybe_unused]] sf::Time dt )

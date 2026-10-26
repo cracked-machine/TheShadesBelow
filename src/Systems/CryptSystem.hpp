@@ -2,11 +2,9 @@
 #define SRC_SYSTEMS_CRYPTSYSTEM_HPP__
 
 #include <Events/CryptRoomEvent.hpp>
-#include <Events/PauseClocksEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Utils/Crypt.hpp>
 
-#include <Events/ResumeClocksEvent.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -47,8 +45,6 @@ public:
     // The entt::dispatcher is independent of the registry, so it is safe to bind event handlers in the constructor
     std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&CryptSystem::on_player_action>( this );
     std::ignore = get_systems_event_queue().sink<Events::CryptRoomEvent>().connect<&CryptSystem::on_room_event>( this );
-    std::ignore = get_systems_event_queue().sink<Events::PauseClocksEvent>().connect<&Sys::CryptSystem::on_pause>( this );
-    std::ignore = get_systems_event_queue().sink<Events::ResumeClocksEvent>().connect<&Sys::CryptSystem::on_resume>( this );
   }
 
   //! @brief init the weak pointer for the spatial grid
@@ -102,11 +98,6 @@ public:
   //! @brief Restores border Cmp::Obstacles to Cmp::Crypt::RoomEnd, Cmp::Crypt::RoomStart and Cmp::Crypt::RoomOpen areas
   //! @param uuid_map
   void create_room_borders( const Factory::Obstacle::UUIDEntityMap &uuid_map );
-
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
 
   //! @brief Shuffle the rooms and passages
   void shuffle_rooms_passages();

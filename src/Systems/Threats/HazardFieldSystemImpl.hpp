@@ -16,9 +16,7 @@
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/DestroyNpcEvent.hpp>
-#include <Events/PauseClocksEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
-#include <Events/ResumeClocksEvent.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <SFML/System/Time.hpp>
 #include <Systems/PersistSystemImpl.hpp>
@@ -44,15 +42,13 @@ template <ValidHazard HazardType>
 HazardFieldSystem<HazardType>::HazardFieldSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
     : Sys::BaseSystem( reg, window, sound_bank )
 {
-  get_systems_event_queue().sink<Events::PauseClocksEvent>().connect<&Sys::HazardFieldSystem<HazardType>::on_pause>( this );
-  get_systems_event_queue().sink<Events::ResumeClocksEvent>().connect<&Sys::HazardFieldSystem<HazardType>::on_resume>( this );
 }
 
 //! @copydoc HazardFieldSystem::update()
 template <ValidHazard HazardType>
 sf::Vector2f HazardFieldSystem<HazardType>::update( sf::Time dt )
 {
-  auto add_hazard_cell = update_hazard_field();
+  auto add_hazard_cell = update_hazard_field( dt );
   check_npc_hazard_field_collision();
 
   m_dmg_timer += dt;
@@ -112,26 +108,13 @@ void HazardFieldSystem<HazardType>::promote_to_hazard_cell( entt::entity entity,
   }
 }
 
-//! @copydoc HazardFieldSystem::on_pause()
-template <ValidHazard HazardType>
-void HazardFieldSystem<HazardType>::on_pause()
-{
-  m_spread_update_clock.stop();
-}
-
-//! @copydoc HazardFieldSystem::on_resume()
-template <ValidHazard HazardType>
-void HazardFieldSystem<HazardType>::on_resume()
-{
-  m_spread_update_clock.start();
-}
-
 //! @copydoc HazardFieldSystem::update_hazard_field()
 template <ValidHazard HazardType>
-sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field()
+sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field( sf::Time dt )
 {
-  if ( m_spread_update_clock.getElapsedTime() < m_update_period ) return {};
-  m_spread_update_clock.restart();
+  m_spread_update_timer += dt;
+  if ( m_spread_update_timer < m_update_period ) return {};
+  m_spread_update_timer = sf::Time::Zero;
 
   auto reserved_sm = m_reserved_sm.lock();
   auto hazard_view = reg().template view<HazardType, Cmp::Position>();

@@ -29,11 +29,6 @@ public:
   //! @param dt
   void update( sf::Time dt );
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
 private:
   //! @brief Tracks how long the bow has been held drawn, between DRAW_BOW and RELEASE_BOW.
   sf::Clock m_bow_draw_clock;

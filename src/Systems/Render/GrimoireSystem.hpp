@@ -34,11 +34,6 @@ public:
   //! @brief Draw the current grimoire page, if the overlay is open.
   void render();
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
   //! @brief True while the grimoire overlay is toggled open.
   [[nodiscard]] bool is_grimoire_overlay_open() const;
 

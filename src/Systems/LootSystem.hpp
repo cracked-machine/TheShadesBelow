@@ -37,11 +37,6 @@ public:
     m_reserved_sm = reserved_sm;
   }
 
-  //! @brief event handlers for pausing system clocks
-  void on_pause() override {}
-  //! @brief event handlers for resuming system clocks
-  void on_resume() override {}
-
   //! @brief Check for player collision with loot items i.e. player picks up loot
   void check_loot_collision( sf::Time dt );
 
