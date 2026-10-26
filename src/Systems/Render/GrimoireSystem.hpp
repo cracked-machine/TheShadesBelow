@@ -43,7 +43,8 @@ public:
   [[nodiscard]] bool is_grimoire_overlay_open() const;
 
 private:
-  //! @brief Toggle the overlay on GRIMOIRE_TOGGLE and, while open, turn pages on GRIMOIRE_PREV/GRIMOIRE_NEXT. Both debounced.
+  //! @brief Toggle the overlay on GRIMOIRE_TOGGLE and, while open, turn pages on GRIMOIRE_PREV/GRIMOIRE_NEXT
+  //! (arrow keys or mouse wheel). Both debounced.
   //! @param ev
   void on_player_action( Events::PlayerActionEvent ev );
 

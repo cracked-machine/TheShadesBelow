@@ -168,6 +168,16 @@ void SceneInputRouter::graveyard_scene_state_handler()
         get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::DRAW_BOW ) );
       }
     }
+    else if ( const auto *wheelScrolled = event->getIf<sf::Event::MouseWheelScrolled>() )
+    {
+      // scroll up/away for the previous grimoire page, down/towards for the next, like scrolling a document
+      if ( wheelScrolled->wheel == sf::Mouse::Wheel::Vertical and wheelScrolled->delta != 0.f )
+      {
+        const auto action = wheelScrolled->delta > 0.f ? Events::PlayerActionEvent::GameActions::GRIMOIRE_PREV
+                                                       : Events::PlayerActionEvent::GameActions::GRIMOIRE_NEXT;
+        get_systems_event_queue().trigger( Events::PlayerActionEvent( action ) );
+      }
+    }
   }
 
   process_move_keys();
