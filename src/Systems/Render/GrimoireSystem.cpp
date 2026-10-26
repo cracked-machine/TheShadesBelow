@@ -210,6 +210,7 @@ void GrimoireSystem::render_outlines()
     rect.setFillColor( outline.fill_color );
     rect.setOutlineColor( outline.line_color );
     rect.setOutlineThickness( static_cast<float>( outline.line_thickness ) );
+    rect.setRotation( outline.rotation );
     draw_screen( rect );
   }
 }

@@ -32,7 +32,8 @@ void UiData::deserialize( const std::filesystem::path &scene_tiledata_path )
       {
         SPDLOG_DEBUG( "Found ui_outline: {}", get_string( object, "name" ) );
         m_outlines.emplace_back( get_float_rect( object ), get_string( object, "name" ), get_color_property( object, "fill_color" ),
-                                 get_color_property( object, "line_color" ), get_int_property( object, "line_thickness" ) );
+                                 get_color_property( object, "line_color" ), get_int_property( object, "line_thickness" ),
+                                 sf::degrees( get_float( object, "rotation" ) ) );
       }
       if ( get_string( object, "type" ) == "ui_label" )
       {

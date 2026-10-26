@@ -1,6 +1,7 @@
 #ifndef SRC_SYSTEMS_RENDER_UIDATA_HPP__
 #define SRC_SYSTEMS_RENDER_UIDATA_HPP__
 
+#include <SFML/System/Angle.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Utils/JsonDeserializer.hpp>
 #include <nlohmann/json_fwd.hpp>
@@ -25,6 +26,8 @@ public:
     sf::Color line_color;
     //! @brief Outline (border) thickness, in pixels.
     int line_thickness;
+    //! @brief Clockwise rotation about the rectangle's top-left corner, matching Tiled's object rotation.
+    sf::Angle rotation;
   };
 
   //! @brief A sprite icon element in the UI layout.
