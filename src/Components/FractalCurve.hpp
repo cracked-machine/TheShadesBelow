@@ -35,7 +35,7 @@ struct FractalCurve
     sequence.push_back( { sf::Vertex( end ) } );
     m_deviations = deviations;
     this->duration = duration;
-    timer.stop();
+    timer = sf::Time::Zero;
   }
 
   //! @brief Rows of vertices produced by successive subdivisions; each row is one generation of split points
@@ -48,7 +48,7 @@ struct FractalCurve
   sf::Time duration{ sf::Time::Zero };
 
   //! @brief Tracks elapsed time since the curve was created, checked against `duration`
-  sf::Clock timer;
+  sf::Time timer;
 
   //! @brief A single world-space line between two vertices of `sequence`
   struct Segment

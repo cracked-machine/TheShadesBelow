@@ -196,7 +196,7 @@ void LightningSystem::delete_expired_lightning_strikes()
   std::vector<entt::entity> kill_list;
   for ( auto [entt, cmp] : reg().view<Cmp::LightningStrike>().each() )
   {
-    if ( cmp.timer.getElapsedTime() >= cmp.duration ) { kill_list.push_back( entt ); }
+    if ( cmp.timer >= cmp.duration ) { kill_list.push_back( entt ); }
   }
 
   for ( auto &entt : kill_list )

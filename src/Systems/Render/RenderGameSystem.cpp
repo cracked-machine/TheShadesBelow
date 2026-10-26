@@ -107,7 +107,7 @@ void RenderGameSystem::render_game( sf::Time dt, const PathFinding::SpatialHashG
   PROFILED( render_shockwaves() );
   PROFILED( render_arrow_compass() );
 
-  PROFILED( render_lightning_strike() );
+  PROFILED( render_lightning_strike( dt ) );
   PROFILED( render_obstacle_cracks() );
 
   // lava pit outline
@@ -155,7 +155,7 @@ void RenderGameSystem::render_zorder_queue()
   if ( shadow_z ) render_flight_shadow();
 }
 
-void RenderGameSystem::update_camera( sf::Time deltaTime )
+void RenderGameSystem::update_camera( sf::Time dt )
 {
 
   // Use the player's current position as the target
@@ -169,9 +169,8 @@ void RenderGameSystem::update_camera( sf::Time deltaTime )
   }
 
   // Smooth lerp toward target position
-  float dt = deltaTime.asSeconds();
   auto camera_smooth_speed = Sys::PersistSystem::get<Cmp::Persist::CameraSmoothSpeed>( reg() ).get_value();
-  float t = 1.0f - std::exp( -camera_smooth_speed * dt ); // Exponential smoothing
+  float t = 1.0f - std::exp( -camera_smooth_speed * dt.asSeconds() ); // Exponential smoothing
 
   m_camera_position.x += ( target_pos.position.x - m_camera_position.x ) * t;
   m_camera_position.y += ( target_pos.position.y - m_camera_position.y ) * t;
@@ -411,12 +410,12 @@ void RenderGameSystem::render_fractal_curve( const Cmp::FractalCurve &curve )
   }
 }
 
-void RenderGameSystem::render_lightning_strike()
+void RenderGameSystem::render_lightning_strike( sf::Time dt )
 {
 
   for ( auto [entt, cmp] : reg().view<Cmp::LightningStrike>().each() )
   {
-    cmp.timer.start();
+    cmp.timer += dt;
     if ( cmp.sequence.size() < 2 ) return;
     render_screen_flash( sf::Color( 255, 255, 255, 180 ) );
     render_fractal_curve( cmp );

@@ -75,7 +75,7 @@ private:
 
   //! @brief Update the camera center on the player using lerp for smooth transform.
   //! @param deltaTime
-  void update_camera( sf::Time deltaTime );
+  void update_camera( sf::Time dt );
 
   //! @brief Draws a Cmp::Position + Cmp::AnimData sprite, applying any Absolute* overrides, then its decorations
   //! (wear level, armed indicator)
@@ -124,7 +124,7 @@ private:
   void render_fractal_curve( const Cmp::FractalCurve &curve );
 
   //! @brief Used by GraveyardScene when player is struck by lightning
-  void render_lightning_strike();
+  void render_lightning_strike( sf::Time dt );
 
   //! @brief Renders the crack decal sequence on obstacles that have taken damage.
   void render_obstacle_cracks();
