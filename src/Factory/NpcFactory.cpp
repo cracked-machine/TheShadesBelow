@@ -24,6 +24,7 @@
 #include <Components/Persistent/NpcShockwaveFreq.hpp>
 #include <Components/Persistent/NpcShockwaveResolution.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/Mortality.hpp>
 #include <Components/Stats/DestroyAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
@@ -199,6 +200,7 @@ entt::entity destroy_npc( entt::registry &reg, entt::entity npc_entity )
   if ( npc_cmp )
   {
     auto action_timer_pair = npc_cmp->at<Cmp::DestroyAction>();
+    if ( action_timer_pair.action.health() < 0 ) Utils::Player::get_mortality( reg ).last_damage_cause = Cmp::Player::Mortality::State::HAUNTED;
     Utils::Player::get_stats( reg ).apply( action_timer_pair.action );
   }
 

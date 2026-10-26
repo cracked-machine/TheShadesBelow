@@ -44,6 +44,8 @@ public:
     CARDIACARREST = 14,
     //! @brief When player health == 0 and venom == 100
     POISONED = 15,
+    //! @brief When player health == 0 and no damage cause was recorded
+    EXHAUSTED = 16,
 
     //! @brief Player is dead. final state. end the game.
     DEAD = 255
@@ -65,6 +67,10 @@ public:
   //! @details Render systems update this value. Logic systems monitor it
   //!          to transition state to DEAD when >= 1.0
   float death_progress{ 0.0f };
+
+  //! @brief Death state implied by the most recent health damage.
+  //! @details Used when health reaches 0 with no maxed stat to blame. ALIVE means no cause recorded.
+  State last_damage_cause{ State::ALIVE };
 };
 
 } // namespace Game::Cmp::Player

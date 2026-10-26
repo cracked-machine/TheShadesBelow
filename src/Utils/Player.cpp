@@ -61,6 +61,7 @@
 #include <Utils/Utils.hpp>
 
 #include <stdexcept>
+#include <type_traits>
 
 namespace Game::Utils::Player
 {
@@ -385,6 +386,17 @@ bool player_has_extra_life( entt::registry &reg )
   return not player_view.empty();
 }
 
+//! @brief Record the death state implied by a damaging item action, for use if the player's health reaches zero.
+template <typename ActionT>
+void record_item_damage_cause( entt::registry &reg, const Cmp::BaseAction &action )
+{
+  if ( action.health() >= 0 ) return;
+  auto &mortality = get_mortality( reg );
+  if constexpr ( std::is_same_v<ActionT, Cmp::ConsumeAction> ) { mortality.last_damage_cause = Cmp::Player::Mortality::State::POISONED; }
+  else if constexpr ( std::is_same_v<ActionT, Cmp::BurnAction> ) { mortality.last_damage_cause = Cmp::Player::Mortality::State::IGNITED; }
+  else { mortality.last_damage_cause = Cmp::Player::Mortality::State::SKEWERED; }
+}
+
 template <typename ActionT>
 Cmp::BaseAction apply_action_from_world_item( entt::registry &reg, entt::entity world_item_entt, const std::source_location &loc )
 {
@@ -396,6 +408,7 @@ Cmp::BaseAction apply_action_from_world_item( entt::registry &reg, entt::entity 
                               std::string( reg.valid( world_item_entt ) ? "valid" : "invalid" ) );
   }
   auto action = plant_item->at<ActionT>().action;
+  record_item_damage_cause<ActionT>( reg, action );
   Utils::Player::get_stats( reg ).apply( action );
   Sys::BaseSystem::get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_item->item_type, ActionT::kKey, action ) );
   return action;
@@ -429,6 +442,7 @@ Cmp::BaseAction apply_action_from_inventory_item( entt::registry &reg )
     auto &player_stats = Utils::Player::get_stats( reg );
     auto action = inventory_cmp.m_item.at<ActionT>().action;
     if ( action.health() < 0 ) reg.emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg ) );
+    record_item_damage_cause<ActionT>( reg, action );
     player_stats.apply( action );
     Sys::BaseSystem::get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( inventory_cmp.m_item.item_type, ActionT::kKey, action ) );
     applied_action = action;
@@ -454,6 +468,7 @@ Cmp::BaseAction apply_action_from_item_store( entt::registry &reg, const Sys::It
 {
   const auto &item = Sys::ItemStore::instance().get( item_type );
   auto action = item.at<ActionT>().action;
+  record_item_damage_cause<ActionT>( reg, action );
   Utils::Player::get_stats( reg ).apply( action );
   Sys::BaseSystem::get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( item_type, ActionT::kKey, action ) );
   return action;
@@ -497,6 +512,7 @@ Cmp::BaseAction apply_action_from_npc_store( entt::registry &reg, const Sys::Npc
 {
   const auto &npc = Sys::NpcStore::instance().get( npc_type );
   const auto &action = npc.at<ActionT>().action;
+  if ( action.health() < 0 ) get_mortality( reg ).last_damage_cause = Cmp::Player::Mortality::State::HAUNTED;
   Utils::Player::get_stats( reg ).apply( action );
   return action;
 }

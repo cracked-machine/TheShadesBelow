@@ -626,6 +626,7 @@ void PlayerSystem::check_player_mortality()
         m_sound_bank.get_effect( "player_respawn" ).play();
         Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 100 }, {}, {}, {}, {}, {}, {} } );
         mortality_cmp.state = Cmp::Player::Mortality::State::ALIVE;
+        mortality_cmp.last_damage_cause = Cmp::Player::Mortality::State::ALIVE;
         reg().remove<Cmp::NoRender>( entity );
         reg().remove<Cmp::Player::PostDeathTimer>( entity );
       }
@@ -671,35 +672,45 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
   if ( m_timed_action_sync_clock.asSeconds() >= kTimedActionSyncClockMax )
   {
     // health effect decrease per toxidrome
-    auto apply_health_dmg = [&]( int dmg )
+    auto apply_health_dmg = [&]( int dmg, Cmp::Player::Mortality::State cause )
     {
       const auto modifier = Cmp::BaseAction( Cmp::Stats::Health{ -dmg }, {}, {}, {}, {}, {} );
       player_stats.apply( modifier );
       reg().emplace_or_replace<Cmp::Player::TookDamage>( player_entt );
+      Utils::Player::get_mortality( reg() ).last_damage_cause = cause;
     };
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Hypoxia>() == 100 )
     {
-      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::HypoxiaHealthDmgPerSec>( reg() ).get_value() );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::HypoxiaHealthDmgPerSec>( reg() ).get_value(), Cmp::Player::Mortality::State::SUFFOCATED );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Tachycardia>() == 100 )
     {
-      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::TachycardiaHealthDmgPerSec>( reg() ).get_value() );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::TachycardiaHealthDmgPerSec>( reg() ).get_value(), Cmp::Player::Mortality::State::CARDIACARREST );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Bradycardia>() == 100 )
     {
-      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::BradycardiaHealthDmgPerSec>( reg() ).get_value() );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::BradycardiaHealthDmgPerSec>( reg() ).get_value(), Cmp::Player::Mortality::State::CARDIACARREST );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Venom>() == 100 )
     {
-      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::VenomHealthDmgPerSec>( reg() ).get_value() );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::VenomHealthDmgPerSec>( reg() ).get_value(), Cmp::Player::Mortality::State::POISONED );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Vertigo>() == 100 )
     {
-      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::VertigoHealthDmgPerSec>( reg() ).get_value() );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::VertigoHealthDmgPerSec>( reg() ).get_value(), Cmp::Player::Mortality::State::TERRIFIED );
     }
-    if ( player_stats.fear() == 100 ) { apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::FearHealthDmgPerSec>( reg() ).get_value() ); }
-    if ( player_stats.despair() == 100 ) { apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::DespairHealthDmgPerSec>( reg() ).get_value() ); }
-    if ( m_player_is_on_fire ) { apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::PlayerOnFireHealthDmgPerSec>( reg() ).get_value() ); }
+    if ( player_stats.fear() == 100 )
+    {
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::FearHealthDmgPerSec>( reg() ).get_value(), Cmp::Player::Mortality::State::TERRIFIED );
+    }
+    if ( player_stats.despair() == 100 )
+    {
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::DespairHealthDmgPerSec>( reg() ).get_value(), Cmp::Player::Mortality::State::SUICIDE );
+    }
+    if ( m_player_is_on_fire )
+    {
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::PlayerOnFireHealthDmgPerSec>( reg() ).get_value(), Cmp::Player::Mortality::State::IGNITED );
+    }
     apply_healing_spring_modifiers();
 
     m_timed_action_sync_clock = sf::Time::Zero;
@@ -747,7 +758,11 @@ void PlayerSystem::apply_npc_modifiers( sf::Time dt )
 
     if ( not Utils::is_visible_in_view( half_view.getBounds(), npc_pos_cmp ) ) continue;
     if ( proximity_timer.asSeconds() < proximity_action.interval() ) continue;
-    if ( proximity_action.health() < 0 ) reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+    if ( proximity_action.health() < 0 )
+    {
+      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+      Utils::Player::get_mortality( reg() ).last_damage_cause = Cmp::Player::Mortality::State::HAUNTED;
+    }
     Utils::Player::get_stats( reg() ).apply( proximity_action );
     proximity_timer = sf::Time::Zero;
   }
@@ -762,7 +777,11 @@ void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
     if ( carry_action.interval() == 0.f ) continue;
     carry_timer += dt;
     if ( carry_timer.asSeconds() < carry_action.interval() ) continue;
-    if ( carry_action.health() < 0 ) reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+    if ( carry_action.health() < 0 )
+    {
+      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+      Utils::Player::get_mortality( reg() ).last_damage_cause = Cmp::Player::Mortality::State::SKEWERED;
+    }
     Utils::Player::get_stats( reg() ).apply( carry_action );
     get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( slot_cmp.m_item.item_type, Cmp::CarryAction::kKey, carry_action ) );
     carry_timer = sf::Time::Zero;
@@ -868,6 +887,17 @@ void PlayerSystem::kill_player_if_stats_are_max()
   {
     m_player_is_on_fire = false;
     on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::IGNITED, Utils::Player::get_position( reg() ) ) );
+  }
+  else
+  {
+    // no maxed stat to blame, so use whatever last damaged the player
+    auto cause = Utils::Player::get_mortality( reg() ).last_damage_cause;
+    if ( cause == Cmp::Player::Mortality::State::ALIVE )
+    {
+      SPDLOG_WARN( "Player health is 0 but no damage cause was recorded" );
+      cause = Cmp::Player::Mortality::State::EXHAUSTED;
+    }
+    on_player_mortality_event( Events::PlayerMortalityEvent( cause, Utils::Player::get_position( reg() ) ) );
   }
 }
 
@@ -1278,6 +1308,14 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::POISONED: {
+      m_sound_bank.stop_all();
+      const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
+      Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
+      m_sound_bank.get_effect( "player_blood_splat" ).play();
+      common_death_throes();
+      break;
+    }
+    case Cmp::Player::Mortality::State::EXHAUSTED: {
       m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
