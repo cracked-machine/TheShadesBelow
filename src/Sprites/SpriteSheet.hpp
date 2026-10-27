@@ -45,12 +45,13 @@ public:
   //! @param walking_collision_mask
   //! @param flying_collision_mask
   //! @param door_position
+  //! @param particle_offsets Particle spawn points, as pixel offsets from the sprite's top-left corner.
   //! @param framerate Animation framerate in frames per second. Forced to 0 for single-frame sheets.
   explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderMode zorder_mode, std::vector<float> zorder_list,
                         const std::filesystem::path &spritesheet_png, const std::vector<uint32_t> &spritesheet_selections,
                         sf::Vector2i grid_size = { 1, 1 }, unsigned int indices_per_sequence = 1,
                         std::vector<bool> walking_collision_mask = {}, std::vector<bool> flying_collision_mask = {},
-                        sf::Vector2i door_position = {},
+                        sf::Vector2i door_position = {}, std::vector<sf::Vector2f> particle_offsets = {},
                         float framerate = 0.f );
 
   //! @brief Construct a new Multi Sprite object using texture object
@@ -65,12 +66,13 @@ public:
   //! @param walking_collision_mask
   //! @param flying_collision_mask
   //! @param door_position
+  //! @param particle_offsets Particle spawn points, as pixel offsets from the sprite's top-left corner.
   //! @param framerate Animation framerate in frames per second. Forced to 0 for single-frame sheets.
   explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderMode zorder_mode, std::vector<float> zorder_list, sf::Texture spritesheet_texture,
                         const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size = { 1, 1 },
                         unsigned int indices_per_sequence = 1, std::vector<bool> walking_collision_mask = {},
                         std::vector<bool> flying_collision_mask = {}, sf::Vector2i door_position = {},
-                        float framerate = 0.f );
+                        std::vector<sf::Vector2f> particle_offsets = {}, float framerate = 0.f );
 
   SpriteSheet( SpriteSheet && ) = default;
   SpriteSheet &operator=( SpriteSheet && ) = default;
@@ -122,6 +124,10 @@ public:
   //! @brief Get the door tile position within the sprite grid.
   //! @return sf::Vector2i
   [[nodiscard]] sf::Vector2i door_position() const { return m_door_position; }
+
+  //! @brief Get the particle spawn points, from `particle_offsets` in spritesheets.json.
+  //! @return Pixel offsets from the sprite's top-left corner. Empty if not specified.
+  [[nodiscard]] const std::vector<sf::Vector2f> &particle_offsets() const { return m_particle_offsets; }
 
   //! @brief Get the texture for the whole spritesheet
   //! @return const sf::Texture&
@@ -218,6 +224,9 @@ private:
 
   //! @brief Door tile position within the sprite grid, if this sheet represents a structure with a door.
   sf::Vector2i m_door_position;
+
+  //! @brief Particle spawn points in pixels, relative to the sprite's top-left corner. See particle_offsets().
+  std::vector<sf::Vector2f> m_particle_offsets;
 
   //! @brief Animation framerate in frames per second. See framerate().
   float m_framerate{ 0.f };

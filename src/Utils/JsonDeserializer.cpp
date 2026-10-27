@@ -124,6 +124,18 @@ std::vector<float> JsonDeserializer::get_float_array( const nlohmann::json &j, s
   return j.at( field ).get<std::vector<float>>();
 }
 
+std::vector<sf::Vector2f> JsonDeserializer::get_vector2f_array( const nlohmann::json &j, std::string field, std::source_location loc )
+{
+  // optional
+  if ( not j.contains( field ) ) return {};
+  std::vector<sf::Vector2f> result;
+  for ( const auto &elem : j.at( field ) )
+  {
+    result.emplace_back( get_float( elem, "x", loc ), get_float( elem, "y", loc ) );
+  }
+  return result;
+}
+
 sf::Color JsonDeserializer::get_color( const nlohmann::json &j, const std::string &field, std::source_location loc )
 {
   auto hex_string = get_string( j, field, loc );

@@ -56,6 +56,7 @@ void SpriteStore::init_store()
                                  Utils::JsonDeserializer::get_bool_array( spritesheet_json, "walking_collision_mask" ),
                                  Utils::JsonDeserializer::get_bool_array( spritesheet_json, "flying_collision_mask" ),
                                  Utils::JsonDeserializer::get_vector2i( spritesheet_json, "door_position", sf::Vector2i{} ),
+                                 Utils::JsonDeserializer::get_vector2f_array( spritesheet_json, "particle_offsets" ),
                                  Utils::JsonDeserializer::get_float( spritesheet_json, "framerate" )
 
     };

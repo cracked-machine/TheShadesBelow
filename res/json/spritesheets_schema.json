@@ -90,6 +90,23 @@
               "required": ["x", "y"],
               "additionalProperties": false
             },
+            "particle_offsets": {
+              "type": "array",
+              "description": "Particle spawn points, as pixel offsets from the sprite's top-left corner. Optional. E.g. the graveyard altar's flame positions, one per relic sacrifice.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  }
+                },
+                "required": ["x", "y"],
+                "additionalProperties": false
+              }
+            },
             "texture_path": {
               "type": "string",
               "description": "Path to the texture file",

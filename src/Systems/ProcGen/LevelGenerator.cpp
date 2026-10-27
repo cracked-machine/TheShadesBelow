@@ -199,7 +199,7 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
   const std::unordered_map<std::string, MultiblockFactoryFn> kMultiblockFactories{
       { "sprite.graveyard.healingspring", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
         { return Factory::Multiblock::add_multiblock_with_segments<Cmp::HealingSpringMultiBlock, Cmp::HealingSpringSegment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
-      { "sprite.graveyard.altar.inactive", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
+      { "sprite.graveyard.altar1.inactive", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
         { return Factory::Multiblock::add_multiblock_with_segments<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
       { "sprite.crypt.objective.closed",[this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
         { return Factory::Multiblock::add_multiblock_with_segments<Cmp::Crypt::ObjectiveMultiBlock, Cmp::Crypt::ObjectiveSegment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
@@ -460,8 +460,16 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
   }
 
   // ALTARS
-  const auto &altar_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.altar.inactive" );
-  spawn_multiblocks<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( static_cast<std::size_t>( min_num_altars.get_value() ), altar_spritesheet,
+  const auto &altar1_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.altar1.inactive" );
+  spawn_multiblocks<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( static_cast<std::size_t>( min_num_altars.get_value() / 3 ), altar1_spritesheet,
+                                                                  /*log=*/true, kMinBuildingSpacingCells );
+
+  const auto &altar2_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.altar2.inactive" );
+  spawn_multiblocks<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( static_cast<std::size_t>( min_num_altars.get_value() / 3 ), altar2_spritesheet,
+                                                                  /*log=*/true, kMinBuildingSpacingCells );
+
+  const auto &altar3_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.altar3.inactive" );
+  spawn_multiblocks<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( static_cast<std::size_t>( min_num_altars.get_value() / 3 ), altar3_spritesheet,
                                                                   /*log=*/true, kMinBuildingSpacingCells );
 
   // CRYPTS - note: we use keys from altars to open crypts so the number should be equal

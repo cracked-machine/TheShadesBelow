@@ -118,6 +118,15 @@ public:
   //! @return std::vector<float> The array's values, or an empty vector if the field is absent.
   static std::vector<float> get_float_array( const nlohmann::json &j, std::string field, std::source_location loc = std::source_location::current() );
 
+  //! @brief Get an optional array field as a list of 2D float vectors, each read from its "x" and "y" sub-fields.
+  //! @param j The JSON object to read from.
+  //! @param field The field name.
+  //! @param loc Caller location, used in error messages (defaults to the call site).
+  //! @return std::vector<sf::Vector2f> The array's values, or an empty vector if the field is absent.
+  //! @throws std::runtime_error if an element is missing its "x"/"y" sub-fields.
+  static std::vector<sf::Vector2f> get_vector2f_array( const nlohmann::json &j, std::string field,
+                                                       std::source_location loc = std::source_location::current() );
+
   //! @brief Get a required string value from a Tiled-style "properties" array, by property name.
   //! @param j The JSON object holding a "properties" array.
   //! @param field The property's "name" to look up.

@@ -197,9 +197,28 @@ void AltarSystem::sacrifice_relic( entt::entity altar_entity, Cmp::Altar::MultiB
   const uint8_t sacrifice_count = altar_cmp.get_sacrifice_count();
   if ( sacrifice_count >= altar_cmp.get_exitkey_drop_threshold() ) return;
 
+  auto *anim_cmp = reg().try_get<Cmp::AnimData>( altar_entity );
+  if ( not anim_cmp ) return;
+  // e.g. "sprite.graveyard.altar2.inactive" -> "sprite.graveyard.altar2.active"
+  const Sys::SpriteKey inactive_sprite_type = anim_cmp->m_sprite_type;
+  std::string active_sprite_str = inactive_sprite_type.str();
+  constexpr std::string_view kInactiveSuffix = ".inactive";
+  if ( not active_sprite_str.ends_with( kInactiveSuffix ) )
+  {
+    SPDLOG_WARN( "Altar sprite {} is not an inactive sprite", active_sprite_str );
+    return;
+  }
+  active_sprite_str.replace( active_sprite_str.size() - kInactiveSuffix.size(), kInactiveSuffix.size(), ".active" );
+  const Sys::SpriteKey active_sprite_type( active_sprite_str );
+
   reg().patch<Cmp::Altar::MultiBlock>( altar_entity, []( Cmp::Altar::MultiBlock &cmp ) { cmp.increment_sacrifice_count(); } );
-  sf::Vector2f flame_ps_pos = altar_cmp.position + Game::Cmp::Altar::MultiBlock::flame_offsets[sacrifice_count];
-  Factory::Particle::add_flame( m_reg, "graveyard.altar.particle.flame", altar_uuid, flame_ps_pos, 5000, Cmp::Particle::kWorldScalePreset );
+  const auto &flame_offsets = Sys::SpriteStore::instance().get( inactive_sprite_type ).particle_offsets();
+  if ( sacrifice_count < flame_offsets.size() )
+  {
+    sf::Vector2f flame_ps_pos = altar_cmp.position + flame_offsets[sacrifice_count];
+    Factory::Particle::add_flame( m_reg, "graveyard.altar.particle.flame", altar_uuid, flame_ps_pos, 5000, Cmp::Particle::kWorldScalePreset );
+  }
+  else { SPDLOG_WARN( "{} has no particle_offsets entry for sacrifice {}", inactive_sprite_type.str(), sacrifice_count ); }
   SPDLOG_DEBUG( "Altar activated to state {}.", altar_cmp.get_sacrifice_count() );
   play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
 
@@ -207,7 +226,7 @@ void AltarSystem::sacrifice_relic( entt::entity altar_entity, Cmp::Altar::MultiB
   {
     drop_reward_item( "item.exitkey" );
     altar_cmp.set_exitkey_lockout();
-    reg().patch<Cmp::AnimData>( altar_entity, []( Cmp::AnimData &cmp ) { cmp.m_sprite_type = "sprite.graveyard.altar.active"; } );
+    reg().patch<Cmp::AnimData>( altar_entity, [&active_sprite_type]( Cmp::AnimData &cmp ) { cmp.m_sprite_type = active_sprite_type; } );
     Factory::Particle::add_crypt_altar_ps( m_reg, "crypt.altar.particle.active", 0.5, 25.f, altar_uuid,
                                            { altar_cmp.position.x + 40.f, altar_cmp.position.y + 21.f }, 5000 );
     m_sound_bank.get_effect( "crypt_altar_activate" ).play();
