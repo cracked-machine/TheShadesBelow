@@ -1,3 +1,7 @@
+#include <Components/Ruin/BuildingMultiBlock.hpp>
+#include <Components/Ruin/BuildingSegment.hpp>
+#include <Components/Ruin/HexagramMultiBlock.hpp>
+#include <Components/Ruin/HexagramSegment.hpp>
 #include <Factory/MultiblockFactoryImpl.hpp>
 
 namespace Game::Factory::Multiblock

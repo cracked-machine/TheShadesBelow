@@ -1,3 +1,9 @@
+#include <Components/Altar/MultiBlock.hpp>
+#include <Components/Altar/Segment.hpp>
+#include <Components/Grave/ExitMultiBlock.hpp>
+#include <Components/Grave/ExitSegment.hpp>
+#include <Components/Grave/MultiBlock.hpp>
+#include <Components/Grave/Segment.hpp>
 #include <Factory/MultiblockFactoryImpl.hpp>
 
 namespace Game::Factory::Multiblock

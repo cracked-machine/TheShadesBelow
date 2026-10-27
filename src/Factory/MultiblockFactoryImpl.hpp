@@ -5,13 +5,23 @@
 // MultiblockFactory*.cpp translation units that explicitly instantiate these
 // templates - never by consumers of MultiblockFactory.hpp - so that editing a
 // function body only forces a handful of instantiation files to recompile.
+// Each instantiation file includes the concrete multiblock/segment components it instantiates.
 #include <Components/Altar/Segment.hpp>
+#include <Components/AnimData.hpp>
+#include <Components/Armable.hpp>
+#include <Components/Crypt/Entrance.hpp>
+#include <Components/Exit.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Inventory/WorldItem.hpp>
+#include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Particle/BlockParticle.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/NoPath.hpp>
 #include <Components/Player/PendingNoPath.hpp>
+#include <Components/Ruin/Entrance.hpp>
+#include <Components/Spring/HealingSpringEntrance.hpp>
+#include <Components/ZOrderValue.hpp>
 #include <Factory/MultiblockFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Sprites/SpriteSheet.hpp>

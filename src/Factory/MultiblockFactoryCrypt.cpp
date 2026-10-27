@@ -1,3 +1,7 @@
+#include <Components/Crypt/BuildingMultiBlock.hpp>
+#include <Components/Crypt/BuildingSegment.hpp>
+#include <Components/Crypt/ObjectiveMultiBlock.hpp>
+#include <Components/Crypt/ObjectiveSegment.hpp>
 #include <Factory/MultiblockFactoryImpl.hpp>
 
 namespace Game::Factory::Multiblock

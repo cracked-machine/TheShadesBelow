@@ -1,3 +1,9 @@
+#include <Components/Ruin/GateSegment.hpp>
+#include <Components/Ruin/StairsBalustradeMultiBlock.hpp>
+#include <Components/Ruin/StairsGateMultiBlock.hpp>
+#include <Components/Ruin/StairsLowerMultiBlock.hpp>
+#include <Components/Ruin/StairsSegment.hpp>
+#include <Components/Ruin/StairsUpperMultiBlock.hpp>
 #include <Factory/MultiblockFactoryImpl.hpp>
 
 namespace Game::Factory::Multiblock

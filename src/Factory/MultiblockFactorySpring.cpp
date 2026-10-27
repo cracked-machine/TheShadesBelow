@@ -1,3 +1,7 @@
+#include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
+#include <Components/Spring/HealingSpringBuildingSegment.hpp>
+#include <Components/Spring/HealingSpringMultiBlock.hpp>
+#include <Components/Spring/HealingSpringSegment.hpp>
 #include <Factory/MultiblockFactoryImpl.hpp>
 
 namespace Game::Factory::Multiblock

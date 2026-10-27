@@ -198,7 +198,7 @@ void AltarSystem::sacrifice_relic( entt::entity altar_entity, Cmp::Altar::MultiB
   if ( sacrifice_count >= altar_cmp.get_exitkey_drop_threshold() ) return;
 
   reg().patch<Cmp::Altar::MultiBlock>( altar_entity, []( Cmp::Altar::MultiBlock &cmp ) { cmp.increment_sacrifice_count(); } );
-  sf::Vector2f flame_ps_pos = altar_cmp.position + altar_cmp.flame_offsets[sacrifice_count];
+  sf::Vector2f flame_ps_pos = altar_cmp.position + Game::Cmp::Altar::MultiBlock::flame_offsets[sacrifice_count];
   Factory::Particle::add_flame( m_reg, "graveyard.altar.particle.flame", altar_uuid, flame_ps_pos, 5000, Cmp::Particle::kWorldScalePreset );
   SPDLOG_DEBUG( "Altar activated to state {}.", altar_cmp.get_sacrifice_count() );
   play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
@@ -207,6 +207,10 @@ void AltarSystem::sacrifice_relic( entt::entity altar_entity, Cmp::Altar::MultiB
   {
     drop_reward_item( "item.exitkey" );
     altar_cmp.set_exitkey_lockout();
+    reg().patch<Cmp::AnimData>( altar_entity, []( Cmp::AnimData &cmp ) { cmp.m_sprite_type = "sprite.graveyard.altar.active"; } );
+    Factory::Particle::add_crypt_altar_ps( m_reg, "crypt.altar.particle.active", 0.5, 25.f, altar_uuid,
+                                           { altar_cmp.position.x + 40.f, altar_cmp.position.y + 21.f }, 5000 );
+    m_sound_bank.get_effect( "crypt_altar_activate" ).play();
   }
 }
 
@@ -233,6 +237,7 @@ void AltarSystem::sacrifice_exitkey( entt::entity altar_entity, Cmp::Altar::Mult
   {
     drop_reward_item( "item.cryptkey" );
     altar_cmp.set_cryptkey_lockout();
+    m_sound_bank.get_effect( "crypt_altar_activate" ).play();
   }
 }
 
@@ -243,7 +248,8 @@ void AltarSystem::play_sacrifice_anim( const Cmp::Altar::MultiBlock &altar_cmp, 
 
   float altar_sacrifice_anim_height = Sys::SpriteStore::instance().get( sprite_type ).sprite_size().y;
   // get the center (topleft coord), then adjust to center the altar_sacrifice_anim, then adjust for altar_sacrifice_anim height
-  Cmp::Position new_pos( altar_cmp.getCenter() - sf::Vector2{ 8.f, 4.f } - sf::Vector2{ 0.f, altar_sacrifice_anim_height }, Constants::kGridSizePxF );
+  Cmp::Position new_pos( altar_cmp.getCenter() - sf::Vector2{ 7.f, 28.f } - sf::Vector2{ 0.f, altar_sacrifice_anim_height },
+                         Constants::kGridSizePxF );
   m_sound_bank.get_effect( "shrine_lighting" ).play();
   Factory::Altar::create_altar_sacrifice_anim( reg(), new_pos, sprite_type );
 

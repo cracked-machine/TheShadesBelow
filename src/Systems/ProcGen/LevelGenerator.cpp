@@ -33,6 +33,7 @@
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
+#include <Components/Ruin/BuildingMultiBlock.hpp>
 #include <Components/Ruin/BuildingSegment.hpp>
 #include <Components/Ruin/Cobweb.hpp>
 #include <Components/Ruin/GateSegment.hpp>
@@ -42,6 +43,7 @@
 #include <Components/Ruin/StairsBalustradeMultiBlock.hpp>
 #include <Components/Ruin/StairsGateMultiBlock.hpp>
 #include <Components/Ruin/StairsLowerMultiBlock.hpp>
+#include <Components/Ruin/StairsSegment.hpp>
 #include <Components/Ruin/StairsUpperMultiBlock.hpp>
 #include <Components/SpawnArea.hpp>
 #include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>

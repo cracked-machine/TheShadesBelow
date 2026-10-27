@@ -375,16 +375,52 @@
     "sprite.graveyard.altar.inactive": {
       "spritesheet": {
         "displayname": "sprite.graveyard.altar.inactive",
-        "RelativeZOrder": [1,1,1,1],
+        "RelativeZOrder": [1],
         "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [0],
-        "walking_collision_mask": [true, true, true, true],
-        "flying_collision_mask": [false, false, false, false],
+        "sprite_indices": [500],
+        "walking_collision_mask": [
+          false, false, false, false, false, 
+          false, true, true, true, false, 
+          false, true, true, true, false, 
+          false, true, true, true, false
+        ],
+        "flying_collision_mask": [
+          false, false, false, false, false, 
+          false, false, true, false, false, 
+          false, false, false, false, false, 
+          false, false, false, false, false
+        ],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
-          "x": 2,
-          "y": 2
+          "x": 5,
+          "y": 4
+        }
+      }
+    },
+    "sprite.graveyard.altar.active": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.altar.active",
+        "RelativeZOrder": [1],
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [505],
+        "walking_collision_mask": [
+          false, false, false, false, false, 
+          false, true, true, true, false, 
+          false, true, true, true, false, 
+          false, true, true, true, false
+        ],
+        "flying_collision_mask": [
+          false, false, false, false, false, 
+          false, false, true, false, false, 
+          false, false, false, false, false, 
+          false, false, false, false, false
+        ],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 5,
+          "y": 4
         }
       }
     },

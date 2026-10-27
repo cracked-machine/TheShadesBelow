@@ -1,3 +1,5 @@
+#include <Components/Grave/PlantMultiBlock.hpp>
+#include <Components/Grave/PlantSegment.hpp>
 #include <Factory/MultiblockFactoryImpl.hpp>
 
 namespace Game::Factory::Multiblock

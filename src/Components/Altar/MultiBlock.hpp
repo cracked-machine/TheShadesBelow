@@ -54,9 +54,9 @@ public:
   bool is_cryptkey_lockout() const { return m_cryptkey_drop_lockout; }
 
   //! @brief Local-space offsets of the flame particle spawn points for each sacrifice, one per
-  //!        corner of the altar's four segments.
-  std::array<sf::Vector2f, 4> flame_offsets = { sf::Vector2f( 6.f, 10.f ), sf::Vector2f( 26.f, 10.f ), sf::Vector2f( 6.f, 24.f ),
-                                                sf::Vector2f( 26.f, 24.f ) };
+  //!        corner of the altar's four segments. Defined in MultiBlock.cpp so tweaking values doesn't
+  //!        recompile every includer.
+  static const std::array<sf::Vector2f, 4> flame_offsets;
 
 private:
   //! @brief The number of sacrifices required to drop an exitkey (4 relics)
