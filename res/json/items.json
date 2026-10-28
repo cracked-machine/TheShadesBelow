@@ -745,8 +745,8 @@
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "reward": { "item": "item.antivenom" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3,
-                                "side_effects": { "spawn_npc": { "type": "npc.adder", "probability": 1.0, "max_instances": 3 } } }},
+      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 5,
+                                "side_effects": { "spawn_npc": { "type": "npc.adder", "probability": 1.0, "max_instances": 3, "trigger_range": 6 } } }},
 
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
@@ -818,7 +818,7 @@
   },
   "item.plant.stjohnswort": {
     "sprite": "sprite.item.plant.stjohnswort",
-    "wear": { "location": "both", "expiryseconds": 30, "active_only": false },
+    "wear": { "location": "inventory", "expiryseconds": 30, "active_only": false },
     "consumable": "none",
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 0 },
     "actions": [

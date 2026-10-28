@@ -806,7 +806,7 @@ void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
 
   for ( auto [plant_entt, plant_mb_cmp, plant_worlditem_cmp] : reg().view<Cmp::PlantMultiBlock, Cmp::WorldItem>().each() )
   {
-    if ( not Utils::Player::is_player_near( reg(), plant_mb_cmp ) ) continue;
+
     auto &[proximity_action, proximity_timer] = plant_worlditem_cmp.at<Cmp::ProximityAction>();
 
     proximity_timer += dt;
@@ -815,13 +815,20 @@ void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
     // spawn NPC now that we are close enough
     if ( not proximity_action.side_effects().empty() )
     {
+      const auto &fx = proximity_action.side_effects();
+      if ( fx.spawn_npc and
+           not Cmp::RectBounds::expanded( plant_mb_cmp, fx.spawn_npc->trigger_range ).findIntersection( Utils::Player::get_position( reg() ) ) )
+        continue;
       if ( auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt ) )
       {
         get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_item->item_type, Cmp::ProximityAction::kKey, proximity_action ) );
         trigger_side_effects( proximity_action, Cmp::Position( plant_mb_cmp.position, Constants::kGridSizePxF ), plant_entt );
       }
+      // reset now, otherwise side effects re-trigger every frame while the player is outside the closer range check below
+      proximity_timer = sf::Time::Zero;
     }
 
+    if ( not Utils::Player::is_player_near( reg(), plant_mb_cmp ) ) continue;
     if ( proximity_action.health() < 0 ) reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     Utils::Player::apply_action_from_world_item<Cmp::ProximityAction>( reg(), plant_entt );
     proximity_timer = sf::Time::Zero;

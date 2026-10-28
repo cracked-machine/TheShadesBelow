@@ -77,6 +77,10 @@ struct SpawnNpcEffect
   float probability{ 0.f };
   //! @brief Max live NPCs spawned by each world item instance, across all of its actions. 0 = unlimited.
   int max_instances{ 0 };
+  //! @brief Distance in blocks from the item that the player must be within before the NPC spawn is triggered.
+  int trigger_range{ 1 };
+  //! @brief Distance from the item to spawned NPC.
+  int spawn_radius{ 1 };
   //! @brief Roll this effect's probability.
   //! @return true if the effect should fire.
   [[nodiscard]] bool roll() const;

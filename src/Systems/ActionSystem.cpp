@@ -445,6 +445,7 @@ void ActionSystem::player_plant_interact()
                 Events::CreateItemEvent( Cmp::Position( plant_mb_cmp.position, Constants::kGridSizePxF ), axe_output, "drop_loot" ) );
           }
           const auto destroy_action = Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
+
           trigger_side_effects( destroy_action, plant_pos_cmp, plant_entt );
           Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
           m_sound_bank.get_effect( "chopping_final" ).play();

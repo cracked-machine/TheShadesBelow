@@ -189,11 +189,11 @@ bool is_inventory_item_active( entt::registry &reg );
 
 bool is_illuminated( entt::registry &reg );
 
-//! @brief True if the player's hitbox (scaled 1.5x the grid size) intersects the given bounds
+//! @brief True if the player's hitbox (scaled `player_hitbox_scale` times the grid size) intersects the given bounds
 //! @param reg reference to the entt registry
 //! @param bounds The bounds to test against the player's hitbox.
 //! @return bool true if the player is near `bounds`.
-bool is_player_near( entt::registry &reg, const sf::FloatRect &bounds );
+bool is_player_near( entt::registry &reg, const sf::FloatRect &bounds, float player_hitbox_scale = 1.5f );
 
 //! @brief The grid cell one tile in front of the player, based on their last facing direction
 //! @param reg reference to the entt registry

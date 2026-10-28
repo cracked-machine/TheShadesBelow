@@ -160,6 +160,7 @@
               "properties": {
                 "type": { "type": "string", "pattern": "^npc\\." },
                 "probability": { "$ref": "#/definitions/probability" },
+                "trigger_range": { "type": "integer", "minimum": 1, "description": "Distance in blocks from the item that the player must be within before the NPC spawn is triggered." },
                 "max_instances": { "type": "integer", "minimum": 1, "description": "Max live NPCs spawned by each item instance, across all its actions. Further spawns are skipped. Omit for unlimited." }
               }
             },

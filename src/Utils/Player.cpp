@@ -277,7 +277,10 @@ bool is_elderflute_active( entt::registry &reg )
 
 bool is_flying( entt::registry &reg )
 {
-  for ( [[maybe_unused]] auto entt : reg.view<Cmp::Player::Character, Cmp::Player::Flying>() ) { return true; }
+  for ( [[maybe_unused]] auto entt : reg.view<Cmp::Player::Character, Cmp::Player::Flying>() )
+  {
+    return true;
+  }
   return false;
 }
 
@@ -313,12 +316,11 @@ bool is_in_spawn( entt::registry &reg, const Cmp::Position &player_pos_cmp )
 
 bool is_illuminated( entt::registry &reg ) { return reg.all_of<Cmp::Player::Illuminated>( get_entity( reg ) ); }
 
-//! @brief True if the player's hitbox (scaled 1.5x the grid size) intersects the given bounds
-bool is_player_near( entt::registry &reg, const sf::FloatRect &bounds )
+bool is_player_near( entt::registry &reg, const sf::FloatRect &bounds, float player_hitbox_scale )
 {
   for ( auto [pc_entt, pc_cmp, pc_pos_cmp] : reg.view<Cmp::Player::Character, const Cmp::Position>().each() )
   {
-    auto player_hitbox = Cmp::RectBounds::scaled( pc_pos_cmp.position, Constants::kGridSizePxF, 1.5f );
+    auto player_hitbox = Cmp::RectBounds::scaled( pc_pos_cmp.position, Constants::kGridSizePxF, player_hitbox_scale );
     if ( player_hitbox.findIntersection( bounds ) ) return true;
   }
   return false;

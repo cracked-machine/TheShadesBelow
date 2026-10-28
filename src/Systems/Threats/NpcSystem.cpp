@@ -10,6 +10,7 @@
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Grave/Segment.hpp>
 #include <Components/LerpPosition.hpp>
+#include <Components/Npc/Adder.hpp>
 #include <Components/Npc/Container.hpp>
 #include <Components/Npc/Drknox.hpp>
 #include <Components/Npc/ElderMother.hpp>
@@ -386,6 +387,18 @@ void NpcSystem::update_pathfinding( sf::Time dt )
       {
         reg().emplace_or_replace<Cmp::Direction>( npc_entt, Cmp::Direction( { 0.0f, 0.0f } ) );
         continue;
+      }
+
+      // Adders lie in wait, only striking out at a player that strays within range
+      if ( reg().all_of<Cmp::Npc::Adder>( npc_entt ) )
+      {
+        static constexpr float kAdderPathfindRange = Constants::kGridSizePxF.x * 3.0f;
+        const auto &npc_pos_cmp = reg().get<Cmp::Position>( npc_entt );
+        if ( Utils::Maths::getChebyshevDistance( npc_pos_cmp.position, player_pos.position ) > kAdderPathfindRange )
+        {
+          reg().emplace_or_replace<Cmp::Direction>( npc_entt, Cmp::Direction( { 0.0f, 0.0f } ) );
+          continue;
+        }
       }
 
       auto navmesh = navmesh_for( npc_entt );
