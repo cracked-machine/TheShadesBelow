@@ -34,7 +34,8 @@ public:
   //! @param reserved_sm
   void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm ) { m_reserved_sm = reserved_sm; }
 
-  //! @brief Event handler that forwards to create_world_item().
+  //! @brief Event handler that forwards to create_world_item(). With `m_spawn_nearby` the item drops on a random free
+  //! cell beside the source, unless the source has already dropped `m_max_instances` times over its lifetime.
   //! @param ev
   void on_create_item_event( Game::Events::CreateItemEvent ev );
 
@@ -51,7 +52,8 @@ public:
   //! @param item Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
   //! @param sfx Sound effect to play on placement, if not empty.
   //! @param zorder
-  void create_world_item( Cmp::Position pos, const Sys::ItemKey &item, std::string sfx, float zorder = 0.f );
+  //! @return entt::entity The new world item, or entt::null for explosives.
+  entt::entity create_world_item( Cmp::Position pos, const Sys::ItemKey &item, std::string sfx, float zorder = 0.f );
 
   //! @brief Replace an existing world item in place with another item type, keeping its position, UUID, etc.
   //! @note The Cmp::Inventory::WearLevel is reset if the new item wears, otherwise it is removed.
@@ -67,6 +69,9 @@ public:
   void create_explosive( Cmp::Position pos, const Sys::ItemKey &item, float zorder );
 
 private:
+  //! @brief How many rings out from the source on_create_item_event() searches for a free cell.
+  static constexpr int kItemDropSearchRadius = 3;
+
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
 };

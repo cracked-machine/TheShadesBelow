@@ -14,7 +14,7 @@
 // clang-format off
 namespace Game::Events { class DropInventoryEvent; class PlayerActionEvent; class PlayerMortalityEvent; class UpdatePlayerPositionEvent; }
 namespace Game::Sprites { class SpriteSheet; }
-namespace Game::Cmp { class LerpPosition; class Position; class AnimData; class RectBounds; class BaseAction; }
+namespace Game::Cmp { class LerpPosition; class Position; class AnimData; class RectBounds; class BaseAction; struct ActionReward; }
 namespace Game::Cmp::Npc { class Shockwave; }
 namespace Game::Cmp::Peristent { class EffectsVolume; } 
 namespace Game::PathFinding { class SpatialHashGrid; }
@@ -112,6 +112,12 @@ private:
   //! @brief Update the proximity action timers and apply the stat modifiers for proximity to plant life.
   //! @param dt
   void apply_plant_proximity_modifiers( sf::Time dt );
+
+  //! @brief Drop a proximity_action reward (loot or item) on a random free cell beside its source.
+  //! @param reward The reward; its max_instances caps the drops over the source's lifetime.
+  //! @param source The source's bounds, e.g. the plant's whole footprint.
+  //! @param source_entt The source world item entity; its Cmp::DropCount tracks the drops.
+  void drop_proximity_reward( const Cmp::ActionReward &reward, const Cmp::Position &source, entt::entity source_entt );
 
   //! @brief Set the player on fire if Cmp::Toxicity::Phototoxia is 100%
   void set_player_on_fire();

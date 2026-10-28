@@ -2,6 +2,9 @@
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LerpPosition.hpp>
+#include <Components/Loot.hpp>
+#include <Components/Npc/NoPathFinding.hpp>
+#include <Components/Npc/Npc.hpp>
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
@@ -9,11 +12,16 @@
 #include <Components/Player/SpeedPenalty.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
+#include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <PathFinding/SpatialHashGrid.hpp>
 #include <Sprites/SpriteSheet.hpp>
+#include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
+#include <Utils/Npc.hpp>
+#include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -252,6 +260,65 @@ bool is_current_scene( entt::registry &reg, Cmp::SceneSettings::SceneId scene_id
     return scene_cmp.id == scene_id;
   }
   return false;
+}
+
+std::optional<sf::Vector2f> find_random_cell_near( const sf::FloatRect &source, int max_rings, const std::function<bool( const sf::Vector2f & )> &is_free )
+{
+  const auto grid = Constants::kGridSizePxF;
+  const sf::FloatRect source_cells = snap_to_grid( source );
+
+  for ( int ring = 1; ring <= max_rings; ++ring )
+  {
+    const sf::FloatRect outer = Cmp::RectBounds::expanded( source_cells, ring ).getBounds();
+    const sf::FloatRect inner = Cmp::RectBounds::expanded( source_cells, ring - 1 ).getBounds();
+
+    // every free cell in this ring
+    std::vector<sf::Vector2f> free_cells;
+    for ( float y = outer.position.y; y < outer.position.y + outer.size.y; y += grid.y )
+    {
+      for ( float x = outer.position.x; x < outer.position.x + outer.size.x; x += grid.x )
+      {
+        const sf::Vector2f cell( x, y );
+        if ( inner.contains( cell + grid / 2.f ) ) continue;
+        if ( is_free( cell ) ) free_cells.push_back( cell );
+      }
+    }
+    if ( free_cells.empty() ) continue;
+
+    Cmp::RandomInt cell_picker( 0, static_cast<int>( free_cells.size() ) - 1 );
+    return free_cells[static_cast<std::size_t>( cell_picker.gen() )];
+  }
+  return std::nullopt;
+}
+
+bool is_free_spawn_area( entt::registry &reg, const sf::FloatRect &area, const PathFinding::SpatialHashGrid *reserved_sm )
+{
+  // shrink the hitbox slightly so neighbouring cells sharing an edge don't count as overlapping
+  const auto area_bounds = Cmp::RectBounds::scaled( area, 0.9f );
+
+  // every cell under the area must be a real, unreserved world tile
+  const auto grid = Constants::kGridSizePxF;
+  for ( float y = area.position.y; y < area.position.y + area.size.y; y += grid.y )
+  {
+    for ( float x = area.position.x; x < area.position.x + area.size.x; x += grid.x )
+    {
+      const Cmp::Position cell_pos( { x, y }, grid );
+      if ( Npc::get_world_pos_entt( reg, cell_pos ) == entt::null ) return false;
+      if ( reserved_sm and not reserved_sm->at( cell_pos ).empty() ) return false;
+    }
+  }
+
+  using Collision::any_intersects;
+  if ( any_intersects<Cmp::Npc::NoPathFinding>( reg, area_bounds ) or any_intersects<Cmp::Loot>( reg, area_bounds ) or
+       any_intersects<Cmp::WorldItem>( reg, area_bounds ) )
+    return false;
+  if ( area_bounds.findIntersection( Player::get_position( reg ) ) ) return false;
+  for ( auto npc_entt : reg.view<Cmp::Npc::NPC>() )
+  {
+    const auto npc_bounds = Npc::collision_bounds( reg, npc_entt );
+    if ( npc_bounds and area_bounds.findIntersection( *npc_bounds ) ) return false;
+  }
+  return true;
 }
 
 } // namespace Game::Utils

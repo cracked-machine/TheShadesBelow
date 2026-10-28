@@ -65,6 +65,7 @@
 #include <Systems/FlyingSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Threats/NpcSystem.hpp>
 #include <Systems/Threats/ShockwaveSystem.hpp>
@@ -108,10 +109,31 @@ void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
     if ( instances >= event.m_max_instances ) return;
   }
 
-  auto npc_entt = Factory::Npc::create_npc( reg(), event.m_position, event.m_npc_type );
+  Cmp::Position spawn_pos = event.m_position;
+  if ( event.m_spawn_nearby )
+  {
+    auto cell = find_nearby_spawn_cell( event.m_position, event.m_npc_type );
+    if ( not cell )
+    {
+      SPDLOG_WARN( "No free cell to spawn {} near [{},{}].", event.m_npc_type.str(), event.m_position.position.x, event.m_position.position.y );
+      return;
+    }
+    spawn_pos = Cmp::Position( *cell, Constants::kGridSizePxF );
+  }
+
+  auto npc_entt = Factory::Npc::create_npc( reg(), spawn_pos, event.m_npc_type );
   if ( npc_entt == entt::null ) return;
   if ( not event.m_source_uuid.empty() ) { reg().emplace_or_replace<Cmp::Npc::SpawnedBy>( npc_entt, event.m_source_uuid ); }
   if ( event.m_on_created ) { event.m_on_created( npc_entt ); }
+}
+
+std::optional<sf::Vector2f> NpcSystem::find_nearby_spawn_cell( const Cmp::Position &source, const Sys::NpcKey &npc_type )
+{
+  const auto &npc_cmp = Sys::NpcStore::instance().get( npc_type );
+  const sf::Vector2f npc_size = Sys::SpriteStore::instance().get( npc_cmp.sprite_type_list.front() ).sprite_size();
+  // the NPC's whole footprint must be free, not just its top-left cell
+  return Utils::find_random_cell_near( source, kNpcSpawnSearchRadius,
+                                       [&]( const sf::Vector2f &cell ) { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell, npc_size ) ); } );
 }
 
 void NpcSystem::on_update_npc_position_event( const Events::UpdateNpcPositionEvent &event )

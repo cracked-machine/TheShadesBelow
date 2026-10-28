@@ -173,6 +173,7 @@ std::string GrimoireSystem::reward_display_name( const Cmp::ActionReward &reward
   {
     return Sys::SpriteStore::instance().get( Sys::ItemStore::instance().get( reward.item ).sprite_type ).display_name();
   }
+  if ( not reward.loot.empty() ) { return Sys::SpriteStore::instance().get( reward.loot ).display_name(); }
   if ( reward.wealth > 0 ) { return std::format( "+{} wealth", reward.wealth ); }
   switch ( reward.special )
   {

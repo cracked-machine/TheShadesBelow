@@ -1,6 +1,7 @@
 
 #include <Audio/SoundBank.hpp>
 #include <Components/AnimData.hpp>
+#include <Components/DropCount.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/WearLevel.hpp>
@@ -14,7 +15,9 @@
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/ItemSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
+#include <Utils/Constants.hpp>
 #include <Utils/Player.hpp>
+#include <Utils/Utils.hpp>
 
 #include <algorithm>
 
@@ -30,7 +33,36 @@ ItemSystem::ItemSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
   std::ignore = get_systems_event_queue().sink<Events::UpdateDmgEvent>().connect<&ItemSystem::on_update_dmg_event>( this );
 }
 
-void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev ) { create_world_item( ev.m_pos, ev.m_item, ev.m_sfx, ev.m_zorder ); }
+void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev )
+{
+  if ( not ev.m_spawn_nearby )
+  {
+    create_world_item( ev.m_pos, ev.m_item, ev.m_sfx, ev.m_zorder );
+    return;
+  }
+
+  const bool has_source = reg().valid( ev.m_source_entt );
+  if ( has_source and ev.m_max_instances > 0 )
+  {
+    const auto *drop_count_cmp = reg().try_get<Cmp::DropCount>( ev.m_source_entt );
+    if ( drop_count_cmp and drop_count_cmp->m_count >= ev.m_max_instances ) return;
+  }
+
+  auto reserved_sm = m_reserved_sm.lock();
+  auto cell = Utils::find_random_cell_near( ev.m_pos, kItemDropSearchRadius,
+                                            [&]( const sf::Vector2f &cell_pos )
+                                            { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), reserved_sm.get() ); } );
+  if ( not cell )
+  {
+    SPDLOG_WARN( "No free cell to drop {} near [{},{}].", ev.m_item.str(), ev.m_pos.position.x, ev.m_pos.position.y );
+    return;
+  }
+
+  auto item_entt = create_world_item( Cmp::Position( *cell, Constants::kGridSizePxF ), ev.m_item, ev.m_sfx, ev.m_zorder );
+  // counted over the source's lifetime, so picking the item up doesn't free a slot
+  if ( item_entt != entt::null and has_source ) { reg().get_or_emplace<Cmp::DropCount>( ev.m_source_entt ).m_count++; }
+}
+
 void ItemSystem::on_swap_world_item_event( const Events::SwapWorldItemEvent &ev ) { swap_world_item( ev.m_entt, ev.m_new_item, ev.m_sfx ); }
 void ItemSystem::on_update_dmg_event( const Events::UpdateDmgEvent &ev )
 {
@@ -56,13 +88,13 @@ void ItemSystem::on_update_dmg_event( const Events::UpdateDmgEvent &ev )
   }
 }
 
-void ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKey &item, std::string sfx, float zorder )
+entt::entity ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKey &item, std::string sfx, float zorder )
 {
 
   if ( item == "item.bomb" )
   {
     create_explosive( pos, item, zorder );
-    return;
+    return entt::null;
   }
 
   const auto &world_item = Sys::ItemStore::instance().get( item );
@@ -92,6 +124,7 @@ void ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKey &item,
 
   SPDLOG_INFO( "Placed {} at {},{}", item, pos.position.x, pos.position.y );
   if ( world_item_entt != entt::null and not sfx.empty() ) { m_sound_bank.get_effect( sfx ).play(); }
+  return world_item_entt;
 }
 
 void ItemSystem::swap_world_item( entt::entity entt, const Sys::ItemKey &item, const std::string &sfx )

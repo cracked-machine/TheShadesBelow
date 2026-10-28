@@ -4,8 +4,12 @@
 #include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>
 
+#include <SFML/Graphics/Rect.hpp>
+#include <SFML/System/Vector2.hpp>
+
 #include <cstddef>
 #include <entt/entity/fwd.hpp>
+#include <functional>
 #include <optional>
 #include <string>
 
@@ -26,6 +30,11 @@ class System;
 class LerpPosition;
 class CurrentScene;
 } // namespace Game::Cmp
+
+namespace Game::PathFinding
+{
+class SpatialHashGrid;
+} // namespace Game::PathFinding
 
 namespace Game::Cmp::SceneSettings
 {
@@ -99,6 +108,22 @@ entt::entity get_world_pos_entt( entt::registry &reg, Cmp::Position match );
 //! @param plant_entt The plant multiblock entity.
 //! @return bool True if the plant's wear level is at or below zero.
 bool is_plant_depleted( entt::registry &reg, entt::entity plant_entt );
+
+//! @brief Find a random cell in the nearest ring of grid cells around `source` that has a free cell,
+//! searching outwards one ring at a time.
+//! @param source The source's bounds, e.g. a plant's whole footprint. Snapped to the grid.
+//! @param max_rings How many rings out from `source` to search.
+//! @param is_free Whether a cell (top-left position) is free.
+//! @return std::optional<sf::Vector2f> top-left of the cell, or nullopt if no ring has a free cell.
+std::optional<sf::Vector2f> find_random_cell_near( const sf::FloatRect &source, int max_rings, const std::function<bool( const sf::Vector2f & )> &is_free );
+
+//! @brief Whether something can be spawned/dropped on `area`: every grid cell under it is a world tile, and it is free of
+//! Cmp::Npc::NoPathFinding entities (obstacles, plants, buildings), loot, world items, NPCs and the player.
+//! @param reg reference to the entt registry
+//! @param area World-space rect, e.g. an NPC footprint or a single grid cell.
+//! @param reserved_sm If provided, cells reserved in it are not free.
+//! @return bool true if `area` is free.
+bool is_free_spawn_area( entt::registry &reg, const sf::FloatRect &area, const PathFinding::SpatialHashGrid *reserved_sm = nullptr );
 
 //! @brief Word-wraps text to fit within max_chars_per_line, preserving existing newlines as hard breaks.
 //! @note Approximate (assumes roughly-uniform character width) - fine for a fatal-error debug screen.

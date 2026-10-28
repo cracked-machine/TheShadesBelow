@@ -125,9 +125,9 @@ struct SideEffects
 };
 
 //! @brief Optional reward granted when an action is applied. See the "reward" object of the sacrifice_action,
-//! forage_action and destroy_action entries in res/json/items.json.
+//! forage_action, destroy_action and proximity_action entries in res/json/items.json.
 //! @details A sacrifice_action reward sets exactly one of item, wealth or special. A forage_action/destroy_action
-//! reward only sets item.
+//! reward only sets item. A proximity_action reward sets exactly one of item or loot, dropped beside the source.
 struct ActionReward
 {
   //! @brief A special altar effect triggered by sacrificing the item.
@@ -148,11 +148,19 @@ struct ActionReward
   int wealth{ 0 };
   //! @brief The special altar effect. NONE if unused.
   Special special{ Special::NONE };
+  //! @brief The loot sprite dropped (proximity_action only). Empty string if unused.
+  Sys::SpriteKey loot;
+  //! @brief Distance in blocks from the source that the player must be within before the reward drops (proximity_action only).
+  int trigger_range{ 1 };
+  //! @brief Max drops over each source item instance's lifetime, picked up or not; further drops are skipped. 0 = unlimited
+  //! (proximity_action only).
+  int max_instances{ 0 };
   //! @brief The number of reward fields that are set.
-  //! @return int Count of item, wealth and special that are not their unused value.
+  //! @return int Count of item, wealth, special and loot that are not their unused value.
   [[nodiscard]] int count() const
   {
-    return static_cast<int>( not item.empty() ) + static_cast<int>( wealth > 0 ) + static_cast<int>( special != Special::NONE );
+    return static_cast<int>( not item.empty() ) + static_cast<int>( wealth > 0 ) + static_cast<int>( special != Special::NONE ) +
+           static_cast<int>( not loot.empty() );
   }
 };
 

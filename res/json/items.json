@@ -746,7 +746,8 @@
                                 "reward": { "item": "item.antivenom" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 5,
-                                "side_effects": { "spawn_npc": { "type": "npc.adder", "probability": 1.0, "max_instances": 3, "trigger_range": 6 } } }},
+                                "reward": { "loot": "sprite.crypt.loot.gold", "trigger_range": 3, "max_instances": 3 },
+                                "side_effects": { "spawn_npc": { "type": "npc.adder", "probability": 1.0, "max_instances": 3, "trigger_range": 3 } } }},
 
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]

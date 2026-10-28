@@ -92,6 +92,8 @@
 #include <Components/Wall.hpp>
 #include <Components/Wormhole/Jump.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/CreateItemEvent.hpp>
+#include <Events/CreateLootEvent.hpp>
 #include <Events/GrimoireUpdateEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
@@ -812,19 +814,30 @@ void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
     proximity_timer += dt;
     if ( proximity_timer.asSeconds() < proximity_action.interval() ) continue;
 
+    const Cmp::Position plant_bounds( plant_mb_cmp.position, plant_mb_cmp.size );
+    const auto &player_pos = Utils::Player::get_position( reg() );
+    auto in_range = [&]( int trigger_range ) { return Cmp::RectBounds::expanded( plant_mb_cmp, trigger_range ).findIntersection( player_pos ).has_value(); };
+    bool triggered = false;
+
     // spawn NPC now that we are close enough
-    if ( not proximity_action.side_effects().empty() )
+    if ( const auto &fx = proximity_action.side_effects(); not fx.empty() and ( not fx.spawn_npc or in_range( fx.spawn_npc->trigger_range ) ) )
     {
-      const auto &fx = proximity_action.side_effects();
-      if ( fx.spawn_npc and
-           not Cmp::RectBounds::expanded( plant_mb_cmp, fx.spawn_npc->trigger_range ).findIntersection( Utils::Player::get_position( reg() ) ) )
-        continue;
-      if ( auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt ) )
-      {
-        get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_item->item_type, Cmp::ProximityAction::kKey, proximity_action ) );
-        trigger_side_effects( proximity_action, Cmp::Position( plant_mb_cmp.position, Constants::kGridSizePxF ), plant_entt );
-      }
-      // reset now, otherwise side effects re-trigger every frame while the player is outside the closer range check below
+      trigger_side_effects( proximity_action, plant_bounds, plant_entt );
+      triggered = true;
+    }
+
+    // drop the reward (e.g. gold) once close enough, independently of the side effects
+    if ( const auto &reward = proximity_action.reward();
+         reward and ( not reward->loot.empty() or not reward->item.empty() ) and in_range( reward->trigger_range ) )
+    {
+      drop_proximity_reward( *reward, plant_bounds, plant_entt );
+      triggered = true;
+    }
+
+    if ( triggered )
+    {
+      get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_worlditem_cmp.item_type, Cmp::ProximityAction::kKey, proximity_action ) );
+      // reset now, otherwise side effects and rewards re-trigger every frame while the player is outside the closer range check below
       proximity_timer = sf::Time::Zero;
     }
 
@@ -832,6 +845,19 @@ void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
     if ( proximity_action.health() < 0 ) reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     Utils::Player::apply_action_from_world_item<Cmp::ProximityAction>( reg(), plant_entt );
     proximity_timer = sf::Time::Zero;
+  }
+}
+
+void PlayerSystem::drop_proximity_reward( const Cmp::ActionReward &reward, const Cmp::Position &source, entt::entity source_entt )
+{
+  if ( not reward.loot.empty() )
+  {
+    get_systems_event_queue().trigger( Events::CreateLootEvent( reward.loot, source, reward.max_instances, source_entt ) );
+  }
+  else if ( not reward.item.empty() )
+  {
+    get_systems_event_queue().trigger(
+        Events::CreateItemEvent( source, reward.item, "drop_loot", 0.f, /*spawn_nearby=*/true, reward.max_instances, source_entt ) );
   }
 }
 

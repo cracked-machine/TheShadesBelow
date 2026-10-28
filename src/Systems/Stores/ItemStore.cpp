@@ -9,8 +9,10 @@
 #include <Factory/ToxicityFactory.hpp>
 #include <SFML/System/Time.hpp>
 #include <Systems/Stores/ItemStore.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/JsonDeserializer.hpp>
 
+#include <algorithm>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
@@ -99,8 +101,14 @@ void ItemStore::init_store()
     for ( const auto &[property, reward] : { std::pair{ "forage_action.reward", worlditem.get_reward<Cmp::ForageAction>() },
                                              std::pair{ "destroy_action.reward", worlditem.get_reward<Cmp::DestroyAction>() } } )
     {
-      if ( not reward or ( reward->wealth == 0 and reward->special == Cmp::ActionReward::Special::NONE ) ) continue;
+      if ( not reward or ( reward->wealth == 0 and reward->special == Cmp::ActionReward::Special::NONE and reward->loot.empty() ) ) continue;
       throw std::runtime_error( "Item '" + item_key + "' " + property + " must only set item in " + m_json_file_path.string() );
+    }
+    // a proximity reward is dropped beside the item: exactly one of item or loot
+    if ( const auto reward = worlditem.get_reward<Cmp::ProximityAction>();
+         reward and ( reward->count() != 1 or ( reward->item.empty() and reward->loot.empty() ) ) )
+    {
+      throw std::runtime_error( "Item '" + item_key + "' proximity_action.reward must set exactly one of item or loot in " + m_json_file_path.string() );
     }
     m_store.emplace( key_type( item_key ), std::move( worlditem ) );
     SPDLOG_DEBUG( "Loaded item: {} ({})", item_key, sprite_mtype );
@@ -111,10 +119,18 @@ void ItemStore::init_store()
   {
     for ( const auto &[property, output] :
           { std::pair{ "sacrifice_action.reward.item", item.get_sacrifice_reward().value_or( Cmp::ActionReward{} ).item },
-            std::pair{ "forage_action.reward.item", item.get_forage_output() }, std::pair{ "destroy_action.reward.item", item.get_axe_output() } } )
+            std::pair{ "forage_action.reward.item", item.get_forage_output() }, std::pair{ "destroy_action.reward.item", item.get_axe_output() },
+            std::pair{ "proximity_action.reward.item", item.get_reward<Cmp::ProximityAction>().value_or( Cmp::ActionReward{} ).item } } )
     {
       if ( output.empty() or m_store.contains( output ) ) continue;
       throw std::runtime_error( "Item '" + item_key.str() + "' has unknown " + property + " '" + output.str() + "' in " + m_json_file_path.string() );
+    }
+    const auto proximity_loot = item.get_reward<Cmp::ProximityAction>().value_or( Cmp::ActionReward{} ).loot;
+    if ( proximity_loot.empty() ) continue;
+    if ( const auto sprite_types = Sys::SpriteStore::instance().get_all(); std::ranges::find( sprite_types, proximity_loot ) == sprite_types.end() )
+    {
+      throw std::runtime_error( "Item '" + item_key.str() + "' has unknown proximity_action.reward.loot '" + proximity_loot.str() + "' in " +
+                                m_json_file_path.string() );
     }
   }
   SPDLOG_DEBUG( "Item store loaded with {} items", m_store.size() );

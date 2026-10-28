@@ -92,8 +92,8 @@
                 "allOf": [{ "$ref": "#/definitions/action_effect" }]
               },
               "proximity_action": {
-                "description": "Applied repeatedly, at its own tick interval, while the player is near the item and it is within the current screen view.",
-                "allOf": [{ "$ref": "#/definitions/action_effect" }]
+                "description": "Applied repeatedly, at its own tick interval, while the player is near the item and it is within the current screen view. Optional reward: exactly one of item or loot, dropped on a random free cell beside the item once the player is within reward.trigger_range.",
+                "allOf": [{ "$ref": "#/definitions/action_effect" }, { "$ref": "#/definitions/proximity_reward" }]
               },
               "sacrifice_action": {
                 "description": "Applied when the item is sacrificed at an altar. The item can only be sacrificed if this action has a reward, which must set exactly one of item, wealth or special.",
@@ -207,11 +207,34 @@
           "type": "string",
           "enum": ["altar", "banish", "crypt"],
           "description": "A special altar effect (sacrifice_action only). altar: light an altar candle (relics). banish: banish ghosts or gain an extra life at a crypt altar (witches jar). crypt: unlock the crypt key (exit key)."
+        },
+        "loot": {
+          "type": "string",
+          "pattern": "^sprite\\..*loot",
+          "description": "The loot sprite dropped (proximity_action only), e.g. sprite.crypt.loot.gold. Must be a valid sprite key."
+        },
+        "trigger_range": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Distance in blocks from the item that the player must be within before the reward drops (proximity_action only). Defaults to 1."
+        },
+        "max_instances": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Max drops over each item instance's lifetime, picked up or not (proximity_action only). Further drops are skipped. Omit for unlimited."
         }
       }
     },
     "item_only_reward": {
       "properties": { "reward": { "required": ["item"], "maxProperties": 1 } }
+    },
+    "proximity_reward": {
+      "properties": {
+        "reward": {
+          "oneOf": [{ "required": ["item"] }, { "required": ["loot"] }],
+          "propertyNames": { "enum": ["item", "loot", "trigger_range", "max_instances"] }
+        }
+      }
     },
     "probability": {
       "type": "number",

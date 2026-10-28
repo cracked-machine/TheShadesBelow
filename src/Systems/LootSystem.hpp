@@ -2,6 +2,7 @@
 #define SRC_SYSTEMS_LOOTSYSTEM_HPP__
 
 #include <Components/LootContainer.hpp>
+#include <Events/CreateLootEvent.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <SFML/Audio/Sound.hpp>
@@ -47,6 +48,14 @@ private:
   //! @brief Break the loot container, then 50% chance of dropping random loot in its place
   //! @param event
   void on_destroy_loot_container_event( const Events::DestroyLootContainerEvent &event );
+
+  //! @brief Drop loot on a random free cell beside the event's source, unless the source has already dropped
+  //! `max_instances` times over its lifetime.
+  //! @param event
+  void on_create_loot_event( const Events::CreateLootEvent &event );
+
+  //! @brief How many rings out from the source on_create_loot_event() searches for a free cell.
+  static constexpr int kLootDropSearchRadius = 3;
 
   //! @brief all grid positions that block NPC pathfinding
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;

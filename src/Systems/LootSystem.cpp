@@ -1,5 +1,7 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/AnimData.hpp>
+#include <Components/DropCount.hpp>
+#include <Components/FootStepTimer.hpp>
 #include <Components/Inventory/FlashUICadaver.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/FlashUIInventory.hpp>
@@ -9,6 +11,7 @@
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Loot.hpp>
 #include <Components/LootContainer.hpp>
+#include <Components/Npc/Npc.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Player/BlastRadius.hpp>
@@ -40,10 +43,49 @@ LootSystem::LootSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
     : BaseSystem( reg, window, sound_bank )
 {
   std::ignore = get_systems_event_queue().sink<Events::DestroyLootContainerEvent>().connect<&LootSystem::on_destroy_loot_container_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::CreateLootEvent>().connect<&LootSystem::on_create_loot_event>( this );
   SPDLOG_DEBUG( "LootSystem initialized" );
 }
 
 void LootSystem::update_loot_container_particles() { Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.pot.particle.dig" ); }
+
+void LootSystem::on_create_loot_event( const Events::CreateLootEvent &event )
+{
+  const bool has_source = reg().valid( event.m_source_entt );
+  if ( has_source and event.m_max_instances > 0 )
+  {
+    const auto *drop_count_cmp = reg().try_get<Cmp::DropCount>( event.m_source_entt );
+    if ( drop_count_cmp and drop_count_cmp->m_count >= event.m_max_instances ) return;
+  }
+
+  auto reserved_sm = m_reserved_sm.lock();
+  auto cell = Utils::find_random_cell_near( event.m_source, kLootDropSearchRadius,
+                                            [&]( const sf::Vector2f &cell_pos )
+                                            { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), reserved_sm.get() ); } );
+  if ( not cell )
+  {
+    SPDLOG_WARN( "No free cell to drop {} near [{},{}].", event.m_loot_type.str(), event.m_source.position.x, event.m_source.position.y );
+    return;
+  }
+
+  // clang-format off
+  auto loot_entt = Factory::Loot::create_loot_drop(
+    reg(),
+    Cmp::AnimData( Cmp::AnimData::Config{ .sprite_type = event.m_loot_type, .enabled = true } ),
+    Cmp::RectBounds::scaled( *cell, Constants::kGridSizePxF, 0.9f ).getBounds(),
+    Factory::IncludePack<>{},
+    Factory::ExcludePack<Cmp::Player::Character, Cmp::Npc::NPC, Cmp::FootStepTimer, Cmp::Loot>{},
+    Factory::ExcludePack<>{},
+    /*zorder_offset=*/-8.f,
+    reserved_sm.get()
+  );
+  // clang-format on
+  if ( loot_entt == entt::null ) return;
+
+  // counted over the source's lifetime, so picking the loot up doesn't free a slot
+  if ( has_source ) { reg().get_or_emplace<Cmp::DropCount>( event.m_source_entt ).m_count++; }
+  m_sound_bank.get_effect( "drop_loot" ).play();
+}
 
 void LootSystem::on_destroy_loot_container_event( const Events::DestroyLootContainerEvent &event )
 {

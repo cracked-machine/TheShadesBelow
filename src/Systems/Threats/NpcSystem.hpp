@@ -6,8 +6,12 @@
 
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
+#include <SFML/Graphics/Rect.hpp>
+#include <SFML/System/Vector2.hpp>
 
 #include <entt/entity/fwd.hpp>
+
+#include <optional>
 
 // clang-format off
 namespace Game::Sys { class Store; }
@@ -68,6 +72,16 @@ private:
   //! allowed to call Factory::Npc::create_npc. Everything else must trigger an Events::CreateNpcEvent.
   //! @param event
   void on_create_npc_event( const Game::Events::CreateNpcEvent &event );
+
+  //! @brief Find a random free cell for `npc_type` in the nearest ring around `source` that has one,
+  //! searching outwards up to kNpcSpawnSearchRadius rings.
+  //! @param source The spawning source's bounds, e.g. a plant's whole footprint.
+  //! @param npc_type See res/json/npc.json.
+  //! @return std::optional<sf::Vector2f> top-left of the cell, or nullopt if none was found.
+  std::optional<sf::Vector2f> find_nearby_spawn_cell( const Cmp::Position &source, const Sys::NpcKey &npc_type );
+
+  //! @brief How many rings out from the source find_nearby_spawn_cell() searches.
+  static constexpr int kNpcSpawnSearchRadius = 6;
 
   //! @brief Create the death animation entity played when an NPC dies.
   //! @param npc_pos_cmp The dying NPC's position.

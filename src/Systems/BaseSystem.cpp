@@ -33,8 +33,9 @@ void BaseSystem::trigger_side_effects( const Cmp::BaseAction &action, const Cmp:
     {
       if ( const auto *uuid_cmp = reg().try_get<Cmp::UUID>( source_entt ) ) { source_uuid = *uuid_cmp; }
     }
-    get_systems_event_queue().trigger(
-        Events::CreateNpcEvent( Sys::NpcKey( effects.spawn_npc->npc_type ), pos_cmp, effects.spawn_npc->max_instances, source_uuid ) );
+    // spawn beside the source (plant, player...) rather than on top of it
+    get_systems_event_queue().trigger( Events::CreateNpcEvent( Sys::NpcKey( effects.spawn_npc->npc_type ), pos_cmp, effects.spawn_npc->max_instances,
+                                                               source_uuid, {}, /*spawn_nearby=*/true ) );
   }
   // a null target lets LightningSystem pick a working lightning rod in view, otherwise the player
   if ( effects.lightning and effects.lightning->roll() ) { get_systems_event_queue().trigger( Events::LightningEvent{} ); }

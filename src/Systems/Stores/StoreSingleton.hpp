@@ -199,7 +199,7 @@ protected:
   }
 
   //! @brief Build the optional reward of a JSON action entry from its optional "reward" object.
-  //! @throws std::runtime_error if the "reward" object sets none of item, wealth or special.
+  //! @throws std::runtime_error if the "reward" object sets none of item, wealth, special or loot.
   static std::optional<Cmp::ActionReward> make_reward( const nlohmann::json &j )
   {
     using Game::Utils::JsonDeserializer;
@@ -210,7 +210,10 @@ protected:
     if ( rw.contains( "item" ) ) { reward.item = Sys::ItemKey( JsonDeserializer::get_string( rw, "item" ) ); }
     if ( rw.contains( "wealth" ) ) { reward.wealth = JsonDeserializer::get_int( rw, "wealth" ); }
     if ( rw.contains( "special" ) ) { reward.special = make_reward_special( JsonDeserializer::get_string( rw, "special" ) ); }
-    if ( reward.count() == 0 ) throw std::runtime_error( "reward must set at least one of item, wealth or special" );
+    if ( rw.contains( "loot" ) ) { reward.loot = Sys::SpriteKey( JsonDeserializer::get_string( rw, "loot" ) ); }
+    if ( rw.contains( "trigger_range" ) ) { reward.trigger_range = JsonDeserializer::get_int( rw, "trigger_range" ); }
+    if ( rw.contains( "max_instances" ) ) { reward.max_instances = JsonDeserializer::get_int( rw, "max_instances" ); }
+    if ( reward.count() == 0 ) throw std::runtime_error( "reward must set at least one of item, wealth, special or loot" );
     return reward;
   }
 
