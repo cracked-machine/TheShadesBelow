@@ -23,6 +23,7 @@
 #include <Components/Npc/Shockwave.hpp>
 #include <Components/Npc/ShockwaveTimer.hpp>
 #include <Components/Npc/Skeleton.hpp>
+#include <Components/Npc/SpawnedBy.hpp>
 #include <Components/Npc/Spider.hpp>
 #include <Components/Npc/Watchman.hpp>
 #include <Components/Npc/WatchmanSearchlight.hpp>
@@ -96,20 +97,20 @@ NpcSystem::NpcSystem( entt::registry &reg, sf::RenderWindow &window, Audio::Soun
 
 void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
 {
-  if ( event.m_unique )
+  if ( event.m_max_instances > 0 and not event.m_source_uuid.empty() )
   {
-    bool relocated = false;
-    for ( auto [npc_entt, npc_cmp] : reg().view<Cmp::Npc::NPC>().each() )
+    int instances = 0;
+    for ( auto [npc_entt, npc_cmp, spawned_by_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Npc::SpawnedBy>().each() )
     {
-      if ( npc_cmp.npc_type != event.m_npc_type ) continue;
-      on_update_npc_position_event( Events::UpdateNpcPositionEvent( npc_entt, event.m_position.position ) );
-      relocated = true;
+      if ( spawned_by_cmp.m_source == event.m_source_uuid ) ++instances;
     }
-    if ( relocated ) return;
+    if ( instances >= event.m_max_instances ) return;
   }
 
   auto npc_entt = Factory::Npc::create_npc( reg(), event.m_position, event.m_npc_type );
-  if ( npc_entt != entt::null and event.m_on_created ) { event.m_on_created( npc_entt ); }
+  if ( npc_entt == entt::null ) return;
+  if ( not event.m_source_uuid.empty() ) { reg().emplace_or_replace<Cmp::Npc::SpawnedBy>( npc_entt, event.m_source_uuid ); }
+  if ( event.m_on_created ) { event.m_on_created( npc_entt ); }
 }
 
 void NpcSystem::on_update_npc_position_event( const Events::UpdateNpcPositionEvent &event )
@@ -165,7 +166,7 @@ void NpcSystem::on_destroy_npc_event( const Events::DestroyNpcEvent &event )
   Factory::Npc::destroy_npc( reg(), npc_entity );
 
   // the entity outlives its NPC, so strip everything else that would have it mistaken for a live one
-  reg().remove<Cmp::Npc::LerpSpeed, Cmp::Npc::Friendly, Cmp::Npc::ShockwaveTimer, Cmp::Npc::WatchmanSearchlight>( npc_entity );
+  reg().remove<Cmp::Npc::LerpSpeed, Cmp::Npc::Friendly, Cmp::Npc::ShockwaveTimer, Cmp::Npc::WatchmanSearchlight, Cmp::Npc::SpawnedBy>( npc_entity );
   reg()
       .remove<Cmp::Npc::Drknox, Cmp::Npc::ElderMother, Cmp::Npc::Ghost, Cmp::Npc::Priest, Cmp::Npc::ShadowHand, Cmp::Npc::Skeleton, Cmp::Npc::Spider,
               Cmp::Npc::Watchman, Cmp::Npc::Wisp, Cmp::Npc::Witch>( npc_entity );

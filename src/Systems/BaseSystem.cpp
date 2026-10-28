@@ -1,6 +1,7 @@
 
 #include <Components/Position.hpp>
 #include <Components/Stats/BaseAction.hpp>
+#include <Components/UUID.hpp>
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/LightningEvent.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -22,13 +23,18 @@ BaseSystem::BaseSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
   SPDLOG_DEBUG( "BaseSystem constructor called" );
 }
 
-void BaseSystem::trigger_side_effects( const Cmp::BaseAction &action, const Cmp::Position &pos_cmp )
+void BaseSystem::trigger_side_effects( const Cmp::BaseAction &action, const Cmp::Position &pos_cmp, entt::entity source_entt )
 {
   const auto &effects = action.side_effects();
   if ( effects.spawn_npc and effects.spawn_npc->roll() )
   {
+    Cmp::UUID source_uuid;
+    if ( reg().valid( source_entt ) )
+    {
+      if ( const auto *uuid_cmp = reg().try_get<Cmp::UUID>( source_entt ) ) { source_uuid = *uuid_cmp; }
+    }
     get_systems_event_queue().trigger(
-        Events::CreateNpcEvent( Sys::NpcKey( effects.spawn_npc->npc_type ), pos_cmp, effects.spawn_npc->unique ) );
+        Events::CreateNpcEvent( Sys::NpcKey( effects.spawn_npc->npc_type ), pos_cmp, effects.spawn_npc->max_instances, source_uuid ) );
   }
   // a null target lets LightningSystem pick a working lightning rod in view, otherwise the player
   if ( effects.lightning and effects.lightning->roll() ) { get_systems_event_queue().trigger( Events::LightningEvent{} ); }

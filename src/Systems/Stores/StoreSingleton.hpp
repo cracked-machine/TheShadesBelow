@@ -234,7 +234,7 @@ protected:
       const auto &spawn_npc = fx.at( "spawn_npc" );
       effects.spawn_npc = Cmp::SpawnNpcEffect{ .npc_type = JsonDeserializer::get_string( spawn_npc, "type" ),
                                                .probability = get_probability( spawn_npc ),
-                                               .unique = spawn_npc.contains( "unique" ) and JsonDeserializer::get_bool( spawn_npc, "unique" ) };
+                                               .max_instances = spawn_npc.contains( "max_instances" ) ? JsonDeserializer::get_int( spawn_npc, "max_instances" ) : 0 };
     }
     if ( fx.contains( "lightning" ) ) { effects.lightning = Cmp::LightningEffect{ .probability = get_probability( fx.at( "lightning" ) ) }; }
     if ( fx.contains( "movement" ) )

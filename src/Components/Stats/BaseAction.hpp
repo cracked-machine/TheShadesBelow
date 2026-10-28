@@ -75,8 +75,8 @@ struct SpawnNpcEffect
   std::string npc_type;
   //! @brief Chance [0, 1] that the effect fires each time the action is applied.
   float probability{ 0.f };
-  //! @brief If true and NPCs of this type already exist, relocate them instead of spawning another.
-  bool unique{ false };
+  //! @brief Max live NPCs spawned by each world item instance, across all of its actions. 0 = unlimited.
+  int max_instances{ 0 };
   //! @brief Roll this effect's probability.
   //! @return true if the effect should fire.
   [[nodiscard]] bool roll() const;

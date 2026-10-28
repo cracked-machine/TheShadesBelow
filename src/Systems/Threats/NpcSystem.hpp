@@ -64,7 +64,7 @@ private:
   //! @param event
   void on_destroy_npc_event( const Game::Events::DestroyNpcEvent &event );
 
-  //! @brief Spawn an NPC, or relocate the existing NPCs of that type if the event is `unique`. This is the only place
+  //! @brief Spawn an NPC, unless its source item already has `max_instances` live NPCs. This is the only place
   //! allowed to call Factory::Npc::create_npc. Everything else must trigger an Events::CreateNpcEvent.
   //! @param event
   void on_create_npc_event( const Game::Events::CreateNpcEvent &event );

@@ -233,7 +233,7 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
         }
       };
       get_systems_event_queue().trigger(
-          Events::CreateNpcEvent( Sys::NpcKey( ms_type ), Cmp::Position( pos, Constants::kGridSizePxF ), false, reserve_npc_cells ) );
+          Events::CreateNpcEvent( Sys::NpcKey( ms_type ), Cmp::Position( pos, Constants::kGridSizePxF ), 0, {}, reserve_npc_cells ) );
       continue;
     }
 

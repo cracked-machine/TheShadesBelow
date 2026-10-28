@@ -1,6 +1,7 @@
 #ifndef SRC_SYSTEMS_BASESYSTEM_HPP__
 #define SRC_SYSTEMS_BASESYSTEM_HPP__
 
+#include <entt/entity/entity.hpp>
 #include <entt/entity/fwd.hpp>
 #include <entt/signal/dispatcher.hpp>
 
@@ -58,7 +59,8 @@ protected:
   //! Events::CreateNpcEvent and lightning strikes via Events::LightningEvent. Movement effects are not yet executed.
   //! @param action The applied action, e.g. as returned by the Utils::Player::apply_action_from_* helpers.
   //! @param pos_cmp The action's source position (e.g. the world item, or the player for inventory/store actions).
-  void trigger_side_effects( const Cmp::BaseAction &action, const Cmp::Position &pos_cmp );
+  //! @param source_entt The world item whose action this is, if any. Its Cmp::UUID keys Cmp::SpawnNpcEffect::max_instances.
+  void trigger_side_effects( const Cmp::BaseAction &action, const Cmp::Position &pos_cmp, entt::entity source_entt = entt::null );
 
   //! @brief Entity registry: non-owning, re-assignable reference (by SceneManager).
   //! The registry is owned by the current Scene.

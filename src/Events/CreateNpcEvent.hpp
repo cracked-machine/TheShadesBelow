@@ -2,6 +2,7 @@
 #define SRC_EVENTS_CREATENPCEVENT_HPP__
 
 #include <Components/Position.hpp>
+#include <Components/UUID.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
 #include <entt/entity/entity.hpp>
@@ -20,12 +21,15 @@ struct CreateNpcEvent
   //! @brief Construct a new CreateNpcEvent object
   //! @param npc_type See res/json/npc.json.
   //! @param position The spawn position. The size is replaced by the NPC sprite's size.
-  //! @param unique If true and NPCs of `npc_type` already exist, relocate them to `position` instead of spawning another.
-  //! @param on_created Optional callback receiving the newly created NPC entity. Not called when relocating or if creation fails.
-  CreateNpcEvent( Sys::NpcKey npc_type, Cmp::Position position, bool unique = false, std::function<void( entt::entity )> on_created = {} )
+  //! @param max_instances Max live NPCs spawned by `source_uuid`; the spawn is skipped once reached. 0 = unlimited.
+  //! @param source_uuid The Cmp::UUID of the spawning world item, or empty if there is none (then unlimited).
+  //! @param on_created Optional callback receiving the newly created NPC entity. Not called when skipped or if creation fails.
+  CreateNpcEvent( Sys::NpcKey npc_type, Cmp::Position position, int max_instances = 0, Cmp::UUID source_uuid = {},
+                  std::function<void( entt::entity )> on_created = {} )
       : m_npc_type( std::move( npc_type ) ),
         m_position( std::move( position ) ),
-        m_unique( unique ),
+        m_max_instances( max_instances ),
+        m_source_uuid( source_uuid ),
         m_on_created( std::move( on_created ) )
   {
   }
@@ -34,8 +38,10 @@ struct CreateNpcEvent
   Sys::NpcKey m_npc_type;
   //! @brief The spawn position.
   Cmp::Position m_position;
-  //! @brief Relocate existing NPCs of this type instead of spawning another.
-  bool m_unique{ false };
+  //! @brief Max live NPCs spawned by m_source_uuid. 0 = unlimited.
+  int m_max_instances{ 0 };
+  //! @brief The Cmp::UUID of the spawning world item, or empty if there is none.
+  Cmp::UUID m_source_uuid;
   //! @brief Optional callback receiving the newly created NPC entity.
   std::function<void( entt::entity )> m_on_created;
 };

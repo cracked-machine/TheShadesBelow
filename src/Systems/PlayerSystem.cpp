@@ -332,7 +332,10 @@ void PlayerSystem::move_obstacle( const sf::FloatRect &target_position )
       // move the obstacle
       const Cmp::Position vacated_pos = selected_pos_cmp;
       selected_pos_cmp.position += player_velocity.position();
-      if ( auto *zorder_cmp = reg().try_get<Cmp::ZOrderValue>( selected_entt ) ) { zorder_cmp->set( zorder_cmp->get() + player_velocity.position().y ); }
+      if ( auto *zorder_cmp = reg().try_get<Cmp::ZOrderValue>( selected_entt ) )
+      {
+        zorder_cmp->set( zorder_cmp->get() + player_velocity.position().y );
+      }
 
       // keep the NPC navmesh in sync: the cell the block was placed on lost its whole bucket when the navmesh was
       // built (NoPathFinding), so give the vacated cell a floor entity again, and close off the destination cell.
@@ -351,7 +354,10 @@ void PlayerSystem::move_obstacle( const sf::FloatRect &target_position )
       {
         if ( cap_search_uuid_cmp != selected_uuid_cmp ) continue;
         cap_search_pos_cmp.position += player_velocity.position();
-        if ( auto *zorder_cmp = reg().try_get<Cmp::ZOrderValue>( cap_search_entt ) ) { zorder_cmp->set( zorder_cmp->get() + player_velocity.position().y ); }
+        if ( auto *zorder_cmp = reg().try_get<Cmp::ZOrderValue>( cap_search_entt ) )
+        {
+          zorder_cmp->set( zorder_cmp->get() + player_velocity.position().y );
+        }
       }
 
       // if we moved obstacle into cobweb it is now stuck :'(
@@ -681,15 +687,18 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
     };
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Hypoxia>() == 100 )
     {
-      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::HypoxiaHealthDmgPerSec>( reg() ).get_value(), Cmp::Player::Mortality::State::SUFFOCATED );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::HypoxiaHealthDmgPerSec>( reg() ).get_value(),
+                        Cmp::Player::Mortality::State::SUFFOCATED );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Tachycardia>() == 100 )
     {
-      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::TachycardiaHealthDmgPerSec>( reg() ).get_value(), Cmp::Player::Mortality::State::CARDIACARREST );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::TachycardiaHealthDmgPerSec>( reg() ).get_value(),
+                        Cmp::Player::Mortality::State::CARDIACARREST );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Bradycardia>() == 100 )
     {
-      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::BradycardiaHealthDmgPerSec>( reg() ).get_value(), Cmp::Player::Mortality::State::CARDIACARREST );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::BradycardiaHealthDmgPerSec>( reg() ).get_value(),
+                        Cmp::Player::Mortality::State::CARDIACARREST );
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Venom>() == 100 )
     {
@@ -697,7 +706,8 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
     }
     if ( player_stats.toxidrome().at<Cmp::Toxicity::Vertigo>() == 100 )
     {
-      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::VertigoHealthDmgPerSec>( reg() ).get_value(), Cmp::Player::Mortality::State::TERRIFIED );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::VertigoHealthDmgPerSec>( reg() ).get_value(),
+                        Cmp::Player::Mortality::State::TERRIFIED );
     }
     if ( player_stats.fear() == 100 )
     {
@@ -709,7 +719,8 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
     }
     if ( m_player_is_on_fire )
     {
-      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::PlayerOnFireHealthDmgPerSec>( reg() ).get_value(), Cmp::Player::Mortality::State::IGNITED );
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::PlayerOnFireHealthDmgPerSec>( reg() ).get_value(),
+                        Cmp::Player::Mortality::State::IGNITED );
     }
     apply_healing_spring_modifiers();
 
@@ -797,8 +808,20 @@ void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
   {
     if ( not Utils::Player::is_player_near( reg(), plant_mb_cmp ) ) continue;
     auto &[proximity_action, proximity_timer] = plant_worlditem_cmp.at<Cmp::ProximityAction>();
+
     proximity_timer += dt;
     if ( proximity_timer.asSeconds() < proximity_action.interval() ) continue;
+
+    // spawn NPC now that we are close enough
+    if ( not proximity_action.side_effects().empty() )
+    {
+      if ( auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt ) )
+      {
+        get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_item->item_type, Cmp::ProximityAction::kKey, proximity_action ) );
+        trigger_side_effects( proximity_action, Cmp::Position( plant_mb_cmp.position, Constants::kGridSizePxF ), plant_entt );
+      }
+    }
+
     if ( proximity_action.health() < 0 ) reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     Utils::Player::apply_action_from_world_item<Cmp::ProximityAction>( reg(), plant_entt );
     proximity_timer = sf::Time::Zero;

@@ -86,7 +86,7 @@ void WispSystem::spawn_wisp()
     SPDLOG_INFO( "Add npc.wisp to {},{}. Target is {},{}", static_cast<uint32_t>( npc_entt ), spawn_pos.x(), spawn_pos.y(), target_pos.x(),
                  target_pos.y() );
   };
-  get_systems_event_queue().trigger( Events::CreateNpcEvent( "npc.wisp", spawn_pos, false, on_created ) );
+  get_systems_event_queue().trigger( Events::CreateNpcEvent( "npc.wisp", spawn_pos, 0, {}, on_created ) );
 }
 
 void WispSystem::reset_wisp_target( entt::entity wisp_entt )

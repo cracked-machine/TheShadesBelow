@@ -1,5 +1,18 @@
 {
   "sprites": {
+    "sprite.adder": {
+      "spritesheet": {
+        "displayname": "Adder",
+        "texture_path": "res/textures/npcadder.png",
+        "sprite_indices": [0,1,2,3],
+        "indices_per_sequence": 4,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
     "sprite.crypt.altar.active": {
       "spritesheet": {
         "displayname": "sprite.crypt.altar.active",
