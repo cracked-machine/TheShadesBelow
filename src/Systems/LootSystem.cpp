@@ -1,6 +1,7 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/DropCount.hpp>
+#include <Components/DroppedBy.hpp>
 #include <Components/FootStepTimer.hpp>
 #include <Components/Inventory/FlashUICadaver.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
@@ -44,6 +45,7 @@ LootSystem::LootSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
 {
   std::ignore = get_systems_event_queue().sink<Events::DestroyLootContainerEvent>().connect<&LootSystem::on_destroy_loot_container_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::CreateLootEvent>().connect<&LootSystem::on_create_loot_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::DestroyLootEvent>().connect<&LootSystem::on_destroy_loot_event>( this );
   SPDLOG_DEBUG( "LootSystem initialized" );
 }
 
@@ -83,8 +85,19 @@ void LootSystem::on_create_loot_event( const Events::CreateLootEvent &event )
   if ( loot_entt == entt::null ) return;
 
   // counted over the source's lifetime, so picking the loot up doesn't free a slot
-  if ( has_source ) { reg().get_or_emplace<Cmp::DropCount>( event.m_source_entt ).m_count++; }
+  if ( has_source )
+  {
+    reg().get_or_emplace<Cmp::DropCount>( event.m_source_entt ).m_count++;
+    // lets the loot be removed along with its source, e.g. when the plant burns
+    if ( const auto *uuid_cmp = reg().try_get<Cmp::UUID>( event.m_source_entt ) ) { reg().emplace_or_replace<Cmp::DroppedBy>( loot_entt, *uuid_cmp ); }
+  }
   m_sound_bank.get_effect( "drop_loot" ).play();
+}
+
+void LootSystem::on_destroy_loot_event( const Events::DestroyLootEvent &event )
+{
+  if ( not reg().valid( event.m_loot_entity ) or not reg().all_of<Cmp::Loot>( event.m_loot_entity ) ) return;
+  Factory::Loot::destroy_loot_drop( reg(), event.m_loot_entity );
 }
 
 void LootSystem::on_destroy_loot_container_event( const Events::DestroyLootContainerEvent &event )

@@ -11,9 +11,12 @@
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
+#include <Components/DroppedBy.hpp>
+#include <Components/Loot.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Moveable.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Npc/SpawnedBy.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
 #include <Components/Particle/EmberParticleSprite.hpp>
@@ -43,6 +46,7 @@
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
+#include <Events/DestroyLootEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/GrimoireUpdateEvent.hpp>
@@ -74,6 +78,7 @@
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/System/Time.hpp>
 #include <algorithm>
+#include <cmath>
 #include <entt/entity/entity.hpp>
 #include <entt/entity/fwd.hpp>
 #include <numbers>
@@ -343,6 +348,7 @@ void ActionSystem::player_plant_interact()
       const auto plant_type = plant_item->item_type;
       const auto forage_output = plant_item->get_forage_output();
       const auto axe_output = plant_item->get_axe_output();
+      const auto axe_hits = plant_item->get_axe_hits();
 
       // each forage wears the plant down
       auto wear_plant = [&]()
@@ -438,6 +444,18 @@ void ActionSystem::player_plant_interact()
           get_systems_event_queue().trigger(
               Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), static_cast<float>( plant_item->get_axe_damage() ) ) );
 
+          // tougher plants (axe_hits in items.json) lose 1/axe_hits of their wear level per hit, rounded up so exactly
+          // axe_hits hits fell an unforaged plant
+          if ( axe_hits > 1 )
+          {
+            get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, std::ceil( 100.f / static_cast<float>( axe_hits ) ) ) );
+            if ( not Utils::is_plant_depleted( reg(), plant_entt ) )
+            {
+              m_sound_bank.get_effect( "chopping" ).play();
+              continue;
+            }
+          }
+
           // plants without a destroy_action.reward.item (see items.json) drop nothing
           if ( not axe_output.empty() )
           {
@@ -447,6 +465,8 @@ void ActionSystem::player_plant_interact()
           const auto destroy_action = Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
 
           trigger_side_effects( destroy_action, plant_pos_cmp, plant_entt );
+          // its loot is left for the player to collect
+          destroy_plant_npcs( plant_uuid_cmp, Sys::SpriteKey( "sprite.death.anim.bloodsplat" ) );
           Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
           m_sound_bank.get_effect( "chopping_final" ).play();
         }
@@ -742,8 +762,38 @@ void ActionSystem::update_burning_worlditems( sf::Time dt )
           trigger_side_effects( burn_action, Cmp::Position( plant_cmp.position, Constants::kGridSizePxF ), plant_entt );
         }
       }
+      destroy_plant_npcs( plant_uuid, Sys::SpriteKey( "sprite.death.anim.flames" ) );
+      destroy_plant_loot( plant_uuid );
       Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
     }
+  }
+}
+
+void ActionSystem::destroy_plant_npcs( const Cmp::UUID &plant_uuid, const Sys::SpriteKey &death_anim )
+{
+  // collect first: the event handler modifies this storage
+  std::vector<entt::entity> npcs;
+  for ( auto [npc_entt, npc_cmp, spawned_by_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Npc::SpawnedBy>().each() )
+  {
+    if ( spawned_by_cmp.m_source == plant_uuid ) npcs.push_back( npc_entt );
+  }
+  for ( auto npc_entt : npcs )
+  {
+    get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, death_anim ) );
+  }
+}
+
+void ActionSystem::destroy_plant_loot( const Cmp::UUID &plant_uuid )
+{
+  // collect first: the event handler modifies this storage
+  std::vector<entt::entity> loot;
+  for ( auto [loot_entt, loot_cmp, dropped_by_cmp] : reg().view<Cmp::Loot, Cmp::DroppedBy>().each() )
+  {
+    if ( dropped_by_cmp.m_source == plant_uuid ) loot.push_back( loot_entt );
+  }
+  for ( auto loot_entt : loot )
+  {
+    get_systems_event_queue().trigger( Events::DestroyLootEvent( loot_entt ) );
   }
 }
 

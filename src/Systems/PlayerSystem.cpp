@@ -816,7 +816,8 @@ void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
 
     const Cmp::Position plant_bounds( plant_mb_cmp.position, plant_mb_cmp.size );
     const auto &player_pos = Utils::Player::get_position( reg() );
-    auto in_range = [&]( int trigger_range ) { return Cmp::RectBounds::expanded( plant_mb_cmp, trigger_range ).findIntersection( player_pos ).has_value(); };
+    auto in_range = [&]( int trigger_range )
+    { return Cmp::RectBounds::expanded( plant_mb_cmp, trigger_range ).findIntersection( player_pos ).has_value(); };
     bool triggered = false;
 
     // spawn NPC now that we are close enough

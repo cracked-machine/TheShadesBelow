@@ -71,6 +71,21 @@ void ItemStore::init_store()
     auto consumable = make_consumable_property( item_value.at( "consumable" ).get<std::string>() );
     Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, pickaxe_damage, axe_damage, shovel_damage, bow_damage, sf::seconds( expiry ),
                               wear_location, wear_active_only, consumable );
+    if ( item_value.contains( "axe_hits" ) )
+    {
+      const auto axe_hits = Utils::JsonDeserializer::get_int( item_value, "axe_hits" );
+      if ( not item_key.starts_with( "item.plant." ) )
+      {
+        throw std::runtime_error( "Item '" + item_key + "' axe_hits is only allowed on plant items in " + m_json_file_path.string() );
+      }
+      // each hit wears the plant down, so it must have a world wear level to be chopped down over several hits
+      if ( axe_hits < 1 or ( axe_hits > 1 and not worlditem.wears_in_world() ) )
+      {
+        throw std::runtime_error( "Item '" + item_key + "' axe_hits must be 1, or above 1 with a world/both wear location, in " +
+                                  m_json_file_path.string() );
+      }
+      worlditem.set_axe_hits( axe_hits );
+    }
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )

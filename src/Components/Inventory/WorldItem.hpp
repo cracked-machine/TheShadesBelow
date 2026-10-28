@@ -177,6 +177,10 @@ public:
   int get_shovel_damage() const { return m_shovel_damage; }
   int get_bow_damage() const { return m_bow_damage; }
 
+  //! @brief Number of axe hits needed to chop this plant down, see "axe_hits" in items.json. Defaults to 1.
+  int get_axe_hits() const { return m_axe_hits; }
+  void set_axe_hits( int axe_hits ) { m_axe_hits = axe_hits; }
+
   //! @brief Whether the item can be eaten, drunk or neither.
   Consumable consumable_type() const { return m_consumable; }
 
@@ -201,6 +205,9 @@ private:
 
   //! @brief Damage done to a bow by this item.
   int m_bow_damage{ 0 };
+
+  //! @brief Number of axe hits needed to chop this plant down. Imported from items.json.
+  int m_axe_hits{ 1 };
 
   //! @brief Expiry for the item. Zero means this item does not expire. Imported from items.json.
   sf::Time m_expiry;

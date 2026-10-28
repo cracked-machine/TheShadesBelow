@@ -49,6 +49,11 @@
             "bow":     { "type": "integer" }
           }
         },
+        "axe_hits": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Optional, plants only (item.plant.*). Number of axe hits needed to chop the plant down. Each hit reduces the plant's wear level by 1/axe_hits, so values above 1 need a wear location of world or both. Defaults to 1."
+        },
         "actions": {
           "type": "array",
           "description": "List of actions available for this item",

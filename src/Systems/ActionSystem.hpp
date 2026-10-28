@@ -3,6 +3,7 @@
 
 #include <Events/PlayerActionEvent.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 namespace Game::PathFinding
 {
@@ -12,6 +13,7 @@ class SpatialHashGrid;
 namespace Game::Cmp
 {
 class PlantMultiBlock;
+struct UUID;
 }
 
 namespace Game::Sys
@@ -80,6 +82,15 @@ private:
   //! @brief Update the plant burning in progress
   //! @param dt
   void update_burning_worlditems( sf::Time dt );
+
+  //! @brief Destroy the NPCs (Cmp::Npc::SpawnedBy) a plant spawned, e.g. when it burns out or is chopped down.
+  //! @param plant_uuid The plant's Cmp::UUID.
+  //! @param death_anim The death animation played for each NPC.
+  void destroy_plant_npcs( const Cmp::UUID &plant_uuid, const Sys::SpriteKey &death_anim );
+
+  //! @brief Destroy the uncollected loot (Cmp::DroppedBy) a plant dropped, e.g. when it burns out.
+  //! @param plant_uuid The plant's Cmp::UUID.
+  void destroy_plant_loot( const Cmp::UUID &plant_uuid );
 
   //! @brief Find a free grid cell around the plant to drop a foraged item into.
   //! @param plant_mb_cmp The plant being foraged.

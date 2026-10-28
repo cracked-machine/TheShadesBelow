@@ -738,6 +738,7 @@
     "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
     "consumable": "none",
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 0 },
+    "axe_hits": 3,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 1 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},

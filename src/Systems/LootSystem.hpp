@@ -4,6 +4,7 @@
 #include <Components/LootContainer.hpp>
 #include <Events/CreateLootEvent.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
+#include <Events/DestroyLootEvent.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
@@ -53,6 +54,11 @@ private:
   //! `max_instances` times over its lifetime.
   //! @param event
   void on_create_loot_event( const Events::CreateLootEvent &event );
+
+  //! @brief Remove a dropped loot entity without collecting it. This is the only place allowed to discard loot;
+  //! everything else must trigger an Events::DestroyLootEvent.
+  //! @param event
+  void on_destroy_loot_event( const Events::DestroyLootEvent &event );
 
   //! @brief How many rings out from the source on_create_loot_event() searches for a free cell.
   static constexpr int kLootDropSearchRadius = 3;
