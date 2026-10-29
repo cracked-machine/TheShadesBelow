@@ -5,6 +5,7 @@
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
+#include <Components/Loot.hpp>
 #include <Components/Moveable.hpp>
 #include <Components/NoRender.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
@@ -112,6 +113,16 @@ void populate_render_position_grid( entt::registry &reg, PathFinding::SpatialHas
     const auto &pos_cmp = static_render_view.get<Cmp::Position>( entity );
     render_position_grid.insert( entity, pos_cmp );
   }
+}
+
+PathFinding::SpatialHashGridSharedPtr create_loot_grid( entt::registry &reg )
+{
+  PathFinding::SpatialHashGridSharedPtr loot_grid = std::make_shared<PathFinding::SpatialHashGrid>();
+  for ( auto [loot_entt, loot_cmp, pos_cmp] : reg.view<Cmp::Loot, Cmp::Position>().each() )
+  {
+    loot_grid->insert( loot_entt, pos_cmp );
+  }
+  return loot_grid;
 }
 
 PathFinding::SpatialHashGridSharedPtr create_render_position_grid( entt::registry &reg )

@@ -35,6 +35,12 @@ PathFinding::SpatialHashGridSharedPtr create_player_navmesh( entt::registry &reg
 //! @return The new navmesh.
 PathFinding::SpatialHashGridSharedPtr create_open_navmesh( entt::registry &reg );
 
+//! @brief Build the grid of loot drops (Cmp::Loot) used to find free spawn/drop cells.
+//! @note Loot dropped afterwards is kept in sync by Factory::Loot::create_loot_drop() / destroy_loot_drop().
+//! @param reg
+//! @return The new grid.
+PathFinding::SpatialHashGridSharedPtr create_loot_grid( entt::registry &reg );
+
 //! @brief Clears and repopulates an existing grid in place with every entity eligible for
 //! RenderGameSystem::queue_positioned()'s grid fast path - see
 //! create_render_position_grid()'s docs for exactly which entities and why.

@@ -48,10 +48,14 @@ void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev )
     if ( drop_count_cmp and drop_count_cmp->m_count >= ev.m_max_instances ) return;
   }
 
+  auto npc_navmesh = m_npc_navmesh.lock();
+  auto ghost_navmesh = m_ghost_navmesh.lock();
+  auto loot_sm = m_loot_sm.lock();
   auto reserved_sm = m_reserved_sm.lock();
+  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
   auto cell = Utils::find_random_cell_near( ev.m_pos, kItemDropSearchRadius,
                                             [&]( const sf::Vector2f &cell_pos )
-                                            { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), reserved_sm.get() ); } );
+                                            { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); } );
   if ( not cell )
   {
     SPDLOG_WARN( "No free cell to drop {} near [{},{}].", ev.m_item.str(), ev.m_pos.position.x, ev.m_pos.position.y );

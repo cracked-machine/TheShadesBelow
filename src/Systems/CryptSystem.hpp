@@ -50,11 +50,12 @@ public:
   //! @brief init the weak pointer for the spatial grid
   //! @param spatial_grid_ptr
   void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &player_navmesh,
-             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr )
+             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr, const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr )
   {
     m_npc_navmesh = npc_navmesh;
     m_player_navmesh = player_navmesh;
     m_reserved_sm = reserved_sm;
+    m_loot_sm = loot_sm;
   }
 
   //! @brief Initial maze setup. Called from Scene::on_enter()
@@ -258,6 +259,9 @@ private:
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
+
+  //! @brief Loot drops (Cmp::Loot)
+  PathFinding::SpatialHashGridWeakPtr m_loot_sm;
 };
 
 } // namespace Game::Sys

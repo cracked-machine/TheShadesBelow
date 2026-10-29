@@ -373,7 +373,8 @@ void CryptSystem::check_objective_activation( Events::PlayerActionEvent::GameAct
                                      sf::Vector2f{ objective_cmp.size.x, Constants::kGridSizePxF.y * 2.f } );
       auto obst_entity = Factory::Loot::create_loot_drop(
           reg(), Cmp::AnimData( Cmp::AnimData::Config{ .sprite_type = "sprite.crypt.loot.cadaver", .enabled = true } ), expanded_search,
-          Factory::IncludePack<>{}, Factory::ExcludePack<Cmp::Player::Character, Cmp::Crypt::ObjectiveSegment>{} );
+          Factory::IncludePack<>{}, Factory::ExcludePack<Cmp::Player::Character, Cmp::Crypt::ObjectiveSegment>{}, Factory::ExcludePack<>{},
+          /*zorder_offset=*/-8.f, /*reserved_sm=*/nullptr, m_loot_sm.lock().get() );
       if ( obst_entity != entt::null )
       {
         m_sound_bank.get_effect( "drop_loot" ).play();
@@ -467,7 +468,8 @@ void CryptSystem::check_chest_activation( Events::PlayerActionEvent::GameActions
       Factory::ExcludePack<Cmp::Player::Character, Cmp::Crypt::Chest, Cmp::Crypt::RoomLavaPitCell, Cmp::Crypt::PassageBlock, Cmp::Wall, Cmp::Obstacle>{},
       Factory::ExcludePack<Cmp::Player::Character, Cmp::Crypt::Chest, Cmp::Crypt::RoomLavaPitCell, Cmp::Crypt::PassageBlock, Cmp::Wall, Cmp::Obstacle>{},
       64.f, 
-      reserved_sm.get()
+      reserved_sm.get(),
+      m_loot_sm.lock().get()
     );
     // clang-format on
 

@@ -93,6 +93,7 @@ void ShopScene::on_init()
   // create navmeshes for pathfinding
   m_generic_npc_navmesh = Factory::Pathfinding::create_npc_navmesh( m_reg );
   m_open_navmesh = Factory::Pathfinding::create_open_navmesh( m_reg );
+  m_loot_sm = Factory::Pathfinding::create_loot_grid( m_reg );
   reinit_navmesh();
 
   // prevent the player from wandering off before the scene has loaded
@@ -197,7 +198,8 @@ void ShopScene::close_overlay()
 
 void ShopScene::reinit_navmesh()
 {
-  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh );
+  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, nullptr, nullptr, m_loot_sm );
+  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_generic_npc_navmesh, nullptr, m_loot_sm );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
   m_sys.find<Sys::Store::Type::RenderDebugSystem>().init( m_generic_npc_navmesh, m_reserved_sm );
 }

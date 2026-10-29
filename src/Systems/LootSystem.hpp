@@ -29,14 +29,16 @@ public:
   //! @param player_navmesh
   //! @param ghost_navmesh
   //! @param reserved_sm
+  //! @param loot_sm loot drops, kept in sync as loot is dropped and removed
   void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &player_navmesh,
              const PathFinding::SpatialHashGridSharedPtr &ghost_navmesh = nullptr,
-             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr )
+             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr, const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr )
   {
     m_npc_navmesh = npc_navmesh;
     m_player_navmesh = player_navmesh;
     m_ghost_navmesh = ghost_navmesh;
     m_reserved_sm = reserved_sm;
+    m_loot_sm = loot_sm;
   }
 
   //! @brief Check for player collision with loot items i.e. player picks up loot
@@ -74,6 +76,9 @@ private:
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
+
+  //! @brief Loot drops (Cmp::Loot)
+  PathFinding::SpatialHashGridWeakPtr m_loot_sm;
 };
 
 } // namespace Game::Sys

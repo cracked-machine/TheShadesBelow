@@ -123,6 +123,8 @@ void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
 
   auto npc_entt = Factory::Npc::create_npc( reg(), spawn_pos, event.m_npc_type );
   if ( npc_entt == entt::null ) return;
+  // insert now rather than on its first move, so spawn searches see it straight away
+  if ( auto navmesh = navmesh_for( npc_entt ) ) { navmesh->insert( npc_entt, reg().get<Cmp::Position>( npc_entt ) ); }
   if ( not event.m_source_uuid.empty() ) { reg().emplace_or_replace<Cmp::Npc::SpawnedBy>( npc_entt, event.m_source_uuid ); }
   if ( event.m_on_created ) { event.m_on_created( npc_entt ); }
 }
@@ -131,9 +133,15 @@ std::optional<sf::Vector2f> NpcSystem::find_nearby_spawn_cell( const Cmp::Positi
 {
   const auto &npc_cmp = Sys::NpcStore::instance().get( npc_type );
   const sf::Vector2f npc_size = Sys::SpriteStore::instance().get( npc_cmp.sprite_type_list.front() ).sprite_size();
+  auto npc_navmesh = m_npc_navmesh.lock();
+  if ( not npc_navmesh ) return std::nullopt;
+  auto ghost_navmesh = m_ghost_navmesh.lock();
+  auto loot_sm = m_loot_sm.lock();
+  auto reserved_sm = m_reserved_sm.lock();
+  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
   // the NPC's whole footprint must be free, not just its top-left cell
   return Utils::find_random_cell_near( source, kNpcSpawnSearchRadius, [&]( const sf::Vector2f &cell )
-  { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell, npc_size ) ); } );
+  { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell, npc_size ), grids ); } );
 }
 
 void NpcSystem::on_update_npc_position_event( const Events::UpdateNpcPositionEvent &event )
@@ -273,7 +281,11 @@ void NpcSystem::check_npc_container_collision()
 
     if ( player_pos.findIntersection( npc_activate_bounds.getBounds() ) )
     {
-      Factory::Npc::create_npc( reg(), npccontainer_pos_cmp, "npc.skeleton" );
+      auto npc_entt = Factory::Npc::create_npc( reg(), npccontainer_pos_cmp, "npc.skeleton" );
+      if ( auto navmesh = navmesh_for( npc_entt ); navmesh and npc_entt != entt::null )
+      {
+        navmesh->insert( npc_entt, reg().get<Cmp::Position>( npc_entt ) );
+      }
       Factory::Npc::destroy_npc_container( reg(), npccontainer_entt, m_reserved_sm.lock() );
     }
   }

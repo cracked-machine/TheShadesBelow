@@ -112,6 +112,7 @@ void CryptScene::on_init()
   // create navmeshes for pathfinding
   m_generic_npc_navmesh = Factory::Pathfinding::create_npc_navmesh( m_reg );
   m_open_navmesh = Factory::Pathfinding::create_open_navmesh( m_reg );
+  m_loot_sm = Factory::Pathfinding::create_loot_grid( m_reg );
   m_player_navmesh = Factory::Pathfinding::create_player_navmesh( m_reg );
   reinit_navmesh();
 
@@ -216,10 +217,12 @@ void CryptScene::do_update( sf::Time dt )
 
 void CryptScene::reinit_navmesh()
 {
-  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh );
+  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, nullptr, nullptr, m_loot_sm );
+  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_generic_npc_navmesh, nullptr, m_loot_sm );
   m_sys.find<Sys::Store::Type::PassageSystem>().init_nav_mesh( m_generic_npc_navmesh );
   m_sys.find<Sys::Store::Type::DoglegSystem>().init( m_generic_npc_navmesh );
-  m_sys.find<Sys::Store::Type::CryptSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::CryptSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm, m_loot_sm );
+  m_sys.find<Sys::Store::Type::LootSystem>().init( m_generic_npc_navmesh, m_player_navmesh, nullptr, m_reserved_sm, m_loot_sm );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
   m_sys.find<Sys::Store::Type::RenderDebugSystem>().init( m_generic_npc_navmesh, m_reserved_sm );
 }

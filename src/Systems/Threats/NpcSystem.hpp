@@ -43,14 +43,16 @@ public:
   //! @param open_navmesh
   //! @param ghost_navmesh variant that ignores plant segments; ghosts fall back to npc_navmesh when unset
   //! @param reserved_sm
+  //! @param loot_sm loot drops, so NPCs don't spawn on them
   void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &open_navmesh,
              const PathFinding::SpatialHashGridSharedPtr &ghost_navmesh = nullptr,
-             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr )
+             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr, const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr )
   {
     m_npc_navmesh = npc_navmesh;
     m_open_navmesh = open_navmesh;
     m_ghost_navmesh = ghost_navmesh;
     m_reserved_sm = reserved_sm;
+    m_loot_sm = loot_sm;
   }
 
   //! @brief Update the NpcSystem
@@ -177,6 +179,9 @@ private:
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
+
+  //! @brief Loot drops, so NPCs don't spawn on them.
+  PathFinding::SpatialHashGridWeakPtr m_loot_sm;
 };
 
 } // namespace Game::Sys

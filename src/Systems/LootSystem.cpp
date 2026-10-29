@@ -60,10 +60,14 @@ void LootSystem::on_create_loot_event( const Events::CreateLootEvent &event )
     if ( drop_count_cmp and drop_count_cmp->m_count >= event.m_max_instances ) return;
   }
 
+  auto npc_navmesh = m_npc_navmesh.lock();
+  auto ghost_navmesh = m_ghost_navmesh.lock();
+  auto loot_sm = m_loot_sm.lock();
   auto reserved_sm = m_reserved_sm.lock();
+  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
   auto cell = Utils::find_random_cell_near( event.m_source, kLootDropSearchRadius,
                                             [&]( const sf::Vector2f &cell_pos )
-                                            { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), reserved_sm.get() ); } );
+                                            { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); } );
   if ( not cell )
   {
     SPDLOG_WARN( "No free cell to drop {} near [{},{}].", event.m_loot_type.str(), event.m_source.position.x, event.m_source.position.y );
@@ -79,7 +83,8 @@ void LootSystem::on_create_loot_event( const Events::CreateLootEvent &event )
     Factory::ExcludePack<Cmp::Player::Character, Cmp::Npc::NPC, Cmp::FootStepTimer, Cmp::Loot>{},
     Factory::ExcludePack<>{},
     /*zorder_offset=*/-8.f,
-    reserved_sm.get()
+    reserved_sm.get(),
+    loot_sm.get()
   );
   // clang-format on
   if ( loot_entt == entt::null ) return;
@@ -97,7 +102,7 @@ void LootSystem::on_create_loot_event( const Events::CreateLootEvent &event )
 void LootSystem::on_destroy_loot_event( const Events::DestroyLootEvent &event )
 {
   if ( not reg().valid( event.m_loot_entity ) or not reg().all_of<Cmp::Loot>( event.m_loot_entity ) ) return;
-  Factory::Loot::destroy_loot_drop( reg(), event.m_loot_entity );
+  Factory::Loot::destroy_loot_drop( reg(), event.m_loot_entity, m_loot_sm.lock().get() );
 }
 
 void LootSystem::on_destroy_loot_container_event( const Events::DestroyLootContainerEvent &event )
@@ -143,7 +148,8 @@ void LootSystem::on_destroy_loot_container_event( const Events::DestroyLootConta
         // no spatial exclude for the player: they may be adjacent to the container's tile when it breaks
         Factory::ExcludePack<Cmp::Obstacle>{},
         /*zorder_offset=*/-8.f, 
-        reserved_sm.get() 
+        reserved_sm.get(),
+        m_loot_sm.lock().get()
     );
     // clang-format on
     if ( dropped_loot_entt != entt::null )
@@ -190,7 +196,7 @@ void LootSystem::check_loot_collision( sf::Time dt )
   auto collect_loot = [this]( entt::entity loot_entity )
   {
     m_sound_bank.get_effect( "get_loot" ).play();
-    Factory::Loot::destroy_loot_drop( reg(), loot_entity );
+    Factory::Loot::destroy_loot_drop( reg(), loot_entity, m_loot_sm.lock().get() );
   };
 
   // Second pass: apply effects and remove loots

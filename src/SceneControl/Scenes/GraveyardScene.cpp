@@ -167,6 +167,7 @@ void GraveyardScene::on_init()
   m_ghost_navmesh = Factory::Pathfinding::create_ghost_navmesh( m_reg );
   m_player_navmesh = Factory::Pathfinding::create_player_navmesh( m_reg );
   m_open_navmesh = Factory::Pathfinding::create_open_navmesh( m_reg );
+  m_loot_sm = Factory::Pathfinding::create_loot_grid( m_reg );
 
   // spatial index for RenderGameSystem's Cmp::Position z-order pass - kept up to date by a periodic
   // rebuild in do_update() rather than precise per-mutation sync, see kRenderPositionGridRebuildInterval
@@ -337,11 +338,12 @@ void GraveyardScene::do_update( sf::Time dt )
 
 void GraveyardScene::reinit_system_spatial_maps()
 {
-  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, m_ghost_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, m_ghost_navmesh, m_reserved_sm, m_loot_sm );
   m_sys.find<Sys::Store::Type::WispSystem>().init( m_open_navmesh );
   m_sys.find<Sys::Store::Type::BombSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::ActionSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm );
-  m_sys.find<Sys::Store::Type::LootSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::LootSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm, m_loot_sm );
+  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_generic_npc_navmesh, m_ghost_navmesh, m_loot_sm );
   m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
   m_sys.find<Sys::Store::Type::WormholeSystem>().init( m_generic_npc_navmesh, m_reserved_sm );

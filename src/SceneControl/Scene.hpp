@@ -62,6 +62,8 @@ protected:
   PathFinding::SpatialHashGridSharedPtr m_player_navmesh;
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridSharedPtr m_reserved_sm;
+  //! @brief Loot drops (Cmp::Loot), used to find free spawn/drop cells
+  PathFinding::SpatialHashGridSharedPtr m_loot_sm;
 
   //! @brief Deserialised JSON scene data. See res/scenes
   SceneMapSharedPtr m_scene_data;

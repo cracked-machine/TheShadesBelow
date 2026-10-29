@@ -30,9 +30,21 @@ public:
   //! @brief Destroy the Item System object
   ~ItemSystem() {}
 
-  //! @brief init the weak pointer for the reserved-positions grid.
+  //! @brief init the weak pointers for the spatial grids.
+  //! @note Called once early with just `reserved_sm` (items can be created mid-generation), then again with every grid
+  //! once the navmeshes exist.
   //! @param reserved_sm
-  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm ) { m_reserved_sm = reserved_sm; }
+  //! @param npc_navmesh used to find a free cell for spawn_nearby items
+  //! @param ghost_navmesh used to find a free cell for spawn_nearby items
+  //! @param loot_sm used to find a free cell for spawn_nearby items
+  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &npc_navmesh = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &ghost_navmesh = nullptr, const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr )
+  {
+    m_reserved_sm = reserved_sm;
+    m_npc_navmesh = npc_navmesh;
+    m_ghost_navmesh = ghost_navmesh;
+    m_loot_sm = loot_sm;
+  }
 
   //! @brief Event handler that forwards to create_world_item(). With `m_spawn_nearby` the item drops on a random free
   //! cell beside the source, unless the source has already dropped `m_max_instances` times over its lifetime.
@@ -74,6 +86,15 @@ private:
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
+
+  //! @brief NPC navmesh: walkable tiles and the NPCs on them
+  PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;
+
+  //! @brief Ghost navmesh: the ghost NPCs on it
+  PathFinding::SpatialHashGridWeakPtr m_ghost_navmesh;
+
+  //! @brief Loot drops (Cmp::Loot)
+  PathFinding::SpatialHashGridWeakPtr m_loot_sm;
 };
 
 } // namespace Game::Sys

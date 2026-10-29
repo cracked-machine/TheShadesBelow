@@ -117,13 +117,27 @@ bool is_plant_depleted( entt::registry &reg, entt::entity plant_entt );
 //! @return std::optional<sf::Vector2f> top-left of the cell, or nullopt if no ring has a free cell.
 std::optional<sf::Vector2f> find_random_cell_near( const sf::FloatRect &source, int max_rings, const std::function<bool( const sf::Vector2f & )> &is_free );
 
-//! @brief Whether something can be spawned/dropped on `area`: every grid cell under it is a world tile, and it is free of
-//! Cmp::Npc::NoPathFinding entities (obstacles, plants, buildings), loot, world items, NPCs and the player.
+//! @brief Spatial grids used by is_free_spawn_area() instead of scanning the registry.
+struct SpawnGrids
+{
+  //! @brief NPC navmesh: a non-empty bucket is a walkable world tile, i.e. not blocked by a Cmp::Npc::NoPathFinding
+  //! entity (obstacle, plant, building). Also holds the NPCs that pathfind on it. Required.
+  const PathFinding::SpatialHashGrid *navmesh = nullptr;
+  //! @brief Ghost navmesh, checked for ghost NPCs only. Optional.
+  const PathFinding::SpatialHashGrid *ghost_navmesh = nullptr;
+  //! @brief Loot drops (Cmp::Loot). Optional.
+  const PathFinding::SpatialHashGrid *loot_sm = nullptr;
+  //! @brief Cells reserved from procgen/algorithmic changes, including dropped world items. Optional.
+  const PathFinding::SpatialHashGrid *reserved_sm = nullptr;
+};
+
+//! @brief Whether something can be spawned/dropped on `area`: every grid cell under it is a walkable, unreserved world
+//! tile, and it is free of loot, world items, NPCs and the player.
 //! @param reg reference to the entt registry
 //! @param area World-space rect, e.g. an NPC footprint or a single grid cell.
-//! @param reserved_sm If provided, cells reserved in it are not free.
+//! @param grids The spatial grids to look up. Nothing is free without `grids.navmesh`.
 //! @return bool true if `area` is free.
-bool is_free_spawn_area( entt::registry &reg, const sf::FloatRect &area, const PathFinding::SpatialHashGrid *reserved_sm = nullptr );
+bool is_free_spawn_area( entt::registry &reg, const sf::FloatRect &area, const SpawnGrids &grids );
 
 //! @brief Word-wraps text to fit within max_chars_per_line, preserving existing newlines as hard breaks.
 //! @note Approximate (assumes roughly-uniform character width) - fine for a fatal-error debug screen.

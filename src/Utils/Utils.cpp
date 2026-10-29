@@ -3,7 +3,6 @@
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LerpPosition.hpp>
 #include <Components/Loot.hpp>
-#include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/Character.hpp>
@@ -18,7 +17,6 @@
 #include <Components/ZOrderValue.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Sprites/SpriteSheet.hpp>
-#include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Npc.hpp>
 #include <Utils/Player.hpp>
@@ -27,6 +25,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/View.hpp>
 #include <SFML/Window/Mouse.hpp>
+#include <algorithm>
 #include <cmath>
 #include <entt/entity/registry.hpp>
 #include <spdlog/spdlog.h>
@@ -272,51 +271,73 @@ std::optional<sf::Vector2f> find_random_cell_near( const sf::FloatRect &source, 
     const sf::FloatRect outer = Cmp::RectBounds::expanded( source_cells, ring ).getBounds();
     const sf::FloatRect inner = Cmp::RectBounds::expanded( source_cells, ring - 1 ).getBounds();
 
-    // every free cell in this ring
-    std::vector<sf::Vector2f> free_cells;
+    // shuffled so the first free cell found is a random pick from this ring's free cells
+    std::vector<sf::Vector2f> ring_cells;
     for ( float y = outer.position.y; y < outer.position.y + outer.size.y; y += grid.y )
     {
       for ( float x = outer.position.x; x < outer.position.x + outer.size.x; x += grid.x )
       {
         const sf::Vector2f cell( x, y );
-        if ( inner.contains( cell + grid / 2.f ) ) continue;
-        if ( is_free( cell ) ) free_cells.push_back( cell );
+        if ( not inner.contains( cell + grid / 2.f ) ) ring_cells.push_back( cell );
       }
     }
-    if ( free_cells.empty() ) continue;
+    Cmp::RandomInt rng( 0, 1 );
+    std::shuffle( ring_cells.begin(), ring_cells.end(), rng );
 
-    Cmp::RandomInt cell_picker( 0, static_cast<int>( free_cells.size() ) - 1 );
-    return free_cells[static_cast<std::size_t>( cell_picker.gen() )];
+    auto free_cell = std::ranges::find_if( ring_cells, is_free );
+    if ( free_cell != ring_cells.end() ) return *free_cell;
   }
   return std::nullopt;
 }
 
-bool is_free_spawn_area( entt::registry &reg, const sf::FloatRect &area, const PathFinding::SpatialHashGrid *reserved_sm )
+bool is_free_spawn_area( entt::registry &reg, const sf::FloatRect &area, const SpawnGrids &grids )
 {
+  if ( not grids.navmesh ) return false;
+
   // shrink the hitbox slightly so neighbouring cells sharing an edge don't count as overlapping
   const auto area_bounds = Cmp::RectBounds::scaled( area, 0.9f );
 
-  // every cell under the area must be a real, unreserved world tile
+  // every cell under the area must be a walkable (non Cmp::Npc::NoPathFinding), unreserved world tile, free of
+  // world items/loot that were in place when the navmesh was built
   const auto grid = Constants::kGridSizePxF;
   for ( float y = area.position.y; y < area.position.y + area.size.y; y += grid.y )
   {
     for ( float x = area.position.x; x < area.position.x + area.size.x; x += grid.x )
     {
       const Cmp::Position cell_pos( { x, y }, grid );
-      if ( Npc::get_world_pos_entt( reg, cell_pos ) == entt::null ) return false;
-      if ( reserved_sm and not reserved_sm->at( cell_pos ).empty() ) return false;
+      const auto bucket = grids.navmesh->at( cell_pos );
+      if ( bucket.empty() ) return false;
+      if ( std::ranges::any_of( bucket, [&]( entt::entity e ) { return reg.valid( e ) and reg.any_of<Cmp::WorldItem, Cmp::Loot>( e ); } ) )
+        return false;
+      if ( grids.reserved_sm and not grids.reserved_sm->at( cell_pos ).empty() ) return false;
     }
   }
 
-  using Collision::any_intersects;
-  if ( any_intersects<Cmp::Npc::NoPathFinding>( reg, area_bounds ) or any_intersects<Cmp::Loot>( reg, area_bounds ) or
-       any_intersects<Cmp::WorldItem>( reg, area_bounds ) )
-    return false;
   if ( area_bounds.findIntersection( Player::get_position( reg ) ) ) return false;
-  for ( auto npc_entt : reg.view<Cmp::Npc::NPC>() )
+
+  // NPCs are bucketed by their top-left, so one mid-lerp from the cell up/left of the area can still overlap it
+  const sf::FloatRect npc_query( area.position - grid, area.size + grid );
+  auto blocked_by_npc = [&]( const PathFinding::SpatialHashGrid *navmesh )
   {
-    const auto npc_bounds = Npc::collision_bounds( reg, npc_entt );
-    if ( npc_bounds and area_bounds.findIntersection( *npc_bounds ) ) return false;
+    if ( not navmesh ) return false;
+    for ( auto entt : navmesh->query_rect( npc_query ) )
+    {
+      if ( not reg.valid( entt ) or not reg.all_of<Cmp::Npc::NPC>( entt ) ) continue;
+      const auto npc_bounds = Npc::collision_bounds( reg, entt );
+      if ( npc_bounds and area_bounds.findIntersection( *npc_bounds ) ) return true;
+    }
+    return false;
+  };
+  if ( blocked_by_npc( grids.navmesh ) or blocked_by_npc( grids.ghost_navmesh ) ) return false;
+
+  if ( grids.loot_sm )
+  {
+    for ( auto loot_entt : grids.loot_sm->query_rect( area ) )
+    {
+      if ( not reg.valid( loot_entt ) ) continue;
+      const auto *loot_pos = reg.try_get<Cmp::Position>( loot_entt );
+      if ( loot_pos and area_bounds.findIntersection( *loot_pos ) ) return false;
+    }
   }
   return true;
 }

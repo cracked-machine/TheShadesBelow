@@ -48,6 +48,13 @@ void destroy_loot_container( entt::registry &registry, entt::entity loot_contain
   registry.remove<Cmp::ZOrderValue>( loot_container_entity );
 }
 
-void destroy_loot_drop( entt::registry &registry, entt::entity loot_entity ) { registry.destroy( loot_entity ); }
+void destroy_loot_drop( entt::registry &registry, entt::entity loot_entity, PathFinding::SpatialHashGrid *loot_sm )
+{
+  if ( loot_sm )
+  {
+    if ( auto *pos_cmp = registry.try_get<Cmp::Position>( loot_entity ) ) loot_sm->remove( loot_entity, *pos_cmp );
+  }
+  registry.destroy( loot_entity );
+}
 
 } // namespace Game::Factory::Loot

@@ -75,11 +75,13 @@ bool has_any_spatial_excluded_at_pos( entt::registry &registry, const Cmp::Posit
 //! @param search The area in which to search for a suitable position.
 //! @param zorder_offset Offset added to position.y for z-ordering.
 //! @param reserved_sm If provided, skips positions already reserved (O(1) check).
+//! @param loot_sm If provided, the new loot entity is inserted into it.
 //! @return The newly created loot entity, or entt::null if no suitable location was found.
 template <typename... Include, typename... Exclude, typename... SpatialExclude>
 inline entt::entity create_loot_drop( entt::registry &registry, Cmp::AnimData &&loot_anim_cmp, sf::FloatRect search, IncludePack<Include...>,
                                       ExcludePack<Exclude...>, ExcludePack<SpatialExclude...> spatial_exclude = ExcludePack<>{},
-                                      float zorder_offset = -8.f, const PathFinding::SpatialHashGrid *reserved_sm = nullptr )
+                                      float zorder_offset = -8.f, const PathFinding::SpatialHashGrid *reserved_sm = nullptr,
+                                      PathFinding::SpatialHashGrid *loot_sm = nullptr )
 {
   auto pos_view = registry.view<Cmp::Position, Include...>( entt::exclude<Exclude...> );
 
@@ -101,6 +103,7 @@ inline entt::entity create_loot_drop( entt::registry &registry, Cmp::AnimData &&
     registry.emplace<Cmp::AnimData>( new_loot_entity, loot_anim_cmp );
     registry.emplace<Cmp::ZOrderValue>( new_loot_entity, pos_cmp.position.y + zorder_offset );
     registry.emplace<Cmp::Loot>( new_loot_entity );
+    if ( loot_sm ) loot_sm->insert( new_loot_entity, registry.get<Cmp::Position>( new_loot_entity ) );
     SPDLOG_DEBUG( "Created loot entity {} of type {} at position ({}, {})", static_cast<int>( new_loot_entity ), loot_anim_cmp.m_sprite_type,
                   pos_cmp.position.x, pos_cmp.position.y );
     return new_loot_entity;
@@ -113,7 +116,8 @@ inline entt::entity create_loot_drop( entt::registry &registry, Cmp::AnimData &&
 //! @brief Destroy a loot drop entity created by create_loot_drop().
 //! @param registry
 //! @param loot_entity
-void destroy_loot_drop( entt::registry &registry, entt::entity loot_entity );
+//! @param loot_sm If provided, the loot entity is removed from it.
+void destroy_loot_drop( entt::registry &registry, entt::entity loot_entity, PathFinding::SpatialHashGrid *loot_sm = nullptr );
 
 } // namespace Game::Factory::Loot
 
