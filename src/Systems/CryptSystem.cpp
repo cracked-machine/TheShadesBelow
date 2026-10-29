@@ -38,6 +38,7 @@
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/CreateLootEvent.hpp>
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/CryptRoomEvent.hpp>
 #include <Events/PassageEvent.hpp>
@@ -457,22 +458,8 @@ void CryptSystem::check_chest_activation( Events::PlayerActionEvent::GameActions
     chest_anim_cmp.m_enabled = true;
     m_sound_bank.get_effect( "crypt_chest_open" ).play();
 
-    auto reserved_sm = m_reserved_sm.lock();
-    // clang-format off
-    auto loot_entt = Factory::Loot::create_loot_drop(
-      reg(),
-      Cmp::AnimData( Cmp::AnimData::Config{ .sprite_type = "sprite.crypt.loot.gold", .enabled = true}),
-      Cmp::RectBounds::scaled( chest_pos_cmp, 3.f ).getBounds(),
-      Factory::IncludePack<>{},
-      Factory::ExcludePack<Cmp::Player::Character, Cmp::Crypt::Chest, Cmp::Crypt::RoomLavaPitCell, Cmp::Crypt::PassageBlock, Cmp::Wall, Cmp::Obstacle>{},
-      Factory::ExcludePack<Cmp::Player::Character, Cmp::Crypt::Chest, Cmp::Crypt::RoomLavaPitCell, Cmp::Crypt::PassageBlock, Cmp::Wall, Cmp::Obstacle>{},
-      64.f, 
-      reserved_sm.get(),
-      m_loot_sm.lock().get()
-    );
-    // clang-format on
-
-    if ( loot_entt != entt::null ) m_sound_bank.get_effect( "drop_loot" ).play();
+    // no source entity: PassageSystem destroys chests on reshuffle, which must not take the gold with them
+    get_systems_event_queue().trigger( Events::CreateLootEvent( "sprite.crypt.loot.gold", chest_pos_cmp ) );
   }
 }
 

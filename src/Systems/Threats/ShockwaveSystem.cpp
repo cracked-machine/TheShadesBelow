@@ -4,7 +4,6 @@
 #include <Components/Obstacle.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
-#include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/TookDamage.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
@@ -14,7 +13,6 @@
 #include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
-#include <Factory/PlayerFactory.hpp>
 #include <Sprites/Shockwave.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
@@ -166,16 +164,10 @@ void ShockwaveSystem::check_shockwave_player_collision()
                      shockwave.sprite.get_position().x, shockwave.sprite.get_position().y, shockwave.sprite.get_radius() );
 
         // trigger death animation
+        // PlayerSystem spends any extra life once the death animation has played
         if ( player_stats_cmp.health() <= 0 )
         {
-          if ( Utils::Player::player_has_extra_life( reg() ) )
-          {
-            get_systems_event_queue().trigger(
-                Events::UpdatePlayerPositionEvent( sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() ) ) ) );
-            Factory::Player::remove_player_extra_life( reg() );
-            m_sound_bank.get_effect( "player_respawn" ).play();
-          }
-          else { get_systems_event_queue().enqueue( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::SHOCKED, player_pos ) ); }
+          get_systems_event_queue().enqueue( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::SHOCKED, player_pos ) );
         }
       }
     }

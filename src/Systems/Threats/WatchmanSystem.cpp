@@ -15,7 +15,6 @@
 #include <Components/Persistent/NpcWatchmanSpawnMax.hpp>
 #include <Components/Persistent/NpcWatchmanSweepAmplitude.hpp>
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
-#include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Position.hpp>
@@ -25,9 +24,7 @@
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
-#include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/ParticleFactory.hpp>
-#include <Factory/PlayerFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/System/Angle.hpp>
@@ -270,16 +267,10 @@ void WatchmanSystem::check_gunfire_player_collision()
     player_cmp.m_damage_cooldown_timer = sf::Time::Zero;
     SPDLOG_INFO( "Player (health:{}) hit by Watchman gunfire", player_stats_cmp.health() );
 
+    // PlayerSystem spends any extra life once the death animation has played
     if ( player_stats_cmp.health() <= 0 )
     {
-      if ( Utils::Player::player_has_extra_life( reg() ) )
-      {
-        get_systems_event_queue().trigger(
-            Events::UpdatePlayerPositionEvent( sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() ) ) ) );
-        Factory::Player::remove_player_extra_life( reg() );
-        m_sound_bank.get_effect( "player_respawn" ).play();
-      }
-      else { get_systems_event_queue().enqueue( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::HAUNTED, player_pos_cmp ) ); }
+      get_systems_event_queue().enqueue( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::HAUNTED, player_pos_cmp ) );
     }
   }
 }
