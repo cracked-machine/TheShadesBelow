@@ -35,14 +35,16 @@ public:
   //! @param player_navmesh
   //! @param ghost_navmesh
   //! @param reserved_sm
+  //! @param loot_sm loot drops, so foraged items don't drop on them
   void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &player_navmesh,
              const PathFinding::SpatialHashGridSharedPtr &ghost_navmesh = nullptr,
-             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr )
+             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr, const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr )
   {
     m_npc_navmesh = npc_navmesh;
     m_player_navmesh = player_navmesh;
     m_ghost_navmesh = ghost_navmesh;
     m_reserved_sm = reserved_sm;
+    m_loot_sm = loot_sm;
   }
 
   //! @brief frame updates
@@ -92,9 +94,9 @@ private:
   //! @param plant_uuid The plant's Cmp::UUID.
   void destroy_plant_loot( const Cmp::UUID &plant_uuid );
 
-  //! @brief Find a free grid cell around the plant to drop a foraged item into.
+  //! @brief Find a random free grid cell around the plant to drop a foraged item into. See Utils::is_free_spawn_area().
   //! @param plant_mb_cmp The plant being foraged.
-  //! @return sf::Vector2f The free cell, or the plant's base cell if every surrounding cell is occupied.
+  //! @return sf::Vector2f The free cell, or the plant's head cell if every surrounding cell is occupied.
   sf::Vector2f find_forage_drop_pos( const Cmp::PlantMultiBlock &plant_mb_cmp );
 
   //! @brief all grid positions that block NPC pathfinding
@@ -108,6 +110,9 @@ private:
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
+
+  //! @brief Loot drops, so foraged items don't drop on them.
+  PathFinding::SpatialHashGridWeakPtr m_loot_sm;
 };
 } // namespace Game::Sys
 

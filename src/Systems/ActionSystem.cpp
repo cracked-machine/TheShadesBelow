@@ -802,47 +802,22 @@ sf::Vector2f ActionSystem::find_forage_drop_pos( const Cmp::PlantMultiBlock &pla
   const auto grid = Constants::kGridSizePxF;
   const auto plant_pos = Utils::snap_to_grid( plant_mb_cmp.position );
 
-  // the plant's base cell is the bottom row of its footprint
-  const sf::Vector2f base_cell( plant_pos.x, plant_pos.y + plant_mb_cmp.size.y - grid.y );
-
-  // collect every cell in the ring around the plant footprint
+  // the plant's head cell is the top row of its footprint (middle column). The player is blocked from the base cell, so
+  // they couldn't pick up anything dropped there.
   const int cols = static_cast<int>( std::round( plant_mb_cmp.size.x / grid.x ) );
-  const int rows = static_cast<int>( std::round( plant_mb_cmp.size.y / grid.y ) );
-  std::vector<sf::Vector2f> candidates;
-  for ( int gy = -1; gy <= rows; ++gy )
-  {
-    for ( int gx = -1; gx <= cols; ++gx )
-    {
-      bool inside_footprint = gx >= 0 and gx < cols and gy >= 0 and gy < rows;
-      if ( inside_footprint ) continue;
-      candidates.emplace_back( plant_pos.x + ( static_cast<float>( gx ) * grid.x ), plant_pos.y + ( static_cast<float>( gy ) * grid.y ) );
-    }
-  }
-  // scatter the drops rather than always filling the same cell first
-  Cmp::RandomInt rng( 0, 1 );
-  std::shuffle( candidates.begin(), candidates.end(), rng );
+  const sf::Vector2f head_cell( plant_pos.x + static_cast<float>( cols / 2 ) * grid.x, plant_pos.y );
 
+  auto npc_navmesh = m_npc_navmesh.lock();
+  auto ghost_navmesh = m_ghost_navmesh.lock();
+  auto loot_sm = m_loot_sm.lock();
   auto reserved_sm = m_reserved_sm.lock();
-  auto is_free = [&]( const sf::Vector2f &cell )
-  {
-    // shrink the hitbox slightly so neighbouring cells sharing an edge don't count as overlapping
-    Cmp::Position cell_pos( cell + sf::Vector2f{ 1.f, 1.f }, grid - sf::Vector2f{ 2.f, 2.f } );
-    if ( Utils::get_world_pos_entt( reg(), cell_pos ) == entt::null ) return false;
-    if ( reserved_sm and not reserved_sm->at( cell_pos ).empty() ) return false;
-    for ( auto [entt, worlditem_cmp, pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>().each() )
-    {
-      if ( pos_cmp.findIntersection( cell_pos ) ) return false;
-    }
-    for ( auto [entt, obstacle_cmp, pos_cmp] : reg().view<Cmp::Obstacle, Cmp::Position>().each() )
-    {
-      if ( obstacle_cmp.m_enabled and pos_cmp.findIntersection( cell_pos ) ) return false;
-    }
-    return true;
-  };
+  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
 
-  auto free_cell = std::ranges::find_if( candidates, is_free );
-  // no free cell around the plant so overlap at the base of the plant
-  return free_cell != candidates.end() ? *free_cell : base_cell;
+  // one ring around the plant footprint, picked at random
+  auto cell = Utils::find_random_cell_near( plant_mb_cmp, 1, [&]( const sf::Vector2f &cell_pos )
+  { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, grid ), grids ); } );
+  // no free cell around the plant so overlap the plant's head, where the player can still reach it
+  return cell.value_or( head_cell );
 }
 
 } // namespace Game::Sys
