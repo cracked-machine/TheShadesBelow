@@ -4,6 +4,7 @@
 #include <Components/AnimData.hpp>
 #include <Components/DestroyedObstacle.hpp>
 #include <Components/Direction.hpp>
+#include <Components/DroppedBy.hpp>
 #include <Components/FractalCurve.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
@@ -11,7 +12,6 @@
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
-#include <Components/DroppedBy.hpp>
 #include <Components/Loot.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Moveable.hpp>
@@ -762,7 +762,7 @@ void ActionSystem::update_burning_worlditems( sf::Time dt )
           trigger_side_effects( burn_action, Cmp::Position( plant_cmp.position, Constants::kGridSizePxF ), plant_entt );
         }
       }
-      destroy_plant_npcs( plant_uuid, Sys::SpriteKey( "sprite.death.anim.flames" ) );
+      destroy_plant_npcs( plant_uuid, Sys::SpriteKey( "sprite.death.anim.banish" ) );
       destroy_plant_loot( plant_uuid );
       Factory::Plant::remove_plant_mb( reg(), plant_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
     }

@@ -132,8 +132,8 @@ std::optional<sf::Vector2f> NpcSystem::find_nearby_spawn_cell( const Cmp::Positi
   const auto &npc_cmp = Sys::NpcStore::instance().get( npc_type );
   const sf::Vector2f npc_size = Sys::SpriteStore::instance().get( npc_cmp.sprite_type_list.front() ).sprite_size();
   // the NPC's whole footprint must be free, not just its top-left cell
-  return Utils::find_random_cell_near( source, kNpcSpawnSearchRadius,
-                                       [&]( const sf::Vector2f &cell ) { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell, npc_size ) ); } );
+  return Utils::find_random_cell_near( source, kNpcSpawnSearchRadius, [&]( const sf::Vector2f &cell )
+  { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell, npc_size ) ); } );
 }
 
 void NpcSystem::on_update_npc_position_event( const Events::UpdateNpcPositionEvent &event )
@@ -241,7 +241,7 @@ void NpcSystem::update( sf::Time dt )
     update_animation();
     m_anim_timer = sf::Time::Zero;
   }
-  update_sfx();
+  update_sfx( dt );
   update_movement( dt );
 
   // before the collision checks, so the ElderMother can't hurt the player on the frame she is banished
@@ -344,10 +344,24 @@ void NpcSystem::update_animation()
   }
 }
 
-void NpcSystem::update_sfx()
+void NpcSystem::update_sfx( sf::Time dt )
 {
   bool any_skeleton_moving = false;
   bool any_spider_moving = false;
+
+  // snake hiss
+  static const sf::Time snake_hiss_cooldown_timeout = sf::seconds( 5.f );
+  for ( auto [adder_entt, adder_cmp, adder_pos_cmp] : reg().view<Cmp::Npc::Adder, Cmp::Position>().each() )
+  {
+    adder_cmp.sfx_cooldown += dt;
+    if ( adder_cmp.sfx_cooldown < snake_hiss_cooldown_timeout ) continue;
+    if ( Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), adder_pos_cmp ) )
+    {
+      auto sfx = std::string( "snake_hiss" ) + std::to_string( Cmp::RandomInt( 1, 7 ).gen() );
+      m_sound_bank.get_effect( sfx ).play();
+    }
+    adder_cmp.sfx_cooldown = sf::Time::Zero;
+  }
 
   for ( auto [npc_entt, npc_cmp, npc_dir_cmp, anim_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Direction, Cmp::AnimData>().each() )
   {

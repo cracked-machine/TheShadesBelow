@@ -105,7 +105,7 @@ private:
   void update_movement_for( PathFinding::SpatialHashGrid &navmesh, entt::entity npc_entity, sf::Time dt );
 
   //! @brief Update the NPC sfx
-  void update_sfx();
+  void update_sfx( sf::Time dt );
 
   //! @brief Check for player collision proximity with NPC containers
   void check_npc_container_collision();
