@@ -59,7 +59,6 @@
 #include <Events/UpdateNpcPositionEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/NpcFactory.hpp>
-#include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/FlyingSystem.hpp>

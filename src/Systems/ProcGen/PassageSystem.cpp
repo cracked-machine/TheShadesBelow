@@ -17,7 +17,6 @@
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/CryptFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
-#include <Factory/PlayerFactory.hpp>
 #include <SceneControl/SceneData.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/PersistSystem.hpp>

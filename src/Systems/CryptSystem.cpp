@@ -44,7 +44,6 @@
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/CryptFactory.hpp>
 #include <Factory/LootFactory.hpp>
-#include <Factory/MultiblockFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>

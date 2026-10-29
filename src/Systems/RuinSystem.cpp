@@ -37,7 +37,6 @@
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
-#include <Factory/MultiblockFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <Factory/RuinFactory.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>

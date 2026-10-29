@@ -25,8 +25,6 @@
 #include <Components/Wormhole/MultiBlock.hpp>
 #include <Components/Wormhole/Singularity.hpp>
 #include <Components/ZOrderValue.hpp>
-#include <Factory/LootFactory.hpp>
-#include <Factory/NpcFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>

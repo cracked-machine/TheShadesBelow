@@ -6,7 +6,6 @@
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/SacrificeAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
-#include <Factory/ToxicityFactory.hpp>
 #include <SFML/System/Time.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>

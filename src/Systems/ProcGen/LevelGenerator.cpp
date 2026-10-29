@@ -59,8 +59,6 @@
 #include <Factory/MultiblockFactory.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
-#include <Factory/PathfindingFactory.hpp>
-#include <Factory/PlantFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <Factory/RuinFactory.hpp>
 #include <Factory/WallFactory.hpp>

@@ -12,7 +12,6 @@
 #include <Components/Spring/HealingSpringEntrance.hpp>
 #include <Components/Spring/HealingSpringMultiBlock.hpp>
 #include <Components/Wall.hpp>
-#include <Factory/MultiblockFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>
 #include <Sprites/SpriteSheet.hpp>

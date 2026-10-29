@@ -98,11 +98,7 @@
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
-#include <Factory/LootFactory.hpp>
-#include <Factory/MultiblockFactory.hpp>
-#include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
-#include <Factory/PlantFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>

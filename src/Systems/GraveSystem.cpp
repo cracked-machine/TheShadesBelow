@@ -23,11 +23,7 @@
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
-#include <Factory/BombFactory.hpp>
-#include <Factory/LootFactory.hpp>
-#include <Factory/ObstacleFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
-#include <Factory/PlayerFactory.hpp>
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/GraveSystem.hpp>
 #include <Systems/PersistSystem.hpp>

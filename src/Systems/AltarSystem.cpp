@@ -36,8 +36,6 @@
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Factory/AltarFactory.hpp>
-#include <Factory/LootFactory.hpp>
-#include <Factory/ObstacleFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <SFML/System/Time.hpp>
