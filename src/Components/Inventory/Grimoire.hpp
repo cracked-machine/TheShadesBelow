@@ -49,7 +49,8 @@ public:
     const auto sacrifice_reward = [&]( const Sys::ItemKey &key )
     {
       if ( key.empty() ) return Sys::ItemKey( "" );
-      const auto reward = item_store.get( key ).get_sacrifice_reward();
+      // plants are offered at the graveyard altars
+      const auto reward = item_store.get( key ).get_sacrifice_reward( Cmp::Altar::Kind::GRAVEYARD );
       return reward ? reward->item : Sys::ItemKey( "" );
     };
     for ( const Sys::ItemKey &item_key : item_store.get_pattern( "^item\\.plant\\." ) )

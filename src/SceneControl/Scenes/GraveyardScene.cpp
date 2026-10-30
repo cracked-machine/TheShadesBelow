@@ -34,6 +34,7 @@
 #include <Components/ZOrderValue.hpp>
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
+#include <Factory/AltarFactory.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PathfindingFactory.hpp>
@@ -213,6 +214,9 @@ void GraveyardScene::on_enter()
 
   // prevent residual lerp movements from previous scene causing havoc in the new one
   Utils::Player::remove_lerp_cmp( m_reg );
+
+  // the extra life may have been spent in another scene (e.g. the crypt), so put out any altar still showing it
+  if ( not Utils::Player::player_has_extra_life( m_reg ) ) Factory::Altar::deactivate_altars( m_reg );
 
   // Respawn player back in the graveyard: either at the last position when they left, or fallback to their start position
   const auto &player_pos = Utils::Player::get_position( m_reg );

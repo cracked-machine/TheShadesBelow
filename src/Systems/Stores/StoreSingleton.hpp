@@ -186,17 +186,29 @@ protected:
                    make_side_effects( j ), make_reward( j ) );
   }
 
-  //! @brief Convert the "reward.special" string of a JSON action entry.
+  //! @brief Convert the "reward.altar" string of a JSON action entry.
   //! @throws std::runtime_error on an unknown value, so an invalid config can't silently disable the altar effect.
-  static Cmp::ActionReward::Special make_reward_special( const std::string &special )
+  static Cmp::ActionReward::AltarEffect make_reward_altar( const std::string &altar )
   {
-    using Special = Cmp::ActionReward::Special;
-    if ( special == "none" ) return Special::NONE;
-    if ( special == "altar" ) return Special::ALTAR;
-    if ( special == "banish" ) return Special::BANISH;
-    if ( special == "crypt" ) return Special::CRYPT;
-    if ( special == "toxic_immunity" ) return Special::TOXIC_IMMUNITY;
-    throw std::runtime_error( "Unknown reward special: '" + special + "'" );
+    using AltarEffect = Cmp::ActionReward::AltarEffect;
+    if ( altar == "None" ) return AltarEffect::NONE;
+    if ( altar == "Candle" ) return AltarEffect::CANDLE;
+    if ( altar == "Banish" ) return AltarEffect::BANISH;
+    if ( altar == "ExtraLife" ) return AltarEffect::EXTRA_LIFE;
+    if ( altar == "CryptKey" ) return AltarEffect::CRYPT_KEY;
+    if ( altar == "ToxicImmunity" ) return AltarEffect::TOXIC_IMMUNITY;
+    throw std::runtime_error( "Unknown reward altar: '" + altar + "'" );
+  }
+
+  //! @brief Convert the "reward.location" string of a JSON action entry.
+  //! @throws std::runtime_error on an unknown value.
+  static Cmp::Altar::Kind make_reward_location( const std::string &location )
+  {
+    using Kind = Cmp::Altar::Kind;
+    if ( location == "Graveyard" ) return Kind::GRAVEYARD;
+    if ( location == "Crypt" ) return Kind::CRYPT;
+    if ( location == "Shop" ) return Kind::SHOP;
+    throw std::runtime_error( "Unknown reward location: '" + location + "'" );
   }
 
   //! @brief Convert the "side_effects.movement.player.type" string of a JSON action entry.
@@ -229,24 +241,36 @@ protected:
     throw std::runtime_error( "Unknown npc movement type: '" + type + "'" );
   }
 
-  //! @brief Build the optional reward of a JSON action entry from its optional "reward" object.
-  //! @throws std::runtime_error if the "reward" object sets none of item, wealth, special or loot.
-  static std::optional<Cmp::ActionReward> make_reward( const nlohmann::json &j )
+  //! @brief Build the rewards of a JSON action entry from its optional "reward" object, or array of objects.
+  //! @throws std::runtime_error if a "reward" object sets none of item, wealth, altar or loot.
+  static Cmp::ActionRewards make_reward( const nlohmann::json &j )
   {
     using Game::Utils::JsonDeserializer;
-    if ( not j.contains( "reward" ) ) return std::nullopt;
-    const auto &rw = j.at( "reward" );
+    if ( not j.contains( "reward" ) ) return {};
 
-    Cmp::ActionReward reward;
-    if ( rw.contains( "item" ) ) { reward.item = Sys::ItemKey( JsonDeserializer::get_string( rw, "item" ) ); }
-    if ( rw.contains( "wealth" ) ) { reward.wealth = JsonDeserializer::get_int( rw, "wealth" ); }
-    if ( rw.contains( "special" ) ) { reward.special = make_reward_special( JsonDeserializer::get_string( rw, "special" ) ); }
-    if ( rw.contains( "loot" ) ) { reward.loot = Sys::SpriteKey( JsonDeserializer::get_string( rw, "loot" ) ); }
-    if ( rw.contains( "trigger_range" ) ) { reward.trigger_range = JsonDeserializer::get_int( rw, "trigger_range" ); }
-    if ( rw.contains( "max_instances" ) ) { reward.max_instances = JsonDeserializer::get_int( rw, "max_instances" ); }
-    if ( rw.contains( "tick" ) ) { reward.tick = JsonDeserializer::get_int( rw, "tick" ); }
-    if ( reward.count() == 0 ) throw std::runtime_error( "reward must set at least one of item, wealth, special or loot" );
-    return reward;
+    const auto make_one = []( const nlohmann::json &rw )
+    {
+      Cmp::ActionReward reward;
+      if ( rw.contains( "item" ) ) { reward.item = Sys::ItemKey( JsonDeserializer::get_string( rw, "item" ) ); }
+      if ( rw.contains( "wealth" ) ) { reward.wealth = JsonDeserializer::get_int( rw, "wealth" ); }
+      if ( rw.contains( "altar" ) ) { reward.altar = make_reward_altar( JsonDeserializer::get_string( rw, "altar" ) ); }
+      if ( rw.contains( "location" ) ) { reward.location = make_reward_location( JsonDeserializer::get_string( rw, "location" ) ); }
+      if ( rw.contains( "loot" ) ) { reward.loot = Sys::SpriteKey( JsonDeserializer::get_string( rw, "loot" ) ); }
+      if ( rw.contains( "trigger_range" ) ) { reward.trigger_range = JsonDeserializer::get_int( rw, "trigger_range" ); }
+      if ( rw.contains( "max_instances" ) ) { reward.max_instances = JsonDeserializer::get_int( rw, "max_instances" ); }
+      if ( rw.contains( "tick" ) ) { reward.tick = JsonDeserializer::get_int( rw, "tick" ); }
+      if ( reward.count() == 0 ) throw std::runtime_error( "reward must set at least one of item, wealth, altar or loot" );
+      return reward;
+    };
+
+    const auto &rw = j.at( "reward" );
+    if ( not rw.is_array() ) return { make_one( rw ) };
+    Cmp::ActionRewards rewards;
+    for ( const auto &entry : rw )
+    {
+      rewards.push_back( make_one( entry ) );
+    }
+    return rewards;
   }
 
   //! @brief Build the optional side effects of a JSON action entry from its optional "side_effects" object.

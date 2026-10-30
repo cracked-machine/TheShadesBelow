@@ -121,6 +121,15 @@ public:
     return at<ActionT>().action.reward();
   }
 
+  //! @brief Get all rewards of the action keyed by ActionT.
+  //! @return The rewards, empty if the item has no such action or the action has no reward.
+  template <typename ActionT>
+  [[nodiscard]] ActionRewards get_rewards() const
+  {
+    if ( not has_action<ActionT>() ) return {};
+    return at<ActionT>().action.rewards();
+  }
+
   //! @brief Get the spawn npc effect of the action keyed by ActionT.
   //! @return The npc spawn effect object, or std::nullopt if the item has no such action or the action has no npc spawn effect.
   template <typename ActionT>
@@ -157,16 +166,21 @@ public:
   //! @brief Whether the item only wears while it is actively in use (e.g. flute playing, broom flying).
   bool wears_only_when_active() const { return m_wear_active_only; }
 
-  //! @brief The reward for sacrificing this item at the altar ("sacrifice_action.reward" in items.json).
-  //! @return The reward, or std::nullopt if the item can't be sacrificed.
-  std::optional<ActionReward> get_sacrifice_reward() const { return get_reward<SacrificeAction>(); }
+  //! @brief The reward for sacrificing this item at the given kind of altar ("sacrifice_action.reward" in items.json).
+  //! @param location The kind of altar the item is offered at.
+  //! @return The reward, or std::nullopt if the item can't be sacrificed at that kind of altar.
+  std::optional<ActionReward> get_sacrifice_reward( Altar::Kind location ) const
+  {
+    if ( not has_action<SacrificeAction>() ) return std::nullopt;
+    return at<SacrificeAction>().action.reward( location );
+  }
 
   //! @brief The npc spawn effect for sacrificing this item at the altar ("side_effects.spawn_npc" in items.json).
   //! @return The reward, or std::nullopt if the item can't be sacrificed.
   std::optional<SpawnNpcEffect> get_sacrifice_npc_spawn_effect() const { return get_spawn_npc_effect<SacrificeAction>(); }
 
   //! @brief Whether this item can be sacrificed at the altar, i.e. its sacrifice_action has a reward or npc spawn effect.
-  bool is_sacrificial() const { return get_sacrifice_reward().has_value() or get_sacrifice_npc_spawn_effect().has_value(); }
+  bool is_sacrificial() const { return not get_rewards<SacrificeAction>().empty() or get_sacrifice_npc_spawn_effect().has_value(); }
 
   //! @brief The item gained when this plant is foraged (empty hand or gloves), see "forage_action.reward.item" in
   //! items.json. Empty string is a no op.

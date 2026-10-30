@@ -627,10 +627,22 @@ void PlayerSystem::check_player_mortality()
     if ( post_death_timer and *post_death_timer < post_death_timer->get_timeout() ) continue;
     if ( mortality_cmp.state == Cmp::Player::Mortality::State::DEAD )
     {
-      if ( Utils::Player::player_has_extra_life( reg() ) )
+      if ( auto *extra_life = reg().try_get<Cmp::Player::ExtraLife>( entity ) )
       {
-        on_update_player_position_event(
-            Events::UpdatePlayerPositionEvent( sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() ) ) ) );
+        // respawn at the granting altar only if the extra life is spent in that altar's scene, otherwise at this scene's start
+        const auto altar_in_scene = [&]()
+        {
+          if ( not extra_life->altar_uuid ) return false;
+          for ( auto [altar_entt, altar_cmp, altar_uuid_cmp] : reg().view<Cmp::Altar::MultiBlock, Cmp::UUID>().each() )
+          {
+            if ( altar_uuid_cmp == *extra_life->altar_uuid ) return true;
+          }
+          return false;
+        };
+        const auto respawn_position = ( extra_life->respawn_position and altar_in_scene() )
+                                          ? *extra_life->respawn_position
+                                          : sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( reg() ) );
+        on_update_player_position_event( Events::UpdatePlayerPositionEvent( respawn_position ) );
         Factory::Player::remove_player_extra_life( reg() );
         m_sound_bank.get_effect( "player_respawn" ).play();
         Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 100 }, {}, {}, {}, {}, {}, {} } );

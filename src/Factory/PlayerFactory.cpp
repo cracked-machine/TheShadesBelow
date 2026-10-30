@@ -40,6 +40,7 @@
 #include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Factory/AltarFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/PlantFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
@@ -174,25 +175,12 @@ void remove_player_last_graveyard_pos( entt::registry &reg )
 
 void remove_player_extra_life( entt::registry &reg )
 {
-  for ( auto [extra_life_entt, extra_life_cmp] : reg.view<Cmp::Player::ExtraLife>().each() )
-  {
-    reg.remove<Cmp::Player::ExtraLife>( extra_life_entt );
-  }
+  auto player_entt = Utils::Player::get_entity( reg );
+  reg.remove<Cmp::Player::ExtraLife>( player_entt );
+  reg.remove<Cmp::FlashUIExtraLife>( player_entt );
 
-  for ( auto [flash_entt, flash_cmp] : reg.view<Cmp::FlashUIExtraLife>().each() )
-  {
-    reg.destroy( flash_entt );
-  }
-
-  for ( auto [ps_entt, ps_cmp] : reg.view<Cmp::Particle::SpriteOwner>().each() )
-  {
-    if ( ps_cmp.sprite->get_tag() == "crypt.altar.particle.active" ) reg.destroy( ps_entt );
-  }
-
-  for ( auto [altar_mb_entt, altar_mb_cmp, altar_anim_cmp] : reg.view<Cmp::Altar::MultiBlock, Cmp::AnimData>().each() )
-  {
-    if ( altar_anim_cmp.m_sprite_type == "sprite.crypt.altar.active" ) { altar_anim_cmp.m_sprite_type = "sprite.crypt.altar.inactive"; }
-  }
+  // deactivate the altar that granted the extra life, if it is in this scene
+  Factory::Altar::deactivate_altars( reg );
 }
 
 } // namespace Game::Factory::Player

@@ -181,8 +181,6 @@ void CryptScene::on_exit()
   Factory::Crypt::destroy_crypt_shuffle_timer( m_reg );
   m_sys.find<Sys::Store::Type::FootstepSystem>().stop_footsteps_sound();
 
-  Factory::Player::remove_player_extra_life( m_reg );
-
   // Hide the sudden position update/camera pan behind a forced loading screen.
   std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 }

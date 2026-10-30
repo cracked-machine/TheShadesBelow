@@ -14,6 +14,7 @@
 #include <Components/FootStepAlpha.hpp>
 #include <Components/FootStepTimer.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
+#include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/Grimoire.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/WearLevel.hpp>
@@ -28,6 +29,7 @@
 #include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/Curse.hpp>
 #include <Components/Player/Doglegs.hpp>
+#include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -293,6 +295,8 @@ void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
   registry.storage<Cmp::UUID>();
   registry.storage<Cmp::Grimoire>();
   registry.storage<Cmp::Player::ConsumeTimer>();
+  registry.storage<Cmp::Player::ExtraLife>();
+  registry.storage<Cmp::FlashUIExtraLife>();
   // Add other player-related components as needed
 }
 

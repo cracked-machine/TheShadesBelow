@@ -176,17 +176,19 @@ std::string GrimoireSystem::reward_display_name( const Cmp::ActionReward &reward
   }
   if ( not reward.loot.empty() ) { return Sys::SpriteStore::instance().get( reward.loot ).display_name(); }
   if ( reward.wealth > 0 ) { return std::format( "+{} wealth", reward.wealth ); }
-  switch ( reward.special )
+  switch ( reward.altar )
   {
-    case Cmp::ActionReward::Special::ALTAR:
+    case Cmp::ActionReward::AltarEffect::CANDLE:
       return "lights altar";
-    case Cmp::ActionReward::Special::BANISH:
+    case Cmp::ActionReward::AltarEffect::BANISH:
       return "banishes ghosts";
-    case Cmp::ActionReward::Special::CRYPT:
+    case Cmp::ActionReward::AltarEffect::EXTRA_LIFE:
+      return "extra life";
+    case Cmp::ActionReward::AltarEffect::CRYPT_KEY:
       return "unlocks crypt";
-    case Cmp::ActionReward::Special::TOXIC_IMMUNITY:
+    case Cmp::ActionReward::AltarEffect::TOXIC_IMMUNITY:
       return std::format( "toxic immunity {}s", reward.tick );
-    case Cmp::ActionReward::Special::NONE:
+    case Cmp::ActionReward::AltarEffect::NONE:
       break;
   }
   return "none";
@@ -270,7 +272,7 @@ void GrimoireSystem::render_labels( const Cmp::Grimoire::Page &current_page, std
 bool GrimoireSystem::render_action_reward( TextColumn &draw_line, const Cmp::BaseAction &action )
 {
   // the reward goes first so it sits alongside the action's header text, e.g. "Sacrifice: (Elder Flute)"
-  const auto &reward = action.reward();
+  const auto reward = action.reward();
   if ( not reward ) { return false; }
   draw_line( std::format( "({})", reward_display_name( *reward ) ), sf::Color::Black );
   return true;

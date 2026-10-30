@@ -1,11 +1,13 @@
 #ifndef SRC_COMPONENTS_STATS_BASEACTION_HPP__
 #define SRC_COMPONENTS_STATS_BASEACTION_HPP__
 
+#include <Components/Altar/Kind.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace Game::Cmp::Toxicity
 {
@@ -184,20 +186,23 @@ struct SideEffects
 
 //! @brief Optional reward granted when an action is applied. See the "reward" object of the sacrifice_action,
 //! forage_action, destroy_action and proximity_action entries in res/json/items.json.
-//! @details A sacrifice_action reward sets exactly one of item, wealth or special. A forage_action/destroy_action
-//! reward only sets item. A proximity_action reward sets exactly one of item or loot, dropped beside the source.
+//! @details A sacrifice_action reward sets exactly one of item, wealth or altar, optionally restricted to one altar
+//! location. A forage_action/destroy_action reward only sets item. A proximity_action reward sets exactly one of item or
+//! loot, dropped beside the source.
 struct ActionReward
 {
-  //! @brief A special altar effect triggered by sacrificing the item.
-  enum class Special {
-    //! @brief No special effect.
+  //! @brief An altar effect triggered by sacrificing the item.
+  enum class AltarEffect {
+    //! @brief No altar effect.
     NONE,
     //! @brief Light an altar candle (relics).
-    ALTAR,
-    //! @brief Banish ghosts, or gain an extra life at a crypt altar (witches jar).
+    CANDLE,
+    //! @brief Banish all ghosts (witches jar).
     BANISH,
+    //! @brief Gain an extra life, respawning the player when they die (witches jar, nightshade).
+    EXTRA_LIFE,
     //! @brief Unlock the crypt key (exit key).
-    CRYPT,
+    CRYPT_KEY,
     //! @brief Temporary immunity to toxidrome increases (St John's Wort).
     TOXIC_IMMUNITY
   };
@@ -206,9 +211,11 @@ struct ActionReward
   Sys::ItemKey item;
   //! @brief The wealth gained. Zero if unused.
   int wealth{ 0 };
-  //! @brief The special altar effect. NONE if unused.
-  Special special{ Special::NONE };
-  //! @brief How long (seconds) a timed special lasts, e.g. TOXIC_IMMUNITY (sacrifice_action only). Zero if unused.
+  //! @brief The altar effect. NONE if unused.
+  AltarEffect altar{ AltarEffect::NONE };
+  //! @brief The kind of altar this reward is granted at (sacrifice_action only). std::nullopt means any altar.
+  std::optional<Altar::Kind> location;
+  //! @brief How long (seconds) a timed altar effect lasts, e.g. TOXIC_IMMUNITY (sacrifice_action only). Zero if unused.
   int tick{ 0 };
   //! @brief The loot sprite dropped (proximity_action only). Empty string if unused.
   Sys::SpriteKey loot;
@@ -218,13 +225,16 @@ struct ActionReward
   //! (proximity_action only).
   int max_instances{ 0 };
   //! @brief The number of reward fields that are set.
-  //! @return int Count of item, wealth, special and loot that are not their unused value.
+  //! @return int Count of item, wealth, altar and loot that are not their unused value.
   [[nodiscard]] int count() const
   {
-    return static_cast<int>( not item.empty() ) + static_cast<int>( wealth > 0 ) + static_cast<int>( special != Special::NONE ) +
+    return static_cast<int>( not item.empty() ) + static_cast<int>( wealth > 0 ) + static_cast<int>( altar != AltarEffect::NONE ) +
            static_cast<int>( not loot.empty() );
   }
 };
+
+//! @brief The rewards of an action. Only a sacrifice_action may have more than one, each for a different altar location.
+using ActionRewards = std::vector<ActionReward>;
 
 //! @brief Base class for a player-stat modifier applied when a particular kind of gameplay action
 //! occurs (e.g. burying, carrying, colliding with, consuming, destroying, or being hit by something).
@@ -255,9 +265,9 @@ public:
   //! @param toxidrome toxidrome affliction applied alongside the stat changes, if any. Each active
   //! toxidrome carries its own toxicity contribution (see Cmp::Toxicity::Toxidrome).
   //! @param side_effects Optional side effects (NPC spawn, lightning, movement), each with its own probability.
-  //! @param reward Optional reward granted when the action is applied (e.g. forage/chop/sacrifice output).
+  //! @param rewards Optional rewards granted when the action is applied (e.g. forage/chop/sacrifice output).
   BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Tick tick,
-              Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects = {}, std::optional<ActionReward> reward = {} );
+              Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects = {}, ActionRewards rewards = {} );
   //! @brief Destroy the Base Action object.
   ~BaseAction();
 
@@ -290,9 +300,16 @@ public:
   //! @brief Get the optional side effects of this action.
   //! @return const SideEffects& The NPC spawn/lightning/movement effects.
   [[nodiscard]] const SideEffects &side_effects() const { return m_side_effects; }
-  //! @brief Get the optional reward of this action.
-  //! @return const std::optional<ActionReward>& The reward, or std::nullopt if the action grants none.
-  [[nodiscard]] const std::optional<ActionReward> &reward() const { return m_reward; }
+  //! @brief Get the optional reward of this action, for actions that have at most one (i.e. not altar specific).
+  //! @return std::optional<ActionReward> The first reward, or std::nullopt if the action grants none.
+  [[nodiscard]] std::optional<ActionReward> reward() const;
+  //! @brief Get the reward of this action granted at the given altar kind.
+  //! @param location The kind of altar the action is applied at.
+  //! @return std::optional<ActionReward> The reward for that location, else the reward for any location, else std::nullopt.
+  [[nodiscard]] std::optional<ActionReward> reward( Altar::Kind location ) const;
+  //! @brief Get all rewards of this action.
+  //! @return const ActionRewards& The rewards, empty if the action grants none.
+  [[nodiscard]] const ActionRewards &rewards() const { return m_rewards; }
   //! @brief Whether this action has no effect, i.e. every stat delta is zero, it applies no toxidrome and has no side effects
   //! or reward.
   //! @return true if applying this action would change nothing.
@@ -330,8 +347,8 @@ private:
   std::unique_ptr<Cmp::Toxicity::Toxidrome> m_toxidrome;
   //! @brief Optional side effects (NPC spawn, lightning, movement).
   SideEffects m_side_effects;
-  //! @brief Optional reward granted when the action is applied.
-  std::optional<ActionReward> m_reward;
+  //! @brief Optional rewards granted when the action is applied.
+  ActionRewards m_rewards;
   //! @brief How often (seconds) the action re-applies, or 0 for a one-shot.
   float m_tick{ 0 };
 };

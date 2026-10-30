@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics/RectangleShape.hpp>
 
+#include <Components/Altar/Kind.hpp>
 #include <Components/Obstacle.hpp>
 
 namespace Game::Cmp::Altar
@@ -41,6 +42,13 @@ public:
   //! @return uint8_t The cryptkey drop threshold.
   [[nodiscard]] uint8_t get_cryptkey_drop_threshold() const { return m_cryptkey_drop_threshold; }
 
+  //! @brief Set which kind of altar this is. Defaults to Kind::GRAVEYARD.
+  //! @param kind The altar kind.
+  void set_kind( Kind kind ) { m_kind = kind; }
+  //! @brief Get which kind of altar this is, used to pick the item's sacrifice reward for this altar.
+  //! @return Kind The altar kind.
+  [[nodiscard]] Kind get_kind() const { return m_kind; }
+
   //! @brief Mark the exitkey as already dropped, preventing this altar from dropping it again.
   void set_exitkey_lockout() { m_exitkey_drop_lockout = true; }
   //! @brief Whether this altar's exitkey has already been dropped.
@@ -58,6 +66,9 @@ private:
   uint8_t m_exitkey_drop_threshold{ 0 };
   //! @brief The number of sacrifices required to drop an cryptkey (4 relics + 1 exitkey)
   uint8_t m_cryptkey_drop_threshold{ 0 };
+
+  //! @brief Which kind of altar this is.
+  Kind m_kind{ Kind::GRAVEYARD };
 
   //! @brief The number of sacrifices made at this altar so far.
   uint8_t m_sacrifice_count{ 0 };

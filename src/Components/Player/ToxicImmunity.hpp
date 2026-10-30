@@ -7,7 +7,7 @@ namespace Game::Cmp::Player
 {
 
 //! @brief  While present on the player entity, toxidromes can't increase (existing toxicity stays, cures still apply),
-//!         and the toxidrome UI meters are drawn "frozen". Added by a Cmp::ActionReward::Special::TOXIC_IMMUNITY
+//!         and the toxidrome UI meters are drawn "frozen". Added by a Cmp::ActionReward::AltarEffect::TOXIC_IMMUNITY
 //!         sacrifice (e.g. St John's Wort) and removed by PlayerSystem once m_timer reaches m_timeout.
 class ToxicImmunity : public TimedEffect
 {

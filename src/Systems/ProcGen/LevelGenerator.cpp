@@ -1,4 +1,5 @@
 #include <Components/Altar/MultiBlock.hpp>
+#include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/Altar/Segment.hpp>
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/BuildingSegment.hpp>
@@ -194,15 +195,23 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
   // clang-format off
   // Multiblock layer - only builds sprites from the tiled layer if they are explicitly included below
   using MultiblockFactoryFn = std::function<entt::entity( entt::registry &, sf::Vector2f, const Sprites::SpriteSheet & )>;
+  // an altar's kind is the scene it is built in, which decides the sacrifice rewards it grants (see "location" in items.json)
+  const auto add_altar = [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
+  {
+    const auto altar_entt = Factory::Multiblock::add_multiblock_with_segments<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first;
+    auto kind = Cmp::Altar::Kind::GRAVEYARD;
+    if ( Utils::is_current_scene( r, Cmp::SceneSettings::SceneId::CRYPT ) ) { kind = Cmp::Altar::Kind::CRYPT; }
+    else if ( Utils::is_current_scene( r, Cmp::SceneSettings::SceneId::SHOP ) ) { kind = Cmp::Altar::Kind::SHOP; }
+    r.patch<Cmp::Altar::MultiBlock>( altar_entt, [kind]( Cmp::Altar::MultiBlock &cmp ) { cmp.set_kind( kind ); } );
+    return altar_entt;
+  };
   const std::unordered_map<std::string, MultiblockFactoryFn> kMultiblockFactories{
       { "sprite.graveyard.healingspring", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
         { return Factory::Multiblock::add_multiblock_with_segments<Cmp::HealingSpringMultiBlock, Cmp::HealingSpringSegment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
-      { "sprite.graveyard.altar1.inactive", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
-        { return Factory::Multiblock::add_multiblock_with_segments<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
+      { "sprite.graveyard.altar1.inactive", add_altar },
       { "sprite.crypt.objective.closed",[this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
         { return Factory::Multiblock::add_multiblock_with_segments<Cmp::Crypt::ObjectiveMultiBlock, Cmp::Crypt::ObjectiveSegment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
-      { "sprite.crypt.altar.inactive", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
-        { return Factory::Multiblock::add_multiblock_with_segments<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
+      { "sprite.crypt.altar.inactive", add_altar },
       { "sprite.ruin.stairs.up", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
         { return Factory::Multiblock::add_multiblock_with_segments<Cmp::Ruin::StairsLowerMultiBlock, Cmp::Ruin::StairsSegment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
       { "sprite.ruin.stairs.down", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )

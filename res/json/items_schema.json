@@ -101,15 +101,16 @@
                 "allOf": [{ "$ref": "#/definitions/action_effect" }, { "$ref": "#/definitions/proximity_reward" }]
               },
               "sacrifice_action": {
-                "description": "Applied when the item is sacrificed at an altar. The item can only be sacrificed if this action has a reward, which must set exactly one of item, wealth or special.",
+                "description": "Applied when the item is sacrificed at an altar. The item can only be sacrificed if this action has a reward, which must set exactly one of item, wealth or altar. The reward may be an array of rewards, each for a different location; an item is refused at an altar with no reward for its location.",
                 "allOf": [
                   { "$ref": "#/definitions/action_effect" },
                   {
                     "properties": {
                       "reward": {
-                        "propertyNames": { "enum": ["item", "wealth", "special", "tick"] },
-                        "oneOf": [{ "required": ["item"] }, { "required": ["wealth"] }, { "required": ["special"] }],
-                        "dependencies": { "tick": ["special"] }
+                        "oneOf": [
+                          { "$ref": "#/definitions/sacrifice_reward_entry" },
+                          { "type": "array", "minItems": 2, "items": { "$ref": "#/definitions/sacrifice_reward_entry" } }
+                        ]
                       }
                     }
                   }
@@ -162,7 +163,12 @@
         "tick": {
           "type": "number"
         },
-        "reward": { "$ref": "#/definitions/reward" },
+        "reward": {
+          "oneOf": [
+            { "$ref": "#/definitions/reward" },
+            { "type": "array", "minItems": 2, "items": { "$ref": "#/definitions/reward" }, "description": "sacrifice_action only." }
+          ]
+        },
         "side_effects": {
           "type": "object",
           "description": "Optional side effects of the action, each rolled independently every time the action is applied.",
@@ -239,10 +245,15 @@
           "minimum": 1,
           "description": "The wealth gained (sacrifice_action only). Tools (axe, pickaxe, shovel) can only be sacrificed once spent."
         },
-        "special": {
+        "altar": {
           "type": "string",
-          "enum": ["altar", "banish", "crypt", "toxic_immunity"],
-          "description": "A special altar effect (sacrifice_action only). altar: light an altar candle (relics). banish: banish ghosts or gain an extra life at a crypt altar (witches jar). crypt: unlock the crypt key (exit key). toxic_immunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
+          "enum": ["None", "Candle", "Banish", "ExtraLife", "CryptKey", "ToxicImmunity"],
+          "description": "The altar effect (sacrifice_action only). Candle: light an altar candle (relics). Banish: banish all ghosts. ExtraLife: respawn when the player dies, at the crypt start (crypt altar) or back at the altar (graveyard altar). CryptKey: unlock the crypt key (exit key). ToxicImmunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
+        },
+        "location": {
+          "type": "string",
+          "enum": ["Graveyard", "Crypt", "Shop"],
+          "description": "The kind of altar this reward is granted at (sacrifice_action only): the graveyard relic altars, the crypt altar or the shop altar. Omit for any altar."
         },
         "loot": {
           "type": "string",
@@ -262,16 +273,23 @@
         "tick": {
           "type": "integer",
           "minimum": 0,
-          "description": "How long (seconds) a timed special lasts, e.g. toxic_immunity."
+          "description": "How long (seconds) a timed altar effect lasts, e.g. ToxicImmunity."
         }
       }
     },
+    "sacrifice_reward_entry": {
+      "allOf": [{ "$ref": "#/definitions/reward" }],
+      "propertyNames": { "enum": ["item", "wealth", "altar", "location", "tick"] },
+      "oneOf": [{ "required": ["item"] }, { "required": ["wealth"] }, { "required": ["altar"] }],
+      "dependencies": { "tick": ["altar"] }
+    },
     "item_only_reward": {
-      "properties": { "reward": { "required": ["item"], "maxProperties": 1 } }
+      "properties": { "reward": { "type": "object", "required": ["item"], "maxProperties": 1 } }
     },
     "proximity_reward": {
       "properties": {
         "reward": {
+          "type": "object",
           "oneOf": [{ "required": ["item"] }, { "required": ["loot"] }],
           "propertyNames": { "enum": ["item", "loot", "trigger_range", "max_instances"] }
         }

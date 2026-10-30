@@ -10,6 +10,7 @@
 #include <Components/Persistent/NpcWatchmanConeLength.hpp>
 #include <Components/Player/TorchRadius.hpp>
 #include <Components/Position.hpp>
+#include <Factory/AltarFactory.hpp>
 #include <Shaders/UniformBuilder.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
@@ -51,11 +52,14 @@ void NightStaticShader::update( entt::registry &reg, sf::Time dt )
   for ( auto [candle_entt, particle_cmp] : reg.view<Cmp::Particle::SpriteOwner>().each() )
   {
     auto ps_tag = particle_cmp.sprite->get_tag();
-    if ( not ps_tag.contains( "particle.flame" ) and not ps_tag.contains( "particle.active" ) ) continue;
+    // an altar activated by an extra life glows until the extra life is spent and its particles are destroyed
+    const bool is_extra_life = ps_tag == Factory::Altar::kExtraLifeParticleTag;
+    if ( not ps_tag.contains( "particle.flame" ) and not is_extra_life ) continue;
     if ( particle_cmp.sprite->get_view_type() != Cmp::Particle::ViewType::WORLD )
       continue; // skip UI-space particles (e.g. candle shown in inventory icon)
     torch_positions.push_back( particle_cmp.sprite->get_emitter_position() );
-    torch_colors.push_back( WARM_YELLOW );
+    // blue to match the altar's extra life particle effect
+    torch_colors.push_back( is_extra_life ? EERIE_BLUE : WARM_YELLOW );
   }
 
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg );

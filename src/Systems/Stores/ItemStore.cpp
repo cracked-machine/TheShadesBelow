@@ -12,8 +12,10 @@
 #include <Utils/JsonDeserializer.hpp>
 
 #include <algorithm>
+#include <iterator>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+#include <typeindex>
 
 namespace
 {
@@ -106,16 +108,35 @@ void ItemStore::init_store()
         }
       }
     }
-    // a sacrifice reward is exactly one of item, wealth or special; forage/chop rewards are an item only
-    if ( const auto reward = worlditem.get_sacrifice_reward(); reward and reward->count() != 1 )
+    // a sacrifice reward is exactly one of item, wealth or altar, and each altar location has at most one reward
+    const auto sacrifice_rewards = worlditem.get_rewards<Cmp::SacrificeAction>();
+    for ( auto it = sacrifice_rewards.begin(); it != sacrifice_rewards.end(); ++it )
     {
-      throw std::runtime_error( "Item '" + item_key + "' sacrifice_action.reward must set exactly one of item, wealth or special in " +
+      if ( it->count() != 1 )
+      {
+        throw std::runtime_error( "Item '" + item_key + "' sacrifice_action.reward must set exactly one of item, wealth or altar in " +
+                                  m_json_file_path.string() );
+      }
+      for ( auto other = std::next( it ); other != sacrifice_rewards.end(); ++other )
+      {
+        if ( it->location and other->location and it->location != other->location ) continue;
+        throw std::runtime_error( "Item '" + item_key + "' sacrifice_action.reward has more than one reward for the same location in " +
+                                  m_json_file_path.string() );
+      }
+    }
+    // only a sacrifice reward can be altar specific
+    for ( const auto &[action_type, action_pair] : worlditem )
+    {
+      if ( action_type == std::type_index( typeid( Cmp::SacrificeAction ) ) ) continue;
+      const auto &rewards = action_pair.action.rewards();
+      if ( rewards.size() <= 1 and std::ranges::none_of( rewards, []( const Cmp::ActionReward &r ) { return r.location.has_value(); } ) ) continue;
+      throw std::runtime_error( "Item '" + item_key + "' only sacrifice_action.reward may be an array or set a location in " +
                                 m_json_file_path.string() );
     }
     for ( const auto &[property, reward] : { std::pair{ "forage_action.reward", worlditem.get_reward<Cmp::ForageAction>() },
                                              std::pair{ "destroy_action.reward", worlditem.get_reward<Cmp::DestroyAction>() } } )
     {
-      if ( not reward or ( reward->wealth == 0 and reward->special == Cmp::ActionReward::Special::NONE and reward->loot.empty() ) ) continue;
+      if ( not reward or ( reward->wealth == 0 and reward->altar == Cmp::ActionReward::AltarEffect::NONE and reward->loot.empty() ) ) continue;
       throw std::runtime_error( "Item '" + item_key + "' " + property + " must only set item in " + m_json_file_path.string() );
     }
     // a proximity reward is dropped beside the item: exactly one of item or loot
@@ -131,9 +152,14 @@ void ItemStore::init_store()
   // output properties must reference items that exist, otherwise the forage/chop/sacrifice silently spawns nothing
   for ( const auto &[item_key, item] : m_store )
   {
+    for ( const auto &reward : item.get_rewards<Cmp::SacrificeAction>() )
+    {
+      if ( reward.item.empty() or m_store.contains( reward.item ) ) continue;
+      throw std::runtime_error( "Item '" + item_key.str() + "' has unknown sacrifice_action.reward.item '" + reward.item.str() + "' in " +
+                                m_json_file_path.string() );
+    }
     for ( const auto &[property, output] :
-          { std::pair{ "sacrifice_action.reward.item", item.get_sacrifice_reward().value_or( Cmp::ActionReward{} ).item },
-            std::pair{ "forage_action.reward.item", item.get_forage_output() }, std::pair{ "destroy_action.reward.item", item.get_axe_output() },
+          { std::pair{ "forage_action.reward.item", item.get_forage_output() }, std::pair{ "destroy_action.reward.item", item.get_axe_output() },
             std::pair{ "proximity_action.reward.item", item.get_reward<Cmp::ProximityAction>().value_or( Cmp::ActionReward{} ).item } } )
     {
       if ( output.empty() or m_store.contains( output ) ) continue;

@@ -47,8 +47,8 @@ Cmp::Position add_player_last_graveyard_pos( entt::registry &reg, const Cmp::Pos
 //! @param reg
 void remove_player_last_graveyard_pos( entt::registry &reg );
 
-//! @brief Consume the player's extra life: removes the ExtraLife component, its UI flash, and the crypt
-//! altar particle effect, and deactivates the crypt altar sprite.
+//! @brief Consume the player's extra life: removes the ExtraLife component and its UI flash from the player, and
+//! deactivates the scene's altars (see Factory::Altar::deactivate_altars()).
 //! @param reg
 void remove_player_extra_life( entt::registry &reg );
 

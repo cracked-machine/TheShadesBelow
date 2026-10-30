@@ -1,11 +1,14 @@
 #ifndef SRC_COMPONENTS_INVENTORY_FLASHUIEXTRALIFE_HPP__
 #define SRC_COMPONENTS_INVENTORY_FLASHUIEXTRALIFE_HPP__
 
+#include <SFML/System/Time.hpp>
+
 namespace Game::Cmp
 {
 
 //! @brief Signals to the Render system to flash the UI for player extra life
-//! @note This live indefinitely until it is destroyed by Factory::Player::remove_player_extra_life().
+//! @note Emplaced on the player entity so it transfers between scenes with Cmp::Player::ExtraLife. This lives
+//! indefinitely until it is removed by Factory::Player::remove_player_extra_life().
 class FlashUIExtraLife
 {
 public:
