@@ -4,10 +4,10 @@
 namespace Game::Cmp::Npc
 {
 
-//! @brief Marker component tagging an entity as the Spider NPC (a hostile NPC type).
+//! @brief Marker component tagging an entity as the Adder NPC (a hostile NPC type).
 struct Adder
 {
-  //! @brief Always true; presence of the component is what identifies the entity as a Spider.
+  //! @brief Always true; presence of the component is what identifies the entity as a Adder.
   bool adder{ true };
   sf::Time sfx_cooldown{ sf::Time::Zero };
 };

@@ -2,6 +2,7 @@
 #include <Components/Armable.hpp>
 #include <Components/Armed.hpp>
 #include <Components/DeathPosition.hpp>
+#include <Components/Greyscale.hpp>
 #include <Components/Direction.hpp>
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/Adder.hpp>
@@ -12,6 +13,7 @@
 #include <Components/Npc/Friendly.hpp>
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/LerpSpeed.hpp>
+#include <Components/Npc/Mimic.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/Priest.hpp>
 #include <Components/Npc/Shockwave.hpp>
@@ -129,7 +131,7 @@ entt::entity create_npc( entt::registry &reg, Cmp::Position pos_cmp, const Sys::
   });
   // clang-format on
 
-  SPDLOG_DEBUG( "Spawned NPC {} ({}) at position ({}, {})", static_cast<int>( new_pos_entity ), npc_type, pos_cmp.position.x, pos_cmp.position.y );
+  SPDLOG_INFO( "Spawned NPC {} ({}) at position ({}, {})", static_cast<int>( new_pos_entity ), npc_type, pos_cmp.position.x, pos_cmp.position.y );
 
   if ( npc_type == "npc.ghost" )
   {
@@ -190,18 +192,20 @@ entt::entity create_npc( entt::registry &reg, Cmp::Position pos_cmp, const Sys::
     reg.emplace_or_replace<Cmp::Npc::Drknox>( new_pos_entity );
     reg.emplace_or_replace<Cmp::Npc::Friendly>( new_pos_entity );
   }
+  else if ( npc_type == "npc.mimic" )
+  {
+    reg.emplace_or_replace<Cmp::Npc::Mimic>( new_pos_entity, Utils::Player::get_stats( reg ).luck() );
+    reg.emplace_or_replace<Cmp::Greyscale>( new_pos_entity );
+    reg.emplace_or_replace<Cmp::Npc::LerpSpeed>( new_pos_entity, npc_cmp.m_lerp_speed );
+    reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 0, 0 } );
+    reg.emplace_or_replace<Cmp::Npc::Friendly>( new_pos_entity );
+  }
   Utils::Player::apply_action_from_npc_store<Cmp::SpawnAction>( reg, npc_type );
   return new_pos_entity;
 }
 
-entt::entity destroy_npc( entt::registry &reg, entt::entity npc_entity )
+void destroy_npc( entt::registry &reg, entt::entity npc_entity )
 {
-
-  // check for position component
-  entt::entity loot_entity = entt::null;
-  auto *npc_pos_cmp = reg.try_get<Cmp::Position>( npc_entity );
-  if ( not npc_pos_cmp ) { SPDLOG_WARN( "Cannot process loot drop for NPC entity {} without a Position component", static_cast<int>( npc_entity ) ); }
-
   // apply destroy action effect to player
   auto *npc_cmp = reg.try_get<Cmp::Npc::NPC>( npc_entity );
   if ( npc_cmp )
@@ -210,16 +214,7 @@ entt::entity destroy_npc( entt::registry &reg, entt::entity npc_entity )
     if ( action_timer_pair.action.health() < 0 ) Utils::Player::get_mortality( reg ).last_damage_cause = Cmp::Player::Mortality::State::HAUNTED;
     Utils::Player::get_stats( reg ).apply( action_timer_pair.action );
   }
-
-  // kill npc once we are done
-  reg.remove<Cmp::Npc::NPC>( npc_entity );
-  reg.remove<Cmp::Npc::Footprint>( npc_entity );
-  reg.remove<Cmp::Position>( npc_entity );
-  reg.remove<Cmp::Direction>( npc_entity );
-  reg.remove<Cmp::AnimData>( npc_entity );
-  reg.remove<Cmp::ZOrderValue>( npc_entity );
-
-  return loot_entity;
+  reg.destroy( npc_entity );
 }
 
 void remove_npc_death_anim( entt::registry &registry, entt::entity entity )

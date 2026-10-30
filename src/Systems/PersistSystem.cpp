@@ -50,6 +50,7 @@
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
+#include <Components/Persistent/NpcMimicTint.hpp>
 #include <Components/Persistent/NpcPushBack.hpp>
 #include <Components/Persistent/NpcShockwaveFreq.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
@@ -182,6 +183,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::MinNumRuins>();
   add_component<Cmp::Persist::MusicVolume>();
   add_component<Cmp::Persist::NpcActivateScale>();
+  add_component<Cmp::Persist::NpcMimicTint>();
   add_component<Cmp::Persist::NpcPushBack>();
   add_component<Cmp::Persist::NpcShockwaveFreq>();
   add_component<Cmp::Persist::NpcShockwaveMaxRadius>();

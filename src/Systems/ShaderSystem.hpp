@@ -27,6 +27,7 @@ public:
   }
 
   //! @brief Calls IShaderSprite::update() function within all added ShaderSpriteBase<T>
+  //! Skipped while the player has a Cmp::Player::CameraHold, so the effects stay in step with the held camera.
   void update( sf::Time dt );
 
   //! @brief Find a ShaderSpriteOwner by tag and return a pointer to ShaderSpriteBase, or nullptr if not found

@@ -441,12 +441,12 @@
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 10, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "side_effects": { "spawn_npc": { "type": "npc.eldermother", "probability": 1.0, "max_instances": 1 } } }},
+                                "side_effects": { "spawn_npc": { "type": "npc.eldermother", "probability": "always", "max_instances": 1 } } }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "reward": { "item": "item.elderstick" },
-                                "side_effects": { "spawn_npc": { "type": "npc.eldermother", "probability": 0.5, "max_instances": 1 } } }},
+                                "side_effects": { "spawn_npc": { "type": "npc.eldermother", "probability": "player_luck", "max_instances": 1 } } }},
       { "forage_action":      { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "reward": { "item": "item.elderberries" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -510,12 +510,13 @@
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "consume_action":     { "health": 1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "halucinogen", "toxicity": 5 }, "tick": 0 }},
+      { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "halucinogen", "toxicity": 1 }, "tick": 1 }},
+      { "consume_action":     { "health": 5, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "halucinogen", "toxicity": 5 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
+                                "side_effects": { "spawn_npc": { "type": "npc.mimic", "max_instances": 1, "probability": "always" } } }}
     ]
   },
   "item.plant.hawthorn": {
@@ -525,14 +526,14 @@
     "damage_to_weapon": { "pickaxe": 0, "axe": 25, "shovel": 10, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "side_effects": { "lightning": { "probability": 1.0 } } }},
+                                "side_effects": { "lightning": { "probability": "always" } } }},
       { "carry_action":       { "health": -1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "reward": { "item": "item.hawthornstick" } }},
       { "forage_action":      { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "reward": { "item": "item.hawthornflower" },
-                                "side_effects": { "lightning": { "probability": 0.5 } } }},
+                                "side_effects": { "lightning": { "probability": "player_luck" } } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
@@ -748,7 +749,7 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 5,
                                 "reward": { "loot": "sprite.crypt.loot.gold", "trigger_range": 3, "max_instances": 3 },
-                                "side_effects": { "spawn_npc": { "type": "npc.adder", "probability": 1.0, "max_instances": 3, "trigger_range": 3 } } }},
+                                "side_effects": { "spawn_npc": { "type": "npc.adder", "probability": "always", "max_instances": 3, "trigger_range": 3 } } }},
 
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
@@ -832,7 +833,7 @@
       { "forage_action":      { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "reward": { "item": "item.stjohnswortflower" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "proximity_action":   { "health": 3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "proximity_action":   { "health": 3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "reward": { "special": "toxic_immunity", "tick": 180 } }}
     ]
@@ -846,7 +847,7 @@
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "side_effects": { "movement": { "probability": 1.0, "npc": { "type": "repel", "tick": 180 } } } }},
+                                "side_effects": { "movement": { "probability": "always", "npc": { "type": "repel", "tick": 180 } } } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},

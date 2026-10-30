@@ -14,6 +14,7 @@
 #include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
+#include <Utils/Player.hpp>
 #include <algorithm>
 #include <entt/entity/registry.hpp>
 #include <entt/entity/view.hpp>
@@ -321,13 +322,14 @@ bool GrimoireSystem::render_action_side_effects( TextColumn &draw_line, const Cm
 {
   // side effects, with their chance of firing
   const Cmp::SideEffects &effects = action.side_effects();
-  const auto draw_effect = [&]( std::string_view label, float probability )
-  { draw_line( std::format( "{}: {:.0f}%", label, probability * 100.f ), sf::Color::Black ); };
+  const int player_luck = Utils::Player::get_stats( reg() ).luck();
+  const auto draw_effect = [&]( std::string_view label, float chance )
+  { draw_line( std::format( "{}: {:.0f}%", label, chance * 100.f ), sf::Color::Black ); };
   if ( effects.spawn_npc )
   {
-    draw_effect( std::format( "summons {}", npc_display_name( effects.spawn_npc->npc_type ) ), effects.spawn_npc->probability );
+    draw_effect( std::format( "summons {}", npc_display_name( effects.spawn_npc->npc_type ) ), effects.spawn_npc->chance( player_luck ) );
   }
-  if ( effects.lightning ) { draw_effect( "lightning", effects.lightning->probability ); }
+  if ( effects.lightning ) { draw_effect( "lightning", effects.lightning->chance( player_luck ) ); }
   if ( effects.movement )
   {
     using PlayerType = Cmp::MovementEffect::Player::Type;
@@ -335,12 +337,12 @@ bool GrimoireSystem::render_action_side_effects( TextColumn &draw_line, const Cm
     if ( const auto &player = effects.movement->player )
     {
       const std::string_view type = player->type == PlayerType::SLOW ? "slow" : "drunk";
-      draw_effect( std::format( "player {} {}s", type, player->tick ), effects.movement->probability );
+      draw_effect( std::format( "player {} {}s", type, player->tick ), effects.movement->chance( player_luck ) );
     }
     if ( const auto &npc = effects.movement->npc )
     {
       const std::string_view type = npc->type == NpcType::SLOW ? "slow" : npc->type == NpcType::DRUNK ? "drunk" : "repel";
-      draw_effect( std::format( "npc {} {}s", type, npc->tick ), effects.movement->probability );
+      draw_effect( std::format( "npc {} {}s", type, npc->tick ), effects.movement->chance( player_luck ) );
     }
   }
   return not effects.empty();

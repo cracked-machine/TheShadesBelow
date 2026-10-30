@@ -48,6 +48,7 @@
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
+#include <Utils/Npc.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -101,49 +102,72 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_type == "" ) return;
   const auto &item = Sys::ItemStore::instance().get( inventory_type );
+  if ( not item.is_sacrificial() ) return;
 
-  auto is_tool = [&]()
+  auto is_carrying_tool = [&]()
   {
     return item.item_type.contains( "item.axe" ) or item.item_type.contains( "item.pickaxe" ) or item.item_type.contains( "item.shovel" ) or
            item.item_type.contains( "item.dowsingrod" );
   };
 
-  const auto reward = item.get_sacrifice_reward();
-  if ( not reward ) return;
+  // only spent tools can be sacrificed
+  if ( is_carrying_tool() and Utils::Player::get_inventory_wear_level( reg() ) > 0 ) { return; }
 
-  // only spent tools can be sacrificed - check before the tool is consumed
-  if ( is_tool() and Utils::Player::get_inventory_wear_level( reg() ) > 0 ) { return; }
+  // the altar refuses an offering whose NPC it has already summoned up to max_instances, otherwise the item is consumed for nothing
+  if ( const auto spawn_npc = item.get_sacrifice_npc_spawn_effect(); spawn_npc and spawn_npc->max_instances > 0 and
+                                                                     Utils::Npc::count_spawned_by( reg(), *altar_uuid_cmp ) >= spawn_npc->max_instances )
+  {
+    return;
+  }
 
+  // the altar may refuse the offering (e.g. a relic once the exitkey has dropped), so only consume the item once it has accepted
+  if ( not grant_sacrifice_reward( altar_entity, altar_cmp, *altar_uuid_cmp, item ) ) return;
+
+  SPDLOG_INFO( "Player made an offering: {}", item.item_type );
   const auto sacrifice_action = Utils::Player::apply_action_from_item_store<Cmp::SacrificeAction>( reg(), item.item_type );
-  trigger_side_effects( sacrifice_action, Utils::Player::get_position( reg() ) );
-  SPDLOG_INFO( "Player made an offering: {} -> {}", item.item_type, reward->item );
+  trigger_side_effects( sacrifice_action, Cmp::Position( altar_cmp.position, altar_cmp.size ), altar_entity );
   Factory::Player::destroy_inventory( reg(), item.item_type );
+}
+
+bool AltarSystem::grant_sacrifice_reward( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid,
+                                          const Cmp::WorldItem &item )
+{
+  const auto reward = item.get_sacrifice_reward();
+  if ( not reward )
+  {
+    play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
+    return true;
+  }
 
   // Each offering has exactly one reward (enforced by ItemStore), see "sacrifice_action.reward" in items.json
-  using RewardSpecial = Cmp::ActionReward::Special;
-  if ( not reward->item.empty() ) { sacrifice_for_item( altar_cmp, reward->item ); }
-  else if ( reward->wealth > 0 ) { sacrifice_for_wealth( altar_cmp, reward->wealth ); }
-  else
+  if ( not reward->item.empty() )
   {
-    switch ( reward->special )
-    {
-      case RewardSpecial::ALTAR:
-        sacrifice_relic( altar_entity, altar_cmp, *altar_uuid_cmp );
-        break;
-      case RewardSpecial::BANISH:
-        sacrifice_witches_jar( altar_entity, altar_cmp, *altar_uuid_cmp, item );
-        break;
-      case RewardSpecial::CRYPT:
-        sacrifice_exitkey( altar_entity, altar_cmp, *altar_uuid_cmp );
-        break;
-      case RewardSpecial::TOXIC_IMMUNITY:
-        sacrifice_for_toxic_immunity( altar_cmp, reward->tick );
-        break;
-      case RewardSpecial::NONE:
-        play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
-        break;
-    }
+    sacrifice_for_item( altar_cmp, reward->item );
+    return true;
   }
+  if ( reward->wealth > 0 )
+  {
+    sacrifice_for_wealth( altar_cmp, reward->wealth );
+    return true;
+  }
+
+  using RewardSpecial = Cmp::ActionReward::Special;
+  switch ( reward->special )
+  {
+    case RewardSpecial::ALTAR:
+      return sacrifice_relic( altar_entity, altar_cmp, altar_uuid );
+    case RewardSpecial::BANISH:
+      return sacrifice_witches_jar( altar_entity, altar_cmp, altar_uuid );
+    case RewardSpecial::CRYPT:
+      return sacrifice_exitkey( altar_entity, altar_cmp, altar_uuid );
+    case RewardSpecial::TOXIC_IMMUNITY:
+      sacrifice_for_toxic_immunity( altar_cmp, reward->tick );
+      return true;
+    case RewardSpecial::NONE:
+      play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
+      return true;
+  }
+  return false;
 }
 
 void AltarSystem::sacrifice_for_item( const Cmp::Altar::MultiBlock &altar_cmp, const Sys::ItemKey &reward_item )
@@ -170,15 +194,14 @@ void AltarSystem::sacrifice_for_toxic_immunity( const Cmp::Altar::MultiBlock &al
   Utils::Player::get_stats( reg() ).set_toxic_immune( true );
 }
 
-void AltarSystem::sacrifice_witches_jar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid,
-                                         const Cmp::WorldItem &item )
+bool AltarSystem::sacrifice_witches_jar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
 {
   auto *anim_cmp = reg().try_get<Cmp::AnimData>( altar_entity );
-  if ( not anim_cmp ) return;
+  if ( not anim_cmp ) return false;
 
   if ( anim_cmp->m_sprite_type == "sprite.crypt.altar.inactive" )
   {
-    if ( not Utils::Player::get_projected_position( reg() ).findIntersection( altar_cmp ) ) return;
+    if ( not Utils::Player::get_projected_position( reg() ).findIntersection( altar_cmp ) ) return false;
 
     // player gains extra life protection
     anim_cmp->m_sprite_type = "sprite.crypt.altar.active";
@@ -191,7 +214,6 @@ void AltarSystem::sacrifice_witches_jar( entt::entity altar_entity, const Cmp::A
   else if ( anim_cmp->m_sprite_type.contains( "sprite.graveyard.altar" ) )
   {
     // player kills all spawned ghosts in the game
-    SPDLOG_INFO( "Player made an offering: {}", item.item_type );
     play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp, npc_anim_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::AnimData>().each() )
     {
@@ -199,18 +221,19 @@ void AltarSystem::sacrifice_witches_jar( entt::entity altar_entity, const Cmp::A
       get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, Sys::SpriteKey( "sprite.death.anim.banish" ) ) );
     }
   }
-  else { return; }
+  else { return false; }
 
   m_sound_bank.get_effect( "witches_jar_sacrifice" ).play();
+  return true;
 }
 
-void AltarSystem::sacrifice_relic( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
+bool AltarSystem::sacrifice_relic( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
 {
   const uint8_t sacrifice_count = altar_cmp.get_sacrifice_count();
-  if ( sacrifice_count >= altar_cmp.get_exitkey_drop_threshold() ) return;
+  if ( sacrifice_count >= altar_cmp.get_exitkey_drop_threshold() ) return false;
 
   auto *anim_cmp = reg().try_get<Cmp::AnimData>( altar_entity );
-  if ( not anim_cmp ) return;
+  if ( not anim_cmp ) return false;
   // e.g. "sprite.graveyard.altar2.inactive" -> "sprite.graveyard.altar2.active"
   const Sys::SpriteKey inactive_sprite_type = anim_cmp->m_sprite_type;
   std::string active_sprite_str = inactive_sprite_type.str();
@@ -218,7 +241,7 @@ void AltarSystem::sacrifice_relic( entt::entity altar_entity, Cmp::Altar::MultiB
   if ( not active_sprite_str.ends_with( kInactiveSuffix ) )
   {
     SPDLOG_WARN( "Altar sprite {} is not an inactive sprite", active_sprite_str );
-    return;
+    return false;
   }
   active_sprite_str.replace( active_sprite_str.size() - kInactiveSuffix.size(), kInactiveSuffix.size(), ".active" );
   const Sys::SpriteKey active_sprite_type( active_sprite_str );
@@ -243,13 +266,14 @@ void AltarSystem::sacrifice_relic( entt::entity altar_entity, Cmp::Altar::MultiB
                                            { altar_cmp.position.x + 40.f, altar_cmp.position.y + 21.f }, 5000 );
     m_sound_bank.get_effect( "crypt_altar_activate" ).play();
   }
+  return true;
 }
 
-void AltarSystem::sacrifice_exitkey( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
+bool AltarSystem::sacrifice_exitkey( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
 {
   // all the relics must be sacrificed first
   const uint8_t sacrifice_count = altar_cmp.get_sacrifice_count();
-  if ( sacrifice_count < altar_cmp.get_exitkey_drop_threshold() or sacrifice_count >= altar_cmp.get_cryptkey_drop_threshold() ) return;
+  if ( sacrifice_count < altar_cmp.get_exitkey_drop_threshold() or sacrifice_count >= altar_cmp.get_cryptkey_drop_threshold() ) return false;
 
   reg().patch<Cmp::Altar::MultiBlock>( altar_entity, []( Cmp::Altar::MultiBlock &cmp ) { cmp.increment_sacrifice_count(); } );
 
@@ -270,6 +294,7 @@ void AltarSystem::sacrifice_exitkey( entt::entity altar_entity, Cmp::Altar::Mult
     altar_cmp.set_cryptkey_lockout();
     m_sound_bank.get_effect( "crypt_altar_activate" ).play();
   }
+  return true;
 }
 
 void AltarSystem::play_sacrifice_anim( const Cmp::Altar::MultiBlock &altar_cmp, SacrificeAnimType sacrifice_anim_type )

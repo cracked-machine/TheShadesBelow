@@ -83,6 +83,7 @@
 #include <Systems/Threats/LightningSystem.hpp>
 #include <Systems/Threats/WatchmanSystem.hpp>
 #include <Systems/Threats/WispSystem.hpp>
+#include <Systems/TeleportSystem.hpp>
 #include <Systems/Threats/WormholeSystem.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Optimizations.hpp>
@@ -295,7 +296,8 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::WispSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::WispSystem>().spawn_wisp() );
   PROFILED( m_sys.find<Sys::Store::Type::WatchmanSystem>().update( dt ) );
-  PROFILED( m_sys.find<Sys::Store::Type::WormholeSystem>().check_player_wormhole_collision( dt ) );
+  PROFILED( m_sys.find<Sys::Store::Type::WormholeSystem>().check_player_wormhole_collision() );
+  PROFILED( m_sys.find<Sys::Store::Type::TeleportSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::ActionSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::FootstepSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::DoglegSystem>().update( dt ) );

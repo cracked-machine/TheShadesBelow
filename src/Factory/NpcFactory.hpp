@@ -46,7 +46,7 @@ entt::entity create_npc( entt::registry &registry, Cmp::Position pos_cmp, const 
 //! @param registry
 //! @param npc_entity
 //! @return entt::null. Kept for symmetry with create_npc(); no loot entity is created here.
-entt::entity destroy_npc( entt::registry &registry, entt::entity npc_entity );
+void destroy_npc( entt::registry &registry, entt::entity npc_entity );
 
 //! @brief Remove the components of an NPC death animation (see NpcSystem), without destroying the entity.
 //! @param registry

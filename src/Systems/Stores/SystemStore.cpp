@@ -34,6 +34,7 @@
 #include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/SystemStore.hpp>
+#include <Systems/TeleportSystem.hpp>
 #include <Systems/Threats/BombSystem.hpp>
 #include <Systems/Threats/HazardFieldSystemImpl.hpp>
 #include <Systems/Threats/LightningSystem.hpp>
@@ -88,6 +89,7 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
   emplace<Type::ShockwaveSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::ShopSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );
   emplace<Type::SinkHoleHazardSystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::TeleportSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::TooltipSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::WatchmanSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::WispSystem>( m_initial_reg, window, sound_bank );

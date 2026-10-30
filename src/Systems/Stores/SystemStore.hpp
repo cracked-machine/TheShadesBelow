@@ -54,6 +54,7 @@ class SpriteStore;
 class ShaderSystem;
 class ShockwaveSystem;
 class ShopSystem;
+class TeleportSystem;
 class TooltipSystem;
 class WatchmanSystem;
 class WispSystem;
@@ -140,6 +141,8 @@ public:
     SinkHoleHazardSystem,
     //! @brief Key for WatchmanSystem.
     WatchmanSystem,
+    //! @brief Key for TeleportSystem.
+    TeleportSystem,
     //! @brief Key for TooltipSystem.
     TooltipSystem,
     //! @brief Key for WispSystem.
@@ -255,6 +258,7 @@ template<> struct Store::SystemTraits<Store::Type::ShockwaveSystem>        { usi
 template<> struct Store::SystemTraits<Store::Type::ShopSystem>             { using type = ShopSystem; };
 template<> struct Store::SystemTraits<Store::Type::SinkHoleHazardSystem>   { using type = SinkHoleHazardSystem; };
 template<> struct Store::SystemTraits<Store::Type::WatchmanSystem>         { using type = WatchmanSystem; };
+template<> struct Store::SystemTraits<Store::Type::TeleportSystem>         { using type = TeleportSystem; };
 template<> struct Store::SystemTraits<Store::Type::TooltipSystem>          { using type = TooltipSystem; };
 template<> struct Store::SystemTraits<Store::Type::WispSystem>             { using type = WispSystem; };
 template<> struct Store::SystemTraits<Store::Type::WormholeSystem>         { using type = WormholeSystem; };

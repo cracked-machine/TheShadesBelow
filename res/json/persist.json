@@ -416,6 +416,15 @@
     "detail": "NPC Activation Bounding Box Scale Factor",
     "format": "%.1f pixels"
     },
+  "NpcMimicTint": {
+    "type": "sf::Color",
+    "value" : {
+      "r": 124,
+      "g": 255,
+      "b": 124,
+      "a": 255
+    }
+    },
   "NpcPushBack": {
     "type": "float",
     "value": 16.0,

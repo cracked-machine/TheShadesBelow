@@ -70,6 +70,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/FootstepSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/PersistSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/PlayerSystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/TeleportSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Threats/BombSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Threats/NpcSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Threats/WatchmanSystem.cpp

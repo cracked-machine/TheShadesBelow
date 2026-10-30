@@ -8,12 +8,12 @@
 #include <Components/Grave/ExitSegment.hpp>
 #include <Components/Grave/Segment.hpp>
 #include <Components/Hazard/FieldCell.hpp>
-#include <Components/LerpPosition.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/Container.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Obstacle.hpp>
+#include <Components/PendingTeleport.hpp>
 #include <Components/Persistent/WormholeAbortThreshold.hpp>
 #include <Components/Persistent/WormholeSeed.hpp>
 #include <Components/Player/Character.hpp>
@@ -21,10 +21,10 @@
 #include <Components/RectBounds.hpp>
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
-#include <Components/Wormhole/Jump.hpp>
 #include <Components/Wormhole/MultiBlock.hpp>
 #include <Components/Wormhole/Singularity.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/TeleportEntityEvent.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
@@ -41,7 +41,9 @@
 #include <Utils/Utils.hpp>
 
 #include <SFML/System/Vector2.hpp>
+
 #include <algorithm>
+#include <vector>
 
 namespace Game::Sys
 {
@@ -52,7 +54,7 @@ WormholeSystem::WormholeSystem( entt::registry &reg, sf::RenderWindow &window, A
   SPDLOG_DEBUG( "WormholeSystem initialized" );
 }
 
-void WormholeSystem::check_player_wormhole_collision( sf::Time dt )
+void WormholeSystem::check_player_wormhole_collision()
 {
   auto wormhole_view = reg().view<Cmp::Wormhole::Singularity, Cmp::Position>();
   auto all_actors_view = reg().view<Cmp::Direction, Cmp::Position>();
@@ -60,18 +62,19 @@ void WormholeSystem::check_player_wormhole_collision( sf::Time dt )
   // a flying player over the singularity aborts the whole sequence before the point of no return
   if ( abort_jump_if_flying_over() ) return;
 
-  // First, check for any entities with Jump that are NOT colliding
-  auto jump_view = reg().view<Cmp::Wormhole::Jump>();
+  // First, check for any jump candidates that are NOT colliding. TeleportSystem ticks the PendingTeleport timers;
+  // candidates with an event are other (non-wormhole) teleports in flight, so leave them alone
+  auto jump_view = reg().view<Cmp::PendingTeleport>();
   for ( auto [entity, jump_cmp] : jump_view.each() )
   {
-    jump_cmp.jump_elapsed += dt;
+    if ( jump_cmp.event ) continue;
     bool still_colliding = false;
 
     auto *jump_pos_cmp = reg().try_get<Cmp::Position>( entity );
     if ( not jump_pos_cmp )
     {
-      SPDLOG_DEBUG( "Entity {} has Jump but NO Position component - removing jump", static_cast<uint32_t>( entity ) );
-      reg().remove<Cmp::Wormhole::Jump>( entity );
+      SPDLOG_DEBUG( "Entity {} has PendingTeleport but NO Position component - removing jump", static_cast<uint32_t>( entity ) );
+      reg().remove<Cmp::PendingTeleport>( entity );
       continue;
     }
 
@@ -85,10 +88,10 @@ void WormholeSystem::check_player_wormhole_collision( sf::Time dt )
       }
     }
 
-    if ( !still_colliding )
+    if ( not still_colliding )
     {
-      SPDLOG_WARN( "Entity {} has Jump but is NO LONGER colliding - removing jump component", static_cast<uint32_t>( entity ) );
-      reg().remove<Cmp::Wormhole::Jump>( entity );
+      SPDLOG_WARN( "Entity {} has PendingTeleport but is NO LONGER colliding - removing jump component", static_cast<uint32_t>( entity ) );
+      reg().remove<Cmp::PendingTeleport>( entity );
       m_sound_bank.get_effect( "wormhole_jump" ).stop();
     }
   }
@@ -106,11 +109,11 @@ void WormholeSystem::check_player_wormhole_collision( sf::Time dt )
       if ( !actor_pos_cmp.findIntersection( wh_hitbox_redux.getBounds() ) ) continue;
 
       // Check if jump component already exists
-      auto *wh_jump_cmp = reg().try_get<Cmp::Wormhole::Jump>( actor_entity );
-      if ( !wh_jump_cmp )
+      auto *wh_jump_cmp = reg().try_get<Cmp::PendingTeleport>( actor_entity );
+      if ( not wh_jump_cmp )
       {
         // First collision - create component
-        reg().emplace<Cmp::Wormhole::Jump>( actor_entity );
+        reg().emplace<Cmp::PendingTeleport>( actor_entity );
         SPDLOG_INFO( "Entity {} is jump candidate.", static_cast<uint32_t>( actor_entity ) );
         // restart the jump sfx for each actor processed so that it is heard by the last actor.
         // There is adequate lead time on the sfx (~2secs) to prevent restart stuttering.
@@ -119,22 +122,27 @@ void WormholeSystem::check_player_wormhole_collision( sf::Time dt )
     }
   }
 
-  // Count how many entitiesare ready to teleport
+  // Count how many wormhole jump candidates there are, and how many are ready to teleport
+  std::size_t jump_candidate_count = 0;
   std::size_t teleport_ready_count = 0;
   for ( auto [entity, jump_cmp] : jump_view.each() )
   {
+    if ( jump_cmp.event ) continue;
+    jump_candidate_count++;
     // Check if cooldown complete
-    float elapsed = jump_cmp.jump_elapsed.asSeconds();
-    float cooldown = jump_cmp.jump_cooldown.asSeconds();
-
-    if ( elapsed >= cooldown ) { teleport_ready_count++; }
+    if ( jump_cmp.elapsed >= jump_cmp.duration ) { teleport_ready_count++; }
   }
 
   // Commence teleportation if all entities are ready to jump
-  if ( teleport_ready_count == jump_view.size() && teleport_ready_count > 0 )
+  if ( teleport_ready_count == jump_candidate_count and teleport_ready_count > 0 )
   {
-    SPDLOG_INFO( "Teleportation commencing. Jump candidates: {}", jump_view.size() );
+    SPDLOG_INFO( "Teleportation commencing. Jump candidates: {}", jump_candidate_count );
+    std::vector<entt::entity> jump_list;
     for ( auto [entity, jump_cmp] : jump_view.each() )
+    {
+      if ( not jump_cmp.event ) jump_list.push_back( entity );
+    }
+    for ( auto entity : jump_list )
     {
 
       // Get random teleported position for this actor entity
@@ -152,18 +160,14 @@ void WormholeSystem::check_player_wormhole_collision( sf::Time dt )
       // clang-format on
       reg().emplace_or_replace<Cmp::ZOrderValue>( new_spawn_entity, new_spawn_pos_cmp.position.y - 256.f );
 
-      // update the teleported entity's components
+      // TeleportSystem keeps the navmeshes in sync with the move
       SPDLOG_DEBUG( "Entity {} - TELEPORTING NOW!", static_cast<uint32_t>( entity ) );
-      reg().remove<Cmp::LerpPosition>( entity );
-      reg().emplace_or_replace<Cmp::Position>( entity, new_spawn_pos_cmp.position, new_spawn_pos_cmp.size );
-      reg().remove<Cmp::Wormhole::Jump>( entity );
-
-      SPDLOG_INFO( "Entity {} - TELEPORT to ({}, {}) COMPLETE", static_cast<uint32_t>( entity ), new_spawn_pos_cmp.position.x,
-                   new_spawn_pos_cmp.position.y );
+      reg().remove<Cmp::PendingTeleport>( entity );
+      get_systems_event_queue().trigger( Events::TeleportEntityEvent( entity, new_spawn_pos_cmp.position ) );
     }
 
     // respawn the wormhole now all entities have teleported
-    SPDLOG_INFO( "Teleportation complete. Jump candidates: {}", jump_view.size() );
+    SPDLOG_INFO( "Teleportation complete. Jump candidates: {}", jump_list.size() );
     despawn_wormhole();
     spawn_wormhole( WormholeSystem::SpawnPhase::Respawn );
   }
@@ -172,16 +176,18 @@ void WormholeSystem::check_player_wormhole_collision( sf::Time dt )
 sf::Time WormholeSystem::jump_sequence_elapsed( entt::registry &reg )
 {
   sf::Time elapsed = sf::Time::Zero;
-  for ( auto [entity, jump_cmp] : reg.view<Cmp::Wormhole::Jump>().each() )
+  for ( auto [entity, jump_cmp] : reg.view<Cmp::PendingTeleport>().each() )
   {
-    elapsed = std::max( elapsed, jump_cmp.jump_elapsed );
+    if ( jump_cmp.event ) continue;
+    elapsed = std::max( elapsed, jump_cmp.elapsed );
   }
   return elapsed;
 }
 
 bool WormholeSystem::is_player_committed_to_jump( entt::registry &reg )
 {
-  if ( not reg.all_of<Cmp::Wormhole::Jump>( Utils::Player::get_entity( reg ) ) ) return false;
+  const auto *player_jump_cmp = reg.try_get<Cmp::PendingTeleport>( Utils::Player::get_entity( reg ) );
+  if ( not player_jump_cmp or player_jump_cmp->event ) return false;
   const float threshold = Sys::PersistSystem::get<Cmp::Persist::WormholeAbortThreshold>( reg ).get_value();
   return jump_sequence_elapsed( reg ).asSeconds() >= threshold;
 }
@@ -202,10 +208,15 @@ bool WormholeSystem::abort_jump_if_flying_over()
   const float threshold = Sys::PersistSystem::get<Cmp::Persist::WormholeAbortThreshold>( reg() ).get_value();
   if ( jump_sequence_elapsed( reg() ).asSeconds() >= threshold ) return false;
 
-  if ( reg().view<Cmp::Wormhole::Jump>().size() > 0 )
+  std::vector<entt::entity> abort_list;
+  for ( auto [entity, jump_cmp] : reg().view<Cmp::PendingTeleport>().each() )
+  {
+    if ( not jump_cmp.event ) abort_list.push_back( entity );
+  }
+  if ( not abort_list.empty() )
   {
     SPDLOG_INFO( "Flying player aborted the wormhole jump sequence" );
-    reg().clear<Cmp::Wormhole::Jump>();
+    reg().remove<Cmp::PendingTeleport>( abort_list.begin(), abort_list.end() );
     m_sound_bank.get_effect( "wormhole_jump" ).stop();
   }
   return true;

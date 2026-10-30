@@ -209,6 +209,15 @@ protected:
     throw std::runtime_error( "Unknown player movement type: '" + type + "'" );
   }
 
+  //! @brief Convert the "side_effects.*.probability" string of a JSON action entry.
+  //! @throws std::runtime_error on an unknown value.
+  static Cmp::Probability make_probability( const std::string &probability )
+  {
+    if ( probability == "always" ) return Cmp::Probability::ALWAYS;
+    if ( probability == "player_luck" ) return Cmp::Probability::PLAYER_LUCK;
+    throw std::runtime_error( "Unknown side effect probability: '" + probability + "'" );
+  }
+
   //! @brief Convert the "side_effects.movement.npc.type" string of a JSON action entry.
   //! @throws std::runtime_error on an unknown value.
   static Cmp::MovementEffect::Npc::Type make_npc_movement_type( const std::string &type )
@@ -241,7 +250,7 @@ protected:
   }
 
   //! @brief Build the optional side effects of a JSON action entry from its optional "side_effects" object.
-  //! @throws std::runtime_error if an effect's probability is outside [0, 1].
+  //! @throws std::runtime_error if an effect's probability is not a known value.
   static Cmp::SideEffects make_side_effects( const nlohmann::json &j )
   {
     using Game::Utils::JsonDeserializer;
@@ -249,12 +258,7 @@ protected:
     if ( not j.contains( "side_effects" ) ) return effects;
     const auto &fx = j.at( "side_effects" );
 
-    const auto get_probability = []( const nlohmann::json &effect )
-    {
-      const float probability = JsonDeserializer::get_float( effect, "probability" );
-      if ( probability < 0.f or probability > 1.f ) throw std::runtime_error( "effect probability must be in range [0, 1]" );
-      return probability;
-    };
+    const auto get_probability = []( const nlohmann::json &effect ) { return make_probability( JsonDeserializer::get_string( effect, "probability" ) ); };
     if ( fx.contains( "spawn_npc" ) )
     {
       const auto &spawn_npc = fx.at( "spawn_npc" );

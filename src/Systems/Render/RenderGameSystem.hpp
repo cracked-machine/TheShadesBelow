@@ -10,11 +10,14 @@
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
 
+#include <SFML/Graphics/Shader.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <entt/core/type_traits.hpp>
 #include <entt/entity/fwd.hpp>
+
+#include <optional>
 
 // clang-format off
 namespace Game::Sprites
@@ -81,6 +84,10 @@ private:
   //! (wear level, armed indicator)
   void draw_animated_sprite( entt::entity entity );
 
+  //! @brief Lazily load res/shaders/Greyscale.frag (Cmp::Greyscale sprites) on first use.
+  //! @return true if the shader is usable, false if sprites should be drawn in colour instead
+  bool load_greyscale_shader();
+
   //! @brief Draws a shader sprite. Post-process shaders composite everything drawn before them in the queue;
   //! sprite-layer shaders composite a layer of just the player, NPC and world item sprites.
   void draw_shader_sprite( Cmp::Shader::SpriteOwner &shader_owner );
@@ -142,6 +149,11 @@ private:
   //! @brief Copy of the window contents taken when the z-order loop reaches a post-process shader, which is then
   //! drawn into that shader's render texture. Reused across passes and frames.
   sf::Texture m_frame_capture;
+
+  //! @brief Desaturating shader for Cmp::Greyscale sprites, see load_greyscale_shader()
+  sf::Shader m_greyscale_shader;
+  //! @brief Result of the lazy greyscale shader load; unset until first use
+  std::optional<bool> m_greyscale_shader_ok;
 };
 
 } // namespace Game::Sys

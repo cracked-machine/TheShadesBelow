@@ -176,9 +176,11 @@ protected:
   //! @param origin
   //! @param angle
   //! @param tint rgb multiplied with the texture (white = no tint)
+  //! @param shader optional shader to draw the sprite with (nullptr = fixed pipeline)
   void safe_render_sprite_to_target( sf::RenderTarget &target, const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos,
                                      std::size_t sprite_index = 0, sf::Vector2f scale = { 1.f, 1.f }, uint8_t alpha = 255,
-                                     sf::Vector2f origin = { 0.f, 0.f }, sf::Angle angle = sf::degrees( 0.f ), sf::Color tint = sf::Color::White );
+                                     sf::Vector2f origin = { 0.f, 0.f }, sf::Angle angle = sf::degrees( 0.f ), sf::Color tint = sf::Color::White,
+                                     const sf::Shader *shader = nullptr );
 
   //! @brief Draw a solid colored square to the given target in place of a missing sprite.
   //! @param target
@@ -207,9 +209,10 @@ protected:
   //! @param origin
   //! @param angle
   //! @param tint rgb multiplied with the texture (white = no tint)
+  //! @param shader optional shader to draw the sprite with (nullptr = fixed pipeline)
   void safe_render_sprite_world( const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos, std::size_t sprite_index = 0,
                                  sf::Vector2f scale = { 1.f, 1.f }, uint8_t alpha = 255, sf::Vector2f origin = { 0.f, 0.f },
-                                 sf::Angle angle = sf::degrees( 0.f ), sf::Color tint = sf::Color::White );
+                                 sf::Angle angle = sf::degrees( 0.f ), sf::Color tint = sf::Color::White, const sf::Shader *shader = nullptr );
 
   //! @brief Draw a solid colored square in world view coordinates in place of a missing sprite.
   //! @param pos_cmp

@@ -4,9 +4,11 @@
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/LerpSpeed.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Npc/SpawnedBy.hpp>
 #include <Components/Npc/Spider.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Position.hpp>
+#include <Components/UUID.hpp>
 #include <PathFinding/AStar.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/Render/RenderSystem.hpp>
@@ -54,6 +56,16 @@ entt::entity get_world_pos_entt( entt::registry &reg, entt::entity npc_entt )
     if ( npc_pos->findIntersection( world_pos_cmp ) ) return world_entt;
   }
   return entt::null;
+}
+
+int count_spawned_by( entt::registry &reg, const Cmp::UUID &source_uuid )
+{
+  int instances = 0;
+  for ( auto [npc_entt, npc_cmp, spawned_by_cmp] : reg.view<Cmp::Npc::NPC, Cmp::Npc::SpawnedBy>().each() )
+  {
+    if ( spawned_by_cmp.m_source == source_uuid ) ++instances;
+  }
+  return instances;
 }
 
 Sys::SpriteKey get_sprite_type( entt::registry &reg, entt::entity npc_entt, std::source_location loc )

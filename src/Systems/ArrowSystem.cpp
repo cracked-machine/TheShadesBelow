@@ -171,8 +171,8 @@ void ArrowSystem::check_npc_arrow_collision()
       if ( not reg().any_of<Cmp::Weapons::Projectiles::InFlight>( arrow_entt ) ) continue;
       if ( reg().any_of<Cmp::Npc::Ghost, Cmp::Npc::Wisp>( npc_entt ) ) continue;
       if ( not npc_pos_cmp.findIntersection( arrow_pos_cmp ) ) continue;
-      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt ) );
       cached_npc_pos_cmp = npc_pos_cmp;
+      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt ) );
     }
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::Container, Cmp::Position>().each() )
     {

@@ -68,32 +68,50 @@ struct Tick
 
 } // namespace Stats
 
+//! @brief How likely a side effect is to fire each time its action is applied.
+enum class Probability {
+  //! @brief Always fires.
+  ALWAYS,
+  //! @brief Rolled against the player's luck: high luck makes good effects likelier and bad effects rarer.
+  PLAYER_LUCK
+};
+
 //! @brief Optional side effect of an action: spawn an NPC at the action's source position.
 struct SpawnNpcEffect
 {
   //! @brief The NPC to spawn, see res/json/npc.json.
   std::string npc_type;
-  //! @brief Chance [0, 1] that the effect fires each time the action is applied.
-  float probability{ 0.f };
+  //! @brief How likely the effect is to fire each time the action is applied.
+  Probability probability{ Probability::ALWAYS };
   //! @brief Max live NPCs spawned by each world item instance, across all of its actions. 0 = unlimited.
   int max_instances{ 0 };
   //! @brief Distance in blocks from the item that the player must be within before the NPC spawn is triggered.
   int trigger_range{ 1 };
   //! @brief Distance from the item to spawned NPC.
   int spawn_radius{ 1 };
+  //! @brief This effect's chance of firing at the given player luck.
+  //! @param player_luck Player's luck stat, range [0, 100].
+  //! @return Chance in [0, 1].
+  [[nodiscard]] float chance( int player_luck ) const;
   //! @brief Roll this effect's probability.
+  //! @param player_luck Player's luck stat, range [0, 100].
   //! @return true if the effect should fire.
-  [[nodiscard]] bool roll() const;
+  [[nodiscard]] bool roll( int player_luck ) const;
 };
 
 //! @brief Optional side effect of an action: a lightning strike (on a working lightning rod in view, else the player).
 struct LightningEffect
 {
-  //! @brief Chance [0, 1] that the effect fires each time the action is applied.
-  float probability{ 0.f };
+  //! @brief How likely the effect is to fire each time the action is applied.
+  Probability probability{ Probability::ALWAYS };
+  //! @brief This effect's chance of firing at the given player luck.
+  //! @param player_luck Player's luck stat, range [0, 100].
+  //! @return Chance in [0, 1].
+  [[nodiscard]] float chance( int player_luck ) const;
   //! @brief Roll this effect's probability.
+  //! @param player_luck Player's luck stat, range [0, 100].
   //! @return true if the effect should fire.
-  [[nodiscard]] bool roll() const;
+  [[nodiscard]] bool roll( int player_luck ) const;
 };
 
 //! @brief Optional side effect of an action affecting player movement and/or NPC pathfinding.
@@ -137,11 +155,16 @@ struct MovementEffect
   std::optional<Player> player;
   //! @brief Effect on NPC pathfinding, if any.
   std::optional<Npc> npc;
-  //! @brief Chance [0, 1] that the effect fires each time the action is applied.
-  float probability{ 0.f };
+  //! @brief How likely the effect is to fire each time the action is applied.
+  Probability probability{ Probability::ALWAYS };
+  //! @brief This effect's chance of firing at the given player luck.
+  //! @param player_luck Player's luck stat, range [0, 100].
+  //! @return Chance in [0, 1].
+  [[nodiscard]] float chance( int player_luck ) const;
   //! @brief Roll this effect's probability.
+  //! @param player_luck Player's luck stat, range [0, 100].
   //! @return true if the effect should fire.
-  [[nodiscard]] bool roll() const;
+  [[nodiscard]] bool roll( int player_luck ) const;
 };
 
 //! @brief The optional side effects of an action, each rolled independently. See the "side_effects" object in

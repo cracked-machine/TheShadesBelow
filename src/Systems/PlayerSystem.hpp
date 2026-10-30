@@ -167,8 +167,6 @@ private:
   //! @param dt
   void check_player_can_pull( sf::Time dt );
 
-  //! @brief Fade the player alpha if they intiiated wormhole jump.
-  void fade_player_on_wormhole_jump();
 
   //! @brief Blink the player if damage cooldown was activated.
   void blink_player();

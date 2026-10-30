@@ -39,13 +39,14 @@ public:
     m_reserved_sm = reserved_sm;
   }
 
-  //! @brief Track actors colliding with the wormhole via Cmp::Wormhole::Jump, drop the component if
-  //! an actor stops colliding before its jump cooldown completes, and once every jump candidate's
-  //! cooldown has elapsed, teleport them all to new random locations and respawn the wormhole.
-  //! @param dt Frame delta, accumulated into each Cmp::Wormhole::Jump
-  void check_player_wormhole_collision( sf::Time dt );
+  //! @brief Track actors colliding with the wormhole via Cmp::PendingTeleport, drop the component if
+  //! an actor stops colliding before its countdown completes, and once every jump candidate's
+  //! countdown has elapsed, teleport them all to new random locations and respawn the wormhole.
+  //! @note TeleportSystem ticks the countdowns and fades the candidates out. A Cmp::PendingTeleport holding an
+  //! event belongs to another (delayed) teleport and is ignored here.
+  void check_player_wormhole_collision();
 
-  //! @brief Time since the current jump sequence started (the oldest Cmp::Wormhole::Jump timer), zero if none.
+  //! @brief Time since the current jump sequence started (the oldest wormhole Cmp::PendingTeleport timer), zero if none.
   //! @param reg
   //! @return sf::Time
   static sf::Time jump_sequence_elapsed( entt::registry &reg );

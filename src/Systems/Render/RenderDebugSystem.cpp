@@ -32,6 +32,7 @@
 #include <Components/Npc/Footprint.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Npc/SpawnedBy.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Illuminated.hpp>
@@ -315,7 +316,7 @@ void RenderDebugSystem::render_ui_npc_list()
       draw_line( " " + std::to_string( entt::to_integral( npc_entity ) ) +
                  ": [" + std::to_string( static_cast<int>( npc_pos_cmp.position.x ) ) +
                  "," + std::to_string( static_cast<int>( npc_pos_cmp.position.y ) ) + "] - " +
-                 npc_anim_cmp.m_sprite_type.str());
+                 npc_cmp.npc_type.str());
       // clang-format on
     }
   }
@@ -386,6 +387,7 @@ void RenderDebugSystem::render_ui_entity_inspect()
       if ( reg().all_of<Cmp::HealingSpringEntrance>( entity ) ) draw_line( " HealingSpringEntrance", sf::Color::Cyan );
       if ( reg().all_of<Cmp::WorldItem>( entity ) ) draw_line( " WorldItem", sf::Color::Green );
       if ( reg().all_of<Cmp::Player::Illuminated>( entity ) ) draw_line( " Illuminated", sf::Color::Yellow );
+      if ( auto *cmp = reg().try_get<Cmp::Npc::SpawnedBy>( entity ) ) draw_line( " SpawnedBy: " + cmp->m_source.str(), sf::Color::White );
 
       if ( auto *cmp = reg().try_get<Cmp::UUID>( entity ) ) draw_line( " " + cmp->str(), sf::Color::White );
 

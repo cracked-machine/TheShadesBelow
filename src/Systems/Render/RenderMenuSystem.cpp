@@ -50,6 +50,7 @@
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
+#include <Components/Persistent/NpcMimicTint.hpp>
 #include <Components/Persistent/NpcPushBack.hpp>
 #include <Components/Persistent/NpcShockwaveFreq.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
@@ -340,6 +341,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     }
 
     Sys::PersistSystem::get<Cmp::Persist::NpcActivateScale>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::NpcMimicTint>( reg() ).render_widget();
 
     // Audio
     ImGui::SeparatorText( "Audio" );

@@ -1,5 +1,7 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Altar/Segment.hpp>
+#include <Components/AbsoluteAlpha.hpp>
+#include <Components/AbsoluteTint.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Crypt/BuildingSegment.hpp>
 #include <Components/Crypt/ObjectiveSegment.hpp>
@@ -17,6 +19,7 @@
 #include <Components/Npc/Friendly.hpp>
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/LerpSpeed.hpp>
+#include <Components/Npc/Mimic.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/Priest.hpp>
@@ -34,8 +37,10 @@
 #include <Components/Particle/EmberParticleSprite.hpp>
 #include <Components/Particle/LavaFireballParticleSprite.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
+#include <Components/PendingTeleport.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
+#include <Components/Persistent/NpcMimicTint.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
 #include <Components/Player/Character.hpp>
@@ -52,11 +57,11 @@
 #include <Components/Stats/CollisionAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
-#include <Components/Wormhole/Jump.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
+#include <Events/TeleportEntityEvent.hpp>
 #include <Events/UpdateNpcPositionEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/NpcFactory.hpp>
@@ -100,14 +105,10 @@ NpcSystem::NpcSystem( entt::registry &reg, sf::RenderWindow &window, Audio::Soun
 
 void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
 {
+  SPDLOG_INFO( "Creating NPC {}, max {}", event.m_npc_type.str(), event.m_max_instances );
   if ( event.m_max_instances > 0 and not event.m_source_uuid.empty() )
   {
-    int instances = 0;
-    for ( auto [npc_entt, npc_cmp, spawned_by_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Npc::SpawnedBy>().each() )
-    {
-      if ( spawned_by_cmp.m_source == event.m_source_uuid ) ++instances;
-    }
-    if ( instances >= event.m_max_instances ) return;
+    if ( Utils::Npc::count_spawned_by( reg(), event.m_source_uuid ) >= event.m_max_instances ) return;
   }
 
   Cmp::Position spawn_pos = event.m_position;
@@ -126,7 +127,11 @@ void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
   if ( npc_entt == entt::null ) return;
   // insert now rather than on its first move, so spawn searches see it straight away
   if ( auto navmesh = navmesh_for( npc_entt ) ) { navmesh->insert( npc_entt, reg().get<Cmp::Position>( npc_entt ) ); }
-  if ( not event.m_source_uuid.empty() ) { reg().emplace_or_replace<Cmp::Npc::SpawnedBy>( npc_entt, event.m_source_uuid ); }
+  if ( not event.m_source_uuid.empty() )
+  {
+    SPDLOG_INFO( "Created SpawnedBy cmp: {}", event.m_source_uuid.str() );
+    reg().emplace_or_replace<Cmp::Npc::SpawnedBy>( npc_entt, event.m_source_uuid );
+  }
   if ( event.m_on_created ) { event.m_on_created( npc_entt ); }
 }
 
@@ -186,22 +191,15 @@ void NpcSystem::on_destroy_npc_event( const Events::DestroyNpcEvent &event )
   if ( auto *lerp_pos_cmp = reg().try_get<Cmp::LerpPosition>( npc_entity ) )
   {
     if ( lerp_pos_cmp->m_lerp_factor > 0.0f ) { bucket_position.position = lerp_pos_cmp->m_start; }
-    reg().remove<Cmp::LerpPosition>( npc_entity );
   }
 
-  // navmesh_for reads the NPC's type marker, so this has to happen before the markers are removed below
+  // navmesh_for reads the NPC's type marker, so this has to happen before the entity is destroyed below
   if ( auto navmesh = navmesh_for( npc_entity ) ) { navmesh->remove( npc_entity, bucket_position ); }
 
   // the animation plays where the NPC is seen to be, which is its mid-step position rather than its bucket
   if ( event.m_death_anim ) { create_death_anim( *pos_cmp, *event.m_death_anim ); }
 
   Factory::Npc::destroy_npc( reg(), npc_entity );
-
-  // the entity outlives its NPC, so strip everything else that would have it mistaken for a live one
-  reg().remove<Cmp::Npc::LerpSpeed, Cmp::Npc::Friendly, Cmp::Npc::ShockwaveTimer, Cmp::Npc::WatchmanSearchlight, Cmp::Npc::SpawnedBy>( npc_entity );
-  reg()
-      .remove<Cmp::Npc::Drknox, Cmp::Npc::ElderMother, Cmp::Npc::Ghost, Cmp::Npc::Priest, Cmp::Npc::ShadowHand, Cmp::Npc::Skeleton, Cmp::Npc::Spider,
-              Cmp::Npc::Watchman, Cmp::Npc::Wisp, Cmp::Npc::Witch>( npc_entity );
 }
 
 entt::entity NpcSystem::create_death_anim( const Cmp::Position &npc_pos_cmp, const Sys::SpriteKey &death_anim )
@@ -261,6 +259,37 @@ void NpcSystem::update( sf::Time dt )
     check_once_collision();
     check_timed_collision( dt );
     check_burning_particle_collision();
+  }
+
+  // kill any expired mimics
+  std::vector<entt::entity> kill_list;
+  for ( auto [npc_entt, npc_cmp, npc_mimic_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Npc::Mimic>().each() )
+  {
+    npc_mimic_cmp.timer += dt;
+    if ( npc_mimic_cmp.timer >= npc_mimic_cmp.timeout ) kill_list.push_back( npc_entt );
+    reg().emplace_or_replace<Cmp::AbsoluteTint>( npc_entt, Sys::PersistSystem::get<Cmp::Persist::NpcMimicTint>( reg() ) );
+
+    // flash as a despawn warning. TeleportSystem owns alpha while a teleport is pending - don't clobber its fade
+    if ( reg().all_of<Cmp::PendingTeleport>( npc_entt ) ) continue;
+    const bool is_flashing = npc_mimic_cmp.timeout - npc_mimic_cmp.timer <= npc_mimic_cmp.flash_duration;
+    const bool flash_visible = ( npc_mimic_cmp.timer.asMilliseconds() / 100 ) % 2 == 0;
+    reg().emplace_or_replace<Cmp::AbsoluteAlpha>( npc_entt, ( not is_flashing or flash_visible ) ? 255 : 0 );
+  }
+  for ( auto &mimic_npc_entt : kill_list )
+  {
+    // snapped so the player isn't teleported onto the mimic's mid-step position
+    const sf::Vector2f mimic_pos = Utils::snap_to_grid( reg().get<Cmp::Position>( mimic_npc_entt ).position );
+    const auto &mimic_cmp = reg().get<Cmp::Npc::Mimic>( mimic_npc_entt );
+    const sf::Time teleport_delay = mimic_cmp.teleport_delay;
+    on_destroy_npc_event( Events::DestroyNpcEvent( mimic_npc_entt ) );
+
+    // the mimic has led the NPCs to its position, so being teleported there is a trap that luck [0,100] avoids
+    const float teleport_chance = 1.f - ( static_cast<float>( Utils::Player::get_stats( reg() ).luck() ) / 100.f );
+    if ( Cmp::RandomFloat( 0.f, 1.f ).gen() < teleport_chance )
+    {
+      get_systems_event_queue().trigger( Events::TeleportEntityEvent( Utils::Player::get_entity( reg() ), mimic_pos,
+                                                                      Sys::SpriteKey( "sprite.death.anim.banish" ), std::nullopt, teleport_delay ) );
+    }
   }
 }
 
@@ -349,6 +378,13 @@ void NpcSystem::update_animation()
       if ( npc_dir_cmp.x > 0 ) { anim_cmp.m_sprite_type = "sprite.wisp.east"; }
       else if ( npc_dir_cmp.x < 0 ) { anim_cmp.m_sprite_type = "sprite.wisp.west"; }
     }
+    else if ( anim_cmp.m_sprite_type.contains( "sprite.player.walk" ) )
+    {
+      if ( npc_dir_cmp.x > 0 ) { anim_cmp.m_sprite_type = "sprite.player.walk.east"; }
+      else if ( npc_dir_cmp.x < 0 ) { anim_cmp.m_sprite_type = "sprite.player.walk.west"; }
+      else if ( npc_dir_cmp.y < 0 ) { anim_cmp.m_sprite_type = "sprite.player.walk.north"; }
+      else if ( npc_dir_cmp.y > 0 ) { anim_cmp.m_sprite_type = "sprite.player.walk.south"; }
+    }
     else if ( anim_cmp.m_sprite_type.contains( "sprite.eldermother" ) )
     {
       if ( npc_dir_cmp.x > 0 ) { anim_cmp.m_flip_x = false; }
@@ -425,6 +461,13 @@ void NpcSystem::update_pathfinding( sf::Time dt )
     const Cmp::Position player_pos = Utils::Player::get_position( reg() );
     const bool player_is_illuminated = Utils::Player::is_illuminated( reg() );
     const bool repel = reg().all_of<Cmp::Player::RepelNpc>( Utils::Player::get_entity( reg() ) );
+    // a mimic diverts all NPC pathfinding away from the player and onto itself
+    std::optional<Cmp::Position> mimic_pos;
+    for ( auto [mimic_entt, mimic_cmp, mimic_pos_cmp] : reg().view<Cmp::Npc::Mimic, Cmp::Position>().each() )
+    {
+      mimic_pos = mimic_pos_cmp;
+      break;
+    }
     const sf::FloatRect view_bounds = Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() );
     const auto lights = Utils::Collision::collect_light_sources( reg() );
     for ( auto [npc_entt, npc_cmp] : reg().view<Cmp::Npc::NPC>().each() )
@@ -440,12 +483,13 @@ void NpcSystem::update_pathfinding( sf::Time dt )
         continue;
       }
 
-      // Adders lie in wait, only striking out at a player that strays within range
+      // Adders lie in wait, only striking out at whatever they would chase (the mimic, else the player) once it strays within range
       if ( reg().all_of<Cmp::Npc::Adder>( npc_entt ) )
       {
         static constexpr float kAdderPathfindRange = Constants::kGridSizePxF.x * 3.0f;
+        const Cmp::Position &adder_target = ( mimic_pos and not repel ) ? *mimic_pos : player_pos;
         const auto &npc_pos_cmp = reg().get<Cmp::Position>( npc_entt );
-        if ( Utils::Maths::getChebyshevDistance( npc_pos_cmp.position, player_pos.position ) > kAdderPathfindRange )
+        if ( Utils::Maths::getChebyshevDistance( npc_pos_cmp.position, adder_target.position ) > kAdderPathfindRange )
         {
           reg().emplace_or_replace<Cmp::Direction>( npc_entt, Cmp::Direction( { 0.0f, 0.0f } ) );
           continue;
@@ -454,12 +498,28 @@ void NpcSystem::update_pathfinding( sf::Time dt )
 
       auto navmesh = navmesh_for( npc_entt );
       if ( not navmesh ) continue;
+
+      // the mimic flees out of view, drawing the NPCs that chase it away from the player.
+      // Lights are ignored: they only hold back threats, and the mimic may spawn inside the player's candle light.
+      if ( reg().all_of<Cmp::Npc::Mimic>( npc_entt ) )
+      {
+        const auto &npc_pos_cmp = reg().get<Cmp::Position>( npc_entt );
+        auto result = Utils::Npc::pathfind_toward( reg(), *navmesh, repel_target( player_pos, npc_pos_cmp, view_bounds ), npc_entt, false, false,
+                                                   false, nullptr, true );
+        if ( result == Utils::Npc::PathfindResult::NoPath )
+        {
+          reg().emplace_or_replace<Cmp::Direction>( npc_entt, Cmp::Direction( { 0.0f, 0.0f } ) );
+        }
+        continue;
+      }
+
       if ( repel )
       {
         // the flee target is not lit by the player's light
         const auto &npc_pos_cmp = reg().get<Cmp::Position>( npc_entt );
         update_pathfinding_for( *navmesh, repel_target( player_pos, npc_pos_cmp, view_bounds ), npc_entt, false, lights );
       }
+      else if ( mimic_pos ) { update_pathfinding_for( *navmesh, *mimic_pos, npc_entt, false, lights ); }
       else { update_pathfinding_for( *navmesh, player_pos, npc_entt, player_is_illuminated, lights ); }
     }
 
@@ -536,8 +596,8 @@ void NpcSystem::update_movement_for( PathFinding::SpatialHashGrid &navmesh, entt
   if ( not pos_cmp or not lerp_pos_cmp ) return;
   if ( lerp_pos_cmp->m_lerp_factor == 0.0f )
   {
-    // Allow NPCs to escape wormholes if they're mid-lerp.
-    if ( reg().try_get<Cmp::Wormhole::Jump>( npc_entity ) ) return;
+    // Allow NPCs to escape wormholes if they're mid-lerp, otherwise hold them still while a teleport is pending.
+    if ( reg().all_of<Cmp::PendingTeleport>( npc_entity ) ) return;
 
     lerp_pos_cmp->m_start = pos_cmp->position;
   }

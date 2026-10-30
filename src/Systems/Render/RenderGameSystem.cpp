@@ -17,6 +17,7 @@
 #include <Components/Exit.hpp>
 #include <Components/FractalCurve.hpp>
 #include <Components/Grave/ExitMultiBlock.hpp>
+#include <Components/Greyscale.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
@@ -36,6 +37,7 @@
 #include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
+#include <Components/Player/CameraHold.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Curse.hpp>
 #include <Components/Player/Flying.hpp>
@@ -78,6 +80,7 @@
 #include <Utils/Profiling.hpp>
 #include <Utils/Utils.hpp>
 
+#include <filesystem>
 #include <memory>
 #include <optional>
 #include <tracy/Tracy.hpp>
@@ -163,10 +166,17 @@ void RenderGameSystem::update_camera( sf::Time dt )
   auto target_pos = Utils::Player::get_position( reg() );
 
   // Initialize camera position on first frame to avoid lerping from origin
-  if ( !m_camera_initialized )
+  if ( not m_camera_initialized )
   {
     m_camera_position = target_pos.position;
     m_camera_initialized = true;
+  }
+
+  // hold the view in place, e.g. while a teleport's departure animation plays
+  if ( not reg().view<Cmp::Player::CameraHold>().empty() )
+  {
+    s_world_view.setCenter( m_camera_position + ( target_pos.size / 2.f ) );
+    return;
   }
 
   // Smooth lerp toward target position
@@ -189,6 +199,30 @@ void RenderGameSystem::update_camera( sf::Time dt )
   s_world_view.setCenter( view_center );
 }
 
+bool RenderGameSystem::load_greyscale_shader()
+{
+  if ( m_greyscale_shader_ok ) return *m_greyscale_shader_ok;
+
+  constexpr const char *kVertPath = "res/shaders/Generic.vert";
+  constexpr const char *kFragPath = "res/shaders/Greyscale.frag";
+  m_greyscale_shader_ok = false;
+  if ( not sf::Shader::isAvailable() ) { SPDLOG_WARN( "Shaders unavailable, greyscale sprites are drawn in colour" ); }
+  else if ( not std::filesystem::exists( kVertPath ) or not std::filesystem::exists( kFragPath ) )
+  {
+    SPDLOG_WARN( "Missing {} or {}, greyscale sprites are drawn in colour", kVertPath, kFragPath );
+  }
+  else if ( not m_greyscale_shader.loadFromFile( kVertPath, kFragPath ) )
+  {
+    SPDLOG_WARN( "Failed to load {}, greyscale sprites are drawn in colour", kFragPath );
+  }
+  else
+  {
+    m_greyscale_shader.setUniform( "texture", sf::Shader::CurrentTexture );
+    m_greyscale_shader_ok = true;
+  }
+  return *m_greyscale_shader_ok;
+}
+
 void RenderGameSystem::draw_animated_sprite( entt::entity entity )
 {
   const auto &[pos_cmp, anim_cmp] = reg().get<Cmp::Position, Cmp::AnimData>( entity );
@@ -203,6 +237,7 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
   const sf::Vector2f origin = offset_cmp ? offset_cmp->getOffset() : sf::Vector2f{ 0.f, 0.f };
   const sf::Angle angle = sf::degrees( rotation_cmp ? rotation_cmp->getAngle() : 0.f );
   const sf::Color tint = tint_cmp ? tint_cmp->getTint() : sf::Color::White;
+  const sf::Shader *shader = ( reg().all_of<Cmp::Greyscale>( entity ) and load_greyscale_shader() ) ? &m_greyscale_shader : nullptr;
   sf::FloatRect render_rect = pos_cmp;
   if ( render_offset_cmp ) render_rect.position += render_offset_cmp->getOffset();
 
@@ -224,7 +259,7 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
   }
 
   safe_render_sprite_world( anim_cmp.m_sprite_type, render_rect, anim_cmp.getFrameIndexOffset() + anim_cmp.m_current_frame, scale, alpha, origin,
-                            angle, tint );
+                            angle, tint, shader );
 
   // per-entity decorations drawn on top of the sprite
   if ( const auto *wear_cmp = reg().try_get<Cmp::Inventory::WearLevel>( entity ) ) render_wear_level( wear_cmp->m_level, pos_cmp );

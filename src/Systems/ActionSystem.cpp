@@ -582,10 +582,9 @@ void ActionSystem::check_player_axe_npc_kill()
       Factory::Particle::add_skelebones_ps( reg(), "graveyard.skele.particle.bones", 50, 2.f, 50.f, 14.f, skelebones_particle_uuid,
                                             npc_pos_cmp.getCenter(), npc_pos_cmp.position.y );
 
+      SPDLOG_DEBUG( "Killed NPC at position ({}, {})!", npc_pos_cmp.position.x, npc_pos_cmp.position.y );
       // now destroy the NPC
       get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entity ) );
-
-      SPDLOG_DEBUG( "Dug through obstacle at position ({}, {})!", npc_pos_cmp.position.x, npc_pos_cmp.position.y );
     }
   }
 }

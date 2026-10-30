@@ -11,7 +11,7 @@
 namespace Game::Events
 {
 
-//! @brief Kill an NPC, optionally playing a death animation where it stood.
+//! @brief Kill an NPC, optionally playing a death animation where it stood. This removes the entity!
 //! @note Consumed by NpcSystem, which removes the NPC from its navmesh and strips its movement and type
 //! components. Trigger this instead of calling Factory::Npc::destroy_npc directly: a direct call leaves a
 //! stale navmesh entry behind, along with the NPC's Cmp::LerpPosition and type marker components.

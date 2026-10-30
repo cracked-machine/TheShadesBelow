@@ -168,9 +168,9 @@
       }
     },
     "probability": {
-      "type": "number",
-      "minimum": 0,
-      "maximum": 1
+      "type": "string",
+      "enum": ["always", "player_luck"],
+      "description": "always: fires every time. player_luck: rolled against player luck; luck makes good effects likelier and bad effects (spawn_npc, lightning, player movement) rarer."
     }
   }
 }

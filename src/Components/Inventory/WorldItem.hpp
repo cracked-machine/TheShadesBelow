@@ -121,6 +121,15 @@ public:
     return at<ActionT>().action.reward();
   }
 
+  //! @brief Get the spawn npc effect of the action keyed by ActionT.
+  //! @return The npc spawn effect object, or std::nullopt if the item has no such action or the action has no npc spawn effect.
+  template <typename ActionT>
+  [[nodiscard]] std::optional<SpawnNpcEffect> get_spawn_npc_effect() const
+  {
+    if ( not has_action<ActionT>() ) return std::nullopt;
+    return at<ActionT>().action.side_effects().spawn_npc;
+  }
+
   //! @brief Add an action keyed by its concrete type. Must be a template: taking BaseAction by value would slice
   //! the argument and key every action under typeid(BaseAction).
   template <typename ActionT>
@@ -152,8 +161,12 @@ public:
   //! @return The reward, or std::nullopt if the item can't be sacrificed.
   std::optional<ActionReward> get_sacrifice_reward() const { return get_reward<SacrificeAction>(); }
 
-  //! @brief Whether this item can be sacrificed at the altar, i.e. its sacrifice_action has a reward.
-  bool is_sacrificial() const { return get_sacrifice_reward().has_value(); }
+  //! @brief The npc spawn effect for sacrificing this item at the altar ("side_effects.spawn_npc" in items.json).
+  //! @return The reward, or std::nullopt if the item can't be sacrificed.
+  std::optional<SpawnNpcEffect> get_sacrifice_npc_spawn_effect() const { return get_spawn_npc_effect<SacrificeAction>(); }
+
+  //! @brief Whether this item can be sacrificed at the altar, i.e. its sacrifice_action has a reward or npc spawn effect.
+  bool is_sacrificial() const { return get_sacrifice_reward().has_value() or get_sacrifice_npc_spawn_effect().has_value(); }
 
   //! @brief The item gained when this plant is foraged (empty hand or gloves), see "forage_action.reward.item" in
   //! items.json. Empty string is a no op.

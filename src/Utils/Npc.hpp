@@ -8,6 +8,7 @@
 namespace Game::Cmp
 {
 class Position;
+struct UUID;
 }
 
 namespace Game::PathFinding
@@ -35,6 +36,12 @@ entt::entity get_world_pos_entt( entt::registry &reg, Cmp::Position npc_pos );
 //! @param npc_entt The NPC entity whose Cmp::Position is used for the intersection test.
 //! @return entt::entity The matching world entity, or entt::null if `npc_entt` has no Cmp::Position or none intersects.
 entt::entity get_world_pos_entt( entt::registry &reg, entt::entity npc_entt );
+
+//! @brief Count the live NPCs spawned by a world item (see Cmp::Npc::SpawnedBy and Cmp::SpawnNpcEffect::max_instances).
+//! @param reg reference to the entt registry
+//! @param source_uuid The Cmp::UUID of the spawning world item.
+//! @return int The number of NPCs whose Cmp::Npc::SpawnedBy matches `source_uuid`.
+int count_spawned_by( entt::registry &reg, const Cmp::UUID &source_uuid );
 
 //! @brief Get an NPC's sprite meta type from its Cmp::AnimData component.
 //! @param reg reference to the entt registry

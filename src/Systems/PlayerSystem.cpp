@@ -35,6 +35,7 @@
 #include <Components/Particle/NoteParticleSprite.hpp>
 #include <Components/Particle/SpriteBase.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
+#include <Components/PendingTeleport.hpp>
 #include <Components/Persistent/BradycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/DespairHealthDmgPerSec.hpp>
 #include <Components/Persistent/EmberDamage.hpp>
@@ -94,7 +95,6 @@
 #include <Components/Toxicity/Vertigo.hpp>
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
-#include <Components/Wormhole/Jump.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/CreateLootEvent.hpp>
@@ -192,7 +192,6 @@ void PlayerSystem::update( sf::Time dt )
     if ( not player_cmp.damage_cooldown_paused ) { player_cmp.m_damage_cooldown_timer += dt; }
   }
 
-  fade_player_on_wormhole_jump();
   blink_player();
 
   // resting render offset, refreshed every frame so tuning applies immediately in every scene.
@@ -1153,27 +1152,13 @@ void PlayerSystem::update_note_particles()
   }
 }
 
-void PlayerSystem::fade_player_on_wormhole_jump()
-{
-  auto player_entt = Utils::Player::get_entity( reg() );
-  auto *wormhole_jump = reg().try_get<Cmp::Wormhole::Jump>( player_entt );
-  if ( wormhole_jump )
-  {
-    // Calculate fade based on elapsed time vs total cooldown
-    float elapsed = wormhole_jump->jump_elapsed.asSeconds();
-    float cooldown = wormhole_jump->jump_cooldown.asSeconds();
-    float progress = std::min( elapsed / cooldown, 1.0f ); // 0.0 to 1.0
-    Utils::Player::get_alpha( reg() ).setAlpha( static_cast<uint8_t>( 255 * ( 1.0f - progress ) ) );
-  }
-}
-
 void PlayerSystem::blink_player()
 {
   // damage cooldown blink effect
   for ( auto [player_entt, player_cmp] : reg().view<Cmp::Player::Character>().each() )
   {
-    // fade_player_on_wormhole_jump() owns alpha while a jump is pending - don't clobber its fade
-    if ( reg().all_of<Cmp::Wormhole::Jump>( player_entt ) ) continue;
+    // TeleportSystem owns alpha while a teleport is pending - don't clobber its fade
+    if ( reg().all_of<Cmp::PendingTeleport>( player_entt ) ) continue;
 
     bool is_in_damage_cooldown = player_cmp.m_damage_cooldown_timer < player_cmp.damage_cooldown_timeout();
     bool blink_visible = ( player_cmp.m_damage_cooldown_timer.asMilliseconds() / 100 ) % 2 == 0;

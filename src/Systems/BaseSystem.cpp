@@ -28,7 +28,12 @@ BaseSystem::BaseSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
 void BaseSystem::trigger_side_effects( const Cmp::BaseAction &action, const Cmp::Position &pos_cmp, entt::entity source_entt )
 {
   const auto &effects = action.side_effects();
-  if ( effects.spawn_npc and effects.spawn_npc->roll() )
+  const int player_luck = Utils::Player::get_stats( reg() ).luck();
+  if ( effects.spawn_npc and not effects.spawn_npc->roll( player_luck ) )
+  {
+    SPDLOG_WARN( "Spawn roll failed for {} (chance {}).", effects.spawn_npc->npc_type, effects.spawn_npc->chance( player_luck ) );
+  }
+  else if ( effects.spawn_npc )
   {
     Cmp::UUID source_uuid;
     if ( reg().valid( source_entt ) )
@@ -40,9 +45,9 @@ void BaseSystem::trigger_side_effects( const Cmp::BaseAction &action, const Cmp:
                                                                source_uuid, {}, /*spawn_nearby=*/true ) );
   }
   // a null target lets LightningSystem pick a working lightning rod in view, otherwise the player
-  if ( effects.lightning and effects.lightning->roll() ) { get_systems_event_queue().trigger( Events::LightningEvent{} ); }
+  if ( effects.lightning and effects.lightning->roll( player_luck ) ) { get_systems_event_queue().trigger( Events::LightningEvent{} ); }
   // only npc repel is implemented so far; drinking again while repelled restarts the timer
-  if ( effects.movement and effects.movement->roll() )
+  if ( effects.movement and effects.movement->roll( player_luck ) )
   {
     const auto &npc_effect = effects.movement->npc;
     if ( npc_effect and npc_effect->type == Cmp::MovementEffect::Npc::Type::REPEL )

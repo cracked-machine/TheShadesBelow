@@ -1,3 +1,4 @@
+#include <Components/Player/CameraHold.hpp>
 #include <Shaders/IShaderSprite.hpp>
 #include <Systems/ShaderSystem.hpp>
 
@@ -24,6 +25,9 @@ std::vector<entt::entity> ShaderSystem::add_to_registry( Cmp::Shader::SpriteOwne
 
 void ShaderSystem::update( sf::Time dt )
 {
+  // freeze the effects along with the camera, otherwise the player-tracking shaders jump ahead of the view
+  if ( not reg().view<Cmp::Player::CameraHold>().empty() ) return;
+
   for ( auto [entt, owner] : reg().view<Cmp::Shader::SpriteOwner>().each() )
   {
     owner.sprite->update( reg(), dt );

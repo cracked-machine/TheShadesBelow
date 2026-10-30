@@ -6,9 +6,25 @@
 namespace Game::Cmp
 {
 
-bool SpawnNpcEffect::roll() const { return Cmp::RandomFloat( 0.f, 1.f ).gen() < probability; }
-bool LightningEffect::roll() const { return Cmp::RandomFloat( 0.f, 1.f ).gen() < probability; }
-bool MovementEffect::roll() const { return Cmp::RandomFloat( 0.f, 1.f ).gen() < probability; }
+namespace
+{
+//! @brief Chance [0, 1] of an effect firing: luck raises the odds of good effects and lowers the odds of bad ones.
+float luck_chance( Probability probability, int player_luck, bool good_for_player )
+{
+  if ( probability == Probability::ALWAYS ) return 1.f;
+  const float luck = static_cast<float>( player_luck ) / 100.f;
+  return good_for_player ? luck : 1.f - luck;
+}
+} // namespace
+
+float SpawnNpcEffect::chance( int player_luck ) const { return luck_chance( probability, player_luck, /*good_for_player=*/false ); }
+float LightningEffect::chance( int player_luck ) const { return luck_chance( probability, player_luck, /*good_for_player=*/false ); }
+// npc-only effects (slow/drunk/repel) help the player; anything touching the player's own movement hinders them
+float MovementEffect::chance( int player_luck ) const { return luck_chance( probability, player_luck, /*good_for_player=*/not player ); }
+
+bool SpawnNpcEffect::roll( int player_luck ) const { return Cmp::RandomFloat( 0.f, 1.f ).gen() < chance( player_luck ); }
+bool LightningEffect::roll( int player_luck ) const { return Cmp::RandomFloat( 0.f, 1.f ).gen() < chance( player_luck ); }
+bool MovementEffect::roll( int player_luck ) const { return Cmp::RandomFloat( 0.f, 1.f ).gen() < chance( player_luck ); }
 
 BaseAction::BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Tick tick )
     : BaseAction( health, fear, despair, infamy, luck, tick, Cmp::Toxicity::Toxidrome{} )

@@ -1888,7 +1888,7 @@
                 {
                  "height":0,
                  "id":276,
-                 "name":"item.plant.stjohnswort",
+                 "name":"item.plant.foxglove",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -1927,14 +1927,14 @@
                 {
                  "height":0,
                  "id":280,
-                 "name":"item.plant.henbane",
+                 "name":"item.plant.hawthorn",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":720,
+                 "x":704,
                  "y":784
                 }, 
                 {

@@ -15,7 +15,6 @@
 #include <SFML/System/Vector2.hpp>
 
 #include <memory>
-#include <vector>
 
 // clang-format off
 namespace Game::PathFinding { enum class QueryCompass; }
