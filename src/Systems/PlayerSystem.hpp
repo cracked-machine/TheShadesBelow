@@ -89,6 +89,16 @@ private:
   //! @param dt
   void apply_timed_action_side_effects( sf::Time dt );
 
+  //! @brief Advance the Cmp::Player::RepelNpc timer, removing the component once it expires, and stain the player
+  //!        red (Cmp::AbsoluteTint) while it is active.
+  //! @param dt
+  void update_repel_npc( sf::Time dt );
+
+  //! @brief Advance the Cmp::Player::ToxicImmunity timer, removing the component once it expires, and keep
+  //!        Cmp::PlayerStats::is_toxic_immune() in sync with it.
+  //! @param dt
+  void update_toxic_immunity( sf::Time dt );
+
   //! @brief Update the player hearbeat based on their tachycardia/bradycardia toxicity.
   //! @param dt
   void update_heartbeat( sf::Time dt );

@@ -3,6 +3,7 @@
 #include <Components/AbsoluteOffset.hpp>
 #include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AbsoluteRotation.hpp>
+#include <Components/AbsoluteTint.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Armed.hpp>
@@ -195,11 +196,13 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
   const auto *alpha_cmp = reg().try_get<Cmp::AbsoluteAlpha>( entity );
   const auto *offset_cmp = reg().try_get<Cmp::AbsoluteOffset>( entity );
   const auto *rotation_cmp = reg().try_get<Cmp::AbsoluteRotation>( entity );
+  const auto *tint_cmp = reg().try_get<Cmp::AbsoluteTint>( entity );
   const auto *render_offset_cmp = reg().try_get<Cmp::AbsoluteRenderOffset>( entity );
 
   const uint8_t alpha = alpha_cmp ? alpha_cmp->getAlpha() : 255;
   const sf::Vector2f origin = offset_cmp ? offset_cmp->getOffset() : sf::Vector2f{ 0.f, 0.f };
   const sf::Angle angle = sf::degrees( rotation_cmp ? rotation_cmp->getAngle() : 0.f );
+  const sf::Color tint = tint_cmp ? tint_cmp->getTint() : sf::Color::White;
   sf::FloatRect render_rect = pos_cmp;
   if ( render_offset_cmp ) render_rect.position += render_offset_cmp->getOffset();
 
@@ -221,7 +224,7 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
   }
 
   safe_render_sprite_world( anim_cmp.m_sprite_type, render_rect, anim_cmp.getFrameIndexOffset() + anim_cmp.m_current_frame, scale, alpha, origin,
-                            angle );
+                            angle, tint );
 
   // per-entity decorations drawn on top of the sprite
   if ( const auto *wear_cmp = reg().try_get<Cmp::Inventory::WearLevel>( entity ) ) render_wear_level( wear_cmp->m_level, pos_cmp );

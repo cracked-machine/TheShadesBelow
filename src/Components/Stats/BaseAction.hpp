@@ -96,12 +96,47 @@ struct LightningEffect
   [[nodiscard]] bool roll() const;
 };
 
-//! @brief Optional side effect of an action affecting player movement/NPC pathfinding.
-//! @note Placeholder: parsed and shown in the grimoire, but not yet executed.
+//! @brief Optional side effect of an action affecting player movement and/or NPC pathfinding.
 struct MovementEffect
 {
-  //! @brief Free-form effect type, e.g. "slow".
-  std::string type;
+  //! @brief Effect on the player's movement.
+  struct Player
+  {
+    //! @brief The kind of player movement effect.
+    enum class Type {
+      //! @brief Slow the player down.
+      SLOW,
+      //! @brief Make the player's movement erratic.
+      DRUNK
+    };
+    //! @brief The kind of player movement effect.
+    Type type{ Type::SLOW };
+    //! @brief How long (seconds) the effect lasts.
+    int tick{ 0 };
+  };
+
+  //! @brief Effect on NPC pathfinding.
+  struct Npc
+  {
+    //! @brief The kind of NPC pathfinding effect.
+    enum class Type {
+      //! @brief Slow NPCs down.
+      SLOW,
+      //! @brief Make NPC pathfinding erratic.
+      DRUNK,
+      //! @brief NPCs flee from the player instead of chasing them.
+      REPEL
+    };
+    //! @brief The kind of NPC pathfinding effect.
+    Type type{ Type::SLOW };
+    //! @brief How long (seconds) the effect lasts.
+    int tick{ 0 };
+  };
+
+  //! @brief Effect on the player's movement, if any.
+  std::optional<Player> player;
+  //! @brief Effect on NPC pathfinding, if any.
+  std::optional<Npc> npc;
   //! @brief Chance [0, 1] that the effect fires each time the action is applied.
   float probability{ 0.f };
   //! @brief Roll this effect's probability.
@@ -139,7 +174,9 @@ struct ActionReward
     //! @brief Banish ghosts, or gain an extra life at a crypt altar (witches jar).
     BANISH,
     //! @brief Unlock the crypt key (exit key).
-    CRYPT
+    CRYPT,
+    //! @brief Temporary immunity to toxidrome increases (St John's Wort).
+    TOXIC_IMMUNITY
   };
 
   //! @brief The item gained. Empty string if unused.
@@ -148,6 +185,8 @@ struct ActionReward
   int wealth{ 0 };
   //! @brief The special altar effect. NONE if unused.
   Special special{ Special::NONE };
+  //! @brief How long (seconds) a timed special lasts, e.g. TOXIC_IMMUNITY (sacrifice_action only). Zero if unused.
+  int tick{ 0 };
   //! @brief The loot sprite dropped (proximity_action only). Empty string if unused.
   Sys::SpriteKey loot;
   //! @brief Distance in blocks from the source that the player must be within before the reward drops (proximity_action only).

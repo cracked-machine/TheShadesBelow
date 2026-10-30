@@ -183,6 +183,8 @@ std::string GrimoireSystem::reward_display_name( const Cmp::ActionReward &reward
       return "banishes ghosts";
     case Cmp::ActionReward::Special::CRYPT:
       return "unlocks crypt";
+    case Cmp::ActionReward::Special::TOXIC_IMMUNITY:
+      return std::format( "toxic immunity {}s", reward.tick );
     case Cmp::ActionReward::Special::NONE:
       break;
   }
@@ -326,7 +328,21 @@ bool GrimoireSystem::render_action_side_effects( TextColumn &draw_line, const Cm
     draw_effect( std::format( "summons {}", npc_display_name( effects.spawn_npc->npc_type ) ), effects.spawn_npc->probability );
   }
   if ( effects.lightning ) { draw_effect( "lightning", effects.lightning->probability ); }
-  if ( effects.movement ) { draw_effect( effects.movement->type, effects.movement->probability ); }
+  if ( effects.movement )
+  {
+    using PlayerType = Cmp::MovementEffect::Player::Type;
+    using NpcType = Cmp::MovementEffect::Npc::Type;
+    if ( const auto &player = effects.movement->player )
+    {
+      const std::string_view type = player->type == PlayerType::SLOW ? "slow" : "drunk";
+      draw_effect( std::format( "player {} {}s", type, player->tick ), effects.movement->probability );
+    }
+    if ( const auto &npc = effects.movement->npc )
+    {
+      const std::string_view type = npc->type == NpcType::SLOW ? "slow" : npc->type == NpcType::DRUNK ? "drunk" : "repel";
+      draw_effect( std::format( "npc {} {}s", type, npc->tick ), effects.movement->probability );
+    }
+  }
   return not effects.empty();
 }
 

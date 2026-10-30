@@ -641,6 +641,15 @@
     "detail": "Movement delay after pulling ruin obstacle",
     "format": "%.1f seconds"
   },
+  "RepelNpcPlayerTint": {
+    "type": "sf::Color",
+    "value" : {
+      "r": 255,
+      "g": 90,
+      "b": 90,
+      "a": 255
+    }
+  },
   "RuinMaxCobwebs": {
     "type": "int",
     "value": 25,
@@ -744,6 +753,33 @@
     "max_value": 100,
     "detail": "Tachycardia Health Dmg Per Sec",
     "format": "%d"
+  },
+  "ToxicImmunityMeterFill": {
+    "type": "sf::Color",
+    "value" : {
+      "r": 170,
+      "g": 230,
+      "b": 255,
+      "a": 255
+    }
+  },
+  "ToxicImmunityMeterShimmer": {
+    "type": "sf::Color",
+    "value" : {
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 160
+    }
+  },
+  "ToxicImmunityMeterTint": {
+    "type": "sf::Color",
+    "value" : {
+      "r": 64,
+      "g": 128,
+      "b": 255,
+      "a": 128
+    }
   },
   "VenomHealthDmgPerSec": {
     "type": "int",

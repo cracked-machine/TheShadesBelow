@@ -42,6 +42,8 @@ private:
   void sacrifice_for_item( const Cmp::Altar::MultiBlock &altar_cmp, const Sys::ItemKey &reward_item );
   //! @brief Swap the item for its "sacrifice_action.reward.wealth" (see items.json), e.g. jewelry or worn out tools
   void sacrifice_for_wealth( const Cmp::Altar::MultiBlock &altar_cmp, int wealth );
+  //! @brief Grant the player Cmp::Player::ToxicImmunity for "sacrifice_action.reward.tick" seconds (see items.json), e.g. St John's Wort
+  void sacrifice_for_toxic_immunity( const Cmp::Altar::MultiBlock &altar_cmp, int tick );
   //! @brief Crypt altar: grants an extra life. Graveyard altar: banishes all ghosts.
   void sacrifice_witches_jar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid, const Cmp::WorldItem &item );
   //! @brief Light an altar flame per relic. Drops an exitkey once the exitkey threshold is reached.

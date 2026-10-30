@@ -195,7 +195,29 @@ protected:
     if ( special == "altar" ) return Special::ALTAR;
     if ( special == "banish" ) return Special::BANISH;
     if ( special == "crypt" ) return Special::CRYPT;
+    if ( special == "toxic_immunity" ) return Special::TOXIC_IMMUNITY;
     throw std::runtime_error( "Unknown reward special: '" + special + "'" );
+  }
+
+  //! @brief Convert the "side_effects.movement.player.type" string of a JSON action entry.
+  //! @throws std::runtime_error on an unknown value.
+  static Cmp::MovementEffect::Player::Type make_player_movement_type( const std::string &type )
+  {
+    using Type = Cmp::MovementEffect::Player::Type;
+    if ( type == "slow" ) return Type::SLOW;
+    if ( type == "drunk" ) return Type::DRUNK;
+    throw std::runtime_error( "Unknown player movement type: '" + type + "'" );
+  }
+
+  //! @brief Convert the "side_effects.movement.npc.type" string of a JSON action entry.
+  //! @throws std::runtime_error on an unknown value.
+  static Cmp::MovementEffect::Npc::Type make_npc_movement_type( const std::string &type )
+  {
+    using Type = Cmp::MovementEffect::Npc::Type;
+    if ( type == "slow" ) return Type::SLOW;
+    if ( type == "drunk" ) return Type::DRUNK;
+    if ( type == "repel" ) return Type::REPEL;
+    throw std::runtime_error( "Unknown npc movement type: '" + type + "'" );
   }
 
   //! @brief Build the optional reward of a JSON action entry from its optional "reward" object.
@@ -213,6 +235,7 @@ protected:
     if ( rw.contains( "loot" ) ) { reward.loot = Sys::SpriteKey( JsonDeserializer::get_string( rw, "loot" ) ); }
     if ( rw.contains( "trigger_range" ) ) { reward.trigger_range = JsonDeserializer::get_int( rw, "trigger_range" ); }
     if ( rw.contains( "max_instances" ) ) { reward.max_instances = JsonDeserializer::get_int( rw, "max_instances" ); }
+    if ( rw.contains( "tick" ) ) { reward.tick = JsonDeserializer::get_int( rw, "tick" ); }
     if ( reward.count() == 0 ) throw std::runtime_error( "reward must set at least one of item, wealth, special or loot" );
     return reward;
   }
@@ -245,7 +268,21 @@ protected:
     if ( fx.contains( "movement" ) )
     {
       const auto &movement = fx.at( "movement" );
-      effects.movement = Cmp::MovementEffect{ .type = JsonDeserializer::get_string( movement, "type" ), .probability = get_probability( movement ) };
+      Cmp::MovementEffect movement_effect{ .probability = get_probability( movement ) };
+      if ( movement.contains( "player" ) )
+      {
+        const auto &player = movement.at( "player" );
+        movement_effect.player = Cmp::MovementEffect::Player{ .type = make_player_movement_type( JsonDeserializer::get_string( player, "type" ) ),
+                                                              .tick = JsonDeserializer::get_int( player, "tick" ) };
+      }
+      if ( movement.contains( "npc" ) )
+      {
+        const auto &npc = movement.at( "npc" );
+        movement_effect.npc = Cmp::MovementEffect::Npc{ .type = make_npc_movement_type( JsonDeserializer::get_string( npc, "type" ) ),
+                                                        .tick = JsonDeserializer::get_int( npc, "tick" ) };
+      }
+      if ( not movement_effect.player and not movement_effect.npc ) throw std::runtime_error( "movement must set at least one of player or npc" );
+      effects.movement = movement_effect;
     }
     return effects;
   }

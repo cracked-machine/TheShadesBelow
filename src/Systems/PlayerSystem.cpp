@@ -3,6 +3,7 @@
 #include <Components/AbsoluteOffset.hpp>
 #include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AbsoluteRotation.hpp>
+#include <Components/AbsoluteTint.hpp>
 #include <Components/Altar/AltarActivationTimer.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
@@ -49,6 +50,7 @@
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
+#include <Components/Persistent/RepelNpcPlayerTint.hpp>
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/VenomHealthDmgPerSec.hpp>
 #include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
@@ -64,7 +66,9 @@
 #include <Components/Player/NoPath.hpp>
 #include <Components/Player/PendingNoPath.hpp>
 #include <Components/Player/PostDeathTimeout.hpp>
+#include <Components/Player/RepelNpc.hpp>
 #include <Components/Player/TookDamage.hpp>
+#include <Components/Player/ToxicImmunity.hpp>
 #include <Components/Player/TorchRadius.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
@@ -228,6 +232,8 @@ void PlayerSystem::update( sf::Time dt )
 
   check_player_mortality();
   apply_timed_action_side_effects( dt );
+  update_repel_npc( dt );
+  update_toxic_immunity( dt );
   create_healing_particles();
   update_note_particles();
 
@@ -657,6 +663,47 @@ void PlayerSystem::update_heartbeat( sf::Time dt )
 
   auto &heartbeat_sfx = m_sound_bank.get_effect( "heartbeat" );
   if ( hb.update( dt, severity ) ) { heartbeat_sfx.play(); }
+}
+
+void PlayerSystem::update_repel_npc( sf::Time dt )
+{
+  auto player_entt = Utils::Player::get_entity( reg() );
+  auto *repel_cmp = reg().try_get<Cmp::Player::RepelNpc>( player_entt );
+  if ( repel_cmp )
+  {
+    repel_cmp->m_timer += dt;
+    if ( repel_cmp->expired() )
+    {
+      reg().remove<Cmp::Player::RepelNpc>( player_entt );
+      repel_cmp = nullptr;
+    }
+  }
+
+  // stain the player red while repelling, blinking as the effect runs out
+  if ( repel_cmp and repel_cmp->indicator_visible() )
+  {
+    reg().emplace_or_replace<Cmp::AbsoluteTint>( player_entt, Sys::PersistSystem::get<Cmp::Persist::RepelNpcPlayerTint>( reg() ) );
+  }
+  else { reg().remove<Cmp::AbsoluteTint>( player_entt ); }
+}
+
+void PlayerSystem::update_toxic_immunity( sf::Time dt )
+{
+  auto player_entt = Utils::Player::get_entity( reg() );
+  auto &player_stats = Utils::Player::get_stats( reg() );
+  auto *immunity_cmp = reg().try_get<Cmp::Player::ToxicImmunity>( player_entt );
+  if ( not immunity_cmp )
+  {
+    player_stats.set_toxic_immune( false );
+    return;
+  }
+  immunity_cmp->m_timer += dt;
+  if ( immunity_cmp->expired() )
+  {
+    reg().remove<Cmp::Player::ToxicImmunity>( player_entt );
+    player_stats.set_toxic_immune( false );
+  }
+  else { player_stats.set_toxic_immune( true ); }
 }
 
 void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )

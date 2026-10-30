@@ -30,7 +30,8 @@ PlayerStats::PlayerStats( const PlayerStats &other )
       m_despair( other.m_despair ),
       m_infamy( other.m_infamy ),
       m_luck( other.m_luck ),
-      m_toxidrome( std::make_unique<Cmp::Toxicity::Toxidrome>( *other.m_toxidrome ) )
+      m_toxidrome( std::make_unique<Cmp::Toxicity::Toxidrome>( *other.m_toxidrome ) ),
+      m_toxic_immune( other.m_toxic_immune )
 {
 }
 
@@ -43,6 +44,7 @@ PlayerStats &PlayerStats::operator=( const PlayerStats &other )
   m_infamy = other.m_infamy;
   m_luck = other.m_luck;
   m_toxidrome = std::make_unique<Cmp::Toxicity::Toxidrome>( *other.m_toxidrome );
+  m_toxic_immune = other.m_toxic_immune;
   return *this;
 }
 
@@ -62,6 +64,8 @@ void PlayerStats::apply( const BaseAction &action )
   m_luck = std::clamp( m_luck + action.luck(), 0, 100 );
   for ( const auto &[id, toxicity_delta] : action.toxidrome() )
   {
+    // toxic immunity blocks increases only; cures still apply
+    if ( m_toxic_immune and toxicity_delta > 0 ) continue;
     if ( m_toxidrome->apply( id, toxicity_delta ) ) { SPDLOG_INFO( "Applied {} toxicity", toxicity_delta ); }
   }
 }

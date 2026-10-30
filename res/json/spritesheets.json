@@ -82,7 +82,7 @@
     },
     "sprite.crypt.loot.cadaver": {
       "spritesheet": {
-        "displayname": "sprite.crypt.loot.cadaver",
+        "displayname": "Loot: Cadaver",
         "texture_path": "res/textures/crypt.png",
         "sprite_indices": [10],
         "indices_per_sequence": 1,
@@ -95,7 +95,7 @@
     },
     "sprite.crypt.loot.gold": {
       "spritesheet": {
-        "displayname": "sprite.crypt.loot.gold",
+        "displayname": "Loot: Gold",
         "texture_path": "res/textures/crypt.png",
         "sprite_indices": [11],
         "indices_per_sequence": 1,
@@ -963,7 +963,7 @@
     },
     "sprite.graveyard.loot.blast": {
       "spritesheet": {
-        "displayname": "sprite.graveyard.loot.blast",
+        "displayname": "Loot: Blast Radius",
         "texture_path": "res/textures/graveyard.png",
         "sprite_indices": [17],
         "indices_per_sequence": 1,
@@ -976,7 +976,7 @@
     },
     "sprite.graveyard.loot.health": {
       "spritesheet": {
-        "displayname": "sprite.graveyard.loot.health",
+        "displayname": "Loot: Health",
         "texture_path": "res/textures/graveyard.png",
         "sprite_indices": [15],
         "indices_per_sequence": 1,
@@ -989,7 +989,7 @@
     },
     "sprite.graveyard.loot.repair": {
       "spritesheet": {
-        "displayname": "sprite.graveyard.loot.repair",
+        "displayname": "Loot: Repair",
         "texture_path": "res/textures/graveyard.png",
         "sprite_indices": [16],
         "indices_per_sequence": 1,

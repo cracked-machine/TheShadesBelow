@@ -102,7 +102,18 @@
               },
               "sacrifice_action": {
                 "description": "Applied when the item is sacrificed at an altar. The item can only be sacrificed if this action has a reward, which must set exactly one of item, wealth or special.",
-                "allOf": [{ "$ref": "#/definitions/action_effect" }, { "properties": { "reward": { "maxProperties": 1 } } }]
+                "allOf": [
+                  { "$ref": "#/definitions/action_effect" },
+                  {
+                    "properties": {
+                      "reward": {
+                        "propertyNames": { "enum": ["item", "wealth", "special", "tick"] },
+                        "oneOf": [{ "required": ["item"] }, { "required": ["wealth"] }, { "required": ["special"] }],
+                        "dependencies": { "tick": ["special"] }
+                      }
+                    }
+                  }
+                ]
               }
             },
             "additionalProperties": false
@@ -180,12 +191,32 @@
             },
             "movement": {
               "type": "object",
-              "description": "Affect player movement/NPC pathfinding. Placeholder: not yet executed.",
-              "required": ["type", "probability"],
+              "description": "Affect player movement and/or NPC pathfinding. Must set at least one of player or npc.",
+              "required": ["probability"],
+              "minProperties": 2,
               "additionalProperties": false,
               "properties": {
-                "type": { "type": "string" },
-                "probability": { "$ref": "#/definitions/probability" }
+                "probability": { "$ref": "#/definitions/probability" },
+                "player": {
+                  "type": "object",
+                  "description": "Effect on the player's movement. Not yet executed.",
+                  "required": ["type", "tick"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": { "type": "string", "enum": ["slow", "drunk"] },
+                    "tick": { "type": "integer", "minimum": 0, "description": "How long (seconds) the effect lasts." }
+                  }
+                },
+                "npc": {
+                  "type": "object",
+                  "description": "Effect on NPC pathfinding. repel: NPCs flee from the player until out of view. slow/drunk: not yet executed.",
+                  "required": ["type", "tick"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": { "type": "string", "enum": ["slow", "drunk", "repel"] },
+                    "tick": { "type": "integer", "minimum": 0, "description": "How long (seconds) the effect lasts." }
+                  }
+                }
               }
             }
           }
@@ -210,8 +241,8 @@
         },
         "special": {
           "type": "string",
-          "enum": ["altar", "banish", "crypt"],
-          "description": "A special altar effect (sacrifice_action only). altar: light an altar candle (relics). banish: banish ghosts or gain an extra life at a crypt altar (witches jar). crypt: unlock the crypt key (exit key)."
+          "enum": ["altar", "banish", "crypt", "toxic_immunity"],
+          "description": "A special altar effect (sacrifice_action only). altar: light an altar candle (relics). banish: banish ghosts or gain an extra life at a crypt altar (witches jar). crypt: unlock the crypt key (exit key). toxic_immunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
         },
         "loot": {
           "type": "string",
@@ -227,6 +258,11 @@
           "type": "integer",
           "minimum": 1,
           "description": "Max drops over each item instance's lifetime, picked up or not (proximity_action only). Further drops are skipped. Omit for unlimited."
+        },
+        "tick": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How long (seconds) a timed special lasts, e.g. toxic_immunity."
         }
       }
     },

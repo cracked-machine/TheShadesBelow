@@ -16,9 +16,13 @@
 #include <Components/NoRender.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
+#include <Components/Persistent/ToxicImmunityMeterFill.hpp>
+#include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
+#include <Components/Persistent/ToxicImmunityMeterTint.hpp>
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/LevelDepth.hpp>
+#include <Components/Player/ToxicImmunity.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
 #include <Components/Shop/Inventory.hpp>
@@ -52,8 +56,14 @@
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/VertexArray.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <filesystem>
 #include <string>
+#include <utility>
 
 namespace Game::Sys
 {
@@ -154,6 +164,17 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
     SPDLOG_CRITICAL( "UiData object is not initialised. Cannot draw icon overlay" );
     return;
   }
+  // toxidrome meters get a frozen fill and a frosted overlay while the player is immune, blinking as the immunity runs out
+  const auto *immunity_cmp = reg().try_get<Cmp::Player::ToxicImmunity>( Utils::Player::get_entity( reg() ) );
+  const bool immunity_visible = immunity_cmp and immunity_cmp->indicator_visible();
+  const sf::Color toxidrome_fill = immunity_visible ? sf::Color( Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterFill>( reg() ) )
+                                                    : sf::Color::Green;
+  const sf::Color toxidrome_overlay = Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterTint>( reg() );
+  const sf::Color toxidrome_glint = Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterShimmer>( reg() );
+  // gives each frozen meter its own frost pattern
+  int toxidrome_index = 0;
+  constexpr float kMeterOutlineThickness = 5.f;
+
   sf::RectangleShape innermeter;
   sf::RectangleShape outermeter;
   for ( const auto &meter : m_main_ui_data->m_meters )
@@ -162,6 +183,7 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
     sf::Color meter_inner_color;
     sf::Color meter_outer_color = sf::Color::Black;
     bool should_render = false;
+    bool is_toxidrome_meter = false;
 
     if ( meter.name == "health_meter" )
     {
@@ -201,56 +223,63 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
     {
       auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Tachycardia>();
       meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
-      meter_inner_color = sf::Color::Green;
+      meter_inner_color = toxidrome_fill;
       meter_outer_color = sf::Color( 64, 64, 64, 255 );
+      is_toxidrome_meter = true;
       should_render = true;
     }
     else if ( meter.name == "bradycardia_meter" )
     {
       auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Bradycardia>();
       meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
-      meter_inner_color = sf::Color::Green;
+      meter_inner_color = toxidrome_fill;
       meter_outer_color = sf::Color( 64, 64, 64, 255 );
+      is_toxidrome_meter = true;
       should_render = true;
     }
     else if ( meter.name == "hallucinogen_meter" )
     {
       auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Hallucinogen>();
       meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
-      meter_inner_color = sf::Color::Green;
+      meter_inner_color = toxidrome_fill;
       meter_outer_color = sf::Color( 64, 64, 64, 255 );
+      is_toxidrome_meter = true;
       should_render = true;
     }
     else if ( meter.name == "hypoxia_meter" )
     {
       auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Hypoxia>();
       meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
-      meter_inner_color = sf::Color::Green;
+      meter_inner_color = toxidrome_fill;
       meter_outer_color = sf::Color( 64, 64, 64, 255 );
+      is_toxidrome_meter = true;
       should_render = true;
     }
     else if ( meter.name == "phototoxia_meter" )
     {
       auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Phototoxia>();
       meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
-      meter_inner_color = sf::Color::Green;
+      meter_inner_color = toxidrome_fill;
       meter_outer_color = sf::Color( 64, 64, 64, 255 );
+      is_toxidrome_meter = true;
       should_render = true;
     }
     else if ( meter.name == "venom_meter" )
     {
       auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Venom>();
       meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
-      meter_inner_color = sf::Color::Green;
+      meter_inner_color = toxidrome_fill;
       meter_outer_color = sf::Color( 64, 64, 64, 255 );
+      is_toxidrome_meter = true;
       should_render = true;
     }
     else if ( meter.name == "vertigo_meter" )
     {
       auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Vertigo>();
       meter_value = static_cast<float>( opt_meter.value_or( 0 ) );
-      meter_inner_color = sf::Color::Green;
+      meter_inner_color = toxidrome_fill;
       meter_outer_color = sf::Color( 64, 64, 64, 255 );
+      is_toxidrome_meter = true;
       should_render = true;
     }
     else if ( meter.name == "inventory_meter" )
@@ -271,9 +300,100 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
     outermeter.setPosition( meter.rect.position );
     outermeter.setFillColor( sf::Color::Transparent );
     outermeter.setOutlineColor( meter_outer_color );
-    outermeter.setOutlineThickness( 5.f );
+    outermeter.setOutlineThickness( kMeterOutlineThickness );
     draw_screen( outermeter );
+
+    // frost the whole toxidrome meter, outline included, so even an empty meter shows the immunity
+    if ( immunity_visible and is_toxidrome_meter )
+    {
+      const sf::Vector2f outline( kMeterOutlineThickness, kMeterOutlineThickness );
+      const sf::FloatRect overlay_rect( meter.rect.position - outline, meter.rect.size + outline * 2.f );
+      if ( load_frost_shader() )
+      {
+        render_meter_frost( overlay_rect, static_cast<float>( toxidrome_index ) * 17.31f, toxidrome_overlay, toxidrome_glint );
+      }
+      else
+      {
+        // no shader support: fall back to a flat frost wash
+        sf::RectangleShape overlay( overlay_rect.size );
+        overlay.setPosition( overlay_rect.position );
+        overlay.setFillColor( toxidrome_overlay );
+        draw_screen( overlay );
+      }
+      ++toxidrome_index;
+    }
   }
+}
+
+void RenderOverlaySystem::render_meter_shimmer( const sf::FloatRect &rect, float progress, sf::Color colour )
+{
+  constexpr float kShimmerHalfWidth = 10.f;
+  // the band leans like "/": its top edge is offset right of its bottom edge by the slant
+  const float half_slant = rect.size.y * 0.25f;
+  const float left = rect.position.x;
+  const float right = rect.position.x + rect.size.x;
+  const float top = rect.position.y;
+  const float bottom = rect.position.y + rect.size.y;
+
+  // the band centre travels from fully off the left edge to fully off the right edge
+  const float travel = kShimmerHalfWidth + half_slant;
+  const float centre = ( left - travel ) + ( ( right - left ) + ( travel * 2.f ) ) * progress;
+
+  sf::Color edge_colour = colour;
+  edge_colour.a = 0;
+
+  // trailing, centre and leading slanted edges; clamping x keeps the band inside the meter
+  sf::VertexArray band( sf::PrimitiveType::TriangleStrip, 6 );
+  const std::array<std::pair<float, sf::Color>, 3> edges = {
+      { { centre - kShimmerHalfWidth, edge_colour }, { centre, colour }, { centre + kShimmerHalfWidth, edge_colour } } };
+  for ( std::size_t idx = 0; idx < edges.size(); ++idx )
+  {
+    const auto &[edge_x, edge_colour_at] = edges[idx];
+    band[idx * 2] = sf::Vertex{ { std::clamp( edge_x + half_slant, left, right ), top }, edge_colour_at };
+    band[( idx * 2 ) + 1] = sf::Vertex{ { std::clamp( edge_x - half_slant, left, right ), bottom }, edge_colour_at };
+  }
+  draw_screen( band );
+}
+
+bool RenderOverlaySystem::load_frost_shader()
+{
+  if ( m_frost_shader_ok ) return *m_frost_shader_ok;
+
+  constexpr const char *kVertPath = "res/shaders/Generic.vert";
+  constexpr const char *kFragPath = "res/shaders/Frost.frag";
+  m_frost_shader_ok = false;
+  if ( not sf::Shader::isAvailable() ) { SPDLOG_WARN( "Shaders unavailable, toxidrome meters use a flat frost overlay" ); }
+  else if ( not std::filesystem::exists( kVertPath ) or not std::filesystem::exists( kFragPath ) )
+  {
+    SPDLOG_WARN( "Missing {} or {}, toxidrome meters use a flat frost overlay", kVertPath, kFragPath );
+  }
+  else if ( not m_frost_shader.loadFromFile( kVertPath, kFragPath ) )
+  {
+    SPDLOG_WARN( "Failed to load {}, toxidrome meters use a flat frost overlay", kFragPath );
+  }
+  else { m_frost_shader_ok = true; }
+  return *m_frost_shader_ok;
+}
+
+void RenderOverlaySystem::render_meter_frost( const sf::FloatRect &rect, float seed, sf::Color frost, sf::Color glint )
+{
+  // the shader works in render target pixels (gl_FragCoord), so map the default view rect onto the target
+  auto &target = active_render_target();
+  const sf::View &screen_view = m_window.getDefaultView();
+  const sf::Vector2f top_left = sf::Vector2f( target.mapCoordsToPixel( rect.position, screen_view ) );
+  const sf::Vector2f bottom_right = sf::Vector2f( target.mapCoordsToPixel( rect.position + rect.size, screen_view ) );
+
+  m_frost_shader.setUniform( "rect", sf::Glsl::Vec4( top_left.x, top_left.y, bottom_right.x - top_left.x, bottom_right.y - top_left.y ) );
+  m_frost_shader.setUniform( "target_height", static_cast<float>( target.getSize().y ) );
+  m_frost_shader.setUniform( "time", m_frost_clock.getElapsedTime().asSeconds() );
+  m_frost_shader.setUniform( "seed", seed );
+  m_frost_shader.setUniform( "frost", sf::Glsl::Vec4( frost ) );
+  m_frost_shader.setUniform( "glint", sf::Glsl::Vec4( glint ) );
+
+  sf::RectangleShape overlay( rect.size );
+  overlay.setPosition( rect.position );
+  overlay.setFillColor( sf::Color::White );
+  draw_screen( overlay, sf::RenderStates( &m_frost_shader ) );
 }
 
 void RenderOverlaySystem::render_ui_texts()

@@ -82,6 +82,7 @@
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Persistent/ResetTutorial.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
+#include <Components/Persistent/RepelNpcPlayerTint.hpp>
 #include <Components/Persistent/RuinMaxCobwebs.hpp>
 #include <Components/Persistent/RuinMaxSpiders.hpp>
 #include <Components/Persistent/RuinProcGenBirthThreshold.hpp>
@@ -97,6 +98,9 @@
 #include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/TooltipsSeen.hpp>
+#include <Components/Persistent/ToxicImmunityMeterFill.hpp>
+#include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
+#include <Components/Persistent/ToxicImmunityMeterTint.hpp>
 #include <Components/Persistent/VenomHealthDmgPerSec.hpp>
 #include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
 #include <Components/Persistent/WormholeAbortThreshold.hpp>
@@ -203,6 +207,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::PlayerShortcutLerpSpeedModifier>();
   add_component<Cmp::Persist::PlayerStartPosition>();
   add_component<Cmp::Persist::PostPullMovementDelay>();
+  add_component<Cmp::Persist::RepelNpcPlayerTint>();
   add_component<Cmp::Persist::RuinMaxCobwebs>();
   add_component<Cmp::Persist::RuinMaxSpiders>();
   add_component<Cmp::Persist::RuinProcGenInitChance>();
@@ -220,6 +225,9 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::DespairHealthDmgPerSec>();
   add_component<Cmp::Persist::HypoxiaHealthDmgPerSec>();
   add_component<Cmp::Persist::TachycardiaHealthDmgPerSec>();
+  add_component<Cmp::Persist::ToxicImmunityMeterFill>();
+  add_component<Cmp::Persist::ToxicImmunityMeterShimmer>();
+  add_component<Cmp::Persist::ToxicImmunityMeterTint>();
   add_component<Cmp::Persist::BradycardiaHealthDmgPerSec>();
   add_component<Cmp::Persist::VenomHealthDmgPerSec>();
   add_component<Cmp::Persist::VertigoHealthDmgPerSec>();

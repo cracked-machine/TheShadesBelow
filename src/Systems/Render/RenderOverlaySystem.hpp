@@ -9,9 +9,12 @@
 #include <Utils/Optimizations.hpp>
 
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/Shader.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/System/Clock.hpp>
 #include <SFML/System/Vector2.hpp>
 
+#include <optional>
 #include <string>
 
 // clang-format off
@@ -56,6 +59,23 @@ private:
   //! recent changes.
   //! @param dt
   void render_ui_meters( sf::Time dt );
+
+  //! @brief Draw a diagonal shimmer band swept across a meter (Cmp::Player::ToxicImmunity "frozen" meters).
+  //! @param rect the meter's bounds (outline included); the band is clipped to it
+  //! @param progress sweep position in [0, 1]; the band is off-meter at both ends
+  //! @param colour the band's peak colour (its alpha fades to 0 at the band's edges)
+  void render_meter_shimmer( const sf::FloatRect &rect, float progress, sf::Color colour );
+
+  //! @brief Lazily load res/shaders/Frost.frag (Cmp::Player::ToxicImmunity "frozen" meters) on first use.
+  //! @return true if the shader is available and loaded. A failure is logged once and cached.
+  bool load_frost_shader();
+
+  //! @brief Draw the frost shader over a toxidrome meter.
+  //! @param rect the meter's bounds (outline included), in default view coordinates
+  //! @param seed per-meter offset so each meter gets its own frost pattern
+  //! @param frost base wash colour
+  //! @param glint crystal ridge and glint colour
+  void render_meter_frost( const sf::FloatRect &rect, float seed, sf::Color frost, sf::Color glint );
 
   //! @brief Render the main UI's static text elements.
   void render_ui_texts();
@@ -107,6 +127,13 @@ private:
 
   //! @brief Screen flash frequency
   int m_ui_flash_factor{ 300 };
+
+  //! @brief Frost overlay shader for the toxidrome meters, see load_frost_shader()
+  sf::Shader m_frost_shader;
+  //! @brief Result of the lazy frost shader load; unset until first use
+  std::optional<bool> m_frost_shader_ok;
+  //! @brief Drives the frost shader's glint twinkle
+  sf::Clock m_frost_clock;
 };
 
 } // namespace Game::Sys

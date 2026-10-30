@@ -65,6 +65,13 @@ public:
   //! @param amount Maximum reduction applied to each active toxidrome's own toxicity value.
   void decay_all_toxidrome( int amount );
 
+  //! @brief Set whether toxidrome increases are ignored. Mirrors Cmp::Player::ToxicImmunity, see PlayerSystem.
+  //! @param immune true to make every positive toxidrome delta in apply() a no-op
+  void set_toxic_immune( bool immune ) { m_toxic_immune = immune; }
+  //! @brief Whether toxidrome increases are currently ignored.
+  //! @return true if the player is immune to toxidrome increases
+  [[nodiscard]] bool is_toxic_immune() const { return m_toxic_immune; }
+
   //! @brief Update the player stats with the BaseAction object.
   //! @note BaseAction: health, fear, despair, infamy, luck, toxidrome. Each toxidrome carried by the
   //! action is merged into the player's existing set individually (an excluded one instead fights the
@@ -90,6 +97,8 @@ private:
   //! copy, pointer-steal for move) to keep PlayerStats copy-constructible (RegistryTransfer relies on
   //! generically copying this component across scene transitions).
   std::unique_ptr<Cmp::Toxicity::Toxidrome> m_toxidrome;
+  //! @brief While true, positive toxidrome deltas are ignored (cures still apply). Mirrors Cmp::Player::ToxicImmunity.
+  bool m_toxic_immune{ false };
 };
 
 } // namespace Game::Cmp

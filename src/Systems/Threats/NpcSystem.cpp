@@ -40,6 +40,7 @@
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>
+#include <Components/Player/RepelNpc.hpp>
 #include <Components/Player/TookDamage.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
@@ -82,6 +83,7 @@
 #include <SFML/System/Time.hpp>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <spdlog/spdlog.h>
 
 namespace Game::Sys
@@ -419,9 +421,11 @@ void NpcSystem::update_pathfinding( sf::Time dt )
   m_pathfinding_timer += dt;
   if ( m_pathfinding_timer.asSeconds() >= kPathfindingInterval )
   {
-    // NPCs — target is always the player
+    // NPCs — target is the player, unless the player repels them (e.g. blood oil): then they flee out of view
     const Cmp::Position player_pos = Utils::Player::get_position( reg() );
     const bool player_is_illuminated = Utils::Player::is_illuminated( reg() );
+    const bool repel = reg().all_of<Cmp::Player::RepelNpc>( Utils::Player::get_entity( reg() ) );
+    const sf::FloatRect view_bounds = Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() );
     const auto lights = Utils::Collision::collect_light_sources( reg() );
     for ( auto [npc_entt, npc_cmp] : reg().view<Cmp::Npc::NPC>().each() )
     {
@@ -450,7 +454,13 @@ void NpcSystem::update_pathfinding( sf::Time dt )
 
       auto navmesh = navmesh_for( npc_entt );
       if ( not navmesh ) continue;
-      update_pathfinding_for( *navmesh, player_pos, npc_entt, player_is_illuminated, lights );
+      if ( repel )
+      {
+        // the flee target is not lit by the player's light
+        const auto &npc_pos_cmp = reg().get<Cmp::Position>( npc_entt );
+        update_pathfinding_for( *navmesh, repel_target( player_pos, npc_pos_cmp, view_bounds ), npc_entt, false, lights );
+      }
+      else { update_pathfinding_for( *navmesh, player_pos, npc_entt, player_is_illuminated, lights ); }
     }
 
     m_pathfinding_timer = sf::Time::Zero;
@@ -463,6 +473,33 @@ void NpcSystem::update_pathfinding_for( PathFinding::SpatialHashGrid &navmesh, c
   // An unreachable player (e.g. flying over an obstacle) is approached as closely as possible rather than given up on.
   auto result = Utils::Npc::pathfind_toward( reg(), navmesh, target_pos, npc_entity, false, target_illuminated, false, &lights, true );
   if ( result == Utils::Npc::PathfindResult::NoPath ) { reg().emplace_or_replace<Cmp::Direction>( npc_entity, Cmp::Direction( { 0.0, 0.0 } ) ); }
+}
+
+Cmp::Position NpcSystem::repel_target( const Cmp::Position &player_pos, const Cmp::Position &npc_pos, const sf::FloatRect &view_bounds ) const
+{
+  // aim one cell past the view edge so the NPC ends up fully out of view
+  const sf::FloatRect bounds( view_bounds.position - Constants::kGridSizePxF, view_bounds.size + Constants::kGridSizePxF * 2.f );
+  const sf::Vector2f origin = player_pos.getCenter();
+  sf::Vector2f dir = npc_pos.getCenter() - origin;
+  // NPC on top of the player: flee toward the farthest view corner
+  if ( dir == sf::Vector2f( 0.f, 0.f ) )
+  {
+    const sf::Vector2f view_center = bounds.getCenter();
+    const sf::Vector2f corner( origin.x < view_center.x ? bounds.position.x + bounds.size.x : bounds.position.x,
+                               origin.y < view_center.y ? bounds.position.y + bounds.size.y : bounds.position.y );
+    dir = corner - origin;
+  }
+
+  // nearest exit through the x and y slabs of the bounds
+  float t = std::numeric_limits<float>::max();
+  if ( dir.x > 0.f ) { t = std::min( t, ( bounds.position.x + bounds.size.x - origin.x ) / dir.x ); }
+  else if ( dir.x < 0.f ) { t = std::min( t, ( bounds.position.x - origin.x ) / dir.x ); }
+  if ( dir.y > 0.f ) { t = std::min( t, ( bounds.position.y + bounds.size.y - origin.y ) / dir.y ); }
+  else if ( dir.y < 0.f ) { t = std::min( t, ( bounds.position.y - origin.y ) / dir.y ); }
+  if ( t == std::numeric_limits<float>::max() ) { t = 0.f; }
+
+  const sf::Vector2f target_center = origin + dir * t;
+  return Cmp::Position( target_center - player_pos.size * 0.5f, player_pos.size );
 }
 
 void NpcSystem::update_movement( sf::Time dt )

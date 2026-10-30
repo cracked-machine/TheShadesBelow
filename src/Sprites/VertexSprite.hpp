@@ -27,6 +27,21 @@ public:
       m_vertices[idx].color.a = alpha;
   }
 
+  //! @brief Tint each vertex in the buffer: rgb is set from the tint, and alpha is multiplied with the
+  //! opacity already set by set_pick_opacity().
+  //! @param tint The tint colour (opaque white = no tint)
+  void set_tint( sf::Color tint )
+  {
+    for ( std::size_t idx = 0; idx < m_vertices.getVertexCount(); ++idx )
+    {
+      auto &colour = m_vertices[idx].color;
+      colour.r = tint.r;
+      colour.g = tint.g;
+      colour.b = tint.b;
+      colour.a = static_cast<uint8_t>( colour.a * tint.a / 255 );
+    }
+  }
+
   //! @brief Draw the sprite buffer to the target
   //! @param target The render target to draw to
   //! @param states The render states to apply

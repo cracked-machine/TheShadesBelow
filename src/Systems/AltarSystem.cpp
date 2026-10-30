@@ -19,9 +19,11 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/KeysCount.hpp>
+#include <Components/Player/ToxicImmunity.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
+#include <Components/Stats/PlayerStats.hpp>
 #include <Components/Stats/SacrificeAction.hpp>
 #include <Components/Toxicity/Bradycadia.hpp>
 #include <Components/Toxicity/Halucinogen.hpp>
@@ -134,6 +136,9 @@ void AltarSystem::check_player_altar_activation( entt::entity altar_entity, Cmp:
       case RewardSpecial::CRYPT:
         sacrifice_exitkey( altar_entity, altar_cmp, *altar_uuid_cmp );
         break;
+      case RewardSpecial::TOXIC_IMMUNITY:
+        sacrifice_for_toxic_immunity( altar_cmp, reward->tick );
+        break;
       case RewardSpecial::NONE:
         play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
         break;
@@ -154,6 +159,15 @@ void AltarSystem::sacrifice_for_wealth( const Cmp::Altar::MultiBlock &altar_cmp,
   m_sound_bank.get_effect( "get_loot" ).play();
   // signal UI to flash
   reg().emplace_or_replace<Cmp::FlashUIWealth>( reg().create() );
+}
+
+void AltarSystem::sacrifice_for_toxic_immunity( const Cmp::Altar::MultiBlock &altar_cmp, int tick )
+{
+  play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
+  // sacrificing again restarts the timer. PlayerSystem keeps the PlayerStats flag in sync, but set it now so
+  // immunity applies from this frame
+  reg().emplace_or_replace<Cmp::Player::ToxicImmunity>( Utils::Player::get_entity( reg() ), sf::seconds( static_cast<float>( tick ) ) );
+  Utils::Player::get_stats( reg() ).set_toxic_immune( true );
 }
 
 void AltarSystem::sacrifice_witches_jar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid,

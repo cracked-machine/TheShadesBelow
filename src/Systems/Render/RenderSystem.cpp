@@ -38,6 +38,15 @@ void RenderSystem::draw_screen( const sf::Drawable &drawable )
   target.setView( previous_view );
 }
 
+void RenderSystem::draw_screen( const sf::Drawable &drawable, const sf::RenderStates &states )
+{
+  auto &target = active_render_target();
+  const sf::View previous_view = target.getView();
+  target.setView( m_window.getDefaultView() );
+  target.draw( drawable, states );
+  target.setView( previous_view );
+}
+
 void RenderSystem::draw_world( const sf::Drawable &drawable )
 {
   auto &target = active_render_target();
@@ -81,7 +90,8 @@ void RenderSystem::render_text( const std::string &text, unsigned int size, sf::
 }
 
 void RenderSystem::safe_render_sprite_to_target( sf::RenderTarget &target, const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos,
-                                                 std::size_t sprite_index, sf::Vector2f scale, uint8_t alpha, sf::Vector2f origin, sf::Angle angle )
+                                                 std::size_t sprite_index, sf::Vector2f scale, uint8_t alpha, sf::Vector2f origin, sf::Angle angle,
+                                                 sf::Color tint )
 {
 
   try
@@ -100,6 +110,7 @@ void RenderSystem::safe_render_sprite_to_target( sf::RenderTarget &target, const
 
       sprite_buffer.setScale( scale );
       sprite_buffer.set_pick_opacity( alpha );
+      if ( tint != sf::Color::White ) { sprite_buffer.set_tint( tint ); }
       sprite_buffer.setOrigin( origin );
       sprite_buffer.setRotation( angle );
       target.draw( sprite_buffer );
@@ -138,12 +149,12 @@ void RenderSystem::safe_render_sprite_screen( const Sys::SpriteKey &sprite_type,
 
 // Keep the original for backwards compatibility
 void RenderSystem::safe_render_sprite_world( const Sys::SpriteKey &sprite_type, const sf::FloatRect &pos, std::size_t sprite_index,
-                                             sf::Vector2f scale, uint8_t alpha, sf::Vector2f origin, sf::Angle angle )
+                                             sf::Vector2f scale, uint8_t alpha, sf::Vector2f origin, sf::Angle angle, sf::Color tint )
 {
   auto &target = active_render_target();
   const sf::View previous_view = target.getView();
   target.setView( get_world_view() );
-  safe_render_sprite_to_target( target, sprite_type, pos, sprite_index, scale, alpha, origin, angle );
+  safe_render_sprite_to_target( target, sprite_type, pos, sprite_index, scale, alpha, origin, angle, tint );
   target.setView( previous_view );
 }
 

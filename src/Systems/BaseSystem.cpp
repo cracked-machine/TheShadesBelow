@@ -1,10 +1,12 @@
 
+#include <Components/Player/RepelNpc.hpp>
 #include <Components/Position.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/UUID.hpp>
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/LightningEvent.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Utils/Player.hpp>
 
 #include <entt/entity/registry.hpp>
 
@@ -39,6 +41,15 @@ void BaseSystem::trigger_side_effects( const Cmp::BaseAction &action, const Cmp:
   }
   // a null target lets LightningSystem pick a working lightning rod in view, otherwise the player
   if ( effects.lightning and effects.lightning->roll() ) { get_systems_event_queue().trigger( Events::LightningEvent{} ); }
+  // only npc repel is implemented so far; drinking again while repelled restarts the timer
+  if ( effects.movement and effects.movement->roll() )
+  {
+    const auto &npc_effect = effects.movement->npc;
+    if ( npc_effect and npc_effect->type == Cmp::MovementEffect::Npc::Type::REPEL )
+    {
+      reg().emplace_or_replace<Cmp::Player::RepelNpc>( Utils::Player::get_entity( reg() ), sf::seconds( static_cast<float>( npc_effect->tick ) ) );
+    }
+  }
 }
 
 // initialised by first call to getEventDispatcher()

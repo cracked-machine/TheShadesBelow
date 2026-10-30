@@ -156,6 +156,15 @@ private:
   void update_pathfinding_for( PathFinding::SpatialHashGrid &navmesh, const Cmp::Position &target_pos, entt::entity npc_entity,
                                bool target_illuminated, const Utils::Collision::LightSources &lights );
 
+  //! @brief Get the flee target for an NPC while the player has Cmp::Player::RepelNpc: the point one cell outside
+  //!        `view_bounds` on the ray from the player through the NPC. Once the NPC leaves the view, pathfind_toward
+  //!        stops it until the view moves.
+  //! @param player_pos
+  //! @param npc_pos
+  //! @param view_bounds current world view bounds
+  //! @return Cmp::Position the flee target, sized as `player_pos`
+  Cmp::Position repel_target( const Cmp::Position &player_pos, const Cmp::Position &npc_pos, const sf::FloatRect &view_bounds ) const;
+
   //! @brief Update NPC animation
   void update_animation();
 

@@ -80,6 +80,7 @@
 #include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
+#include <Components/Persistent/RepelNpcPlayerTint.hpp>
 #include <Components/Persistent/ResetTutorial.hpp>
 #include <Components/Persistent/RuinMaxCobwebs.hpp>
 #include <Components/Persistent/RuinMaxSpiders.hpp>
@@ -92,6 +93,9 @@
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/ToxicImmunityMeterFill.hpp>
+#include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
+#include <Components/Persistent/ToxicImmunityMeterTint.hpp>
 #include <Components/Persistent/VenomHealthDmgPerSec.hpp>
 #include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
 #include <Components/Persistent/WormholeAbortThreshold.hpp>
@@ -231,6 +235,13 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::CameraSmoothSpeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerLerpInterruptThreshold>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PostPullMovementDelay>( reg() ).render_widget();
+
+    ImGui::SeparatorText( "Item Effect Settings" );
+
+    Sys::PersistSystem::get<Cmp::Persist::RepelNpcPlayerTint>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterFill>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterTint>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterShimmer>( reg() ).render_widget();
 
     ImGui::SeparatorText( "Weapon Wear Settings" );
 

@@ -135,12 +135,32 @@
             },
             "movement": {
               "type": "object",
-              "description": "Affect player movement/NPC pathfinding. Placeholder: not yet executed.",
-              "required": ["type", "probability"],
+              "description": "Affect player movement and/or NPC pathfinding. Must set at least one of player or npc.",
+              "required": ["probability"],
+              "minProperties": 2,
               "additionalProperties": false,
               "properties": {
-                "type": { "type": "string" },
-                "probability": { "$ref": "#/definitions/probability" }
+                "probability": { "$ref": "#/definitions/probability" },
+                "player": {
+                  "type": "object",
+                  "description": "Effect on the player's movement. Not yet executed.",
+                  "required": ["type", "tick"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": { "type": "string", "enum": ["slow", "drunk"] },
+                    "tick": { "type": "integer", "minimum": 0, "description": "How long (seconds) the effect lasts." }
+                  }
+                },
+                "npc": {
+                  "type": "object",
+                  "description": "Effect on NPC pathfinding. repel: NPCs flee from the player until out of view. slow/drunk: not yet executed.",
+                  "required": ["type", "tick"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": { "type": "string", "enum": ["slow", "drunk", "repel"] },
+                    "tick": { "type": "integer", "minimum": 0, "description": "How long (seconds) the effect lasts." }
+                  }
+                }
               }
             }
           }
