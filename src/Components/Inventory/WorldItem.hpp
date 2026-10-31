@@ -179,8 +179,9 @@ public:
   //! @return The reward, or std::nullopt if the item can't be sacrificed.
   std::optional<SpawnNpcEffect> get_sacrifice_npc_spawn_effect() const { return get_spawn_npc_effect<SacrificeAction>(); }
 
-  //! @brief Whether this item can be sacrificed at the altar, i.e. its sacrifice_action has a reward or npc spawn effect.
-  bool is_sacrificial() const { return not get_rewards<SacrificeAction>().empty() or get_sacrifice_npc_spawn_effect().has_value(); }
+  //! @brief Whether this item can be sacrificed at the altar, i.e. its sacrifice_action has any effect: a non zero stat
+  //! delta, a toxidrome, a side effect or a reward.
+  bool is_sacrificial() const { return has_action<SacrificeAction>() and not at<SacrificeAction>().action.is_zero(); }
 
   //! @brief The item gained when this plant is foraged (empty hand or gloves), see "forage_action.reward.item" in
   //! items.json. Empty string is a no op.
