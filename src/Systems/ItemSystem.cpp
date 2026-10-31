@@ -37,7 +37,8 @@ void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev )
 {
   if ( not ev.m_spawn_nearby )
   {
-    create_world_item( ev.m_pos, ev.m_item, ev.m_sfx, ev.m_zorder );
+    auto item_entt = create_world_item( ev.m_pos, ev.m_item, ev.m_sfx, ev.m_zorder );
+    if ( item_entt != entt::null and ev.m_on_created ) { ev.m_on_created( item_entt ); }
     return;
   }
 
@@ -65,6 +66,7 @@ void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev )
   auto item_entt = create_world_item( Cmp::Position( *cell, Constants::kGridSizePxF ), ev.m_item, ev.m_sfx, ev.m_zorder );
   // counted over the source's lifetime, so picking the item up doesn't free a slot
   if ( item_entt != entt::null and has_source ) { reg().get_or_emplace<Cmp::DropCount>( ev.m_source_entt ).m_count++; }
+  if ( item_entt != entt::null and ev.m_on_created ) { ev.m_on_created( item_entt ); }
 }
 
 void ItemSystem::on_swap_world_item_event( const Events::SwapWorldItemEvent &ev ) { swap_world_item( ev.m_entt, ev.m_new_item, ev.m_sfx ); }

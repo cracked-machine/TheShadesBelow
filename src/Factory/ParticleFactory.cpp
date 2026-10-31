@@ -326,6 +326,35 @@ void add_lava_fireball_ps( entt::registry &reg, const std::string &tag, int part
   SPDLOG_DEBUG( "Created lava fireball ParticleSprite {}", static_cast<uint32_t>( entt ) );
 }
 
+void add_aimed_fireball_ps( entt::registry &reg, const std::string &tag, float lifetime_seconds, float speed, float gravity, float size, Cmp::UUID &uuid_cmp,
+                               sf::Vector2f from, sf::Vector2f to, float zorder, const Cmp::Particle::FireballPalette &palette )
+{
+  auto ps = Cmp::Particle::LavaFireballParticleSprite( 1 );
+  ps.set_tag( tag );
+  ps.set_generations( 1 );
+  ps.set_particle_size_range( std::uniform_real_distribution<float>( size, size ) );
+  ps.set_emitter_position( from );
+  ps.set_lifetime_ms( sf::seconds( lifetime_seconds ) );
+  // reach the target after the same flight time as a straight shot at `speed`, launched upwards just enough that gravity
+  // brings it back down onto the target: v0 = d / t - g * t / 2
+  const sf::Vector2f direction = to - from;
+  const float flight_time = speed > 0.f ? direction.length() / speed : 0.f;
+  sf::Vector2f launch_velocity = direction;
+  if ( flight_time > 0.f ) { launch_velocity = ( direction / flight_time ) - sf::Vector2f( 0.f, gravity * flight_time / 2.f ); }
+  ps.set_speed( launch_velocity.length() );
+  ps.set_angle( launch_velocity == sf::Vector2f{} ? 0.f : launch_velocity.angle().asDegrees() );
+  ps.set_gravity( gravity );
+  ps.set_land_at_emitter( false );
+  ps.set_palette( palette );
+
+  auto entt = reg.create();
+  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>(
+      entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::LavaFireballParticleSprite>( ps ) ) );
+  reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
+  reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
+  SPDLOG_DEBUG( "Created aimed fireball ParticleSprite {}", static_cast<uint32_t>( entt ) );
+}
+
 void add_ember_ps( entt::registry &reg, const std::string &tag, int particle_count, float lifetime_seconds, float speed, float size,
                    Cmp::UUID &uuid_cmp, sf::Vector2f pos, float zorder )
 {

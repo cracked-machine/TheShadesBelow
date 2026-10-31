@@ -47,8 +47,11 @@ private:
   //! @brief The animation played above the altar following a sacrifice
   enum class SacrificeAnimType { DEFAULT, KEY };
 
-  //! @brief Swap the item for its "sacrifice_action.reward.item" (see items.json)
-  void sacrifice_for_item( const Cmp::Altar::MultiBlock &altar_cmp, const Sys::ItemKey &reward_item );
+  //! @brief Swap the item for its "sacrifice_action.reward.item" (see items.json), at the player by default, else at the
+  //! reward's target. Call once the offering has left the inventory.
+  //! @param on_created Optional callback receiving each item dropped in the world, e.g. to bind it to a summoned NPC.
+  void sacrifice_for_item( const Cmp::Altar::MultiBlock &altar_cmp, const Cmp::ActionReward &reward,
+                           const std::function<void( entt::entity )> &on_created = {} );
   //! @brief Swap the item for its "sacrifice_action.reward.wealth" (see items.json), e.g. jewelry or worn out tools
   void sacrifice_for_wealth( const Cmp::Altar::MultiBlock &altar_cmp, int wealth );
   //! @brief Grant the player Cmp::Player::ToxicImmunity for "sacrifice_action.reward.tick" seconds (see items.json), e.g. St John's Wort

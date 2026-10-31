@@ -6,14 +6,10 @@
 namespace Game::Cmp::Altar
 {
 
-//! @brief Added to the player entity when altar activation cooldown is in effect.
+//! @brief Added to the player entity when altar activation cooldown is in effect: the time since the last offering.
+//! The cooldown itself is Cmp::Persist::AltarOfferingCooldown, or Cmp::Persist::AltarSummonOfferingCooldown.
 class ActivationTimer : public sf::Time
 {
-public:
-  sf::Time get_timeout() { return m_timeout; };
-
-private:
-  sf::Time m_timeout{ sf::seconds( 3.f ) };
 };
 
 } // namespace Game::Cmp::Altar

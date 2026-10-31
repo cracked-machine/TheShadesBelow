@@ -8,8 +8,7 @@ namespace Game::Cmp::Npc
 //! Cmp::Npc::ShockwaveTimer).
 struct Priest
 {
-  //! @brief Always true; presence of the component is what identifies the entity as a Priest.
-  bool priest{ true };
+  sf::Time sfx_cooldown{ sf::Time::Zero };
 };
 
 } // namespace Game::Cmp::Npc

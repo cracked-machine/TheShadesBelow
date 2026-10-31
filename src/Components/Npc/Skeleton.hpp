@@ -7,8 +7,7 @@ namespace Game::Cmp::Npc
 //! @brief Marker component tagging an entity as the Skeleton NPC (a hostile NPC type).
 struct Skeleton
 {
-  //! @brief Always true; presence of the component is what identifies the entity as a Skeleton.
-  bool skeleton{ true };
+  sf::Time sfx_cooldown{ sf::Time::Zero };
 };
 
 } // namespace Game::Cmp::Npc

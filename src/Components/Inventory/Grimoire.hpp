@@ -48,7 +48,8 @@ public:
     const auto &item_store = Sys::ItemStore::instance();
     const auto sacrifice_reward = [&]( const Sys::ItemKey &key )
     {
-      if ( key.empty() ) return Sys::ItemKey( "" );
+      // a wildcard output has no single item to look up
+      if ( key.empty() or key.str().ends_with( '*' ) ) return Sys::ItemKey( "" );
       // plants are offered at the graveyard altars
       const auto reward = item_store.get( key ).get_sacrifice_reward( Cmp::Altar::Kind::GRAVEYARD );
       return reward ? reward->item : Sys::ItemKey( "" );

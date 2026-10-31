@@ -2,10 +2,11 @@
 #include <Components/Armable.hpp>
 #include <Components/Armed.hpp>
 #include <Components/DeathPosition.hpp>
-#include <Components/Greyscale.hpp>
 #include <Components/Direction.hpp>
+#include <Components/Greyscale.hpp>
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/Adder.hpp>
+#include <Components/Npc/Azazel.hpp>
 #include <Components/Npc/Container.hpp>
 #include <Components/Npc/Drknox.hpp>
 #include <Components/Npc/ElderMother.hpp>
@@ -187,6 +188,7 @@ entt::entity create_npc( entt::registry &reg, Cmp::Position pos_cmp, const Sys::
     reg.emplace_or_replace<Cmp::Npc::LerpSpeed>( new_pos_entity, npc_cmp.m_lerp_speed );
     reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 1, 1 } );
   }
+  else if ( npc_type == "npc.azazel" ) { reg.emplace_or_replace<Cmp::Npc::Azazel>( new_pos_entity ); }
   else if ( npc_type == "npc.drknox" )
   {
     reg.emplace_or_replace<Cmp::Npc::Drknox>( new_pos_entity );

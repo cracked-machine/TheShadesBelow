@@ -41,6 +41,13 @@
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/AltarOfferingCooldown.hpp>
+#include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
+#include <Components/Persistent/AzazelFireballArc.hpp>
+#include <Components/Persistent/AzazelFireballColour.hpp>
+#include <Components/Persistent/AzazelFireballCooldown.hpp>
+#include <Components/Persistent/AzazelFireballDamage.hpp>
+#include <Components/Persistent/AzazelFireballSpeed.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
@@ -285,6 +292,13 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::HazardPushbackResist>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::LightningDamage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::LavaFireballDamage>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::AzazelFireballDamage>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::AzazelFireballCooldown>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::AzazelFireballSpeed>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::AzazelFireballArc>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::AzazelFireballColour>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::AltarOfferingCooldown>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::AltarSummonOfferingCooldown>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::EmberDamage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::LightningRodDebrisDamage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::WormholeSeed>( reg() ).render_widget();

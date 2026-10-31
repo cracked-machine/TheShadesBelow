@@ -7,8 +7,7 @@ namespace Game::Cmp::Npc
 //! @brief Marker component tagging an entity as the Drknox NPC (a friendly NPC type).
 struct Drknox
 {
-  //! @brief Always true; presence of the component is what identifies the entity as Drknox.
-  bool drknox{ true };
+  sf::Time sfx_cooldown{ sf::Time::Zero };
 };
 
 } // namespace Game::Cmp::Npc

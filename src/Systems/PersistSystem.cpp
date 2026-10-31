@@ -41,6 +41,13 @@
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/AltarOfferingCooldown.hpp>
+#include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
+#include <Components/Persistent/AzazelFireballArc.hpp>
+#include <Components/Persistent/AzazelFireballColour.hpp>
+#include <Components/Persistent/AzazelFireballCooldown.hpp>
+#include <Components/Persistent/AzazelFireballDamage.hpp>
+#include <Components/Persistent/AzazelFireballSpeed.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
@@ -176,6 +183,13 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::HazardPushbackResist>();
   add_component<Cmp::Persist::HealthBonus>();
   add_component<Cmp::Persist::LavaFireballDamage>();
+  add_component<Cmp::Persist::AzazelFireballDamage>();
+  add_component<Cmp::Persist::AzazelFireballCooldown>();
+  add_component<Cmp::Persist::AzazelFireballSpeed>();
+  add_component<Cmp::Persist::AzazelFireballArc>();
+  add_component<Cmp::Persist::AzazelFireballColour>();
+  add_component<Cmp::Persist::AltarOfferingCooldown>();
+  add_component<Cmp::Persist::AltarSummonOfferingCooldown>();
   add_component<Cmp::Persist::LightningDamage>();
   add_component<Cmp::Persist::MinNumAltars>();
   add_component<Cmp::Persist::MinNumCrypts>();

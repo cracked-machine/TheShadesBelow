@@ -8,8 +8,7 @@ namespace Game::Cmp::Npc
 //! Cmp::Npc::WatchmanSearchlight for its per-entity searchlight/gunfire state).
 struct Watchman
 {
-  //! @brief Always true; presence of the component is what identifies the entity as a Watchman.
-  bool watchman{ true };
+  sf::Time sfx_cooldown{ sf::Time::Zero };
 };
 
 } // namespace Game::Cmp::Npc

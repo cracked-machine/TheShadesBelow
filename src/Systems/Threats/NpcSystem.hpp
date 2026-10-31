@@ -82,6 +82,10 @@ private:
   //! @return std::optional<sf::Vector2f> top-left of the cell, or nullopt if none was found.
   std::optional<sf::Vector2f> find_nearby_spawn_cell( const Cmp::Position &source, const Sys::NpcKey &npc_type );
 
+  //! @brief The size of an NPC type's sprite, i.e. its footprint once spawned.
+  //! @param npc_type See res/json/npc.json.
+  static sf::Vector2f npc_sprite_size( const Sys::NpcKey &npc_type );
+
   //! @brief How many rings out from the source find_nearby_spawn_cell() searches.
   static constexpr int kNpcSpawnSearchRadius = 6;
 
@@ -108,6 +112,10 @@ private:
 
   //! @brief Update the NPC sfx
   void update_sfx( sf::Time dt );
+
+  //! @brief Azazel shoots a straight fireball at the player every Cmp::Persist::AzazelFireballCooldown while on screen,
+  //! and is banished once all of its Cmp::Npc::SummonOffering items have been sacrificed.
+  void update_azazel( sf::Time dt );
 
   //! @brief Check for player collision proximity with NPC containers
   void check_npc_container_collision();

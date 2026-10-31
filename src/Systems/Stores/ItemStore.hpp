@@ -19,6 +19,17 @@ public:
   //! @brief Destroy the Item Store object
   ~ItemStore() {}
 
+  //! @brief Get the item keys a reward item refers to (see Cmp::ActionReward::item).
+  //! @param key An item key, or an item key prefix ending with '*', e.g. "item.jewelry*".
+  //! @return All item keys starting with the prefix, else the key itself if it exists, else empty.
+  [[nodiscard]] std::vector<key_type> get_item_matches( const key_type &key ) const;
+
+  //! @brief Resolve a reward item to a concrete item key, picking a random match if it ends with '*'.
+  //! @param key An item key, or an item key prefix ending with '*'.
+  //! @return The item key.
+  //! @throws std::runtime_error if no item matches.
+  [[nodiscard]] key_type pick_item( const key_type &key ) const;
+
 private:
   //! @brief Populates m_store with InventoryItem components
   void init_store();

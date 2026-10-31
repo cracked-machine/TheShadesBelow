@@ -154,15 +154,16 @@ void ItemStore::init_store()
   {
     for ( const auto &reward : item.get_rewards<Cmp::SacrificeAction>() )
     {
-      if ( reward.item.empty() or m_store.contains( reward.item ) ) continue;
+      if ( reward.item.empty() or not get_item_matches( reward.item ).empty() ) continue;
       throw std::runtime_error( "Item '" + item_key.str() + "' has unknown sacrifice_action.reward.item '" + reward.item.str() + "' in " +
                                 m_json_file_path.string() );
     }
     for ( const auto &[property, output] :
-          { std::pair{ "forage_action.reward.item", item.get_forage_output() }, std::pair{ "destroy_action.reward.item", item.get_axe_output() },
+          { std::pair{ "forage_action.reward.item", item.get_reward<Cmp::ForageAction>().value_or( Cmp::ActionReward{} ).item },
+            std::pair{ "destroy_action.reward.item", item.get_reward<Cmp::DestroyAction>().value_or( Cmp::ActionReward{} ).item },
             std::pair{ "proximity_action.reward.item", item.get_reward<Cmp::ProximityAction>().value_or( Cmp::ActionReward{} ).item } } )
     {
-      if ( output.empty() or m_store.contains( output ) ) continue;
+      if ( output.empty() or not get_item_matches( output ).empty() ) continue;
       throw std::runtime_error( "Item '" + item_key.str() + "' has unknown " + property + " '" + output.str() + "' in " + m_json_file_path.string() );
     }
     const auto proximity_loot = item.get_reward<Cmp::ProximityAction>().value_or( Cmp::ActionReward{} ).loot;
@@ -174,6 +175,24 @@ void ItemStore::init_store()
     }
   }
   SPDLOG_DEBUG( "Item store loaded with {} items", m_store.size() );
+}
+
+std::vector<ItemStore::key_type> ItemStore::get_item_matches( const key_type &key ) const
+{
+  if ( not key.str().ends_with( '*' ) ) return m_store.contains( key ) ? std::vector<key_type>{ key } : std::vector<key_type>{};
+  const auto prefix = key.str().substr( 0, key.str().size() - 1 );
+  std::vector<key_type> matches;
+  for ( const auto &[type, _] : m_store )
+  {
+    if ( type.str().starts_with( prefix ) ) matches.push_back( type );
+  }
+  return matches;
+}
+
+ItemStore::key_type ItemStore::pick_item( const key_type &key ) const
+{
+  if ( not key.str().ends_with( '*' ) ) return key;
+  return get_random( get_item_matches( key ) ).item_type;
 }
 
 } // namespace Game::Sys

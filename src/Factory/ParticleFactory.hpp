@@ -7,6 +7,7 @@
 
 // clang-format off
 namespace Game::Cmp { class UUID; class ZOrderValue; }
+namespace Game::Cmp::Particle { struct FireballPalette; }
 // clang-format on
 
 namespace Game::Factory::Particle
@@ -183,6 +184,23 @@ void add_skelebones_ps( entt::registry &reg, const std::string &tag, int particl
 //! @param zorder Draw order relative to other entities.
 void add_lava_fireball_ps( entt::registry &reg, const std::string &tag, int particle_count, float lifetime_seconds, float speed, float size,
                            Cmp::UUID &uuid_cmp, sf::Vector2f pos, float zorder );
+
+//! @brief Spawn a single fireball shot from `from` at `to`, in a straight line or (with gravity) an arc that still passes
+//! through `to`. It is destroyed when its lifetime expires or it hits something (an obstacle, see
+//! Sys::ParticleSystem::check_collsion(), or the player).
+//! @param reg
+//! @param tag <location>.<item>.particle.<sprite>
+//! @param lifetime_seconds Flight time, in seconds, i.e. its range is lifetime_seconds * speed.
+//! @param speed Speed along the line from `from` to `to`, in world units per second.
+//! @param gravity Downwards acceleration bending the flight into an arc, in world units/s^2. Zero flies straight.
+//! @param size Fireball radius, in world units.
+//! @param uuid_cmp UUID assigned to the created entity.
+//! @param from World position the fireball is shot from.
+//! @param to World position the fireball is aimed at.
+//! @param zorder Draw order relative to other entities.
+//! @param palette The flame colours, e.g. Cmp::Particle::LavaFireballParticleSprite::kPurplePalette.
+void add_aimed_fireball_ps( entt::registry &reg, const std::string &tag, float lifetime_seconds, float speed, float gravity, float size, Cmp::UUID &uuid_cmp,
+                               sf::Vector2f from, sf::Vector2f to, float zorder, const Cmp::Particle::FireballPalette &palette );
 
 //! @brief Spawn an ember particle effect: each particle is launched upwards with a random spread, travels
 //! in a parabola and is destroyed when it falls back to the y position of `pos`.

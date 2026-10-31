@@ -11,6 +11,7 @@
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
+#include <Components/Npc/SummonOffering.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/NoPath.hpp>
@@ -284,6 +285,11 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
   auto *inventory_slot_level_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inventory_slot_entt );
   if ( inventory_slot_level_cmp ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( world_item_entt, inventory_slot_level_cmp->m_level ); }
 
+  if ( const auto *offering_cmp = reg().try_get<Cmp::Npc::SummonOffering>( inventory_slot_entt ) )
+  {
+    reg().emplace_or_replace<Cmp::Npc::SummonOffering>( world_item_entt, Cmp::Npc::SummonOffering{ offering_cmp->m_summoner } );
+  }
+
   auto *inventory_slot_dowsing_cmp = reg().try_get<Cmp::Inventory::DowsingTarget>( inventory_slot_entt );
   if ( inventory_slot_dowsing_cmp )
   {
@@ -395,6 +401,12 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
   {
     reg.emplace_or_replace<Cmp::Inventory::DowsingTarget>( inventory_entity, dowsing_target_cmp->target );
     reg.emplace_or_replace<Cmp::ZOrderValue>( inventory_entity, -12.f );
+  }
+
+  // keep a summoning offering bound to its summoned NPC while it is carried
+  if ( const auto *offering_cmp = reg.try_get<Cmp::Npc::SummonOffering>( world_item_entt ) )
+  {
+    reg.emplace_or_replace<Cmp::Npc::SummonOffering>( inventory_entity, Cmp::Npc::SummonOffering{ offering_cmp->m_summoner } );
   }
 
   // transfer the wear level from the worlditem to the new player inventory item

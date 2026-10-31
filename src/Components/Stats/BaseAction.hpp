@@ -81,8 +81,18 @@ enum class Probability {
 //! @brief Optional side effect of an action: spawn an NPC at the action's source position.
 struct SpawnNpcEffect
 {
+  //! @brief Where the NPC spawns relative to the action's source.
+  enum class Location {
+    //! @brief A random free cell beside the source.
+    NEARBY,
+    //! @brief The NPC sprite centred on the source's exact pixel centre (not grid snapped), e.g. on an altar.
+    CENTER
+  };
+
   //! @brief The NPC to spawn, see res/json/npc.json.
   std::string npc_type;
+  //! @brief Where the NPC spawns relative to the action's source.
+  Location location{ Location::NEARBY };
   //! @brief How likely the effect is to fire each time the action is applied.
   Probability probability{ Probability::ALWAYS };
   //! @brief Max live NPCs spawned by each world item instance, across all of its actions. 0 = unlimited.
@@ -189,8 +199,20 @@ struct SideEffects
 //! @details A sacrifice_action reward sets exactly one of item, wealth or altar, optionally restricted to one altar
 //! location. A forage_action/destroy_action reward only sets item. A proximity_action reward sets exactly one of item or
 //! loot, dropped beside the source.
+//! The item may end with '*' to pick a random item key with that prefix (e.g. "item.jewelry*"), and may set a target
+//! (inventory or nearby) and, when nearby, a count of items to drop.
 struct ActionReward
 {
+  //! @brief Where a reward item is placed.
+  enum class Target {
+    //! @brief The action's default placement, e.g. inventory for an empty-hand forage, beside the plant for a gloves forage.
+    DEFAULT,
+    //! @brief Added to the player inventory, or dropped nearby if the player's hand isn't free.
+    INVENTORY,
+    //! @brief Dropped on random free cells beside the source.
+    NEARBY
+  };
+
   //! @brief An altar effect triggered by sacrificing the item.
   enum class AltarEffect {
     //! @brief No altar effect.
@@ -224,6 +246,12 @@ struct ActionReward
   //! @brief Max drops over each source item instance's lifetime, picked up or not; further drops are skipped. 0 = unlimited
   //! (proximity_action only).
   int max_instances{ 0 };
+  //! @brief Where the reward item is placed.
+  Target target{ Target::DEFAULT };
+  //! @brief The number of reward items dropped, "count" in items.json (Target::NEARBY only).
+  int quantity{ 1 };
+  //! @brief Whether the item ends with '*', i.e. is a random pick from the item keys with that prefix.
+  [[nodiscard]] bool is_item_wildcard() const { return item.str().ends_with( '*' ); }
   //! @brief The number of reward fields that are set.
   //! @return int Count of item, wealth, altar and loot that are not their unused value.
   [[nodiscard]] int count() const

@@ -66,6 +66,7 @@
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/NpcStore.hpp>
+#include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Systems/Threats/LightningSystem.hpp>
 #include <Systems/Threats/WormholeSystem.hpp>
@@ -344,11 +345,12 @@ void ActionSystem::player_plant_interact()
 
       auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
 
-      // copy the type and outputs: creating items or removing the plant below can invalidate plant_item
+      // copy the type and rewards: creating items or removing the plant below can invalidate plant_item
       const auto plant_type = plant_item->item_type;
-      const auto forage_output = plant_item->get_forage_output();
-      const auto axe_output = plant_item->get_axe_output();
+      const auto forage_reward = plant_item->get_reward<Cmp::ForageAction>();
+      const auto axe_reward = plant_item->get_reward<Cmp::DestroyAction>();
       const auto axe_hits = plant_item->get_axe_hits();
+      const Cmp::Position plant_bounds( plant_mb_cmp.position, plant_mb_cmp.size );
 
       // each forage wears the plant down
       auto wear_plant = [&]()
@@ -377,14 +379,22 @@ void ActionSystem::player_plant_interact()
       if ( inventory_type == "" )
       {
         // plants without a forage_action.reward.item (see items.json) give nothing
-        if ( not forage_output.empty() )
+        if ( forage_reward )
         {
           auto plantleaves_particle_uuid = Cmp::UUID::generate();
           Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
                                                  plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
-          get_systems_event_queue().trigger( Events::AddInventoryEvent( forage_output ) );
-          const auto spawn_action = Utils::Player::apply_action_from_inventory_item<Cmp::SpawnAction>( reg() );
-          trigger_side_effects( spawn_action, Utils::Player::get_position( reg() ) );
+          if ( forage_reward->target == Cmp::ActionReward::Target::DEFAULT )
+          {
+            get_systems_event_queue().trigger( Events::AddInventoryEvent( Sys::ItemStore::instance().pick_item( forage_reward->item ) ) );
+          }
+          else { grant_item_reward( *forage_reward, plant_bounds, plant_entt ); }
+          // only an item that went to the inventory has its spawn_action applied here
+          if ( forage_reward->target != Cmp::ActionReward::Target::NEARBY )
+          {
+            const auto spawn_action = Utils::Player::apply_action_from_inventory_item<Cmp::SpawnAction>( reg() );
+            trigger_side_effects( spawn_action, Utils::Player::get_position( reg() ) );
+          }
           m_sound_bank.get_effect( "chopping_final" ).play();
           wear_plant();
         }
@@ -395,13 +405,18 @@ void ActionSystem::player_plant_interact()
       {
         // Gloves stay equipped: the forage is dropped next to the plant and the plant's action modifiers are deliberately
         // skipped. They don't protect against hawthorn lightning though.
-        if ( ( plant_type == "item.plant.nettle" or plant_type == "item.plant.hawthorn" ) and not forage_output.empty() )
+        if ( ( plant_type == "item.plant.nettle" or plant_type == "item.plant.hawthorn" ) and forage_reward )
         {
           auto plantleaves_particle_uuid = Cmp::UUID::generate();
           Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
                                                  plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
-          get_systems_event_queue().trigger(
-              Events::CreateItemEvent( Cmp::Position( find_forage_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ), forage_output, "drop_loot" ) );
+          if ( forage_reward->target == Cmp::ActionReward::Target::DEFAULT )
+          {
+            get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( find_forage_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
+                                                                        Sys::ItemStore::instance().pick_item( forage_reward->item ), "drop_loot" ) );
+          }
+          // the gloves occupy the inventory, so an inventory reward is dropped nearby
+          else { grant_item_reward( *forage_reward, plant_bounds, plant_entt ); }
           wear_plant();
           auto gloves_wear = Sys::PersistSystem::get<Cmp::Persist::GlovesWearPerForage>( reg() ).get_value();
           get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), gloves_wear ) );
@@ -457,11 +472,13 @@ void ActionSystem::player_plant_interact()
           }
 
           // plants without a destroy_action.reward.item (see items.json) drop nothing
-          if ( not axe_output.empty() )
+          if ( axe_reward and axe_reward->target == Cmp::ActionReward::Target::DEFAULT )
           {
-            get_systems_event_queue().trigger(
-                Events::CreateItemEvent( Cmp::Position( plant_mb_cmp.position, Constants::kGridSizePxF ), axe_output, "drop_loot" ) );
+            get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( plant_mb_cmp.position, Constants::kGridSizePxF ),
+                                                                        Sys::ItemStore::instance().pick_item( axe_reward->item ), "drop_loot" ) );
           }
+          // the axe occupies the inventory, so an inventory reward is dropped nearby
+          else if ( axe_reward ) { grant_item_reward( *axe_reward, plant_bounds, plant_entt ); }
           const auto destroy_action = Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
 
           trigger_side_effects( destroy_action, plant_pos_cmp, plant_entt );

@@ -7,8 +7,7 @@ namespace Game::Cmp::Npc
 //! @brief Marker component tagging an entity as the Elder Mother NPC (a hostile, multiblock NPC type).
 struct ElderMother
 {
-  //! @brief Always true; presence of the component is what identifies the entity as an Elder Mother.
-  bool eldermother{ true };
+  sf::Time sfx_cooldown{ sf::Time::Zero };
 };
 
 } // namespace Game::Cmp::Npc

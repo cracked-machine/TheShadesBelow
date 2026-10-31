@@ -18,21 +18,31 @@ namespace Game::Events
 //! Factory::Npc::create_npc() directly.
 struct CreateNpcEvent
 {
+  //! @brief How the spawn position is derived from `position`.
+  enum class Placement {
+    //! @brief The NPC's top-left at `position`.
+    AT,
+    //! @brief `position` is the source's bounds; spawn on a random free cell from the nearest ring around it.
+    NEARBY,
+    //! @brief `position` is the source's bounds; centre the NPC sprite on its exact pixel centre (not grid snapped).
+    CENTER
+  };
+
   //! @brief Construct a new CreateNpcEvent object
   //! @param npc_type See res/json/npc.json.
   //! @param position The spawn position. The size is replaced by the NPC sprite's size.
   //! @param max_instances Max live NPCs spawned by `source_uuid`; the spawn is skipped once reached. 0 = unlimited.
   //! @param source_uuid The Cmp::UUID of the spawning world item, or empty if there is none (then unlimited).
   //! @param on_created Optional callback receiving the newly created NPC entity. Not called when skipped or if creation fails.
-  //! @param spawn_nearby true: `position` is the source's bounds; spawn on a random free cell from the nearest ring around it.
+  //! @param placement How the spawn position is derived from `position`, see Placement.
   CreateNpcEvent( Sys::NpcKey npc_type, Cmp::Position position, int max_instances = 0, Cmp::UUID source_uuid = {},
-                  std::function<void( entt::entity )> on_created = {}, bool spawn_nearby = false )
+                  std::function<void( entt::entity )> on_created = {}, Placement placement = Placement::AT )
       : m_npc_type( std::move( npc_type ) ),
         m_position( std::move( position ) ),
         m_max_instances( max_instances ),
         m_source_uuid( source_uuid ),
         m_on_created( std::move( on_created ) ),
-        m_spawn_nearby( spawn_nearby )
+        m_placement( placement )
   {
   }
 
@@ -46,8 +56,8 @@ struct CreateNpcEvent
   Cmp::UUID m_source_uuid;
   //! @brief Optional callback receiving the newly created NPC entity.
   std::function<void( entt::entity )> m_on_created;
-  //! @brief true: m_position is the source's bounds; spawn on a random free cell from the nearest ring around it.
-  bool m_spawn_nearby{ false };
+  //! @brief How the spawn position is derived from m_position.
+  Placement m_placement{ Placement::AT };
 };
 
 } // namespace Game::Events

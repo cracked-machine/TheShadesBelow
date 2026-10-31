@@ -2,6 +2,7 @@
 #define SRC_SYSTEMS_BASESYSTEM_HPP__
 
 #include <entt/entity/entity.hpp>
+#include <functional>
 #include <entt/entity/fwd.hpp>
 #include <entt/signal/dispatcher.hpp>
 
@@ -13,7 +14,7 @@
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
 namespace Game::PathFinding{ class SpatialHashGrid; }
-namespace Game::Cmp { class BaseAction; class Position; }
+namespace Game::Cmp { class BaseAction; class Position; struct ActionReward; }
 // clang-format on
 
 namespace Game::Sys
@@ -61,6 +62,16 @@ protected:
   //! @param pos_cmp The action's source position (e.g. the world item, or the player for inventory/store actions).
   //! @param source_entt The world item whose action this is, if any. Its Cmp::UUID keys Cmp::SpawnNpcEffect::max_instances.
   void trigger_side_effects( const Cmp::BaseAction &action, const Cmp::Position &pos_cmp, entt::entity source_entt = entt::null );
+
+  //! @brief Grant a reward item at its explicit target (see Cmp::ActionReward::Target): Events::AddInventoryEvent if the
+  //! player's hand is free, otherwise Events::CreateItemEvent on free cells beside the source. A wildcard item is picked
+  //! afresh for each item. Callers handle Cmp::ActionReward::Target::DEFAULT themselves, which is treated as NEARBY here.
+  //! @param reward The reward, its item must be set.
+  //! @param source The source's bounds, e.g. the plant or altar.
+  //! @param source_entt The world item whose action this is, if any. Keys Cmp::ActionReward::max_instances.
+  //! @param on_created Optional callback receiving each item dropped in the world (not called for an inventory item).
+  void grant_item_reward( const Cmp::ActionReward &reward, const Cmp::Position &source, entt::entity source_entt = entt::null,
+                          const std::function<void( entt::entity )> &on_created = {} );
 
   //! @brief Entity registry: non-owning, re-assignable reference (by SceneManager).
   //! The registry is owned by the current Scene.

@@ -85,11 +85,11 @@
                 "allOf": [{ "$ref": "#/definitions/action_effect" }]
               },
               "destroy_action": {
-                "description": "Applied when the item's world entity is destroyed/removed. Optional reward.item: the item dropped when this plant is chopped down with an axe.",
+                "description": "Applied when the item's world entity is destroyed/removed. Optional reward.item: the item dropped at the plant when it is chopped down with an axe, unless reward.target is set.",
                 "allOf": [{ "$ref": "#/definitions/action_effect" }, { "$ref": "#/definitions/item_only_reward" }]
               },
               "forage_action": {
-                "description": "Optional. Applied when the player forages the plant. With gloves only its side effects apply, not its stat changes. Optional reward.item: the item gained when this plant is foraged with an empty hand (added to inventory) or gloves (dropped next to the plant).",
+                "description": "Optional. Applied when the player forages the plant. With gloves only its side effects apply, not its stat changes. Optional reward.item: the item gained when this plant is foraged with an empty hand (added to inventory) or gloves (dropped next to the plant), unless reward.target is set.",
                 "allOf": [{ "$ref": "#/definitions/action_effect" }, { "$ref": "#/definitions/item_only_reward" }]
               },
               "spawn_action": {
@@ -181,6 +181,7 @@
               "additionalProperties": false,
               "properties": {
                 "type": { "type": "string", "pattern": "^npc\\." },
+                "location": { "type": "string", "enum": ["nearby", "center"], "description": "nearby (default): a random free cell beside the source. center: the NPC sprite centred on the source's exact pixel centre, e.g. on an altar." },
                 "probability": { "$ref": "#/definitions/probability" },
                 "trigger_range": { "type": "integer", "minimum": 1, "description": "Distance in blocks from the item that the player must be within before the NPC spawn is triggered." },
                 "max_instances": { "type": "integer", "minimum": 1, "description": "Max live NPCs spawned by each item instance, across all its actions. Further spawns are skipped. Omit for unlimited." }
@@ -237,8 +238,8 @@
       "properties": {
         "item": {
           "type": "string",
-          "pattern": "^item\\.",
-          "description": "The item gained. Must be a valid item key. For sacrifice_action, the spawned item will replace player inventory."
+          "pattern": "^item\\.[^*]+\\*?$",
+          "description": "The item gained. Must be a valid item key, or an item key prefix ending with '*' to pick a random matching item for each item granted (e.g. item.jewelry*). For sacrifice_action, the spawned item is dropped at the player by default."
         },
         "wealth": {
           "type": "integer",
@@ -274,24 +275,37 @@
           "type": "integer",
           "minimum": 0,
           "description": "How long (seconds) a timed altar effect lasts, e.g. ToxicImmunity."
+        },
+        "target": {
+          "type": "string",
+          "enum": ["inventory", "nearby"],
+          "description": "Where the reward item is placed. inventory: added to the player inventory, or dropped nearby if the player's hand isn't free. nearby: dropped on random free cells beside the source. Omit for the action's default placement."
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The number of reward items dropped (target nearby only). Defaults to 1."
         }
-      }
+      },
+      "dependencies": { "target": ["item"], "count": ["target"] },
+      "if": { "required": ["count"] },
+      "then": { "properties": { "target": { "const": "nearby" } } }
     },
     "sacrifice_reward_entry": {
       "allOf": [{ "$ref": "#/definitions/reward" }],
-      "propertyNames": { "enum": ["item", "wealth", "altar", "location", "tick"] },
+      "propertyNames": { "enum": ["item", "wealth", "altar", "location", "tick", "target", "count"] },
       "oneOf": [{ "required": ["item"] }, { "required": ["wealth"] }, { "required": ["altar"] }],
       "dependencies": { "tick": ["altar"] }
     },
     "item_only_reward": {
-      "properties": { "reward": { "type": "object", "required": ["item"], "maxProperties": 1 } }
+      "properties": { "reward": { "type": "object", "required": ["item"], "propertyNames": { "enum": ["item", "target", "count"] } } }
     },
     "proximity_reward": {
       "properties": {
         "reward": {
           "type": "object",
           "oneOf": [{ "required": ["item"] }, { "required": ["loot"] }],
-          "propertyNames": { "enum": ["item", "loot", "trigger_range", "max_instances"] }
+          "propertyNames": { "enum": ["item", "loot", "trigger_range", "max_instances", "target", "count"] }
         }
       }
     },

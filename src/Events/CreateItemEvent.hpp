@@ -4,6 +4,7 @@
 #include <Components/Position.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <entt/entity/entity.hpp>
+#include <functional>
 #include <utility>
 
 namespace Game::Events
@@ -22,15 +23,17 @@ struct CreateItemEvent
   //! @param max_instances Max drops over `source_entt`'s lifetime (with `spawn_nearby`), picked up or not; the drop is skipped once reached.
   //! 0 = unlimited.
   //! @param source_entt The dropping world item, or entt::null if there is none (then unlimited).
+  //! @param on_created Optional callback receiving the newly created world item entity. Not called when skipped or if creation fails.
   explicit CreateItemEvent( Cmp::Position pos, Sys::ItemKey item, std::string sfx = "", float zorder = 0.f, bool spawn_nearby = false,
-                            int max_instances = 0, entt::entity source_entt = entt::null )
+                            int max_instances = 0, entt::entity source_entt = entt::null, std::function<void( entt::entity )> on_created = {} )
       : m_pos( pos ),
         m_item( std::move( item ) ),
         m_sfx( std::move( sfx ) ),
         m_zorder( zorder ),
         m_spawn_nearby( spawn_nearby ),
         m_max_instances( max_instances ),
-        m_source_entt( source_entt )
+        m_source_entt( source_entt ),
+        m_on_created( std::move( on_created ) )
   {
   }
 
@@ -48,6 +51,8 @@ struct CreateItemEvent
   int m_max_instances{ 0 };
   //! @brief The dropping world item, or entt::null if there is none.
   entt::entity m_source_entt{ entt::null };
+  //! @brief Optional callback receiving the newly created world item entity.
+  std::function<void( entt::entity )> m_on_created;
 };
 
 } // namespace Game::Events

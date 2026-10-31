@@ -15,7 +15,10 @@
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Npc/SummonOffering.hpp>
 #include <Components/Particle/FlameParticleSprite.hpp>
+#include <Components/Persistent/AltarOfferingCooldown.hpp>
+#include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -94,7 +97,16 @@ void AltarSystem::update( sf::Time dt )
 void AltarSystem::check_player_altar_sacrifice( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp )
 {
   auto *altar_timer = reg().try_get<Cmp::Altar::ActivationTimer>( Utils::Player::get_entity( reg() ) );
-  if ( altar_timer and *altar_timer < altar_timer->get_timeout() ) return;
+  if ( altar_timer )
+  {
+    // summoning offerings (e.g. Azazel's jewelry) come in batches, so they can be sacrificed in quicker succession
+    const auto inventory_entt = Utils::Player::get_inventory_entt( reg() );
+    const bool is_summon_offering = reg().valid( inventory_entt ) and reg().all_of<Cmp::Npc::SummonOffering>( inventory_entt );
+    const sf::Time timeout = is_summon_offering
+                                 ? sf::seconds( Sys::PersistSystem::get<Cmp::Persist::AltarSummonOfferingCooldown>( reg() ).get_value() )
+                                 : sf::seconds( Sys::PersistSystem::get<Cmp::Persist::AltarOfferingCooldown>( reg() ).get_value() );
+    if ( *altar_timer < timeout ) return;
+  }
 
   auto *altar_uuid_cmp = reg().try_get<Cmp::UUID>( altar_entity );
   if ( not altar_uuid_cmp ) throw std::runtime_error( "Altar does not have UUID" );
@@ -131,6 +143,18 @@ void AltarSystem::check_player_altar_sacrifice( entt::entity altar_entity, Cmp::
   const auto sacrifice_action = Utils::Player::apply_action_from_item_store<Cmp::SacrificeAction>( reg(), item.item_type );
   trigger_side_effects( sacrifice_action, Cmp::Position( altar_cmp.position, altar_cmp.size ), altar_entity );
   Factory::Player::destroy_inventory( reg(), item.item_type );
+  // the offering has left the inventory, so an inventory reward item can take its place
+  if ( reward and not reward->item.empty() )
+  {
+    // items dropped by a summoning sacrifice are bound to the summoned NPC, e.g. Azazel stays until its jewelry is sacrificed
+    std::function<void( entt::entity )> on_created;
+    if ( sacrifice_action.side_effects().spawn_npc )
+    {
+      on_created = [this, summoner = *altar_uuid_cmp]( entt::entity item_entt )
+      { reg().emplace_or_replace<Cmp::Npc::SummonOffering>( item_entt, summoner ); };
+    }
+    sacrifice_for_item( altar_cmp, *reward, on_created );
+  }
 }
 
 bool AltarSystem::grant_sacrifice_reward( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid,
@@ -143,9 +167,10 @@ bool AltarSystem::grant_sacrifice_reward( entt::entity altar_entity, Cmp::Altar:
   }
 
   // Each offering has exactly one reward (enforced by ItemStore), see "sacrifice_action.reward" in items.json
+  // The item itself is granted by sacrifice_for_item() once the offering has left the inventory
   if ( not reward->item.empty() )
   {
-    sacrifice_for_item( altar_cmp, reward->item );
+    play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
     return true;
   }
   if ( reward->wealth > 0 )
@@ -176,10 +201,16 @@ bool AltarSystem::grant_sacrifice_reward( entt::entity altar_entity, Cmp::Altar:
   return false;
 }
 
-void AltarSystem::sacrifice_for_item( const Cmp::Altar::MultiBlock &altar_cmp, const Sys::ItemKey &reward_item )
+void AltarSystem::sacrifice_for_item( const Cmp::Altar::MultiBlock &altar_cmp, const Cmp::ActionReward &reward,
+                                      const std::function<void( entt::entity )> &on_created )
 {
-  play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
-  get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), reward_item, "drop_loot" ) );
+  if ( reward.target == Cmp::ActionReward::Target::DEFAULT )
+  {
+    get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), Sys::ItemStore::instance().pick_item( reward.item ),
+                                                                "drop_loot", 0.f, false, 0, entt::null, on_created ) );
+    return;
+  }
+  grant_item_reward( reward, Cmp::Position( altar_cmp.position, altar_cmp.size ), entt::null, on_created );
 }
 
 void AltarSystem::sacrifice_for_wealth( const Cmp::Altar::MultiBlock &altar_cmp, int wealth )
@@ -308,7 +339,8 @@ void AltarSystem::activate_altar( entt::entity altar_entity, const Cmp::Altar::M
 
   anim_cmp->m_sprite_type = active_sprite_type;
   const sf::Vector2f particle_offset = ( altar_cmp.get_kind() == Cmp::Altar::Kind::CRYPT ) ? sf::Vector2f{ 8.f, 24.f } : sf::Vector2f{ 40.f, 21.f };
-  Factory::Particle::add_crypt_altar_ps( m_reg, Factory::Altar::kExtraLifeParticleTag, 0.5, 25.f, altar_uuid, altar_cmp.position + particle_offset, 5000 );
+  Factory::Particle::add_crypt_altar_ps( m_reg, Factory::Altar::kExtraLifeParticleTag, 0.5, 25.f, altar_uuid, altar_cmp.position + particle_offset,
+                                         5000 );
   m_sound_bank.get_effect( "crypt_altar_activate" ).play();
 }
 

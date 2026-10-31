@@ -94,7 +94,10 @@ void GrimoireSystem::for_each_subpage( const Sys::ItemKey &item_key, const std::
     for ( Cmp::Grimoire::SubPage *sub_page :
           { &page.plant_subpage, &page.forage_subpage, &page.drop_subpage, &page.forage_special_subpage, &page.drop_special_subpage } )
     {
-      if ( sub_page->item_key == item_key ) { fn( page_idx, *sub_page ); }
+      // a wildcard subpage (e.g. "item.jewelry*") is discovered by any item with its prefix
+      const auto &sub_key = sub_page->item_key.str();
+      const bool matches = sub_key.ends_with( '*' ) ? item_key.str().starts_with( sub_key.substr( 0, sub_key.size() - 1 ) ) : sub_page->item_key == item_key;
+      if ( matches ) { fn( page_idx, *sub_page ); }
     }
   }
 }
@@ -172,7 +175,15 @@ std::string GrimoireSystem::reward_display_name( const Cmp::ActionReward &reward
 {
   if ( not reward.item.empty() )
   {
-    return Sys::SpriteStore::instance().get( Sys::ItemStore::instance().get( reward.item ).sprite_type ).display_name();
+    const std::string quantity = reward.quantity > 1 ? std::format( "{}x ", reward.quantity ) : "";
+    if ( reward.is_item_wildcard() )
+    {
+      // e.g. "item.jewelry*" -> "random jewelry"
+      auto prefix = reward.item.str().substr( 0, reward.item.str().size() - 1 );
+      if ( prefix.starts_with( "item." ) ) { prefix.erase( 0, std::string_view( "item." ).size() ); }
+      return std::format( "{}random {}", quantity, prefix );
+    }
+    return quantity + Sys::SpriteStore::instance().get( Sys::ItemStore::instance().get( reward.item ).sprite_type ).display_name();
   }
   if ( not reward.loot.empty() ) { return Sys::SpriteStore::instance().get( reward.loot ).display_name(); }
   if ( reward.wealth > 0 ) { return std::format( "+{} wealth", reward.wealth ); }

@@ -55,10 +55,10 @@ void LavaFireballParticleSprite::simulate( sf::Time dt )
 
     // y grows downwards: the particle is launched with a negative y velocity, so it sits above the
     // emitter (smaller y) for the whole flight, while gravity pulls the y velocity back to positive.
-    p.m_velocity.y += kGravity * dt.asSeconds();
+    p.m_velocity.y += m_gravity * dt.asSeconds();
     p.m_vertex.position += p.m_velocity * dt.asSeconds();
 
-    p.m_vertex.color = sf::Color( 255, 110, 20 );
+    p.m_vertex.color = m_palette.body;
 
     // re-roll the ragged outline every so often, rather than every frame, so it flickers instead of buzzing
     p.m_flicker_countdown -= dt;
@@ -71,7 +71,8 @@ void LavaFireballParticleSprite::simulate( sf::Time dt )
 
     // falling, and back down at the height it was emitted from: kill it.
     // The velocity check stops this from firing on the emit frame, where the particle is still at the emitter.
-    if ( p.m_velocity.y > 0.f and p.m_vertex.position.y >= p.m_emitter_position.y )
+    // An aimed fireball never lands, it flies until its lifetime expires or it hits something.
+    if ( m_land_at_emitter and p.m_velocity.y > 0.f and p.m_vertex.position.y >= p.m_emitter_position.y )
     {
       p.m_lifetime = sf::Time::Zero;
       p.m_vertex.color.a = 0;
@@ -150,9 +151,9 @@ void LavaFireballParticleSprite::draw( sf::RenderTarget &target, sf::RenderState
     };
 
     // dark glow drawn first, larger than the body so it peeks out from behind it, then the hot core on top
-    push_layer( kGlowLayer, sf::Color( 200, 30, 0, static_cast<std::uint8_t>( alpha / 2 ) ) );
+    push_layer( kGlowLayer, sf::Color( m_palette.glow.r, m_palette.glow.g, m_palette.glow.b, static_cast<std::uint8_t>( alpha / 2 ) ) );
     push_layer( kBodyLayer, p.m_vertex.color );
-    push_layer( kCoreLayer, sf::Color( 255, 230, 120, alpha ) );
+    push_layer( kCoreLayer, sf::Color( m_palette.core.r, m_palette.core.g, m_palette.core.b, alpha ) );
   }
 
   target.draw( verts.data(), verts.size(), sf::PrimitiveType::Triangles, states );

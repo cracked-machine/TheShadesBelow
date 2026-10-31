@@ -41,6 +41,7 @@
 #include <Components/Persistent/EmberDamage.hpp>
 #include <Components/Persistent/FearHealthDmgPerSec.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/AzazelFireballDamage.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
@@ -96,7 +97,6 @@
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
-#include <Events/CreateItemEvent.hpp>
 #include <Events/CreateLootEvent.hpp>
 #include <Events/GrimoireUpdateEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
@@ -209,6 +209,8 @@ void PlayerSystem::update( sf::Time dt )
     set_player_on_fire();
     check_burning_particle_collision( Cmp::Particle::LavaFireballParticleSprite::kTagSuffix,
                                       Sys::PersistSystem::get<Cmp::Persist::LavaFireballDamage>( reg() ).get_value() );
+    check_burning_particle_collision( Cmp::Particle::LavaFireballParticleSprite::kAzazelTagSuffix,
+                                      Sys::PersistSystem::get<Cmp::Persist::AzazelFireballDamage>( reg() ).get_value() );
     check_burning_particle_collision( Cmp::Particle::EmberParticleSprite::kTagSuffix,
                                       Sys::PersistSystem::get<Cmp::Persist::EmberDamage>( reg() ).get_value() );
     check_burning_particle_collision( Cmp::Particle::LightningRodParticleSprite::kTagSuffix,
@@ -911,8 +913,8 @@ void PlayerSystem::drop_proximity_reward( const Cmp::ActionReward &reward, const
   }
   else if ( not reward.item.empty() )
   {
-    get_systems_event_queue().trigger(
-        Events::CreateItemEvent( source, reward.item, "drop_loot", 0.f, /*spawn_nearby=*/true, reward.max_instances, source_entt ) );
+    // a proximity reward is dropped nearby by default
+    grant_item_reward( reward, source, source_entt );
   }
 }
 

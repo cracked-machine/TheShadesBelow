@@ -120,6 +120,7 @@
               "additionalProperties": false,
               "properties": {
                 "type": { "type": "string", "pattern": "^npc\\." },
+                "location": { "type": "string", "enum": ["nearby", "center"], "description": "nearby (default): a random free cell beside the source. center: the NPC sprite centred on the source's exact pixel centre, e.g. on an altar." },
                 "probability": { "$ref": "#/definitions/probability" },
                 "max_instances": { "type": "integer", "minimum": 1, "description": "Max live NPCs spawned by each item instance, across all its actions. Further spawns are skipped. Omit for unlimited." }
               }

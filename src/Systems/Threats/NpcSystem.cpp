@@ -13,6 +13,7 @@
 #include <Components/Grave/Segment.hpp>
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/Adder.hpp>
+#include <Components/Npc/Azazel.hpp>
 #include <Components/Npc/Container.hpp>
 #include <Components/Npc/Drknox.hpp>
 #include <Components/Npc/ElderMother.hpp>
@@ -29,6 +30,7 @@
 #include <Components/Npc/Skeleton.hpp>
 #include <Components/Npc/SpawnedBy.hpp>
 #include <Components/Npc/Spider.hpp>
+#include <Components/Npc/SummonOffering.hpp>
 #include <Components/Npc/Watchman.hpp>
 #include <Components/Npc/WatchmanSearchlight.hpp>
 #include <Components/Npc/Wisp.hpp>
@@ -38,6 +40,10 @@
 #include <Components/Particle/LavaFireballParticleSprite.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/PendingTeleport.hpp>
+#include <Components/Persistent/AzazelFireballArc.hpp>
+#include <Components/Persistent/AzazelFireballColour.hpp>
+#include <Components/Persistent/AzazelFireballCooldown.hpp>
+#include <Components/Persistent/AzazelFireballSpeed.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcMimicTint.hpp>
@@ -65,6 +71,7 @@
 #include <Events/UpdateNpcPositionEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/NpcFactory.hpp>
+#include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/FlyingSystem.hpp>
@@ -112,7 +119,7 @@ void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
   }
 
   Cmp::Position spawn_pos = event.m_position;
-  if ( event.m_spawn_nearby )
+  if ( event.m_placement == Events::CreateNpcEvent::Placement::NEARBY )
   {
     auto cell = find_nearby_spawn_cell( event.m_position, event.m_npc_type );
     if ( not cell )
@@ -121,6 +128,12 @@ void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
       return;
     }
     spawn_pos = Cmp::Position( *cell, Constants::kGridSizePxF );
+  }
+  else if ( event.m_placement == Events::CreateNpcEvent::Placement::CENTER )
+  {
+    // NPCs are top-left anchored, so offset by half the sprite. Deliberately not snapped to the grid.
+    const sf::Vector2f npc_size = npc_sprite_size( event.m_npc_type );
+    spawn_pos = Cmp::Position( event.m_position.getCenter() - npc_size / 2.f, npc_size );
   }
 
   auto npc_entt = Factory::Npc::create_npc( reg(), spawn_pos, event.m_npc_type );
@@ -135,10 +148,15 @@ void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
   if ( event.m_on_created ) { event.m_on_created( npc_entt ); }
 }
 
-std::optional<sf::Vector2f> NpcSystem::find_nearby_spawn_cell( const Cmp::Position &source, const Sys::NpcKey &npc_type )
+sf::Vector2f NpcSystem::npc_sprite_size( const Sys::NpcKey &npc_type )
 {
   const auto &npc_cmp = Sys::NpcStore::instance().get( npc_type );
-  const sf::Vector2f npc_size = Sys::SpriteStore::instance().get( npc_cmp.sprite_type_list.front() ).sprite_size();
+  return Sys::SpriteStore::instance().get( npc_cmp.sprite_type_list.front() ).sprite_size();
+}
+
+std::optional<sf::Vector2f> NpcSystem::find_nearby_spawn_cell( const Cmp::Position &source, const Sys::NpcKey &npc_type )
+{
+  const sf::Vector2f npc_size = npc_sprite_size( npc_type );
   auto npc_navmesh = m_npc_navmesh.lock();
   if ( not npc_navmesh ) return std::nullopt;
   auto ghost_navmesh = m_ghost_navmesh.lock();
@@ -290,6 +308,53 @@ void NpcSystem::update( sf::Time dt )
       get_systems_event_queue().trigger( Events::TeleportEntityEvent( Utils::Player::get_entity( reg() ), mimic_pos,
                                                                       Sys::SpriteKey( "sprite.death.anim.banish" ), std::nullopt, teleport_delay ) );
     }
+  }
+
+  update_azazel( dt );
+}
+
+void NpcSystem::update_azazel( sf::Time dt )
+{
+  const auto fireball_tag = std::string( Cmp::Particle::LavaFireballParticleSprite::kAzazelTag );
+  // remove any spent fireballs
+  Factory::Particle::delete_expired_particle_sprites( reg(), fireball_tag );
+
+  const sf::Time fire_cooldown = sf::seconds( Sys::PersistSystem::get<Cmp::Persist::AzazelFireballCooldown>( reg() ).get_value() );
+  const float fire_speed = Sys::PersistSystem::get<Cmp::Persist::AzazelFireballSpeed>( reg() ).get_value();
+  const float fire_arc = Sys::PersistSystem::get<Cmp::Persist::AzazelFireballArc>( reg() ).get_value();
+  auto fire_palette = Cmp::Particle::LavaFireballParticleSprite::kPurplePalette;
+  fire_palette.body = Sys::PersistSystem::get<Cmp::Persist::AzazelFireballColour>( reg() );
+  const auto &world_view = RenderSystem::get_world_view();
+  const sf::Vector2f player_centre = Utils::Player::get_position( reg() ).getCenter();
+
+  // destroying an NPC modifies the registry, so collect the despawns rather than destroying them mid-iteration
+  std::vector<entt::entity> kill_list;
+  for ( auto [npc_entt, azazel_cmp, pos_cmp, spawned_by_cmp] : reg().view<Cmp::Npc::Azazel, Cmp::Position, Cmp::Npc::SpawnedBy>().each() )
+  {
+    // Azazel is banished once every offering dropped by its summoning sacrifice (world item or carried) has been sacrificed
+    const auto offerings = reg().view<Cmp::Npc::SummonOffering>();
+    const bool has_offerings = std::ranges::any_of( offerings, [&]( entt::entity offering_entt )
+    { return offerings.get<Cmp::Npc::SummonOffering>( offering_entt ).m_summoner == spawned_by_cmp.m_source; } );
+    if ( not has_offerings )
+    {
+      kill_list.push_back( npc_entt );
+      continue;
+    }
+
+    azazel_cmp.fire_cooldown += dt;
+    if ( azazel_cmp.fire_cooldown < fire_cooldown ) continue;
+    if ( not Utils::is_visible_in_view( world_view, pos_cmp ) ) continue;
+    azazel_cmp.fire_cooldown = sf::Time::Zero;
+
+    // a shallow arc onto the player, low enough that obstacles in between still block it (see ParticleSystem::check_collsion)
+    auto fireball_uuid = Cmp::UUID::generate();
+    Factory::Particle::add_aimed_fireball_ps( reg(), fireball_tag, 3.f, fire_speed, fire_arc, 4.f, fireball_uuid, pos_cmp.getCenter(), player_centre,
+                                              pos_cmp.position.y + 64.f, fire_palette );
+  }
+  for ( auto azazel_entt : kill_list )
+  {
+    SPDLOG_INFO( "Azazel entity {} banished: all offerings sacrificed", static_cast<int>( azazel_entt ) );
+    on_destroy_npc_event( Events::DestroyNpcEvent( azazel_entt ) );
   }
 }
 

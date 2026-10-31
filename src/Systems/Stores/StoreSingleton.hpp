@@ -200,6 +200,16 @@ protected:
     throw std::runtime_error( "Unknown reward altar: '" + altar + "'" );
   }
 
+  //! @brief Convert the "reward.target" string of a JSON action entry.
+  //! @throws std::runtime_error on an unknown value.
+  static Cmp::ActionReward::Target make_reward_target( const std::string &target )
+  {
+    using Target = Cmp::ActionReward::Target;
+    if ( target == "inventory" ) return Target::INVENTORY;
+    if ( target == "nearby" ) return Target::NEARBY;
+    throw std::runtime_error( "Unknown reward target: '" + target + "'" );
+  }
+
   //! @brief Convert the "reward.location" string of a JSON action entry.
   //! @throws std::runtime_error on an unknown value.
   static Cmp::Altar::Kind make_reward_location( const std::string &location )
@@ -228,6 +238,16 @@ protected:
     if ( probability == "always" ) return Cmp::Probability::ALWAYS;
     if ( probability == "player_luck" ) return Cmp::Probability::PLAYER_LUCK;
     throw std::runtime_error( "Unknown side effect probability: '" + probability + "'" );
+  }
+
+  //! @brief Convert the "side_effects.spawn_npc.location" string of a JSON action entry.
+  //! @throws std::runtime_error on an unknown value.
+  static Cmp::SpawnNpcEffect::Location make_spawn_npc_location( const std::string &location )
+  {
+    using Location = Cmp::SpawnNpcEffect::Location;
+    if ( location == "nearby" ) return Location::NEARBY;
+    if ( location == "center" ) return Location::CENTER;
+    throw std::runtime_error( "Unknown spawn_npc location: '" + location + "'" );
   }
 
   //! @brief Convert the "side_effects.movement.npc.type" string of a JSON action entry.
@@ -259,7 +279,17 @@ protected:
       if ( rw.contains( "trigger_range" ) ) { reward.trigger_range = JsonDeserializer::get_int( rw, "trigger_range" ); }
       if ( rw.contains( "max_instances" ) ) { reward.max_instances = JsonDeserializer::get_int( rw, "max_instances" ); }
       if ( rw.contains( "tick" ) ) { reward.tick = JsonDeserializer::get_int( rw, "tick" ); }
+      if ( rw.contains( "target" ) ) { reward.target = make_reward_target( JsonDeserializer::get_string( rw, "target" ) ); }
+      if ( rw.contains( "count" ) ) { reward.quantity = JsonDeserializer::get_int( rw, "count" ); }
       if ( reward.count() == 0 ) throw std::runtime_error( "reward must set at least one of item, wealth, altar or loot" );
+      if ( ( rw.contains( "target" ) or rw.contains( "count" ) ) and reward.item.empty() )
+      {
+        throw std::runtime_error( "reward target and count require an item" );
+      }
+      if ( rw.contains( "count" ) and ( reward.target != Cmp::ActionReward::Target::NEARBY or reward.quantity < 1 ) )
+      {
+        throw std::runtime_error( "reward count must be at least 1 and requires target 'nearby'" );
+      }
       return reward;
     };
 
@@ -288,6 +318,8 @@ protected:
       const auto &spawn_npc = fx.at( "spawn_npc" );
       effects.spawn_npc = Cmp::SpawnNpcEffect{
           .npc_type = JsonDeserializer::get_string( spawn_npc, "type" ),
+          .location = spawn_npc.contains( "location" ) ? make_spawn_npc_location( JsonDeserializer::get_string( spawn_npc, "location" ) )
+                                                       : Cmp::SpawnNpcEffect::Location::NEARBY,
           .probability = get_probability( spawn_npc ),
           .max_instances = spawn_npc.contains( "max_instances" ) ? JsonDeserializer::get_int( spawn_npc, "max_instances" ) : 0,
           .trigger_range = spawn_npc.contains( "trigger_range" ) ? JsonDeserializer::get_int( spawn_npc, "trigger_range" ) : 1 };

@@ -73,6 +73,63 @@
     "detail": "Axe wear: killing skeleton",
     "format": "%.1f"
   },
+  "AltarOfferingCooldown": {
+    "type": "float",
+    "value": 3.0,
+    "min_value": 0.0,
+    "max_value": 10.0,
+    "detail": "Altar Offering Cooldown",
+    "format": "%.1f"
+  },
+  "AltarSummonOfferingCooldown": {
+    "type": "float",
+    "value": 1.5,
+    "min_value": 0.0,
+    "max_value": 3.0,
+    "detail": "Altar Summon Offering Cooldown",
+    "format": "%.1f"
+  },
+  "AzazelFireballArc": {
+    "type": "float",
+    "value": 60.0,
+    "min_value": 0.0,
+    "max_value": 400.0,
+    "detail": "Azazel Fireball Arc",
+    "format": "%.0f"
+  },
+  "AzazelFireballColour": {
+    "type": "sf::Color",
+    "value" : {
+      "r": 170,
+      "g": 60,
+      "b": 255,
+      "a": 255
+    }
+  },
+  "AzazelFireballCooldown": {
+    "type": "float",
+    "value": 1.5,
+    "min_value": 0.2,
+    "max_value": 10.0,
+    "detail": "Azazel Fireball Cooldown",
+    "format": "%.1f"
+  },
+  "AzazelFireballDamage": {
+    "type": "int",
+    "value": 10,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Azazel Fireball Damage",
+    "format": "%d"
+  },
+  "AzazelFireballSpeed": {
+    "type": "float",
+    "value": 90.0,
+    "min_value": 20.0,
+    "max_value": 400.0,
+    "detail": "Azazel Fireball Speed",
+    "format": "%.0f"
+  },
   "BlastRadius": {
     "type": "int",
     "value": 2,
