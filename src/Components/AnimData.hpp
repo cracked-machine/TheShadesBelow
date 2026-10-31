@@ -91,6 +91,9 @@ struct AnimData
   //! @param framerate Frames per second. 0 = not animated.
   void set_framerate_override( float framerate ) { m_framerate_override = framerate; }
 
+  //! @brief Revert to the sprite sheet's framerate.
+  void clear_framerate_override() { m_framerate_override.reset(); }
+
 private:
   //! @brief Replaces the sprite sheet's framerate when set, in frames per second.
   std::optional<float> m_framerate_override;

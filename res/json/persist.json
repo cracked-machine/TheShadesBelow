@@ -188,7 +188,7 @@
   },
   "FlyingOscillationAmplitude": {
     "type": "float",
-    "value": 2.0,
+    "value": 0.1,
     "min_value": 0.0,
     "max_value": 8.0,
     "detail": "Broom flight: max vertical oscillation amplitude (px)",

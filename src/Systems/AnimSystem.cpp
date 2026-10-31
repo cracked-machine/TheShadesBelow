@@ -27,8 +27,11 @@ void AnimSystem::update( sf::Time dt )
   for ( auto [anim_entt, anim_cmp, pos_cmp] : anim_view.each() )
   {
     if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), pos_cmp ) ) continue;
-    // don't accumulate dt if the player is not moving - fixes initial rapid framerate bug
-    if ( anim_cmp.m_sprite_type.contains( "sprite.player" ) and ( Utils::Player::get_direction( reg() ) == sf::Vector2f( 0, 0 ) ) ) continue;
+    // don't accumulate dt if the player is not moving - fixes initial rapid framerate bug.
+    // The flying sprite is exempt: the broom keeps animating while hovering.
+    if ( anim_cmp.m_sprite_type.contains( "sprite.player" ) and anim_cmp.m_sprite_type != "sprite.player.flying" and
+         ( Utils::Player::get_direction( reg() ) == sf::Vector2f( 0, 0 ) ) )
+      continue;
     if ( anim_cmp.m_enabled )
     {
       const auto &ms = Sys::SpriteStore::instance().get( anim_cmp.m_sprite_type );

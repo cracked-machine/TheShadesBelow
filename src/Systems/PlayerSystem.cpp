@@ -599,6 +599,9 @@ void PlayerSystem::update_player_animation()
   const float effective_speed = movement_speed * speed_penalty;
   anim_cmp.set_framerate_override( effective_speed > 0.f ? effective_speed / stride_length : 1.f / stride_length );
 
+  auto &last_dir = Utils::Player::get_last_direction( reg() );
+  const bool flying = Utils::Player::is_flying( reg() );
+
   // update the animation state based on movement direction
   if ( direction_cmp == sf::Vector2f( 0.0f, 0.0f ) ) { anim_cmp.m_enabled = false; }
   else
@@ -606,16 +609,40 @@ void PlayerSystem::update_player_animation()
     // Held direction but no real displacement this frame (see PlayerSystem::update_player_position)
     // means collision blocked the move - freeze the walk-cycle instead of animating in place.
     anim_cmp.m_enabled = movement_delta->m_distance > 0.f;
-    if ( direction_cmp.x == 1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.east"; }
-    else if ( direction_cmp.x == -1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.west"; }
-    else if ( direction_cmp.y == -1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.north"; }
-    else if ( direction_cmp.y == 1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.south"; }
+    if ( not flying )
+    {
+      if ( direction_cmp.x == 1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.east"; }
+      else if ( direction_cmp.x == -1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.west"; }
+      else if ( direction_cmp.y == -1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.north"; }
+      else if ( direction_cmp.y == 1 ) { anim_cmp.m_sprite_type = "sprite.player.walk.south"; }
+    }
 
     // Store the facing direction from raw input - not resolved movement - so it keeps updating even
     // when the player is blocked (e.g. turning to face an obstacle to dig it without moving into it).
-    auto &last_dir = Utils::Player::get_last_direction( reg() );
     if ( std::abs( direction_cmp.x ) >= std::abs( direction_cmp.y ) ) { last_dir = sf::Vector2f{ direction_cmp.x > 0.f ? 1.f : -1.f, 0.f }; }
     else { last_dir = sf::Vector2f{ 0.f, direction_cmp.y > 0.f ? 1.f : -1.f }; }
+  }
+
+  // The flying sheet is a single east-facing sequence: mirror it for west, keep the last side for north/south.
+  // It animates continuously at the sheet's own framerate, even while hovering or blocked.
+  if ( flying )
+  {
+    anim_cmp.m_sprite_type = "sprite.player.flying";
+    anim_cmp.m_enabled = true;
+    anim_cmp.clear_framerate_override();
+    if ( last_dir.x > 0.f ) { anim_cmp.m_flip_x = false; }
+    else if ( last_dir.x < 0.f ) { anim_cmp.m_flip_x = true; }
+  }
+  // just landed: restore the walking sprite for the current facing, even if the player is standing still.
+  // The flying sheet has more frames than the walk sheets, so restart the walk cycle to stay in range.
+  else if ( anim_cmp.m_sprite_type == "sprite.player.flying" )
+  {
+    anim_cmp.m_flip_x = false;
+    anim_cmp.m_current_frame = 0;
+    if ( last_dir.x > 0.f ) { anim_cmp.m_sprite_type = "sprite.player.walk.east"; }
+    else if ( last_dir.x < 0.f ) { anim_cmp.m_sprite_type = "sprite.player.walk.west"; }
+    else if ( last_dir.y < 0.f ) { anim_cmp.m_sprite_type = "sprite.player.walk.north"; }
+    else { anim_cmp.m_sprite_type = "sprite.player.walk.south"; }
   }
 }
 
