@@ -1,9 +1,11 @@
+#include <Components/BurrCount.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LerpPosition.hpp>
 #include <Components/Loot.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Persistent/BurrSlowFactor.hpp>
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
@@ -17,6 +19,8 @@
 #include <Components/ZOrderValue.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Sprites/SpriteSheet.hpp>
+#include <Systems/PersistSystem.hpp>
+#include <Utils/Cardinal.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Npc.hpp>
 #include <Utils/Player.hpp>
@@ -250,6 +254,28 @@ std::string wrap_text_to_width( const std::string &text, std::size_t max_chars_p
     }
   }
   return result;
+}
+
+float get_burr_speed_multiplier( entt::registry &reg, entt::entity entt, const Cmp::Position &pos )
+{
+  const float slow_factor = Sys::PersistSystem::get<Cmp::Persist::BurrSlowFactor>( reg ).get_value();
+
+  float multiplier = 1.f;
+  if ( const auto *burr_cmp = reg.try_get<Cmp::BurrCount>( entt ) ) { multiplier *= burr_cmp->multiplier( slow_factor ); }
+
+  // burrs stuck to an obstacle face slow the grid position outside that face; a burr stuck to an NPC only slows that NPC.
+  // Centred half-size hitbox so diagonally neighbouring cells don't count.
+  const auto hitbox = Cmp::RectBounds::scaled( pos, 0.5f );
+  for ( auto [obstacle_entt, obstacle_burr_cmp, obstacle_pos_cmp] : reg.view<Cmp::BurrCount, Cmp::Position>( entt::exclude<Cmp::Npc::NPC> ).each() )
+  {
+    for ( auto side : Utils::Cardinal() )
+    {
+      if ( obstacle_burr_cmp.count( side ) == 0 ) continue;
+      const Cmp::Position outside_cell( obstacle_pos_cmp.position + side.vector().componentWiseMul( Constants::kGridSizePxF ), Constants::kGridSizePxF );
+      if ( hitbox.findIntersection( outside_cell ) ) { multiplier *= obstacle_burr_cmp.multiplier( slow_factor, side ); }
+    }
+  }
+  return multiplier;
 }
 
 bool is_current_scene( entt::registry &reg, Cmp::SceneSettings::SceneId scene_id )

@@ -39,6 +39,7 @@ namespace Game::Cmp
 class ZOrderValue;
 class Position;
 class Armed;
+class BurrCount;
 struct FractalCurve;
 } // namespace Game::Cmp
 
@@ -108,6 +109,11 @@ private:
 
   //! @brief Used by GraveyardScene when player has key and relic carryitems
   void render_arrow_compass();
+
+  //! @brief Draw the burrs stuck to an NPC, one burr sprite per Cmp::BurrCount burr, where each struck.
+  //! @param burr_cmp The NPC's burrs.
+  //! @param body_rect The NPC's on-screen bounds.
+  void render_attached_burrs( const Cmp::BurrCount &burr_cmp, const sf::FloatRect &body_rect );
 
   //! @brief Draw a small wear-level bar above an item, filled proportionally to `wearlevel`.
   //! @param wearlevel

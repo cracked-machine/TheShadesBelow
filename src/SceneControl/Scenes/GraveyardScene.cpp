@@ -52,6 +52,7 @@
 #include <Systems/AltarSystem.hpp>
 #include <Systems/AnimSystem.hpp>
 #include <Systems/ArrowSystem.hpp>
+#include <Systems/BurrSystem.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/ExitSystem.hpp>
@@ -326,6 +327,7 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::ExitSystem>().update_exit_zorder() );
   PROFILED( m_sys.find<Sys::Store::Type::ExitSystem>().check_exit_collision() );
   PROFILED( m_sys.find<Sys::Store::Type::ArrowSystem>().update( dt ) );
+  PROFILED( m_sys.find<Sys::Store::Type::BurrSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::InventorySystem>().update( dt ) );
 
   // embers arc over obstacles rather than colliding with them

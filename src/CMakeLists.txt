@@ -47,6 +47,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Sprites/Shockwave.cpp
     ${CMAKE_SOURCE_DIR}/src/Sprites/CircleSegment.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ArrowSystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/BurrSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ProcGen/LevelGenerator.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ProcGen/CellAutomataSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ProcGen/DLASystem.cpp

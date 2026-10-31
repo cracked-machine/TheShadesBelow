@@ -15,6 +15,12 @@ inline static constexpr sf::Vector2f kGridSizePxF{ 16.f, 16.f };
 //! @brief Display resolution used when the actual display size cannot be determined.
 inline static constexpr sf::Vector2u kFallbackDisplaySize{ 1920, 1080 };
 
+//! @brief Shortest fraction of the origin->mouse distance a bow shot or thrown item travels, on the briefest charge.
+inline static constexpr float kMinChargeFraction{ 0.25f };
+
+//! @brief Seconds a bow draw or item throw must be charged to reach the mouse position.
+inline static constexpr float kFullChargeSeconds{ 1.f };
+
 //! @brief the directory containing the game resources files
 inline static std::filesystem::path res_dir( "res" );
 

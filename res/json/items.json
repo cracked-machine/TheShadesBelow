@@ -421,7 +421,7 @@
   },
   "item.burr": {
     "sprite": "sprite.burr",
-    "wear": { "location": "both", "expiryseconds": 0, "active_only": false },
+    "wear": { "location": "both", "expiryseconds": 60, "active_only": false },
     "consumable": "none",
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [

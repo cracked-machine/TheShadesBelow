@@ -184,6 +184,14 @@ SCENESETTING &scene_setting( entt::registry &reg )
 //! @return bool true if the registry's Cmp::SceneSettings::CurrentScene matches `scene_id`. False if it has none (e.g. menu scenes).
 bool is_current_scene( entt::registry &reg, Cmp::SceneSettings::SceneId scene_id );
 
+//! @brief Movement speed multiplier from burrs stuck to `entt`, and burrs stuck to the faces of obstacles neighbouring `pos`
+//! (each face slows the grid position outside it).
+//! @param reg reference to the entt registry
+//! @param entt The moving entity (player or NPC); its own Cmp::BurrCount, if any, is included.
+//! @param pos The moving entity's current position.
+//! @return float Compounded multiplier in (0, 1], see Cmp::Persist::BurrSlowFactor. 1.f if there are no burrs.
+float get_burr_speed_multiplier( entt::registry &reg, entt::entity entt, const Cmp::Position &pos );
+
 //! @brief Get the Grid Position object
 //! @tparam Signedness The signedness of the grid position coordinates (int or unsigned int).
 //! @param registry reference to the entt registry

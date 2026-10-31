@@ -52,9 +52,8 @@ void ArrowSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
     // release an arrow; how far it flies depends on how long the bow was held drawn
     m_sound_bank.get_effect( "release_bow" ).play();
 
-    static const float kMinChargeFraction = 0.25f;
-    static const float kFullDrawSeconds = 1.f;
-    float charge_fraction = m_bow_drawing ? std::clamp( m_bow_draw_clock.getElapsedTime().asSeconds() / kFullDrawSeconds, kMinChargeFraction, 1.f )
+    float charge_fraction = m_bow_drawing ? std::clamp( m_bow_draw_clock.getElapsedTime().asSeconds() / Constants::kFullChargeSeconds,
+                                                        Constants::kMinChargeFraction, 1.f )
                                           : 1.f;
     m_bow_drawing = false;
 

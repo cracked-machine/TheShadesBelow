@@ -1,6 +1,7 @@
 #ifndef SRC_UTILS_CARDINAL_HPP__
 #define SRC_UTILS_CARDINAL_HPP__
 
+#include <SFML/System/Angle.hpp>
 #include <SFML/System/Vector2.hpp>
 
 namespace Game::Utils
@@ -68,6 +69,21 @@ public:
       default:
         return { 0.f, 0.f };
     }
+  }
+
+  //! @brief The rotation of this direction, clockwise from East as SFML rotates with y pointing down.
+  //! @return sf::Angle 0 deg East, 90 deg South, 180 deg West, 270 deg North
+  [[nodiscard]] constexpr sf::Angle angle() const { return sf::degrees( static_cast<float>( m_value ) * 90.f ); }
+
+  //! @brief The cardinal direction of a vector's larger axis; a tie resolves to the horizontal axis.
+  //! @param v The vector to classify.
+  //! @return Cardinal East/West when |x| >= |y|, otherwise South/North.
+  [[nodiscard]] static constexpr Cardinal dominant( sf::Vector2f v )
+  {
+    const float abs_x = v.x < 0.f ? -v.x : v.x;
+    const float abs_y = v.y < 0.f ? -v.y : v.y;
+    if ( abs_x >= abs_y ) return v.x >= 0.f ? East : West;
+    return v.y >= 0.f ? South : North;
   }
 
   //! @brief Minimal iterator over the 4 Cardinal values, using a plain non-wrapping counter —

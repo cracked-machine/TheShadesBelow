@@ -667,7 +667,9 @@ void NpcSystem::update_movement_for( PathFinding::SpatialHashGrid &navmesh, entt
     lerp_pos_cmp->m_start = pos_cmp->position;
   }
 
-  lerp_pos_cmp->m_lerp_factor += lerp_pos_cmp->m_lerp_speed * dt.asSeconds();
+  // re-evaluated every frame so the NPC speeds back up mid-step as burrs expire
+  const float burr_multiplier = Utils::get_burr_speed_multiplier( reg(), npc_entity, *pos_cmp );
+  lerp_pos_cmp->m_lerp_factor += lerp_pos_cmp->m_lerp_speed * burr_multiplier * dt.asSeconds();
 
   // lerp has completed
   if ( lerp_pos_cmp->m_lerp_factor >= 1.0f )

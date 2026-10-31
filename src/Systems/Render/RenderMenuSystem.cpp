@@ -13,6 +13,9 @@
 #include <Components/Persistent/BombBonus.hpp>
 #include <Components/Persistent/BombDamage.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
+#include <Components/Persistent/BurrExpiry.hpp>
+#include <Components/Persistent/BurrSlowFactor.hpp>
+#include <Components/Persistent/BurrThrowCooldown.hpp>
 #include <Components/Persistent/BradycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
 #include <Components/Persistent/CorruptionDamage.hpp>
@@ -266,6 +269,12 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::BowReleaseWear>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlantWearPerForage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GlovesWearPerForage>( reg() ).render_widget();
+
+    ImGui::SeparatorText( "Burr Settings" );
+
+    Sys::PersistSystem::get<Cmp::Persist::BurrExpiry>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::BurrSlowFactor>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::BurrThrowCooldown>( reg() ).render_widget();
 
     ImGui::SeparatorText( "Broom Flight Settings" );
 

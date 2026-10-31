@@ -1864,9 +1864,9 @@
     },
     "sprite.burr": {
       "spritesheet": {
-        "displayname": "Sticky Burr",
+        "displayname": "Burr",
         "texture_path": "res/textures/plants_loot.png",
-        "sprite_indices": [9],
+        "sprite_indices": [21],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2182,6 +2182,19 @@
         "texture_path": "res/textures/player2.png",
         "sprite_indices": [9, 10, 11],
         "indices_per_sequence": 3,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.player.flying": {
+      "spritesheet": {
+        "displayname": "sprite.player.flying",
+        "texture_path": "res/textures/playerflying.png",
+        "sprite_indices": [0,1,2,3],
+        "indices_per_sequence": 4,
         "framerate": 10,
         "grid_size": {
           "x": 1,

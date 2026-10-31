@@ -212,8 +212,10 @@ void reset_curse( entt::registry &reg )
 float get_speed_penalty( entt::registry &reg )
 {
   auto *penalty_cmp = reg.try_get<Cmp::Player::SpeedPenalty>( get_entity( reg ) );
-  if ( penalty_cmp ) { return penalty_cmp->m_penalty; }
-  return 1.f;
+  float penalty = penalty_cmp ? penalty_cmp->m_penalty : 1.f;
+  // a flying player passes over burrs on the ground
+  if ( not is_flying( reg ) ) penalty *= Utils::get_burr_speed_multiplier( reg, get_entity( reg ), get_position( reg ) );
+  return penalty;
 }
 
 void remove_lerp_cmp( entt::registry &reg )

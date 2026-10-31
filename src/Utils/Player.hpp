@@ -133,9 +133,10 @@ Cmp::Player::Curse &get_curse( entt::registry &reg );
 //! @throws std::runtime_error if the player has no Cmp::Player::Curse.
 void reset_curse( entt::registry &reg );
 
-//! @brief Get the player's current movement speed multiplier from Cmp::Player::SpeedPenalty.
+//! @brief Get the player's current movement speed multiplier from Cmp::Player::SpeedPenalty and any burrs on the ground
+//! under the player (see Utils::get_burr_speed_multiplier).
 //! @param reg reference to the entt registry
-//! @return float The speed penalty multiplier, or 1.f if the player has no Cmp::Player::SpeedPenalty.
+//! @return float The speed penalty multiplier, or 1.f if the player is neither penalised nor walking over burrs.
 float get_speed_penalty( entt::registry &reg );
 
 //! @brief Remove the player's Cmp::LerpPosition component, if present, to prevent stale

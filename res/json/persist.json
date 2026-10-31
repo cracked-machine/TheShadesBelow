@@ -162,6 +162,30 @@
     "detail": "Bow wear: per arrow released",
     "format": "%.1f"
   },
+  "BurrExpiry": {
+    "type": "float",
+    "value": 10.0,
+    "min_value": 1.0,
+    "max_value": 60.0,
+    "detail": "Burr expiry (seconds)",
+    "format": "%.1f"
+  },
+  "BurrSlowFactor": {
+    "type": "float",
+    "value": 0.75,
+    "min_value": 0.1,
+    "max_value": 1.0,
+    "detail": "Burr slow factor (per burr, compounding)",
+    "format": "%.2f"
+  },
+  "BurrThrowCooldown": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 5.0,
+    "detail": "Burr throw cooldown after pickup/throw (seconds)",
+    "format": "%.1f"
+  },
   "FlyingOscillationAmplitude": {
     "type": "float",
     "value": 2.0,

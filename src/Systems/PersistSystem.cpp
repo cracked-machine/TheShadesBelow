@@ -13,6 +13,9 @@
 #include <Components/Persistent/BombBonus.hpp>
 #include <Components/Persistent/BombDamage.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
+#include <Components/Persistent/BurrExpiry.hpp>
+#include <Components/Persistent/BurrSlowFactor.hpp>
+#include <Components/Persistent/BurrThrowCooldown.hpp>
 #include <Components/Persistent/BradycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
 #include <Components/Persistent/CorruptionDamage.hpp>
@@ -249,6 +252,9 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::VertigoHealthDmgPerSec>();
   add_component<Cmp::Persist::PlayerOnFireHealthDmgPerSec>();
   add_component<Cmp::Persist::BowReleaseWear>();
+  add_component<Cmp::Persist::BurrExpiry>();
+  add_component<Cmp::Persist::BurrSlowFactor>();
+  add_component<Cmp::Persist::BurrThrowCooldown>();
   add_component<Cmp::Persist::FlyingOscillationAmplitude>();
   add_component<Cmp::Persist::FlyingLiftOffset>();
   add_component<Cmp::Persist::PlayerRenderOffset>();

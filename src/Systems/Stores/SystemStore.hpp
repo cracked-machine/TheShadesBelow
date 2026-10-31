@@ -24,6 +24,7 @@ class ArrowSystem;
 class AltarSystem;
 class BaseSystem;
 class BombSystem;
+class BurrSystem;
 class CorruptionHazardSystem;
 class CryptSystem;
 class ExitSystem;
@@ -75,6 +76,8 @@ public:
     ArrowSystem,
     //! @brief Key for BombSystem.
     BombSystem,
+    //! @brief Key for BurrSystem.
+    BurrSystem,
     //! @brief Key for ProcGen::CellAutomataSystem.
     CellAutomataSystem,
     //! @brief Key for CorruptionHazardSystem.
@@ -226,6 +229,7 @@ template<> struct Store::SystemTraits<Store::Type::AltarSystem>            { usi
 template<> struct Store::SystemTraits<Store::Type::AnimSystem>             { using type = AnimSystem; };
 template<> struct Store::SystemTraits<Store::Type::ArrowSystem>            { using type = ArrowSystem; };
 template<> struct Store::SystemTraits<Store::Type::BombSystem>             { using type = BombSystem; };
+template<> struct Store::SystemTraits<Store::Type::BurrSystem>             { using type = BurrSystem; };
 template<> struct Store::SystemTraits<Store::Type::CellAutomataSystem>     { using type = ProcGen::CellAutomataSystem; };
 template<> struct Store::SystemTraits<Store::Type::CorruptionHazardSystem> { using type = CorruptionHazardSystem; };
 template<> struct Store::SystemTraits<Store::Type::CryptSystem>            { using type = Game::Sys::CryptSystem; };

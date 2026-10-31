@@ -3,10 +3,12 @@
 #include <Components/AbsoluteOffset.hpp>
 #include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AbsoluteRotation.hpp>
+#include <Components/AbsoluteScale.hpp>
 #include <Components/AbsoluteTint.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Armed.hpp>
+#include <Components/BurrCount.hpp>
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/Chest.hpp>
 #include <Components/Crypt/Entrance.hpp>
@@ -17,8 +19,8 @@
 #include <Components/Exit.hpp>
 #include <Components/FractalCurve.hpp>
 #include <Components/Grave/ExitMultiBlock.hpp>
-#include <Components/Greyscale.hpp>
 #include <Components/Grave/MultiBlock.hpp>
+#include <Components/Greyscale.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/WearLevel.hpp>
@@ -232,6 +234,7 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
   const auto *rotation_cmp = reg().try_get<Cmp::AbsoluteRotation>( entity );
   const auto *tint_cmp = reg().try_get<Cmp::AbsoluteTint>( entity );
   const auto *render_offset_cmp = reg().try_get<Cmp::AbsoluteRenderOffset>( entity );
+  const auto *scale_cmp = reg().try_get<Cmp::AbsoluteScale>( entity );
 
   const uint8_t alpha = alpha_cmp ? alpha_cmp->getAlpha() : 255;
   const sf::Vector2f origin = offset_cmp ? offset_cmp->getOffset() : sf::Vector2f{ 0.f, 0.f };
@@ -240,6 +243,8 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
   const sf::Shader *shader = ( reg().all_of<Cmp::Greyscale>( entity ) and load_greyscale_shader() ) ? &m_greyscale_shader : nullptr;
   sf::FloatRect render_rect = pos_cmp;
   if ( render_offset_cmp ) render_rect.position += render_offset_cmp->getOffset();
+  // the entity's on-screen bounds, before any mirroring shift below
+  const sf::FloatRect body_rect = render_rect;
 
   // a negative scale mirrors the sprite about its origin, so shift it back to mirror it in place
   sf::Vector2f scale{ 1.f, 1.f };
@@ -258,12 +263,18 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
     }
   }
 
+  if ( scale_cmp ) scale *= scale_cmp->getScale();
+
   safe_render_sprite_world( anim_cmp.m_sprite_type, render_rect, anim_cmp.getFrameIndexOffset() + anim_cmp.m_current_frame, scale, alpha, origin,
                             angle, tint, shader );
 
   // per-entity decorations drawn on top of the sprite
   if ( const auto *wear_cmp = reg().try_get<Cmp::Inventory::WearLevel>( entity ) ) render_wear_level( wear_cmp->m_level, pos_cmp );
   if ( const auto *armed_cmp = reg().try_get<Cmp::Armed>( entity ) ) render_armed_indicator( *armed_cmp, pos_cmp );
+  if ( const auto *burr_cmp = reg().try_get<Cmp::BurrCount>( entity ); burr_cmp and reg().all_of<Cmp::Npc::NPC>( entity ) )
+  {
+    render_attached_burrs( *burr_cmp, body_rect );
+  }
 }
 
 void RenderGameSystem::draw_shader_sprite( Cmp::Shader::SpriteOwner &shader_owner )
@@ -382,6 +393,20 @@ void RenderGameSystem::render_arrow_compass()
     if ( not placement ) return;
     safe_render_sprite_world( Cmp::Player::ArrowCompass::kSpriteType, placement->rect, 0, placement->scale, 255, placement->origin,
                               placement->angle );
+  }
+}
+
+void RenderGameSystem::render_attached_burrs( const Cmp::BurrCount &burr_cmp, const sf::FloatRect &body_rect )
+{
+  const sf::Vector2f half_cell = Constants::kGridSizePxF / 2.f;
+  const sf::Vector2f centre = body_rect.getCenter();
+
+  // each burr is drawn on the face where it struck the NPC (see Sys::BurrSystem), so it follows the NPC as it moves
+  for ( const auto &burr : burr_cmp.burrs() )
+  {
+    // the origin is the sprite centre, so the burr is scaled and turned to face outwards in place
+    safe_render_sprite_world( "sprite.burr", sf::FloatRect( centre + burr.offset - half_cell, Constants::kGridSizePxF ), 0,
+                              { Cmp::BurrCount::kStuckScale, Cmp::BurrCount::kStuckScale }, 255, half_cell, burr.side.angle() );
   }
 }
 

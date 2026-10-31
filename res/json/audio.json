@@ -13,6 +13,7 @@
     { "name": "broom_takeoff", "path": "res/audio/broom_takeoff.mp3" },
     { "name": "bubbling_lava", "path": "res/audio/lava.mp3" },
     { "name": "burning", "path": "res/audio/burning.mp3" },
+    { "name": "burr_throw", "path": "res/audio/burr_throw.mp3" },
     { "name": "chopping", "path": "res/audio/chopping.mp3" },
     { "name": "chopping_final", "path": "res/audio/chopping_final.mp3" },
     { "name": "cobweb_movement", "path": "res/audio/cobweb_movement.mp3" },

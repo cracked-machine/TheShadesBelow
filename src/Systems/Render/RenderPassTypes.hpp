@@ -14,6 +14,7 @@
 #include <Components/Ruin/BuildingMultiBlock.hpp>
 #include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
 #include <Components/Weapons/Arrow.hpp>
+#include <Components/Weapons/Burr.hpp>
 #include <Components/Wormhole/MultiBlock.hpp>
 
 #include <entt/core/type_traits.hpp>
@@ -31,7 +32,8 @@ using MultiBlockRoots = entt::type_list<Cmp::Altar::MultiBlock, Cmp::Crypt::Buil
 
 //! @brief Renderable entities that move after creation, so they are never indexed in the static render position
 //! grid and must be scanned every frame instead.
-using Movers = entt::type_list<Cmp::Player::Character, Cmp::Npc::NPC, Cmp::Weapons::Projectiles::Arrow, Cmp::Moveable, Cmp::ObstacleCap>;
+using Movers = entt::type_list<Cmp::Player::Character, Cmp::Npc::NPC, Cmp::Weapons::Projectiles::Arrow, Cmp::Weapons::Projectiles::Burr,
+                               Cmp::Moveable, Cmp::ObstacleCap>;
 
 namespace detail
 {

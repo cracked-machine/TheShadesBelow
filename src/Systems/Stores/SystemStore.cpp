@@ -5,6 +5,7 @@
 #include <Systems/AnimSystem.hpp>
 #include <Systems/ArrowSystem.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Systems/BurrSystem.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/ExitSystem.hpp>
 #include <Systems/FlyingSystem.hpp>
@@ -58,6 +59,7 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
   emplace<Type::AltarSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::AnimSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::BombSystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::BurrSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::CellAutomataSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::DiffusionLtdAggrSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::DoglegSystem>( m_initial_reg, window, sound_bank );
