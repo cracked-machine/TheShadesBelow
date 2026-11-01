@@ -39,8 +39,8 @@ constexpr float kNavigateDebounceThreshold = 0.5f;
 std::pair<const Cmp::Grimoire::SubPage *, std::string_view> resolve_subpage( const Cmp::Grimoire::Page &page, std::string_view name )
 {
   // the *_special_ prefixes must come before forage_/drop_ as the first matching prefix wins
-  const std::pair<std::string_view, const Cmp::Grimoire::SubPage *> prefixes[] = { { "forage_special_", &page.forage_special_subpage },
-                                                                                   { "drop_special_", &page.drop_special_subpage },
+  const std::pair<std::string_view, const Cmp::Grimoire::SubPage *> prefixes[] = { { "forage_special_", &page.forage_sacrifice_subpage },
+                                                                                   { "drop_special_", &page.drop_sacrifice_subpage },
                                                                                    { "plant_", &page.plant_subpage },
                                                                                    { "forage_", &page.forage_subpage },
                                                                                    { "drop_", &page.drop_subpage } };
@@ -92,11 +92,12 @@ void GrimoireSystem::for_each_subpage( const Sys::ItemKey &item_key, const std::
   {
     Cmp::Grimoire::Page &page = grimoire_cmp->pages[page_idx];
     for ( Cmp::Grimoire::SubPage *sub_page :
-          { &page.plant_subpage, &page.forage_subpage, &page.drop_subpage, &page.forage_special_subpage, &page.drop_special_subpage } )
+          { &page.plant_subpage, &page.forage_subpage, &page.drop_subpage, &page.forage_sacrifice_subpage, &page.drop_sacrifice_subpage } )
     {
       // a wildcard subpage (e.g. "item.jewelry*") is discovered by any item with its prefix
       const auto &sub_key = sub_page->item_key.str();
-      const bool matches = sub_key.ends_with( '*' ) ? item_key.str().starts_with( sub_key.substr( 0, sub_key.size() - 1 ) ) : sub_page->item_key == item_key;
+      const bool matches = sub_key.ends_with( '*' ) ? item_key.str().starts_with( sub_key.substr( 0, sub_key.size() - 1 ) )
+                                                    : sub_page->item_key == item_key;
       if ( matches ) { fn( page_idx, *sub_page ); }
     }
   }

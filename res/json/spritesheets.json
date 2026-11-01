@@ -1676,6 +1676,20 @@
         "walking_collision_mask": [false, true]
       }
     },
+    "sprite.item.none": {
+      "spritesheet": {
+        "displayname": "None",
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [45],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        },
+        "walking_collision_mask": [false, true]
+      }
+    },
     "sprite.item.preservedcat": {
       "spritesheet": {
         "displayname": "Preserved Cat",

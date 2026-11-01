@@ -3,9 +3,20 @@
 
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Stats/BaseAction.hpp>
+#include <Components/Stats/BurnAction.hpp>
+#include <Components/Stats/CarryAction.hpp>
+#include <Components/Stats/CollisionAction.hpp>
+#include <Components/Stats/ConsumeAction.hpp>
+#include <Components/Stats/DestroyAction.hpp>
+#include <Components/Stats/ForageAction.hpp>
+#include <Components/Stats/ProjectileAction.hpp>
+#include <Components/Stats/ProximityAction.hpp>
+#include <Components/Stats/SacrificeAction.hpp>
+#include <Components/Stats/SpawnAction.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
+#include <algorithm>
 #include <map>
 #include <vector>
 
@@ -31,9 +42,9 @@ public:
     SubPage forage_subpage;
     SubPage drop_subpage;
     //! @brief Reward for sacrificing the forage item.
-    SubPage forage_special_subpage;
+    SubPage forage_sacrifice_subpage;
     //! @brief Reward for sacrificing the drop item.
-    SubPage drop_special_subpage;
+    SubPage drop_sacrifice_subpage;
   };
 
   //! @brief Page list type, in Sys::ItemStore plant order.
@@ -60,16 +71,67 @@ public:
       pages.push_back( Page{ .plant_subpage = { .item_key = item_key, .sprite_key = "sprite.plant.unknown", .action_map = {} },
                              .forage_subpage = { .item_key = item.get_forage_output(), .sprite_key = "sprite.item.unknown", .action_map = {} },
                              .drop_subpage = { .item_key = item.get_axe_output(), .sprite_key = "sprite.item.unknown", .action_map = {} },
-                             .forage_special_subpage = { .item_key = sacrifice_reward( item.get_forage_output() ),
-                                                         .sprite_key = "sprite.item.unknown",
-                                                         .action_map = {} },
-                             .drop_special_subpage = {
+                             .forage_sacrifice_subpage = { .item_key = sacrifice_reward( item.get_forage_output() ),
+                                                           .sprite_key = "sprite.item.unknown",
+                                                           .action_map = {} },
+                             .drop_sacrifice_subpage = {
                                  .item_key = sacrifice_reward( item.get_axe_output() ), .sprite_key = "sprite.item.unknown", .action_map = {} } } );
+      auto &page = pages.back();
+      for ( SubPage *sub_page :
+            { &page.plant_subpage, &page.forage_subpage, &page.drop_subpage, &page.forage_sacrifice_subpage, &page.drop_sacrifice_subpage } )
+      {
+        prefill_empty_actions( *sub_page );
+      }
+      // an item whose sacrifice does nothing has no sacrifice reward, so every action of its sacrifice subpage is "none"
+      for ( const auto &[item_subpage, sacrifice_subpage] :
+            { std::pair{ &page.forage_subpage, &page.forage_sacrifice_subpage }, std::pair{ &page.drop_subpage, &page.drop_sacrifice_subpage } } )
+      {
+        if ( item_subpage->action_map.contains( std::string( SacrificeAction::kKey ) ) ) { prefill_none_actions( *sacrifice_subpage ); }
+      }
     }
   }
 
   //! @brief Whether the grimoire overlay is currently enabled/shown.
   bool is_enabled{ false };
+
+private:
+  //! @brief Call fn.template operator()<ActionT>() for every Cmp::BaseAction subclass (see src/Components/Stats).
+  template <typename Fn>
+  static void for_each_action_type( Fn &&fn )
+  {
+    const auto call = [&]<typename... ActionsT>() { ( fn.template operator()<ActionsT>(), ... ); };
+    call.template operator()<BurnAction, CarryAction, CollisionAction, ConsumeAction, DestroyAction, ForageAction, ProjectileAction, ProximityAction,
+                             SacrificeAction, SpawnAction>();
+  }
+
+  //! @brief Add each of the subpage item's actions that has no effect (see BaseAction::is_zero) to the subpage, so it
+  //! shows "none" before it is discovered. A wildcard subpage (e.g. "item.jewelry*") only gets an action that is empty
+  //! for every matching item.
+  static void prefill_empty_actions( SubPage &sub_page )
+  {
+    if ( sub_page.item_key.empty() ) return;
+    const auto &item_store = Sys::ItemStore::instance();
+    const auto matches = item_store.get_item_matches( sub_page.item_key );
+    if ( matches.empty() ) return;
+    for_each_action_type( [&]<typename ActionT>()
+    {
+      const bool all_empty = std::ranges::all_of( matches, [&]( const Sys::ItemKey &key )
+      {
+        const auto &item = item_store.get( key );
+        return item.has_action<ActionT>() and item.get_action<ActionT>().is_zero();
+      } );
+      if ( all_empty ) { sub_page.action_map.emplace( std::string( ActionT::kKey ), item_store.get( matches.front() ).get_action<ActionT>() ); }
+    } );
+  }
+
+  //! @brief Show the subpage as "sprite.item.none" (icon and "None" name) with an empty action for every action key,
+  //! so all of its actions show "none".
+  static void prefill_none_actions( SubPage &sub_page )
+  {
+    sub_page.sprite_key = "sprite.item.none";
+    for_each_action_type( [&]<typename ActionT>()
+    { sub_page.action_map.emplace( std::string( ActionT::kKey ), BaseAction( {}, {}, {}, {}, {}, {} ) ); } );
+  }
 };
 
 } // namespace Game::Cmp
