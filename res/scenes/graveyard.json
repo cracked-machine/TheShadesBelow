@@ -1870,7 +1870,7 @@
                  "visible":true,
                  "width":0,
                  "x":768,
-                 "y":816
+                 "y":848
                 }, 
                 {
                  "height":0,
@@ -1883,7 +1883,7 @@
                  "visible":true,
                  "width":0,
                  "x":800,
-                 "y":816
+                 "y":848
                 }, 
                 {
                  "height":0,
@@ -1909,7 +1909,7 @@
                  "visible":true,
                  "width":0,
                  "x":816,
-                 "y":816
+                 "y":848
                 }, 
                 {
                  "height":0,
@@ -1922,7 +1922,7 @@
                  "visible":true,
                  "width":0,
                  "x":784,
-                 "y":816
+                 "y":848
                 }, 
                 {
                  "height":0,
@@ -1962,6 +1962,19 @@
                  "width":0,
                  "x":752,
                  "y":800
+                }, 
+                {
+                 "height":0,
+                 "id":283,
+                 "name":"item.gloves",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":752,
+                 "y":848
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1970,7 +1983,7 @@
          "y":0
         }],
  "nextlayerid":11,
- "nextobjectid":283,
+ "nextobjectid":284,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

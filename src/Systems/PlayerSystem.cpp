@@ -36,12 +36,12 @@
 #include <Components/Particle/SpriteBase.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/PendingTeleport.hpp>
+#include <Components/Persistent/AzazelFireballDamage.hpp>
 #include <Components/Persistent/BradycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/DespairHealthDmgPerSec.hpp>
 #include <Components/Persistent/EmberDamage.hpp>
 #include <Components/Persistent/FearHealthDmgPerSec.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
-#include <Components/Persistent/AzazelFireballDamage.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
@@ -70,8 +70,8 @@
 #include <Components/Player/PostDeathTimeout.hpp>
 #include <Components/Player/RepelNpc.hpp>
 #include <Components/Player/TookDamage.hpp>
-#include <Components/Player/ToxicImmunity.hpp>
 #include <Components/Player/TorchRadius.hpp>
+#include <Components/Player/ToxicImmunity.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
@@ -886,8 +886,6 @@ void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
 
 void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
 {
-  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-  if ( inventory_type == "item.gloves" ) return;
 
   for ( auto [plant_entt, plant_mb_cmp, plant_worlditem_cmp] : reg().view<Cmp::PlantMultiBlock, Cmp::WorldItem>().each() )
   {
