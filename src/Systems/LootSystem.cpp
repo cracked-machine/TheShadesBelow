@@ -96,7 +96,7 @@ void LootSystem::on_create_loot_event( const Events::CreateLootEvent &event )
     // lets the loot be removed along with its source, e.g. when the plant burns
     if ( const auto *uuid_cmp = reg().try_get<Cmp::UUID>( event.m_source_entt ) ) { reg().emplace_or_replace<Cmp::DroppedBy>( loot_entt, *uuid_cmp ); }
   }
-  m_sound_bank.get_effect( "drop_loot" ).play();
+  if ( not event.m_sfx.empty() ) m_sound_bank.get_effect( event.m_sfx ).play();
 }
 
 void LootSystem::on_destroy_loot_event( const Events::DestroyLootEvent &event )

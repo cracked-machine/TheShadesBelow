@@ -459,7 +459,7 @@ void CryptSystem::check_chest_activation( Events::PlayerActionEvent::GameActions
     m_sound_bank.get_effect( "crypt_chest_open" ).play();
 
     // no source entity: PassageSystem destroys chests on reshuffle, which must not take the gold with them
-    get_systems_event_queue().trigger( Events::CreateLootEvent( "sprite.crypt.loot.gold", chest_pos_cmp ) );
+    get_systems_event_queue().trigger( Events::CreateLootEvent( "sprite.crypt.loot.gold", chest_pos_cmp, 0, entt::null, "drop_loot" ) );
   }
 }
 

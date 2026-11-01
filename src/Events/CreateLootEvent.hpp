@@ -6,6 +6,7 @@
 
 #include <entt/entity/entity.hpp>
 
+#include <string>
 #include <utility>
 
 namespace Game::Events
@@ -20,11 +21,14 @@ struct CreateLootEvent
   //! @param source The source's bounds; the loot drops on a random free cell from the nearest ring around it.
   //! @param max_instances Max drops over `source_entt`'s lifetime, picked up or not; the drop is skipped once reached. 0 = unlimited.
   //! @param source_entt The dropping world item, or entt::null if there is none (then unlimited).
-  CreateLootEvent( Sys::SpriteKey loot_type, Cmp::Position source, int max_instances = 0, entt::entity source_entt = entt::null )
+  //! @param sfx The sound effect to play when the loot drops, e.g. drop_loot. Empty = no sound.
+  CreateLootEvent( Sys::SpriteKey loot_type, Cmp::Position source, int max_instances = 0, entt::entity source_entt = entt::null,
+                   std::string sfx = {} )
       : m_loot_type( std::move( loot_type ) ),
-        m_source( std::move( source ) ),
+        m_source( source ),
         m_max_instances( max_instances ),
-        m_source_entt( source_entt )
+        m_source_entt( source_entt ),
+        m_sfx( std::move( sfx ) )
   {
   }
 
@@ -36,6 +40,8 @@ struct CreateLootEvent
   int m_max_instances{ 0 };
   //! @brief The dropping world item, or entt::null if there is none.
   entt::entity m_source_entt{ entt::null };
+  //! @brief The sound effect to play when the loot drops. Empty = no sound.
+  std::string m_sfx;
 };
 
 } // namespace Game::Events
