@@ -96,6 +96,10 @@ sf::FloatRect snap_to_grid( const Cmp::Position &position, Rounding rounding ) n
 //! @return sf::FloatRect A small (2x2 px) bounds centered on the mouse's world position.
 sf::FloatRect get_mouse_bounds_in_gameview( const sf::RenderWindow &window, const sf::View &gameview );
 
+//! @brief Removes all Cmp::SelectedPosition components
+//! @param reg
+void reset_all_selected_positions( entt::registry &reg );
+
 //! @brief Find the entity whose Cmp::Position intersects `match`.
 //! @param reg reference to the entt registry
 //! @param match The position to test for intersection.
@@ -103,7 +107,7 @@ sf::FloatRect get_mouse_bounds_in_gameview( const sf::RenderWindow &window, cons
 entt::entity get_world_pos_entt( entt::registry &reg, Cmp::Position match );
 
 //! @brief True if the plant has a Cmp::Inventory::WearLevel and it has been fully foraged.
-//! @note Depleted plants are removed from the world (see ActionSystem::player_plant_interact).
+//! @note Depleted plants are removed from the world (see PlantSystem::player_plant_interact).
 //! @param reg reference to the entt registry
 //! @param plant_entt The plant multiblock entity.
 //! @return bool True if the plant's wear level is at or below zero.

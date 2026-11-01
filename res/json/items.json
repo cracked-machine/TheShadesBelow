@@ -638,7 +638,7 @@
                                 "reward": { "item": "item.hogweedseed" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "phototoxia", "toxicity": 5 }, "tick": 3,
-                                "side_effects": { "kill_npc": { "probability": "player_luck", "trigger_range": 1, "wear_per_kill": 25, "npc_types": ["npc.skeleton", "npc.adder"], "death_anim": "sprite.death.anim.flames" } } }},
+                                "side_effects": { "kill_npc": { "probability": "player_luck", "trigger_range": 1, "wear_per_kill": 10, "npc_types": ["npc.skeleton", "npc.adder"], "death_anim": "sprite.death.anim.flames" } } }},
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },

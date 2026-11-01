@@ -196,6 +196,11 @@ bool is_illuminated( entt::registry &reg );
 //! @return bool true if the player is near `bounds`.
 bool is_player_near( entt::registry &reg, const sf::FloatRect &bounds, float player_hitbox_scale = 1.5f );
 
+//! @brief True if the player's last dig action is still within its cooldown window (Cmp::Persist::DiggingCooldownThreshold)
+//! @param reg reference to the entt registry
+//! @return bool true if the player must wait before digging again.
+bool is_digging_on_cooldown( entt::registry &reg );
+
 //! @brief The grid cell one tile in front of the player, based on their last facing direction
 //! @param reg reference to the entt registry
 //! @return Cmp::Position A 1x1 position one grid cell ahead of the player's current center.

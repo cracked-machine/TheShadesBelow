@@ -9,6 +9,7 @@
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/LerpPosition.hpp>
+#include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/Wisp.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
@@ -18,6 +19,7 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/Curse.hpp>
+#include <Components/Player/DiggingTimer.hpp>
 #include <Components/Player/Doglegs.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/Flying.hpp>
@@ -50,6 +52,7 @@
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/GrimoireUpdateEvent.hpp>
+#include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/NpcStore.hpp>
@@ -326,6 +329,13 @@ bool is_player_near( entt::registry &reg, const sf::FloatRect &bounds, float pla
     if ( player_hitbox.findIntersection( bounds ) ) return true;
   }
   return false;
+}
+
+bool is_digging_on_cooldown( entt::registry &reg )
+{
+  auto digging_cooldown_amount = Sys::PersistSystem::get<Cmp::Persist::DiggingCooldownThreshold>( reg ).get_value();
+  auto *player_dig_cooldown = reg.try_get<Cmp::Player::DiggingTimer>( get_entity( reg ) );
+  return ( player_dig_cooldown != nullptr ) and *player_dig_cooldown < sf::seconds( digging_cooldown_amount );
 }
 
 //! @brief The grid cell one tile in front of the player, based on their last facing direction

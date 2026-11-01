@@ -66,6 +66,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/AnimSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/BaseSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ActionSystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/PlantSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/InventorySystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ExitSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/FootstepSystem.cpp

@@ -144,6 +144,7 @@ private:
 
   //! @brief Kill NPCs that come within range of a plant whose proximity_action has a kill_npc side effect. Each NPC in
   //! range is rolled once per proximity_action tick; the plant's own spawns are spared.
+  //! A plant worn out by its kills (see Cmp::KillNpcEffect::wear_per_kill) is destroyed via Events::DestroyPlantEvent.
   //! @param dt Frame time, advancing each plant's Cmp::Plant::KillNpcTimer.
   void check_plant_kill_npc( sf::Time dt );
 

@@ -22,6 +22,7 @@
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/AddInventoryEvent.hpp>
+#include <Events/DestroyPlantEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
@@ -29,7 +30,6 @@
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/MultiblockFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
-#include <Factory/PlantFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SFML/Audio/Music.hpp>
@@ -414,7 +414,7 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
   if ( wear_level_cmp ) { reg.emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, wear_level_cmp->m_level ); }
 
   // now destroy the world item entt
-  Factory::Plant::remove_plant_mb( reg, world_item_entt, m_npc_navmesh.lock(), m_player_navmesh.lock(), m_reserved_sm.lock() );
+  get_systems_event_queue().trigger( Events::DestroyPlantEvent( world_item_entt ) );
   if ( reg.valid( world_item_entt ) )
   {
     if ( auto reserved_sm = m_reserved_sm.lock(); reserved_sm )

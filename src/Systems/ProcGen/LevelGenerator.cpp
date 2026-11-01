@@ -55,6 +55,7 @@
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/CreateNpcEvent.hpp>
+#include <Events/CreatePlantEvent.hpp>
 #include <Factory/CryptFactory.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Factory/MultiblockFactory.hpp>
@@ -255,7 +256,10 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
       auto mb_entt = it->second( reg(), pos, ms );
       m_reserved_sm->insert( mb_entt, Cmp::Position( pos, Constants::kGridSizePxF ) );
     }
-    else if ( ms_type.contains( "item.plant" ) ) { gen_plant( Sys::ItemKey( ms_type ), pos ); }
+    else if ( ms_type.contains( "item.plant" ) )
+    {
+      get_systems_event_queue().trigger( Events::CreatePlantEvent( Sys::ItemKey( ms_type ), Cmp::Position( pos, Constants::kGridSizePxF ) ) );
+    }
     else if ( ms_type.contains( "item." ) )
     {
       // prevent infinite respawns in the RuinSceneUpperFloor
@@ -583,57 +587,6 @@ std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( cons
   return { entt::null, Cmp::Position{ { 0.f, 0.f }, { 0.f, 0.f } } };
 }
 
-bool LevelGenerator::gen_plant( const Sys::ItemKey &plant_type, sf::Vector2f pos )
-{
-  const auto &plant_ss = Sys::SpriteStore::instance().get( Sys::SpriteKey( "sprite." + plant_type.str() ) );
-
-  // Plants can span more than one grid row (e.g. 1x2), so every cell in the footprint - not
-  // just the origin - must be a real, unreserved world tile. Otherwise a plant can overlap a
-  // reserved tile it doesn't share an entity with, e.g. the player spawn.
-  auto plant_grid_size = plant_ss.get_grid_size();
-  bool footprint_clear = true;
-  for ( int gy = 0; gy < plant_grid_size.y and footprint_clear; ++gy )
-  {
-    for ( int gx = 0; gx < plant_grid_size.x; ++gx )
-    {
-      sf::Vector2f pos_offset( static_cast<float>( gx ) * Constants::kGridSizePxF.x, static_cast<float>( gy ) * Constants::kGridSizePxF.y );
-      Cmp::Position cell_pos( pos + pos_offset, Constants::kGridSizePxF );
-      if ( Utils::get_world_pos_entt( reg(), cell_pos ) == entt::null || not m_reserved_sm->at( cell_pos ).empty() )
-      {
-        footprint_clear = false;
-        break;
-      }
-    }
-  }
-
-  if ( footprint_clear )
-  {
-    // now create the plant at a new entt
-    auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>( reg(), pos, plant_ss, 0, 0,
-                                                                                                                    m_reserved_sm.get() );
-
-    // Add the worlditem now so we don't have to look it up later when digging up the plant
-    const auto &plant_item = Sys::ItemStore::instance().get( plant_type );
-    reg().emplace_or_replace<Cmp::WorldItem>( mb_entt, plant_item );
-    // the wear level limits how many items can be foraged from the plant
-    if ( plant_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( mb_entt, 100.f ); }
-
-    // Protect every cell covered by this plant: segment entities carry the UUID and
-    // are at each tile position. Insert them so subsequent placement calls see them
-    // as reserved via the O(1) navmesh check.
-    auto *mb_uuid = reg().try_get<Cmp::UUID>( mb_entt );
-    if ( mb_uuid )
-    {
-      for ( auto [seg_entt, seg_cmp, seg_pos, seg_uuid] : reg().view<Cmp::PlantSegment, Cmp::Position, Cmp::UUID>().each() )
-      {
-        if ( seg_uuid == *mb_uuid ) m_reserved_sm->insert( seg_entt, seg_pos );
-      }
-    }
-    return true;
-  }
-  return false;
-}
-
 std::vector<entt::entity> LevelGenerator::gen_loot_containers( sf::Vector2u map_grid_size )
 {
   std::vector<entt::entity> assigned_entts;
@@ -717,12 +670,15 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants()
     }
     auto selected_plant_iter = candidates.at( Cmp::RandomInt( 0, static_cast<int>( candidates.size() - 1 ) ).gen() );
 
-    // gen_plant() re-adds the "sprite." prefix itself (to match the bare "item.plant.*" markers used elsewhere), so strip it back off here.
+    // PlantSystem re-adds the "sprite." prefix itself (to match the bare "item.plant.*" markers used elsewhere), so strip it back off here.
     const std::string kSpritePrefix = "sprite.";
     const Sys::ItemKey chosen_plant_item_type( selected_plant_iter->first.str().substr( kSpritePrefix.size() ) );
 
     // Create the plant in the game area and increment the tracker counter
-    if ( gen_plant( chosen_plant_item_type, random_pos.position ) )
+    bool created = false;
+    get_systems_event_queue().trigger(
+        Events::CreatePlantEvent( chosen_plant_item_type, random_pos, [&created]( [[maybe_unused]] entt::entity plant_entt ) { created = true; } ) );
+    if ( created )
     {
       assigned_entts.push_back( random_entity );
       ++selected_plant_iter->second;

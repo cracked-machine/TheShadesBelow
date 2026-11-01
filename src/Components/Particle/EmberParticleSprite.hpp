@@ -51,7 +51,7 @@ public:
   //!        so they apply to embers from any scene.
   static constexpr std::string_view kTagSuffix = "particle.ember";
 
-  //! @brief Tag of the embers spawned by ActionSystem::update_burning_worlditems() for burning yew trees.
+  //! @brief Tag of the embers spawned by PlantSystem::update_burning_plants() for burning yew trees.
   static constexpr std::string_view kYewTag = "graveyard.plant.particle.ember";
 
   //! @brief Downwards acceleration applied to each particle (world px/s^2).

@@ -52,6 +52,7 @@
 #include <Components/Persistent/NpcMimicTint.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
+#include <Components/Inventory/WearLevel.hpp>
 #include <Components/Plant/KillNpcTimer.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>
@@ -71,6 +72,7 @@
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
+#include <Events/DestroyPlantEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Events/GrimoireUpdateEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
@@ -969,13 +971,13 @@ void NpcSystem::check_timed_collision( sf::Time dt )
 void NpcSystem::check_plant_kill_npc( sf::Time dt )
 {
   const int player_luck = Utils::Player::get_stats( reg() ).luck();
+  // destroyed after the loop: the event handler modifies this storage
+  std::vector<entt::entity> worn_out_plants;
   for ( auto [plant_entt, plant_mb_cmp, plant_worlditem_cmp, plant_uuid] : reg().view<Cmp::PlantMultiBlock, Cmp::WorldItem, Cmp::UUID>().each() )
   {
     const auto &proximity_action = plant_worlditem_cmp.get_action<Cmp::ProximityAction>();
     const auto &kill_npc = proximity_action.side_effects().kill_npc;
     if ( not kill_npc ) continue;
-    // a plant worn out by its kills stays in the world but is harmless
-    if ( Utils::is_plant_depleted( reg(), plant_entt ) ) continue;
 
     auto &timer = reg().get_or_emplace<Cmp::Plant::KillNpcTimer>( plant_entt );
     timer += dt;
@@ -984,9 +986,16 @@ void NpcSystem::check_plant_kill_npc( sf::Time dt )
 
     // collect first: the event handler modifies this storage
     const auto kill_bounds = Cmp::RectBounds::expanded( plant_mb_cmp, kill_npc->trigger_range );
+    // don't kill more NPCs than the plant's remaining wear allows
+    std::size_t kills_left = std::numeric_limits<std::size_t>::max();
+    if ( const auto *wearlevel_cmp = reg().try_get<Cmp::Inventory::WearLevel>( plant_entt ); wearlevel_cmp and kill_npc->wear_per_kill > 0.f )
+    {
+      kills_left = static_cast<std::size_t>( std::ceil( wearlevel_cmp->m_level / kill_npc->wear_per_kill ) );
+    }
     std::vector<entt::entity> npcs;
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position>().each() )
     {
+      if ( npcs.size() >= kills_left ) break;
       if ( not kill_npc->targets( npc_cmp.npc_type ) ) continue;
       // a plant doesn't kill its own spawns, e.g. red campion adders
       if ( const auto *spawned_by_cmp = reg().try_get<Cmp::Npc::SpawnedBy>( npc_entt ); spawned_by_cmp and spawned_by_cmp->m_source == plant_uuid )
@@ -1003,6 +1012,12 @@ void NpcSystem::check_plant_kill_npc( sf::Time dt )
       if ( kill_npc->wear_per_kill > 0.f ) get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, kill_npc->wear_per_kill ) );
     }
     get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_worlditem_cmp.item_type, Cmp::ProximityAction::kKey, proximity_action ) );
+    // a plant worn out by its kills withers away, like a fully foraged one
+    if ( Utils::is_plant_depleted( reg(), plant_entt ) ) worn_out_plants.push_back( plant_entt );
+  }
+  for ( auto plant_entt : worn_out_plants )
+  {
+    get_systems_event_queue().trigger( Events::DestroyPlantEvent( plant_entt ) );
   }
 }
 

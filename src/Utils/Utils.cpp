@@ -16,6 +16,7 @@
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
+#include <Components/SelectedPosition.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Sprites/SpriteSheet.hpp>
@@ -182,6 +183,16 @@ sf::FloatRect get_mouse_bounds_in_gameview( const sf::RenderWindow &window, cons
   auto mouse_position_bounds = sf::FloatRect( mouse_world_pos, sf::Vector2f( 2.f, 2.f ) );
 
   return mouse_position_bounds;
+}
+
+void reset_all_selected_positions( entt::registry &reg )
+{
+  auto selected_position_view = reg.view<Cmp::SelectedPosition>();
+  for ( auto [existing_sel_entity, sel_cmp] : selected_position_view.each() )
+  {
+    reg.remove<Cmp::SelectedPosition>( existing_sel_entity );
+    SPDLOG_DEBUG( "Removing previous Cmp::SelectedPosition {},{} from entity {}", sel_cmp.x, sel_cmp.y, static_cast<int>( existing_sel_entity ) );
+  }
 }
 
 //! @brief Get the Grid Position object

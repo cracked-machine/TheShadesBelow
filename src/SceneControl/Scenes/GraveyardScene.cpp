@@ -65,6 +65,7 @@
 #include <Systems/LootSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
+#include <Systems/PlantSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/PlayerSystem.hpp>
 #include <Systems/ProcGen/CellAutomataSystem.hpp>
@@ -125,6 +126,7 @@ void GraveyardScene::on_init()
   m_reserved_sm = std::make_shared<PathFinding::SpatialHashGrid>();
   m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm );
   m_sys.find<Sys::Store::Type::ExitSystem>().init( m_reserved_sm );
+  m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm );
 
   // create the player, optionally increment the level counter
   if ( m_reg.view<Cmp::Player::Character>().size() == 0 )
@@ -304,6 +306,7 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::WormholeSystem>().check_player_wormhole_collision() );
   PROFILED( m_sys.find<Sys::Store::Type::TeleportSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::ActionSystem>().update( dt ) );
+  PROFILED( m_sys.find<Sys::Store::Type::PlantSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::FootstepSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::DoglegSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::GraveSystem>().update() );
@@ -349,7 +352,8 @@ void GraveyardScene::reinit_system_spatial_maps()
   m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, m_ghost_navmesh, m_reserved_sm, m_loot_sm );
   m_sys.find<Sys::Store::Type::WispSystem>().init( m_open_navmesh );
   m_sys.find<Sys::Store::Type::BombSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm );
-  m_sys.find<Sys::Store::Type::ActionSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm, m_loot_sm );
+  m_sys.find<Sys::Store::Type::ActionSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_loot_sm );
   m_sys.find<Sys::Store::Type::LootSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm, m_loot_sm );
   m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_generic_npc_navmesh, m_ghost_navmesh, m_loot_sm );
   m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm );

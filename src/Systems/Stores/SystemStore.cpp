@@ -16,6 +16,7 @@
 #include <Systems/ItemSystem.hpp>
 #include <Systems/LootSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
+#include <Systems/PlantSystem.hpp>
 #include <Systems/PlayerSystem.hpp>
 #include <Systems/ProcGen/CellAutomataSystem.hpp>
 #include <Systems/ProcGen/DLASystem.hpp>
@@ -54,6 +55,9 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
       m_item_store( std::make_unique<ItemStore>() ),
       m_npc_store( std::make_unique<NpcStore>() )
 {
+  // before ActionSystem: their Events::PlayerActionEvent handlers run in construction order, so a DIG tries plants
+  // before obstacles and pots
+  emplace<Type::PlantSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::ActionSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::ArrowSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::AltarSystem>( m_initial_reg, window, sound_bank );

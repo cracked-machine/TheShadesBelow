@@ -43,6 +43,7 @@ class NpcSystem;
 class ParticleSystem;
 class PassageSystem;
 class PersistSystem;
+class PlantSystem;
 class PlayerSystem;
 class RenderDebugSystem;
 class RenderGameSystem;
@@ -120,6 +121,8 @@ public:
     PassageSystem,
     //! @brief Key for PersistSystem.
     PersistSystem,
+    //! @brief Key for PlantSystem.
+    PlantSystem,
     //! @brief Key for PlayerSystem.
     PlayerSystem,
     //! @brief Key for ProcGen::LevelGenerator.
@@ -250,6 +253,7 @@ template<> struct Store::SystemTraits<Store::Type::NpcSystem>              { usi
 template<> struct Store::SystemTraits<Store::Type::ParticleSystem>         { using type = ParticleSystem; };
 template<> struct Store::SystemTraits<Store::Type::PassageSystem>          { using type = Game::Sys::PassageSystem; };
 template<> struct Store::SystemTraits<Store::Type::PersistSystem>          { using type = PersistSystem; };
+template<> struct Store::SystemTraits<Store::Type::PlantSystem>            { using type = PlantSystem; };
 template<> struct Store::SystemTraits<Store::Type::PlayerSystem>           { using type = PlayerSystem; };
 template<> struct Store::SystemTraits<Store::Type::LevelGenerator>         { using type = ProcGen::LevelGenerator; };
 template<> struct Store::SystemTraits<Store::Type::RenderDebugSystem>      { using type = RenderDebugSystem; };
