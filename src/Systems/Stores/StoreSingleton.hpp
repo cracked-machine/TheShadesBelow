@@ -369,6 +369,12 @@ protected:
       if ( not movement_effect.player and not movement_effect.npc ) throw std::runtime_error( "movement must set at least one of player or npc" );
       effects.movement = movement_effect;
     }
+    if ( fx.contains( "toxic_immunity" ) )
+    {
+      const auto &toxic_immunity = fx.at( "toxic_immunity" );
+      effects.toxic_immunity = Cmp::ToxicImmunityEffect{ .tick = JsonDeserializer::get_int( toxic_immunity, "tick" ),
+                                                         .probability = get_probability( toxic_immunity ) };
+    }
     return effects;
   }
 

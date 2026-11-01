@@ -1,5 +1,6 @@
 
 #include <Components/Player/RepelNpc.hpp>
+#include <Components/Player/ToxicImmunity.hpp>
 #include <Components/Position.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/UUID.hpp>
@@ -65,6 +66,14 @@ void BaseSystem::trigger_side_effects( const Cmp::BaseAction &action, const Cmp:
     {
       reg().emplace_or_replace<Cmp::Player::RepelNpc>( Utils::Player::get_entity( reg() ), sf::seconds( static_cast<float>( npc_effect->tick ) ) );
     }
+  }
+  // applying again restarts the timer. PlayerSystem keeps the PlayerStats flag in sync, but set it now so immunity
+  // applies from this frame
+  if ( effects.toxic_immunity and effects.toxic_immunity->roll( player_luck ) )
+  {
+    reg().emplace_or_replace<Cmp::Player::ToxicImmunity>( Utils::Player::get_entity( reg() ),
+                                                          sf::seconds( static_cast<float>( effects.toxic_immunity->tick ) ) );
+    Utils::Player::get_stats( reg() ).set_toxic_immune( true );
   }
 }
 

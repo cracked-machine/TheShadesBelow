@@ -24,6 +24,7 @@ float SpawnNpcEffect::chance( int player_luck ) const { return luck_chance( prob
 float LightningEffect::chance( int player_luck ) const { return luck_chance( probability, player_luck, /*good_for_player=*/false ); }
 // npc-only effects (slow/drunk/repel) help the player; anything touching the player's own movement hinders them
 float MovementEffect::chance( int player_luck ) const { return luck_chance( probability, player_luck, /*good_for_player=*/not player ); }
+float ToxicImmunityEffect::chance( int player_luck ) const { return luck_chance( probability, player_luck, /*good_for_player=*/true ); }
 
 bool SpawnNpcEffect::roll( int player_luck ) const { return Cmp::RandomFloat( 0.f, 1.f ).gen() < chance( player_luck ); }
 
@@ -56,6 +57,7 @@ bool SpawnNpcEffect::condition_met( const PlayerStats &stats ) const
 }
 bool LightningEffect::roll( int player_luck ) const { return Cmp::RandomFloat( 0.f, 1.f ).gen() < chance( player_luck ); }
 bool MovementEffect::roll( int player_luck ) const { return Cmp::RandomFloat( 0.f, 1.f ).gen() < chance( player_luck ); }
+bool ToxicImmunityEffect::roll( int player_luck ) const { return Cmp::RandomFloat( 0.f, 1.f ).gen() < chance( player_luck ); }
 
 BaseAction::BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Tick tick )
     : BaseAction( health, fear, despair, infamy, luck, tick, Cmp::Toxicity::Toxidrome{} )

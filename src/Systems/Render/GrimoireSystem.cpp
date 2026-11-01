@@ -360,6 +360,10 @@ bool GrimoireSystem::render_action_side_effects( TextColumn &draw_line, const Cm
       draw_effect( std::format( "npc {} {}s", type, npc->tick ), effects.movement->chance( player_luck ) );
     }
   }
+  if ( effects.toxic_immunity )
+  {
+    draw_effect( std::format( "toxic immunity {}s", effects.toxic_immunity->tick ), effects.toxic_immunity->chance( player_luck ) );
+  }
   return not effects.empty();
 }
 

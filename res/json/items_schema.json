@@ -206,6 +206,16 @@
                 "probability": { "$ref": "#/definitions/probability" }
               }
             },
+            "toxic_immunity": {
+              "type": "object",
+              "description": "Toxidromes can't increase for tick seconds (existing toxicity stays, cures still apply). Applying again restarts the timer.",
+              "required": ["tick", "probability"],
+              "additionalProperties": false,
+              "properties": {
+                "tick": { "type": "integer", "minimum": 1, "description": "How long (seconds) the immunity lasts." },
+                "probability": { "$ref": "#/definitions/probability" }
+              }
+            },
             "movement": {
               "type": "object",
               "description": "Affect player movement and/or NPC pathfinding. Must set at least one of player or npc.",

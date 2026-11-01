@@ -214,6 +214,23 @@ struct MovementEffect
   [[nodiscard]] bool roll( int player_luck ) const;
 };
 
+//! @brief Optional side effect of an action: toxidromes can't increase for tick seconds (see Cmp::Player::ToxicImmunity).
+struct ToxicImmunityEffect
+{
+  //! @brief How long (seconds) the immunity lasts.
+  int tick{ 0 };
+  //! @brief How likely the effect is to fire each time the action is applied.
+  Probability probability{ Probability::ALWAYS };
+  //! @brief This effect's chance of firing at the given player luck.
+  //! @param player_luck Player's luck stat, range [0, 100].
+  //! @return Chance in [0, 1].
+  [[nodiscard]] float chance( int player_luck ) const;
+  //! @brief Roll this effect's probability.
+  //! @param player_luck Player's luck stat, range [0, 100].
+  //! @return true if the effect should fire.
+  [[nodiscard]] bool roll( int player_luck ) const;
+};
+
 //! @brief The optional side effects of an action, each rolled independently. See the "side_effects" object in
 //! res/json/items.json and res/json/npc.json.
 struct SideEffects
@@ -224,9 +241,11 @@ struct SideEffects
   std::optional<LightningEffect> lightning;
   //! @brief Movement/pathfinding effect.
   std::optional<MovementEffect> movement;
+  //! @brief Toxic immunity.
+  std::optional<ToxicImmunityEffect> toxic_immunity;
   //! @brief Whether there are no effects at all.
   //! @return true if no effect is set.
-  [[nodiscard]] bool empty() const { return not spawn_npc and not lightning and not movement; }
+  [[nodiscard]] bool empty() const { return not spawn_npc and not lightning and not movement and not toxic_immunity; }
 };
 
 //! @brief Optional reward granted when an action is applied. See the "reward" object of the sacrifice_action,

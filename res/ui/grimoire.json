@@ -1165,7 +1165,6 @@
         {
          "draworder":"topdown",
          "id":4,
-         "locked":true,
          "name":"PlantOverlay",
          "objects":[
                 {
@@ -1198,7 +1197,7 @@
                  "y":250
                 }, 
                 {
-                 "height":540,
+                 "height":600,
                  "id":68,
                  "name":"plant_effects_outline",
                  "opacity":1,
@@ -1516,6 +1515,54 @@
                  "width":100,
                  "x":680,
                  "y":240
+                }, 
+                {
+                 "height":0,
+                 "id":192,
+                 "name":"sacrifice_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Sacrifice:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":480,
+                 "y":790
+                }, 
+                {
+                 "height":0,
+                 "id":193,
+                 "name":"plant_sacrifice_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":580,
+                 "y":790
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1983,7 +2030,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":192,
+ "nextobjectid":194,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",
