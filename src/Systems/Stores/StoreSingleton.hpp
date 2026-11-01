@@ -250,6 +250,30 @@ protected:
     throw std::runtime_error( "Unknown spawn_npc location: '" + location + "'" );
   }
 
+  //! @brief Build the "side_effects.spawn_npc.if" condition of a JSON action entry.
+  //! @throws std::runtime_error on an unknown stat.
+  static Cmp::SpawnNpcEffect::Condition make_spawn_npc_condition( const nlohmann::json &cond )
+  {
+    using Game::Utils::JsonDeserializer;
+    using Stat = Cmp::SpawnNpcEffect::Condition::Stat;
+    Cmp::SpawnNpcEffect::Condition condition{ .stat_name = JsonDeserializer::get_string( cond, "stat" ),
+                                              .value = JsonDeserializer::get_int( cond, "value" ) };
+    const auto &stat = condition.stat_name;
+    if ( stat == "health" ) condition.stat = Stat::HEALTH;
+    else if ( stat == "fear" ) condition.stat = Stat::FEAR;
+    else if ( stat == "despair" ) condition.stat = Stat::DESPAIR;
+    else if ( stat == "infamy" ) condition.stat = Stat::INFAMY;
+    else if ( stat == "luck" ) condition.stat = Stat::LUCK;
+    else if ( stat == "all" ) condition.stat = Stat::ALL_TOXIDROMES;
+    else if ( const auto id = Game::Factory::Toxicity::toxidrome_id( stat ) )
+    {
+      condition.stat = Stat::TOXIDROME;
+      condition.toxidrome_id = *id;
+    }
+    else { throw std::runtime_error( "Unknown spawn_npc if.stat: '" + stat + "'" ); }
+    return condition;
+  }
+
   //! @brief Convert the "side_effects.movement.npc.type" string of a JSON action entry.
   //! @throws std::runtime_error on an unknown value.
   static Cmp::MovementEffect::Npc::Type make_npc_movement_type( const std::string &type )
@@ -323,6 +347,7 @@ protected:
           .probability = get_probability( spawn_npc ),
           .max_instances = spawn_npc.contains( "max_instances" ) ? JsonDeserializer::get_int( spawn_npc, "max_instances" ) : 0,
           .trigger_range = spawn_npc.contains( "trigger_range" ) ? JsonDeserializer::get_int( spawn_npc, "trigger_range" ) : 1 };
+      if ( spawn_npc.contains( "if" ) ) { effects.spawn_npc->condition = make_spawn_npc_condition( spawn_npc.at( "if" ) ); }
     }
     if ( fx.contains( "lightning" ) ) { effects.lightning = Cmp::LightningEffect{ .probability = get_probability( fx.at( "lightning" ) ) }; }
     if ( fx.contains( "movement" ) )

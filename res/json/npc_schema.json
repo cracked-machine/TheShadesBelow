@@ -122,7 +122,17 @@
                 "type": { "type": "string", "pattern": "^npc\\." },
                 "location": { "type": "string", "enum": ["nearby", "center"], "description": "nearby (default): a random free cell beside the source. center: the NPC sprite centred on the source's exact pixel centre, e.g. on an altar." },
                 "probability": { "$ref": "#/definitions/probability" },
-                "max_instances": { "type": "integer", "minimum": 1, "description": "Max live NPCs spawned by each item instance, across all its actions. Further spawns are skipped. Omit for unlimited." }
+                "max_instances": { "type": "integer", "minimum": 1, "description": "Max live NPCs spawned by each item instance, across all its actions. Further spawns are skipped. Omit for unlimited." },
+                "if": {
+                  "type": "object",
+                  "description": "Only spawn while the player's current stat equals value. A toxidrome name compares that toxidrome's toxicity (0 if inactive); all compares the summed toxicity of every active toxidrome. probability, trigger_range and max_instances still apply.",
+                  "required": ["stat", "value"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "stat": { "type": "string", "enum": ["health", "fear", "despair", "infamy", "luck", "tachycardia", "bradycardia", "halucinogen", "hypoxia", "phototoxia", "venom", "vertigo", "all"] },
+                    "value": { "type": "integer" }
+                  }
+                }
               }
             },
             "lightning": {

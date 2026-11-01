@@ -4,6 +4,7 @@
 #include <Components/Altar/Kind.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
+#include <entt/core/fwd.hpp>
 #include <memory>
 #include <optional>
 #include <string>
@@ -16,6 +17,8 @@ class Toxidrome;
 
 namespace Game::Cmp
 {
+class PlayerStats;
+
 namespace Stats
 {
 
@@ -101,6 +104,38 @@ struct SpawnNpcEffect
   int trigger_range{ 1 };
   //! @brief Distance from the item to spawned NPC.
   int spawn_radius{ 1 };
+
+  //! @brief Optional gate: the NPC only spawns while a player stat equals a value. See "side_effects.spawn_npc.if".
+  struct Condition
+  {
+    //! @brief The player stat compared.
+    enum class Stat {
+      HEALTH,
+      FEAR,
+      DESPAIR,
+      INFAMY,
+      LUCK,
+      //! @brief One toxidrome's toxicity, 0 if inactive (see toxidrome_id).
+      TOXIDROME,
+      //! @brief The summed toxicity of every active toxidrome.
+      ALL_TOXIDROMES
+    };
+    //! @brief The player stat compared.
+    Stat stat{ Stat::HEALTH };
+    //! @brief The "stat" name as written in JSON, for display.
+    std::string stat_name;
+    //! @brief The toxidrome's entt::type_hash id, only used when stat is TOXIDROME.
+    entt::id_type toxidrome_id{ 0 };
+    //! @brief The value the stat must equal.
+    int value{ 0 };
+  };
+  //! @brief Spawn only while this holds. No condition = always eligible.
+  std::optional<Condition> condition;
+
+  //! @brief Whether the condition (if any) holds for the given player stats.
+  //! @param stats The player's current stats.
+  //! @return true if there is no condition or it holds.
+  [[nodiscard]] bool condition_met( const PlayerStats &stats ) const;
   //! @brief This effect's chance of firing at the given player luck.
   //! @param player_luck Player's luck stat, range [0, 100].
   //! @return Chance in [0, 1].

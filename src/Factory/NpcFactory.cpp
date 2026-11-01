@@ -7,6 +7,7 @@
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/Adder.hpp>
 #include <Components/Npc/Azazel.hpp>
+#include <Components/Npc/Burryman.hpp>
 #include <Components/Npc/Container.hpp>
 #include <Components/Npc/Drknox.hpp>
 #include <Components/Npc/ElderMother.hpp>
@@ -185,6 +186,12 @@ entt::entity create_npc( entt::registry &reg, Cmp::Position pos_cmp, const Sys::
   else if ( npc_type == "npc.adder" )
   {
     reg.emplace_or_replace<Cmp::Npc::Adder>( new_pos_entity );
+    reg.emplace_or_replace<Cmp::Npc::LerpSpeed>( new_pos_entity, npc_cmp.m_lerp_speed );
+    reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 1, 1 } );
+  }
+  else if ( npc_type == "npc.burryman" )
+  {
+    reg.emplace_or_replace<Cmp::Npc::Burryman>( new_pos_entity );
     reg.emplace_or_replace<Cmp::Npc::LerpSpeed>( new_pos_entity, npc_cmp.m_lerp_speed );
     reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 1, 1 } );
   }

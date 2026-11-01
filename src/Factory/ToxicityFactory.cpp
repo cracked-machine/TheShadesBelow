@@ -33,6 +33,18 @@ bool set_by_name( Cmp::Toxicity::Toxidrome &t, const std::string &type, int toxi
 
 } // namespace
 
+std::optional<entt::id_type> toxidrome_id( const std::string &type )
+{
+  if ( type == "tachycardia" ) return entt::type_hash<Cmp::Toxicity::Tachycardia>::value();
+  if ( type == "bradycardia" ) return entt::type_hash<Cmp::Toxicity::Bradycardia>::value();
+  if ( type == "halucinogen" ) return entt::type_hash<Cmp::Toxicity::Hallucinogen>::value();
+  if ( type == "hypoxia" ) return entt::type_hash<Cmp::Toxicity::Hypoxia>::value();
+  if ( type == "phototoxia" ) return entt::type_hash<Cmp::Toxicity::Phototoxia>::value();
+  if ( type == "venom" ) return entt::type_hash<Cmp::Toxicity::Venom>::value();
+  if ( type == "vertigo" ) return entt::type_hash<Cmp::Toxicity::Vertigo>::value();
+  return std::nullopt;
+}
+
 Cmp::Toxicity::Toxidrome create_toxidrome( const std::string &type, int toxicity )
 {
   if ( type == "none" )

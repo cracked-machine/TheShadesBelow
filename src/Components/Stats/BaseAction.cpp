@@ -1,6 +1,9 @@
 #include <Components/Random.hpp>
 #include <Components/Stats/BaseAction.hpp>
+#include <Components/Stats/PlayerStats.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
+#include <algorithm>
+#include <numeric>
 #include <utility>
 
 namespace Game::Cmp
@@ -23,6 +26,34 @@ float LightningEffect::chance( int player_luck ) const { return luck_chance( pro
 float MovementEffect::chance( int player_luck ) const { return luck_chance( probability, player_luck, /*good_for_player=*/not player ); }
 
 bool SpawnNpcEffect::roll( int player_luck ) const { return Cmp::RandomFloat( 0.f, 1.f ).gen() < chance( player_luck ); }
+
+bool SpawnNpcEffect::condition_met( const PlayerStats &stats ) const
+{
+  if ( not condition ) return true;
+  const auto &toxidrome = stats.toxidrome();
+  const auto current = [&]() -> int
+  {
+    using Stat = Condition::Stat;
+    switch ( condition->stat )
+    {
+      case Stat::HEALTH: return stats.health();
+      case Stat::FEAR: return stats.fear();
+      case Stat::DESPAIR: return stats.despair();
+      case Stat::INFAMY: return stats.infamy();
+      case Stat::LUCK: return stats.luck();
+      case Stat::TOXIDROME:
+      {
+        // an inactive toxidrome counts as zero toxicity
+        const auto it = std::find_if( toxidrome.begin(), toxidrome.end(), [&]( const auto &entry ) { return entry.first == condition->toxidrome_id; } );
+        return it == toxidrome.end() ? 0 : it->second;
+      }
+      case Stat::ALL_TOXIDROMES:
+        return std::accumulate( toxidrome.begin(), toxidrome.end(), 0, []( int sum, const auto &entry ) { return sum + entry.second; } );
+    }
+    return 0;
+  }();
+  return current == condition->value;
+}
 bool LightningEffect::roll( int player_luck ) const { return Cmp::RandomFloat( 0.f, 1.f ).gen() < chance( player_luck ); }
 bool MovementEffect::roll( int player_luck ) const { return Cmp::RandomFloat( 0.f, 1.f ).gen() < chance( player_luck ); }
 

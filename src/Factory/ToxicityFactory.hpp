@@ -4,6 +4,8 @@
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <Components/Toxicity/TraitsBase.hpp>
 #include <cstddef>
+#include <entt/core/fwd.hpp>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -70,6 +72,11 @@ Cmp::Toxicity::Toxidrome create_toxidrome( const std::string &type, int toxicity
 //! @throws std::runtime_error on an invalid or no-op configuration: an empty list, a multi-type list with non-negative
 //!         toxicity, or one containing "none", "all", an unknown or a duplicated type.
 Cmp::Toxicity::Toxidrome create_toxidrome( const std::vector<std::string> &types, int toxicity );
+
+//! @brief Look up a toxidrome's entt::type_hash id from its data-driven type name (e.g. loaded from JSON).
+//! @param type Toxidrome type name, e.g. "venom". "none" and "all" are not single toxidromes.
+//! @return The toxidrome's id, or std::nullopt for an unknown name.
+std::optional<entt::id_type> toxidrome_id( const std::string &type );
 
 } // namespace Game::Factory::Toxicity
 

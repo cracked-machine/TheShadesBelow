@@ -31,8 +31,14 @@ BaseSystem::BaseSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
 void BaseSystem::trigger_side_effects( const Cmp::BaseAction &action, const Cmp::Position &pos_cmp, entt::entity source_entt )
 {
   const auto &effects = action.side_effects();
-  const int player_luck = Utils::Player::get_stats( reg() ).luck();
-  if ( effects.spawn_npc and not effects.spawn_npc->roll( player_luck ) )
+  const auto &player_stats = Utils::Player::get_stats( reg() );
+  const int player_luck = player_stats.luck();
+  // the "if" condition gates the spawn before its probability is rolled; max_instances is enforced by the CreateNpcEvent handler
+  if ( effects.spawn_npc and not effects.spawn_npc->condition_met( player_stats ) )
+  {
+    SPDLOG_DEBUG( "Spawn condition not met for {}.", effects.spawn_npc->npc_type );
+  }
+  else if ( effects.spawn_npc and not effects.spawn_npc->roll( player_luck ) )
   {
     SPDLOG_WARN( "Spawn roll failed for {} (chance {}).", effects.spawn_npc->npc_type, effects.spawn_npc->chance( player_luck ) );
   }

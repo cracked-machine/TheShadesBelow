@@ -20,6 +20,7 @@
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
+#include <Components/Toxicity/Venom.hpp>
 #include <Events/BuyShopItemEvent.hpp>
 #include <Events/CryptRoomEvent.hpp>
 #include <Events/DismissTooltipEvent.hpp>
@@ -31,6 +32,7 @@
 #include <Events/SaveSettingsEvent.hpp>
 #include <Events/UnlockDoorEvent.hpp>
 #include <Factory/PlayerFactory.hpp>
+#include <Factory/ToxicityFactory.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <SceneControl/Events/ProcessCryptSceneInputEvent.hpp>
 #include <SceneControl/Events/ProcessGameoverSceneInputEvent.hpp>
@@ -474,9 +476,23 @@ bool SceneInputRouter::try_handle_debug_key( sf::Keyboard::Scancode scancode )
   else if ( scancode == Scancode::F11 ) { queue_suicide_event(); }
   else if ( scancode == Scancode::Numpad3 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, Cmp::Stats::Infamy{ 10 }, {}, {} } ); }
   else if ( scancode == Scancode::Numpad2 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, Cmp::Stats::Despair{ 10 }, {}, {}, {} } ); }
-  else if ( scancode == Scancode::NumpadPlus ) { Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 10 }, {}, {}, {}, {}, {} } ); }
+  else if ( scancode == Scancode::NumpadEnter ) { Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 10 }, {}, {}, {}, {}, {} } ); }
   else if ( scancode == Scancode::NumpadMinus ) { Utils::Player::get_stats( reg() ).decay_all_toxidrome( 10 ); }
-  else if ( scancode == Scancode::Hyphen ) { Utils::Player::get_stats( reg() ).decay_all_toxidrome( 10 ); }
+  else if ( scancode == Scancode::NumpadPlus )
+  {
+    auto brady = Factory::Toxicity::create_toxidrome( "bradycardia", 10 );
+    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, brady } );
+    auto venom = Factory::Toxicity::create_toxidrome( "venom", 10 );
+    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, venom } );
+    auto photo = Factory::Toxicity::create_toxidrome( "phototoxia", 10 );
+    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, photo } );
+    auto hallucin = Factory::Toxicity::create_toxidrome( "halucinogen", 10 );
+    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, hallucin } );
+    auto hypoxia = Factory::Toxicity::create_toxidrome( "hypoxia", 10 );
+    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, hypoxia } );
+    auto vertigo = Factory::Toxicity::create_toxidrome( "vertigo", 10 );
+    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, vertigo } );
+  }
   else if ( scancode == Scancode::NumpadMultiply ) { Utils::Player::get_wealth( reg() ).wealth += 1; }
   else if ( scancode == Scancode::Numpad7 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Luck{ 10 }, {} } ); }
   else if ( scancode == Scancode::Numpad4 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Luck{ -10 }, {} } ); }

@@ -340,7 +340,9 @@ bool GrimoireSystem::render_action_side_effects( TextColumn &draw_line, const Cm
   { draw_line( std::format( "{}: {:.0f}%", label, chance * 100.f ), sf::Color::Black ); };
   if ( effects.spawn_npc )
   {
-    draw_effect( std::format( "summons {}", npc_display_name( effects.spawn_npc->npc_type ) ), effects.spawn_npc->chance( player_luck ) );
+    std::string label = std::format( "summons {}", npc_display_name( effects.spawn_npc->npc_type ) );
+    if ( const auto &condition = effects.spawn_npc->condition ) { label += std::format( " if {} {}", condition->stat_name, condition->value ); }
+    draw_effect( label, effects.spawn_npc->chance( player_luck ) );
   }
   if ( effects.lightning ) { draw_effect( "lightning", effects.lightning->chance( player_luck ) ); }
   if ( effects.movement )
