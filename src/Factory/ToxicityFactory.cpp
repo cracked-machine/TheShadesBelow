@@ -8,7 +8,8 @@
 #include <Factory/ToxicityFactory.hpp>
 
 #include <stdexcept>
-#include <unordered_set>
+#include <utility>
+#include <vector>
 
 namespace Game::Factory::Toxicity
 {
@@ -16,8 +17,9 @@ namespace Game::Factory::Toxicity
 namespace
 {
 
-// Stores toxicity verbatim for the named toxidrome, bypassing exclusion checks. Only used for
-// cures (negative deltas), which only reduce already active toxidromes so exclusions don't matter.
+// Stores toxicity verbatim for the named toxidrome, bypassing exclusion checks. Callers must either
+// only pass cures (negative deltas), which only reduce already active toxidromes so exclusions don't
+// matter, or have already checked the named toxidromes with mutually_exclusive() below.
 bool set_by_name( Cmp::Toxicity::Toxidrome &t, const std::string &type, int toxicity )
 {
   if ( type == "tachycardia" ) t.set<Cmp::Toxicity::Tachycardia>( toxicity );
@@ -29,6 +31,29 @@ bool set_by_name( Cmp::Toxicity::Toxidrome &t, const std::string &type, int toxi
   else if ( type == "vertigo" ) t.set<Cmp::Toxicity::Vertigo>( toxicity );
   else return false;
   return true;
+}
+
+// Runtime counterpart of Cmp::Toxicity::are_mutually_exclusive_v over every known toxidrome, for
+// type names that aren't known until runtime (e.g. a JSON "type" array).
+template <typename... All>
+struct ExclusionTable
+{
+  template <typename A>
+  static bool excludes( entt::id_type b )
+  {
+    return ( ( entt::type_hash<All>::value() == b and Cmp::Toxicity::are_mutually_exclusive_v<A, All> ) or ... );
+  }
+
+  static bool mutually_exclusive( entt::id_type a, entt::id_type b )
+  {
+    return ( ( entt::type_hash<All>::value() == a and excludes<All>( b ) ) or ... );
+  }
+};
+
+bool mutually_exclusive( entt::id_type a, entt::id_type b )
+{
+  using namespace Cmp::Toxicity;
+  return ExclusionTable<Bradycardia, Tachycardia, Hypoxia, Hallucinogen, Phototoxia, Venom, Vertigo>::mutually_exclusive( a, b );
 }
 
 } // namespace
@@ -80,16 +105,24 @@ Cmp::Toxicity::Toxidrome create_toxidrome( const std::vector<std::string> &types
   if ( types.size() == 1 ) return create_toxidrome( types.front(), toxicity );
 
   // a cure for several toxidromes: same reasoning as "all", the list may name mutually exclusive
-  // toxidromes (e.g. tachycardia and bradycardia), so only negative deltas are supported
-  if ( toxicity >= 0 )
-    throw std::runtime_error( "Multi-type toxidrome only supports negative toxicity (cures), got " + std::to_string( toxicity ) );
+  // toxidromes (e.g. tachycardia and bradycardia) since negative deltas only reduce active ones.
+  // A positive list must be conflict-free, checked at runtime as the names aren't known until now.
+  if ( toxicity == 0 ) throw std::runtime_error( "Multi-type toxidrome has zero toxicity, use type 'none' instead" );
   Cmp::Toxicity::Toxidrome t;
-  std::unordered_set<std::string> seen;
+  std::vector<std::pair<std::string, entt::id_type>> seen;
   for ( const auto &type : types )
   {
     if ( type == "none" or type == "all" ) throw std::runtime_error( "Toxidrome type '" + type + "' isn't allowed in a multi-type list" );
-    if ( not seen.insert( type ).second ) throw std::runtime_error( "Toxidrome type '" + type + "' is listed more than once" );
-    if ( not set_by_name( t, type, toxicity ) ) throw std::runtime_error( "Unknown toxidrome type: " + type );
+    const auto id = toxidrome_id( type );
+    if ( not id ) throw std::runtime_error( "Unknown toxidrome type: " + type );
+    for ( const auto &[other, other_id] : seen )
+    {
+      if ( other_id == *id ) throw std::runtime_error( "Toxidrome type '" + type + "' is listed more than once" );
+      if ( toxicity > 0 and mutually_exclusive( *id, other_id ) )
+        throw std::runtime_error( "Toxidrome types '" + other + "' and '" + type + "' are mutually exclusive, so can't both be added" );
+    }
+    seen.emplace_back( type, *id );
+    set_by_name( t, type, toxicity );
   }
   return t;
 }

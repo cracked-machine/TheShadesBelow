@@ -65,12 +65,13 @@ Cmp::Toxicity::Toxidrome create_toxidrome( const std::string &type, int toxicity
 
 //! @brief Build a Toxidrome from a list of data-driven type names (e.g. a JSON "type" array).
 //! @param types Toxidrome type names; a single name behaves exactly like create_toxidrome( const std::string &, int ).
-//!              Several names only support a negative toxicity (a cure applied to each listed toxidrome), since the
-//!              list may contain mutually exclusive toxidromes.
+//!              With several names, a negative toxicity cures each listed toxidrome and the list may contain mutually
+//!              exclusive toxidromes; a positive toxicity adds each listed toxidrome, so none may exclude another.
 //! @param toxicity The toxicity delta applied to each listed toxidrome.
 //! @return The constructed Cmp::Toxicity::Toxidrome.
-//! @throws std::runtime_error on an invalid or no-op configuration: an empty list, a multi-type list with non-negative
-//!         toxicity, or one containing "none", "all", an unknown or a duplicated type.
+//! @throws std::runtime_error on an invalid or no-op configuration: an empty list, a multi-type list with zero
+//!         toxicity, one containing "none", "all", an unknown or a duplicated type, or a positive-toxicity list
+//!         containing mutually exclusive types.
 Cmp::Toxicity::Toxidrome create_toxidrome( const std::vector<std::string> &types, int toxicity );
 
 //! @brief Look up a toxidrome's entt::type_hash id from its data-driven type name (e.g. loaded from JSON).

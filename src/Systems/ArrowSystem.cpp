@@ -39,7 +39,7 @@ ArrowSystem::ArrowSystem( entt::registry &reg, sf::RenderWindow &window, Audio::
 void ArrowSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
 {
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-  if ( inventory_type != "item.bow" ) { return; }
+  if ( inventory_type != "item.longbow" ) { return; }
 
   if ( ev.action == Game::Events::PlayerActionEvent::GameActions::DRAW_BOW )
   {
