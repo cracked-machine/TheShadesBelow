@@ -387,6 +387,7 @@ protected:
           kill_npc_effect.npc_types.emplace_back( npc_type );
         }
       }
+      if ( kill_npc.contains( "wear_per_kill" ) ) { kill_npc_effect.wear_per_kill = JsonDeserializer::get_float( kill_npc, "wear_per_kill" ); }
       if ( kill_npc.contains( "death_anim" ) ) { kill_npc_effect.death_anim = Sys::SpriteKey( JsonDeserializer::get_string( kill_npc, "death_anim" ) ); }
       effects.kill_npc = kill_npc_effect;
     }

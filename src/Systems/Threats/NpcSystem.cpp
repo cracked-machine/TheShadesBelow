@@ -71,6 +71,7 @@
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
+#include <Events/UpdateDmgEvent.hpp>
 #include <Events/GrimoireUpdateEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/TeleportEntityEvent.hpp>
@@ -973,6 +974,8 @@ void NpcSystem::check_plant_kill_npc( sf::Time dt )
     const auto &proximity_action = plant_worlditem_cmp.get_action<Cmp::ProximityAction>();
     const auto &kill_npc = proximity_action.side_effects().kill_npc;
     if ( not kill_npc ) continue;
+    // a plant worn out by its kills stays in the world but is harmless
+    if ( Utils::is_plant_depleted( reg(), plant_entt ) ) continue;
 
     auto &timer = reg().get_or_emplace<Cmp::Plant::KillNpcTimer>( plant_entt );
     timer += dt;
@@ -997,6 +1000,7 @@ void NpcSystem::check_plant_kill_npc( sf::Time dt )
     for ( auto npc_entt : npcs )
     {
       get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, kill_npc->death_anim, "shrine_lighting" ) );
+      if ( kill_npc->wear_per_kill > 0.f ) get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, kill_npc->wear_per_kill ) );
     }
     get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_worlditem_cmp.item_type, Cmp::ProximityAction::kKey, proximity_action ) );
   }

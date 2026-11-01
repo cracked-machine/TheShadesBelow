@@ -243,6 +243,8 @@ struct KillNpcEffect
   std::optional<Sys::SpriteKey> death_anim;
   //! @brief How likely the effect is to fire, rolled per NPC in range each time the action is applied.
   Probability probability{ Probability::ALWAYS };
+  //! @brief Wear (out of 100) the source takes per kill. A fully worn source stops killing.
+  float wear_per_kill{ 0.f };
   //! @brief Whether this effect can kill the given NPC type.
   //! @param npc_type The NPC's type key.
   //! @return true if npc_types is empty or contains npc_type.
