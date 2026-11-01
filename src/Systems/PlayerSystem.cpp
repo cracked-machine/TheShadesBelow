@@ -949,10 +949,16 @@ void PlayerSystem::set_player_on_fire()
   if ( not Utils::Player::get_stats( reg() ).toxidrome().has<Cmp::Toxicity::Phototoxia>() ) return;
 
   auto player_pos = Utils::Player::get_position( reg() );
-  const sf::Vector2f flame_emitter_pos( player_pos.getCenter().x, player_pos.position.y + player_pos.size.y );
+  sf::Vector2f flame_emitter_pos( player_pos.getCenter().x, player_pos.position.y + player_pos.size.y );
+  // follow the player sprite's render offset (resting offset plus any flying lift)
+  if ( const auto *offset_cmp = reg().try_get<Cmp::AbsoluteRenderOffset>( Utils::Player::get_entity( reg() ) ) )
+  {
+    flame_emitter_pos += offset_cmp->getOffset();
+  }
 
+  // phototoxic skin only burns under a light source, the flames go out in the dark
   auto toxicity = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Phototoxia>();
-  if ( toxicity >= 100 )
+  if ( toxicity >= 100 and Utils::Player::is_illuminated( reg() ) )
   {
     for ( auto [ps_owner_entt, ps_owner_cmp] : reg().view<Cmp::Particle::SpriteOwner>().each() )
     {
@@ -1022,7 +1028,7 @@ void PlayerSystem::kill_player_if_stats_are_max()
   {
     on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::TERRIFIED, Utils::Player::get_position( reg() ) ) );
   }
-  else if ( Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Phototoxia>() == 100 )
+  else if ( Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Phototoxia>() == 100 and m_player_is_on_fire )
   {
     m_player_is_on_fire = false;
     on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::IGNITED, Utils::Player::get_position( reg() ) ) );

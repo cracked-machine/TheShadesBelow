@@ -480,7 +480,7 @@
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "hypoxia", "toxicity": 5 }, "tick": 0 }},
+      { "consume_action":     { "health": 3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "hypoxia", "toxicity": 5 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -631,13 +631,13 @@
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "phototoxia", "toxicity": 1 }, "tick": 3 }},
+      { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "phototoxia", "toxicity": 5 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "forage_action":      { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "reward": { "item": "item.hogweedseed" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "phototoxia", "toxicity": 1 }, "tick": 3,
+      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "phototoxia", "toxicity": 5 }, "tick": 3,
                                 "side_effects": { "kill_npc": { "probability": "always", "trigger_range": 1, "npc_types": ["npc.skeleton", "npc.adder"], "death_anim": "sprite.death.anim.flames" } } }},
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
@@ -833,7 +833,7 @@
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "consume_action":     { "health": 1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "vertigo", "toxicity": 5 }, "tick": 0 }},
+      { "consume_action":     { "health": 3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "vertigo", "toxicity": 5 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -932,7 +932,7 @@
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "consume_action":     { "health": 1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "bradycardia", "toxicity": 5 }, "tick": 0 }},
+      { "consume_action":     { "health": 3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "bradycardia", "toxicity": 5 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},

@@ -129,7 +129,7 @@ private:
   //! @param source_entt The source world item entity; its Cmp::DropCount tracks the drops.
   void drop_proximity_reward( const Cmp::ActionReward &reward, const Cmp::Position &source, entt::entity source_entt );
 
-  //! @brief Set the player on fire if Cmp::Toxicity::Phototoxia is 100%
+  //! @brief Set the player on fire if Cmp::Toxicity::Phototoxia is 100% and they are illuminated, put the fire out otherwise
   void set_player_on_fire();
 
   //! @brief Damage the player if they are hit by a burning particle (lava fireball, ember), then knock them back
