@@ -27,6 +27,7 @@
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/Moveable.hpp>
+#include <Components/Npc/Burryman.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/Shockwave.hpp>
@@ -275,6 +276,7 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
   {
     render_attached_burrs( *burr_cmp, body_rect );
   }
+  if ( const auto *burryman_cmp = reg().try_get<Cmp::Npc::Burryman>( entity ) ) render_carried_items( *burryman_cmp, body_rect );
 }
 
 void RenderGameSystem::draw_shader_sprite( Cmp::Shader::SpriteOwner &shader_owner )
@@ -407,6 +409,25 @@ void RenderGameSystem::render_attached_burrs( const Cmp::BurrCount &burr_cmp, co
     // the origin is the sprite centre, so the burr is scaled and turned to face outwards in place
     safe_render_sprite_world( "sprite.burr", sf::FloatRect( centre + burr.offset - half_cell, Constants::kGridSizePxF ), 0,
                               { Cmp::BurrCount::kStuckScale, Cmp::BurrCount::kStuckScale }, 255, half_cell, burr.side.angle() );
+  }
+}
+
+void RenderGameSystem::render_carried_items( const Cmp::Npc::Burryman &burryman_cmp, const sf::FloatRect &body_rect )
+{
+  const sf::Vector2f half_cell = Constants::kGridSizePxF / 2.f;
+  const sf::Vector2f centre = body_rect.getCenter();
+  const std::size_t count = burryman_cmp.carried.size();
+
+  for ( std::size_t i = 0; i < count; ++i )
+  {
+    // the item may have worn away while he carried it
+    if ( not reg().valid( burryman_cmp.carried[i] ) ) continue;
+    const auto *item_cmp = reg().try_get<Cmp::WorldItem>( burryman_cmp.carried[i] );
+    if ( not item_cmp ) continue;
+    // the origin is the sprite centre, so the item is scaled down in place
+    const sf::Vector2f offset = Cmp::Npc::Burryman::carried_offset( i, count, body_rect.size );
+    safe_render_sprite_world( item_cmp->sprite_type, sf::FloatRect( centre + offset - half_cell, Constants::kGridSizePxF ), 0,
+                              { Cmp::Npc::Burryman::kCarriedScale, Cmp::Npc::Burryman::kCarriedScale }, 255, half_cell );
   }
 }
 

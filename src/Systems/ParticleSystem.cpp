@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include <Components/Inventory/WorldItem.hpp>
+#include <Components/Npc/Burryman.hpp>
 #include <Components/Particle/BlockParticle.hpp>
 #include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Player/Character.hpp>
@@ -67,6 +68,31 @@ void ParticleSystem::update( sf::Time dt )
       ps_owner.sprite->set_emitter_position(
           { candle_pos_cmp.getCenter().x, candle_pos_cmp.getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset } );
       ps_zorder_cmp.set( std::min( candle_zorder_cmp.get() + 1.f, max_flame_zorder ) );
+    }
+  }
+
+  // a candle carried by the Burryman keeps burning on the small candle drawn round his edge
+  for ( auto [burryman_entt, burryman_cmp, burryman_pos_cmp, burryman_zorder_cmp] :
+        reg().view<Cmp::Npc::Burryman, Cmp::Position, Cmp::ZOrderValue>().each() )
+  {
+    const std::size_t count = burryman_cmp.carried.size();
+    for ( std::size_t i = 0; i < count; ++i )
+    {
+      const entt::entity candle_entt = burryman_cmp.carried[i];
+      if ( not reg().valid( candle_entt ) ) continue;
+      const auto *candle_cmp = reg().try_get<Cmp::WorldItem>( candle_entt );
+      const auto *candle_uuid_cmp = reg().try_get<Cmp::UUID>( candle_entt );
+      if ( not candle_cmp or not candle_uuid_cmp or not candle_cmp->sprite_type.contains( "candle" ) ) continue;
+
+      const sf::Vector2f candle_centre = burryman_pos_cmp.getCenter() + Cmp::Npc::Burryman::carried_offset( i, count, burryman_pos_cmp.size );
+      for ( auto [ps_entt, ps_owner, ps_uuid_cmp, ps_zorder_cmp] : reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID, Cmp::ZOrderValue>().each() )
+      {
+        if ( ps_uuid_cmp != *candle_uuid_cmp ) continue;
+        ps_owner.sprite->set_emitter_position(
+            { candle_centre.x,
+              candle_centre.y - ( Cmp::Particle::FlameParticleSprite::kVerticalOffset * Cmp::Npc::Burryman::kCarriedScale ) } );
+        ps_zorder_cmp.set( std::min( burryman_zorder_cmp.get() + 1.f, max_flame_zorder ) );
+      }
     }
   }
 

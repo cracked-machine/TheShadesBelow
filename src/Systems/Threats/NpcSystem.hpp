@@ -12,6 +12,7 @@
 #include <entt/entity/fwd.hpp>
 
 #include <optional>
+#include <string_view>
 
 // clang-format off
 namespace Game::Sys { class Store; }
@@ -172,6 +173,34 @@ private:
   //! @param view_bounds current world view bounds
   //! @return Cmp::Position the flee target, sized as `player_pos`
   Cmp::Position repel_target( const Cmp::Position &player_pos, const Cmp::Position &npc_pos, const sf::FloatRect &view_bounds ) const;
+
+  //! @brief Steer a Burryman towards the nearest world item he has a clear path to, or away from the player
+  //! once there are none. He ignores lights, the mimic and repel.
+  //! @param navmesh
+  //! @param npc_entity
+  //! @param player_pos
+  //! @param view_bounds current world view bounds
+  void update_burryman_pathfinding( PathFinding::SpatialHashGrid &navmesh, entt::entity npc_entity, const Cmp::Position &player_pos,
+                                    const sf::FloatRect &view_bounds );
+
+  //! @brief Every Burryman picks up the world items next to him. A carried item keeps its entity, minus
+  //! Cmp::Position, Cmp::AnimData and Cmp::ZOrderValue, and is tracked in Cmp::Npc::Burryman::carried.
+  //! @param dt
+  void update_burryman_pickup( sf::Time dt );
+
+  //! @brief Scatter a Burryman's carried items back into the world, each onto its own free cell near him.
+  //! @param burryman_entity
+  //! @param burryman_pos The Burryman's position.
+  void drop_burryman_items( entt::entity burryman_entity, const Cmp::Position &burryman_pos );
+
+  //! @brief How many of the nearest world items a Burryman checks for a clear path each pathfinding tick.
+  static constexpr std::size_t kBurrymanMaxCandidates = 4;
+
+  //! @brief The world item the Burryman won't steal.
+  static constexpr std::string_view kBurrymanIgnoredItem = "item.rottenfood";
+
+  //! @brief How many rings out from the Burryman drop_burryman_items() searches for free cells.
+  static constexpr int kBurrymanDropRadius = 4;
 
   //! @brief Update NPC animation
   void update_animation();

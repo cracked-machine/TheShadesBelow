@@ -43,6 +43,7 @@ class BurrCount;
 struct FractalCurve;
 } // namespace Game::Cmp
 
+namespace Game::Cmp::Npc { struct Burryman; }
 namespace Game::Cmp::Particle { class IParticleSprite; struct SpriteOwner; }
 namespace Game::Cmp::Shader { struct SpriteOwner; }
 // clang-format on
@@ -114,6 +115,11 @@ private:
   //! @param burr_cmp The NPC's burrs.
   //! @param body_rect The NPC's on-screen bounds.
   void render_attached_burrs( const Cmp::BurrCount &burr_cmp, const sf::FloatRect &body_rect );
+
+  //! @brief Draw the world items a Burryman is carrying, scaled down and spaced evenly round his outer edge.
+  //! @param burryman_cmp The Burryman's carried items.
+  //! @param body_rect The Burryman's on-screen bounds.
+  void render_carried_items( const Cmp::Npc::Burryman &burryman_cmp, const sf::FloatRect &body_rect );
 
   //! @brief Draw a small wear-level bar above an item, filled proportionally to `wearlevel`.
   //! @param wearlevel

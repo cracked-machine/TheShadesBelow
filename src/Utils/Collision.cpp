@@ -2,6 +2,7 @@
 #include <Components/Crypt/RoomLavaPitCell.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Inventory/WorldItem.hpp>
+#include <Components/Npc/Burryman.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/Wisp.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
@@ -41,6 +42,20 @@ LightSources collect_light_sources( entt::registry &reg )
     if ( not Utils::is_visible_in_view( light_bounds, candle_pos ) ) continue;
     if ( not candle_cmp.item_type.contains( "candle" ) ) continue;
     lights.circles.push_back( candle_pos.getCenter() );
+  }
+
+  // a candle the Burryman has stolen lights his way
+  for ( auto [burryman_entt, burryman_cmp, burryman_pos] : reg.view<Cmp::Npc::Burryman, Cmp::Position>().each() )
+  {
+    if ( not Utils::is_visible_in_view( light_bounds, burryman_pos ) ) continue;
+    const bool has_candle = std::ranges::any_of( burryman_cmp.carried,
+                                                 [&]( entt::entity item_entt )
+                                                 {
+                                                   if ( not reg.valid( item_entt ) ) return false;
+                                                   const auto *item_cmp = reg.try_get<Cmp::WorldItem>( item_entt );
+                                                   return item_cmp and item_cmp->item_type.contains( "candle" );
+                                                 } );
+    if ( has_candle ) lights.circles.push_back( burryman_pos.getCenter() );
   }
 
   for ( auto [altar_entt, altar_cmp, altar_uuid_cmp] : reg.view<Cmp::Altar::MultiBlock, Cmp::UUID>().each() )

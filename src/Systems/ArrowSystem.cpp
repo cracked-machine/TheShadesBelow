@@ -21,6 +21,7 @@
 #include <Systems/BaseSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Player.hpp>
@@ -162,6 +163,7 @@ void ArrowSystem::update_arrow_trajectory( sf::Time dt )
 void ArrowSystem::check_npc_arrow_collision()
 {
   Cmp::Position cached_npc_pos_cmp( { -100.f, -100.f }, Constants::kGridSizePxF );
+  Sys::NpcKey cached_npc_type;
   std::vector<entt::entity> hit_loot_containers;
   for ( auto [arrow_entt, arrow_cmp, arrow_pos_cmp] : reg().view<Cmp::Weapons::Projectiles::Arrow, Cmp::Position>().each() )
   {
@@ -171,7 +173,8 @@ void ArrowSystem::check_npc_arrow_collision()
       if ( reg().any_of<Cmp::Npc::Ghost, Cmp::Npc::Wisp>( npc_entt ) ) continue;
       if ( not npc_pos_cmp.findIntersection( arrow_pos_cmp ) ) continue;
       cached_npc_pos_cmp = npc_pos_cmp;
-      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt ) );
+      cached_npc_type = npc_cmp.npc_type;
+      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, std::nullopt, Events::DestroyNpcEvent::Cause::ARROW ) );
     }
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::Container, Cmp::Position>().each() )
     {
@@ -195,10 +198,20 @@ void ArrowSystem::check_npc_arrow_collision()
 
   if ( cached_npc_pos_cmp.position != sf::Vector2f{ -100.f, -100.f } )
   {
-    m_sound_bank.get_effect( "rattling_bones" ).play();
-    auto skelebones_particle_uuid = Cmp::UUID::generate();
-    Factory::Particle::add_skelebones_ps( reg(), "graveyard.skele.particle.bones", 50, 2.f, 50.f, 14.f, skelebones_particle_uuid,
-                                          cached_npc_pos_cmp.getCenter(), cached_npc_pos_cmp.position.y );
+    if ( cached_npc_type == "npc.skeleton" )
+    {
+      m_sound_bank.get_effect( "rattling_bones" ).play();
+      auto skelebones_particle_uuid = Cmp::UUID::generate();
+      Factory::Particle::add_skelebones_ps( reg(), "graveyard.skele.particle.bones", 50, 2.f, 50.f, 14.f, skelebones_particle_uuid,
+                                            cached_npc_pos_cmp.getCenter(), cached_npc_pos_cmp.position.y );
+    }
+    else if ( cached_npc_type == "npc.burryman" )
+    {
+      m_sound_bank.get_effect( "chopping_final" ).play();
+      auto burryman_twigs_particle_uuid = Cmp::UUID::generate();
+      Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, burryman_twigs_particle_uuid,
+                                            cached_npc_pos_cmp.getCenter(), cached_npc_pos_cmp.position.y );
+    }
   }
 }
 

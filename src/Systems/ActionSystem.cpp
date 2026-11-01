@@ -15,6 +15,7 @@
 #include <Components/Loot.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Moveable.hpp>
+#include <Components/Npc/Burryman.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/SpawnedBy.hpp>
 #include <Components/Obstacle.hpp>
@@ -65,8 +66,8 @@
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
-#include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/ItemStore.hpp>
+#include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Systems/Threats/LightningSystem.hpp>
 #include <Systems/Threats/WormholeSystem.hpp>
@@ -412,8 +413,9 @@ void ActionSystem::player_plant_interact()
                                                  plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
           if ( forage_reward->target == Cmp::ActionReward::Target::DEFAULT )
           {
-            get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( find_forage_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
-                                                                        Sys::ItemStore::instance().pick_item( forage_reward->item ), "drop_loot" ) );
+            get_systems_event_queue().trigger(
+                Events::CreateItemEvent( Cmp::Position( find_forage_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
+                                         Sys::ItemStore::instance().pick_item( forage_reward->item ), "drop_loot" ) );
           }
           // the gloves occupy the inventory, so an inventory reward is dropped nearby
           else { grant_item_reward( *forage_reward, plant_bounds, plant_entt ); }
@@ -562,7 +564,11 @@ void ActionSystem::check_player_axe_npc_kill()
   SPDLOG_DEBUG( "position_view size: {}", position_view.size_hint() );
   for ( auto [npc_entity, npc_pos_cmp, npc_cmp, anim_cmp] : position_view.each() )
   {
-    if ( not anim_cmp.m_sprite_type.contains( "sprite.skeleton" ) ) continue;
+    // only skeletons and the Burryman can be axed
+    const bool is_skeleton = anim_cmp.m_sprite_type.contains( "sprite.skeleton" );
+    const bool is_burryman = reg().all_of<Cmp::Npc::Burryman>( npc_entity );
+
+    if ( not is_skeleton and not is_burryman ) continue;
     auto mouse_position_bounds = Utils::get_mouse_bounds_in_gameview( m_window, RenderSystem::get_world_view() );
     if ( mouse_position_bounds.findIntersection( npc_pos_cmp ) )
     {
@@ -593,15 +599,24 @@ void ActionSystem::check_player_axe_npc_kill()
 
       // select the final smash sound
       m_sound_bank.get_effect( "axe_whip" ).play();
-      m_sound_bank.get_effect( "rattling_bones" ).play();
-
-      auto skelebones_particle_uuid = Cmp::UUID::generate();
-      Factory::Particle::add_skelebones_ps( reg(), "graveyard.skele.particle.bones", 50, 2.f, 50.f, 14.f, skelebones_particle_uuid,
-                                            npc_pos_cmp.getCenter(), npc_pos_cmp.position.y );
+      if ( is_skeleton )
+      {
+        m_sound_bank.get_effect( "rattling_bones" ).play();
+        auto skelebones_particle_uuid = Cmp::UUID::generate();
+        Factory::Particle::add_skelebones_ps( reg(), "graveyard.skele.particle.bones", 50, 2.f, 50.f, 14.f, skelebones_particle_uuid,
+                                              npc_pos_cmp.getCenter(), npc_pos_cmp.position.y );
+      }
+      else if ( is_burryman )
+      {
+        m_sound_bank.get_effect( "chopping_final" ).play();
+        auto burryman_twigs_particle_uuid = Cmp::UUID::generate();
+        Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, burryman_twigs_particle_uuid,
+                                              npc_pos_cmp.getCenter(), npc_pos_cmp.position.y );
+      }
 
       SPDLOG_DEBUG( "Killed NPC at position ({}, {})!", npc_pos_cmp.position.x, npc_pos_cmp.position.y );
       // now destroy the NPC
-      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entity ) );
+      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entity, std::nullopt, Events::DestroyNpcEvent::Cause::AXE ) );
     }
   }
 }

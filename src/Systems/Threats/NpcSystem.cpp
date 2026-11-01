@@ -1,7 +1,7 @@
 #include <Audio/SoundBank.hpp>
-#include <Components/Altar/Segment.hpp>
 #include <Components/AbsoluteAlpha.hpp>
 #include <Components/AbsoluteTint.hpp>
+#include <Components/Altar/Segment.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Crypt/BuildingSegment.hpp>
 #include <Components/Crypt/ObjectiveSegment.hpp>
@@ -9,11 +9,14 @@
 #include <Components/Direction.hpp>
 #include <Components/FootStepTimer.hpp>
 #include <Components/Grave/ExitSegment.hpp>
+#include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Grave/Segment.hpp>
+#include <Components/Inventory/WorldItem.hpp>
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/Adder.hpp>
 #include <Components/Npc/Azazel.hpp>
+#include <Components/Npc/Burryman.hpp>
 #include <Components/Npc/Container.hpp>
 #include <Components/Npc/Drknox.hpp>
 #include <Components/Npc/ElderMother.hpp>
@@ -94,9 +97,11 @@
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Time.hpp>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <limits>
 #include <spdlog/spdlog.h>
+#include <vector>
 
 namespace Game::Sys
 {
@@ -203,6 +208,14 @@ void NpcSystem::on_destroy_npc_event( const Events::DestroyNpcEvent &event )
   auto *pos_cmp = reg().try_get<Cmp::Position>( npc_entity );
   if ( not pos_cmp ) return;
 
+  // only the axe or an arrow kills the Burryman, and he drops everything he stole
+  if ( reg().all_of<Cmp::Npc::Burryman>( npc_entity ) )
+  {
+    using Cause = Events::DestroyNpcEvent::Cause;
+    if ( event.m_cause != Cause::AXE and event.m_cause != Cause::ARROW ) return;
+    drop_burryman_items( npc_entity, *pos_cmp );
+  }
+
   // The bucket the NPC is in is the cell it last set off from, not wherever it has lerped to since. A step that
   // hasn't started yet (zero lerp factor) has no m_start: the NPC is still in the cell it is standing on.
   Cmp::Position bucket_position = *pos_cmp;
@@ -268,6 +281,7 @@ void NpcSystem::update( sf::Time dt )
   }
   update_sfx( dt );
   update_movement( dt );
+  update_burryman_pickup( dt );
 
   // before the collision checks, so the ElderMother can't hurt the player on the frame she is banished
   check_elderflute_banish();
@@ -564,6 +578,13 @@ void NpcSystem::update_pathfinding( sf::Time dt )
       auto navmesh = navmesh_for( npc_entt );
       if ( not navmesh ) continue;
 
+      // the Burryman never chases: he steals what he can reach, then flees the player
+      if ( reg().all_of<Cmp::Npc::Burryman>( npc_entt ) )
+      {
+        update_burryman_pathfinding( *navmesh, npc_entt, player_pos, view_bounds );
+        continue;
+      }
+
       // the mimic flees out of view, drawing the NPCs that chase it away from the player.
       // Lights are ignored: they only hold back threats, and the mimic may spawn inside the player's candle light.
       if ( reg().all_of<Cmp::Npc::Mimic>( npc_entt ) )
@@ -625,6 +646,122 @@ Cmp::Position NpcSystem::repel_target( const Cmp::Position &player_pos, const Cm
 
   const sf::Vector2f target_center = origin + dir * t;
   return Cmp::Position( target_center - player_pos.size * 0.5f, player_pos.size );
+}
+
+void NpcSystem::update_burryman_pathfinding( PathFinding::SpatialHashGrid &navmesh, entt::entity npc_entity, const Cmp::Position &player_pos,
+                                             const sf::FloatRect &view_bounds )
+{
+  const auto &npc_pos_cmp = reg().get<Cmp::Position>( npc_entity );
+
+  // the nearest on-screen world items, planted plants and rotten food excepted
+  std::vector<std::pair<float, Cmp::Position>> candidates;
+  for ( auto [item_entt, item_cmp, item_pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>( entt::exclude<Cmp::PlantMultiBlock> ).each() )
+  {
+    if ( item_cmp.item_type.str() == kBurrymanIgnoredItem ) continue;
+    if ( not Utils::is_visible_in_view( view_bounds, item_pos_cmp ) ) continue;
+    const sf::Vector2f delta = item_pos_cmp.getCenter() - npc_pos_cmp.getCenter();
+    candidates.emplace_back( delta.lengthSquared(), item_pos_cmp );
+  }
+  const std::size_t candidate_count = std::min( candidates.size(), kBurrymanMaxCandidates );
+  std::partial_sort( candidates.begin(), candidates.begin() + static_cast<std::ptrdiff_t>( candidate_count ), candidates.end(),
+                     []( const auto &lhs, const auto &rhs ) { return lhs.first < rhs.first; } );
+
+  // Item cells may be missing from the navmesh (Cmp::Npc::NoPathFinding), so aim for a walkable cell next to the
+  // item instead: update_burryman_pickup() collects it from there. No path to any of them means no clear path.
+  const std::array<sf::Vector2f, 4> neighbours{ sf::Vector2f( 0.f, -Constants::kGridSizePxF.y ), sf::Vector2f( Constants::kGridSizePxF.x, 0.f ),
+                                                sf::Vector2f( 0.f, Constants::kGridSizePxF.y ), sf::Vector2f( -Constants::kGridSizePxF.x, 0.f ) };
+  for ( std::size_t i = 0; i < candidate_count; ++i )
+  {
+    const sf::Vector2f item_cell = Utils::snap_to_grid( candidates[i].second.position );
+    for ( const auto &offset : neighbours )
+    {
+      const Cmp::Position target( item_cell + offset, Constants::kGridSizePxF );
+      if ( navmesh.at( target ).empty() ) continue;
+      auto result = Utils::Npc::pathfind_toward( reg(), navmesh, target, npc_entity, false, false, false, nullptr, false );
+      if ( result != Utils::Npc::PathfindResult::NoPath ) return;
+    }
+  }
+
+  // nothing left within reach: flee out of view, ignoring lights like the mimic
+  auto result = Utils::Npc::pathfind_toward( reg(), navmesh, repel_target( player_pos, npc_pos_cmp, view_bounds ), npc_entity, false, false, false,
+                                             nullptr, true );
+  if ( result == Utils::Npc::PathfindResult::NoPath ) { reg().emplace_or_replace<Cmp::Direction>( npc_entity, Cmp::Direction( { 0.0f, 0.0f } ) ); }
+}
+
+void NpcSystem::update_burryman_pickup( sf::Time dt )
+{
+  auto reserved_sm = m_reserved_sm.lock();
+  for ( auto [npc_entt, burryman_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::Burryman, Cmp::Position>().each() )
+  {
+    burryman_cmp.sfx_cooldown += dt;
+
+    // reaches into the cells around him, diagonals included
+    const auto reach = Cmp::RectBounds::scaled( npc_pos_cmp, 1.5f );
+
+    // collect first: removing Cmp::Position below modifies the view's storage
+    std::vector<entt::entity> picked_up;
+    for ( auto [item_entt, item_cmp, item_pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>( entt::exclude<Cmp::PlantMultiBlock> ).each() )
+    {
+      if ( item_cmp.item_type.str() == kBurrymanIgnoredItem ) continue;
+      if ( reach.findIntersection( item_pos_cmp ) ) picked_up.push_back( item_entt );
+    }
+    if ( picked_up.empty() ) continue;
+
+    for ( auto item_entt : picked_up )
+    {
+      if ( reserved_sm ) reserved_sm->remove( item_entt, reg().get<Cmp::Position>( item_entt ) );
+      // keeps every other component (wear level, uuid, dowsing target...) for when he drops it again
+      reg().remove<Cmp::Position, Cmp::AnimData, Cmp::ZOrderValue>( item_entt );
+      burryman_cmp.carried.push_back( item_entt );
+      SPDLOG_INFO( "Burryman {} picked up {}", static_cast<int>( npc_entt ), reg().get<Cmp::WorldItem>( item_entt ).item_type );
+    }
+
+    static const sf::Time kPickupSfxCooldown = sf::milliseconds( 500 );
+    if ( burryman_cmp.sfx_cooldown >= kPickupSfxCooldown )
+    {
+      m_sound_bank.get_effect( "equip_inventory" ).play();
+      burryman_cmp.sfx_cooldown = sf::Time::Zero;
+    }
+  }
+}
+
+void NpcSystem::drop_burryman_items( entt::entity burryman_entity, const Cmp::Position &burryman_pos )
+{
+  auto &burryman_cmp = reg().get<Cmp::Npc::Burryman>( burryman_entity );
+
+  auto npc_navmesh = m_npc_navmesh.lock();
+  auto ghost_navmesh = m_ghost_navmesh.lock();
+  auto loot_sm = m_loot_sm.lock();
+  auto reserved_sm = m_reserved_sm.lock();
+  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
+
+  // scatter the items: each one gets its own free cell around him
+  std::vector<sf::Vector2f> used_cells;
+  bool dropped_any = false;
+  for ( auto item_entt : burryman_cmp.carried )
+  {
+    // the item may have worn away while he carried it
+    if ( not reg().valid( item_entt ) or not reg().all_of<Cmp::WorldItem>( item_entt ) ) continue;
+
+    auto cell = Utils::find_random_cell_near( burryman_pos, kBurrymanDropRadius, [&]( const sf::Vector2f &cell_pos )
+    {
+      if ( std::ranges::find( used_cells, cell_pos ) != used_cells.end() ) return false;
+      return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids );
+    } );
+    // better on top of him than lost
+    const sf::Vector2f drop_pos = cell ? *cell : Utils::snap_to_grid( burryman_pos.position );
+    used_cells.push_back( drop_pos );
+
+    const Cmp::Position item_pos( drop_pos, Constants::kGridSizePxF );
+    reg().emplace_or_replace<Cmp::Position>( item_entt, item_pos );
+    reg().emplace_or_replace<Cmp::AnimData>(
+        item_entt, Cmp::AnimData::Config{ .sprite_type = reg().get<Cmp::WorldItem>( item_entt ).sprite_type, .enabled = false } );
+    reg().emplace_or_replace<Cmp::ZOrderValue>( item_entt, drop_pos.y - 1.f );
+    if ( reserved_sm ) reserved_sm->insert( item_entt, item_pos );
+    dropped_any = true;
+  }
+  burryman_cmp.carried.clear();
+  if ( dropped_any ) m_sound_bank.get_effect( "drop_inventory" ).play();
 }
 
 void NpcSystem::update_movement( sf::Time dt )
