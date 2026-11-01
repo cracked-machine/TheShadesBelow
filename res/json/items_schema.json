@@ -74,15 +74,15 @@
             "properties": {
               "burn_action": {
                 "description": "Applied repeatedly, at its own tick interval, while the item is burning.",
-                "allOf": [{ "$ref": "#/definitions/action_effect" }]
+                "allOf": [{ "$ref": "#/definitions/action_effect" }, { "$ref": "#/definitions/no_altar_reward" }]
               },
               "carry_action": {
                 "description": "Applied repeatedly, at its own tick interval, while the item is held in the player's inventory (e.g. a carried candle accumulating darkness fear over time).",
-                "allOf": [{ "$ref": "#/definitions/action_effect" }]
+                "allOf": [{ "$ref": "#/definitions/action_effect" }, { "$ref": "#/definitions/no_altar_reward" }]
               },
               "consume_action": {
                 "description": "Applied when the item is consumed (eaten/drunk/used up).",
-                "allOf": [{ "$ref": "#/definitions/action_effect" }]
+                "allOf": [{ "$ref": "#/definitions/action_effect" }, { "$ref": "#/definitions/no_altar_reward" }]
               },
               "destroy_action": {
                 "description": "Applied when the item's world entity is destroyed/removed. Optional reward.item: the item dropped at the plant when it is chopped down with an axe, unless reward.target is set.",
@@ -94,7 +94,7 @@
               },
               "spawn_action": {
                 "description": "Applied when the item spawns (e.g. loot dropped by a destroyed grave or NPC).",
-                "allOf": [{ "$ref": "#/definitions/action_effect" }]
+                "allOf": [{ "$ref": "#/definitions/action_effect" }, { "$ref": "#/definitions/no_altar_reward" }]
               },
               "proximity_action": {
                 "description": "Applied repeatedly, at its own tick interval, while the player is near the item and it is within the current screen view. Optional reward: exactly one of item or loot, dropped on a random free cell beside the item once the player is within reward.trigger_range.",
@@ -164,10 +164,7 @@
           "type": "number"
         },
         "reward": {
-          "oneOf": [
-            { "$ref": "#/definitions/reward" },
-            { "type": "array", "minItems": 2, "items": { "$ref": "#/definitions/reward" }, "description": "sacrifice_action only." }
-          ]
+          "description": "Optional reward. Its shape is set by each action (no_altar_reward, item_only_reward, proximity_reward or sacrifice_reward_entry)."
         },
         "side_effects": {
           "type": "object",
@@ -317,13 +314,19 @@
       "oneOf": [{ "required": ["item"] }, { "required": ["wealth"] }, { "required": ["altar"] }],
       "dependencies": { "tick": ["altar"] }
     },
+    "no_altar_reward": {
+      "description": "A single reward object. Altar effects are only applied by sacrifice_action, so any other action may not set reward.altar.",
+      "properties": { "reward": { "allOf": [{ "$ref": "#/definitions/reward" }], "propertyNames": { "not": { "const": "altar" } } } }
+    },
     "item_only_reward": {
-      "properties": { "reward": { "type": "object", "required": ["item"], "propertyNames": { "enum": ["item", "target", "count"] } } }
+      "properties": {
+        "reward": { "allOf": [{ "$ref": "#/definitions/reward" }], "required": ["item"], "propertyNames": { "enum": ["item", "target", "count"] } }
+      }
     },
     "proximity_reward": {
       "properties": {
         "reward": {
-          "type": "object",
+          "allOf": [{ "$ref": "#/definitions/reward" }],
           "oneOf": [{ "required": ["item"] }, { "required": ["loot"] }],
           "propertyNames": { "enum": ["item", "loot", "trigger_range", "max_instances", "target", "count"] }
         }
