@@ -231,6 +231,32 @@ struct ToxicImmunityEffect
   [[nodiscard]] bool roll( int player_luck ) const;
 };
 
+//! @brief Optional side effect of an action: kill NPCs that come near the action's source (proximity_action only).
+//! @note The Burryman is immune (see Events::DestroyNpcEvent) and NPCs spawned by the source itself are spared.
+struct KillNpcEffect
+{
+  //! @brief The NPC types that can be killed, see res/json/npc.json. Empty = any NPC.
+  std::vector<Sys::NpcKey> npc_types;
+  //! @brief Distance in blocks from the source that an NPC must be within to be killed.
+  int trigger_range{ 1 };
+  //! @brief Sprite played where the NPC dies, or std::nullopt for no animation.
+  std::optional<Sys::SpriteKey> death_anim;
+  //! @brief How likely the effect is to fire, rolled per NPC in range each time the action is applied.
+  Probability probability{ Probability::ALWAYS };
+  //! @brief Whether this effect can kill the given NPC type.
+  //! @param npc_type The NPC's type key.
+  //! @return true if npc_types is empty or contains npc_type.
+  [[nodiscard]] bool targets( const Sys::NpcKey &npc_type ) const;
+  //! @brief This effect's chance of firing at the given player luck.
+  //! @param player_luck Player's luck stat, range [0, 100].
+  //! @return Chance in [0, 1].
+  [[nodiscard]] float chance( int player_luck ) const;
+  //! @brief Roll this effect's probability.
+  //! @param player_luck Player's luck stat, range [0, 100].
+  //! @return true if the effect should fire.
+  [[nodiscard]] bool roll( int player_luck ) const;
+};
+
 //! @brief The optional side effects of an action, each rolled independently. See the "side_effects" object in
 //! res/json/items.json and res/json/npc.json.
 struct SideEffects
@@ -243,9 +269,11 @@ struct SideEffects
   std::optional<MovementEffect> movement;
   //! @brief Toxic immunity.
   std::optional<ToxicImmunityEffect> toxic_immunity;
+  //! @brief Kill nearby NPCs.
+  std::optional<KillNpcEffect> kill_npc;
   //! @brief Whether there are no effects at all.
   //! @return true if no effect is set.
-  [[nodiscard]] bool empty() const { return not spawn_npc and not lightning and not movement and not toxic_immunity; }
+  [[nodiscard]] bool empty() const { return not spawn_npc and not lightning and not movement and not toxic_immunity and not kill_npc; }
 };
 
 //! @brief Optional reward granted when an action is applied. See the "reward" object of the sacrifice_action,

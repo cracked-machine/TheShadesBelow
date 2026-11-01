@@ -375,6 +375,21 @@ protected:
       effects.toxic_immunity = Cmp::ToxicImmunityEffect{ .tick = JsonDeserializer::get_int( toxic_immunity, "tick" ),
                                                          .probability = get_probability( toxic_immunity ) };
     }
+    if ( fx.contains( "kill_npc" ) )
+    {
+      const auto &kill_npc = fx.at( "kill_npc" );
+      Cmp::KillNpcEffect kill_npc_effect{ .trigger_range = kill_npc.contains( "trigger_range" ) ? JsonDeserializer::get_int( kill_npc, "trigger_range" ) : 1,
+                                          .probability = get_probability( kill_npc ) };
+      if ( kill_npc.contains( "npc_types" ) )
+      {
+        for ( const auto &npc_type : JsonDeserializer::get_string_or_list( kill_npc, "npc_types" ) )
+        {
+          kill_npc_effect.npc_types.emplace_back( npc_type );
+        }
+      }
+      if ( kill_npc.contains( "death_anim" ) ) { kill_npc_effect.death_anim = Sys::SpriteKey( JsonDeserializer::get_string( kill_npc, "death_anim" ) ); }
+      effects.kill_npc = kill_npc_effect;
+    }
     return effects;
   }
 

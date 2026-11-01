@@ -365,6 +365,15 @@ bool GrimoireSystem::render_action_side_effects( TextColumn &draw_line, const Cm
   {
     draw_effect( std::format( "toxic immunity {}s", effects.toxic_immunity->tick ), effects.toxic_immunity->chance( player_luck ) );
   }
+  if ( effects.kill_npc )
+  {
+    std::string names;
+    for ( const auto &npc_type : effects.kill_npc->npc_types )
+    {
+      names += std::format( "{}{}", names.empty() ? "" : ", ", npc_display_name( npc_type.str() ) );
+    }
+    draw_effect( std::format( "kills {}", names.empty() ? "npcs" : names ), effects.kill_npc->chance( player_luck ) );
+  }
   return not effects.empty();
 }
 

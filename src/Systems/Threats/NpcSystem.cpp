@@ -52,6 +52,7 @@
 #include <Components/Persistent/NpcMimicTint.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
+#include <Components/Plant/KillNpcTimer.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Player/RepelNpc.hpp>
@@ -64,11 +65,13 @@
 #include <Components/SpawnArea.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/CollisionAction.hpp>
+#include <Components/Stats/ProximityAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
+#include <Events/GrimoireUpdateEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/TeleportEntityEvent.hpp>
 #include <Events/UpdateNpcPositionEvent.hpp>
@@ -229,6 +232,7 @@ void NpcSystem::on_destroy_npc_event( const Events::DestroyNpcEvent &event )
 
   // the animation plays where the NPC is seen to be, which is its mid-step position rather than its bucket
   if ( event.m_death_anim ) { create_death_anim( *pos_cmp, *event.m_death_anim ); }
+  if ( event.m_death_sfx ) { m_sound_bank.get_effect( *event.m_death_sfx ).play(); }
 
   Factory::Npc::destroy_npc( reg(), npc_entity );
 }
@@ -285,6 +289,7 @@ void NpcSystem::update( sf::Time dt )
 
   // before the collision checks, so the ElderMother can't hurt the player on the frame she is banished
   check_elderflute_banish();
+  check_plant_kill_npc( dt );
 
   if ( Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled )
   {
@@ -845,8 +850,7 @@ void NpcSystem::check_elderflute_banish()
   for ( auto [npc_entt, em_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::ElderMother, Cmp::Position>().each() )
   {
     if ( not Utils::is_visible_in_view( half_view.getBounds(), npc_pos_cmp ) ) continue;
-    get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, Sys::SpriteKey( "sprite.death.anim.banish" ) ) );
-    m_sound_bank.get_effect( "witches_jar_sacrifice" ).play();
+    get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, Sys::SpriteKey( "sprite.death.anim.banish" ), "witches_jar_sacrifice" ) );
   }
 }
 
@@ -958,6 +962,43 @@ void NpcSystem::check_timed_collision( sf::Time dt )
     npc_action_timer = sf::Time::Zero;
 
     if ( check_player_death( player_mort ) ) return;
+  }
+}
+
+void NpcSystem::check_plant_kill_npc( sf::Time dt )
+{
+  const int player_luck = Utils::Player::get_stats( reg() ).luck();
+  for ( auto [plant_entt, plant_mb_cmp, plant_worlditem_cmp, plant_uuid] : reg().view<Cmp::PlantMultiBlock, Cmp::WorldItem, Cmp::UUID>().each() )
+  {
+    const auto &proximity_action = plant_worlditem_cmp.get_action<Cmp::ProximityAction>();
+    const auto &kill_npc = proximity_action.side_effects().kill_npc;
+    if ( not kill_npc ) continue;
+
+    auto &timer = reg().get_or_emplace<Cmp::Plant::KillNpcTimer>( plant_entt );
+    timer += dt;
+    if ( timer.asSeconds() < proximity_action.interval() ) continue;
+    timer = Cmp::Plant::KillNpcTimer{};
+
+    // collect first: the event handler modifies this storage
+    const auto kill_bounds = Cmp::RectBounds::expanded( plant_mb_cmp, kill_npc->trigger_range );
+    std::vector<entt::entity> npcs;
+    for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position>().each() )
+    {
+      if ( not kill_npc->targets( npc_cmp.npc_type ) ) continue;
+      // a plant doesn't kill its own spawns, e.g. red campion adders
+      if ( const auto *spawned_by_cmp = reg().try_get<Cmp::Npc::SpawnedBy>( npc_entt ); spawned_by_cmp and spawned_by_cmp->m_source == plant_uuid )
+        continue;
+      if ( not kill_bounds.findIntersection( npc_pos_cmp ).has_value() ) continue;
+      if ( not kill_npc->roll( player_luck ) ) continue;
+      npcs.push_back( npc_entt );
+    }
+    if ( npcs.empty() ) continue;
+
+    for ( auto npc_entt : npcs )
+    {
+      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, kill_npc->death_anim, "shrine_lighting" ) );
+    }
+    get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_worlditem_cmp.item_type, Cmp::ProximityAction::kKey, proximity_action ) );
   }
 }
 

@@ -901,8 +901,9 @@ void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
     { return Cmp::RectBounds::expanded( plant_mb_cmp, trigger_range ).findIntersection( player_pos ).has_value(); };
     bool triggered = false;
 
-    // spawn NPC now that we are close enough
-    if ( const auto &fx = proximity_action.side_effects(); not fx.empty() and ( not fx.spawn_npc or in_range( fx.spawn_npc->trigger_range ) ) )
+    // spawn NPC now that we are close enough. kill_npc is left to NpcSystem: it is gated on NPCs, not the player
+    const auto &fx = proximity_action.side_effects();
+    if ( ( fx.spawn_npc or fx.lightning or fx.movement or fx.toxic_immunity ) and ( not fx.spawn_npc or in_range( fx.spawn_npc->trigger_range ) ) )
     {
       trigger_side_effects( proximity_action, plant_bounds, plant_entt );
       triggered = true;

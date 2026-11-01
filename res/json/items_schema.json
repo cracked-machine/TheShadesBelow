@@ -203,6 +203,18 @@
                 "probability": { "$ref": "#/definitions/probability" }
               }
             },
+            "kill_npc": {
+              "type": "object",
+              "description": "proximity_action only. Kill NPCs within trigger_range of the item, rolled per NPC each tick, whether or not the player is near. The Burryman is immune and NPCs spawned by the item itself are spared.",
+              "required": ["probability"],
+              "additionalProperties": false,
+              "properties": {
+                "probability": { "$ref": "#/definitions/probability" },
+                "trigger_range": { "type": "integer", "minimum": 1, "description": "Distance in blocks from the item that an NPC must be within to be killed. Defaults to 1." },
+                "npc_types": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^npc\\." }, "description": "The NPC types that can be killed. Omit for any NPC." },
+                "death_anim": { "type": "string", "pattern": "^sprite\\.death\\.anim\\.", "description": "Sprite played where the NPC dies. Omit for no animation." }
+              }
+            },
             "toxic_immunity": {
               "type": "object",
               "description": "Toxidromes can't increase for tick seconds (existing toxicity stays, cures still apply). Applying again restarts the timer.",

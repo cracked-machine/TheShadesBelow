@@ -142,6 +142,11 @@ private:
   //! The particle is destroyed by the hit.
   void check_burning_particle_collision();
 
+  //! @brief Kill NPCs that come within range of a plant whose proximity_action has a kill_npc side effect. Each NPC in
+  //! range is rolled once per proximity_action tick; the plant's own spawns are spared.
+  //! @param dt Frame time, advancing each plant's Cmp::Plant::KillNpcTimer.
+  void check_plant_kill_npc( sf::Time dt );
+
   //! @brief Find a suitable knockback position for the player
   //! @param npc_direction
   //! @param npc_bounds The NPC's collision bounds; the player is pushed clear of all of it.

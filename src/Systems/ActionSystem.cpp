@@ -597,18 +597,19 @@ void ActionSystem::check_player_axe_npc_kill()
       float dmg = Sys::PersistSystem::get<Cmp::Persist::AxeSkeletonKillWear>( reg() ).get_value();
       get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 
-      // select the final smash sound
+      // select the final smash sound, played by the DestroyNpcEvent handler
       m_sound_bank.get_effect( "axe_whip" ).play();
+      std::optional<std::string> death_sfx;
       if ( is_skeleton )
       {
-        m_sound_bank.get_effect( "rattling_bones" ).play();
+        death_sfx = "rattling_bones";
         auto skelebones_particle_uuid = Cmp::UUID::generate();
         Factory::Particle::add_skelebones_ps( reg(), "graveyard.skele.particle.bones", 50, 2.f, 50.f, 14.f, skelebones_particle_uuid,
                                               npc_pos_cmp.getCenter(), npc_pos_cmp.position.y );
       }
       else if ( is_burryman )
       {
-        m_sound_bank.get_effect( "chopping_final" ).play();
+        death_sfx = "chopping_final";
         auto burryman_twigs_particle_uuid = Cmp::UUID::generate();
         Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, burryman_twigs_particle_uuid,
                                               npc_pos_cmp.getCenter(), npc_pos_cmp.position.y );
@@ -616,7 +617,7 @@ void ActionSystem::check_player_axe_npc_kill()
 
       SPDLOG_DEBUG( "Killed NPC at position ({}, {})!", npc_pos_cmp.position.x, npc_pos_cmp.position.y );
       // now destroy the NPC
-      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entity, std::nullopt, Events::DestroyNpcEvent::Cause::AXE ) );
+      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entity, std::nullopt, death_sfx, Events::DestroyNpcEvent::Cause::AXE ) );
     }
   }
 }

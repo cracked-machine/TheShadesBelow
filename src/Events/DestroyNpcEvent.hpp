@@ -6,6 +6,7 @@
 #include <entt/entity/entity.hpp>
 
 #include <optional>
+#include <string>
 #include <utility>
 
 namespace Game::Events
@@ -30,15 +31,20 @@ public:
 
   //! @param npc_entity The NPC to kill.
   //! @param death_anim Sprite to play at the NPC's position, or std::nullopt for no animation.
+  //! @param death_sfx Sound effect (see res/json/audio.json) to play when the NPC dies, or std::nullopt for none.
   //! @param cause What killed the NPC.
-  explicit DestroyNpcEvent( entt::entity npc_entity, std::optional<Sys::SpriteKey> death_anim = std::nullopt, Cause cause = Cause::OTHER )
+  explicit DestroyNpcEvent( entt::entity npc_entity, std::optional<Sys::SpriteKey> death_anim = std::nullopt,
+                            std::optional<std::string> death_sfx = std::nullopt, Cause cause = Cause::OTHER )
       : m_npc_entity( npc_entity ),
         m_death_anim( std::move( death_anim ) ),
+        m_death_sfx( std::move( death_sfx ) ),
         m_cause( cause )
   {
   }
   entt::entity m_npc_entity;
   std::optional<Sys::SpriteKey> m_death_anim;
+  //! @brief Only played if the NPC actually dies, e.g. not for the Burryman hit by anything but the axe or arrows.
+  std::optional<std::string> m_death_sfx;
   Cause m_cause;
 };
 
