@@ -887,6 +887,14 @@
     "detail": "Vertigo Health Dmg Per Sec",
     "format": "%d"
   },
+  "HallucinogenHealthDmgPerSec": {
+    "type": "int",
+    "value": 5,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Hallucinogen Health Dmg Per Sec",
+    "format": "%d"
+  },
   "ResetTutorial": {
     "type": "bool",
     "value": false,
