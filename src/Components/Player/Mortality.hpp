@@ -46,6 +46,8 @@ public:
     POISONED = 15,
     //! @brief When player health == 0 and no damage cause was recorded
     EXHAUSTED = 16,
+    //! @brief When player hallucinogen reaches 100
+    INSANITY = 17,
 
     //! @brief Player is dead. final state. end the game.
     DEAD = 255

@@ -274,8 +274,9 @@ void PlantSystem::player_plant_interact()
       }
       else if ( inventory_type == "item.gloves" )
       {
-        // Gloves stay equipped: the forage is dropped next to the plant and the plant's action modifiers are deliberately
-        // skipped. They don't protect against hawthorn lightning though.
+        // Gloves stay equipped: the forage is dropped next to the plant, marked safe so its spawn/carry actions never
+        // sting the player, and the plant's action modifiers are deliberately skipped. They don't protect against
+        // hawthorn lightning though.
         if ( ( plant_type == "item.plant.nettle" or plant_type == "item.plant.hawthorn" ) and forage_reward )
         {
           auto plantleaves_particle_uuid = Cmp::UUID::generate();
@@ -285,7 +286,8 @@ void PlantSystem::player_plant_interact()
           {
             get_systems_event_queue().trigger(
                 Events::CreateItemEvent( Cmp::Position( find_forage_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
-                                         Sys::ItemStore::instance().pick_item( forage_reward->item ), "drop_loot" ) );
+                                         Sys::ItemStore::instance().pick_item( forage_reward->item ), "drop_loot", 0.f, false, 0, entt::null,
+                                         [this]( entt::entity item_entt ) { reg().get<Cmp::WorldItem>( item_entt ).set_safe(); } ) );
           }
           // the gloves occupy the inventory, so an inventory reward is dropped nearby
           else { grant_item_reward( *forage_reward, plant_bounds, plant_entt ); }

@@ -212,6 +212,11 @@ public:
   //! @brief Whether the item can be eaten, drunk or neither.
   Consumable consumable_type() const { return m_consumable; }
 
+  //! @brief Mark the item as foraged with gloves: its spawn_action and carry_action no longer apply to the player.
+  void set_safe() { m_safe = true; }
+  //! @brief Whether the item was foraged with gloves, see set_safe().
+  bool is_safe() const { return m_safe; }
+
   //! @brief Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
   Sys::ItemKey item_type;
 
@@ -248,6 +253,9 @@ private:
 
   //! @brief Whether the item can be eaten, drunk or neither. Imported from items.json.
   Consumable m_consumable{ Consumable::NONE };
+
+  //! @brief Foraged with gloves, see set_safe().
+  bool m_safe{ false };
 };
 
 } // namespace Game::Cmp

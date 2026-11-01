@@ -41,6 +41,7 @@
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
+#include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
@@ -328,6 +329,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::BradycardiaHealthDmgPerSec>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::VenomHealthDmgPerSec>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::VertigoHealthDmgPerSec>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::HallucinogenHealthDmgPerSec>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerOnFireHealthDmgPerSec>( reg() ).render_widget();
 
     // Loot Settings

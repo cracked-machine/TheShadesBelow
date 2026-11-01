@@ -360,8 +360,12 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
 void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world_item_entt )
 {
 
-  const auto spawn_action = Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg, world_item_entt );
-  if ( const auto *world_item_pos_cmp = reg.try_get<Cmp::Position>( world_item_entt ) ) { trigger_side_effects( spawn_action, *world_item_pos_cmp, world_item_entt ); }
+  // items foraged with gloves (see Cmp::WorldItem::set_safe) don't sting when picked up
+  if ( const auto *safe_item_cmp = reg.try_get<Cmp::WorldItem>( world_item_entt ); not safe_item_cmp or not safe_item_cmp->is_safe() )
+  {
+    const auto spawn_action = Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg, world_item_entt );
+    if ( const auto *world_item_pos_cmp = reg.try_get<Cmp::Position>( world_item_entt ) ) { trigger_side_effects( spawn_action, *world_item_pos_cmp, world_item_entt ); }
+  }
 
   auto *anim_data_cmp = reg.try_get<Cmp::AnimData>( world_item_entt );
   if ( not anim_data_cmp ) return;

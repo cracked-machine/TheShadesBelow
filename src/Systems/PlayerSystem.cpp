@@ -41,6 +41,7 @@
 #include <Components/Persistent/DespairHealthDmgPerSec.hpp>
 #include <Components/Persistent/EmberDamage.hpp>
 #include <Components/Persistent/FearHealthDmgPerSec.hpp>
+#include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
@@ -88,6 +89,7 @@
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/Toxicity/Bradycadia.hpp>
+#include <Components/Toxicity/Halucinogen.hpp>
 #include <Components/Toxicity/Hypoxia.hpp>
 #include <Components/Toxicity/Phototoxia.hpp>
 #include <Components/Toxicity/Tachycardia.hpp>
@@ -794,6 +796,11 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
       apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::VertigoHealthDmgPerSec>( reg() ).get_value(),
                         Cmp::Player::Mortality::State::TERRIFIED );
     }
+    if ( player_stats.toxidrome().at<Cmp::Toxicity::Hallucinogen>() == 100 )
+    {
+      apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::HallucinogenHealthDmgPerSec>( reg() ).get_value(),
+                        Cmp::Player::Mortality::State::INSANITY );
+    }
     if ( player_stats.fear() == 100 )
     {
       apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::FearHealthDmgPerSec>( reg() ).get_value(), Cmp::Player::Mortality::State::TERRIFIED );
@@ -871,6 +878,8 @@ void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
   {
     auto &[carry_action, carry_timer] = slot_cmp.m_item.at<Cmp::CarryAction>();
     if ( carry_action.interval() == 0.f ) continue;
+    // items foraged with gloves (see Cmp::WorldItem::set_safe) are harmless to carry
+    if ( slot_cmp.m_item.is_safe() ) continue;
     carry_timer += dt;
     if ( carry_timer.asSeconds() < carry_action.interval() ) continue;
     if ( carry_action.health() < 0 )
@@ -1027,6 +1036,10 @@ void PlayerSystem::kill_player_if_stats_are_max()
   else if ( Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Vertigo>() == 100 )
   {
     on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::TERRIFIED, Utils::Player::get_position( reg() ) ) );
+  }
+  else if ( Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Hallucinogen>() == 100 )
+  {
+    on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::INSANITY, Utils::Player::get_position( reg() ) ) );
   }
   else if ( Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Phototoxia>() == 100 and m_player_is_on_fire )
   {
@@ -1447,6 +1460,14 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       break;
     }
     case Cmp::Player::Mortality::State::EXHAUSTED: {
+      m_sound_bank.stop_all();
+      const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
+      Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );
+      m_sound_bank.get_effect( "player_blood_splat" ).play();
+      common_death_throes();
+      break;
+    }
+    case Cmp::Player::Mortality::State::INSANITY: {
       m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );

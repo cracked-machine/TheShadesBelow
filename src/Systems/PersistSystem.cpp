@@ -41,6 +41,7 @@
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
+#include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
@@ -250,6 +251,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::BradycardiaHealthDmgPerSec>();
   add_component<Cmp::Persist::VenomHealthDmgPerSec>();
   add_component<Cmp::Persist::VertigoHealthDmgPerSec>();
+  add_component<Cmp::Persist::HallucinogenHealthDmgPerSec>();
   add_component<Cmp::Persist::PlayerOnFireHealthDmgPerSec>();
   add_component<Cmp::Persist::BowReleaseWear>();
   add_component<Cmp::Persist::BurrExpiry>();
