@@ -726,11 +726,11 @@
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "carry_action":       { "health": 0, "fear": 1, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "tachycardia", "toxicity": 1 }, "tick": 1, 
-                                "wear": { "expiryseconds": 0, "active_only": false } }},
+                                "wear": { "expiryseconds": 30, "active_only": false } }},
       { "consume_action":     { "health": 1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "tachycardia", "toxicity": 5 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
-                                "wear": { "expiryseconds": 0, "active_only": false } }},
+                                "wear": { "expiryseconds": 30, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "sacrifice_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "reward": { "item": "item.jewelry*", "target": "nearby", "count": 9 },
