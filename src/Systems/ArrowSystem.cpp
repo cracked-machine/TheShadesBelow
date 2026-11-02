@@ -43,6 +43,9 @@ void ArrowSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_type != "item.longbow" ) { return; }
 
+  auto wearlevel = Utils::Player::get_inventory_wear_level( reg() );
+  if ( wearlevel <= 0 ) return;
+
   if ( ev.action == Game::Events::PlayerActionEvent::GameActions::DRAW_BOW )
   {
     // draw the bow
@@ -162,8 +165,6 @@ void ArrowSystem::update_arrow_trajectory( sf::Time dt )
     else { arrow_cmp.m_fixed_time_step_accumulator += dt; }
   }
 
-  // apply outside of the view loop: a worn out bow is dropped. Only wear the bow if it is still held, not a weapon
-  // swapped in while the arrow was in flight
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_type != "item.longbow" ) return;
   for ( auto dmg : bow_damages )
