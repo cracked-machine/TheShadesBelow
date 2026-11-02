@@ -20,18 +20,6 @@
 namespace
 {
 
-//! @brief Convert the "wear.location" string of a JSON item entry.
-Game::Cmp::WorldItem::Location make_wear_location( const std::string &wear_location )
-{
-  using Location = Game::Cmp::WorldItem::Location;
-  if ( wear_location == "none" ) return Location::NONE;
-  if ( wear_location == "world" ) return Location::WORLD;
-  if ( wear_location == "inventory" ) return Location::INVENTORY;
-  if ( wear_location == "both" ) return Location::BOTH;
-  SPDLOG_WARN( "Unknown wear location: {}", wear_location );
-  return Location::NONE;
-}
-
 Game::Cmp::WorldItem::Consumable make_consumable_property( const std::string &consumable )
 {
   using Consumable = Game::Cmp::WorldItem::Consumable;
@@ -60,33 +48,13 @@ void ItemStore::init_store()
   for ( const auto &[item_key, item_value] : json.items() )
   {
     Sys::SpriteKey sprite_mtype( item_value.at( "sprite" ).get<std::string>() );
-    const auto &wear = item_value.at( "wear" );
-    auto expiry = wear.at( "expiryseconds" ).get<float>();
-    auto wear_location = make_wear_location( wear.at( "location" ).get<std::string>() );
-    auto wear_active_only = wear.at( "active_only" ).get<bool>();
     auto damage_to_weapon = item_value.at( "damage_to_weapon" );
     auto pickaxe_damage = damage_to_weapon.at( "pickaxe" ).get<int>();
     auto axe_damage = damage_to_weapon.at( "axe" ).get<int>();
     auto shovel_damage = damage_to_weapon.at( "shovel" ).get<int>();
     auto bow_damage = damage_to_weapon.at( "bow" ).get<int>();
     auto consumable = make_consumable_property( item_value.at( "consumable" ).get<std::string>() );
-    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, pickaxe_damage, axe_damage, shovel_damage, bow_damage, sf::seconds( expiry ),
-                              wear_location, wear_active_only, consumable );
-    if ( item_value.contains( "axe_hits" ) )
-    {
-      const auto axe_hits = Utils::JsonDeserializer::get_int( item_value, "axe_hits" );
-      if ( not item_key.starts_with( "item.plant." ) )
-      {
-        throw std::runtime_error( "Item '" + item_key + "' axe_hits is only allowed on plant items in " + m_json_file_path.string() );
-      }
-      // each hit wears the plant down, so it must have a world wear level to be chopped down over several hits
-      if ( axe_hits < 1 or ( axe_hits > 1 and not worlditem.wears_in_world() ) )
-      {
-        throw std::runtime_error( "Item '" + item_key + "' axe_hits must be 1, or above 1 with a world/both wear location, in " +
-                                  m_json_file_path.string() );
-      }
-      worlditem.set_axe_hits( axe_hits );
-    }
+    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, pickaxe_damage, axe_damage, shovel_damage, bow_damage, consumable );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )
@@ -106,7 +74,29 @@ void ItemStore::init_store()
         {
           rethrow_with_context( item_key, action_key, action_value, e );
         }
+        // wear is only read from spawn_action (world), carry_action (inventory) and proximity_action
+        if ( action_value.contains( "wear" ) and action_key != Cmp::SpawnAction::kKey and action_key != Cmp::CarryAction::kKey and
+             action_key != Cmp::ProximityAction::kKey )
+        {
+          throw std::runtime_error( "Item '" + item_key + "' " + std::string( action_key ) +
+                                    ".wear is only allowed on spawn_action, carry_action or proximity_action in " + m_json_file_path.string() );
+        }
       }
+    }
+    if ( item_value.contains( "axe_hits" ) )
+    {
+      const auto axe_hits = Utils::JsonDeserializer::get_int( item_value, "axe_hits" );
+      if ( not item_key.starts_with( "item.plant." ) )
+      {
+        throw std::runtime_error( "Item '" + item_key + "' axe_hits is only allowed on plant items in " + m_json_file_path.string() );
+      }
+      // each hit wears the plant down, so it must have a world wear level to be chopped down over several hits
+      if ( axe_hits < 1 or ( axe_hits > 1 and not worlditem.wears_in_world() ) )
+      {
+        throw std::runtime_error( "Item '" + item_key + "' axe_hits must be 1, or above 1 with a spawn_action wear, in " +
+                                  m_json_file_path.string() );
+      }
+      worlditem.set_axe_hits( axe_hits );
     }
     // a sacrifice reward is exactly one of item, wealth or altar, and each altar location has at most one reward
     const auto sacrifice_rewards = worlditem.get_rewards<Cmp::SacrificeAction>();

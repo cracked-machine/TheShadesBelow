@@ -329,14 +329,13 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
   std::vector<entt::entity> world_items;
   for ( auto [worlditem_entt, worlditem_cmp, wearlevel_cmp] : reg().view<Cmp::WorldItem, Cmp::Inventory::WearLevel>().each() )
   {
-    if ( worlditem_cmp.expiry() == sf::Time::Zero ) continue;
-    if ( not worlditem_cmp.wears_in_world() ) continue;
+    if ( worlditem_cmp.world_expiry() == sf::Time::Zero ) continue;
     world_items.push_back( worlditem_entt );
   }
   for ( auto worlditem_entt : world_items )
   {
     auto &worlditem_cmp = reg().get<Cmp::WorldItem>( worlditem_entt );
-    float dmg = 100.f / ( worlditem_cmp.expiry().asSeconds() / expiry_update_timeout.asSeconds() );
+    float dmg = 100.f / ( worlditem_cmp.world_expiry().asSeconds() / expiry_update_timeout.asSeconds() );
     get_systems_event_queue().trigger( Events::UpdateDmgEvent( worlditem_entt, dmg ) );
   }
 
@@ -348,9 +347,9 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
     if ( inventory_cmp.m_item.wears_only_when_active() and not Utils::Player::is_inventory_item_active( reg() ) ) break;
     // the slot entity has no Cmp::WorldItem of its own - the item lives inside the slot component.
     // Tools have no expiry; they only wear through use.
-    if ( inventory_cmp.m_item.wears_in_inventory() and inventory_cmp.m_item.expiry() != sf::Time::Zero )
+    if ( inventory_cmp.m_item.inventory_expiry() != sf::Time::Zero )
     {
-      float dmg = 100.f / ( inventory_cmp.m_item.expiry().asSeconds() / expiry_update_timeout.asSeconds() );
+      float dmg = 100.f / ( inventory_cmp.m_item.inventory_expiry().asSeconds() / expiry_update_timeout.asSeconds() );
       update_dmg( inventory_entt, dmg, Events::UpdateDmgEvent::SUBTRACT );
     }
     break; // only one inventory slot

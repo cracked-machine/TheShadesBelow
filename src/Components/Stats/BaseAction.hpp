@@ -348,6 +348,18 @@ struct ActionReward
 //! @brief The rewards of an action. Only a sacrifice_action may have more than one, each for a different altar location.
 using ActionRewards = std::vector<ActionReward>;
 
+//! @brief How an item wears while one of its actions is in effect. See "wear" in res/json/items.json: on spawn_action it
+//! wears in the world, on carry_action in the inventory, on proximity_action each time the action is applied.
+struct ActionWear
+{
+  //! @brief Seconds for the item to wear out completely while the action is in effect. 0 = no time decay, the item only
+  //! wears through use (tools, gloves, foraging).
+  float expiry_seconds{ 0.f };
+  //! @brief Only wear while the action is active. carry_action: the item is in use (e.g. flute playing, broom flying).
+  //! proximity_action: applying the action changed a player stat.
+  bool active_only{ false };
+};
+
 //! @brief Base class for a player-stat modifier applied when a particular kind of gameplay action
 //! occurs (e.g. burying, carrying, colliding with, consuming, destroying, or being hit by something).
 //! @details Holds the health/fear/despair/infamy/toxicity deltas, an optional toxidrome affliction, and
@@ -406,6 +418,13 @@ public:
   //! @brief Get the re-apply interval.
   //! @return float How often (seconds) the action re-applies, or 0 for a one-shot.
   [[nodiscard]] float interval() const { return m_tick; }
+  //! @brief Get how the source item wears while this action is in effect ("wear" in items.json): spawn_action = in the
+  //! world, carry_action = in the inventory, proximity_action = each time it is applied to the player.
+  //! @return const std::optional<ActionWear>& The wear, or std::nullopt if the item doesn't wear during this action.
+  [[nodiscard]] const std::optional<ActionWear> &wear() const { return m_wear; }
+  //! @brief Set how the source item wears while this action is in effect, see wear().
+  //! @param wear The wear settings.
+  void set_wear( ActionWear wear ) { m_wear = wear; }
   //! @brief Get the toxidrome affliction associated with this action.
   //! @return Stats::toxidrome The toxidrome type and its own tick interval.
   [[nodiscard]] const Cmp::Toxicity::Toxidrome &toxidrome() const;
@@ -463,6 +482,8 @@ private:
   ActionRewards m_rewards;
   //! @brief How often (seconds) the action re-applies, or 0 for a one-shot.
   float m_tick{ 0 };
+  //! @brief How the source item wears while the action is in effect, see wear().
+  std::optional<ActionWear> m_wear;
 };
 
 } // namespace Game::Cmp

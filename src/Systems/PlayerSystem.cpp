@@ -100,9 +100,11 @@
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateLootEvent.hpp>
+#include <Events/DestroyPlantEvent.hpp>
 #include <Events/GrimoireUpdateEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
+#include <Events/UpdateDmgEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
@@ -895,7 +897,7 @@ void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
 
 void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
 {
-
+  std::vector<entt::entity> worn_out_plants;
   for ( auto [plant_entt, plant_mb_cmp, plant_worlditem_cmp] : reg().view<Cmp::PlantMultiBlock, Cmp::WorldItem>().each() )
   {
 
@@ -935,8 +937,31 @@ void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
 
     if ( not Utils::Player::is_player_near( reg(), plant_mb_cmp ) ) continue;
     if ( proximity_action.health() < 0 ) reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
+
+    // snapshot the stats so an "active_only" wear can tell whether the action did anything, e.g. no healing at full health
+    const auto &player_stats = Utils::Player::get_stats( reg() );
+    auto stat_snapshot = [&]()
+    {
+      return std::make_tuple( player_stats.health(), player_stats.fear(), player_stats.despair(), player_stats.infamy(), player_stats.luck(),
+                              std::unordered_map<entt::id_type, int>( player_stats.toxidrome().begin(), player_stats.toxidrome().end() ) );
+    };
+    const auto stats_before = stat_snapshot();
     Utils::Player::apply_action_from_world_item<Cmp::ProximityAction>( reg(), plant_entt );
     proximity_timer = sf::Time::Zero;
+
+    // each application wears the plant down over "wear.expiryseconds" of proximity, e.g. st john's wort withers as it heals
+    if ( const auto &wear = proximity_action.wear(); wear and wear->expiry_seconds > 0.f and proximity_action.interval() > 0.f )
+    {
+      if ( wear->active_only and stat_snapshot() == stats_before ) continue;
+      get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, 100.f * proximity_action.interval() / wear->expiry_seconds ) );
+      if ( Utils::is_plant_depleted( reg(), plant_entt ) ) worn_out_plants.push_back( plant_entt );
+    }
+  }
+  // a plant worn out by its proximity action withers away, like a fully foraged one. Destroyed after the loop: the
+  // event handler modifies the storage being iterated
+  for ( auto plant_entt : worn_out_plants )
+  {
+    get_systems_event_queue().trigger( Events::DestroyPlantEvent( plant_entt ) );
   }
 }
 

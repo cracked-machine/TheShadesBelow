@@ -178,12 +178,18 @@ protected:
     using Game::Utils::JsonDeserializer;
     // toxidrome fields may be nested under "toxidrome" or sit directly on the action entry
     const auto &tox = j.contains( "toxidrome" ) ? j.at( "toxidrome" ) : j;
-    return Action( { JsonDeserializer::get_int( j, "health" ) }, { JsonDeserializer::get_int( j, "fear" ) },
+    Action action( { JsonDeserializer::get_int( j, "health" ) }, { JsonDeserializer::get_int( j, "fear" ) },
                    { JsonDeserializer::get_int( j, "despair" ) }, { JsonDeserializer::get_int( j, "infamy" ) },
                    { JsonDeserializer::get_int( j, "luck" ) }, { JsonDeserializer::get_float( j, "tick" ) },
                    Game::Factory::Toxicity::create_toxidrome( JsonDeserializer::get_string_or_list( tox, "type" ),
                                                               JsonDeserializer::get_int( tox, "toxicity" ) ),
                    make_side_effects( j ), make_reward( j ) );
+    if ( j.contains( "wear" ) )
+    {
+      const auto &wear = j.at( "wear" );
+      action.set_wear( Cmp::ActionWear{ JsonDeserializer::get_float( wear, "expiryseconds" ), wear.at( "active_only" ).get<bool>() } );
+    }
+    return action;
   }
 
   //! @brief Convert the "reward.altar" string of a JSON action entry.

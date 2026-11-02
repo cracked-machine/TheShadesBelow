@@ -2,12 +2,15 @@
 #define SRC_COMPONENTS_INVENTORY_WORLDITEM_HPP__
 
 #include <Components/Stats/BaseAction.hpp>
+#include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/DestroyAction.hpp>
 #include <Components/Stats/ForageAction.hpp>
 #include <Components/Stats/SacrificeAction.hpp>
+#include <Components/Stats/SpawnAction.hpp>
 #include <SFML/System/Time.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
+#include <algorithm>
 #include <optional>
 #include <string>
 #include <typeindex>
@@ -23,18 +26,6 @@ namespace Game::Cmp
 class WorldItem
 {
 public:
-  //! @brief Where an item's Cmp::Inventory::WearLevel is active. Imported from items.json.
-  enum class Location {
-    //! @brief The item has no wear level at all.
-    NONE,
-    //! @brief The item only wears while it is in the world.
-    WORLD,
-    //! @brief The item only wears while it is in the player inventory.
-    INVENTORY,
-    //! @brief The item wears both in the world and in the player inventory.
-    BOTH
-  };
-
   //! @brief Determines if the item can be eaten, drunk or neither.
   enum class Consumable {
     //! @brief The item cannot be consumed.
@@ -64,12 +55,8 @@ public:
   //! @param axe_dmg Damage done to an axe by this item.
   //! @param shovel_dmg Damage done to a shovel by this item.
   //! @param bow_dmg Damage done to a bow by this item.
-  //! @param expiry Time for the item to fully expire. Zero means this item does not expire.
-  //! @param wear_location Where the item's wear level is active.
-  //! @param wear_active_only Whether the item only wears while actively in use (e.g. flute playing, broom flying).
   //! @param consumable Whether the item can be eaten, drunk or neither.
   WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, int pickaxe_dmg, int axe_dmg, int shovel_dmg, int bow_dmg,
-             sf::Time expiry = sf::Time::Zero, Location wear_location = Location::NONE, bool wear_active_only = false,
              Consumable consumable = Consumable::NONE )
       : item_type( std::move( item_type ) ),
         sprite_type( std::move( sprite_type ) ),
@@ -77,9 +64,6 @@ public:
         m_axe_damage( axe_dmg ),
         m_shovel_damage( shovel_dmg ),
         m_bow_damage( bow_dmg ),
-        m_expiry( expiry ),
-        m_wear_location( wear_location ),
-        m_wear_active_only( wear_active_only ),
         m_consumable( consumable )
   {
   }
@@ -139,6 +123,15 @@ public:
     return at<ActionT>().action.side_effects().spawn_npc;
   }
 
+  //! @brief Get the wear of the action keyed by ActionT ("wear" in items.json).
+  //! @return The wear, or std::nullopt if the item has no such action or the action has no wear.
+  template <typename ActionT>
+  [[nodiscard]] std::optional<ActionWear> get_wear() const
+  {
+    if ( not has_action<ActionT>() ) return std::nullopt;
+    return at<ActionT>().action.wear();
+  }
+
   //! @brief Add an action keyed by its concrete type. Must be a template: taking BaseAction by value would slice
   //! the argument and key every action under typeid(BaseAction).
   template <typename ActionT>
@@ -151,20 +144,26 @@ public:
   auto begin() { return m_actions.begin(); }
   auto end() { return m_actions.end(); }
 
-  //! @brief Time for the item to fully expire. Zero means this item does not expire.
-  sf::Time expiry() const { return m_expiry; }
+  //! @brief Whether the item carries a Cmp::Inventory::WearLevel, i.e. any of its actions has a "wear" block in items.json.
+  bool has_wear() const
+  {
+    return std::ranges::any_of( m_actions, []( const auto &pair ) { return pair.second.action.wear().has_value(); } );
+  }
 
-  //! @brief Whether the item carries a Cmp::Inventory::WearLevel.
-  bool has_wear() const { return m_wear_location != Location::NONE; }
+  //! @brief Whether the item wears while it is in the world ("spawn_action.wear" in items.json).
+  bool wears_in_world() const { return get_wear<SpawnAction>().has_value(); }
 
-  //! @brief Whether the item's wear level is active while it is in the world.
-  bool wears_in_world() const { return m_wear_location == Location::WORLD or m_wear_location == Location::BOTH; }
+  //! @brief Time for the item to fully expire while it is in the world. Zero means it does not expire there.
+  sf::Time world_expiry() const { return sf::seconds( get_wear<SpawnAction>().value_or( ActionWear{} ).expiry_seconds ); }
 
-  //! @brief Whether the item's wear level is active while it is in the player inventory.
-  bool wears_in_inventory() const { return m_wear_location == Location::INVENTORY or m_wear_location == Location::BOTH; }
+  //! @brief Whether the item wears while it is in the player inventory ("carry_action.wear" in items.json).
+  bool wears_in_inventory() const { return get_wear<CarryAction>().has_value(); }
 
-  //! @brief Whether the item only wears while it is actively in use (e.g. flute playing, broom flying).
-  bool wears_only_when_active() const { return m_wear_active_only; }
+  //! @brief Time for the item to fully expire while it is in the player inventory. Zero means it does not expire there.
+  sf::Time inventory_expiry() const { return sf::seconds( get_wear<CarryAction>().value_or( ActionWear{} ).expiry_seconds ); }
+
+  //! @brief Whether the item only wears in the inventory while it is actively in use (e.g. flute playing, broom flying).
+  bool wears_only_when_active() const { return get_wear<CarryAction>().value_or( ActionWear{} ).active_only; }
 
   //! @brief The reward for sacrificing this item at the given kind of altar ("sacrifice_action.reward" in items.json).
   //! @param location The kind of altar the item is offered at.
@@ -241,15 +240,6 @@ private:
 
   //! @brief Number of axe hits needed to chop this plant down. Imported from items.json.
   int m_axe_hits{ 1 };
-
-  //! @brief Expiry for the item. Zero means this item does not expire. Imported from items.json.
-  sf::Time m_expiry;
-
-  //! @brief Where the item's wear level is active. Imported from items.json.
-  Location m_wear_location{ Location::NONE };
-
-  //! @brief Whether the item only wears while actively in use. Imported from items.json.
-  bool m_wear_active_only{ false };
 
   //! @brief Whether the item can be eaten, drunk or neither. Imported from items.json.
   Consumable m_consumable{ Consumable::NONE };

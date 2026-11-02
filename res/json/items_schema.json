@@ -5,32 +5,12 @@
   "patternProperties": {
     "^(item\\..+|ERROR_SPRITE)$": {
       "type": "object",
-      "required": ["sprite", "wear", "damage_to_weapon", "actions"],
+      "required": ["sprite", "damage_to_weapon", "actions"],
       "additionalProperties": false,
       "properties": {
         "sprite": {
           "type": "string",
           "description": "The sprite identifier for the item"
-        },
-        "wear": {
-          "type": "object",
-          "required": ["location", "expiryseconds", "active_only"],
-          "additionalProperties": false,
-          "properties": {
-            "location": {
-              "type": "string",
-              "enum": ["none", "world", "inventory", "both"],
-              "description": "Where the item's wear level is active. World, Inventory or Both. None if the item does not wear."
-            },
-            "expiryseconds": {
-              "type": "number",
-              "description": "The expiry for this item in seconds. Zero if no expiry."
-            },
-            "active_only": {
-              "type": "boolean",
-              "description": "If true the item only wears while it is actively being used (e.g. flute playing, broom flying)."
-            }
-          }
         },
         "consumable": {
           "type": "string",
@@ -162,6 +142,23 @@
         },
         "tick": {
           "type": "number"
+        },
+        "wear": {
+          "type": "object",
+          "description": "Optional. How the item wears while this action is in effect: spawn_action = while it lies in the world, carry_action = while it is in the inventory, proximity_action = each time it is applied to the player. Any wear block gives the item a wear level; a worn out item is destroyed (edibles rot, plants wither). Omit on every action for an item that never wears.",
+          "required": ["expiryseconds", "active_only"],
+          "additionalProperties": false,
+          "properties": {
+            "expiryseconds": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Seconds for the item to wear out completely while the action is in effect. 0 = no time decay: the item only wears through use (tools, gloves, foraging)."
+            },
+            "active_only": {
+              "type": "boolean",
+              "description": "Only wear while the action is active. carry_action: while the item is in use (e.g. flute playing, broom flying). proximity_action: only on ticks where the action changed a player stat (e.g. a healing plant at full health doesn't wear)."
+            }
+          }
         },
         "reward": {
           "description": "Optional reward. Its shape is set by each action (no_altar_reward, item_only_reward, proximity_reward or sacrifice_reward_entry)."

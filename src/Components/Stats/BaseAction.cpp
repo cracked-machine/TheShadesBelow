@@ -93,7 +93,8 @@ BaseAction::BaseAction( const BaseAction &other )
       m_toxidrome( std::make_unique<Cmp::Toxicity::Toxidrome>( *other.m_toxidrome ) ),
       m_side_effects( other.m_side_effects ),
       m_rewards( other.m_rewards ),
-      m_tick( other.m_tick )
+      m_tick( other.m_tick ),
+      m_wear( other.m_wear )
 {
 }
 
@@ -109,6 +110,7 @@ BaseAction &BaseAction::operator=( const BaseAction &other )
   m_side_effects = other.m_side_effects;
   m_rewards = other.m_rewards;
   m_tick = other.m_tick;
+  m_wear = other.m_wear;
   return *this;
 }
 
