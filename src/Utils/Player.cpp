@@ -5,6 +5,7 @@
 #include <Components/Direction.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
+#include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
@@ -411,6 +412,16 @@ void record_item_damage_cause( entt::registry &reg, const Cmp::BaseAction &actio
   else { mortality.last_damage_cause = Cmp::Player::Mortality::State::SKEWERED; }
 }
 
+//! @brief A spawn_action or carry_action only damages the player while its item has a Cmp::Inventory::StingDamage.
+template <typename ActionT>
+void remove_damage_if_no_sting( entt::registry &reg, entt::entity item_entt, Cmp::BaseAction &action )
+{
+  if constexpr ( std::is_same_v<ActionT, Cmp::SpawnAction> or std::is_same_v<ActionT, Cmp::CarryAction> )
+  {
+    if ( not reg.all_of<Cmp::Inventory::StingDamage>( item_entt ) ) action.remove_damage();
+  }
+}
+
 template <typename ActionT>
 Cmp::BaseAction apply_action_from_world_item( entt::registry &reg, entt::entity world_item_entt, const std::source_location &loc )
 {
@@ -422,6 +433,7 @@ Cmp::BaseAction apply_action_from_world_item( entt::registry &reg, entt::entity 
                               std::string( reg.valid( world_item_entt ) ? "valid" : "invalid" ) );
   }
   auto action = plant_item->at<ActionT>().action;
+  remove_damage_if_no_sting<ActionT>( reg, world_item_entt, action );
   record_item_damage_cause<ActionT>( reg, action );
   Utils::Player::get_stats( reg ).apply( action );
   Sys::BaseSystem::get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_item->item_type, ActionT::kKey, action ) );
@@ -455,6 +467,7 @@ Cmp::BaseAction apply_action_from_inventory_item( entt::registry &reg )
   {
     auto &player_stats = Utils::Player::get_stats( reg );
     auto action = inventory_cmp.m_item.at<ActionT>().action;
+    remove_damage_if_no_sting<ActionT>( reg, inventory_entt, action );
     if ( action.health() < 0 ) reg.emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg ) );
     record_item_damage_cause<ActionT>( reg, action );
     player_stats.apply( action );

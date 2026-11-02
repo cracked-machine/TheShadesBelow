@@ -403,6 +403,11 @@ public:
   //! @brief Get the health delta.
   //! @return int The change applied to the health stat.
   [[nodiscard]] int health() const { return m_health; }
+  //! @brief Drop any damage from this action, leaving a health gain and the other stat deltas as they are.
+  void remove_damage()
+  {
+    if ( m_health < 0 ) m_health = 0;
+  }
   //! @brief Get the fear delta.
   //! @return int The change applied to the fear stat.
   [[nodiscard]] int fear() const { return m_fear; }

@@ -16,6 +16,7 @@
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Hazard/CollisionResist.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
+#include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
@@ -878,12 +879,13 @@ void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
   // We need the inventory component not the types
   for ( auto [slot_entt, slot_cmp] : reg().view<Cmp::PlayerInventorySlot>().each() )
   {
-    auto &[carry_action, carry_timer] = slot_cmp.m_item.at<Cmp::CarryAction>();
-    if ( carry_action.interval() == 0.f ) continue;
-    // items foraged with gloves (see Cmp::WorldItem::set_safe) are harmless to carry
-    if ( slot_cmp.m_item.is_safe() ) continue;
+    auto &[carry_action_def, carry_timer] = slot_cmp.m_item.at<Cmp::CarryAction>();
+    if ( carry_action_def.interval() == 0.f ) continue;
     carry_timer += dt;
-    if ( carry_timer.asSeconds() < carry_action.interval() ) continue;
+    if ( carry_timer.asSeconds() < carry_action_def.interval() ) continue;
+    // items without a Cmp::Inventory::StingDamage (e.g. foraged with gloves) are harmless to carry
+    auto carry_action = carry_action_def;
+    if ( not reg().all_of<Cmp::Inventory::StingDamage>( slot_entt ) ) carry_action.remove_damage();
     if ( carry_action.health() < 0 )
     {
       reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );

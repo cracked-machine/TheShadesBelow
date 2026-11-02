@@ -6,6 +6,7 @@
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
+#include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
@@ -144,6 +145,7 @@ void InventorySystem::add_inventory_item( const Sys::ItemKey &item )
   auto inventory_entity = reg().create();
   reg().emplace_or_replace<Cmp::PlayerInventorySlot>( inventory_entity, inventory_item );
   if ( inventory_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, 100.f ); }
+  if ( inventory_item.stings() ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( inventory_entity ); }
 
   if ( item.contains( "candle" ) ) { reg().emplace_or_replace<Cmp::UUID>( inventory_entity, Cmp::UUID::generate() ); }
 
@@ -233,6 +235,7 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
     // keep the remaining forage count when the plant is replanted
     auto *plant_wearlevel_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inventory_slot_entt );
     if ( plant_wearlevel_cmp ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( mb_entt, plant_wearlevel_cmp->m_level ); }
+    if ( reg().all_of<Cmp::Inventory::StingDamage>( inventory_slot_entt ) ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( mb_entt ); }
 
     // rebuild the m_player_navmesh here
     if ( auto player_navmesh = m_player_navmesh.lock() )
@@ -284,6 +287,7 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
   // try to copy any relevant components over to the new world carryitem entt
   auto *inventory_slot_level_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inventory_slot_entt );
   if ( inventory_slot_level_cmp ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( world_item_entt, inventory_slot_level_cmp->m_level ); }
+  if ( reg().all_of<Cmp::Inventory::StingDamage>( inventory_slot_entt ) ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( world_item_entt ); }
 
   if ( const auto *offering_cmp = reg().try_get<Cmp::Npc::SummonOffering>( inventory_slot_entt ) )
   {
@@ -359,12 +363,9 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
 void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world_item_entt )
 {
 
-  // items foraged with gloves (see Cmp::WorldItem::set_safe) don't sting when picked up
-  if ( const auto *safe_item_cmp = reg.try_get<Cmp::WorldItem>( world_item_entt ); not safe_item_cmp or not safe_item_cmp->is_safe() )
-  {
-    const auto spawn_action = Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg, world_item_entt );
-    if ( const auto *world_item_pos_cmp = reg.try_get<Cmp::Position>( world_item_entt ) ) { trigger_side_effects( spawn_action, *world_item_pos_cmp, world_item_entt ); }
-  }
+  // items without a Cmp::Inventory::StingDamage (e.g. foraged with gloves) don't sting when picked up
+  const auto spawn_action = Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg, world_item_entt );
+  if ( const auto *world_item_pos_cmp = reg.try_get<Cmp::Position>( world_item_entt ) ) { trigger_side_effects( spawn_action, *world_item_pos_cmp, world_item_entt ); }
 
   auto *anim_data_cmp = reg.try_get<Cmp::AnimData>( world_item_entt );
   if ( not anim_data_cmp ) return;
@@ -415,6 +416,7 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
   // transfer the wear level from the worlditem to the new player inventory item
   auto *wear_level_cmp = reg.try_get<Cmp::Inventory::WearLevel>( world_item_entt );
   if ( wear_level_cmp ) { reg.emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, wear_level_cmp->m_level ); }
+  if ( reg.all_of<Cmp::Inventory::StingDamage>( world_item_entt ) ) { reg.emplace_or_replace<Cmp::Inventory::StingDamage>( inventory_entity ); }
 
   // now destroy the world item entt
   get_systems_event_queue().trigger( Events::DestroyPlantEvent( world_item_entt ) );

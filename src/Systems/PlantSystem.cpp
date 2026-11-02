@@ -2,6 +2,7 @@
 #include <Components/DroppedBy.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
+#include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Loot.hpp>
@@ -167,6 +168,7 @@ entt::entity PlantSystem::gen_plant( const Sys::ItemKey &plant_type, const Cmp::
     reg().emplace_or_replace<Cmp::WorldItem>( mb_entt, plant_item );
     // the wear level limits how many items can be foraged from the plant
     if ( plant_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( mb_entt, 100.f ); }
+    if ( plant_item.stings() ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( mb_entt ); }
 
     // Protect every cell covered by this plant: segment entities carry the UUID and
     // are at each tile position. Insert them so subsequent placement calls see them
@@ -274,8 +276,8 @@ void PlantSystem::player_plant_interact()
       }
       else if ( inventory_type == "item.gloves" )
       {
-        // Gloves stay equipped: the forage is dropped next to the plant, marked safe so its spawn/carry actions never
-        // sting the player, and the plant's action modifiers are deliberately skipped. They don't protect against
+        // Gloves stay equipped: the forage is dropped next to the plant without a Cmp::Inventory::StingDamage so its
+        // spawn/carry actions never damage the player, and the plant's action modifiers are deliberately skipped. They don't protect against
         // hawthorn lightning though.
         if ( ( plant_type == "item.plant.nettle" or plant_type == "item.plant.hawthorn" ) and forage_reward )
         {
@@ -286,8 +288,8 @@ void PlantSystem::player_plant_interact()
           {
             get_systems_event_queue().trigger(
                 Events::CreateItemEvent( Cmp::Position( find_forage_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
-                                         Sys::ItemStore::instance().pick_item( forage_reward->item ), "drop_loot", 0.f, false, 0, entt::null,
-                                         [this]( entt::entity item_entt ) { reg().get<Cmp::WorldItem>( item_entt ).set_safe(); } ) );
+                                         Sys::ItemStore::instance().pick_item( forage_reward->item ), "drop_loot", 0.f, false, 0, entt::null, {},
+                                         false ) );
           }
           // the gloves occupy the inventory, so an inventory reward is dropped nearby
           else { grant_item_reward( *forage_reward, plant_bounds, plant_entt ); }

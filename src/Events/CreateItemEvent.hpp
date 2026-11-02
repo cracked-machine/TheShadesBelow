@@ -24,8 +24,10 @@ struct CreateItemEvent
   //! 0 = unlimited.
   //! @param source_entt The dropping world item, or entt::null if there is none (then unlimited).
   //! @param on_created Optional callback receiving the newly created world item entity. Not called when skipped or if creation fails.
+  //! @param sting false: never add a Cmp::Inventory::StingDamage, e.g. the item was foraged with gloves.
   explicit CreateItemEvent( Cmp::Position pos, Sys::ItemKey item, std::string sfx = "", float zorder = 0.f, bool spawn_nearby = false,
-                            int max_instances = 0, entt::entity source_entt = entt::null, std::function<void( entt::entity )> on_created = {} )
+                            int max_instances = 0, entt::entity source_entt = entt::null, std::function<void( entt::entity )> on_created = {},
+                            bool sting = true )
       : m_pos( pos ),
         m_item( std::move( item ) ),
         m_sfx( std::move( sfx ) ),
@@ -33,7 +35,8 @@ struct CreateItemEvent
         m_spawn_nearby( spawn_nearby ),
         m_max_instances( max_instances ),
         m_source_entt( source_entt ),
-        m_on_created( std::move( on_created ) )
+        m_on_created( std::move( on_created ) ),
+        m_sting( sting )
   {
   }
 
@@ -53,6 +56,8 @@ struct CreateItemEvent
   entt::entity m_source_entt{ entt::null };
   //! @brief Optional callback receiving the newly created world item entity.
   std::function<void( entt::entity )> m_on_created;
+  //! @brief false: never add a Cmp::Inventory::StingDamage, see Cmp::WorldItem::stings().
+  bool m_sting{ true };
 };
 
 } // namespace Game::Events

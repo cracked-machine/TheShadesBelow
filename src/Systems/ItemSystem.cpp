@@ -4,6 +4,7 @@
 #include <Components/DropCount.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
+#include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
@@ -37,7 +38,7 @@ void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev )
 {
   if ( not ev.m_spawn_nearby )
   {
-    auto item_entt = create_world_item( ev.m_pos, ev.m_item, ev.m_sfx, ev.m_zorder );
+    auto item_entt = create_world_item( ev.m_pos, ev.m_item, ev.m_sfx, ev.m_zorder, ev.m_sting );
     if ( item_entt != entt::null and ev.m_on_created ) { ev.m_on_created( item_entt ); }
     return;
   }
@@ -63,7 +64,7 @@ void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev )
     return;
   }
 
-  auto item_entt = create_world_item( Cmp::Position( *cell, Constants::kGridSizePxF ), ev.m_item, ev.m_sfx, ev.m_zorder );
+  auto item_entt = create_world_item( Cmp::Position( *cell, Constants::kGridSizePxF ), ev.m_item, ev.m_sfx, ev.m_zorder, ev.m_sting );
   // counted over the source's lifetime, so picking the item up doesn't free a slot
   if ( item_entt != entt::null and has_source ) { reg().get_or_emplace<Cmp::DropCount>( ev.m_source_entt ).m_count++; }
   if ( item_entt != entt::null and ev.m_on_created ) { ev.m_on_created( item_entt ); }
@@ -94,7 +95,7 @@ void ItemSystem::on_update_dmg_event( const Events::UpdateDmgEvent &ev )
   }
 }
 
-entt::entity ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKey &item, std::string sfx, float zorder )
+entt::entity ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKey &item, std::string sfx, float zorder, bool sting )
 {
 
   if ( item == "item.bomb" )
@@ -120,6 +121,7 @@ entt::entity ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKe
   // Use a UUID to identify the InventoryItem/PlayerInventorySlot when the entity is destroyed.
   reg().emplace_or_replace<Cmp::UUID>( world_item_entt, Cmp::UUID::generate() );
   if ( world_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( world_item_entt, 100.f ); }
+  if ( sting and world_item.stings() ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( world_item_entt ); }
   // the target is picked once here, then carried with the item between the world and the player inventory
   if ( item == "item.dowsingrod" )
   {
@@ -147,6 +149,8 @@ void ItemSystem::swap_world_item( entt::entity entt, const Sys::ItemKey &item, c
   reg().emplace_or_replace<Cmp::AnimData>( entt, Cmp::AnimData::Config{ .sprite_type = new_item.sprite_type, .enabled = false } );
   if ( new_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( entt, 100.f ); }
   else { reg().remove<Cmp::Inventory::WearLevel>( entt ); }
+  if ( new_item.stings() ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( entt ); }
+  else { reg().remove<Cmp::Inventory::StingDamage>( entt ); }
 
   if ( not sfx.empty() ) { m_sound_bank.get_effect( sfx ).play(); }
 }
