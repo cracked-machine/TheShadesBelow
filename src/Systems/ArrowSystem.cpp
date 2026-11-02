@@ -2,6 +2,8 @@
 #include <Components/AbsoluteOffset.hpp>
 #include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AbsoluteRotation.hpp>
+#include <Components/Grave/PlantMultiBlock.hpp>
+#include <Components/Inventory/WorldItem.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/Container.hpp>
 #include <Components/Npc/Ghost.hpp>
@@ -72,7 +74,7 @@ void ArrowSystem::update( sf::Time dt )
 
 void ArrowSystem::update_arrow_trajectory( sf::Time dt )
 {
-
+  std::vector<float> bow_damages;
   for ( auto [arrow_entt, arrow_cmp, arrow_pos_cmp] : reg().view<Cmp::Weapons::Projectiles::Arrow, Cmp::Position>().each() )
   {
     if ( arrow_cmp.m_fixed_time_step_accumulator >= arrow_cmp.fixed_time_step_max() )
@@ -116,6 +118,7 @@ void ArrowSystem::update_arrow_trajectory( sf::Time dt )
           m_sound_bank.get_effect( "draw_bow" ).stop();
           m_sound_bank.get_effect( "release_bow" ).stop();
           reg().remove<Cmp::Weapons::Projectiles::InFlight>( arrow_entt );
+          if ( auto bow_dmg = get_bow_damage_at( arrow_pos_cmp ); bow_dmg > 0 ) { bow_damages.push_back( static_cast<float>( bow_dmg ) ); }
 
           if ( auto *rotation_cmp = reg().try_get<Cmp::AbsoluteRotation>( arrow_entt ) ) arrow_cmp.m_rest_angle = rotation_cmp->getAngle();
 
@@ -158,6 +161,28 @@ void ArrowSystem::update_arrow_trajectory( sf::Time dt )
     }
     else { arrow_cmp.m_fixed_time_step_accumulator += dt; }
   }
+
+  // apply outside of the view loop: a worn out bow is dropped. Only wear the bow if it is still held, not a weapon
+  // swapped in while the arrow was in flight
+  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+  if ( inventory_type != "item.longbow" ) return;
+  for ( auto dmg : bow_damages )
+  {
+    get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
+  }
+}
+
+int ArrowSystem::get_bow_damage_at( const Cmp::Position &arrow_pos_cmp )
+{
+  for ( auto [plant_entt, plant_mb_cmp, plant_item_cmp] : reg().view<Cmp::PlantMultiBlock, Cmp::WorldItem>().each() )
+  {
+    if ( plant_mb_cmp.findIntersection( arrow_pos_cmp ) ) return plant_item_cmp.get_bow_damage();
+  }
+  for ( auto [item_entt, item_cmp, item_pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>( entt::exclude<Cmp::PlantMultiBlock> ).each() )
+  {
+    if ( item_pos_cmp.findIntersection( arrow_pos_cmp ) ) return item_cmp.get_bow_damage();
+  }
+  return 0;
 }
 
 void ArrowSystem::check_npc_arrow_collision()

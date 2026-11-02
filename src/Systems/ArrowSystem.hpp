@@ -43,6 +43,11 @@ private:
   //! @brief Check if NPC is hit by arrow
   void check_npc_arrow_collision();
 
+  //! @brief Damage done to the bow by the item the arrow landed in ("damage_to_weapon.bow" in items.json)
+  //! @param arrow_pos_cmp The landed arrow position
+  //! @return The damage, or zero if the arrow did not land in an item
+  int get_bow_damage_at( const Cmp::Position &arrow_pos_cmp );
+
   //! @brief If player is carrying bow then fire arrow in direction of mouse position
   //! @param charge_fraction How far to the mouse position the arrow should travel, in [0,1]
   void create_player_arrow( float charge_fraction );
