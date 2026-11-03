@@ -614,11 +614,24 @@
         }
       }
     },
-    "sprite.graveyard.arrow": {
+    "sprite.graveyard.arrowcompass": {
       "spritesheet": {
-        "displayname": "sprite.graveyard.arrow",
+        "displayname": "sprite.graveyard.arrowcompass",
         "texture_path": "res/textures/graveyard.png",
         "sprite_indices": [22],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.arrowtrail": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.arrowtrail",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [23],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {

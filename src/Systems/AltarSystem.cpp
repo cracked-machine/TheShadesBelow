@@ -165,9 +165,6 @@ bool AltarSystem::grant_sacrifice_reward( entt::entity altar_entity, Cmp::Altar:
     play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
     return true;
   }
-
-  // Each offering has exactly one reward (enforced by ItemStore), see "sacrifice_action.reward" in items.json
-  // The item itself is granted by sacrifice_for_item() once the offering has left the inventory
   if ( not reward->item.empty() )
   {
     play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
@@ -183,14 +180,16 @@ bool AltarSystem::grant_sacrifice_reward( entt::entity altar_entity, Cmp::Altar:
   switch ( reward->altar )
   {
     case AltarEffect::CANDLE:
-      return sacrifice_relic( altar_entity, altar_cmp, altar_uuid );
+      // return sacrifice_relic( altar_entity, altar_cmp, altar_uuid );
+      return false;
     case AltarEffect::BANISH:
       sacrifice_for_banish( altar_cmp );
       return true;
     case AltarEffect::EXTRA_LIFE:
       return sacrifice_for_extra_life( altar_entity, altar_cmp, altar_uuid );
     case AltarEffect::CRYPT_KEY:
-      return sacrifice_exitkey( altar_entity, altar_cmp, altar_uuid );
+      // return sacrifice_exitkey( altar_entity, altar_cmp, altar_uuid );
+      return false;
     case AltarEffect::TOXIC_IMMUNITY:
       sacrifice_for_toxic_immunity( altar_cmp, reward->tick );
       return true;
@@ -206,8 +205,9 @@ void AltarSystem::sacrifice_for_item( const Cmp::Altar::MultiBlock &altar_cmp, c
 {
   if ( reward.target == Cmp::ActionReward::Target::DEFAULT )
   {
-    get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), Sys::ItemStore::instance().pick_item( reward.item ),
-                                                                "drop_loot", 0.f, false, 0, entt::null, on_created ) );
+    get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ),
+                                                                Sys::ItemStore::instance().pick_item( reward.item ), "drop_loot", 0.f, false, 0,
+                                                                entt::null, on_created ) );
     return;
   }
   grant_item_reward( reward, Cmp::Position( altar_cmp.position, altar_cmp.size ), entt::null, on_created );

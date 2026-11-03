@@ -10,10 +10,10 @@
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/LerpPosition.hpp>
-#include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/Wisp.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
+#include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
@@ -25,6 +25,7 @@
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/Flying.hpp>
 #include <Components/Player/FootstepType.hpp>
+#include <Components/Player/GraveTrailPosition.hpp>
 #include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/Illuminated.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
@@ -336,7 +337,7 @@ bool is_digging_on_cooldown( entt::registry &reg )
 {
   auto digging_cooldown_amount = Sys::PersistSystem::get<Cmp::Persist::DiggingCooldownThreshold>( reg ).get_value();
   auto *player_dig_cooldown = reg.try_get<Cmp::Player::DiggingTimer>( get_entity( reg ) );
-  return ( player_dig_cooldown != nullptr ) and *player_dig_cooldown < sf::seconds( digging_cooldown_amount );
+  return ( player_dig_cooldown != nullptr ) and * player_dig_cooldown < sf::seconds( digging_cooldown_amount );
 }
 
 //! @brief The grid cell one tile in front of the player, based on their last facing direction
@@ -576,6 +577,14 @@ Cmp::Player::Doglegs &get_doglegs( entt::registry &reg )
   auto player_entt = get_entity( reg );
   // scene-local cache that is not transferred between scenes, so create it on demand
   return reg.get_or_emplace<Cmp::Player::Doglegs>( player_entt );
+}
+
+Cmp::Player::GraveTrailPosition &trail_position( entt::registry &reg )
+{
+  auto player_entt = get_entity( reg );
+  auto *trail_pos_cmp = reg.try_get<Cmp::Player::GraveTrailPosition>( player_entt );
+  if ( not trail_pos_cmp ) throw std::runtime_error( "Player has no Cmp::Player::GraveTrailPosition component." );
+  return *trail_pos_cmp;
 }
 
 } // namespace Game::Utils::Player

@@ -111,6 +111,9 @@ private:
   //! @brief Used by GraveyardScene when player has key and relic carryitems
   void render_arrow_compass();
 
+  //! @brief Used by GraveyardScene to point each Cmp::Grave::TrailMarker grave towards its target grave
+  void render_trail_markers();
+
   //! @brief Draw the burrs stuck to an NPC, one burr sprite per Cmp::BurrCount burr, where each struck.
   //! @param burr_cmp The NPC's burrs.
   //! @param body_rect The NPC's on-screen bounds.

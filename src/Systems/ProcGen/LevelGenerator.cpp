@@ -1,5 +1,4 @@
 #include <Components/Altar/MultiBlock.hpp>
-#include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/Altar/Segment.hpp>
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/BuildingSegment.hpp>
@@ -46,6 +45,7 @@
 #include <Components/Ruin/StairsLowerMultiBlock.hpp>
 #include <Components/Ruin/StairsSegment.hpp>
 #include <Components/Ruin/StairsUpperMultiBlock.hpp>
+#include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/SpawnArea.hpp>
 #include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
 #include <Components/Spring/HealingSpringBuildingSegment.hpp>
@@ -450,7 +450,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
   if ( grave_meta_types.size() < 2 ) { SPDLOG_WARN( "No GRAVE spritesheets found in SpriteStore" ); }
   else
   {
-    std::map<Cmp::Grave::Consequence::Type, int> gc_dist;
+    std::map<Cmp::Grave::Consequence::Type, int> grave_consequences_distribution;
     auto required_num_graves = static_cast<size_t>( min_num_altars.get_value() * grave_num_multiplier.get_value() );
     for ( std::size_t i = 0; i < required_num_graves; ++i )
     {
@@ -464,10 +464,11 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
         m_reserved_sm->insert( mb_entt, pos.value() );
         // fix the roll at creation; the consequence is resolved against the player's current luck when needed
         auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 99 ).gen() );
-        gc_dist[consequence.get( Utils::Player::get_stats( reg() ).luck() )]++;
+        // simulate the rolls now to get an idea of the distribution with game start player luck
+        grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck(), Utils::Player::trail_position( reg() ) )]++;
       }
     }
-    SPDLOG_INFO( "Grave Consequences dist at current luck: {}", gc_dist );
+    SPDLOG_INFO( "Grave Consequences dist at current luck: {}", grave_consequences_distribution );
   }
 
   // ALTARS

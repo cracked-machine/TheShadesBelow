@@ -369,6 +369,14 @@
     "detail": "Grave Number Multiplier",
     "format": "%d"
   },
+  "GraveTrailSizeMultiplier": {
+    "type": "int",
+    "value": 1,
+    "min_value": 1,
+    "max_value": 10,
+    "detail": "Grave Trail Size Multiplier",
+    "format": "%d"
+  },
   "GraveyardProcGenBirthThreshold": {
     "type": "int",
     "value": 2,

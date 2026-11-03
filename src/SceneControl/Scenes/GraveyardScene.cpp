@@ -19,6 +19,7 @@
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Persistent/RuinProcGenMaxIterations.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/GraveTrailPosition.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Ruin/BuildingMultiBlock.hpp>
@@ -128,13 +129,17 @@ void GraveyardScene::on_init()
   m_sys.find<Sys::Store::Type::ExitSystem>().init( m_reserved_sm );
   m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm );
 
-  // create the player, optionally increment the level counter
+  // create the player, or increment the level counter and restart the grave trail for the new level
   if ( m_reg.view<Cmp::Player::Character>().size() == 0 )
   {
     Factory::Player::create_player( m_reg, m_reserved_sm );
     Sys::BaseSystem::get_systems_event_queue().trigger( Events::AddInventoryEvent( "item.pickaxe" ) );
   }
-  else { Utils::Player::get_level_depth( m_reg ).increment_count( 1 ); }
+  else
+  {
+    Utils::Player::get_level_depth( m_reg ).increment_count( 1 );
+    Utils::Player::trail_position( m_reg ) = Cmp::Player::GraveTrailPosition{};
+  }
 
   auto [map_size_grid, map_size_pixel] = m_scene_data->map_size();
 

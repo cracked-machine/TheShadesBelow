@@ -23,6 +23,7 @@
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Grave/Segment.hpp>
+#include <Components/Grave/TrailMarker.hpp>
 #include <Components/Hazard/CorruptionCell.hpp>
 #include <Components/Hazard/SinkholeCell.hpp>
 #include <Components/Inventory/WorldItem.hpp>
@@ -163,7 +164,7 @@ void RenderDebugSystem::render_debug_stats()
   PROFILED( render_ui_entity_inspect() );
   for ( auto [selected_entt, selected_cmp, pos_cmp] : reg().view<Cmp::SelectedPosition, Cmp::Position>().each() )
   {
-    if ( not Utils::is_visible_in_view( get_screen_view(), pos_cmp ) ) continue;
+    if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), pos_cmp ) ) continue;
     PROFILED( render_square( pos_cmp.position, pos_cmp.size, sf::Color::Yellow ) );
   }
 
@@ -184,9 +185,15 @@ void RenderDebugSystem::render_debug_stats()
   const int player_luck = Utils::Player::get_stats( reg() ).luck();
   for ( auto [grave_entt, grave_mb, consequence] : reg().view<Cmp::Grave::MultiBlock, Cmp::Grave::Consequence>().each() )
   {
-    if ( not Utils::is_visible_in_view( get_screen_view(), grave_mb ) ) continue;
-    if ( consequence.get( player_luck ) != Cmp::Grave::Consequence::Type::NPC_TRAP ) continue;
+    if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), grave_mb ) ) continue;
+    if ( consequence.roll( player_luck, Utils::Player::trail_position( reg() ) ) != Cmp::Grave::Consequence::Type::NPC_TRAP ) continue;
     render_square( grave_mb.position, grave_mb.size, sf::Color::Blue );
+  }
+
+  for ( auto [grave_entt, grave_mb, trail_cmp] : reg().view<Cmp::Grave::MultiBlock, Cmp::Grave::TrailMarker>().each() )
+  {
+    if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), grave_mb ) ) continue;
+    render_square( grave_mb.position, grave_mb.size, sf::Color::Green );
   }
   draw_debug_overlay();
 }
@@ -387,6 +394,7 @@ void RenderDebugSystem::render_ui_entity_inspect()
       if ( reg().all_of<Cmp::HealingSpringEntrance>( entity ) ) draw_line( " HealingSpringEntrance", sf::Color::Cyan );
       if ( reg().all_of<Cmp::WorldItem>( entity ) ) draw_line( " WorldItem", sf::Color::Green );
       if ( reg().all_of<Cmp::Player::Illuminated>( entity ) ) draw_line( " Illuminated", sf::Color::Yellow );
+      if ( reg().all_of<Cmp::Grave::TrailMarker>( entity ) ) draw_line( " TrailMarker", sf::Color::Green );
       if ( auto *cmp = reg().try_get<Cmp::Npc::SpawnedBy>( entity ) ) draw_line( " SpawnedBy: " + cmp->m_source.str(), sf::Color::White );
 
       if ( auto *cmp = reg().try_get<Cmp::UUID>( entity ) ) draw_line( " " + cmp->str(), sf::Color::White );

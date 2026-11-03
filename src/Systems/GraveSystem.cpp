@@ -3,17 +3,22 @@
 #include <Components/AbsoluteAlpha.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Grave/Consequence.hpp>
+#include <Components/Grave/Exhumed.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/Segment.hpp>
+#include <Components/Grave/TrailMarker.hpp>
 #include <Components/Particle/GraveHaloParticleSprite.hpp>
 #include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
+#include <Components/Persistent/GraveTrailSizeMultiplier.hpp>
 #include <Components/Persistent/PickaxeGraveDigWear.hpp>
 #include <Components/Persistent/ShovelGraveDigWear.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
+#include <Components/Player/GraveTrailPosition.hpp>
 #include <Components/Player/KeysCount.hpp>
+#include <Components/Player/LevelDepth.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
@@ -32,8 +37,10 @@
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
+#include <Utils/Random.hpp>
 #include <Utils/Utils.hpp>
 
+#include <entt/entity/fwd.hpp>
 #include <utility>
 
 namespace Game::Sys
@@ -152,7 +159,8 @@ void GraveSystem::update_grave_halo_particles()
     } );
     const bool has_halo = halo != ps_list.end();
 
-    if ( holding_flute and consequence.get( player_luck ) == Cmp::Grave::Consequence::Type::NPC_TRAP and wearlevel > 0 )
+    if ( holding_flute and consequence.roll( player_luck, Utils::Player::trail_position( reg() ) ) == Cmp::Grave::Consequence::Type::NPC_TRAP and
+         wearlevel > 0 )
     {
       // restart is a no-op if already running
       if ( has_halo ) { halo->second.get().restart(); }
@@ -192,6 +200,44 @@ void GraveSystem::apply_dig_hit( entt::entity grave_entity, Cmp::Grave::MultiBlo
   open_grave( grave_entity, grave_anim_cmp );
 }
 
+GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_entt )
+{
+  auto &trail_position = Utils::Player::trail_position( reg() );
+  const unsigned int max_trail_size = Utils::Player::get_level_depth( reg() ).get_count() *
+                                      Sys::PersistSystem::get<Cmp::Persist::GraveTrailSizeMultiplier>( reg() ).get_value();
+
+  if ( trail_position.value >= max_trail_size * 2 )
+  {
+    // crypt key trail is complete: the caller drops the crypt key instead
+    reg().remove<Cmp::Grave::TrailMarker>( source_entt );
+    return TrailStep::CRYPT_KEY;
+  }
+  // exit key trail is complete: the caller drops the exit key, but the trail carries on towards the crypt key
+  const bool exit_key_reached = trail_position.value == max_trail_size;
+
+  // no un-exhumed graves left to point at
+  auto interred_view = reg().view<Cmp::Position, Cmp::Grave::MultiBlock>( entt::exclude<Cmp::Grave::Exhumed> );
+  if ( interred_view.begin() == interred_view.end() )
+  {
+    SPDLOG_WARN( "No un-exhumed graves left, skipping trail marker for {}", static_cast<uint32_t>( source_entt ) );
+    return exit_key_reached ? TrailStep::EXIT_KEY : TrailStep::NO_GRAVES;
+  }
+
+  // point the source grave's arrow at a random un-exhumed grave
+  auto [target_entt, target_pos] = Utils::Rnd::get_random_position( reg(), Utils::Rnd::IncludePack<Cmp::Grave::MultiBlock>{},
+                                                                    Utils::Rnd::ExcludePack<Cmp::Grave::Exhumed>{} );
+  const auto &source_pos = reg().get<Cmp::Position>( source_entt );
+  auto angle = Utils::Maths::angle( target_pos.getCenter() - source_pos.getCenter() ).value_or( sf::Angle::Zero );
+  reg().emplace_or_replace<Cmp::Grave::TrailMarker>( source_entt, angle );
+  // the only un-exhumed grave with a marker is the current target; its angle is set once it is exhumed
+  reg().emplace_or_replace<Cmp::Grave::TrailMarker>( target_entt );
+  trail_position.value++;
+
+  SPDLOG_INFO( "Trail {}/{}: grave {} now points to grave {}", trail_position.value, max_trail_size * 2, static_cast<uint32_t>( source_entt ),
+               static_cast<uint32_t>( target_entt ) );
+  return exit_key_reached ? TrailStep::EXIT_KEY : TrailStep::ADVANCED;
+}
+
 void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_anim_cmp )
 {
   if ( std::string::size_type n = grave_anim_cmp.m_sprite_type.str().find( ".closed" ); n != std::string::npos )
@@ -203,9 +249,30 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
     m_sound_bank.get_effect( "pickaxe_final" ).play();
   }
 
+  // exhume before any trail pick so this grave can never be chosen as its own next target
+  reg().emplace_or_replace<Cmp::Grave::Exhumed>( grave_entity );
+
+  // a grave on the trail skips its own consequence: it either points onwards or, at the end of the trail, holds the exit key
+  if ( reg().all_of<Cmp::Grave::TrailMarker>( grave_entity ) )
+  {
+    switch ( pick_next_trail_grave( grave_entity ) )
+    {
+      case TrailStep::EXIT_KEY:
+        spawn_grave_loot( { "item.exitkey" } );
+        break;
+      case TrailStep::CRYPT_KEY:
+        spawn_grave_loot( { "item.cryptkey" } );
+        break;
+      case TrailStep::ADVANCED:
+      case TrailStep::NO_GRAVES:
+        break;
+    }
+    return;
+  }
+
   auto *consequence = reg().try_get<Cmp::Grave::Consequence>( grave_entity );
   if ( not consequence ) return;
-  switch ( consequence->get( Utils::Player::get_stats( reg() ).luck() ) )
+  switch ( consequence->roll( Utils::Player::get_stats( reg() ).luck(), Utils::Player::trail_position( reg() ) ) )
   {
     case Cmp::Grave::Consequence::Type::NPC_TRAP:
       SPDLOG_DEBUG( "Grave activated NPC trap." );
@@ -216,9 +283,6 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
       SPDLOG_DEBUG( "Grave activated bomb trap." );
       get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::TRIGGER_BOMB ) );
       break;
-    case Cmp::Grave::Consequence::Type::RELIC:
-      spawn_grave_loot( { "item.relic1", "item.relic2", "item.relic3", "item.relic4" } );
-      break;
     case Cmp::Grave::Consequence::Type::JEWELRY:
       spawn_grave_loot( { "item.jewelry_sapphire_necklace", "item.jewelry_amephyst_ring", "item.jewelry_ruby_ring", "item.jewelry_emerald_necklace",
                           "item.jewelry_emerald_gemstone", "item.jewelry_sapphire_gemstone", "item.jewelry_diamond_gemstone",
@@ -226,6 +290,11 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
       break;
     case Cmp::Grave::Consequence::Type::CURSE_TABLET:
       spawn_grave_loot( { "item.cursetablet" } );
+      break;
+    case Cmp::Grave::Consequence::Type::TRAIL_START:
+      SPDLOG_INFO( "Grave {} started the trail", static_cast<uint32_t>( grave_entity ) );
+      // nowhere for the trail to go: hand over the key now so the level can still be exited
+      if ( pick_next_trail_grave( grave_entity ) != TrailStep::ADVANCED ) { spawn_grave_loot( { "item.exitkey" } ); }
       break;
   }
 }

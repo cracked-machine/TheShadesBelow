@@ -20,6 +20,8 @@
 #include <Components/FractalCurve.hpp>
 #include <Components/Grave/ExitMultiBlock.hpp>
 #include <Components/Grave/MultiBlock.hpp>
+#include <Components/Grave/Exhumed.hpp>
+#include <Components/Grave/TrailMarker.hpp>
 #include <Components/Greyscale.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
@@ -113,6 +115,7 @@ void RenderGameSystem::render_game( sf::Time dt, const PathFinding::SpatialHashG
   PROFILED( render_zorder_queue() );
   PROFILED( render_shockwaves() );
   PROFILED( render_arrow_compass() );
+  PROFILED( render_trail_markers() );
 
   PROFILED( render_lightning_strike( dt ) );
   PROFILED( render_obstacle_cracks() );
@@ -395,6 +398,21 @@ void RenderGameSystem::render_arrow_compass()
     if ( not placement ) return;
     safe_render_sprite_world( Cmp::Player::ArrowCompass::kSpriteType, placement->rect, 0, placement->scale, 255, placement->origin,
                               placement->angle );
+  }
+}
+
+void RenderGameSystem::render_trail_markers()
+{
+  const auto view_bounds = Utils::calculate_view_bounds( RenderSystem::get_world_view() );
+  const sf::Vector2f half_grid = Constants::kGridSizePxF / 2.f;
+  // an un-exhumed marker is the hidden target grave, so only exhumed markers have an arrow to show
+  for ( auto [grave_entt, marker_cmp, grave_pos_cmp] : reg().view<Cmp::Grave::TrailMarker, Cmp::Position, Cmp::Grave::Exhumed>().each() )
+  {
+    if ( not Utils::is_visible_in_view( view_bounds, grave_pos_cmp ) ) continue;
+
+    // the origin is the sprite centre, so the arrow is turned in place over the middle of the grave
+    safe_render_sprite_world( "sprite.graveyard.arrowtrail", { grave_pos_cmp.getCenter() - half_grid, Constants::kGridSizePxF }, 0, { 1.f, 1.f },
+                              255, half_grid, marker_cmp.angle );
   }
 }
 

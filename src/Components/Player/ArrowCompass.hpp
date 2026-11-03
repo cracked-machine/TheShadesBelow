@@ -44,7 +44,7 @@ struct ArrowCompass
     sf::Vector2f origin;
   };
 
-  inline static const Sys::SpriteKey kSpriteType{ "sprite.graveyard.arrow" };
+  inline static const Sys::SpriteKey kSpriteType{ "sprite.graveyard.arrowcompass" };
 
   //! @brief Inset from the view edge at which the arrow is placed
   static constexpr float kEdgeMargin{ 32.f };

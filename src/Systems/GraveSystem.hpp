@@ -57,6 +57,22 @@ private:
   //! @param grave_anim_cmp
   void apply_dig_hit( entt::entity grave_entity, Cmp::Grave::MultiBlock &grave_cmp, Cmp::AnimData &grave_anim_cmp );
 
+  //! @brief Outcome of pick_next_trail_grave(), telling the caller which key (if any) to drop
+  enum class TrailStep
+  {
+    ADVANCED,  //!< the trail moved on to a new grave
+    EXIT_KEY,  //!< the exit key trail is complete; the trail still moves on if graves remain
+    CRYPT_KEY, //!< the crypt key trail is complete and the trail ends
+    NO_GRAVES  //!< no un-exhumed graves are left to point at
+  };
+
+  //! @brief Point source_entt's Cmp::Grave::TrailMarker arrow at a random un-exhumed grave and give that grave the next Cmp::Grave::TrailMarker
+  //! @param source_entt the grave just exhumed
+  //! @return TrailStep::EXIT_KEY or TrailStep::CRYPT_KEY if that trail is complete (one or two times the trail size from
+  //! Cmp::Persist::GraveTrailSizeMultiplier), the caller drops the key
+  //! @return TrailStep::NO_GRAVES if no graves are left to point at, otherwise TrailStep::ADVANCED
+  TrailStep pick_next_trail_grave( entt::entity source_entt );
+
   //! @brief Switch the grave's sprite to its opened state and trigger a random consequence
   //! @param grave_entity
   //! @param grave_anim_cmp
