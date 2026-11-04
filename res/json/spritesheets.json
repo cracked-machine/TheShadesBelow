@@ -39,6 +39,34 @@
         }
       }
     },
+    "sprite.crow.idle": {
+      "spritesheet": {
+        "displayname": "Crow",
+        "texture_path": "res/textures/npccrow.png",
+        "sprite_indices": [0,1,2,3],
+        "indices_per_sequence": 4,
+        "RelativeZOrder": [64],
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.crow.fly": {
+      "spritesheet": {
+        "displayname": "Crow",
+        "texture_path": "res/textures/npccrow.png",
+        "sprite_indices": [4,5,6,7],
+        "indices_per_sequence": 4,
+        "RelativeZOrder": [64],
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
     "sprite.crypt.altar.active": {
       "spritesheet": {
         "displayname": "sprite.crypt.altar.active",

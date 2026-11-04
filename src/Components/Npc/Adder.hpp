@@ -12,4 +12,4 @@ struct Adder
 
 } // namespace Game::Cmp::Npc
 
-#endif // SRC_COMPONENTS_NPC_SPIDER_HPP__
+#endif // SRC_COMPONENTS_NPC_ADDER_HPP__

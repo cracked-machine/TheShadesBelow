@@ -12,12 +12,14 @@
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Grave/Segment.hpp>
+#include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/Adder.hpp>
 #include <Components/Npc/Azazel.hpp>
 #include <Components/Npc/Burryman.hpp>
 #include <Components/Npc/Container.hpp>
+#include <Components/Npc/Crow.hpp>
 #include <Components/Npc/Drknox.hpp>
 #include <Components/Npc/ElderMother.hpp>
 #include <Components/Npc/Friendly.hpp>
@@ -52,7 +54,6 @@
 #include <Components/Persistent/NpcMimicTint.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
-#include <Components/Inventory/WearLevel.hpp>
 #include <Components/Plant/KillNpcTimer.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>
@@ -73,10 +74,10 @@
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/DestroyPlantEvent.hpp>
-#include <Events/UpdateDmgEvent.hpp>
 #include <Events/GrimoireUpdateEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/TeleportEntityEvent.hpp>
+#include <Events/UpdateDmgEvent.hpp>
 #include <Events/UpdateNpcPositionEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/NpcFactory.hpp>
@@ -287,6 +288,7 @@ void NpcSystem::update( sf::Time dt )
     m_anim_timer = sf::Time::Zero;
   }
   update_sfx( dt );
+  update_crows( dt );
   update_movement( dt );
   update_burryman_pickup( dt );
 
@@ -414,6 +416,9 @@ void NpcSystem::update_animation()
 
   for ( auto [npc_entt, npc_cmp, npc_dir_cmp, anim_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Direction, Cmp::AnimData>().each() )
   {
+    // crows pace their grave or fly off, even while the dowsing rod blinds everything else, see update_crows
+    if ( reg().any_of<Cmp::Npc::Crow>( npc_entt ) ) continue;
+
     // dowsing rod "blinds" all NPC pathfinding, except wisps: let them walk out their current step, then stand still
     if ( inventory_type.contains( "dowsingrod" ) and not reg().any_of<Cmp::Npc::Wisp>( npc_entt ) )
     {
@@ -532,6 +537,117 @@ void NpcSystem::update_sfx( sf::Time dt )
     if ( spider_sfx.getStatus() != sf::Sound::Status::Playing ) { spider_sfx.play(); }
   }
   else { spider_sfx.stop(); }
+
+  std::vector<std::string> crow_calls{ "crow1", "crow2", "crow3", "crow4", "crow5" };
+  auto crow_call_picker = Cmp::RandomInt( 0, crow_calls.size() - 1 );
+  for ( auto [crow_entt, crow_cmp, pos_cmp] : reg().view<Cmp::Npc::Crow, Cmp::Position>().each() )
+  {
+    sf::Time kCrowCallTimeout = crow_cmp.flee ? sf::seconds( 0.5f ) : sf::seconds( 3.f );
+    crow_cmp.sfx_cooldown += dt;
+    if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), pos_cmp ) ) continue;
+    if ( crow_cmp.sfx_cooldown >= kCrowCallTimeout )
+    {
+      auto &crow_sfx = m_sound_bank.get_effect( crow_calls.at( crow_call_picker.gen() ) );
+      if ( crow_sfx.getStatus() != sf::Sound::Status::Playing ) { crow_sfx.play(); }
+      crow_cmp.sfx_cooldown = sf::Time::Zero;
+    }
+  }
+}
+
+void NpcSystem::update_crows( sf::Time dt )
+{
+  static constexpr float kCrowFlightSpeed = Constants::kGridSizePxF.x * 6.0f;
+  static constexpr float kCrowPerchSpeed = 6.0f;
+  static constexpr float kCrowPerchRange = 8.0f;
+  static constexpr float kCrowMaxPerchWait = 1.0f;
+  const sf::FloatRect view_bounds = Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() );
+  const Cmp::Position player_pos = Utils::Player::get_position( reg() );
+
+  std::vector<entt::entity> kill_list;
+  for ( auto [crow_entt, crow_cmp, pos_cmp, anim_cmp] : reg().view<Cmp::Npc::Crow, Cmp::Position, Cmp::AnimData>().each() )
+  {
+    if ( not crow_cmp.flee )
+    {
+      // the crow only animates while standing still. AnimSystem only steps an NPC's frames while its Cmp::Direction
+      // is non-zero, so the standing crow is given a nominal direction and the moving crow a zero one
+      const auto set_perch_direction = [&]()
+      {
+        const bool moving = crow_cmp.perch_target_x.has_value();
+        reg().emplace_or_replace<Cmp::Direction>( crow_entt, moving ? sf::Vector2f( 0.0f, 0.0f ) : sf::Vector2f( 1.0f, 0.0f ) );
+        anim_cmp.m_enabled = not moving;
+        // moving: hold the first frame
+        if ( moving )
+        {
+          anim_cmp.m_current_frame = 0;
+          anim_cmp.m_elapsed_time = sf::Time::Zero;
+        }
+      };
+      set_perch_direction();
+      if ( crow_cmp.perch_wait > sf::Time::Zero )
+      {
+        crow_cmp.perch_wait -= dt;
+        continue;
+      }
+
+      // done moving or waiting: either wait a while, or move to a random spot within kCrowPerchRange of the grave centre
+      if ( not crow_cmp.perch_target_x )
+      {
+        if ( Cmp::RandomInt( 0, 1 ).gen() == 0 ) { crow_cmp.perch_wait = sf::seconds( Cmp::RandomFloat( 0.0f, kCrowMaxPerchWait ).gen() ); }
+        else
+        {
+          crow_cmp.perch_target_x = crow_cmp.perch_center_x + Cmp::RandomFloat( -kCrowPerchRange, kCrowPerchRange ).gen();
+          // the sprite faces east, so mirror it to walk west
+          anim_cmp.m_flip_x = *crow_cmp.perch_target_x < pos_cmp.getCenter().x;
+        }
+        set_perch_direction();
+        continue;
+      }
+
+      const Cmp::Position old_position = pos_cmp;
+      const float remaining = *crow_cmp.perch_target_x - pos_cmp.getCenter().x;
+      const float step = kCrowPerchSpeed * dt.asSeconds();
+      if ( std::abs( remaining ) <= step )
+      {
+        pos_cmp.position.x = *crow_cmp.perch_target_x - pos_cmp.size.x / 2.0f;
+        crow_cmp.perch_target_x.reset();
+        set_perch_direction();
+      }
+      else { pos_cmp.position.x += std::copysign( step, remaining ); }
+      if ( auto navmesh = navmesh_for( crow_entt ) ) { navmesh->update( crow_entt, old_position, pos_cmp ); }
+      continue;
+    }
+    if ( not crow_cmp.flight_direction )
+    {
+      // take off: the crow flies over everything, so it leaves the navmesh and abandons any step it was walking.
+      // The bucket it is in is the cell it last set off from, not wherever it has lerped to since.
+      Cmp::Position bucket_position = pos_cmp;
+      if ( auto *lerp_pos_cmp = reg().try_get<Cmp::LerpPosition>( crow_entt ) )
+      {
+        if ( lerp_pos_cmp->m_lerp_factor > 0.0f ) { bucket_position.position = lerp_pos_cmp->m_start; }
+        reg().remove<Cmp::LerpPosition>( crow_entt );
+      }
+      if ( auto navmesh = navmesh_for( crow_entt ) ) { navmesh->remove( crow_entt, bucket_position ); }
+
+      // flee away from the player, straight up if the player is standing right on it
+      const sf::Vector2f away = pos_cmp.getCenter() - player_pos.getCenter();
+      crow_cmp.flight_direction = away.lengthSquared() > 0.0f ? away.normalized() : sf::Vector2f( 0.0f, -1.0f );
+      reg().emplace_or_replace<Cmp::Direction>( crow_entt, *crow_cmp.flight_direction );
+      anim_cmp.m_sprite_type = "sprite.crow.fly";
+      anim_cmp.m_flip_x = crow_cmp.flight_direction->x < 0.0f;
+      anim_cmp.m_enabled = true;
+    }
+
+    pos_cmp.position += *crow_cmp.flight_direction * kCrowFlightSpeed * dt.asSeconds();
+    const float zorder = Sys::SpriteStore::instance().get( anim_cmp.m_sprite_type ).zorder( 0, pos_cmp.position.y );
+    reg().patch<Cmp::ZOrderValue>( crow_entt, [&]( auto &zorder_cmp ) { zorder_cmp.set( zorder ); } );
+
+    if ( not Utils::is_visible_in_view( view_bounds, pos_cmp ) ) kill_list.push_back( crow_entt );
+  }
+  // already off the navmesh, so the event's navmesh removal is a no-op
+  for ( auto crow_entt : kill_list )
+  {
+    on_destroy_npc_event( Events::DestroyNpcEvent( crow_entt ) );
+  }
 }
 
 void NpcSystem::update_pathfinding( sf::Time dt )
@@ -560,6 +676,8 @@ void NpcSystem::update_pathfinding( sf::Time dt )
     for ( auto [npc_entt, npc_cmp] : reg().view<Cmp::Npc::NPC>().each() )
     {
       if ( reg().any_of<Cmp::Npc::Wisp>( npc_entt ) ) continue;
+      // crows never chase: they pace their grave, then fly straight off screen, see update_crows
+      if ( reg().any_of<Cmp::Npc::Crow>( npc_entt ) ) continue;
 
       // Watchmen stand sentry, sweeping their searchlight, until they actually catch the player
       // in the beam — only then do they give chase.

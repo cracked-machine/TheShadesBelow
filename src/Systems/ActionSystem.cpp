@@ -171,11 +171,11 @@ void ActionSystem::check_player_dig_obstacle_collision()
       else if ( inventory_type == "item.shovel" or inventory_type == "item.axe" ) { damage_per_hit = damage_per_hit / 5; }
       obstacle_cmp.damage += damage_per_hit;
 
-      float dmg = 0.f;
-      if ( inventory_type == "item.pickaxe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::PickaxeObstacleDigWear>( reg() ).get_value(); }
-      else if ( inventory_type == "item.axe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::AxeObstacleDigWear>( reg() ).get_value(); }
-      else if ( inventory_type == "item.shovel" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::ShovelObstacleDigWear>( reg() ).get_value(); }
-      get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
+      // float dmg = 0.f;
+      // if ( inventory_type == "item.pickaxe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::PickaxeObstacleDigWear>( reg() ).get_value(); }
+      // else if ( inventory_type == "item.axe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::AxeObstacleDigWear>( reg() ).get_value(); }
+      // else if ( inventory_type == "item.shovel" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::ShovelObstacleDigWear>( reg() ).get_value(); }
+      // get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 
       // Destroy the obstacle?
       if ( obstacle_cmp.damage >= 100 )

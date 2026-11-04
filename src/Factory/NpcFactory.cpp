@@ -9,6 +9,7 @@
 #include <Components/Npc/Azazel.hpp>
 #include <Components/Npc/Burryman.hpp>
 #include <Components/Npc/Container.hpp>
+#include <Components/Npc/Crow.hpp>
 #include <Components/Npc/Drknox.hpp>
 #include <Components/Npc/ElderMother.hpp>
 #include <Components/Npc/Footprint.hpp>
@@ -192,6 +193,13 @@ entt::entity create_npc( entt::registry &reg, Cmp::Position pos_cmp, const Sys::
   else if ( npc_type == "npc.burryman" )
   {
     reg.emplace_or_replace<Cmp::Npc::Burryman>( new_pos_entity );
+    reg.emplace_or_replace<Cmp::Npc::LerpSpeed>( new_pos_entity, npc_cmp.m_lerp_speed );
+    reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 1, 1 } );
+  }
+  else if ( npc_type == "npc.crow" )
+  {
+    reg.emplace_or_replace<Cmp::Npc::Crow>( new_pos_entity );
+    reg.emplace_or_replace<Cmp::Npc::Friendly>( new_pos_entity );
     reg.emplace_or_replace<Cmp::Npc::LerpSpeed>( new_pos_entity, npc_cmp.m_lerp_speed );
     reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 1, 1 } );
   }

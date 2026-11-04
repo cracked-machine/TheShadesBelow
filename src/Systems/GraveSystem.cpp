@@ -7,6 +7,7 @@
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/Segment.hpp>
 #include <Components/Grave/TrailMarker.hpp>
+#include <Components/Npc/Crow.hpp>
 #include <Components/Particle/GraveHaloParticleSprite.hpp>
 #include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
@@ -24,6 +25,8 @@
 #include <Components/RectBounds.hpp>
 #include <Components/SelectedPosition.hpp>
 #include <Components/Stats/SpawnAction.hpp>
+#include <Components/UUID.hpp>
+#include <Components/ZOrderValue.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
@@ -208,6 +211,12 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
   const unsigned int max_trail_size = Utils::Player::get_level_depth( reg() ).get_count() *
                                       Sys::PersistSystem::get<Cmp::Persist::GraveTrailSizeMultiplier>( reg() ).get_value();
 
+  // the crow perched on the grave just opened flies away, so at most one crow is ever perched on the trail
+  for ( auto [crow_entt, crow_cmp] : reg().view<Cmp::Npc::Crow>().each() )
+  {
+    crow_cmp.flee = true;
+  }
+
   if ( trail_position.size() >= static_cast<size_t>( max_trail_size ) * 2 )
   {
     // crypt key trail is complete: the caller drops the crypt key instead
@@ -244,8 +253,7 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
   {
     all_candidates.emplace_back( cand_entt, cand_pos );
     auto cand_angle = Utils::Maths::angle( cand_pos.getCenter() - source_pos.getCenter() );
-    if ( backtrack_angle and cand_angle and
-         std::abs( ( *cand_angle - *backtrack_angle ).wrapSigned().asDegrees() ) <= kTrailBacktrackExclusionDeg )
+    if ( backtrack_angle and cand_angle and std::abs( ( *cand_angle - *backtrack_angle ).wrapSigned().asDegrees() ) <= kTrailBacktrackExclusionDeg )
     {
       continue;
     }
@@ -266,6 +274,14 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
   reg().emplace_or_replace<Cmp::Grave::TrailMarker>( source_entt, angle );
   // the only un-exhumed grave with a marker is the current target; its angle is set once it is exhumed
   reg().emplace_or_replace<Cmp::Grave::TrailMarker>( target_entt );
+  auto *uuid_cmp = reg().try_get<Cmp::UUID>( target_entt );
+  if ( uuid_cmp )
+  {
+    const auto &target_pos_cmp = reg().get<Cmp::Position>( target_entt );
+    const float perch_center_x = target_pos_cmp.getCenter().x;
+    get_systems_event_queue().trigger( Events::CreateNpcEvent( "npc.crow", target_pos_cmp, 1, *uuid_cmp, [this, perch_center_x]( entt::entity crow_entt )
+                                                               { reg().get<Cmp::Npc::Crow>( crow_entt ).perch_center_x = perch_center_x; } ) );
+  }
   trail_position.push_back( source_entt );
 
   std::stringstream trailss;
