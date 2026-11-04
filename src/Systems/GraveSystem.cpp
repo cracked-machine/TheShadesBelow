@@ -16,7 +16,7 @@
 #include <Components/Persistent/ShovelGraveDigWear.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
-#include <Components/Player/GraveTrailPosition.hpp>
+#include <Components/Player/GraveTrail.hpp>
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Position.hpp>
@@ -206,14 +206,14 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
   const unsigned int max_trail_size = Utils::Player::get_level_depth( reg() ).get_count() *
                                       Sys::PersistSystem::get<Cmp::Persist::GraveTrailSizeMultiplier>( reg() ).get_value();
 
-  if ( trail_position.value >= max_trail_size * 2 )
+  if ( trail_position.size() >= max_trail_size * 2 )
   {
     // crypt key trail is complete: the caller drops the crypt key instead
     reg().remove<Cmp::Grave::TrailMarker>( source_entt );
     return TrailStep::CRYPT_KEY;
   }
   // exit key trail is complete: the caller drops the exit key, but the trail carries on towards the crypt key
-  const bool exit_key_reached = trail_position.value == max_trail_size;
+  const bool exit_key_reached = trail_position.size() == max_trail_size;
 
   // no un-exhumed graves left to point at
   auto interred_view = reg().view<Cmp::Position, Cmp::Grave::MultiBlock>( entt::exclude<Cmp::Grave::Exhumed> );
@@ -231,10 +231,14 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
   reg().emplace_or_replace<Cmp::Grave::TrailMarker>( source_entt, angle );
   // the only un-exhumed grave with a marker is the current target; its angle is set once it is exhumed
   reg().emplace_or_replace<Cmp::Grave::TrailMarker>( target_entt );
-  trail_position.value++;
+  trail_position.push_back( source_entt );
 
-  SPDLOG_INFO( "Trail {}/{}: grave {} now points to grave {}", trail_position.value, max_trail_size * 2, static_cast<uint32_t>( source_entt ),
-               static_cast<uint32_t>( target_entt ) );
+  std::stringstream trailss;
+  for ( auto entt : trail_position )
+  {
+    trailss << " " << static_cast<uint32_t>( entt );
+  }
+  SPDLOG_INFO( "Trail {}/{}: {}", trail_position.size(), max_trail_size * 2, trailss.str() );
   return exit_key_reached ? TrailStep::EXIT_KEY : TrailStep::ADVANCED;
 }
 

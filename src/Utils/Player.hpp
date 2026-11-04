@@ -7,7 +7,7 @@
 #include <Components/Player/Doglegs.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/FootstepType.hpp>
-#include <Components/Player/GraveTrailPosition.hpp>
+#include <Components/Player/GraveTrail.hpp>
 #include <Components/Stats/PlayerStats.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <Systems/Stores/StoreKey.hpp>
@@ -305,7 +305,7 @@ Cmp::Player::ConsumeTimer *is_player_eating( entt::registry &reg );
 //! @return Cmp::Player::Doglegs& modifiable component
 Cmp::Player::Doglegs &get_doglegs( entt::registry &reg );
 
-Cmp::Player::GraveTrailPosition &trail_position( entt::registry &reg );
+Cmp::Player::GraveTrail &trail_position( entt::registry &reg );
 
 } // namespace Game::Utils::Player
 

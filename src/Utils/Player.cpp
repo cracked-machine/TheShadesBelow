@@ -25,7 +25,7 @@
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/Flying.hpp>
 #include <Components/Player/FootstepType.hpp>
-#include <Components/Player/GraveTrailPosition.hpp>
+#include <Components/Player/GraveTrail.hpp>
 #include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/Illuminated.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
@@ -579,11 +579,11 @@ Cmp::Player::Doglegs &get_doglegs( entt::registry &reg )
   return reg.get_or_emplace<Cmp::Player::Doglegs>( player_entt );
 }
 
-Cmp::Player::GraveTrailPosition &trail_position( entt::registry &reg )
+Cmp::Player::GraveTrail &trail_position( entt::registry &reg )
 {
   auto player_entt = get_entity( reg );
-  auto *trail_pos_cmp = reg.try_get<Cmp::Player::GraveTrailPosition>( player_entt );
-  if ( not trail_pos_cmp ) throw std::runtime_error( "Player has no Cmp::Player::GraveTrailPosition component." );
+  auto *trail_pos_cmp = reg.try_get<Cmp::Player::GraveTrail>( player_entt );
+  if ( not trail_pos_cmp ) throw std::runtime_error( "Player has no Cmp::Player::GraveTrail component." );
   return *trail_pos_cmp;
 }
 

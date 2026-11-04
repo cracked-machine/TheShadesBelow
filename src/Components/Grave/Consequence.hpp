@@ -1,7 +1,7 @@
 #ifndef SRC_COMPONENTS_GRAVE_CONSEQUENCE_HPP__
 #define SRC_COMPONENTS_GRAVE_CONSEQUENCE_HPP__
 
-#include <Components/Player/GraveTrailPosition.hpp>
+#include <Components/Player/GraveTrail.hpp>
 namespace Game::Cmp::Grave
 {
 
@@ -31,7 +31,7 @@ public:
   //! @brief Resolve the consequence from the grave's fixed roll and the player's current luck.
   //! @note The roll never changes, so the result only changes when player luck changes.
   //! @param player_luck
-  [[nodiscard]] Type roll( int player_luck, const Cmp::Player::GraveTrailPosition &trail_position ) const
+  [[nodiscard]] Type roll( int player_luck, const Cmp::Player::GraveTrail &trail_position ) const
   {
     // Roulette wheel. We take the inverse of player luck and use both numbers to gate the spawn probablities.
     // For example, if player luck is 50, then the badluck is also 50
@@ -47,7 +47,7 @@ public:
     if ( m_roll < tier1_threshold ) { return Type::BOMB_TRAP; }
     if ( m_roll < tier2_threshold ) { return Type::CURSE_TABLET; }
     if ( m_roll < tier3_threshold ) { return Type::NPC_TRAP; }
-    if ( m_roll < tier4_threshold and trail_position.value == 0 ) { return Type::TRAIL_START; }
+    if ( m_roll < tier4_threshold and trail_position.size() == 0 ) { return Type::TRAIL_START; }
     return Type::JEWELRY;
   }
 

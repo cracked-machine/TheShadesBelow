@@ -24,7 +24,7 @@
 #include <Components/Player/Doglegs.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/FootstepType.hpp>
-#include <Components/Player/GraveTrailPosition.hpp>
+#include <Components/Player/GraveTrail.hpp>
 #include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
@@ -110,7 +110,7 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   reg.emplace_or_replace<Cmp::Player::HeartBeat>( entity );
   reg.emplace_or_replace<Cmp::Player::Doglegs>( entity );
   reg.emplace_or_replace<Cmp::Grimoire>( entity );
-  reg.emplace_or_replace<Cmp::Player::GraveTrailPosition>( entity );
+  reg.emplace_or_replace<Cmp::Player::GraveTrail>( entity );
 }
 
 entt::entity add_spawn_area( entt::registry &reg, entt::entity entity, float zorder )

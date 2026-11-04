@@ -19,7 +19,7 @@
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Persistent/RuinProcGenMaxIterations.hpp>
 #include <Components/Player/Character.hpp>
-#include <Components/Player/GraveTrailPosition.hpp>
+#include <Components/Player/GraveTrail.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Ruin/BuildingMultiBlock.hpp>
@@ -53,8 +53,8 @@
 #include <Systems/AltarSystem.hpp>
 #include <Systems/AnimSystem.hpp>
 #include <Systems/ArrowSystem.hpp>
-#include <Systems/BurrSystem.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Systems/BurrSystem.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/ExitSystem.hpp>
 #include <Systems/FlyingSystem.hpp>
@@ -66,8 +66,8 @@
 #include <Systems/LootSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
-#include <Systems/PlantSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
+#include <Systems/PlantSystem.hpp>
 #include <Systems/PlayerSystem.hpp>
 #include <Systems/ProcGen/CellAutomataSystem.hpp>
 #include <Systems/ProcGen/DLASystem.hpp>
@@ -82,12 +82,12 @@
 #include <Systems/RuinSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
+#include <Systems/TeleportSystem.hpp>
 #include <Systems/Threats/BombSystem.hpp>
 #include <Systems/Threats/HazardFieldSystemImpl.hpp>
 #include <Systems/Threats/LightningSystem.hpp>
 #include <Systems/Threats/WatchmanSystem.hpp>
 #include <Systems/Threats/WispSystem.hpp>
-#include <Systems/TeleportSystem.hpp>
 #include <Systems/Threats/WormholeSystem.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Optimizations.hpp>
@@ -138,7 +138,7 @@ void GraveyardScene::on_init()
   else
   {
     Utils::Player::get_level_depth( m_reg ).increment_count( 1 );
-    Utils::Player::trail_position( m_reg ) = Cmp::Player::GraveTrailPosition{};
+    Utils::Player::trail_position( m_reg ) = Cmp::Player::GraveTrail{};
   }
 
   auto [map_size_grid, map_size_pixel] = m_scene_data->map_size();
