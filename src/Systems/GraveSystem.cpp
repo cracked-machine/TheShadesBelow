@@ -202,11 +202,13 @@ void GraveSystem::apply_dig_hit( entt::entity grave_entity, Cmp::Grave::MultiBlo
 
 GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_entt )
 {
+  constexpr float kTrailBacktrackExclusionDeg = 35.f;
+
   auto &trail_position = Utils::Player::trail_position( reg() );
   const unsigned int max_trail_size = Utils::Player::get_level_depth( reg() ).get_count() *
                                       Sys::PersistSystem::get<Cmp::Persist::GraveTrailSizeMultiplier>( reg() ).get_value();
 
-  if ( trail_position.size() >= max_trail_size * 2 )
+  if ( trail_position.size() >= static_cast<size_t>( max_trail_size ) * 2 )
   {
     // crypt key trail is complete: the caller drops the crypt key instead
     reg().remove<Cmp::Grave::TrailMarker>( source_entt );
@@ -223,10 +225,43 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
     return exit_key_reached ? TrailStep::EXIT_KEY : TrailStep::NO_GRAVES;
   }
 
-  // point the source grave's arrow at a random un-exhumed grave
-  auto [target_entt, target_pos] = Utils::Rnd::get_random_position( reg(), Utils::Rnd::IncludePack<Cmp::Grave::MultiBlock>{},
-                                                                    Utils::Rnd::ExcludePack<Cmp::Grave::Exhumed>{} );
   const auto &source_pos = reg().get<Cmp::Position>( source_entt );
+
+  // direction back towards the previous trail grave, if any: candidates in that direction would send the player back the way they came
+  std::optional<sf::Angle> backtrack_angle;
+  const auto prev_entt = trail_position.size() > 0 ? trail_position.at( trail_position.size() - 1 ) : entt::entity{ entt::null };
+  if ( reg().valid( prev_entt ) )
+  {
+    if ( const auto *prev_pos = reg().try_get<Cmp::Position>( prev_entt ) )
+    {
+      backtrack_angle = Utils::Maths::angle( prev_pos->getCenter() - source_pos.getCenter() );
+    }
+  }
+
+  std::vector<std::pair<entt::entity, Cmp::Position>> all_candidates;
+  std::vector<std::pair<entt::entity, Cmp::Position>> forward_candidates;
+  for ( auto [cand_entt, cand_pos, cand_mb] : interred_view.each() )
+  {
+    all_candidates.emplace_back( cand_entt, cand_pos );
+    auto cand_angle = Utils::Maths::angle( cand_pos.getCenter() - source_pos.getCenter() );
+    if ( backtrack_angle and cand_angle and
+         std::abs( ( *cand_angle - *backtrack_angle ).wrapSigned().asDegrees() ) <= kTrailBacktrackExclusionDeg )
+    {
+      continue;
+    }
+    forward_candidates.emplace_back( cand_entt, cand_pos );
+  }
+
+  // every remaining grave lies back the way the player came: allow backtracking rather than stall the trail
+  if ( forward_candidates.empty() )
+  {
+    SPDLOG_DEBUG( "No trail candidates outside the backtrack cone, falling back to all {} graves", all_candidates.size() );
+    forward_candidates = std::move( all_candidates );
+  }
+
+  // point the source grave's arrow at a random un-exhumed grave
+  Cmp::RandomInt candidate_picker( 0, static_cast<int>( forward_candidates.size() ) - 1 );
+  auto [target_entt, target_pos] = forward_candidates.at( static_cast<std::size_t>( candidate_picker.gen() ) );
   auto angle = Utils::Maths::angle( target_pos.getCenter() - source_pos.getCenter() ).value_or( sf::Angle::Zero );
   reg().emplace_or_replace<Cmp::Grave::TrailMarker>( source_entt, angle );
   // the only un-exhumed grave with a marker is the current target; its angle is set once it is exhumed
