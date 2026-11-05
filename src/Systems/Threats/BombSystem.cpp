@@ -59,19 +59,15 @@ BombSystem::BombSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
 void BombSystem::update( sf::Time dt )
 {
   for ( auto [armed_entt, armed_cmp] : reg().view<Cmp::Armed>().each() )
-    armed_cmp.m_elapsed += dt;
-
-  PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock();
-  if ( not pathfinding_navmesh )
   {
-    SPDLOG_WARN( "Unable to lock weakptr: pathfinding_navmesh" );
-    return;
+    armed_cmp.m_elapsed += dt;
   }
 
-  PathFinding::SpatialHashGridSharedPtr player_navmesh = m_player_navmesh.lock();
-  if ( not player_navmesh )
+  auto pathfinding_navmesh = m_npc_navmesh.lock();
+  auto player_navmesh = m_player_navmesh.lock();
+  if ( not pathfinding_navmesh or not player_navmesh )
   {
-    SPDLOG_WARN( "Unable to lock weakptr: player_navmesh" );
+    SPDLOG_WARN( "Unable to lock navmesh weakptr (npc: {}, player: {})", bool( pathfinding_navmesh ), bool( player_navmesh ) );
     return;
   }
 
@@ -90,7 +86,7 @@ void BombSystem::update( sf::Time dt )
   {
     auto *armed_cmp_ptr = reg().try_get<Cmp::Armed>( armed_entt );
     auto *armed_pos_cmp_ptr = reg().try_get<Cmp::Position>( armed_entt );
-    if ( not armed_cmp_ptr || not armed_pos_cmp_ptr ) continue; // removed/changed already this tick (e.g. a chain reaction)
+    if ( not armed_cmp_ptr or not armed_pos_cmp_ptr ) continue; // removed/changed already this tick (e.g. a chain reaction)
     if ( armed_cmp_ptr->getElapsedFuseTime() < armed_cmp_ptr->m_fuse_delay ) continue;
 
     // Copy out what the rest of this iteration needs now, before any mutating calls below: those calls can
@@ -127,7 +123,7 @@ void BombSystem::update( sf::Time dt )
                                                                [&]( entt::entity npc_entity, Cmp::Npc::Container &, Cmp::Position & )
     { Factory::Npc::destroy_npc_container( reg(), npc_entity, reserved_sm ); } );
 
-    // detonate nearby carryitems - cruel but fair
+    // detonate nearby WorldItems - cruel but fair
     Utils::Collision::for_each_intersect<Cmp::WorldItem>( reg(), armed_pos_cmp,
                                                           [&]( entt::entity item_entt, Cmp::WorldItem &item_cmp, Cmp::Position &item_pos_cmp )
     {
@@ -137,6 +133,7 @@ void BombSystem::update( sf::Time dt )
         auto dmg = Sys::PersistSystem::get<Cmp::Persist::BombDamage>( reg() ).get_value();
         get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
       }
+      else if ( item_cmp.item_type == "item.exitkey" or item_cmp.item_type == "item.cryptkey" ) { return; }
       else if ( item_cmp.item_type == "item.bomb" )
       {
         // process other bombs lying around - chain reaction!
