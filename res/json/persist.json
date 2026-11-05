@@ -51,7 +51,7 @@
   },
   "AxeObstacleDigWear": {
     "type": "float",
-    "value": 1.0,
+    "value": 0.1,
     "min_value": 0.0,
     "max_value": 5.0,
     "detail": "Axe wear: digging obstacle",
@@ -371,7 +371,7 @@
   },
   "GraveTrailSizeMultiplier": {
     "type": "int",
-    "value": 1,
+    "value": 3,
     "min_value": 1,
     "max_value": 10,
     "detail": "Grave Trail Size Multiplier",
@@ -645,7 +645,7 @@
   },
   "PickaxeObstacleDigWear": {
     "type": "float",
-    "value": 1.0,
+    "value": 0.1,
     "min_value": 0.0,
     "max_value": 5.0,
     "detail": "Pickaxe wear: digging obstacle",
@@ -830,7 +830,7 @@
   },
   "ShovelObstacleDigWear": {
     "type": "float",
-    "value": 1.0,
+    "value": 0.1,
     "min_value": 0.0,
     "max_value": 5.0,
     "detail": "Shovel wear: digging obstacle",

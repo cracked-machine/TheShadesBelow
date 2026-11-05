@@ -106,10 +106,12 @@ void ActionSystem::on_player_action( const Events::PlayerActionEvent &event )
 void ActionSystem::check_player_dig_obstacle_collision()
 {
 
-  if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) { return; }
-
   auto [_, inventory_item, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_item != "item.pickaxe" and inventory_item != "item.axe" and inventory_item != "item.shovel" ) return;
+
+  // a broken pickaxe still digs (very slowly), other broken tools are useless
+  const bool tool_broken = Utils::Player::get_inventory_wear_level( reg() ) <= 0;
+  if ( tool_broken and inventory_item != "item.pickaxe" ) { return; }
 
   // abort if still in cooldown
   if ( Utils::Player::is_digging_on_cooldown( reg() ) ) { return; }
@@ -167,15 +169,20 @@ void ActionSystem::check_player_dig_obstacle_collision()
       // calculate new alpha value and apply to the current obstacle and any obstacle with matching UUID (cap sprite obstacles)
       auto damage_per_hit = Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).get_value();
       auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-      if ( inventory_type == "item.pickaxe" ) { damage_per_hit = damage_per_hit / 2; }
+      if ( inventory_type == "item.pickaxe" and tool_broken ) { damage_per_hit = damage_per_hit / 20; }
+      else if ( inventory_type == "item.pickaxe" ) { damage_per_hit = damage_per_hit / 2; }
       else if ( inventory_type == "item.shovel" or inventory_type == "item.axe" ) { damage_per_hit = damage_per_hit / 5; }
       obstacle_cmp.damage += damage_per_hit;
 
-      // float dmg = 0.f;
-      // if ( inventory_type == "item.pickaxe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::PickaxeObstacleDigWear>( reg() ).get_value(); }
-      // else if ( inventory_type == "item.axe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::AxeObstacleDigWear>( reg() ).get_value(); }
-      // else if ( inventory_type == "item.shovel" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::ShovelObstacleDigWear>( reg() ).get_value(); }
-      // get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
+      // already broken: no further wear, otherwise the break sound replays on every hit
+      if ( not tool_broken )
+      {
+        float dmg = 0.f;
+        if ( inventory_type == "item.pickaxe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::PickaxeObstacleDigWear>( reg() ).get_value(); }
+        else if ( inventory_type == "item.axe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::AxeObstacleDigWear>( reg() ).get_value(); }
+        else if ( inventory_type == "item.shovel" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::ShovelObstacleDigWear>( reg() ).get_value(); }
+        get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
+      }
 
       // Destroy the obstacle?
       if ( obstacle_cmp.damage >= 100 )
@@ -290,7 +297,9 @@ void ActionSystem::check_player_smash_pot()
   auto [_, inventory_slot_type, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_slot_type != "item.pickaxe" and inventory_slot_type != "item.axe" and inventory_slot_type != "item.shovel" ) { return; }
 
-  if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) { return; }
+  // a broken pickaxe still smashes pots, other broken tools are useless
+  const bool tool_broken = Utils::Player::get_inventory_wear_level( reg() ) <= 0;
+  if ( tool_broken and inventory_slot_type != "item.pickaxe" ) { return; }
 
   // abort if still in cooldown
   if ( Utils::Player::is_digging_on_cooldown( reg() ) ) { return; }
@@ -315,11 +324,15 @@ void ActionSystem::check_player_smash_pot()
 
       reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
-      float dmg = 0.f;
-      if ( inventory_slot_type == "item.pickaxe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::PickaxePotSmashWear>( reg() ).get_value(); }
-      else if ( inventory_slot_type == "item.axe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::AxePotSmashWear>( reg() ).get_value(); }
-      else if ( inventory_slot_type == "item.shovel" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::ShovelPotSmashWear>( reg() ).get_value(); }
-      get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
+      // already broken: no further wear, otherwise the break sound replays on every smash
+      if ( not tool_broken )
+      {
+        float dmg = 0.f;
+        if ( inventory_slot_type == "item.pickaxe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::PickaxePotSmashWear>( reg() ).get_value(); }
+        else if ( inventory_slot_type == "item.axe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::AxePotSmashWear>( reg() ).get_value(); }
+        else if ( inventory_slot_type == "item.shovel" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::ShovelPotSmashWear>( reg() ).get_value(); }
+        get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
+      }
 
       // wait until we're outside of the view loop to break the container: LootSystem spawns loot with a Cmp::Position
       smashed_loot_entity = loot_entity;
