@@ -127,7 +127,7 @@ private:
   //! @param body_rect The Burryman's on-screen bounds.
   void render_carried_items( const Cmp::Npc::Burryman &burryman_cmp, const sf::FloatRect &body_rect );
 
-  //! @brief Draw every talisman of an altar (sacrificed or not) at its slot in the altar's `talisman_offsets`.
+  //! @brief Draw every talisman of an altar (offered or not) at its slot in the altar's `talisman_offsets`.
   //! @param talisman_cmp The altar's talismans; each one's index picks its offset.
   //! @param anim_cmp The altar's current sprite, used to find its inactive variant, which holds the offsets.
   //! @param body_rect The altar's on-screen bounds.

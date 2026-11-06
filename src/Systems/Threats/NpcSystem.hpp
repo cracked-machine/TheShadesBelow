@@ -119,7 +119,7 @@ private:
   void update_crows( sf::Time dt );
 
   //! @brief Azazel shoots a straight fireball at the player every Cmp::Persist::AzazelFireballCooldown while on screen,
-  //! and is banished once all of its Cmp::Npc::SummonOffering items have been sacrificed.
+  //! and is banished once all of its Cmp::Npc::SummonOffering items have been offered.
   void update_azazel( sf::Time dt );
 
   //! @brief Check for player collision proximity with NPC containers

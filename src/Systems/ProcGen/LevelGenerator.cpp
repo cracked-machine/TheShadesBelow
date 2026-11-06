@@ -198,7 +198,7 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
   // clang-format off
   // Multiblock layer - only builds sprites from the tiled layer if they are explicitly included below
   using MultiblockFactoryFn = std::function<entt::entity( entt::registry &, sf::Vector2f, const Sprites::SpriteSheet & )>;
-  // an altar's kind is the scene it is built in, which decides the sacrifice rewards it grants (see "location" in items.json)
+  // an altar's kind is the scene it is built in, which decides the offering rewards it grants (see "location" in items.json)
   const auto add_altar = [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
   {
     const auto altar_entt = Factory::Multiblock::add_multiblock_with_segments<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first;

@@ -6,8 +6,8 @@
 namespace Game::Cmp::Persist
 {
 
-//! @brief Altar sacrifice cooldown (seconds) when offering a Cmp::Npc::SummonOffering, e.g. Azazel's jewelry, so they can be
-//! sacrificed in quick succession. Other offerings use Cmp::Persist::AltarOfferingCooldown.
+//! @brief Altar offering cooldown (seconds) when offering a Cmp::Npc::SummonOffering, e.g. Azazel's jewelry, so they can be
+//! offered in quick succession. Other offerings use Cmp::Persist::AltarOfferingCooldown.
 struct AltarSummonOfferingCooldown : public BasePersistent<float>
 {
   //! @brief Construct with an initial cooldown and optional min/max bounds.

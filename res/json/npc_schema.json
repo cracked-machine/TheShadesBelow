@@ -29,7 +29,7 @@
             { "contains": { "required": ["destroy_action"] } },
             { "contains": { "required": ["spawn_action"] } },
             { "contains": { "required": ["proximity_action"] } },
-            { "contains": { "required": ["sacrifice_action"] } },
+            { "contains": { "required": ["offering_action"] } },
             { "contains": { "required": ["projectile_action"] } },
             { "contains": { "required": ["collision_action"] } }
           ],
@@ -61,7 +61,7 @@
                 "description": "Applied repeatedly, at its own tick interval, while the player is near the NPC and it is within the current screen view.",
                 "allOf": [{ "$ref": "#/definitions/action_effect" }]
               },
-              "sacrifice_action": {
+              "offering_action": {
                 "description": "Defined for schema uniformity with items.json; not currently applied to NPCs.",
                 "allOf": [{ "$ref": "#/definitions/action_effect" }]
               },

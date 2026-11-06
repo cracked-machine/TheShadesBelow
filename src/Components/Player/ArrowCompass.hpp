@@ -52,24 +52,24 @@ struct ArrowCompass
   //! @brief Inset from the view edge at which the arrow is placed
   static constexpr float kEdgeMargin{ 32.f };
 
-  //! @brief Recompute the mode if the inventory item type or its sacrifice eligibility has changed since the last call.
+  //! @brief Recompute the mode if the inventory item type or its offering eligibility has changed since the last call.
   //! @param item_type The item type currently in the player's inventory slot (empty if none)
-  //! @param can_sacrifice Whether the inventory item can currently be sacrificed at the altar (tools only once spent)
+  //! @param is_offerable Whether the inventory item can currently be offered at the altar (tools only once spent)
   //! @return true if the mode was recomputed (forces a retarget on the next refresh_target())
-  bool update_mode( const Sys::ItemKey &item_type, bool can_sacrifice )
+  bool update_mode( const Sys::ItemKey &item_type, bool is_offerable )
   {
-    if ( item_type == m_cached_item_type and can_sacrifice == m_cached_can_sacrifice ) return false;
+    if ( item_type == m_cached_item_type and is_offerable == m_cached_is_offerable ) return false;
     m_cached_item_type = item_type;
-    m_cached_can_sacrifice = can_sacrifice;
+    m_cached_is_offerable = is_offerable;
 
-    // keys take precedence so the (sacrificial) exitkey still points at the exit
+    // keys take precedence so the (offering) exitkey still points at the exit
     if ( item_type.contains( "cryptkey" ) )
       m_mode = Mode::CRYPT;
     else if ( item_type.contains( "exitkey" ) )
       m_mode = Mode::EXIT;
     else if ( item_type.contains( "talisman" ) )
       m_mode = Mode::TALISMAN;
-    else if ( can_sacrifice or item_type.contains( "relic" ) )
+    else if ( is_offerable or item_type.contains( "relic" ) )
       m_mode = Mode::ALTAR;
     else
       m_mode = Mode::NONE;
@@ -120,7 +120,7 @@ struct ArrowCompass
         break;
       }
       case Mode::TALISMAN: {
-        // mirrors AltarSystem::sacrifice_talisman(): once any altar is activated, no altar accepts talismans
+        // mirrors AltarSystem::offering_talisman(): once any altar is activated, no altar accepts talismans
         m_target.reset();
         if ( not reg.view<Cmp::Altar::Activated>().empty() ) break;
 
@@ -226,7 +226,7 @@ private:
 
   Mode m_mode{ Mode::NONE };
   Sys::ItemKey m_cached_item_type;
-  bool m_cached_can_sacrifice{ false };
+  bool m_cached_is_offerable{ false };
   std::optional<Cmp::Position> m_target;
   bool m_retarget_pending{ true };
 

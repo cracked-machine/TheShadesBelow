@@ -278,9 +278,9 @@ struct SideEffects
   [[nodiscard]] bool empty() const { return not spawn_npc and not lightning and not movement and not toxic_immunity and not kill_npc; }
 };
 
-//! @brief Optional reward granted when an action is applied. See the "reward" object of the sacrifice_action,
+//! @brief Optional reward granted when an action is applied. See the "reward" object of the offering_action,
 //! forage_action, destroy_action and proximity_action entries in res/json/items.json.
-//! @details A sacrifice_action reward sets exactly one of item, wealth or altar, optionally restricted to one altar
+//! @details An offering_action reward sets exactly one of item, wealth or altar, optionally restricted to one altar
 //! location. A forage_action/destroy_action reward only sets item. A proximity_action reward sets exactly one of item or
 //! loot, dropped beside the source.
 //! The item may end with '*' to pick a random item key with that prefix (e.g. "item.jewelry*"), and may set a target
@@ -297,7 +297,7 @@ struct ActionReward
     NEARBY
   };
 
-  //! @brief An altar effect triggered by sacrificing the item.
+  //! @brief An altar effect triggered by offering the item.
   enum class AltarEffect {
     //! @brief No altar effect.
     NONE,
@@ -319,9 +319,9 @@ struct ActionReward
   int wealth{ 0 };
   //! @brief The altar effect. NONE if unused.
   AltarEffect altar{ AltarEffect::NONE };
-  //! @brief The kind of altar this reward is granted at (sacrifice_action only). std::nullopt means any altar.
+  //! @brief The kind of altar this reward is granted at (offering_action only). std::nullopt means any altar.
   std::optional<Altar::Kind> location;
-  //! @brief How long (seconds) a timed altar effect lasts, e.g. TOXIC_IMMUNITY (sacrifice_action only). Zero if unused.
+  //! @brief How long (seconds) a timed altar effect lasts, e.g. TOXIC_IMMUNITY (offering_action only). Zero if unused.
   int tick{ 0 };
   //! @brief The loot sprite dropped (proximity_action only). Empty string if unused.
   Sys::SpriteKey loot;
@@ -345,7 +345,7 @@ struct ActionReward
   }
 };
 
-//! @brief The rewards of an action. Only a sacrifice_action may have more than one, each for a different altar location.
+//! @brief The rewards of an action. Only an offering_action may have more than one, each for a different altar location.
 using ActionRewards = std::vector<ActionReward>;
 
 //! @brief How an item wears while one of its actions is in effect. See "wear" in res/json/items.json: on spawn_action it
@@ -366,7 +366,7 @@ struct ActionWear
 //! the tick interval at which the modifier re-applies, plus optional side effects (see SideEffects) and an
 //! optional reward (see ActionReward).
 //! Derived classes (BurnAction, CarryAction, CollisionAction, ConsumeAction, DestroyAction, ForageAction,
-//! ProjectileAction, ProximityAction, SacrificeAction, SpawnAction) add no behaviour of their own - they exist purely so that Cmp::WorldItem::actions
+//! ProjectileAction, ProximityAction, OfferingAction, SpawnAction) add no behaviour of their own - they exist purely so that Cmp::WorldItem::actions
 //! and NPC action maps can key modifiers by the std::type_index of the triggering action kind.
 class BaseAction
 {
@@ -389,7 +389,7 @@ public:
   //! @param toxidrome toxidrome affliction applied alongside the stat changes, if any. Each active
   //! toxidrome carries its own toxicity contribution (see Cmp::Toxicity::Toxidrome).
   //! @param side_effects Optional side effects (NPC spawn, lightning, movement), each with its own probability.
-  //! @param rewards Optional rewards granted when the action is applied (e.g. forage/chop/sacrifice output).
+  //! @param rewards Optional rewards granted when the action is applied (e.g. forage/chop/offering output).
   BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Tick tick,
               Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects = {}, ActionRewards rewards = {} );
   //! @brief Destroy the Base Action object.

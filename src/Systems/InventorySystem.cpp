@@ -132,7 +132,7 @@ void InventorySystem::update_dmg( entt::entity entt, float amount, Events::Updat
       }
       else
       {
-        // dead tools remain in inventory for altar sacrifice
+        // dead tools remain in inventory for altar offering
         m_sound_bank.get_effect( "tool_break" ).play();
       }
     }

@@ -4,7 +4,7 @@
 #include <Components/Stats/DestroyAction.hpp>
 #include <Components/Stats/ForageAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
-#include <Components/Stats/SacrificeAction.hpp>
+#include <Components/Stats/OfferingAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <SFML/System/Time.hpp>
 #include <Systems/Stores/ItemStore.hpp>
@@ -68,7 +68,7 @@ void ItemStore::init_store()
           else if ( action_key == Cmp::ForageAction::kKey ) { worlditem.emplace( make_action<Cmp::ForageAction>( action_value ) ); }
           else if ( action_key == Cmp::SpawnAction::kKey ) { worlditem.emplace( make_action<Cmp::SpawnAction>( action_value ) ); }
           else if ( action_key == Cmp::ProximityAction::kKey ) { worlditem.emplace( make_action<Cmp::ProximityAction>( action_value ) ); }
-          else if ( action_key == Cmp::SacrificeAction::kKey ) { worlditem.emplace( make_action<Cmp::SacrificeAction>( action_value ) ); }
+          else if ( action_key == Cmp::OfferingAction::kKey ) { worlditem.emplace( make_action<Cmp::OfferingAction>( action_value ) ); }
           else { SPDLOG_WARN( "Unknown action key: {}", action_key ); }
         } catch ( const std::exception &e )
         {
@@ -98,29 +98,29 @@ void ItemStore::init_store()
       }
       worlditem.set_axe_hits( axe_hits );
     }
-    // a sacrifice reward is exactly one of item, wealth or altar, and each altar location has at most one reward
-    const auto sacrifice_rewards = worlditem.get_rewards<Cmp::SacrificeAction>();
-    for ( auto it = sacrifice_rewards.begin(); it != sacrifice_rewards.end(); ++it )
+    // an offering reward is exactly one of item, wealth or altar, and each altar location has at most one reward
+    const auto offering_rewards = worlditem.get_rewards<Cmp::OfferingAction>();
+    for ( auto it = offering_rewards.begin(); it != offering_rewards.end(); ++it )
     {
       if ( it->count() != 1 )
       {
-        throw std::runtime_error( "Item '" + item_key + "' sacrifice_action.reward must set exactly one of item, wealth or altar in " +
+        throw std::runtime_error( "Item '" + item_key + "' offering_action.reward must set exactly one of item, wealth or altar in " +
                                   m_json_file_path.string() );
       }
-      for ( auto other = std::next( it ); other != sacrifice_rewards.end(); ++other )
+      for ( auto other = std::next( it ); other != offering_rewards.end(); ++other )
       {
         if ( it->location and other->location and it->location != other->location ) continue;
-        throw std::runtime_error( "Item '" + item_key + "' sacrifice_action.reward has more than one reward for the same location in " +
+        throw std::runtime_error( "Item '" + item_key + "' offering_action.reward has more than one reward for the same location in " +
                                   m_json_file_path.string() );
       }
     }
-    // only a sacrifice reward can be altar specific
+    // only an offering reward can be altar specific
     for ( const auto &[action_type, action_pair] : worlditem )
     {
-      if ( action_type == std::type_index( typeid( Cmp::SacrificeAction ) ) ) continue;
+      if ( action_type == std::type_index( typeid( Cmp::OfferingAction ) ) ) continue;
       const auto &rewards = action_pair.action.rewards();
       if ( rewards.size() <= 1 and std::ranges::none_of( rewards, []( const Cmp::ActionReward &r ) { return r.location.has_value(); } ) ) continue;
-      throw std::runtime_error( "Item '" + item_key + "' only sacrifice_action.reward may be an array or set a location in " +
+      throw std::runtime_error( "Item '" + item_key + "' only offering_action.reward may be an array or set a location in " +
                                 m_json_file_path.string() );
     }
     for ( const auto &[property, reward] : { std::pair{ "forage_action.reward", worlditem.get_reward<Cmp::ForageAction>() },
@@ -139,13 +139,13 @@ void ItemStore::init_store()
     SPDLOG_DEBUG( "Loaded item: {} ({})", item_key, sprite_mtype );
   }
 
-  // output properties must reference items that exist, otherwise the forage/chop/sacrifice silently spawns nothing
+  // output properties must reference items that exist, otherwise the forage/chop/offering silently spawns nothing
   for ( const auto &[item_key, item] : m_store )
   {
-    for ( const auto &reward : item.get_rewards<Cmp::SacrificeAction>() )
+    for ( const auto &reward : item.get_rewards<Cmp::OfferingAction>() )
     {
       if ( reward.item.empty() or not get_item_matches( reward.item ).empty() ) continue;
-      throw std::runtime_error( "Item '" + item_key.str() + "' has unknown sacrifice_action.reward.item '" + reward.item.str() + "' in " +
+      throw std::runtime_error( "Item '" + item_key.str() + "' has unknown offering_action.reward.item '" + reward.item.str() + "' in " +
                                 m_json_file_path.string() );
     }
     for ( const auto &[property, output] :

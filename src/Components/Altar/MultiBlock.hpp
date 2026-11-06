@@ -11,7 +11,7 @@ namespace Game::Cmp::Altar
 
 //! @brief Multi-block sprite for an altar, defined geometrically as a rectangle.
 //! @details Can be used to find its Segment parts and track overall activation state, including
-//!          the running sacrifice count and exit/crypt key drop thresholds.
+//!          the running offering count and exit/crypt key drop thresholds.
 class MultiBlock : public sf::FloatRect
 {
 public:
@@ -26,26 +26,26 @@ public:
     m_cryptkey_drop_threshold = 5;
   }
 
-  //! @brief Increment the number of sacrifices made at this altar by one.
-  void increment_sacrifice_count() { ++m_sacrifice_count; }
-  //! @brief Set the number of sacrifices made at this altar.
-  //! @param count The new sacrifice count.
-  void set_sacrifice_count( uint8_t count ) { m_sacrifice_count = count; }
-  //! @brief Get the number of sacrifices made at this altar.
-  //! @return uint8_t The current sacrifice count.
-  [[nodiscard]] uint8_t get_sacrifice_count() const { return m_sacrifice_count; }
+  //! @brief Increment the number of offerings made at this altar by one.
+  void increment_offering_count() { ++m_offering_count; }
+  //! @brief Set the number of offerings made at this altar.
+  //! @param count The new offering count.
+  void set_offering_count( uint8_t count ) { m_offering_count = count; }
+  //! @brief Get the number of offerings made at this altar.
+  //! @return uint8_t The current offering count.
+  [[nodiscard]] uint8_t get_offering_count() const { return m_offering_count; }
 
-  //! @brief Get the number of sacrifices required to drop an exitkey.
+  //! @brief Get the number of offerings required to drop an exitkey.
   //! @return uint8_t The exitkey drop threshold.
   [[nodiscard]] uint8_t get_exitkey_drop_threshold() const { return m_exitkey_drop_threshold; }
-  //! @brief Get the number of sacrifices required to drop a cryptkey.
+  //! @brief Get the number of offerings required to drop a cryptkey.
   //! @return uint8_t The cryptkey drop threshold.
   [[nodiscard]] uint8_t get_cryptkey_drop_threshold() const { return m_cryptkey_drop_threshold; }
 
   //! @brief Set which kind of altar this is. Defaults to Kind::GRAVEYARD.
   //! @param kind The altar kind.
   void set_kind( Kind kind ) { m_kind = kind; }
-  //! @brief Get which kind of altar this is, used to pick the item's sacrifice reward for this altar.
+  //! @brief Get which kind of altar this is, used to pick the item's offering reward for this altar.
   //! @return Kind The altar kind.
   [[nodiscard]] Kind get_kind() const { return m_kind; }
 
@@ -62,16 +62,16 @@ public:
   bool is_cryptkey_lockout() const { return m_cryptkey_drop_lockout; }
 
 private:
-  //! @brief The number of sacrifices required to drop an exitkey (4 relics)
-  uint8_t m_exitkey_drop_threshold{ 0 };
-  //! @brief The number of sacrifices required to drop an cryptkey (4 relics + 1 exitkey)
-  uint8_t m_cryptkey_drop_threshold{ 0 };
-
   //! @brief Which kind of altar this is.
   Kind m_kind{ Kind::GRAVEYARD };
 
-  //! @brief The number of sacrifices made at this altar so far.
-  uint8_t m_sacrifice_count{ 0 };
+  //! @brief The number of offerings required to drop an exitkey (4 relics)
+  uint8_t m_exitkey_drop_threshold{ 0 };
+  //! @brief The number of offerings required to drop an cryptkey (4 relics + 1 exitkey)
+  uint8_t m_cryptkey_drop_threshold{ 0 };
+
+  //! @brief The number of offerings made at this altar so far.
+  uint8_t m_offering_count{ 0 };
 
   //! @brief Whether this altar has already dropped its exitkey.
   bool m_exitkey_drop_lockout{ false };

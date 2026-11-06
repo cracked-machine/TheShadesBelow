@@ -134,7 +134,7 @@ public:
 
   //! @brief Get the talisman draw points, from `talisman_offsets` in spritesheets.json.
   //! @details Entry i is the slot of the i-th talisman in key order (see Cmp::Altar::TalismanCount::index) and
-  //! lines up with particle_offsets()[i], the candle lit when that talisman is sacrificed.
+  //! lines up with particle_offsets()[i], the candle lit when that talisman is offered.
   //! @return Pixel offsets from the sprite's top-left corner. Empty if not specified.
   [[nodiscard]] const std::vector<sf::Vector2f> &talisman_offsets() const { return m_talisman_offsets; }
 

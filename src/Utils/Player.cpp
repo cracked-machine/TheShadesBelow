@@ -49,7 +49,7 @@
 #include <Components/Stats/ForageAction.hpp>
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
-#include <Components/Stats/SacrificeAction.hpp>
+#include <Components/Stats/OfferingAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
@@ -451,7 +451,7 @@ template Cmp::BaseAction apply_action_from_world_item<Cmp::DestroyAction>( entt:
 template Cmp::BaseAction apply_action_from_world_item<Cmp::ForageAction>( entt::registry &, entt::entity, const std::source_location & );
 template Cmp::BaseAction apply_action_from_world_item<Cmp::ProjectileAction>( entt::registry &, entt::entity, const std::source_location & );
 template Cmp::BaseAction apply_action_from_world_item<Cmp::ProximityAction>( entt::registry &, entt::entity, const std::source_location & );
-template Cmp::BaseAction apply_action_from_world_item<Cmp::SacrificeAction>( entt::registry &, entt::entity, const std::source_location & );
+template Cmp::BaseAction apply_action_from_world_item<Cmp::OfferingAction>( entt::registry &, entt::entity, const std::source_location & );
 template Cmp::BaseAction apply_action_from_world_item<Cmp::SpawnAction>( entt::registry &, entt::entity, const std::source_location & );
 
 template <typename ActionT>
@@ -488,7 +488,7 @@ template Cmp::BaseAction apply_action_from_inventory_item<Cmp::DestroyAction>( e
 template Cmp::BaseAction apply_action_from_inventory_item<Cmp::ForageAction>( entt::registry & );
 template Cmp::BaseAction apply_action_from_inventory_item<Cmp::ProjectileAction>( entt::registry & );
 template Cmp::BaseAction apply_action_from_inventory_item<Cmp::ProximityAction>( entt::registry & );
-template Cmp::BaseAction apply_action_from_inventory_item<Cmp::SacrificeAction>( entt::registry & );
+template Cmp::BaseAction apply_action_from_inventory_item<Cmp::OfferingAction>( entt::registry & );
 template Cmp::BaseAction apply_action_from_inventory_item<Cmp::SpawnAction>( entt::registry & );
 
 template <typename ActionT>
@@ -512,7 +512,7 @@ template Cmp::BaseAction apply_action_from_item_store<Cmp::DestroyAction>( entt:
 template Cmp::BaseAction apply_action_from_item_store<Cmp::ForageAction>( entt::registry &, const Sys::ItemKey & );
 template Cmp::BaseAction apply_action_from_item_store<Cmp::ProjectileAction>( entt::registry &, const Sys::ItemKey & );
 template Cmp::BaseAction apply_action_from_item_store<Cmp::ProximityAction>( entt::registry &, const Sys::ItemKey & );
-template Cmp::BaseAction apply_action_from_item_store<Cmp::SacrificeAction>( entt::registry &, const Sys::ItemKey & );
+template Cmp::BaseAction apply_action_from_item_store<Cmp::OfferingAction>( entt::registry &, const Sys::ItemKey & );
 template Cmp::BaseAction apply_action_from_item_store<Cmp::SpawnAction>( entt::registry &, const Sys::ItemKey & );
 
 template <typename ActionT>
@@ -532,7 +532,7 @@ template Cmp::BaseAction get_action_from_item_store<Cmp::DestroyAction>( const S
 template Cmp::BaseAction get_action_from_item_store<Cmp::ForageAction>( const Sys::ItemKey & );
 template Cmp::BaseAction get_action_from_item_store<Cmp::ProjectileAction>( const Sys::ItemKey & );
 template Cmp::BaseAction get_action_from_item_store<Cmp::ProximityAction>( const Sys::ItemKey & );
-template Cmp::BaseAction get_action_from_item_store<Cmp::SacrificeAction>( const Sys::ItemKey & );
+template Cmp::BaseAction get_action_from_item_store<Cmp::OfferingAction>( const Sys::ItemKey & );
 template Cmp::BaseAction get_action_from_item_store<Cmp::SpawnAction>( const Sys::ItemKey & );
 
 template <typename ActionT>
@@ -555,7 +555,7 @@ template Cmp::BaseAction apply_action_from_npc_store<Cmp::DestroyAction>( entt::
 template Cmp::BaseAction apply_action_from_npc_store<Cmp::ForageAction>( entt::registry &, const Sys::NpcKey & );
 template Cmp::BaseAction apply_action_from_npc_store<Cmp::ProjectileAction>( entt::registry &, const Sys::NpcKey & );
 template Cmp::BaseAction apply_action_from_npc_store<Cmp::ProximityAction>( entt::registry &, const Sys::NpcKey & );
-template Cmp::BaseAction apply_action_from_npc_store<Cmp::SacrificeAction>( entt::registry &, const Sys::NpcKey & );
+template Cmp::BaseAction apply_action_from_npc_store<Cmp::OfferingAction>( entt::registry &, const Sys::NpcKey & );
 template Cmp::BaseAction apply_action_from_npc_store<Cmp::SpawnAction>( entt::registry &, const Sys::NpcKey & );
 
 Cmp::Player::HeartBeat &get_heartbeat( entt::registry &reg )

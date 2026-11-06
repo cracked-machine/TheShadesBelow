@@ -910,7 +910,7 @@
                 {
                  "height":0,
                  "id":87,
-                 "name":"sacrifice_txt",
+                 "name":"offering_txt",
                  "opacity":1,
                  "point":true,
                  "properties":[
@@ -922,7 +922,7 @@
                         {
                          "name":"value",
                          "type":"string",
-                         "value":"Sacrifice:"
+                         "value":"Offering:"
                         }],
                  "rotation":0,
                  "type":"ui_text",
@@ -1006,7 +1006,7 @@
                 {
                  "height":0,
                  "id":94,
-                 "name":"forage_sacrifice_action",
+                 "name":"forage_offering_action",
                  "opacity":1,
                  "point":true,
                  "properties":[
@@ -1111,7 +1111,7 @@
                 {
                  "height":0,
                  "id":147,
-                 "name":"sacrifice_txt",
+                 "name":"offering_txt",
                  "opacity":1,
                  "point":true,
                  "properties":[
@@ -1123,7 +1123,7 @@
                         {
                          "name":"value",
                          "type":"string",
-                         "value":"Sacrifice:"
+                         "value":"Offering:"
                         }],
                  "rotation":0,
                  "type":"ui_text",
@@ -1135,7 +1135,7 @@
                 {
                  "height":0,
                  "id":148,
-                 "name":"drop_sacrifice_action",
+                 "name":"drop_offering_action",
                  "opacity":1,
                  "point":true,
                  "properties":[
@@ -1519,7 +1519,7 @@
                 {
                  "height":0,
                  "id":192,
-                 "name":"sacrifice_txt",
+                 "name":"offering_txt",
                  "opacity":1,
                  "point":true,
                  "properties":[
@@ -1531,7 +1531,7 @@
                         {
                          "name":"value",
                          "type":"string",
-                         "value":"Sacrifice:"
+                         "value":"Offering:"
                         }],
                  "rotation":0,
                  "type":"ui_text",
@@ -1543,7 +1543,7 @@
                 {
                  "height":0,
                  "id":193,
-                 "name":"plant_sacrifice_action",
+                 "name":"plant_offering_action",
                  "opacity":1,
                  "point":true,
                  "properties":[

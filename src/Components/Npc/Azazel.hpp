@@ -7,7 +7,7 @@ namespace Game::Cmp::Npc
 {
 
 //! @brief Marker component tagging an entity as the Azazel NPC (a hostile NPC type). Azazel shoots fireballs at the
-//! player and despawns once all of its Cmp::Npc::SummonOffering items have been sacrificed (see NpcSystem::update_azazel()).
+//! player and despawns once all of its Cmp::Npc::SummonOffering items have been offered (see NpcSystem::update_azazel()).
 struct Azazel
 {
   sf::Time sfx_cooldown{ sf::Time::Zero };

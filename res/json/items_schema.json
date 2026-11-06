@@ -46,7 +46,7 @@
             { "contains": { "required": ["destroy_action"] } },
             { "contains": { "required": ["spawn_action"] } },
             { "contains": { "required": ["proximity_action"] } },
-            { "contains": { "required": ["sacrifice_action"] } }
+            { "contains": { "required": ["offering_action"] } }
           ],
           "items": {
             "type": "object",
@@ -80,16 +80,16 @@
                 "description": "Applied repeatedly, at its own tick interval, while the player is near the item and it is within the current screen view. Optional reward: exactly one of item or loot, dropped on a random free cell beside the item once the player is within reward.trigger_range.",
                 "allOf": [{ "$ref": "#/definitions/action_effect" }, { "$ref": "#/definitions/proximity_reward" }]
               },
-              "sacrifice_action": {
-                "description": "Applied when the item is sacrificed at an altar. The item can only be sacrificed if this action has a reward, which must set exactly one of item, wealth or altar. The reward may be an array of rewards, each for a different location; an item is refused at an altar with no reward for its location.",
+              "offering_action": {
+                "description": "Applied when the item is offered at an altar. The item can only be offered if this action has a reward, which must set exactly one of item, wealth or altar. The reward may be an array of rewards, each for a different location; an item is refused at an altar with no reward for its location.",
                 "allOf": [
                   { "$ref": "#/definitions/action_effect" },
                   {
                     "properties": {
                       "reward": {
                         "oneOf": [
-                          { "$ref": "#/definitions/sacrifice_reward_entry" },
-                          { "type": "array", "minItems": 2, "items": { "$ref": "#/definitions/sacrifice_reward_entry" } }
+                          { "$ref": "#/definitions/offering_reward_entry" },
+                          { "type": "array", "minItems": 2, "items": { "$ref": "#/definitions/offering_reward_entry" } }
                         ]
                       }
                     }
@@ -161,7 +161,7 @@
           }
         },
         "reward": {
-          "description": "Optional reward. Its shape is set by each action (no_altar_reward, item_only_reward, proximity_reward or sacrifice_reward_entry)."
+          "description": "Optional reward. Its shape is set by each action (no_altar_reward, item_only_reward, proximity_reward or offering_reward_entry)."
         },
         "side_effects": {
           "type": "object",
@@ -266,22 +266,22 @@
         "item": {
           "type": "string",
           "pattern": "^item\\.[^*]+\\*?$",
-          "description": "The item gained. Must be a valid item key, or an item key prefix ending with '*' to pick a random matching item for each item granted (e.g. item.jewelry*). For sacrifice_action, the spawned item is dropped at the player by default."
+          "description": "The item gained. Must be a valid item key, or an item key prefix ending with '*' to pick a random matching item for each item granted (e.g. item.jewelry*). For offering_action, the spawned item is dropped at the player by default."
         },
         "wealth": {
           "type": "integer",
           "minimum": 1,
-          "description": "The wealth gained (sacrifice_action only). Tools (axe, pickaxe, shovel) can only be sacrificed once spent."
+          "description": "The wealth gained (offering_action only). Tools (axe, pickaxe, shovel) can only be offered once spent."
         },
         "altar": {
           "type": "string",
           "enum": ["None", "Talisman", "Banish", "ExtraLife", "CryptKey", "ToxicImmunity"],
-          "description": "The altar effect (sacrifice_action only). Talisman: light an altar talisman. Banish: banish all ghosts. ExtraLife: respawn when the player dies, at the crypt start (crypt altar) or back at the altar (graveyard altar). CryptKey: unlock the crypt key (exit key). ToxicImmunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
+          "description": "The altar effect (offering_action only). Talisman: light an altar talisman. Banish: banish all ghosts. ExtraLife: respawn when the player dies, at the crypt start (crypt altar) or back at the altar (graveyard altar). CryptKey: unlock the crypt key (exit key). ToxicImmunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
         },
         "location": {
           "type": "string",
           "enum": ["Graveyard", "Crypt", "Shop"],
-          "description": "The kind of altar this reward is granted at (sacrifice_action only): the graveyard relic altars, the crypt altar or the shop altar. Omit for any altar."
+          "description": "The kind of altar this reward is granted at (offering_action only): the graveyard relic altars, the crypt altar or the shop altar. Omit for any altar."
         },
         "loot": {
           "type": "string",
@@ -318,14 +318,14 @@
       "if": { "required": ["count"] },
       "then": { "properties": { "target": { "const": "nearby" } } }
     },
-    "sacrifice_reward_entry": {
+    "offering_reward_entry": {
       "allOf": [{ "$ref": "#/definitions/reward" }],
       "propertyNames": { "enum": ["item", "wealth", "altar", "location", "tick", "target", "count"] },
       "oneOf": [{ "required": ["item"] }, { "required": ["wealth"] }, { "required": ["altar"] }],
       "dependencies": { "tick": ["altar"] }
     },
     "no_altar_reward": {
-      "description": "A single reward object. Altar effects are only applied by sacrifice_action, so any other action may not set reward.altar.",
+      "description": "A single reward object. Altar effects are only applied by offering_action, so any other action may not set reward.altar.",
       "properties": { "reward": { "allOf": [{ "$ref": "#/definitions/reward" }], "propertyNames": { "not": { "const": "altar" } } } }
     },
     "item_only_reward": {

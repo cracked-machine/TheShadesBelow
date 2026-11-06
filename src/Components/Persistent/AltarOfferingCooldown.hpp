@@ -6,7 +6,7 @@
 namespace Game::Cmp::Persist
 {
 
-//! @brief Altar sacrifice cooldown (seconds) after an offering, before the next one is accepted. A
+//! @brief Altar offering cooldown (seconds) after an offering, before the next one is accepted. A
 //! Cmp::Npc::SummonOffering uses Cmp::Persist::AltarSummonOfferingCooldown instead.
 struct AltarOfferingCooldown : public BasePersistent<float>
 {

@@ -14,11 +14,11 @@ inline constexpr const char *kCandleFlameParticleTag = "graveyard.altar.particle
 //! @brief Tag of the sparkle particles shown, along with the altar's active sprite, while the player holds its extra life.
 inline constexpr const char *kExtraLifeParticleTag = "altar.particle.extralife";
 
-//! @brief Spawn the one-shot sacrifice animation played on an altar.
+//! @brief Spawn the one-shot offering animation played on an altar.
 //! @param reg
 //! @param pos Position and size of the animation entity.
 //! @param anim_type Sprite type to play.
-void create_altar_sacrifice_anim( entt::registry &reg, Cmp::Position pos, Sys::SpriteKey anim_type );
+void create_altar_offering_anim( entt::registry &reg, Cmp::Position pos, Sys::SpriteKey anim_type );
 
 //! @brief Get the active or inactive variant of an altar sprite.
 //! @details e.g. "sprite.graveyard.altar.inactive" -> "sprite.graveyard.altar.active"

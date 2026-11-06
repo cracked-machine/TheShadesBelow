@@ -4,7 +4,7 @@
 namespace Game::Cmp::Altar
 {
 
-//! @brief Which kind of altar an offering is made at. A sacrifice reward can be restricted to one kind via its
+//! @brief Which kind of altar an offering is made at. An offering reward can be restricted to one kind via its
 //! "location" in items.json (see Cmp::ActionReward::location).
 enum class Kind {
   //! @brief The relic altars in the graveyard.

@@ -33,7 +33,7 @@ Their only sources are Rowan berries (Vertigo) and Elder berries (Hypoxia), at +
 In an unlit area Phototoxia does nothing. So the costs of BloodOil (+20) and Hogweed (+5/3s while touching, carrying or burning it) only matter near candles or lava. **BloodOil (repel every NPC for 60s) is close to free in a dark level.** Accept this as counterplay, or give BloodOil a cost that doesn't depend on light (e.g. +DESPAIR).
 
 ### G4. Nightshade flowers never rot
-Every other foraged edible rots (berries and StJW flower in 30s, leaves and Hawthorn flowers in 60s, seeds in 180s). The Nightshade flower has `expiryseconds: 0` in both the world and the inventory. Players can forage and drop a pile of them and sacrifice them one at a time later, each one a full Azazel and jewelry run. That's probably harmless (each run still costs INFAMY), but it's the one exception in the set. If it isn't deliberate, give it a 60s wear.
+Every other foraged edible rots (berries and StJW flower in 30s, leaves and Hawthorn flowers in 60s, seeds in 180s). The Nightshade flower has `expiryseconds: 0` in both the world and the inventory. Players can forage and drop a pile of them and offer them one at a time later, each one a full Azazel and jewelry run. That's probably harmless (each run still costs INFAMY), but it's the one exception in the set. If it isn't deliberate, give it a 60s wear.
 
 ### G5. Actions that do nothing (accepted)
 - Burning StJW, Burdock or Nettle only removes the plant.
@@ -46,7 +46,7 @@ Every other foraged edible rots (berries and StJW flower in 30s, leaves and Hawt
   - Hogweed kill
   - Mimic teleport
 - **FEAR sinks:** HawthornTea, HawthornFlower, the spring.
-- **INFAMY sinks:** YewBerry, StJW plant sacrifice, the spring. There's a spring on every level, so nothing can get stuck.
+- **INFAMY sinks:** YewBerry, StJW plant offering, the spring. There's a spring on every level, so nothing can get stuck.
 
 ---
 
@@ -57,7 +57,7 @@ Every other foraged edible rots (berries and StJW flower in 30s, leaves and Hawt
 |---|---|
 | Nettle | Bare-handed: -5 to forage, -1/3s while carried, +5 when eaten, so about break-even if eaten quickly. Gloves: +5 net. |
 | Hawthorn | Bare-handed: -5 to forage (plus a luck roll for lightning), -1 HP and +1 DESPAIR every 3s while the flower is carried, which becomes HawthornTea (-20 FEAR, -20 heart toxidromes). Gloves: free apart from wear. |
-| St John's Wort | +3 HP/3s while touching it, only wearing while it heals (about +60 HP per plant). Flower -5 DESPAIR. The plant sacrifice gives -10 INFAMY. |
+| St John's Wort | +3 HP/3s while touching it, only wearing while it heals (about +60 HP per plant). Flower -5 DESPAIR. The plant offering gives -10 INFAMY. |
 | Berries, FoxgloveFlower | +3 HP for +5 toxicity |
 | ElderWine | 60s immunity to every toxidrome, from one berry |
 | Elder proximity | +2 FEAR/3s while touching it |
@@ -82,7 +82,7 @@ No conflicts remain in the core design. Optional polish:
 | Item | Note |
 |---|---|
 | HogweedSeed cures Hallucinogen | No traditional basis. The **StJW flower** (*fuga daemonum*, "drives away demons") would fit better. |
-| BurdockRoot cure on Sacrifice | It was traditionally eaten or drunk, so Consume fits better. |
+| BurdockRoot cure on Offering | It was traditionally eaten or drunk, so Consume fits better. |
 
 Consistent:
 - Heart axis: Yew/Foxglove ↔ Henbane, Nightshade/Henbane smoke ↔ Digitalis, Hawthorn tea for both

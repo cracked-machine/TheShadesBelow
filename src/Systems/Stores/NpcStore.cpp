@@ -7,7 +7,7 @@
 #include <Components/Stats/ForageAction.hpp>
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
-#include <Components/Stats/SacrificeAction.hpp>
+#include <Components/Stats/OfferingAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Systems/Stores/NpcStore.hpp>
 #include <Utils/JsonDeserializer.hpp>
@@ -53,7 +53,7 @@ void NpcStore::init_store()
           else if ( action_key == Cmp::ForageAction::kKey ) { npc.emplace( make_action<Cmp::ForageAction>( action_value ) ); }
           else if ( action_key == Cmp::SpawnAction::kKey ) { npc.emplace( make_action<Cmp::SpawnAction>( action_value ) ); }
           else if ( action_key == Cmp::ProximityAction::kKey ) { npc.emplace( make_action<Cmp::ProximityAction>( action_value ) ); }
-          else if ( action_key == Cmp::SacrificeAction::kKey ) { npc.emplace( make_action<Cmp::SacrificeAction>( action_value ) ); }
+          else if ( action_key == Cmp::OfferingAction::kKey ) { npc.emplace( make_action<Cmp::OfferingAction>( action_value ) ); }
           else if ( action_key == Cmp::ProjectileAction::kKey ) { npc.emplace( make_action<Cmp::ProjectileAction>( action_value ) ); }
           else if ( action_key == Cmp::CollisionAction::kKey ) { npc.emplace( make_action<Cmp::CollisionAction>( action_value ) ); }
           else { SPDLOG_WARN( "Unknown action key: {}", action_key ); }

@@ -1,4 +1,4 @@
-#include <Components/Altar/Sacrifice.hpp>
+#include <Components/Altar/Offering.hpp>
 #include <Components/Altar/Segment.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Npc/Npc.hpp>

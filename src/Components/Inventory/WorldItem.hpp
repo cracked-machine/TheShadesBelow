@@ -5,7 +5,7 @@
 #include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/DestroyAction.hpp>
 #include <Components/Stats/ForageAction.hpp>
-#include <Components/Stats/SacrificeAction.hpp>
+#include <Components/Stats/OfferingAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <SFML/System/Time.hpp>
 #include <Systems/Stores/StoreKey.hpp>
@@ -165,22 +165,22 @@ public:
   //! @brief Whether the item only wears in the inventory while it is actively in use (e.g. flute playing, broom flying).
   bool wears_only_when_active() const { return get_wear<CarryAction>().value_or( ActionWear{} ).active_only; }
 
-  //! @brief The reward for sacrificing this item at the given kind of altar ("sacrifice_action.reward" in items.json).
+  //! @brief The reward for offering this item at the given kind of altar ("offering_action.reward" in items.json).
   //! @param location The kind of altar the item is offered at.
-  //! @return The reward, or std::nullopt if the item can't be sacrificed at that kind of altar.
-  std::optional<ActionReward> get_sacrifice_reward( Altar::Kind location ) const
+  //! @return The reward, or std::nullopt if the item can't be offered at that kind of altar.
+  std::optional<ActionReward> get_offering_reward( Altar::Kind location ) const
   {
-    if ( not has_action<SacrificeAction>() ) return std::nullopt;
-    return at<SacrificeAction>().action.reward( location );
+    if ( not has_action<OfferingAction>() ) return std::nullopt;
+    return at<OfferingAction>().action.reward( location );
   }
 
-  //! @brief The npc spawn effect for sacrificing this item at the altar ("side_effects.spawn_npc" in items.json).
-  //! @return The reward, or std::nullopt if the item can't be sacrificed.
-  std::optional<SpawnNpcEffect> get_sacrifice_npc_spawn_effect() const { return get_spawn_npc_effect<SacrificeAction>(); }
+  //! @brief The npc spawn effect for offering this item at the altar ("side_effects.spawn_npc" in items.json).
+  //! @return The reward, or std::nullopt if the item can't be offered.
+  std::optional<SpawnNpcEffect> get_offering_npc_spawn_effect() const { return get_spawn_npc_effect<OfferingAction>(); }
 
-  //! @brief Whether this item can be sacrificed at the altar, i.e. its sacrifice_action has any effect: a non zero stat
+  //! @brief Whether this item can be offered at the altar, i.e. its offering_action has any effect: a non zero stat
   //! delta, a toxidrome, a side effect or a reward.
-  bool is_sacrificial() const { return has_action<SacrificeAction>() and not at<SacrificeAction>().action.is_zero(); }
+  bool is_offerable() const { return has_action<OfferingAction>() and not at<OfferingAction>().action.is_zero(); }
 
   //! @brief The item gained when this plant is foraged (empty hand or gloves), see "forage_action.reward.item" in
   //! items.json. Empty string is a no op.

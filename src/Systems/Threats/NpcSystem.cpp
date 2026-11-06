@@ -355,7 +355,7 @@ void NpcSystem::update_azazel( sf::Time dt )
   std::vector<entt::entity> kill_list;
   for ( auto [npc_entt, azazel_cmp, pos_cmp, spawned_by_cmp] : reg().view<Cmp::Npc::Azazel, Cmp::Position, Cmp::Npc::SpawnedBy>().each() )
   {
-    // Azazel is banished once every offering dropped by its summoning sacrifice (world item or carried) has been sacrificed
+    // Azazel is banished once every offering dropped by its summoning offering (world item or carried) has been offered
     const auto offerings = reg().view<Cmp::Npc::SummonOffering>();
     const bool has_offerings = std::ranges::any_of( offerings, [&]( entt::entity offering_entt )
     { return offerings.get<Cmp::Npc::SummonOffering>( offering_entt ).m_summoner == spawned_by_cmp.m_source; } );
@@ -377,7 +377,7 @@ void NpcSystem::update_azazel( sf::Time dt )
   }
   for ( auto azazel_entt : kill_list )
   {
-    SPDLOG_INFO( "Azazel entity {} banished: all offerings sacrificed", static_cast<int>( azazel_entt ) );
+    SPDLOG_INFO( "Azazel entity {} banished: all offerings offered", static_cast<int>( azazel_entt ) );
     on_destroy_npc_event( Events::DestroyNpcEvent( azazel_entt ) );
   }
 }
@@ -971,7 +971,7 @@ void NpcSystem::check_elderflute_banish()
   for ( auto [npc_entt, em_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::ElderMother, Cmp::Position>().each() )
   {
     if ( not Utils::is_visible_in_view( half_view.getBounds(), npc_pos_cmp ) ) continue;
-    get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, Sys::SpriteKey( "sprite.death.anim.banish" ), "witches_jar_sacrifice" ) );
+    get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, Sys::SpriteKey( "sprite.death.anim.banish" ), "witches_jar_offering" ) );
   }
 }
 

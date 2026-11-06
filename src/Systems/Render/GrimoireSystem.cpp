@@ -40,8 +40,8 @@ constexpr float kNavigateDebounceThreshold = 0.5f;
 std::pair<const Cmp::Grimoire::SubPage *, std::string_view> resolve_subpage( const Cmp::Grimoire::Page &page, std::string_view name )
 {
   // the *_special_ prefixes must come before forage_/drop_ as the first matching prefix wins
-  const std::pair<std::string_view, const Cmp::Grimoire::SubPage *> prefixes[] = { { "forage_special_", &page.forage_sacrifice_subpage },
-                                                                                   { "drop_special_", &page.drop_sacrifice_subpage },
+  const std::pair<std::string_view, const Cmp::Grimoire::SubPage *> prefixes[] = { { "forage_special_", &page.forage_offering_subpage },
+                                                                                   { "drop_special_", &page.drop_offering_subpage },
                                                                                    { "plant_", &page.plant_subpage },
                                                                                    { "forage_", &page.forage_subpage },
                                                                                    { "drop_", &page.drop_subpage } };
@@ -93,7 +93,7 @@ void GrimoireSystem::for_each_subpage( const Sys::ItemKey &item_key, const std::
   {
     Cmp::Grimoire::Page &page = grimoire_cmp->pages[page_idx];
     for ( Cmp::Grimoire::SubPage *sub_page :
-          { &page.plant_subpage, &page.forage_subpage, &page.drop_subpage, &page.forage_sacrifice_subpage, &page.drop_sacrifice_subpage } )
+          { &page.plant_subpage, &page.forage_subpage, &page.drop_subpage, &page.forage_offering_subpage, &page.drop_offering_subpage } )
     {
       if ( sub_page->item_key == item_key ) { fn( page_idx, *sub_page ); }
     }
@@ -299,7 +299,7 @@ void GrimoireSystem::render_labels( const Cmp::Grimoire::Page &current_page, std
 
 bool GrimoireSystem::render_action_reward( TextColumn &draw_line, const Cmp::BaseAction &action )
 {
-  // the reward goes first so it sits alongside the action's header text, e.g. "Sacrifice: (Elder Flute)"
+  // the reward goes first so it sits alongside the action's header text, e.g. "Offering: (Elder Flute)"
   const auto reward = action.reward();
   if ( not reward ) { return false; }
   draw_line( std::format( "({})", reward_display_name( *reward ) ), sf::Color::Black );

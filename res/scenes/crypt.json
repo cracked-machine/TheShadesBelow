@@ -62,6 +62,7 @@
             17, 17, 17, 17, 17, 17, 17, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 22, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 17, 17, 17, 17, 17, 17, 17],
          "height":57,
          "id":1,
+         "locked":true,
          "name":"levelgen",
          "opacity":1,
          "type":"tilelayer",
@@ -73,6 +74,7 @@
         {
          "draworder":"topdown",
          "id":3,
+         "locked":true,
          "name":"solid",
          "objects":[
                 {
@@ -265,7 +267,7 @@
          "name":"wall",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":43,
          "x":0,
          "y":0
@@ -273,6 +275,7 @@
         {
          "draworder":"topdown",
          "id":5,
+         "locked":true,
          "name":"multiblock",
          "objects":[
                 {
@@ -393,6 +396,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":57,
          "id":2,
+         "locked":true,
          "name":"player",
          "opacity":1,
          "type":"tilelayer",
