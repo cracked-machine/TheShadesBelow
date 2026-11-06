@@ -57,49 +57,60 @@ namespace Game::Sys
 
 void FootstepSystem::update( sf::Time dt )
 {
+  auto *movement_delta = reg().try_get<Cmp::Player::MovementDelta>( Utils::Player::get_entity( reg() ) );
+  const bool player_moved = movement_delta and movement_delta->m_distance > 0.f;
+
+  // only advance the footstep timer while the player is actually moving, so standing still
+  // or pushing against a wall doesn't stack footsteps on the same spot
+  if ( player_moved ) update_timer += dt;
 
   // add new footstep for player
   auto player_view = reg().view<Cmp::Player::Character, const Cmp::Position, Cmp::Direction>();
   for ( auto [entity, player, pos_cmp, dir_cmp] : player_view.each() )
   {
-    if ( dir_cmp == sf::Vector2f( 0.0f, 0.0f ) ) { continue; }
+    if ( dir_cmp == sf::Vector2f( 0.0f, 0.0f ) or not player_moved ) { continue; }
     add_footstep( pos_cmp, dir_cmp );
   }
 
-  static const unsigned int kFootstepFadeFactor{ 1 };
+  // fade is time-based (not per-frame) so footsteps fade at the same rate regardless of framerate
+  static const sf::Time kFootstepFadeDuration{ sf::seconds( 4.25f ) };
+  const sf::Time fade_delay = sf::seconds( Sys::PersistSystem::get<Cmp::Persist::PlayerFootstepFadeDelay>( reg() ).get_value() );
   auto view = reg().view<Cmp::FootStepTimer, Cmp::FootStepAlpha>();
   for ( auto [entity, timer, alpha] : view.each() )
   {
     timer.m_elapsed += dt;
-    if ( timer.m_elapsed > sf::seconds( Sys::PersistSystem::get<Cmp::Persist::PlayerFootstepFadeDelay>( reg() ).get_value() ) )
+    if ( timer.m_elapsed <= fade_delay ) continue;
+
+    const float fade_progress = ( timer.m_elapsed - fade_delay ) / kFootstepFadeDuration;
+    if ( fade_progress >= 1.f )
     {
-      alpha.m_alpha -= kFootstepFadeFactor;
-      if ( alpha.m_alpha <= 0 )
-      {
-        SPDLOG_DEBUG( "Removing footstep entity {}", int( entity ) );
-        reg().destroy( entity );
-      }
+      SPDLOG_DEBUG( "Removing footstep entity {}", int( entity ) );
+      reg().destroy( entity );
+      continue;
     }
+    alpha.m_alpha = static_cast<uint8_t>( 255.f * ( 1.f - fade_progress ) );
   }
 
   // Distance the player must cover between footstep sounds; tying the trigger to
   // distance rather than time makes the cadence scale with actual movement speed automatically,
   // including any active Cmp::Player::SpeedPenalty and being blocked by collision.
   const float footstep_sfx_stride_length = Sys::PersistSystem::get<Cmp::Persist::PlayerFootstepSfxStrideLength>( reg() ).get_value();
-  auto *movement_delta = reg().try_get<Cmp::Player::MovementDelta>( Utils::Player::get_entity( reg() ) );
   if ( not movement_delta ) return;
   m_footstep_sfx_distance += movement_delta->m_distance;
   if ( m_footstep_sfx_distance >= footstep_sfx_stride_length )
   {
-    play_footsteps_sound();
-    m_footstep_sfx_distance -= footstep_sfx_stride_length;
+    // only consume the stride if a sound actually played; otherwise hold the step until the
+    // previous clip finishes rather than silently dropping it (clamped to avoid a burst of steps)
+    if ( play_footsteps_sound() ) { m_footstep_sfx_distance -= footstep_sfx_stride_length; }
+    else { m_footstep_sfx_distance = footstep_sfx_stride_length; }
   }
 }
 
 void FootstepSystem::add_footstep( const Cmp::Position &pos, const Cmp::Direction &dir )
 {
   if ( not Utils::scene_setting<Cmp::SceneSettings::Footsteps>( reg() ).enabled ) return;
-  if ( update_clock.getElapsedTime() >= sf::seconds( Sys::PersistSystem::get<Cmp::Persist::PlayerFootstepAddDelay>( reg() ).get_value() ) )
+  const sf::Time add_delay = sf::seconds( Sys::PersistSystem::get<Cmp::Persist::PlayerFootstepAddDelay>( reg() ).get_value() );
+  if ( update_timer >= add_delay )
   {
 
     auto nopathfind_view = reg().view<Cmp::Npc::NoPathFinding, Cmp::Position>();
@@ -136,17 +147,18 @@ void FootstepSystem::add_footstep( const Cmp::Position &pos, const Cmp::Directio
       reg().emplace<Cmp::AbsoluteOffset>( entity, Constants::kGridSizePx.x / 2.f, Constants::kGridSizePx.y / 2.f );
     }
 
-    // Reset the timer to enforce discrete steps
-    update_clock.restart();
+    // Carry over any overshoot so step spacing doesn't drift with frame timing
+    update_timer -= add_delay;
+    if ( update_timer >= add_delay ) update_timer = sf::Time::Zero;
   }
 }
 
-void FootstepSystem::play_footsteps_sound()
+bool FootstepSystem::play_footsteps_sound()
 {
 
-  auto play = [this]( const std::string &sfx_name )
+  auto play = [this]( const std::string &sfx_name ) -> bool
   {
-    if ( m_sound_bank.get_effect( sfx_name ).getStatus() == sf::Sound::Status::Playing ) return;
+    if ( m_sound_bank.get_effect( sfx_name ).getStatus() == sf::Sound::Status::Playing ) return false;
     m_alternate_footsteps = not m_alternate_footsteps;
     auto &sfx = m_sound_bank.get_effect( sfx_name );
     // add some variance to the steps to make it sound more natural, scaled by the user's effects volume
@@ -154,6 +166,7 @@ void FootstepSystem::play_footsteps_sound()
     const auto effects_volume = Sys::PersistSystem::get<Cmp::Persist::EffectsVolume>( reg() ).get_value();
     sfx.setVolume( effects_volume * Cmp::RandomFloat( 0.5f, 1.f ).gen() );
     sfx.play();
+    return true;
   };
 
   auto &footstep_type = Utils::Player::get_footstep_type( reg() );
@@ -161,22 +174,17 @@ void FootstepSystem::play_footsteps_sound()
   switch ( footstep_type.m_type )
   {
     case Cmp::Player::Footstep::Type::NONE:
-      break;
-    case Cmp::Player::Footstep::Type::GRASS: {
-      play( "footstep_grass" );
-      break;
-    }
-    case Cmp::Player::Footstep::Type::WOODFLOOR: {
-      play( "footstep_woodfloor" );
-      break;
-    }
+      return true; // silent surface: consume the stride
+    case Cmp::Player::Footstep::Type::GRASS:
+      return play( "footstep_grass" );
+    case Cmp::Player::Footstep::Type::WOODFLOOR:
+      return play( "footstep_woodfloor" );
     case Cmp::Player::Footstep::Type::MUD:
-      play( "footstep_mud" );
-      break;
+      return play( "footstep_mud" );
     case Cmp::Player::Footstep::Type::STONE:
-      play( "footstep_stone" );
-      break;
+      return play( "footstep_stone" );
   }
+  return true;
 }
 
 void FootstepSystem::stop_footsteps_sound()

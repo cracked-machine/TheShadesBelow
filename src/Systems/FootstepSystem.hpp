@@ -35,7 +35,7 @@ public:
 
 private:
   //! @brief Rate-limit adding the footstep sprites
-  sf::Clock update_clock;
+  sf::Time update_timer;
 
   //! @brief Distance (px) the player has covered since the last footstep sound, so cadence scales with speed.
   float m_footstep_sfx_distance{ 0.f };
@@ -48,7 +48,8 @@ private:
   void add_footstep( const Cmp::Position &pos, const Cmp::Direction &dir );
 
   //! @brief Play the current Cmp::Player::FootStep sfx
-  void play_footsteps_sound();
+  //! @return false if the previous clip is still playing and the step was not played
+  bool play_footsteps_sound();
 };
 
 } // namespace Game::Sys
