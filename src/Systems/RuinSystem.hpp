@@ -61,7 +61,7 @@ public:
   void spawn_floor_access( sf::Vector2f spawn_position, sf::Vector2f size, Cmp::Ruin::FloorAccess::Direction dir );
 
   //! @brief Pan the creaking rope sound effect back and forth over time.
-  void creaking_rope_update();
+  void creaking_rope_update( sf::Time dt );
 
   //! @brief Trigger a floor transition scene event when the player steps onto a floor access tile leading
   //! in `direction`, debounced by m_floor_access_cooldown.
@@ -133,7 +133,7 @@ private:
   bool m_was_on_floor_access{ false };
 
   //! @brief Elapsed-time source for the creaking rope's stereo pan oscillation.
-  sf::Clock m_creaking_rope_swing_timer{};
+  sf::Time m_creaking_rope_swing_timer;
 
   //! @brief Handle to the async task that delays curse effects (screams, shadow hand spawn) after
   //! Cmp::Player::Curse is activated.

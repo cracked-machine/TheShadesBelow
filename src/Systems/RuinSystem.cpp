@@ -427,10 +427,11 @@ void RuinSystem::remove_rune_markings_neighbouring_cobwebs( PathFinding::Spatial
   }
 }
 
-void RuinSystem::creaking_rope_update()
+void RuinSystem::creaking_rope_update( sf::Time dt )
 {
+  m_creaking_rope_swing_timer += dt;
   static float m_creaking_rope_swing_freq{ 0.075f }; // oscillations per second
-  auto t = m_creaking_rope_swing_timer.getElapsedTime().asSeconds();
+  auto t = m_creaking_rope_swing_timer.asSeconds();
 
   float stereo_pan_value = std::sin( t * m_creaking_rope_swing_freq * std::numbers::pi );
 

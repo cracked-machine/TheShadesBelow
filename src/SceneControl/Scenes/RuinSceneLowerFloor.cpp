@@ -41,8 +41,8 @@
 #include <Systems/LootSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
-#include <Systems/PlantSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
+#include <Systems/PlantSystem.hpp>
 #include <Systems/PlayerSystem.hpp>
 #include <Systems/ProcGen/CellAutomataSystem.hpp>
 #include <Systems/ProcGen/DLASystem.hpp>
@@ -229,7 +229,7 @@ void RuinSceneLowerFloor::do_update( [[maybe_unused]] sf::Time dt )
   m_sys.find<Store::Type::LootSystem>().check_loot_collision( dt );
   m_sys.find<Store::Type::RuinSystem>().check_floor_access_collision( Cmp::Ruin::FloorAccess::Direction::TO_UPPER );
   m_sys.find<Store::Type::RuinSystem>().check_movement_slowdowns();
-  m_sys.find<Store::Type::RuinSystem>().creaking_rope_update();
+  m_sys.find<Store::Type::RuinSystem>().creaking_rope_update( dt );
   m_sys.find<Store::Type::RuinSystem>().check_puzzle_status();
   m_sys.find<Store::Type::ActionSystem>().update( dt );
   m_sys.find<Store::Type::PlantSystem>().update( dt );
