@@ -167,6 +167,8 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
   // toxidrome meters get a frozen fill and a frosted overlay while the player is immune, blinking as the immunity runs out
   const auto *immunity_cmp = reg().try_get<Cmp::Player::ToxicImmunity>( Utils::Player::get_entity( reg() ) );
   const bool immunity_visible = immunity_cmp and immunity_cmp->indicator_visible();
+  // advance once per frame, not per meter, so every frozen meter shares the same shader time
+  if ( immunity_visible ) { m_frost_timer += dt; }
   const sf::Color toxidrome_fill = immunity_visible ? sf::Color( Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterFill>( reg() ) )
                                                     : sf::Color::Green;
   const sf::Color toxidrome_overlay = Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterTint>( reg() );
@@ -385,7 +387,7 @@ void RenderOverlaySystem::render_meter_frost( const sf::FloatRect &rect, float s
 
   m_frost_shader.setUniform( "rect", sf::Glsl::Vec4( top_left.x, top_left.y, bottom_right.x - top_left.x, bottom_right.y - top_left.y ) );
   m_frost_shader.setUniform( "target_height", static_cast<float>( target.getSize().y ) );
-  m_frost_shader.setUniform( "time", m_frost_clock.getElapsedTime().asSeconds() );
+  m_frost_shader.setUniform( "time", m_frost_timer.asSeconds() );
   m_frost_shader.setUniform( "seed", seed );
   m_frost_shader.setUniform( "frost", sf::Glsl::Vec4( frost ) );
   m_frost_shader.setUniform( "glint", sf::Glsl::Vec4( glint ) );

@@ -133,7 +133,7 @@ private:
   //! @brief Result of the lazy frost shader load; unset until first use
   std::optional<bool> m_frost_shader_ok;
   //! @brief Drives the frost shader's glint twinkle
-  sf::Clock m_frost_clock;
+  sf::Time m_frost_timer;
 };
 
 } // namespace Game::Sys
