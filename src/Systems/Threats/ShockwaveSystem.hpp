@@ -35,7 +35,7 @@ public:
 
 private:
   //! @brief Tracks time since the last shockwave radius/collision update.
-  sf::Clock shockwave_update_clock;
+  sf::Time shockwave_update_timer;
 
   //! @brief Check if shockwave has collided with an obstacle and needs to be segmented.
   //! @param shockwave_entity

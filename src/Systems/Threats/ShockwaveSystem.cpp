@@ -176,6 +176,8 @@ void ShockwaveSystem::check_shockwave_player_collision()
 
 void ShockwaveSystem::update( sf::Time dt )
 {
+  shockwave_update_timer += dt;
+
   // emit shockwaves from each NPC
   for ( auto [npc_entt, npc_cmp, anim_cmp, npc_pos_cmp, npc_uuid_cmp] : reg().view<Cmp::Npc::NPC, Cmp::AnimData, Cmp::Position, Cmp::UUID>().each() )
   {
@@ -217,7 +219,7 @@ void ShockwaveSystem::update( sf::Time dt )
 
     if ( new_radius > max_radius.get_value() ) { reg().destroy( entt ); }
   }
-  shockwave_update_clock.restart();
+  shockwave_update_timer = sf::Time::Zero;
 
   check_shockwave_player_collision();
 }
