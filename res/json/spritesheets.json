@@ -468,6 +468,12 @@
           { "x": 56, "y": 10 },
           { "x": 24, "y": 33 },
           { "x": 56, "y": 33 }
+        ],
+        "talisman_offsets": [
+          { "x": 16, "y": 14 },
+          { "x": 48, "y": 14 },
+          { "x": 16, "y": 37 },
+          { "x": 48, "y": 37 }
         ]
       }
     },
@@ -1625,9 +1631,9 @@
         }
       }
     },
-    "sprite.item.relic1": {
+    "sprite.item.talisman1": {
       "spritesheet": {
-        "displayname": "Relic: Saint's Blood",
+        "displayname": "Talisman1",
         "texture_path": "res/textures/inventoryitems.png",
         "sprite_indices": [180],
         "indices_per_sequence": 1,
@@ -1638,9 +1644,22 @@
         }
       }
     },
-    "sprite.item.relic2": {
+    "sprite.altar.talisman1": {
       "spritesheet": {
-        "displayname": "Relic: Saint's Eyeball",
+        "displayname": "Talisman1",
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [540],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.talisman2": {
+      "spritesheet": {
+        "displayname": "Talisman2",
         "texture_path": "res/textures/inventoryitems.png",
         "sprite_indices": [190],
         "indices_per_sequence": 1,
@@ -1651,9 +1670,22 @@
         }
       }
     },
-    "sprite.item.relic3": {
+    "sprite.altar.talisman2": {
       "spritesheet": {
-        "displayname": "Relic: Saint's Bone",
+        "displayname": "Talisman1",
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [541],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.talisman3": {
+      "spritesheet": {
+        "displayname": "Talisman3",
         "texture_path": "res/textures/inventoryitems.png",
         "sprite_indices": [200],
         "indices_per_sequence": 1,
@@ -1664,11 +1696,37 @@
         }
       }
     },
-    "sprite.item.relic4": {
+    "sprite.altar.talisman3": {
       "spritesheet": {
-        "displayname": "Relic: Saint's Hand",
+        "displayname": "Talisman1",
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [542],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.talisman4": {
+      "spritesheet": {
+        "displayname": "Talisman4",
         "texture_path": "res/textures/inventoryitems.png",
         "sprite_indices": [210],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.altar.talisman4": {
+      "spritesheet": {
+        "displayname": "Talisman1",
+        "texture_path": "res/textures/landmarks.png",
+        "sprite_indices": [543],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {

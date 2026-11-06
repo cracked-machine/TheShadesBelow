@@ -27,6 +27,15 @@ void create_altar_sacrifice_anim( entt::registry &reg, Cmp::Position pos, Sys::S
 //! @return The sprite type with its state suffix replaced, or `sprite_type` unchanged if it has no state suffix.
 Sys::SpriteKey get_altar_sprite( const Sys::SpriteKey &sprite_type, bool active );
 
+//! @brief Get the sprite drawn on the altar for a talisman item.
+//! @details Looks up the item's sprite in Sys::ItemStore and swaps its "sprite.item." prefix for "sprite.altar.",
+//! e.g. "item.talisman1" -> "sprite.item.talisman1" -> "sprite.altar.talisman1".
+//! @param item_key A talisman item key.
+//! @return The altar sprite type.
+//! @throws std::runtime_error if the item is unknown, its sprite does not start with "sprite.item.", or the derived
+//! altar sprite is not in Sys::SpriteStore.
+Sys::SpriteKey get_altar_talisman_sprite( const Sys::ItemKey &item_key );
+
 //! @brief Remove the extra life effect from every altar in the scene: revert the active sprites and destroy the extra
 //! life particles. The candles are left as they are.
 //! @param reg

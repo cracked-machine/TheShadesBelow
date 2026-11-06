@@ -6,6 +6,7 @@
 #include <Components/AbsoluteScale.hpp>
 #include <Components/AbsoluteTint.hpp>
 #include <Components/Altar/MultiBlock.hpp>
+#include <Components/Altar/TalismanCount.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Armed.hpp>
 #include <Components/BurrCount.hpp>
@@ -76,6 +77,7 @@
 #include <Systems/Render/RenderPassTypes.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
+#include <Factory/AltarFactory.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Threats/HazardFieldSystemImpl.hpp>
 #include <Utils/Constants.hpp>
@@ -280,6 +282,7 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
     render_attached_burrs( *burr_cmp, body_rect );
   }
   if ( const auto *burryman_cmp = reg().try_get<Cmp::Npc::Burryman>( entity ) ) render_carried_items( *burryman_cmp, body_rect );
+  if ( const auto *talisman_cmp = reg().try_get<Cmp::Altar::TalismanCount>( entity ) ) render_altar_talismans( *talisman_cmp, anim_cmp, body_rect );
 }
 
 void RenderGameSystem::draw_shader_sprite( Cmp::Shader::SpriteOwner &shader_owner )
@@ -446,6 +449,24 @@ void RenderGameSystem::render_carried_items( const Cmp::Npc::Burryman &burryman_
     const sf::Vector2f offset = Cmp::Npc::Burryman::carried_offset( i, count, body_rect.size );
     safe_render_sprite_world( item_cmp->sprite_type, sf::FloatRect( centre + offset - half_cell, Constants::kGridSizePxF ), 0,
                               { Cmp::Npc::Burryman::kCarriedScale, Cmp::Npc::Burryman::kCarriedScale }, 255, half_cell );
+  }
+}
+
+void RenderGameSystem::render_altar_talismans( const Cmp::Altar::TalismanCount &talisman_cmp, const Cmp::AnimData &anim_cmp,
+                                               const sf::FloatRect &body_rect )
+{
+  // the altar may be lit by an extra life, but its talisman offsets are defined on the inactive sprite
+  const auto &talisman_offsets =
+      Sys::SpriteStore::instance().get( Factory::Altar::get_altar_sprite( anim_cmp.m_sprite_type, false ) ).talisman_offsets();
+
+  // talismans are always shown, sacrificed or not; iteration order matches TalismanCount::index()
+  std::size_t idx = 0;
+  for ( const auto &[talisman_key, activated] : talisman_cmp )
+  {
+    if ( idx >= talisman_offsets.size() ) break;
+    safe_render_sprite_world( Factory::Altar::get_altar_talisman_sprite( talisman_key ),
+                              sf::FloatRect( body_rect.position + talisman_offsets[idx], Constants::kGridSizePxF ), 0 );
+    ++idx;
   }
 }
 

@@ -64,7 +64,7 @@ private:
   bool sacrifice_for_extra_life( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
   //! @brief Light an altar candle per relic. Drops an exitkey once the exitkey threshold is reached (all candles lit).
   //! @return false if the altar refused the offering
-  bool sacrifice_relic( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
+  bool sacrifice_talisman( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
   //! @brief Turn the altar flames blue. Drops a cryptkey once the cryptkey threshold is reached.
   //! @return false if the altar refused the offering
   bool sacrifice_exitkey( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );

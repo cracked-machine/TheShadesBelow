@@ -275,8 +275,8 @@
         },
         "altar": {
           "type": "string",
-          "enum": ["None", "Candle", "Banish", "ExtraLife", "CryptKey", "ToxicImmunity"],
-          "description": "The altar effect (sacrifice_action only). Candle: light an altar candle (relics). Banish: banish all ghosts. ExtraLife: respawn when the player dies, at the crypt start (crypt altar) or back at the altar (graveyard altar). CryptKey: unlock the crypt key (exit key). ToxicImmunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
+          "enum": ["None", "Talisman", "Banish", "ExtraLife", "CryptKey", "ToxicImmunity"],
+          "description": "The altar effect (sacrifice_action only). Talisman: light an altar talisman. Banish: banish all ghosts. ExtraLife: respawn when the player dies, at the crypt start (crypt altar) or back at the altar (graveyard altar). CryptKey: unlock the crypt key (exit key). ToxicImmunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
         },
         "location": {
           "type": "string",

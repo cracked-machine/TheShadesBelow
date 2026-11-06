@@ -1,6 +1,7 @@
 
 #include <Audio/SoundBank.hpp>
 #include <Components/AbsoluteAlpha.hpp>
+#include <Components/Altar/Activated.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/Exhumed.hpp>
@@ -162,7 +163,9 @@ void GraveSystem::update_grave_halo_particles()
     } );
     const bool has_halo = halo != ps_list.end();
 
-    if ( holding_flute and consequence.roll( player_luck, Utils::Player::trail_position( reg() ) ) == Cmp::Grave::Consequence::Type::NPC_TRAP and
+    bool altar_activated = reg().view<Cmp::Altar::Activated>().size() != 0;
+    if ( holding_flute and
+         consequence.roll( player_luck, Utils::Player::trail_position( reg() ), altar_activated ) == Cmp::Grave::Consequence::Type::NPC_TRAP and
          wearlevel > 0 )
     {
       // restart is a no-op if already running
@@ -279,8 +282,9 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
   {
     const auto &target_pos_cmp = reg().get<Cmp::Position>( target_entt );
     const float perch_center_x = target_pos_cmp.getCenter().x;
-    get_systems_event_queue().trigger( Events::CreateNpcEvent( "npc.crow", target_pos_cmp, 1, *uuid_cmp, [this, perch_center_x]( entt::entity crow_entt )
-                                                               { reg().get<Cmp::Npc::Crow>( crow_entt ).perch_center_x = perch_center_x; } ) );
+    get_systems_event_queue().trigger( Events::CreateNpcEvent( "npc.crow", target_pos_cmp, 1, *uuid_cmp,
+                                                               [this, perch_center_x]( entt::entity crow_entt )
+    { reg().get<Cmp::Npc::Crow>( crow_entt ).perch_center_x = perch_center_x; } ) );
   }
   trail_position.push_back( source_entt );
 
@@ -304,7 +308,7 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
     m_sound_bank.get_effect( "pickaxe_final" ).play();
   }
 
-  // exhume before any trail pick so this grave can never be chosen as its own next target
+  // exhume early so this grave can never be chosen as its own next target
   reg().emplace_or_replace<Cmp::Grave::Exhumed>( grave_entity );
 
   // a grave on the trail skips its own consequence: it either points onwards or, at the end of the trail, holds the exit key
@@ -325,9 +329,10 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
     return;
   }
 
+  bool altar_activated = reg().view<Cmp::Altar::Activated>().size() != 0;
   auto *consequence = reg().try_get<Cmp::Grave::Consequence>( grave_entity );
   if ( not consequence ) return;
-  switch ( consequence->roll( Utils::Player::get_stats( reg() ).luck(), Utils::Player::trail_position( reg() ) ) )
+  switch ( consequence->roll( Utils::Player::get_stats( reg() ).luck(), Utils::Player::trail_position( reg() ), altar_activated ) )
   {
     case Cmp::Grave::Consequence::Type::NPC_TRAP:
       SPDLOG_DEBUG( "Grave activated NPC trap." );
@@ -345,6 +350,9 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
       break;
     case Cmp::Grave::Consequence::Type::CURSE_TABLET:
       spawn_grave_loot( { "item.cursetablet" } );
+      break;
+    case Cmp::Grave::Consequence::Type::TALISMAN:
+      spawn_grave_loot( { "item.talisman1", "item.talisman2", "item.talisman3", "item.talisman4" } );
       break;
     case Cmp::Grave::Consequence::Type::TRAIL_START:
       SPDLOG_INFO( "Grave {} started the trail", static_cast<uint32_t>( grave_entity ) );

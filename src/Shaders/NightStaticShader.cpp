@@ -81,7 +81,7 @@ void NightStaticShader::update( entt::registry &reg, sf::Time dt )
     for ( auto [grave_entt, grave_mb, consequence] : reg.view<Cmp::Grave::MultiBlock, Cmp::Grave::Consequence>().each() )
     {
       if ( not Utils::is_visible_in_view( lit_view_bounds, grave_mb ) ) continue;
-      if ( consequence.roll( player_luck, Utils::Player::trail_position( reg ) ) != Cmp::Grave::Consequence::Type::NPC_TRAP ) continue;
+      if ( consequence.roll( player_luck, Utils::Player::trail_position( reg ), false ) != Cmp::Grave::Consequence::Type::NPC_TRAP ) continue;
       torch_positions.push_back( grave_mb.getCenter() );
       torch_colors.push_back( ghost_grave_color );
     }

@@ -1,7 +1,9 @@
 #ifndef SRC_COMPONENTS_PLAYER_ARROWCOMPASS_HPP__
 #define SRC_COMPONENTS_PLAYER_ARROWCOMPASS_HPP__
 
+#include <Components/Altar/Activated.hpp>
 #include <Components/Altar/MultiBlock.hpp>
+#include <Components/Altar/TalismanCount.hpp>
 #include <Components/Crypt/Entrance.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Position.hpp>
@@ -32,8 +34,9 @@ namespace Game::Cmp::Player
 //!        each frame. Not transferred between scenes (see RegistryTransfer) so a stale target never carries over.
 struct ArrowCompass
 {
-  //! @brief What the compass is pointing at, derived from the player's inventory item type
-  enum class Mode { NONE, EXIT, CRYPT, ALTAR };
+  //! @brief What the compass is pointing at, derived from the player's inventory item type.
+  //!        TALISMAN points only at an altar that still needs the held talisman (most talismans lit first, then nearest).
+  enum class Mode { NONE, EXIT, CRYPT, ALTAR, TALISMAN };
 
   //! @brief Where and how to draw the arrow sprite this frame
   struct Placement
@@ -64,6 +67,8 @@ struct ArrowCompass
       m_mode = Mode::CRYPT;
     else if ( item_type.contains( "exitkey" ) )
       m_mode = Mode::EXIT;
+    else if ( item_type.contains( "talisman" ) )
+      m_mode = Mode::TALISMAN;
     else if ( can_sacrifice or item_type.contains( "relic" ) )
       m_mode = Mode::ALTAR;
     else
@@ -112,6 +117,26 @@ struct ArrowCompass
           if ( altar_cmp.is_exitkey_lockout() ) return std::nullopt;
           return Cmp::Position( altar_cmp.position, altar_cmp.size );
         } );
+        break;
+      }
+      case Mode::TALISMAN: {
+        // mirrors AltarSystem::sacrifice_talisman(): once any altar is activated, no altar accepts talismans
+        m_target.reset();
+        if ( not reg.view<Cmp::Altar::Activated>().empty() ) break;
+
+        std::size_t best_count = 0;
+        float best_distance = std::numeric_limits<float>::max();
+        for ( auto [altar_entt, altar_cmp, talisman_cmp] : reg.view<Cmp::Altar::MultiBlock, Cmp::Altar::TalismanCount>().each() )
+        {
+          if ( not talisman_cmp.index( m_cached_item_type ) or talisman_cmp.activated( m_cached_item_type ) ) continue;
+          // prefer the altar closest to completion, then the nearest
+          const std::size_t count = talisman_cmp.count();
+          const float distance = Utils::Maths::getEuclideanDistance( altar_cmp.position, player_center );
+          if ( m_target and ( count < best_count or ( count == best_count and distance >= best_distance ) ) ) continue;
+          best_count = count;
+          best_distance = distance;
+          m_target = Cmp::Position( altar_cmp.position, altar_cmp.size );
+        }
         break;
       }
       case Mode::NONE:

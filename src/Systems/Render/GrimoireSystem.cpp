@@ -210,7 +210,7 @@ std::string GrimoireSystem::reward_display_name( const Cmp::ActionReward &reward
   if ( reward.wealth > 0 ) { return std::format( "+{} wealth", reward.wealth ); }
   switch ( reward.altar )
   {
-    case Cmp::ActionReward::AltarEffect::CANDLE:
+    case Cmp::ActionReward::AltarEffect::TALISMAN:
       return "lights altar";
     case Cmp::ActionReward::AltarEffect::BANISH:
       return "banishes ghosts";

@@ -4,9 +4,12 @@
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/AltarFactory.hpp>
+#include <Systems/Stores/ItemStore.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <entt/entity/registry.hpp>
 
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -35,6 +38,24 @@ Sys::SpriteKey get_altar_sprite( const Sys::SpriteKey &sprite_type, bool active 
   else if ( sprite_str.ends_with( ".active" ) ) { sprite_str.erase( sprite_str.size() - std::string_view( ".active" ).size() ); }
   else { return sprite_type; }
   return Sys::SpriteKey( sprite_str + ( active ? ".active" : ".inactive" ) );
+}
+
+Sys::SpriteKey get_altar_talisman_sprite( const Sys::ItemKey &item_key )
+{
+  constexpr std::string_view kItemPrefix = "sprite.item.";
+  constexpr std::string_view kAltarPrefix = "sprite.altar.";
+
+  const std::string &item_sprite = Sys::ItemStore::instance().get( item_key ).sprite_type.str();
+  if ( not item_sprite.starts_with( kItemPrefix ) )
+  {
+    throw std::runtime_error( "Talisman '" + item_key.str() + "' has sprite '" + item_sprite + "', which does not start with '" +
+                              std::string( kItemPrefix ) + "'" );
+  }
+
+  const Sys::SpriteKey altar_sprite( std::string( kAltarPrefix ) + item_sprite.substr( kItemPrefix.size() ) );
+  // throws if there is no altar variant of this talisman's sprite
+  [[maybe_unused]] const auto &sheet = Sys::SpriteStore::instance().get( altar_sprite );
+  return altar_sprite;
 }
 
 void deactivate_altars( entt::registry &reg )

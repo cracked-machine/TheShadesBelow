@@ -1,5 +1,7 @@
+#include <Components/Altar/Activated.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Altar/Segment.hpp>
+#include <Components/Altar/TalismanCount.hpp>
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/BuildingSegment.hpp>
 #include <Components/Crypt/InteriorMultiBlock.hpp>
@@ -465,7 +467,9 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
         // fix the roll at creation; the consequence is resolved against the player's current luck when needed
         auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 99 ).gen() );
         // simulate the rolls now to get an idea of the distribution with game start player luck
-        grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck(), Utils::Player::trail_position( reg() ) )]++;
+        bool altar_activated = reg().view<Cmp::Altar::Activated>().size() != 0;
+        grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck(), Utils::Player::trail_position( reg() ),
+                                                          altar_activated )]++;
       }
     }
     SPDLOG_INFO( "Grave Consequences dist at current luck: {}", grave_consequences_distribution );
@@ -473,8 +477,14 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
 
   // ALTARS
   const auto &altar1_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.altar.inactive" );
-  spawn_multiblocks<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( static_cast<std::size_t>( min_num_altars.get_value() ), altar1_spritesheet,
-                                                                  /*log=*/true, kMinBuildingSpacingCells );
+  auto altar_mb_entts = spawn_multiblocks<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( static_cast<std::size_t>( min_num_altars.get_value() ),
+                                                                                        altar1_spritesheet,
+                                                                                        /*log=*/true, kMinBuildingSpacingCells );
+  std::vector<Sys::ItemKey> talismans{ "item.talisman1", "item.talisman2", "item.talisman3", "item.talisman4" };
+  for ( auto entt : altar_mb_entts )
+  {
+    reg().emplace_or_replace<Cmp::Altar::TalismanCount>( entt, talismans );
+  }
 
   // CRYPTS - note: we use keys from altars to open crypts so the number should be equal
   const auto &crypt_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.crypt.closed" );
@@ -492,8 +502,9 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
 }
 
 template <typename MULTIBLOCK, typename MBSEGMENT>
-void LevelGenerator::spawn_multiblocks( std::size_t count, const Sprites::SpriteSheet &ss, bool log, int min_spacing_cells )
+std::vector<entt::entity> LevelGenerator::spawn_multiblocks( std::size_t count, const Sprites::SpriteSheet &ss, bool log, int min_spacing_cells )
 {
+  std::vector<entt::entity> entts_created;
   for ( std::size_t i = 0; i < count; ++i )
   {
     // Try the requested spacing first, then halve it until a position is found, so the
@@ -516,7 +527,9 @@ void LevelGenerator::spawn_multiblocks( std::size_t count, const Sprites::Sprite
                                                                                                   m_reserved_sm.get() );
     m_reserved_sm->insert( mb_entt, random_origin_position );
     if ( log ) { SPDLOG_INFO( "Added {} to {},{}", ss.type(), random_origin_position.position.x, random_origin_position.position.y ); }
+    entts_created.push_back( mb_entt );
   }
+  return entts_created;
 }
 
 std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( const Sprites::SpriteSheet &ms, unsigned long seed,

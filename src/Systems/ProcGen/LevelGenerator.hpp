@@ -133,7 +133,7 @@ private:
   //! @brief Spawn `count` multiblocks of the given type at random valid positions found via find_spawn_location().
   //! @param min_spacing_cells Preferred clearance from other large buildings; halved on failure so `count` is still met.
   template <typename MULTIBLOCK, typename MBSEGMENT>
-  void spawn_multiblocks( std::size_t count, const Sprites::SpriteSheet &ss, bool log = false, int min_spacing_cells = 0 );
+  std::vector<entt::entity> spawn_multiblocks( std::size_t count, const Sprites::SpriteSheet &ss, bool log = false, int min_spacing_cells = 0 );
 
   //! @brief Spatial map for finding obstacles during level gen / cell automata algorithm
   PathFinding::SpatialHashGridUniquePtr m_obstacle_sm;

@@ -92,7 +92,24 @@
             },
             "particle_offsets": {
               "type": "array",
-              "description": "Particle spawn points, as pixel offsets from the sprite's top-left corner. Optional. E.g. the graveyard altar's flame positions, one per relic sacrifice.",
+              "description": "Particle spawn points, as pixel offsets from the sprite's top-left corner. Optional. E.g. the graveyard altar's candle flame positions: entry i is lit when the talisman in slot i is sacrificed, so it must line up with 'talisman_offsets'[i].",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  }
+                },
+                "required": ["x", "y"],
+                "additionalProperties": false
+              }
+            },
+            "talisman_offsets": {
+              "type": "array",
+              "description": "Talisman draw points, as pixel offsets from the sprite's top-left corner. Optional. Used by the graveyard altar: entry i is where the talisman in slot i (item key order, e.g. item.talisman1 -> 0) is drawn, and must line up with 'particle_offsets'[i].",
               "items": {
                 "type": "object",
                 "properties": {

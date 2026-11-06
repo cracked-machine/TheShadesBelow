@@ -41,7 +41,10 @@ class Position;
 class Armed;
 class BurrCount;
 struct FractalCurve;
+struct AnimData;
 } // namespace Game::Cmp
+
+namespace Game::Cmp::Altar { class TalismanCount; }
 
 namespace Game::Cmp::Npc { struct Burryman; }
 namespace Game::Cmp::Particle { class IParticleSprite; struct SpriteOwner; }
@@ -123,6 +126,12 @@ private:
   //! @param burryman_cmp The Burryman's carried items.
   //! @param body_rect The Burryman's on-screen bounds.
   void render_carried_items( const Cmp::Npc::Burryman &burryman_cmp, const sf::FloatRect &body_rect );
+
+  //! @brief Draw every talisman of an altar (sacrificed or not) at its slot in the altar's `talisman_offsets`.
+  //! @param talisman_cmp The altar's talismans; each one's index picks its offset.
+  //! @param anim_cmp The altar's current sprite, used to find its inactive variant, which holds the offsets.
+  //! @param body_rect The altar's on-screen bounds.
+  void render_altar_talismans( const Cmp::Altar::TalismanCount &talisman_cmp, const Cmp::AnimData &anim_cmp, const sf::FloatRect &body_rect );
 
   //! @brief Draw a small wear-level bar above an item, filled proportionally to `wearlevel`.
   //! @param wearlevel

@@ -301,8 +301,8 @@ struct ActionReward
   enum class AltarEffect {
     //! @brief No altar effect.
     NONE,
-    //! @brief Light an altar candle (relics).
-    CANDLE,
+    //! @brief Light an altar talisman.
+    TALISMAN,
     //! @brief Banish all ghosts (witches jar).
     BANISH,
     //! @brief Gain an extra life, respawning the player when they die (witches jar, nightshade).

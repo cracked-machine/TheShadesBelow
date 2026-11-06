@@ -14,7 +14,8 @@ namespace Game::Sprites
 SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderMode zorder_mode, std::vector<float> zorder_list,
                           const std::filesystem::path &spritesheet_png, const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size,
                           unsigned int indices_per_sequence, std::vector<bool> walking_collision_mask, std::vector<bool> flying_collision_mask,
-                          sf::Vector2i door_position, std::vector<sf::Vector2f> particle_offsets, float framerate )
+                          sf::Vector2i door_position, std::vector<sf::Vector2f> particle_offsets, float framerate,
+                          std::vector<sf::Vector2f> talisman_offsets )
     : m_sprite_type{ std::move( type ) },
       m_display_name( std::move( display_name ) ),
       m_zorder_mode( zorder_mode ),
@@ -25,6 +26,7 @@ SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderM
       m_flying_collision_mask{ normalise_collision_mask( std::move( flying_collision_mask ), grid_size, m_sprite_type, "flying_collision_mask" ) },
       m_door_position( door_position ),
       m_particle_offsets( std::move( particle_offsets ) ),
+      m_talisman_offsets( std::move( talisman_offsets ) ),
       m_framerate{ normalise_framerate( framerate, indices_per_sequence, m_sprite_type ) }
 {
   m_spritesheet_texture = std::make_unique<sf::Texture>();
@@ -45,7 +47,8 @@ SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderM
 SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderMode zorder_mode, std::vector<float> zorder_list, sf::Texture tilemap_texture,
                           const std::vector<uint32_t> &tilemap_picks, sf::Vector2i grid_size,
                           unsigned int indices_per_sequence, std::vector<bool> walking_collision_mask, std::vector<bool> flying_collision_mask,
-                          sf::Vector2i door_position, std::vector<sf::Vector2f> particle_offsets, float framerate )
+                          sf::Vector2i door_position, std::vector<sf::Vector2f> particle_offsets, float framerate,
+                          std::vector<sf::Vector2f> talisman_offsets )
     : m_sprite_type{ std::move( type ) },
       m_display_name( std::move( display_name ) ),
       m_zorder_mode( zorder_mode ),
@@ -56,6 +59,7 @@ SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderM
       m_flying_collision_mask{ normalise_collision_mask( std::move( flying_collision_mask ), grid_size, m_sprite_type, "flying_collision_mask" ) },
       m_door_position( door_position ),
       m_particle_offsets( std::move( particle_offsets ) ),
+      m_talisman_offsets( std::move( talisman_offsets ) ),
       m_framerate{ normalise_framerate( framerate, indices_per_sequence, m_sprite_type ) }
 {
   SPDLOG_DEBUG( "Loaded tilemap texture" );

@@ -198,7 +198,7 @@ protected:
   {
     using AltarEffect = Cmp::ActionReward::AltarEffect;
     if ( altar == "None" ) return AltarEffect::NONE;
-    if ( altar == "Candle" ) return AltarEffect::CANDLE;
+    if ( altar == "Talisman" ) return AltarEffect::TALISMAN;
     if ( altar == "Banish" ) return AltarEffect::BANISH;
     if ( altar == "ExtraLife" ) return AltarEffect::EXTRA_LIFE;
     if ( altar == "CryptKey" ) return AltarEffect::CRYPT_KEY;
@@ -265,12 +265,18 @@ protected:
     Cmp::SpawnNpcEffect::Condition condition{ .stat_name = JsonDeserializer::get_string( cond, "stat" ),
                                               .value = JsonDeserializer::get_int( cond, "value" ) };
     const auto &stat = condition.stat_name;
-    if ( stat == "health" ) condition.stat = Stat::HEALTH;
-    else if ( stat == "fear" ) condition.stat = Stat::FEAR;
-    else if ( stat == "despair" ) condition.stat = Stat::DESPAIR;
-    else if ( stat == "infamy" ) condition.stat = Stat::INFAMY;
-    else if ( stat == "luck" ) condition.stat = Stat::LUCK;
-    else if ( stat == "all" ) condition.stat = Stat::ALL_TOXIDROMES;
+    if ( stat == "health" )
+      condition.stat = Stat::HEALTH;
+    else if ( stat == "fear" )
+      condition.stat = Stat::FEAR;
+    else if ( stat == "despair" )
+      condition.stat = Stat::DESPAIR;
+    else if ( stat == "infamy" )
+      condition.stat = Stat::INFAMY;
+    else if ( stat == "luck" )
+      condition.stat = Stat::LUCK;
+    else if ( stat == "all" )
+      condition.stat = Stat::ALL_TOXIDROMES;
     else if ( const auto id = Game::Factory::Toxicity::toxidrome_id( stat ) )
     {
       condition.stat = Stat::TOXIDROME;
@@ -342,7 +348,8 @@ protected:
     if ( not j.contains( "side_effects" ) ) return effects;
     const auto &fx = j.at( "side_effects" );
 
-    const auto get_probability = []( const nlohmann::json &effect ) { return make_probability( JsonDeserializer::get_string( effect, "probability" ) ); };
+    const auto get_probability = []( const nlohmann::json &effect )
+    { return make_probability( JsonDeserializer::get_string( effect, "probability" ) ); };
     if ( fx.contains( "spawn_npc" ) )
     {
       const auto &spawn_npc = fx.at( "spawn_npc" );
@@ -384,8 +391,9 @@ protected:
     if ( fx.contains( "kill_npc" ) )
     {
       const auto &kill_npc = fx.at( "kill_npc" );
-      Cmp::KillNpcEffect kill_npc_effect{ .trigger_range = kill_npc.contains( "trigger_range" ) ? JsonDeserializer::get_int( kill_npc, "trigger_range" ) : 1,
-                                          .probability = get_probability( kill_npc ) };
+      Cmp::KillNpcEffect kill_npc_effect{
+          .trigger_range = kill_npc.contains( "trigger_range" ) ? JsonDeserializer::get_int( kill_npc, "trigger_range" ) : 1,
+          .probability = get_probability( kill_npc ) };
       if ( kill_npc.contains( "npc_types" ) )
       {
         for ( const auto &npc_type : JsonDeserializer::get_string_or_list( kill_npc, "npc_types" ) )
@@ -394,7 +402,10 @@ protected:
         }
       }
       if ( kill_npc.contains( "wear_per_kill" ) ) { kill_npc_effect.wear_per_kill = JsonDeserializer::get_float( kill_npc, "wear_per_kill" ); }
-      if ( kill_npc.contains( "death_anim" ) ) { kill_npc_effect.death_anim = Sys::SpriteKey( JsonDeserializer::get_string( kill_npc, "death_anim" ) ); }
+      if ( kill_npc.contains( "death_anim" ) )
+      {
+        kill_npc_effect.death_anim = Sys::SpriteKey( JsonDeserializer::get_string( kill_npc, "death_anim" ) );
+      }
       effects.kill_npc = kill_npc_effect;
     }
     return effects;

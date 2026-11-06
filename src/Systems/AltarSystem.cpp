@@ -1,9 +1,11 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/AbsoluteAlpha.hpp>
+#include <Components/Altar/Activated.hpp>
 #include <Components/Altar/AltarActivationTimer.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Altar/Sacrifice.hpp>
 #include <Components/Altar/Segment.hpp>
+#include <Components/Altar/TalismanCount.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Armable.hpp>
 #include <Components/DestroyedObstacle.hpp>
@@ -179,8 +181,8 @@ bool AltarSystem::grant_sacrifice_reward( entt::entity altar_entity, Cmp::Altar:
   using AltarEffect = Cmp::ActionReward::AltarEffect;
   switch ( reward->altar )
   {
-    case AltarEffect::CANDLE:
-      // return sacrifice_relic( altar_entity, altar_cmp, altar_uuid );
+    case AltarEffect::TALISMAN:
+      return sacrifice_talisman( altar_entity, altar_cmp, altar_uuid );
       return false;
     case AltarEffect::BANISH:
       sacrifice_for_banish( altar_cmp );
@@ -248,6 +250,9 @@ bool AltarSystem::sacrifice_for_extra_life( entt::entity altar_entity, const Cmp
   // refuse the offering while an extra life is already active, so it isn't wasted
   if ( Utils::Player::player_has_extra_life( reg() ) ) return false;
 
+  bool altar_activated = reg().all_of<Cmp::Altar::Activated>( altar_entity );
+  if ( not altar_activated ) return false;
+
   Cmp::Player::ExtraLife extra_life;
   extra_life.altar_uuid = altar_uuid;
   if ( altar_cmp.get_kind() == Cmp::Altar::Kind::CRYPT )
@@ -266,10 +271,17 @@ bool AltarSystem::sacrifice_for_extra_life( entt::entity altar_entity, const Cmp
   return true;
 }
 
-bool AltarSystem::sacrifice_relic( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
+bool AltarSystem::sacrifice_talisman( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
 {
-  const uint8_t sacrifice_count = altar_cmp.get_sacrifice_count();
-  if ( sacrifice_count >= altar_cmp.get_exitkey_drop_threshold() ) return false;
+
+  bool altar_activated = reg().view<Cmp::Altar::Activated>().size() != 0;
+  if ( altar_activated )
+  {
+    SPDLOG_WARN( "Altar already activated. Skipping" );
+    return false;
+  }
+  auto *talisman_count_cmp = reg().try_get<Cmp::Altar::TalismanCount>( altar_entity );
+  if ( not talisman_count_cmp ) { throw std::runtime_error( "Altar does not have an Cmp::Altar::TalismanCount component" ); }
 
   auto *anim_cmp = reg().try_get<Cmp::AnimData>( altar_entity );
   if ( not anim_cmp ) return false;
@@ -281,22 +293,34 @@ bool AltarSystem::sacrifice_relic( entt::entity altar_entity, Cmp::Altar::MultiB
     return false;
   }
 
-  reg().patch<Cmp::Altar::MultiBlock>( altar_entity, []( Cmp::Altar::MultiBlock &cmp ) { cmp.increment_sacrifice_count(); } );
-  const auto &flame_offsets = Sys::SpriteStore::instance().get( inactive_sprite_type ).particle_offsets();
-  if ( sacrifice_count < flame_offsets.size() )
+  auto [_, item_type, _] = Utils::Player::get_inventory( reg() );
+  if ( item_type.empty() ) return false;
+
+  const Sys::ItemKey talisman_key( item_type );
+  // the talisman's index picks its candle, so the flame lights beside that talisman whatever order they are sacrificed in
+  const auto flame_idx = talisman_count_cmp->index( talisman_key );
+  if ( not flame_idx )
   {
-    sf::Vector2f flame_ps_pos = altar_cmp.position + flame_offsets[sacrifice_count];
+    SPDLOG_WARN( "{} is not a talisman for this altar", item_type );
+    return false;
+  }
+  if ( talisman_count_cmp->activated( talisman_key ) ) return false;
+  talisman_count_cmp->activate( talisman_key );
+  SPDLOG_INFO( "Activated {} ({} of {})", item_type, talisman_count_cmp->count(), talisman_count_cmp->size() );
+
+  const auto &flame_offsets = Sys::SpriteStore::instance().get( inactive_sprite_type ).particle_offsets();
+  if ( *flame_idx < flame_offsets.size() )
+  {
+    sf::Vector2f flame_ps_pos = altar_cmp.position + flame_offsets[*flame_idx];
     Factory::Particle::add_flame( m_reg, Factory::Altar::kCandleFlameParticleTag, altar_uuid, flame_ps_pos, 5000, Cmp::Particle::kWorldScalePreset );
   }
-  else { SPDLOG_WARN( "{} has no particle_offsets entry for sacrifice {}", inactive_sprite_type.str(), sacrifice_count ); }
+  else { SPDLOG_WARN( "{} has no particle_offsets entry for talisman index {}", inactive_sprite_type.str(), *flame_idx ); }
   SPDLOG_DEBUG( "Altar activated to state {}.", altar_cmp.get_sacrifice_count() );
   play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
 
-  if ( altar_cmp.get_sacrifice_count() == altar_cmp.get_exitkey_drop_threshold() and not altar_cmp.is_exitkey_lockout() )
+  if ( talisman_count_cmp->count() == 4 )
   {
-    // all the candles are now lit in their default colour
-    drop_reward_item( "item.exitkey" );
-    altar_cmp.set_exitkey_lockout();
+    reg().emplace_or_replace<Cmp::Altar::Activated>( altar_entity );
     m_sound_bank.get_effect( "crypt_altar_activate" ).play();
   }
   return true;

@@ -1,3 +1,4 @@
+#include <Components/Altar/Activated.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Altar/Segment.hpp>
 #include <Components/AnimData.hpp>
@@ -186,7 +187,9 @@ void RenderDebugSystem::render_debug_stats()
   for ( auto [grave_entt, grave_mb, consequence] : reg().view<Cmp::Grave::MultiBlock, Cmp::Grave::Consequence>().each() )
   {
     if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), grave_mb ) ) continue;
-    if ( consequence.roll( player_luck, Utils::Player::trail_position( reg() ) ) != Cmp::Grave::Consequence::Type::NPC_TRAP ) continue;
+    bool altar_activated = reg().view<Cmp::Altar::Activated>().size() != 0;
+    if ( consequence.roll( player_luck, Utils::Player::trail_position( reg() ), altar_activated ) != Cmp::Grave::Consequence::Type::NPC_TRAP )
+      continue;
     render_square( grave_mb.position, grave_mb.size, sf::Color::Blue );
   }
 
