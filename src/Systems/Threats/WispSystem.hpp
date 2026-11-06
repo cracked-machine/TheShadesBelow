@@ -4,7 +4,6 @@
 #include <PathFinding/SmartPointers.hpp>
 #include <Systems/BaseSystem.hpp>
 
-#include <SFML/System/Clock.hpp>
 #include <SFML/System/Time.hpp>
 
 #include <entt/entity/fwd.hpp>
@@ -43,7 +42,7 @@ private:
   sf::Time m_pathfinding_timer;
 
   //! @brief Delay the target reset once the pathfinding has comepleted.
-  sf::Clock m_wisp_target_reset_clock;
+  sf::Time m_wisp_target_reset_timer;
 
   //! @brief Used for wisps to move freely within the level boundaries.
   PathFinding::SpatialHashGridWeakPtr m_open_navmesh;

@@ -19,13 +19,14 @@ WispSystem::WispSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
     : BaseSystem( reg, window, sound_bank )
 {
   SPDLOG_DEBUG( "WispSystem initialized" );
-  m_wisp_target_reset_clock.reset();
+  m_wisp_target_reset_timer = sf::Time::Zero;
 }
 
 void WispSystem::update( sf::Time dt )
 {
   static constexpr float kPathfindingInterval = 0.10f;
   m_pathfinding_timer += dt;
+
   if ( m_pathfinding_timer.asSeconds() >= kPathfindingInterval )
   {
     if ( auto navmesh = m_open_navmesh.lock() )
@@ -37,7 +38,8 @@ void WispSystem::update( sf::Time dt )
         auto result = Utils::Npc::pathfind_toward( reg(), *navmesh, npc_target_pos_cmp, npc_target_cmp.id, target_in_spawn, false, true );
         if ( result == Utils::Npc::PathfindResult::NoPath )
         {
-          if ( not m_wisp_target_reset_clock.isRunning() ) { m_wisp_target_reset_clock.restart(); }
+          // accumulate the full pathfinding interval, not just this frame's dt
+          m_wisp_target_reset_timer += m_pathfinding_timer;
           reset_wisp_target( npc_target_cmp.id );
         }
       }
@@ -93,7 +95,7 @@ void WispSystem::reset_wisp_target( entt::entity wisp_entt )
 {
 
   const static float kWispTargetResetTimeout = 10.f;
-  if ( m_wisp_target_reset_clock.getElapsedTime().asSeconds() < kWispTargetResetTimeout ) return;
+  if ( m_wisp_target_reset_timer.asSeconds() < kWispTargetResetTimeout ) return;
 
   for ( auto [old_target_entt, old_npc_target_cmp, old_npc_target_pos_cmp] : reg().view<Cmp::Npc::Target, Cmp::Position>().each() )
   {
@@ -112,7 +114,7 @@ void WispSystem::reset_wisp_target( entt::entity wisp_entt )
     reg().emplace_or_replace<Cmp::Npc::Target>( new_target_entt, wisp_entt );
 
     SPDLOG_INFO( "Reset npc.wisp target to {},{}", new_target_pos.x(), new_target_pos.y() );
-    m_wisp_target_reset_clock.reset();
+    m_wisp_target_reset_timer = sf::Time::Zero;
     break; // only one target per wisp
   }
 }
