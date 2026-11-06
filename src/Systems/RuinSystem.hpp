@@ -66,12 +66,12 @@ public:
   //! @brief Trigger a floor transition scene event when the player steps onto a floor access tile leading
   //! in `direction`, debounced by m_floor_access_cooldown.
   //! @param direction
-  void check_floor_access_collision( Cmp::Ruin::FloorAccess::Direction direction );
+  void check_floor_access_collision( sf::Time dt, Cmp::Ruin::FloorAccess::Direction direction );
 
   //! @brief Reset the floor access cooldown (call when entering a ruin scene)
   void reset_floor_access_cooldown()
   {
-    m_floor_access_cooldown.restart();
+    m_floor_access_cooldown_timer = sf::Time::Zero;
     m_was_on_floor_access = true; // Assume we just landed on a floor access
   }
 
@@ -124,7 +124,7 @@ private:
   entt::dispatcher &m_scenemanager_event_dispatcher;
 
   //! @brief Cooldown clock to prevent immediate floor access re-triggering
-  sf::Clock m_floor_access_cooldown{};
+  sf::Time m_floor_access_cooldown_timer;
 
   //! @brief Minimum time, in seconds, between floor access re-triggers.
   static constexpr float kFloorAccessCooldownSeconds = 0.5f;

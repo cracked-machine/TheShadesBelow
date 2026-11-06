@@ -200,9 +200,10 @@ void RuinSystem::spawn_floor_access( sf::Vector2f spawn_position, sf::Vector2f s
   SPDLOG_DEBUG( "Spawning floor access at {},{}", spawn_position.x, spawn_position.y );
 }
 
-void RuinSystem::check_floor_access_collision( Cmp::Ruin::FloorAccess::Direction direction )
+void RuinSystem::check_floor_access_collision( sf::Time dt, Cmp::Ruin::FloorAccess::Direction direction )
 {
-  if ( m_floor_access_cooldown.getElapsedTime().asSeconds() < kFloorAccessCooldownSeconds ) { return; }
+  m_floor_access_cooldown_timer += dt;
+  if ( m_floor_access_cooldown_timer.asSeconds() < kFloorAccessCooldownSeconds ) { return; }
 
   auto player_pos = Utils::Player::get_position( reg() );
   bool currently_on_floor_access = false;
