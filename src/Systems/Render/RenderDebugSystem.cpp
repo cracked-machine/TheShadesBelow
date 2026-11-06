@@ -1,4 +1,3 @@
-#include <Components/Altar/Activated.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Altar/Segment.hpp>
 #include <Components/AnimData.hpp>
@@ -25,6 +24,7 @@
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Grave/Segment.hpp>
 #include <Components/Grave/TrailMarker.hpp>
+#include <Components/Grave/TrailStart.hpp>
 #include <Components/Hazard/CorruptionCell.hpp>
 #include <Components/Hazard/SinkholeCell.hpp>
 #include <Components/Inventory/WorldItem.hpp>
@@ -187,9 +187,7 @@ void RenderDebugSystem::render_debug_stats()
   for ( auto [grave_entt, grave_mb, consequence] : reg().view<Cmp::Grave::MultiBlock, Cmp::Grave::Consequence>().each() )
   {
     if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), grave_mb ) ) continue;
-    bool altar_activated = reg().view<Cmp::Altar::Activated>().size() != 0;
-    if ( consequence.roll( player_luck, Utils::Player::trail_position( reg() ), altar_activated ) != Cmp::Grave::Consequence::Type::NPC_TRAP )
-      continue;
+    if ( consequence.roll( player_luck ) != Cmp::Grave::Consequence::Type::NPC_TRAP ) continue;
     render_square( grave_mb.position, grave_mb.size, sf::Color::Blue );
   }
 
@@ -197,6 +195,12 @@ void RenderDebugSystem::render_debug_stats()
   {
     if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), grave_mb ) ) continue;
     render_square( grave_mb.position, grave_mb.size, sf::Color::Green );
+  }
+
+  for ( auto [grave_entt, grave_mb] : reg().view<Cmp::Grave::MultiBlock, Cmp::Grave::TrailStart>().each() )
+  {
+    if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), grave_mb ) ) continue;
+    render_square( grave_mb.position, grave_mb.size, sf::Color::Yellow );
   }
   draw_debug_overlay();
 }
@@ -398,6 +402,7 @@ void RenderDebugSystem::render_ui_entity_inspect()
       if ( reg().all_of<Cmp::WorldItem>( entity ) ) draw_line( " WorldItem", sf::Color::Green );
       if ( reg().all_of<Cmp::Player::Illuminated>( entity ) ) draw_line( " Illuminated", sf::Color::Yellow );
       if ( reg().all_of<Cmp::Grave::TrailMarker>( entity ) ) draw_line( " TrailMarker", sf::Color::Green );
+      if ( reg().all_of<Cmp::Grave::TrailStart>( entity ) ) draw_line( " TrailStart", sf::Color::Yellow );
       if ( auto *cmp = reg().try_get<Cmp::Npc::SpawnedBy>( entity ) ) draw_line( " SpawnedBy: " + cmp->m_source.str(), sf::Color::White );
 
       if ( auto *cmp = reg().try_get<Cmp::UUID>( entity ) ) draw_line( " " + cmp->str(), sf::Color::White );

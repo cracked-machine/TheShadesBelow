@@ -1,4 +1,3 @@
-#include <Components/Altar/Activated.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Altar/Segment.hpp>
 #include <Components/Altar/TalismanCount.hpp>
@@ -467,9 +466,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
         // fix the roll at creation; the consequence is resolved against the player's current luck when needed
         auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 99 ).gen() );
         // simulate the rolls now to get an idea of the distribution with game start player luck
-        bool altar_activated = reg().view<Cmp::Altar::Activated>().size() != 0;
-        grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck(), Utils::Player::trail_position( reg() ),
-                                                          altar_activated )]++;
+        grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck() )]++;
       }
     }
     SPDLOG_INFO( "Grave Consequences dist at current luck: {}", grave_consequences_distribution );

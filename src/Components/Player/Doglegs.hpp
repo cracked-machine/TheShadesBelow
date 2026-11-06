@@ -12,7 +12,7 @@ namespace Game::Cmp::Player
 {
 
 //! @brief Scene-local cache of the dowsing rod guide paths and their chevron markers. Rebuilt every frame by
-//! DoglegSystem and drawn by RenderGameSystem. Not transferred between scenes.
+//! DowsingGuideSystem and drawn by RenderGameSystem. Not transferred between scenes.
 class Doglegs
 {
 public:

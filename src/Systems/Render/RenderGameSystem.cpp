@@ -7,6 +7,7 @@
 #include <Components/AbsoluteTint.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Altar/TalismanCount.hpp>
+#include <Components/Altar/TrailGuide.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Armed.hpp>
 #include <Components/BurrCount.hpp>
@@ -163,6 +164,8 @@ void RenderGameSystem::render_zorder_queue()
     else if ( auto *floor_tiles = reg().try_get<Sprites::Containers::VertexFloor>( entity ) ) { draw_vertex_floor( *floor_tiles ); }
     // the inventory slot holding the dowsing rod: draws the chevrons above the floor and below sprites
     else if ( reg().all_of<Cmp::Inventory::DowsingTarget>( entity ) ) { draw_world( Utils::Player::get_doglegs( reg() ).m_markers ); }
+    // the chevrons from the activated altar to the trail start graves
+    else if ( auto *trail_guide = reg().try_get<Cmp::Altar::TrailGuide>( entity ) ) { draw_world( trail_guide->paths.m_markers ); }
   }
   if ( shadow_z ) render_flight_shadow();
 }

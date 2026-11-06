@@ -71,8 +71,9 @@
 #include <Systems/PlayerSystem.hpp>
 #include <Systems/ProcGen/CellAutomataSystem.hpp>
 #include <Systems/ProcGen/DLASystem.hpp>
-#include <Systems/ProcGen/DoglegSystem.hpp>
+#include <Systems/ProcGen/DowsingGuideSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
+#include <Systems/ProcGen/TrailGuideSystem.hpp>
 #include <Systems/Render/GrimoireSystem.hpp>
 #include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
@@ -322,7 +323,8 @@ void GraveyardScene::do_update( sf::Time dt )
     PROFILED( m_sys.find<Sys::Store::Type::ActionSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::PlantSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::FootstepSystem>().update( dt ) );
-    PROFILED( m_sys.find<Sys::Store::Type::DoglegSystem>().update( dt ) );
+    PROFILED( m_sys.find<Sys::Store::Type::DowsingGuideSystem>().update( dt ) );
+    PROFILED( m_sys.find<Sys::Store::Type::TrailGuideSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::GraveSystem>().update() );
 
     PROFILED( m_sys.find<Sys::Store::Type::CryptSystem>().update_exit_zorder() );

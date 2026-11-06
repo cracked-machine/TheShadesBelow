@@ -20,9 +20,10 @@
 #include <Systems/PlayerSystem.hpp>
 #include <Systems/ProcGen/CellAutomataSystem.hpp>
 #include <Systems/ProcGen/DLASystem.hpp>
-#include <Systems/ProcGen/DoglegSystem.hpp>
+#include <Systems/ProcGen/DowsingGuideSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/ProcGen/PassageSystem.hpp>
+#include <Systems/ProcGen/TrailGuideSystem.hpp>
 #include <Systems/Render/GrimoireSystem.hpp>
 #include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
@@ -66,7 +67,8 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
   emplace<Type::BurrSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::CellAutomataSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::DiffusionLtdAggrSystem>( m_initial_reg, window, sound_bank );
-  emplace<Type::DoglegSystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::DowsingGuideSystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::TrailGuideSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::CorruptionHazardSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::CryptSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );
   emplace<Type::ExitSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );

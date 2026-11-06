@@ -1,3 +1,4 @@
+#include <Components/Altar/TrailGuide.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/NoRender.hpp>
@@ -28,6 +29,8 @@ void ZOrderQueue::refresh( entt::registry &reg, sf::FloatRect view_bounds, const
   PROFILED( queue_all<Cmp::Shader::SpriteOwner>( reg ) );
   // inventory slots only have a zorder when they draw something in the world, e.g. dowsing rod guide lines
   PROFILED( queue_all<Cmp::PlayerInventorySlot>( reg ) );
+  // chevrons guiding the player from the activated altar to the trail start graves
+  PROFILED( queue_all<Cmp::Altar::TrailGuide>( reg ) );
   PROFILED( queue_positioned( reg, view_bounds, render_position_grid ) );
 
   PROFILED( std::ranges::sort( m_entries, {}, &Entry::z ) );

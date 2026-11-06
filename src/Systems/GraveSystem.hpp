@@ -13,6 +13,7 @@
 namespace Game::Cmp { class AnimData; }
 namespace Game::Cmp::Player { class Character; }
 namespace Game::Cmp::Grave { class Consequence; }
+namespace Game::Events { struct AltarActivatedEvent; }
 // clang-format on
 
 namespace Game::Sys
@@ -35,6 +36,12 @@ private:
   //! @brief handler for Events::PlayerActionEvent::GameActions::DIG
   //! @param event
   void on_player_action( const Events::PlayerActionEvent &event );
+
+  //! @brief Handler for Events::AltarActivatedEvent. Tags Cmp::Persist::GraveTrailStartCount random un-exhumed graves, at least
+  //! 10 grid cells clear of the altar, with Cmp::Grave::TrailStart. Each start faces a different edge of the altar until all
+  //! four edges have one. Exhuming any one of them starts the key grave trail.
+  //! @param event
+  void on_altar_activated( const Events::AltarActivatedEvent &event );
 
   //! @brief True if the player has a digging tool equipped with remaining wear
   bool has_digging_tool_equipped();
@@ -77,6 +84,10 @@ private:
   //! @param grave_entity
   //! @param grave_anim_cmp
   void open_grave( entt::entity grave_entity, Cmp::AnimData &grave_anim_cmp );
+
+  //! @brief Put the exhumed key straight into the player's inventory, dropping whatever they were holding at their feet
+  //! @param key item.exitkey or item.cryptkey
+  void grant_grave_key( const Sys::ItemKey &key );
 
   //! @brief Pick a random item from the pool, drop it as loot, and apply its Cmp::SpawnAction modifiers to the player
   //! @param loot_pool

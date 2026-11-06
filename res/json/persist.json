@@ -377,6 +377,23 @@
     "detail": "Grave Trail Size Multiplier",
     "format": "%d"
   },
+  "GraveTrailStartCount": {
+    "type": "int",
+    "value": 3,
+    "min_value": 1,
+    "max_value": 5,
+    "detail": "Grave Trail Start Count",
+    "format": "%d"
+  },
+  "GraveTrailGuideColour": {
+    "type": "sf::Color",
+    "value": {
+      "r": 255,
+      "g": 140,
+      "b": 0,
+      "a": 255
+    }
+  },
   "GraveyardProcGenBirthThreshold": {
     "type": "int",
     "value": 2,

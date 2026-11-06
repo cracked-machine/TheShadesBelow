@@ -12,7 +12,7 @@ namespace Game::Cmp::Inventory
 {
 
 //! @brief The landmark a dowsing rod guides towards. Assigned once when the rod is created and carried with it
-//! between the world item and the player inventory slot. While the rod is in the player inventory, DoglegSystem
+//! between the world item and the player inventory slot. While the rod is in the player inventory, DowsingGuideSystem
 //! sends colored chevrons along a path from the player to each landmark matching `target`: an L-shaped "dogleg" in
 //! the graveyard, the walkable route along the passages in the crypt.
 struct DowsingTarget
@@ -44,7 +44,7 @@ struct DowsingTarget
   //! @brief The landmark this dowsing rod guides towards.
   Target target{ Target::NONE };
 
-  //! @brief Time since the chevron pulse last left the player. Advanced and reset by DoglegSystem.
+  //! @brief Time since the chevron pulse last left the player. Advanced and reset by DowsingGuideSystem.
   sf::Time m_dowsing_pulse_time{ sf::Time::Zero };
 };
 

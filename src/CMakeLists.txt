@@ -53,7 +53,9 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/ProcGen/DLASystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ProcGen/PassageSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ProcGen/PassageAlgorithms.cpp
-    ${CMAKE_SOURCE_DIR}/src/Systems/ProcGen/DoglegSystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/ProcGen/DoglegMarkerSystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/ProcGen/DowsingGuideSystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/ProcGen/TrailGuideSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderDebugSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderGameSystem.cpp

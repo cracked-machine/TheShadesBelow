@@ -1,13 +1,12 @@
-#ifndef SRC_SYSTEMS_PROCGEN_DOGLEGSYSTEM_HPP__
-#define SRC_SYSTEMS_PROCGEN_DOGLEGSYSTEM_HPP__
+#ifndef SRC_SYSTEMS_PROCGEN_DOWSINGGUIDESYSTEM_HPP__
+#define SRC_SYSTEMS_PROCGEN_DOWSINGGUIDESYSTEM_HPP__
 
 #include <Components/Player/Doglegs.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
 #include <PathFinding/BreadthFirst.hpp>
 #include <PathFinding/SmartPointers.hpp>
-#include <Systems/BaseSystem.hpp>
+#include <Systems/ProcGen/DoglegMarkerSystem.hpp>
 
-#include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Time.hpp>
 
 // clang-format off
@@ -22,12 +21,12 @@ namespace Game::Sys::ProcGen
 //! walkable route along the passages, and a landmark that cannot be reached on foot gets no path. All paths share
 //! one pulse, which restarts once it has reached the landmark or left the view on every path. Results are stored
 //! in Cmp::Player::Doglegs for RenderGameSystem to draw.
-class DoglegSystem : public BaseSystem
+class DowsingGuideSystem : public DoglegMarkerSystem
 {
 public:
-  //! @brief Construct a new DoglegSystem object
-  DoglegSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
-      : BaseSystem( reg, window, sound_bank )
+  //! @brief Construct a new DowsingGuideSystem object
+  DowsingGuideSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+      : DoglegMarkerSystem( reg, window, sound_bank )
   {
   }
 
@@ -40,12 +39,6 @@ public:
   void update( sf::Time dt );
 
 private:
-  //! @brief Add single L-shaped dogleg to the component
-  //! @param source_pos
-  //! @param target_pos
-  //! @param color
-  void add_dogleg( sf::Vector2f source_pos, sf::Vector2f target_pos, sf::Color color );
-
   //! @brief Add the walkable route from the player to a landmark, or nothing if there is no way there on foot
   //! @param source_pos Player centre
   //! @param target_pos
@@ -58,15 +51,6 @@ private:
 
   //! @brief Add a path from the player to each landmark matching the dowsing rod target
   void update_target( const Cmp::Inventory::DowsingTarget &dowsing_cmp );
-
-  //! @brief Place the chevron markers along each dogleg for the current pulse time
-  void update_markers( Cmp::Inventory::DowsingTarget &dowsing_cmp );
-
-  //! @brief Clear doglegs and markers from the component
-  void clear();
-
-  //! @brief Distance from the player to where the path leaves the view, or the whole path if the target is in view
-  static float visible_length( const Cmp::Player::Doglegs::Dogleg &dogleg, const sf::FloatRect &view_bounds );
 
   //! @brief Which scene is updating, selects the landmarks and the kind of path
   Cmp::SceneSettings::SceneId m_location{ Cmp::SceneSettings::SceneId::GRAVEYARD };
@@ -83,4 +67,4 @@ private:
 
 } // namespace Game::Sys::ProcGen
 
-#endif // SRC_SYSTEMS_PROCGEN_DOGLEGSYSTEM_HPP__
+#endif // SRC_SYSTEMS_PROCGEN_DOWSINGGUIDESYSTEM_HPP__

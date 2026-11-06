@@ -37,7 +37,9 @@
 #include <Components/Persistent/FuseDelay.hpp>
 #include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
+#include <Components/Persistent/GraveTrailGuideColour.hpp>
 #include <Components/Persistent/GraveTrailSizeMultiplier.hpp>
+#include <Components/Persistent/GraveTrailStartCount.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
@@ -385,6 +387,8 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::MinNumAltars>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailSizeMultiplier>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::GraveTrailStartCount>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::GraveTrailGuideColour>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ExitKeyRequirement>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MinNumCrypts>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MinNumHealingSprings>( reg() ).render_widget();

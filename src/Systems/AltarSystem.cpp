@@ -39,6 +39,7 @@
 #include <Components/Toxicity/Vertigo.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/AltarActivatedEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
@@ -322,6 +323,8 @@ bool AltarSystem::offering_talisman( entt::entity altar_entity, Cmp::Altar::Mult
   {
     reg().emplace_or_replace<Cmp::Altar::Activated>( altar_entity );
     m_sound_bank.get_effect( "crypt_altar_activate" ).play();
+    // GraveSystem picks the trail start graves that TrailGuideSystem then guides the player to
+    get_systems_event_queue().trigger( Events::AltarActivatedEvent{ Cmp::Position( altar_cmp.position, altar_cmp.size ) } );
   }
   return true;
 }

@@ -37,7 +37,9 @@
 #include <Components/Persistent/FuseDelay.hpp>
 #include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
+#include <Components/Persistent/GraveTrailGuideColour.hpp>
 #include <Components/Persistent/GraveTrailSizeMultiplier.hpp>
+#include <Components/Persistent/GraveTrailStartCount.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
@@ -182,6 +184,8 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::FuseDelay>();
   add_component<Cmp::Persist::GraveNumMultiplier>();
   add_component<Cmp::Persist::GraveTrailSizeMultiplier>();
+  add_component<Cmp::Persist::GraveTrailStartCount>();
+  add_component<Cmp::Persist::GraveTrailGuideColour>();
   add_component<Cmp::Persist::GraveyardProcGenInitChance>();
   add_component<Cmp::Persist::GraveyardProcGenMaxIterations>();
   add_component<Cmp::Persist::GraveyardProcGenBirthThreshold>();
