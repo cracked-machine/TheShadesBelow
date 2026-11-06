@@ -318,7 +318,7 @@ bool AltarSystem::sacrifice_talisman( entt::entity altar_entity, Cmp::Altar::Mul
   SPDLOG_DEBUG( "Altar activated to state {}.", altar_cmp.get_sacrifice_count() );
   play_sacrifice_anim( altar_cmp, SacrificeAnimType::DEFAULT );
 
-  if ( talisman_count_cmp->count() == 4 )
+  if ( talisman_count_cmp->count() == talisman_count_cmp->size() )
   {
     reg().emplace_or_replace<Cmp::Altar::Activated>( altar_entity );
     m_sound_bank.get_effect( "crypt_altar_activate" ).play();

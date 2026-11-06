@@ -30,6 +30,13 @@ public:
   //! @throws std::runtime_error if no item matches.
   [[nodiscard]] key_type pick_item( const key_type &key ) const;
 
+  //! @brief Pick n distinct random item keys matching key, in random order.
+  //! @param key An item key, or an item key prefix ending with '*', e.g. "item.talisman*".
+  //! @param n The number of distinct item keys to pick.
+  //! @return n distinct matching item keys.
+  //! @throws std::runtime_error if fewer than n items match.
+  [[nodiscard]] std::vector<key_type> pick_distinct_items( const key_type &key, std::size_t n ) const;
+
 private:
   //! @brief Populates m_store with InventoryItem components
   void init_store();

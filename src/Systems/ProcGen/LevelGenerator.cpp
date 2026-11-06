@@ -480,10 +480,11 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
   auto altar_mb_entts = spawn_multiblocks<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( static_cast<std::size_t>( min_num_altars.get_value() ),
                                                                                         altar1_spritesheet,
                                                                                         /*log=*/true, kMinBuildingSpacingCells );
-  std::vector<Sys::ItemKey> talismans{ "item.talisman1", "item.talisman2", "item.talisman3", "item.talisman4" };
+  // each altar draws its own talismans, so the sets may overlap between altars
   for ( auto entt : altar_mb_entts )
   {
-    reg().emplace_or_replace<Cmp::Altar::TalismanCount>( entt, talismans );
+    reg().emplace_or_replace<Cmp::Altar::TalismanCount>(
+        entt, Sys::ItemStore::instance().pick_distinct_items( "item.talisman*", Cmp::Altar::TalismanCount::kAltarTalismanCount ) );
   }
 
   // CRYPTS - note: we use keys from altars to open crypts so the number should be equal

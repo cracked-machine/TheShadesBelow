@@ -15,6 +15,9 @@ namespace Game::Cmp::Altar
 class TalismanCount
 {
 public:
+  //! @brief Number of talismans each altar takes. Matches the slots in the altar sprite's particle_offsets/talisman_offsets.
+  static constexpr std::size_t kAltarTalismanCount = 4;
+
   TalismanCount( const std::vector<Sys::ItemKey> &keys )
   {
     m_data.clear();

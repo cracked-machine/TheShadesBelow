@@ -185,4 +185,22 @@ ItemStore::key_type ItemStore::pick_item( const key_type &key ) const
   return get_random( get_item_matches( key ) ).item_type;
 }
 
+std::vector<ItemStore::key_type> ItemStore::pick_distinct_items( const key_type &key, std::size_t n ) const
+{
+  auto matches = get_item_matches( key );
+  if ( matches.size() < n )
+  {
+    throw std::runtime_error( "Cannot pick " + std::to_string( n ) + " distinct items for '" + key.str() + "': only " +
+                              std::to_string( matches.size() ) + " match in " + m_json_file_path.string() );
+  }
+  // partial Fisher-Yates: the first n entries end up as a uniform random selection
+  for ( std::size_t i = 0; i < n; ++i )
+  {
+    const auto pick = static_cast<std::size_t>( Cmp::RandomInt( static_cast<int>( i ), static_cast<int>( matches.size() ) - 1 ).gen() );
+    std::swap( matches[i], matches[pick] );
+  }
+  matches.resize( n );
+  return matches;
+}
+
 } // namespace Game::Sys

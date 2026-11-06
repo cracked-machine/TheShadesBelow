@@ -2,6 +2,7 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/AbsoluteAlpha.hpp>
 #include <Components/Altar/Activated.hpp>
+#include <Components/Altar/TalismanCount.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/Exhumed.hpp>
@@ -45,6 +46,7 @@
 #include <Utils/Utils.hpp>
 
 #include <entt/entity/fwd.hpp>
+#include <set>
 #include <utility>
 
 namespace Game::Sys
@@ -351,9 +353,24 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
     case Cmp::Grave::Consequence::Type::CURSE_TABLET:
       spawn_grave_loot( { "item.cursetablet" } );
       break;
-    case Cmp::Grave::Consequence::Type::TALISMAN:
-      spawn_grave_loot( { "item.talisman1", "item.talisman2", "item.talisman3", "item.talisman4" } );
+    case Cmp::Grave::Consequence::Type::TALISMAN: {
+      // any talisman that at least one altar takes
+      std::set<Sys::ItemKey> talismans;
+      for ( auto [_, talisman_cmp] : reg().view<Cmp::Altar::TalismanCount>().each() )
+      {
+        for ( const auto &[talisman_key, _activated] : talisman_cmp )
+        {
+          talismans.insert( talisman_key );
+        }
+      }
+      if ( talismans.empty() )
+      {
+        SPDLOG_WARN( "Grave rolled a talisman but no altar takes talismans" );
+        break;
+      }
+      spawn_grave_loot( { talismans.begin(), talismans.end() } );
       break;
+    }
     case Cmp::Grave::Consequence::Type::TRAIL_START:
       SPDLOG_INFO( "Grave {} started the trail", static_cast<uint32_t>( grave_entity ) );
       // nowhere for the trail to go: hand over the key now so the level can still be exited
