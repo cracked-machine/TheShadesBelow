@@ -30,8 +30,8 @@ public:
   void update( sf::Time dt );
 
 private:
-  //! @brief Tracks how long the bow has been held drawn, between DRAW_BOW and RELEASE_BOW.
-  sf::Clock m_bow_draw_clock;
+  //! @brief Accumulates how long the bow has been held drawn, between DRAW_BOW and RELEASE_BOW.
+  sf::Time m_bow_draw_timer;
 
   //! @brief True while the bow is being drawn (left mouse button held with bow equipped).
   bool m_bow_drawing{ false };

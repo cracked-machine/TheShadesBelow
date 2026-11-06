@@ -51,14 +51,14 @@ void ArrowSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
     // draw the bow
     if ( m_sound_bank.get_effect( "draw_bow" ).getStatus() != sf::Sound::Status::Playing ) m_sound_bank.get_effect( "draw_bow" ).play();
     m_bow_drawing = true;
-    m_bow_draw_clock.restart();
+    m_bow_draw_timer = sf::Time::Zero;
   }
   else if ( ev.action == Game::Events::PlayerActionEvent::GameActions::RELEASE_BOW )
   {
     // release an arrow; how far it flies depends on how long the bow was held drawn
     m_sound_bank.get_effect( "release_bow" ).play();
 
-    float charge_fraction = m_bow_drawing ? std::clamp( m_bow_draw_clock.getElapsedTime().asSeconds() / Constants::kFullChargeSeconds,
+    float charge_fraction = m_bow_drawing ? std::clamp( m_bow_draw_timer.asSeconds() / Constants::kFullChargeSeconds,
                                                         Constants::kMinChargeFraction, 1.f )
                                           : 1.f;
     m_bow_drawing = false;
@@ -71,6 +71,7 @@ void ArrowSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
 
 void ArrowSystem::update( sf::Time dt )
 {
+  if ( m_bow_drawing ) { m_bow_draw_timer += dt; }
   update_arrow_trajectory( dt );
   check_npc_arrow_collision();
 }
