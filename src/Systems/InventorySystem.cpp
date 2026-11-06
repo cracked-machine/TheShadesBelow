@@ -6,8 +6,8 @@
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
-#include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
+#include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
@@ -67,6 +67,7 @@ InventorySystem::InventorySystem( entt::registry &reg, sf::RenderWindow &window,
 
 void InventorySystem::update( sf::Time dt )
 {
+  m_swap_item_cooldown_timer += dt;
   Factory::Particle::delete_expired_particle_sprites( reg(), "player.forage.particle.eating" );
 
   auto player_entt = Utils::Player::get_entity( reg() );
@@ -180,7 +181,7 @@ void InventorySystem::swap_inventory()
   // can't let go of the broom mid-flight (including the descent to the landing cell)
   if ( Utils::Player::is_flying( reg() ) ) return;
 
-  if ( m_swap_item_cooldown_timer.getElapsedTime() < sf::milliseconds( 750.f ) ) return;
+  if ( m_swap_item_cooldown_timer < sf::milliseconds( 750.f ) ) return;
 
   auto player_pos = Cmp::RectBounds::scaled( Utils::Player::get_position( reg() ), 0.5 );
   Sys::SpriteKey existing_player_inventory_type;
@@ -203,7 +204,7 @@ void InventorySystem::swap_inventory()
 
     pickup_world_item( reg(), world_item_entt );
   }
-  m_swap_item_cooldown_timer.restart();
+  m_swap_item_cooldown_timer = sf::Time::Zero;
   SPDLOG_DEBUG( "inventory_view: {} ", inventory_view.size() );
 }
 
@@ -287,7 +288,10 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
   // try to copy any relevant components over to the new world carryitem entt
   auto *inventory_slot_level_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inventory_slot_entt );
   if ( inventory_slot_level_cmp ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( world_item_entt, inventory_slot_level_cmp->m_level ); }
-  if ( reg().all_of<Cmp::Inventory::StingDamage>( inventory_slot_entt ) ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( world_item_entt ); }
+  if ( reg().all_of<Cmp::Inventory::StingDamage>( inventory_slot_entt ) )
+  {
+    reg().emplace_or_replace<Cmp::Inventory::StingDamage>( world_item_entt );
+  }
 
   if ( const auto *offering_cmp = reg().try_get<Cmp::Npc::SummonOffering>( inventory_slot_entt ) )
   {
@@ -365,7 +369,10 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
 
   // items without a Cmp::Inventory::StingDamage (e.g. foraged with gloves) don't sting when picked up
   const auto spawn_action = Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg, world_item_entt );
-  if ( const auto *world_item_pos_cmp = reg.try_get<Cmp::Position>( world_item_entt ) ) { trigger_side_effects( spawn_action, *world_item_pos_cmp, world_item_entt ); }
+  if ( const auto *world_item_pos_cmp = reg.try_get<Cmp::Position>( world_item_entt ) )
+  {
+    trigger_side_effects( spawn_action, *world_item_pos_cmp, world_item_entt );
+  }
 
   auto *anim_data_cmp = reg.try_get<Cmp::AnimData>( world_item_entt );
   if ( not anim_data_cmp ) return;

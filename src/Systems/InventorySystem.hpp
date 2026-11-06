@@ -116,7 +116,7 @@ private:
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
 
   //! @brief Prevent player from spamming the drop inventory action.
-  sf::Clock m_swap_item_cooldown_timer;
+  sf::Time m_swap_item_cooldown_timer;
 
   //! @brief fixed step for updating the item damage for expiry.
   sf::Time m_expiry_update_timer;
