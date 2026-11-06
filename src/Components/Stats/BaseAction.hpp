@@ -50,13 +50,6 @@ struct Infamy
   int value{ 0 };
 };
 
-//! @brief Strongly-typed toxicity delta, used to disambiguate BaseAction/derived-action constructor arguments.
-struct Toxicity
-{
-  //! @brief The change applied to the toxicity stat.
-  int value{ 0 };
-};
-
 //! @brief Strongly-typed luck delta, used to disambiguate BaseAction/derived-action constructor arguments.
 struct Luck
 {
