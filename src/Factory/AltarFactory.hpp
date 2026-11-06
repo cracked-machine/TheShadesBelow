@@ -21,7 +21,7 @@ inline constexpr const char *kExtraLifeParticleTag = "altar.particle.extralife";
 void create_altar_sacrifice_anim( entt::registry &reg, Cmp::Position pos, Sys::SpriteKey anim_type );
 
 //! @brief Get the active or inactive variant of an altar sprite.
-//! @details e.g. "sprite.graveyard.altar2.inactive" -> "sprite.graveyard.altar2.active"
+//! @details e.g. "sprite.graveyard.altar.inactive" -> "sprite.graveyard.altar.active"
 //! @param sprite_type An altar sprite type ending in ".active" or ".inactive".
 //! @param active Whether to return the active variant.
 //! @return The sprite type with its state suffix replaced, or `sprite_type` unchanged if it has no state suffix.
