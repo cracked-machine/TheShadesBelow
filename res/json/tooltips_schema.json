@@ -48,7 +48,7 @@
         "type": "object",
         "properties": {
           "id": {"type": "string", "description": "Unique id, stored in persist.json TooltipsSeen"},
-          "trigger": {"type": "string", "enum": ["AddInventoryEvent", "ItemPickedUpEvent"], "description": "Event that triggers the tooltip"},
+          "trigger": {"type": "string", "enum": ["AddInventoryEvent", "ItemPickedUpEvent", "GrimoireDiscoveryEvent"], "description": "Event that triggers the tooltip"},
           "condition": {
             "type": "object",
             "properties": {
@@ -56,7 +56,7 @@
             },
             "additionalProperties": false
           },
-          "text": {"type": "string", "description": "Message to display"},
+          "text": {"type": "string", "description": "Message to display. \"{item}\" is replaced by the display name of the item carried by the triggering event"},
           "frequency": {"type": "string", "enum": ["once", "always", "disabled"]},
           "duration_s": {"type": "number", "exclusiveMinimum": 0, "description": "Seconds the tooltip is displayed for"}
         },

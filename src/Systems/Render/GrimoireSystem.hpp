@@ -51,11 +51,13 @@ private:
   //! @param ev
   void on_add_inventory_event( const Events::AddInventoryEvent &ev );
 
-  //! @brief Reveal the sprite and carry action on every grimoire subpage belonging to the item.
+  //! @brief Reveal the sprite and carry action on every grimoire subpage belonging to the item. Triggers
+  //! Events::GrimoireDiscoveryEvent if anything was newly revealed.
   //! @param item_key
   void discover_item( const Sys::ItemKey &item_key );
 
-  //! @brief Discover an action on a plant's grimoire page once it has been applied to the player.
+  //! @brief Discover an action on a plant's grimoire page once it has been applied to the player. Triggers
+  //! Events::GrimoireDiscoveryEvent the first time the action (or the item) is revealed.
   //! @param ev
   void on_grimoire_update_event( const Events::GrimoireUpdateEvent &ev );
 

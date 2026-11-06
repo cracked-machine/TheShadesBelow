@@ -4,6 +4,8 @@
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/TooltipSystem.hpp>
+#include <Systems/Stores/ItemStore.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Text.hpp>
@@ -34,6 +36,7 @@ TooltipSystem::TooltipSystem( entt::registry &reg, sf::RenderWindow &window, Aud
   load_definitions( "res/json/tooltips.json" );
   std::ignore = get_systems_event_queue().sink<Events::AddInventoryEvent>().connect<&TooltipSystem::on_add_inventory_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::ItemPickedUpEvent>().connect<&TooltipSystem::on_item_picked_up_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::GrimoireDiscoveryEvent>().connect<&TooltipSystem::on_grimoire_discovery_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::DismissTooltipEvent>().connect<&TooltipSystem::on_dismiss_tooltip_event>( this );
   SPDLOG_DEBUG( "TooltipSystem initialized with {} tooltips", m_definitions.size() );
 }
@@ -114,6 +117,12 @@ void TooltipSystem::on_item_picked_up_event( const Events::ItemPickedUpEvent &ev
   m_candidates.push_back( { "ItemPickedUpEvent", event.m_item.str() } );
 }
 
+void TooltipSystem::on_grimoire_discovery_event( const Events::GrimoireDiscoveryEvent &event )
+{
+  if ( not m_enabled ) { return; }
+  m_candidates.push_back( { "GrimoireDiscoveryEvent", event.m_item.str() } );
+}
+
 void TooltipSystem::update( sf::Time dt )
 {
   check_reset();
@@ -127,8 +136,9 @@ void TooltipSystem::update( sf::Time dt )
       const auto *def = find_match( candidate );
       if ( not def ) { continue; }
 
-      // the newest tooltip replaces any tooltip already showing
-      m_active = ActiveTooltip{ def->text, def->duration };
+      // a repeating notification must not hide a one-time tutorial; otherwise the newest tooltip replaces the active one
+      if ( def->frequency == Frequency::ALWAYS and m_active and m_active->frequency == Frequency::ONCE ) { continue; }
+      m_active = ActiveTooltip{ format_text( *def, candidate ), def->duration, def->frequency };
       if ( def->frequency == Frequency::ONCE )
       {
         m_seen.insert( def->id );
@@ -180,6 +190,18 @@ const TooltipSystem::TooltipDef *TooltipSystem::find_match( const Candidate &can
     return &def;
   }
   return nullptr;
+}
+
+std::string TooltipSystem::format_text( const TooltipDef &def, const Candidate &candidate )
+{
+  static constexpr std::string_view kItemPlaceholder = "{item}";
+  std::string text = def.text;
+  const auto pos = text.find( kItemPlaceholder );
+  if ( pos == std::string::npos or candidate.item.empty() ) { return text; }
+
+  const auto &item = Sys::ItemStore::instance().get( Sys::ItemKey( candidate.item ) );
+  text.replace( pos, kItemPlaceholder.size(), Sys::SpriteStore::instance().get( item.sprite_type ).display_name() );
+  return text;
 }
 
 void TooltipSystem::render()

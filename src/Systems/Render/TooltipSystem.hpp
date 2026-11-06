@@ -3,6 +3,7 @@
 
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/DismissTooltipEvent.hpp>
+#include <Events/GrimoireDiscoveryEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 
@@ -22,6 +23,9 @@ namespace Game::Sys
 //! @details Listens to game events without consuming them. Event handlers only record a candidate; candidates are
 //! evaluated in update(), which runs in the next scene update, so every other handler for the event has already
 //! run and game state is up to date, regardless of the dispatcher's handler order.
+//! A repeating ("always") tooltip never replaces an active one-time ("once") tooltip, so a notification raised in the
+//! same frame as a tutorial (e.g. picking up an item) cannot hide it. A tooltip's text may contain "{item}", which is
+//! replaced by the display name of the item carried by the triggering event.
 class TooltipSystem : public RenderSystem
 {
 public:
@@ -47,6 +51,10 @@ public:
   //! @param event
   void on_item_picked_up_event( const Events::ItemPickedUpEvent &event );
 
+  //! @brief Record a candidate for tooltips triggered by "GrimoireDiscoveryEvent".
+  //! @param event
+  void on_grimoire_discovery_event( const Events::GrimoireDiscoveryEvent &event );
+
   //! @brief Hide the active tooltip before its timer expires.
   //! @param event
   void on_dismiss_tooltip_event( [[maybe_unused]] const Events::DismissTooltipEvent &event ) { m_active.reset(); }
@@ -67,7 +75,8 @@ private:
   {
     //! @brief unique id, stored in Cmp::Persist::TooltipsSeen
     std::string id;
-    //! @brief name of the event that triggers this tooltip, e.g. "AddInventoryEvent" or "ItemPickedUpEvent"
+    //! @brief name of the event that triggers this tooltip, e.g. "AddInventoryEvent", "ItemPickedUpEvent" or
+    //! "GrimoireDiscoveryEvent"
     std::string trigger;
     //! @brief optional item key condition, empty matches any item
     std::string item;
@@ -95,6 +104,8 @@ private:
     std::string text;
     //! @brief time left before the tooltip is hidden
     sf::Time remaining;
+    //! @brief the frequency of the definition being displayed, see update()
+    Frequency frequency;
   };
 
   //! @brief Panel style from res/json/tooltips.json
@@ -129,6 +140,12 @@ private:
   //! @param candidate
   //! @return const TooltipDef* the matching definition, or nullptr
   const TooltipDef *find_match( const Candidate &candidate ) const;
+
+  //! @brief Get the definition's text with "{item}" replaced by the display name of the candidate's item.
+  //! @param def
+  //! @param candidate
+  //! @return std::string the text to display
+  static std::string format_text( const TooltipDef &def, const Candidate &candidate );
 
   //! @brief global switch from res/json/tooltips.json, false disables all tooltips
   bool m_enabled{ true };

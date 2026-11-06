@@ -18,6 +18,8 @@
 
 #include <algorithm>
 #include <map>
+#include <set>
+#include <string>
 #include <vector>
 
 namespace Game::Cmp
@@ -34,6 +36,9 @@ public:
     Sys::ItemKey item_key = "";
     Sys::SpriteKey sprite_key = "";
     ActionMap action_map;
+    //! @brief Keys of the actions revealed by discovery. Excludes the prefilled "none" entries, which are in action_map
+    //! from the start.
+    std::set<std::string> discovered_actions;
   };
 
   struct Page

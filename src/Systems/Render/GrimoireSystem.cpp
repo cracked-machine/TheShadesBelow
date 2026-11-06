@@ -4,6 +4,7 @@
 #include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
+#include <Events/GrimoireDiscoveryEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <SFML/Graphics/Color.hpp>
@@ -110,27 +111,38 @@ void GrimoireSystem::on_add_inventory_event( const Events::AddInventoryEvent &ev
 void GrimoireSystem::discover_item( const Sys::ItemKey &item_key )
 {
   const auto &item = Sys::ItemStore::instance().get( item_key );
+  bool changed = false;
   for_each_subpage( item_key, [&]( std::size_t page_idx, Cmp::Grimoire::SubPage &sub_page )
   {
+    if ( sub_page.sprite_key != item.sprite_type ) { changed = true; }
     sub_page.sprite_key = item.sprite_type;
     if ( item.has_action<Cmp::CarryAction>() )
     {
       sub_page.action_map.insert_or_assign( std::string( Cmp::CarryAction::kKey ), item.get_action<Cmp::CarryAction>() );
+      if ( sub_page.discovered_actions.insert( std::string( Cmp::CarryAction::kKey ) ).second ) { changed = true; }
     }
     if ( not is_grimoire_overlay_open() ) { m_current_page_idx = page_idx; }
   } );
+  // once per item, however many pages it appears on
+  if ( changed ) { get_systems_event_queue().trigger( Events::GrimoireDiscoveryEvent( item_key ) ); }
 }
 
 void GrimoireSystem::on_grimoire_update_event( const Events::GrimoireUpdateEvent &ev )
 {
   if ( ev.m_action_key == Cmp::ProximityAction::kKey and ev.m_action.is_zero() ) { return; }
   const auto &item = Sys::ItemStore::instance().get( ev.m_item );
+  bool changed = false;
   for_each_subpage( ev.m_item, [&]( std::size_t page_idx, Cmp::Grimoire::SubPage &sub_page )
   {
+    if ( sub_page.sprite_key != item.sprite_type ) { changed = true; }
     sub_page.sprite_key = item.sprite_type;
     sub_page.action_map.insert_or_assign( ev.m_action_key, ev.m_action );
+    // repeating actions send an update on every application; only the first one is a discovery
+    if ( sub_page.discovered_actions.insert( ev.m_action_key ).second ) { changed = true; }
     if ( not is_grimoire_overlay_open() ) { m_current_page_idx = page_idx; }
   } );
+  // once per item, however many pages it appears on
+  if ( changed ) { get_systems_event_queue().trigger( Events::GrimoireDiscoveryEvent( ev.m_item ) ); }
 }
 
 void GrimoireSystem::on_player_action( Events::PlayerActionEvent ev )
