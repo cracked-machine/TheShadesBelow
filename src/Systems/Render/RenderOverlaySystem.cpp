@@ -511,7 +511,7 @@ void RenderOverlaySystem::render_ui_labels( sf::Time dt )
 void RenderOverlaySystem::render_level_depth()
 {
   const auto &player_level_cmp = Utils::Player::get_level_depth( reg() );
-  if ( player_level_cmp.display_timer.getElapsedTime() >= player_level_cmp.display_cooldown ) { return; }
+  if ( player_level_cmp.display_timer >= player_level_cmp.display_cooldown ) { return; }
 
   const auto &display_res = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
   sf::Text level_txt( m_font, "Nekropolis " + std::to_string( player_level_cmp.get_count() ), 100 );

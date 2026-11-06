@@ -64,6 +64,7 @@
 #include <Components/Player/DiggingTimer.hpp>
 #include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/Illuminated.hpp>
+#include <Components/Player/LevelDepth.hpp>
 #include <Components/Player/Mortality.hpp>
 #include <Components/Player/MovementDelta.hpp>
 #include <Components/Player/MovementSuppressTimer.hpp>

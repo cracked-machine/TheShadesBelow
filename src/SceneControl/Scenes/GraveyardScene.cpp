@@ -276,6 +276,8 @@ void GraveyardScene::do_update( sf::Time dt )
 {
   ZoneScoped;
 
+  Utils::Player::get_level_depth( m_reg ).display_timer += dt;
+
   // keep m_render_position_sm up to date with static entities created/destroyed since it was last
   // built - see its doc comment for why this is a periodic rebuild rather than precise sync.
   // Repopulates the existing grid object in place (never reassigns m_render_position_sm) so systems

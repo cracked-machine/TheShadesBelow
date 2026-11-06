@@ -21,7 +21,7 @@ public:
   void increment_count( unsigned int count )
   {
     m_level += count;
-    display_timer.restart();
+    display_timer = sf::Time::Zero;
   }
   //! @brief Decrease the level depth, clamped at zero.
   //! @param count amount to subtract from the current depth
@@ -33,12 +33,12 @@ public:
 
   //! @brief Get the current level depth.
   //! @return unsigned int the current level depth
-  unsigned int get_count() const { return m_level; }
+  [[nodiscard]] unsigned int get_count() const { return m_level; }
 
   //! @brief How long the depth indicator stays visible on screen after being triggered.
   sf::Time display_cooldown{ sf::seconds( 5 ) };
   //! @brief Timer tracking how long the depth indicator has been displayed.
-  sf::Clock display_timer;
+  sf::Time display_timer;
 
 private:
   //! @brief Current level depth.
