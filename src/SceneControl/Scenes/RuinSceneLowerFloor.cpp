@@ -34,7 +34,6 @@
 #include <Systems/ActionSystem.hpp>
 #include <Systems/AnimSystem.hpp>
 #include <Systems/BaseSystem.hpp>
-#include <Systems/CryptSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/HealingSpringSystem.hpp>
 #include <Systems/InventorySystem.hpp>

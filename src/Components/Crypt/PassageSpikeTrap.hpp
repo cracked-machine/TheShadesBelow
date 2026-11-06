@@ -1,11 +1,6 @@
 #ifndef SRC_COMPONENTS_CRYPT_PASSAGESPIKETRAP_HPP__
 #define SRC_COMPONENTS_CRYPT_PASSAGESPIKETRAP_HPP__
 
-#include <SFML/Graphics/Rect.hpp>
-#include <SFML/System/Clock.hpp>
-#include <SFML/System/Time.hpp>
-#include <SFML/System/Vector2.hpp>
-
 namespace Game::Cmp::Crypt
 {
 
@@ -34,10 +29,11 @@ public:
 
   //! @brief Id of the passage this trap belongs to.
   unsigned int m_passage_id = 0;
-  //! @brief Tracks elapsed time since the trap last triggered, checked against m_cooldown_threshold.
-  sf::Clock m_cooldown_timer;
   //! @brief Minimum time that must elapse between trap activations.
-  sf::Time m_cooldown_threshold{ sf::seconds( 2 ) };
+  sf::Time m_cooldown_threshold{ sf::seconds( 3 ) };
+  //! @brief Tracks elapsed time since the trap last triggered, checked against m_cooldown_threshold.
+  //! Starts at the threshold so the first activation is immediate.
+  sf::Time m_cooldown_timer{ m_cooldown_threshold };
 };
 
 } // namespace Game::Cmp::Crypt

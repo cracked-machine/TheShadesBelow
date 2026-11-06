@@ -107,7 +107,7 @@ void CryptSystem::update( sf::Time dt )
   check_lever_activation();
   check_lava_pit_activation_by_proximity();
   do_lava_pit_animation( dt );
-  check_spike_trap_activation_by_proximity();
+  check_spike_trap_activation_by_proximity( dt );
 }
 
 void CryptSystem::shuffle_rooms_passages()
@@ -992,31 +992,31 @@ void CryptSystem::check_spike_trap_collision()
   }
 }
 
-void CryptSystem::check_spike_trap_activation_by_proximity()
+void CryptSystem::check_spike_trap_activation_by_proximity( sf::Time dt )
 {
   auto player_pos_cmp = Utils::Player::get_position( reg() );
   auto player_hitbox_enable = Cmp::RectBounds::scaled( player_pos_cmp.position, player_pos_cmp.size, 2.f );
   auto player_hitbox_disable = Cmp::RectBounds::scaled( player_pos_cmp.position, player_pos_cmp.size, 5.f );
   for ( auto [spike_trap_entt, spike_trap_cmp, spike_trap_anim_cmp] : reg().view<Cmp::Crypt::PassageSpikeTrap, Cmp::AnimData>().each() )
   {
+    spike_trap_cmp.m_cooldown_timer += dt;
     auto spike_trap_hitbox = sf::FloatRect( spike_trap_cmp, Constants::kGridSizePxF );
-    if ( player_hitbox_enable.findIntersection( spike_trap_hitbox ) and
-         spike_trap_cmp.m_cooldown_timer.getElapsedTime() > spike_trap_cmp.m_cooldown_threshold )
+    if ( player_hitbox_enable.findIntersection( spike_trap_hitbox ) )
     {
-      // re-activate the threat
-      SPDLOG_DEBUG( "Reactivating spike: {}", static_cast<int>( spike_trap_entt ) );
-      spike_trap_anim_cmp.m_enabled = true;
-      spike_trap_cmp.m_cooldown_timer.reset();
+      if ( spike_trap_cmp.m_cooldown_timer > spike_trap_cmp.m_cooldown_threshold )
+      {
+        spike_trap_anim_cmp.m_enabled = true;
+        spike_trap_cmp.m_cooldown_timer = sf::Time::Zero;
 
-      auto sfx_status = m_sound_bank.get_effect( "spike_trap" ).getStatus();
-      if ( sfx_status != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "spike_trap" ).play(); }
+        auto sfx_status = m_sound_bank.get_effect( "spike_trap" ).getStatus();
+        if ( sfx_status != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "spike_trap" ).play(); }
+      }
     }
     else if ( not player_hitbox_disable.findIntersection( spike_trap_hitbox ) )
     {
-      // de-activate the threat
       spike_trap_anim_cmp.m_enabled = false;
       spike_trap_anim_cmp.m_current_frame = spike_trap_anim_cmp.m_base_frame;
-      spike_trap_cmp.m_cooldown_timer.restart();
+      spike_trap_cmp.m_cooldown_timer = spike_trap_cmp.m_cooldown_threshold;
     }
   }
 }

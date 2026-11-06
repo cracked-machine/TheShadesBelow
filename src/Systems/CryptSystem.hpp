@@ -25,8 +25,7 @@ class CryptSystem : public Game::Sys::BaseSystem
 {
 public:
   //! @brief Which wall category a restored obstacle belongs to when decorating a room.
-  enum class RoomWallType
-  {
+  enum class RoomWallType {
     //! @brief A wall on the interior of a room.
     INTERIOR = 0,
     //! @brief A wall on the outer border between rooms.
@@ -203,7 +202,7 @@ private:
 
   //! @brief Activate/deactivate the spike trap if player is close
   //! @note This uses animation component `m_animation_active` member.
-  void check_spike_trap_activation_by_proximity();
+  void check_spike_trap_activation_by_proximity( sf::Time dt );
 
   //! @brief Removes Cmp::Lever components from Cmp::Crypt::RoomOpen areas
   //! @param player_pos_cmp
