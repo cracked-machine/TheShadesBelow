@@ -40,6 +40,15 @@ ArrowSystem::ArrowSystem( entt::registry &reg, sf::RenderWindow &window, Audio::
 
 void ArrowSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
 {
+  // before the inventory checks, so a draw is abandoned even if the longbow has since been swapped out or worn through
+  if ( ev.action == Game::Events::PlayerActionEvent::GameActions::CANCEL_BOW )
+  {
+    m_bow_drawing = false;
+    m_bow_draw_timer = sf::Time::Zero;
+    m_sound_bank.get_effect( "draw_bow" ).stop();
+    return;
+  }
+
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_type != "item.longbow" ) { return; }
 

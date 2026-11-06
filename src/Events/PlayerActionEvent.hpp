@@ -35,6 +35,8 @@ struct PlayerActionEvent
     DRAW_BOW,
     //! @brief Release the drawn bow, firing an arrow.
     RELEASE_BOW,
+    //! @brief Abandon a bow draw or burr throw charge without firing.
+    CANCEL_BOW,
     //! @brief Attempt to eat/drink the current inventory item.
     CONSUME,
     //! @brief Attempt to burn the nearest/facing plant object.

@@ -17,7 +17,7 @@
 namespace Game::Sys
 {
 
-//! @brief Toggles and drives the player's grimoire (spellbook) overlay.
+//! @brief Toggles and drives the player's grimoire (spellbook) overlay. Gameplay is paused while the overlay is open.
 class GrimoireSystem : public RenderSystem
 {
 public:
@@ -34,12 +34,12 @@ public:
   //! @brief Draw the current grimoire page, if the overlay is open.
   void render();
 
-  //! @brief True while the grimoire overlay is toggled open.
+  //! @brief True while the grimoire overlay is toggled open. Scenes that host the grimoire use this as their pause query.
   [[nodiscard]] bool is_grimoire_overlay_open() const;
 
 private:
   //! @brief Toggle the overlay on GRIMOIRE_TOGGLE and, while open, turn pages on GRIMOIRE_PREV/GRIMOIRE_NEXT
-  //! (arrow keys or mouse wheel). Both debounced.
+  //! (arrow keys or mouse wheel). Both debounced. Opening cancels any bow draw and pauses sound effects; closing resumes them.
   //! @param ev
   void on_player_action( Events::PlayerActionEvent ev );
 

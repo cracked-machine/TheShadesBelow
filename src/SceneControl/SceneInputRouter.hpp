@@ -85,6 +85,18 @@ private:
   //! @brief reset and process new user direction input
   void process_move_keys();
 
+  //! @brief Process input while the grimoire overlay is open. Gameplay is paused, so only the grimoire's own
+  //!        controls (process_grimoire_keys, process_grimoire_wheel) and the common window events are handled.
+  void grimoire_overlay_input_handler();
+  //! @brief Check whether the player's grimoire overlay is open in the current scene's registry.
+  //! @return true if the grimoire is open, false if it is closed or there is no player.
+  bool is_grimoire_open();
+  //! @brief Trigger the held-key grimoire actions: G toggles the overlay, Left/Right turn pages.
+  void process_grimoire_keys();
+  //! @brief Turn the grimoire page if the event is a vertical mouse wheel scroll; otherwise does nothing.
+  //! @param event The polled window event
+  void process_grimoire_wheel( const sf::Event &event );
+
   //! @brief forwards to ImGui and handles the window Closed/Resized events common to every scene; returns true if the event was consumed
   bool dispatch_common_window_event( const sf::Event &event );
   //! @brief handles the debug/cheat keys shared by every gameplay scene; returns true if the scancode was handled

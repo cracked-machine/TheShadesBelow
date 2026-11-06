@@ -79,6 +79,14 @@ void BurrSystem::on_item_picked_up_event( const Events::ItemPickedUpEvent &ev )
 
 void BurrSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
 {
+  // before the inventory checks, so a charge is abandoned even if the burr has since left the inventory
+  if ( ev.action == Game::Events::PlayerActionEvent::GameActions::CANCEL_BOW )
+  {
+    m_throw_charging = false;
+    m_throw_charge_timer = sf::Time::Zero;
+    return;
+  }
+
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_type != "item.burr" ) { return; }
 

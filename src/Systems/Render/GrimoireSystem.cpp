@@ -142,6 +142,14 @@ void GrimoireSystem::on_player_action( Events::PlayerActionEvent ev )
   {
     grimoire_cmp->is_enabled = not grimoire_cmp->is_enabled;
     m_toggle_debounce = sf::Time::Zero;
+    if ( grimoire_cmp->is_enabled )
+    {
+      // the mouse release is swallowed while paused, so abandon any draw now rather than leave it pending.
+      // Cancel before pausing the effects so the draw sfx is stopped, not paused and later resumed.
+      get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::CANCEL_BOW ) );
+      m_sound_bank.pause_effects();
+    }
+    else { m_sound_bank.resume_effects(); }
     return;
   }
 

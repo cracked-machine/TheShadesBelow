@@ -2,6 +2,7 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Direction.hpp>
 #include <Components/Exit.hpp>
+#include <Components/Inventory/Grimoire.hpp>
 #include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/BlastRadius.hpp>
@@ -115,6 +116,11 @@ void SceneInputRouter::settings_scene_state_handler()
 
 void SceneInputRouter::graveyard_scene_state_handler()
 {
+  if ( is_grimoire_open() )
+  {
+    grimoire_overlay_input_handler();
+    return;
+  }
 
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
@@ -170,16 +176,7 @@ void SceneInputRouter::graveyard_scene_state_handler()
         get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::DRAW_BOW ) );
       }
     }
-    else if ( const auto *wheelScrolled = event->getIf<sf::Event::MouseWheelScrolled>() )
-    {
-      // scroll up/away for the previous grimoire page, down/towards for the next, like scrolling a document
-      if ( wheelScrolled->wheel == sf::Mouse::Wheel::Vertical and wheelScrolled->delta != 0.f )
-      {
-        const auto action = wheelScrolled->delta > 0.f ? Events::PlayerActionEvent::GameActions::GRIMOIRE_PREV
-                                                       : Events::PlayerActionEvent::GameActions::GRIMOIRE_NEXT;
-        get_systems_event_queue().trigger( Events::PlayerActionEvent( action ) );
-      }
-    }
+    else { process_grimoire_wheel( *event ); }
   }
 
   process_move_keys();
@@ -190,18 +187,7 @@ void SceneInputRouter::graveyard_scene_state_handler()
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::PLACE_BOMB ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::FLY ) );
   }
-  if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::G ) )
-  {
-    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::GRIMOIRE_TOGGLE ) );
-  }
-  if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::Left ) )
-  {
-    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::GRIMOIRE_PREV ) );
-  }
-  if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::Right ) )
-  {
-    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::GRIMOIRE_NEXT ) );
-  }
+  process_grimoire_keys();
   if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::F ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::CONSUME ) );
@@ -425,6 +411,53 @@ void SceneInputRouter::level_complete_scene_state_handler()
 }
 
 // PRIVATE
+
+void SceneInputRouter::grimoire_overlay_input_handler()
+{
+  // gameplay is paused while the grimoire is open, so only the grimoire's own controls get through.
+  // The pause menu is blocked too: leaving it resumes the sound effects the grimoire paused.
+  while ( const std::optional event = m_window.pollEvent() )
+  {
+    if ( dispatch_common_window_event( *event ) ) continue;
+    process_grimoire_wheel( *event );
+  }
+  process_grimoire_keys();
+}
+
+bool SceneInputRouter::is_grimoire_open()
+{
+  auto grimoire_view = reg().view<const Cmp::Grimoire>();
+  if ( grimoire_view.empty() ) { return false; }
+  return grimoire_view.get<const Cmp::Grimoire>( grimoire_view.front() ).is_enabled;
+}
+
+void SceneInputRouter::process_grimoire_keys()
+{
+  if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::G ) )
+  {
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::GRIMOIRE_TOGGLE ) );
+  }
+  if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::Left ) )
+  {
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::GRIMOIRE_PREV ) );
+  }
+  if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::Right ) )
+  {
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::GRIMOIRE_NEXT ) );
+  }
+}
+
+void SceneInputRouter::process_grimoire_wheel( const sf::Event &event )
+{
+  const auto *wheelScrolled = event.getIf<sf::Event::MouseWheelScrolled>();
+  // scroll up/away for the previous grimoire page, down/towards for the next, like scrolling a document
+  if ( wheelScrolled and wheelScrolled->wheel == sf::Mouse::Wheel::Vertical and wheelScrolled->delta != 0.f )
+  {
+    const auto action = wheelScrolled->delta > 0.f ? Events::PlayerActionEvent::GameActions::GRIMOIRE_PREV
+                                                   : Events::PlayerActionEvent::GameActions::GRIMOIRE_NEXT;
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( action ) );
+  }
+}
 
 void SceneInputRouter::process_move_keys()
 {
