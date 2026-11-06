@@ -229,13 +229,7 @@ private:
   entt::entity m_hazard_pushback_target;
 
   //! @brief How long the player has continuously pushed into m_hazard_pushback_target.
-  sf::Clock m_hazard_pushback_clock;
-
-  //! @brief Tracks how long the bow has been held drawn, between DRAW_BOW and RELEASE_BOW.
-  sf::Clock m_bow_draw_clock;
-
-  //! @brief True while the bow is being drawn (left mouse button held with bow equipped).
-  bool m_bow_drawing{ false };
+  sf::Time m_hazard_pushback_timer;
 
   //! @brief Axis of the last successfully committed player movement, used only to decide which axis
   //! `update_player_position` resolves first each frame (see the axis-favoring fix in that function).

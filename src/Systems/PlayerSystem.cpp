@@ -198,6 +198,9 @@ void PlayerSystem::update( sf::Time dt )
     if ( not player_cmp.damage_cooldown_paused ) { player_cmp.m_damage_cooldown_timer += dt; }
   }
 
+  // advanced here rather than in resolve_hazard_pushback(), which runs once per axis each frame
+  if ( m_hazard_pushback_target != entt::null ) { m_hazard_pushback_timer += dt; }
+
   blink_player();
 
   // resting render offset, refreshed every frame so tuning applies immediately in every scene.
@@ -1325,12 +1328,12 @@ bool PlayerSystem::resolve_hazard_pushback( const Cmp::RectBounds &search_bounds
   if ( hazard_entt != m_hazard_pushback_target )
   {
     m_hazard_pushback_target = hazard_entt;
-    m_hazard_pushback_clock.restart();
+    m_hazard_pushback_timer = sf::Time::Zero;
     return false;
   }
 
   const auto &resist_cmp = reg().get<Cmp::Hazard::CollisionResist>( hazard_entt );
-  return m_hazard_pushback_clock.getElapsedTime().asSeconds() >= resist_cmp.resist_seconds;
+  return m_hazard_pushback_timer.asSeconds() >= resist_cmp.resist_seconds;
 }
 
 void PlayerSystem::promote_pending_no_path()
