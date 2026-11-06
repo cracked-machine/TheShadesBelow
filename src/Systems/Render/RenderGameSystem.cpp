@@ -488,7 +488,7 @@ void RenderGameSystem::render_armed_indicator( const Cmp::Armed &armed_cmp, cons
   temp_square.setFillColor( sf::Color::Transparent );
   if ( armed_cmp.getElapsedWarningTime() > armed_cmp.m_warning_delay )
   {
-    const float &flash_clk_elapsed_secs = Utils::Player::get_global_bomb_flash_clk( reg() ).getElapsedTime().asSeconds();
+    const float &flash_clk_elapsed_secs = Utils::Player::get_global_bomb_flash_timer( reg() ).asSeconds();
     const float &armed_blink_hertz = Sys::PersistSystem::get<Cmp::Persist::ArmedBlinkFreq>( reg() ).get_value();
     const bool flash_on = static_cast<int>( flash_clk_elapsed_secs * armed_blink_hertz * 2.f ) % 2 == 0;
     if ( flash_on )

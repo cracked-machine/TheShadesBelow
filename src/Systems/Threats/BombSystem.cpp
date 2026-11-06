@@ -217,7 +217,7 @@ void BombSystem::update( sf::Time dt )
   }
 
   auto remaining_armed_view = reg().view<Cmp::Armed>();
-  if ( remaining_armed_view->empty() ) { Utils::Player::get_global_bomb_flash_clk( reg() ).reset(); }
+  if ( remaining_armed_view->empty() ) { Utils::Player::get_global_bomb_flash_timer( reg() ) = sf::Time::Zero; }
 }
 
 void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_entity, const int blast_radius )
@@ -303,7 +303,7 @@ void BombSystem::arm_grave_bomb()
   auto realigned_epicenter_pos = Utils::snap_to_grid( Utils::Player::get_position( reg() ) );
   reg().emplace_or_replace<Cmp::Position>( new_bomb_entt, realigned_epicenter_pos.position, realigned_epicenter_pos.size );
   place_concentric_bomb_pattern( new_bomb_entt, Utils::Player::get_blast_radius( reg() ).value );
-  Utils::Player::get_global_bomb_flash_clk( reg() ).restart();
+  Utils::Player::get_global_bomb_flash_timer( reg() ) = sf::Time::Zero;
 }
 
 void BombSystem::arm_player_bomb()
@@ -333,7 +333,7 @@ void BombSystem::arm_player_bomb()
       reg().emplace<Cmp::Position>( armed_epicenter_entity, realigned_epicenter_pos.position, realigned_epicenter_pos.size );
       place_concentric_bomb_pattern( armed_epicenter_entity, Utils::Player::get_blast_radius( reg() ).value );
       Factory::Player::destroy_inventory( reg(), "item.bomb" );
-      Utils::Player::get_global_bomb_flash_clk( reg() ).restart();
+      Utils::Player::get_global_bomb_flash_timer( reg() ) = sf::Time::Zero;
     }
   }
 }

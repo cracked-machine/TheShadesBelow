@@ -40,7 +40,7 @@ public:
         skip_damage_cooldown_once( other.skip_damage_cooldown_once ),
         damage_cooldown_paused( other.damage_cooldown_paused ),
         m_damage_cooldown_timer( sf::Time::Zero ),
-        m_global_bomb_flash_clk() // Reset clocks on copy
+        m_global_bomb_flash_timer( sf::Time::Zero ) // Reset clocks on copy
   {
   }
 
@@ -57,7 +57,7 @@ public:
       skip_damage_cooldown_once = other.skip_damage_cooldown_once;
       damage_cooldown_paused = other.damage_cooldown_paused;
       m_damage_cooldown_timer = sf::Time::Zero;
-      m_global_bomb_flash_clk.reset();
+      m_global_bomb_flash_timer = sf::Time::Zero;
     }
     return *this;
   }
@@ -66,7 +66,7 @@ public:
   Character() = default;
 
   //! @brief Timer used to drive the global bomb-flash visual effect.
-  sf::Clock m_global_bomb_flash_clk;
+  sf::Time m_global_bomb_flash_timer;
 
 private:
   sf::Time m_damage_cooldown_timeout{ sf::seconds( 3.f ) };

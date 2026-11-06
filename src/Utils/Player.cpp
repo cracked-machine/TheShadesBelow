@@ -386,12 +386,12 @@ Cmp::Player::Footstep &get_footstep_type( entt::registry &reg )
   return *footstep_cmp;
 }
 
-sf::Clock &get_global_bomb_flash_clk( entt::registry &reg )
+sf::Time &get_global_bomb_flash_timer( entt::registry &reg )
 {
   auto player_view = reg.view<Cmp::Player::Character>();
   for ( auto [entt, player_cmp] : player_view.each() )
   {
-    return player_cmp.m_global_bomb_flash_clk;
+    return player_cmp.m_global_bomb_flash_timer;
   }
   throw std::runtime_error( "Player entt has no component: Cmp::Player::Character" );
 }

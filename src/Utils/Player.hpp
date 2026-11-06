@@ -231,7 +231,7 @@ Cmp::Player::Footstep &get_footstep_type( entt::registry &reg );
 //! @param reg reference to the entt registry
 //! @return sf::Clock& Reference to the clock stored on the player's Cmp::Player::Character.
 //! @throws std::runtime_error if the player has no Cmp::Player::Character.
-sf::Clock &get_global_bomb_flash_clk( entt::registry &reg );
+sf::Time &get_global_bomb_flash_timer( entt::registry &reg );
 
 //! @brief Check whether the player currently has an extra life.
 //! @param reg reference to the entt registry
