@@ -95,11 +95,7 @@ void GrimoireSystem::for_each_subpage( const Sys::ItemKey &item_key, const std::
     for ( Cmp::Grimoire::SubPage *sub_page :
           { &page.plant_subpage, &page.forage_subpage, &page.drop_subpage, &page.forage_sacrifice_subpage, &page.drop_sacrifice_subpage } )
     {
-      // a wildcard subpage (e.g. "item.jewelry*") is discovered by any item with its prefix
-      const auto &sub_key = sub_page->item_key.str();
-      const bool matches = sub_key.ends_with( '*' ) ? item_key.str().starts_with( sub_key.substr( 0, sub_key.size() - 1 ) )
-                                                    : sub_page->item_key == item_key;
-      if ( matches ) { fn( page_idx, *sub_page ); }
+      if ( sub_page->item_key == item_key ) { fn( page_idx, *sub_page ); }
     }
   }
 }
