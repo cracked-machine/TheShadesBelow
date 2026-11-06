@@ -249,7 +249,7 @@ void GraveyardScene::on_enter()
   // check if the player inventory has a candle, if so light it up!
   Factory::Particle::add_flame_for_player_inventory_slot( m_reg );
 
-  m_scene_exit_cooldown.restart();
+  m_scene_exit_cooldown_timer = sf::Time::Zero;
 
   // Set the default footstep SFX for this scene
   m_reg.emplace_or_replace<Cmp::Player::Footstep>( Utils::Player::get_entity( m_reg ), Cmp::Player::Footstep::Type::GRASS );
@@ -282,10 +282,11 @@ void GraveyardScene::do_update( sf::Time dt )
   // built - see its doc comment for why this is a periodic rebuild rather than precise sync.
   // Repopulates the existing grid object in place (never reassigns m_render_position_sm) so systems
   // like InventorySystem that hold a weak_ptr to it from a one-time init() call don't go stale.
-  if ( m_render_position_grid_rebuild_clock.getElapsedTime() >= kRenderPositionGridRebuildInterval )
+  m_render_position_grid_rebuild_timer += dt;
+  if ( m_render_position_grid_rebuild_timer >= kRenderPositionGridRebuildInterval )
   {
     PROFILED( Factory::Pathfinding::populate_render_position_grid( m_reg, *m_render_position_sm ) );
-    m_render_position_grid_rebuild_clock.restart();
+    m_render_position_grid_rebuild_timer = sf::Time::Zero;
   }
 
   PROFILED( m_sys.find<Sys::Store::Type::AnimSystem>().update( dt ) );
@@ -319,7 +320,8 @@ void GraveyardScene::do_update( sf::Time dt )
   PROFILED( m_sys.find<Sys::Store::Type::GraveSystem>().update() );
 
   PROFILED( m_sys.find<Sys::Store::Type::CryptSystem>().update_exit_zorder() );
-  if ( m_scene_exit_cooldown.getElapsedTime() >= m_scene_exit_cooldown_time )
+  m_scene_exit_cooldown_timer += dt;
+  if ( m_scene_exit_cooldown_timer >= m_scene_exit_cooldown_time )
   {
     PROFILED( m_sys.find<Sys::Store::Type::CryptSystem>().check_entrance_collision() );
   }

@@ -46,8 +46,6 @@ private:
   sf::VertexArray m_vertices;
   //! @brief Texture used for the floor tile map.
   sf::Texture m_tileset;
-  //! @brief Clock used to time floor-related effects.
-  sf::Clock m_clock{};
 };
 
 } // namespace Game::Sprites::Containers

@@ -227,9 +227,9 @@ Cmp::PlayerStats &get_stats( entt::registry &reg );
 
 Cmp::Player::Footstep &get_footstep_type( entt::registry &reg );
 
-//! @brief Get the player's global bomb-flash clock, used to time the screen flash effect for bomb detonations.
+//! @brief Get the player's global bomb-flash timer, used to time the screen flash effect for bomb detonations.
 //! @param reg reference to the entt registry
-//! @return sf::Clock& Reference to the clock stored on the player's Cmp::Player::Character.
+//! @return sf::Time& Reference to the clock stored on the player's Cmp::Player::Character.
 //! @throws std::runtime_error if the player has no Cmp::Player::Character.
 sf::Time &get_global_bomb_flash_timer( entt::registry &reg );
 

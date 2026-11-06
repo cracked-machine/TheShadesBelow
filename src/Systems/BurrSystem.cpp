@@ -69,12 +69,12 @@ BurrSystem::BurrSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
 
 void BurrSystem::on_add_inventory_event( const Events::AddInventoryEvent &ev )
 {
-  if ( ev.m_item == "item.burr" ) m_throw_cooldown_clock.restart();
+  if ( ev.m_item == "item.burr" ) m_throw_cooldown_timer = sf::Time::Zero;
 }
 
 void BurrSystem::on_item_picked_up_event( const Events::ItemPickedUpEvent &ev )
 {
-  if ( ev.m_item == "item.burr" ) m_throw_cooldown_clock.restart();
+  if ( ev.m_item == "item.burr" ) m_throw_cooldown_timer = sf::Time::Zero;
 }
 
 void BurrSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
@@ -84,7 +84,7 @@ void BurrSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
 
   // e.g. releasing the left mouse button that foraged the burr, or spamming throws: start a fresh charge once it's over
   const sf::Time cooldown = sf::seconds( Sys::PersistSystem::get<Cmp::Persist::BurrThrowCooldown>( reg() ).get_value() );
-  if ( m_throw_cooldown_clock.getElapsedTime() < cooldown )
+  if ( m_throw_cooldown_timer < cooldown )
   {
     m_throw_charging = false;
     return;
@@ -94,7 +94,7 @@ void BurrSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
   {
     // wind up the throw
     m_throw_charging = true;
-    m_throw_charge_clock.restart();
+    m_throw_charge_timer = sf::Time::Zero;
   }
   else if ( ev.action == Game::Events::PlayerActionEvent::GameActions::RELEASE_BOW )
   {
@@ -105,17 +105,19 @@ void BurrSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
     // throw the burr; how far it flies depends on how long the throw was charged
     m_sound_bank.get_effect( "burr_throw" ).play();
 
-    float charge_fraction = std::clamp( m_throw_charge_clock.getElapsedTime().asSeconds() / Constants::kFullChargeSeconds,
+    float charge_fraction = std::clamp( m_throw_charge_timer.asSeconds() / Constants::kFullChargeSeconds,
                                         Constants::kMinChargeFraction, 1.f );
 
     create_player_burr( charge_fraction );
     Factory::Player::destroy_inventory( reg(), "item.burr" );
-    m_throw_cooldown_clock.restart();
+    m_throw_cooldown_timer = sf::Time::Zero;
   }
 }
 
 void BurrSystem::update( sf::Time dt )
 {
+  m_throw_cooldown_timer += dt;
+  if ( m_throw_charging ) { m_throw_charge_timer += dt; }
   update_burr_trajectory( dt );
   check_burr_collisions();
   expire_burrs( dt );

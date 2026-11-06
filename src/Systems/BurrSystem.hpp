@@ -39,14 +39,14 @@ public:
   void update( sf::Time dt );
 
 private:
-  //! @brief Tracks how long the throw has been charged, between DRAW_BOW and RELEASE_BOW.
-  sf::Clock m_throw_charge_clock;
+  //! @brief Accumulates how long the throw has been charged, between DRAW_BOW and RELEASE_BOW.
+  sf::Time m_throw_charge_timer;
 
   //! @brief True while the throw is being charged (left mouse button held with item.burr equipped).
   bool m_throw_charging{ false };
 
   //! @brief Time since a burr entered the inventory or was thrown; throws are ignored until Cmp::Persist::BurrThrowCooldown has passed.
-  sf::Clock m_throw_cooldown_clock;
+  sf::Time m_throw_cooldown_timer;
 
   //! @brief Update the burr position, spin and parabola arc
   //! @param dt

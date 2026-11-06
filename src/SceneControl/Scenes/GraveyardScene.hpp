@@ -64,8 +64,8 @@ private:
   //! @brief Store of game systems the scene drives each update
   Sys::Store &m_sys;
 
-  //! @brief Clock measuring elapsed time since the scene was last entered, used to gate exit collision checks
-  sf::Clock m_scene_exit_cooldown{};
+  //! @brief Elapsed time since the scene was last entered, used to gate exit collision checks
+  sf::Time m_scene_exit_cooldown_timer;
 
   //! @brief Minimum time after entering the scene before exit collisions (e.g. crypt entrance) are checked
   sf::Time m_scene_exit_cooldown_time{ sf::seconds( 2 ) };
@@ -79,13 +79,13 @@ private:
   //! @brief Spatial index of static (never moved after creation) renderable entities, queried by
   //! ZOrderQueue::refresh() instead of a full-registry scan. First built after level
   //! generation finishes in on_init(), then periodically rebuilt from scratch in do_update() (see
-  //! m_render_position_grid_rebuild_clock) so runtime-created static entities - dropped items,
+  //! m_render_position_grid_rebuild_timer) so runtime-created static entities - dropped items,
   //! replanted trees, placed bombs, footstep decals - eventually get indexed too, without needing
   //! precise insert()/remove() calls threaded through every system that can create/destroy one.
   PathFinding::SpatialHashGridSharedPtr m_render_position_sm;
 
   //! @brief Rate-limits m_render_position_sm rebuilds; see its doc comment.
-  sf::Clock m_render_position_grid_rebuild_clock;
+  sf::Time m_render_position_grid_rebuild_timer;
 
   //! @brief How often m_render_position_sm is rebuilt from scratch. Trades off staleness (a newly
   //! created static entity won't render until the next rebuild) against cost (a full registry scan) -

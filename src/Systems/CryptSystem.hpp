@@ -232,12 +232,6 @@ private:
   //! @brief Dispatcher reference for scene management events
   entt::dispatcher &m_scenemanager_event_dispatcher;
 
-  //! @brief Prevents rapid external entrance door unlocking
-  sf::Clock m_door_cooldown_timer;
-
-  //! @brief Entrance door unlock cooldown duration, in seconds.
-  float m_door_cooldown_time{ 1.0f };
-
   //! @brief Number of enabled levers
   unsigned int m_enabled_levers{ 0 };
 
