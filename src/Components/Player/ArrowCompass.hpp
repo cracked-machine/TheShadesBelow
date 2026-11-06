@@ -155,7 +155,7 @@ struct ArrowCompass
     if ( t < std::numeric_limits<float>::max() ) { arrow_position = player_center + direction * t; }
 
     // Map sin(time) from [-1, 1] to [min_scale, max_scale]
-    const float sine = std::sin( m_freq * m_osc_clock.getElapsedTime().asSeconds() );
+    const float sine = std::sin( m_freq * m_osc_timer.asSeconds() );
     const float oscillating_scale = m_min_scale + ( ( m_max_scale - m_min_scale ) * ( sine + 1.f ) / 2.f );
 
     const sf::Vector2f half_grid = Constants::kGridSizePxF / 2.f;
@@ -170,6 +170,9 @@ struct ArrowCompass
 
   //! @brief How often the target is re-resolved (nearest crypt/altar depends on player position)
   sf::Time m_retarget_interval{ sf::milliseconds( 250 ) };
+
+  //! @brief Time component of the sine wave for the arrow's pulsing scale
+  sf::Time m_osc_timer;
 
 private:
   //! @brief Allocation-free nearest-position search over an entt view, skipping entities `to_position` rejects.
@@ -202,8 +205,6 @@ private:
   std::optional<Cmp::Position> m_target;
   bool m_retarget_pending{ true };
 
-  //! @brief Time component of the sine wave for the arrow's pulsing scale
-  sf::Clock m_osc_clock;
   //! @brief Frequency of the sine wave for the arrow's pulsing scale
   float m_freq{ 4.f };
   //! @brief Min scale of the arrow pulse

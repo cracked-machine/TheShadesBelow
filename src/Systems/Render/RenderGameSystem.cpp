@@ -18,9 +18,9 @@
 #include <Components/Crypt/RoomLavaPit.hpp>
 #include <Components/Exit.hpp>
 #include <Components/FractalCurve.hpp>
+#include <Components/Grave/Exhumed.hpp>
 #include <Components/Grave/ExitMultiBlock.hpp>
 #include <Components/Grave/MultiBlock.hpp>
-#include <Components/Grave/Exhumed.hpp>
 #include <Components/Grave/TrailMarker.hpp>
 #include <Components/Greyscale.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
@@ -411,8 +411,8 @@ void RenderGameSystem::render_trail_markers()
     if ( not Utils::is_visible_in_view( view_bounds, grave_pos_cmp ) ) continue;
 
     // the origin is the sprite centre, so the arrow is turned in place over the middle of the grave
-    safe_render_sprite_world( "sprite.graveyard.arrowtrail", { grave_pos_cmp.getCenter() - half_grid, Constants::kGridSizePxF }, 0, { 1.f, 1.f },
-                              255, half_grid, marker_cmp.angle );
+    safe_render_sprite_world( "sprite.graveyard.arrowtrail", { grave_pos_cmp.getCenter() - half_grid, Constants::kGridSizePxF }, 0, { 1.f, 1.f }, 255,
+                              half_grid, marker_cmp.angle );
   }
 }
 

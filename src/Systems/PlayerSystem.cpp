@@ -245,7 +245,11 @@ void PlayerSystem::update( sf::Time dt )
 
   update_heartbeat( dt );
 
-  if ( auto *compass_cmp = reg().try_get<Cmp::Player::ArrowCompass>( Utils::Player::get_entity( reg() ) ) ) { compass_cmp->m_retarget_timer += dt; }
+  if ( auto *compass_cmp = reg().try_get<Cmp::Player::ArrowCompass>( Utils::Player::get_entity( reg() ) ) )
+  {
+    compass_cmp->m_retarget_timer += dt;
+    compass_cmp->m_osc_timer += dt;
+  }
 
   if ( is_player_in_light() ) { reg().emplace_or_replace<Cmp::Player::Illuminated>( Utils::Player::get_entity( reg() ) ); }
   else { reg().remove<Cmp::Player::Illuminated>( Utils::Player::get_entity( reg() ) ); }
