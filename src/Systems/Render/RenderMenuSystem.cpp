@@ -62,6 +62,7 @@
 #include <Components/Persistent/MinNumCrypts.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
+#include <Components/Persistent/MissingTalismanBias.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcMimicTint.hpp>
@@ -390,6 +391,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailSizeMultiplier>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailStartCount>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::MissingTalismanBias>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailGuideColour>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ExitKeyRequirement>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MinNumCrypts>( reg() ).render_widget();

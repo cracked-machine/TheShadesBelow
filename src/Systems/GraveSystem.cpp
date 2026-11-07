@@ -1,6 +1,7 @@
 
 #include <Audio/SoundBank.hpp>
 #include <Components/AbsoluteAlpha.hpp>
+#include <Components/Altar/Activated.hpp>
 #include <Components/Altar/TalismanCount.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Grave/Consequence.hpp>
@@ -17,6 +18,7 @@
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
 #include <Components/Persistent/GraveTrailSizeMultiplier.hpp>
 #include <Components/Persistent/GraveTrailStartCount.hpp>
+#include <Components/Persistent/MissingTalismanBias.hpp>
 #include <Components/Persistent/PickaxeGraveDigWear.hpp>
 #include <Components/Persistent/ShovelGraveDigWear.hpp>
 #include <Components/Player/Character.hpp>
@@ -57,7 +59,8 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <set>
+#include <map>
+#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -373,21 +376,39 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
       spawn_grave_loot( { "item.cursetablet" } );
       break;
     case Cmp::Grave::Consequence::Type::TALISMAN: {
-      // any talisman that at least one altar takes
-      std::set<Sys::ItemKey> talismans;
+      // any talisman that at least one altar takes, biased towards those a partly activated altar still needs so the
+      // player is not left digging up talismans they have already offered. Once any altar is activated, no altar takes
+      // talismans (see AltarSystem::offering_talisman()), so the pick stays uniform.
+      const bool any_altar_activated = not reg().view<Cmp::Altar::Activated>().empty();
+      const int bias = std::max( 0, Sys::PersistSystem::get<Cmp::Persist::MissingTalismanBias>( reg() ).get_value() );
+      std::map<Sys::ItemKey, int> weights;
       for ( auto [_, talisman_cmp] : reg().view<Cmp::Altar::TalismanCount>().each() )
       {
-        for ( const auto &[talisman_key, _activated] : talisman_cmp )
+        const std::size_t offered = talisman_cmp.count();
+        const bool partly_activated = offered > 0 and offered < talisman_cmp.size();
+        for ( const auto &[talisman_key, activated] : talisman_cmp )
         {
-          talismans.insert( talisman_key );
+          int &weight = weights.try_emplace( talisman_key, 1 ).first->second;
+          if ( any_altar_activated or not partly_activated or activated ) continue;
+          // the closer the altar is to completion, the stronger the bias; the strongest altar wins, they do not stack
+          weight = std::max( weight, 1 + bias * static_cast<int>( offered ) );
         }
       }
-      if ( talismans.empty() )
+      if ( weights.empty() )
       {
         SPDLOG_WARN( "Grave rolled a talisman but no altar takes talismans" );
         break;
       }
-      spawn_grave_loot( { talismans.begin(), talismans.end() } );
+      // spawn_grave_loot() picks uniformly, so each talisman is listed once per unit of weight
+      std::vector<Sys::ItemKey> loot_pool;
+      std::stringstream weightss;
+      for ( const auto &[talisman_key, weight] : weights )
+      {
+        loot_pool.insert( loot_pool.end(), static_cast<std::size_t>( weight ), talisman_key );
+        weightss << " " << talisman_key.str() << "=" << weight;
+      }
+      SPDLOG_DEBUG( "Grave talisman weights:{}", weightss.str() );
+      spawn_grave_loot( loot_pool );
       break;
     }
   }

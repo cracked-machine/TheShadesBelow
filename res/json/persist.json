@@ -385,6 +385,14 @@
     "detail": "Grave Trail Start Count",
     "format": "%d"
   },
+  "MissingTalismanBias": {
+    "type": "int",
+    "value": 3,
+    "min_value": 0,
+    "max_value": 10,
+    "detail": "Missing Talisman Bias",
+    "format": "%d"
+  },
   "GraveTrailGuideColour": {
     "type": "sf::Color",
     "value": {

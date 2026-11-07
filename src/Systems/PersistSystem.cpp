@@ -62,6 +62,7 @@
 #include <Components/Persistent/MinNumCrypts.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
+#include <Components/Persistent/MissingTalismanBias.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcMimicTint.hpp>
@@ -185,6 +186,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::GraveNumMultiplier>();
   add_component<Cmp::Persist::GraveTrailSizeMultiplier>();
   add_component<Cmp::Persist::GraveTrailStartCount>();
+  add_component<Cmp::Persist::MissingTalismanBias>();
   add_component<Cmp::Persist::GraveTrailGuideColour>();
   add_component<Cmp::Persist::GraveyardProcGenInitChance>();
   add_component<Cmp::Persist::GraveyardProcGenMaxIterations>();
