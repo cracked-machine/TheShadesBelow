@@ -925,6 +925,24 @@
     "detail": "Hallucinogen Health Dmg Per Sec",
     "format": "%d"
   },
+  "ReservedArmedBlockColourBorder": {
+    "type": "sf::Color",
+    "value" : {
+      "r": 255,
+      "g": 0,
+      "b": 0,
+      "a": 128
+    }
+  },
+  "ReservedArmedBlockColourFill": {
+    "type": "sf::Color",
+    "value" : {
+      "r": 255,
+      "g": 0,
+      "b": 0,
+      "a": 24
+    }
+  },
   "ResetTutorial": {
     "type": "bool",
     "value": false,

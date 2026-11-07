@@ -60,6 +60,13 @@ entt::entity create_armed( entt::registry &reg, entt::entity entity, Cmp::Armed:
 
   reg.emplace_or_replace<Cmp::Npc::NoPathFinding>( entity );
 
+  // a tile with no sprite (e.g. open ground) still needs a z-order so ZOrderQueue can queue its armed indicator.
+  // Removed again by destroy_armed().
+  if ( not reg.all_of<Cmp::AnimData>( entity ) )
+  {
+    if ( const auto *pos_cmp = reg.try_get<Cmp::Position>( entity ) ) reg.emplace_or_replace<Cmp::ZOrderValue>( entity, pos_cmp->position.y );
+  }
+
   return entity;
 }
 

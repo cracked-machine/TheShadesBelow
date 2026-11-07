@@ -55,6 +55,10 @@ private:
   //! @brief Queues world-space particle sprites whose bounds are in view, and all screen-space ones.
   void queue_particles( entt::registry &reg, sf::FloatRect view_bounds );
 
+  //! @brief Queues every visible Cmp::Armed tile that has no sprite (open ground, visual-only Cmp::BlastMarker), so its
+  //! armed indicator is drawn. Armed tiles with a sprite draw theirs with the sprite.
+  void queue_unsprited_armed( entt::registry &reg, sf::FloatRect view_bounds );
+
   //! @brief Queues every visible Cmp::Position entity, other than multiblock roots.
   //! @param render_position_grid Spatial index of static entities, queried instead of scanning the registry;
   //! movers are then scanned separately. nullptr falls back to a full registry scan.

@@ -3,6 +3,7 @@
 #include <Components/AnimData.hpp>
 #include <Components/Armable.hpp>
 #include <Components/Armed.hpp>
+#include <Components/BlastMarker.hpp>
 #include <Components/Crypt/BuildingSegment.hpp>
 #include <Components/DeathPosition.hpp>
 #include <Components/DestroyedObstacle.hpp>
@@ -19,6 +20,8 @@
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/BombDamage.hpp>
 #include <Components/Persistent/BombsExhumeGraves.hpp>
+#include <Components/Persistent/ReservedArmedBlockColourBorder.hpp>
+#include <Components/Persistent/ReservedArmedBlockColourFill.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Mortality.hpp>
 #include <Components/Position.hpp>
@@ -45,6 +48,9 @@
 
 #include <algorithm>
 #include <optional>
+#include <map>
+#include <set>
+#include <utility>
 #include <spdlog/spdlog.h>
 
 namespace
@@ -111,6 +117,13 @@ void BombSystem::update( sf::Time dt )
     auto *armed_pos_cmp_ptr = reg().try_get<Cmp::Position>( armed_entt );
     if ( not armed_cmp_ptr or not armed_pos_cmp_ptr ) continue; // removed/changed already this tick (e.g. a chain reaction)
     if ( armed_cmp_ptr->getElapsedFuseTime() < armed_cmp_ptr->m_fuse_delay ) continue;
+
+    // visual-only tile over a reserved position: its flashing is done, nothing to detonate
+    if ( reg().all_of<Cmp::BlastMarker>( armed_entt ) )
+    {
+      reg().destroy( armed_entt );
+      continue;
+    }
 
     // Copy out what the rest of this iteration needs now, before any mutating calls below: those calls can
     // reallocate the Cmp::Armed/Cmp::Position pools, which would dangle armed_cmp_ptr/armed_pos_cmp_ptr.
@@ -287,24 +300,54 @@ void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_en
   Factory::Bomb::create_armed( reg(), epicenter_entity, Cmp::Armed::EpiCenter::YES, sequence_counter++, centerTile.y + kZOrderOffset );
   reg().get<Cmp::Armed>( epicenter_entity ).m_blast_radius = blast_radius;
 
-  // We dont detonate reserved positions so dont arm them in the first place
+  // We dont detonate reserved positions (or the exit) so dont arm them, but they still get a visual-only
+  // Cmp::BlastMarker so the blast pattern has no holes.
   // Also exclude NPCs since they're handled separately and may be missing Position component during death animation
-  auto all_obstacle_view = reg().view<Cmp::Armable, Cmp::Position>( exclude<Cmp::Npc::NPC, Cmp::Exit> );
+  auto all_obstacle_view = reg().view<Cmp::Armable, Cmp::Position>( exclude<Cmp::Npc::NPC> );
   auto reserved_sm = m_reserved_sm.lock();
 
+  // cells already showing a marker (e.g. from an overlapping blast), so each cell gets at most one
+  std::set<std::pair<int, int>> marked_cells;
+  // z-order for each new marker cell, see Cmp::BlastMarker
+  std::map<std::pair<int, int>, float> marker_zorders;
+  constexpr float kBlastMarkerZOffset = 0.5f;
+  for ( auto marker_entt : reg().view<Cmp::BlastMarker, Cmp::Position>() )
+  {
+    if ( auto cell = Utils::get_grid_position<int>( reg(), marker_entt ) ) marked_cells.emplace( cell->x, cell->y );
+  }
+
   // Bucket every candidate entity by its layer (Chebyshev distance from the epicenter) in a single pass,
-  // rather than re-scanning and re-computing distances once per layer.
+  // rather than re-scanning and re-computing distances once per layer. entt::null marks a cell that only gets a marker.
   std::vector<std::vector<std::pair<entt::entity, sf::Vector2i>>> entities_by_layer( static_cast<std::size_t>( std::max( blast_radius, 0 ) ) + 1 );
 
   for ( auto [destructable_entity, destructable_cmp, destructable_pos] : all_obstacle_view.each() )
   {
     if ( destructable_entity == epicenter_entity || reg().any_of<Cmp::Armed>( destructable_entity ) ) continue;
-    if ( reserved_sm && not reserved_sm->at( destructable_pos ).empty() ) continue;
 
     sf::Vector2i grid_position = Utils::get_grid_position<int>( reg(), destructable_entity ).value();
     int distance_from_center = Utils::Maths::getChebyshevDistance( grid_position, centerTile );
 
-    if ( distance_from_center < 1 || distance_from_center > blast_radius ) continue;
+    if ( distance_from_center < 1 or distance_from_center > blast_radius ) continue;
+
+    const auto reserved_entities = reserved_sm ? reserved_sm->at( destructable_pos ) : std::vector<entt::entity>{};
+    if ( not reserved_entities.empty() or reg().all_of<Cmp::Exit>( destructable_entity ) )
+    {
+      const std::pair<int, int> cell{ grid_position.x, grid_position.y };
+      if ( marked_cells.emplace( cell ).second )
+      {
+        entities_by_layer[static_cast<std::size_t>( distance_from_center )].emplace_back( entt::null, grid_position );
+      }
+      // draw the marker just above the highest sprite on the cell, so the grave/item/exit can't hide it
+      float &marker_z = marker_zorders.try_emplace( cell, destructable_pos.position.y ).first->second;
+      auto raise_to = [&]( entt::entity e )
+      {
+        if ( const auto *z_cmp = reg().try_get<Cmp::ZOrderValue>( e ) ) marker_z = std::max( marker_z, z_cmp->get() + kBlastMarkerZOffset );
+      };
+      raise_to( destructable_entity );
+      for ( entt::entity reserved_entt : reserved_entities )
+        raise_to( reserved_entt );
+      continue;
+    }
 
     if ( reg().any_of<Cmp::LootContainer>( destructable_entity ) )
     {
@@ -334,6 +377,23 @@ void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_en
     // Arm each entity in the layer in clockwise order
     for ( const auto &[entity, pos] : layer_entities )
     {
+      if ( entity == entt::null )
+      {
+        // visual-only marker over a cell we must not detonate
+        auto marker_entt = reg().create();
+        reg().emplace<Cmp::Position>( marker_entt, Constants::kGridSizePxF.componentWiseMul( sf::Vector2f( pos ) ), Constants::kGridSizePxF );
+        Factory::Bomb::create_armed( reg(), marker_entt, Cmp::Armed::EpiCenter::NO, sequence_counter++, centerTile.y + kZOrderOffset );
+        // create_armed() always adds this, but a marker must not affect pathing or placement checks
+        reg().remove<Cmp::Npc::NoPathFinding>( marker_entt );
+        reg().emplace<Cmp::BlastMarker>( marker_entt );
+        // reserved cells have their own colours, so they read as "in the blast, but not destroyed"
+        auto &marker_armed_cmp = reg().get<Cmp::Armed>( marker_entt );
+        marker_armed_cmp.m_armed_color_border = Sys::PersistSystem::get<Cmp::Persist::ReservedArmedBlockColourBorder>( reg() );
+        marker_armed_cmp.m_armed_color_fill = Sys::PersistSystem::get<Cmp::Persist::ReservedArmedBlockColourFill>( reg() );
+        // no sprite of its own, so it is queued at this z-order and drawn by RenderGameSystem::render_zorder_queue()
+        reg().emplace_or_replace<Cmp::ZOrderValue>( marker_entt, marker_zorders.at( { pos.x, pos.y } ) );
+        continue;
+      }
       Factory::Bomb::create_armed( reg(), entity, Cmp::Armed::EpiCenter::NO, sequence_counter++, centerTile.y + kZOrderOffset );
     }
   }

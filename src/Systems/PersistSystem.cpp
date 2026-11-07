@@ -3,6 +3,8 @@
 #include <Components/Persistent/ArmedBlinkFreq.hpp>
 #include <Components/Persistent/ArmedBlockColourBorder.hpp>
 #include <Components/Persistent/ArmedBlockColourFill.hpp>
+#include <Components/Persistent/ReservedArmedBlockColourBorder.hpp>
+#include <Components/Persistent/ReservedArmedBlockColourFill.hpp>
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
 #include <Components/Persistent/AxeGraveDigWear.hpp>
@@ -166,6 +168,8 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ArmedBlinkFreq>();
   add_component<Cmp::Persist::ArmedBlockColourFill>();
   add_component<Cmp::Persist::ArmedBlockColourBorder>();
+  add_component<Cmp::Persist::ReservedArmedBlockColourFill>();
+  add_component<Cmp::Persist::ReservedArmedBlockColourBorder>();
   add_component<Cmp::Persist::ArmedOffDelay>();
   add_component<Cmp::Persist::ArmedOnDelay>();
   add_component<Cmp::Persist::BombBonus>();

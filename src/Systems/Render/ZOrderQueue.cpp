@@ -1,5 +1,6 @@
 #include <Components/Altar/TrailGuide.hpp>
 #include <Components/AnimData.hpp>
+#include <Components/Armed.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/NoRender.hpp>
 #include <Components/Position.hpp>
@@ -32,6 +33,8 @@ void ZOrderQueue::refresh( entt::registry &reg, sf::FloatRect view_bounds, const
   // chevrons guiding the player from the activated altar to the trail start graves
   PROFILED( queue_all<Cmp::Altar::TrailGuide>( reg ) );
   PROFILED( queue_positioned( reg, view_bounds, render_position_grid ) );
+  // armed tiles with no sprite (open ground, Cmp::BlastMarker): queue_positioned() only takes sprites
+  PROFILED( queue_unsprited_armed( reg, view_bounds ) );
 
   PROFILED( std::ranges::sort( m_entries, {}, &Entry::z ) );
 }
@@ -74,6 +77,15 @@ void ZOrderQueue::queue_particles( entt::registry &reg, sf::FloatRect view_bound
   }
 }
 
+void ZOrderQueue::queue_unsprited_armed( entt::registry &reg, sf::FloatRect view_bounds )
+{
+  auto view = reg.view<Cmp::Armed, Cmp::Position, Cmp::ZOrderValue>( entt::exclude<Cmp::AnimData, Cmp::NoRender> );
+  for ( auto [entity, armed_cmp, pos_cmp, z_order_cmp] : view.each() )
+  {
+    if ( Utils::is_visible_in_view( view_bounds, pos_cmp ) ) push( entity, z_order_cmp );
+  }
+}
+
 void ZOrderQueue::queue_positioned( entt::registry &reg, sf::FloatRect view_bounds,
                                     const PathFinding::SpatialHashGridSharedPtr &render_position_grid )
 {
@@ -89,7 +101,8 @@ void ZOrderQueue::queue_positioned( entt::registry &reg, sf::FloatRect view_boun
     if ( not reg.valid( entity ) or reg.all_of<Cmp::NoRender>( entity ) ) continue;
     auto *pos_cmp = reg.try_get<Cmp::Position>( entity );
     auto *z_order_cmp = reg.try_get<Cmp::ZOrderValue>( entity );
-    if ( not pos_cmp or not z_order_cmp ) continue;
+    // e.g. an obstacle removed since the last rebuild; an armed one is queued by queue_unsprited_armed() instead
+    if ( not pos_cmp or not z_order_cmp or not reg.all_of<Cmp::AnimData>( entity ) ) continue;
     if ( Utils::is_visible_in_view( view_bounds, *pos_cmp ) ) push( entity, *z_order_cmp );
   }
 

@@ -160,6 +160,13 @@ void RenderGameSystem::render_zorder_queue()
       if ( shaders_enabled ) draw_shader_sprite( *shader_owner );
     }
     else if ( auto *particle_owner = reg().try_get<Cmp::Particle::SpriteOwner>( entity ) ) { draw_particle_sprite( *particle_owner ); }
+    // armed tile with no sprite (open ground, Cmp::BlastMarker): just the armed indicator. Armed tiles with a sprite
+    // draw theirs in draw_animated_sprite()
+    else if ( reg().all_of<Cmp::Armed, Cmp::Position>( entity ) )
+    {
+      render_armed_indicator( reg().get<Cmp::Armed>( entity ), reg().get<Cmp::Position>( entity ) );
+    }
+
     else if ( auto *floor_tiles = reg().try_get<Sprites::Containers::VertexFloor>( entity ) ) { draw_vertex_floor( *floor_tiles ); }
     // the inventory slot holding the dowsing rod: draws the chevrons above the floor and below sprites
     else if ( reg().all_of<Cmp::Inventory::DowsingTarget>( entity ) ) { draw_world( Utils::Player::get_doglegs( reg() ).m_markers ); }
