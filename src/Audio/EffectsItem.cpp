@@ -20,7 +20,8 @@ EffectsData::EffectsData( const std::filesystem::path &filepath )
 
 EffectsData::EffectsData( EffectsData &&other ) noexcept
     : buffer( std::move( other.buffer ) ),
-      control( *buffer )
+      control( *buffer ),
+      paused_volume( other.paused_volume )
 {
 }
 
@@ -30,6 +31,7 @@ auto EffectsData::operator=( EffectsData &&other ) noexcept -> EffectsData &
 
   // rebind control to the new buffer location
   control.setBuffer( *buffer );
+  paused_volume = other.paused_volume;
   // return the derefenced buffer object
   return *this;
 }

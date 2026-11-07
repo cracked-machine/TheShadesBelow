@@ -3,8 +3,10 @@
 
 #include <Audio/EffectsItem.hpp>
 #include <Audio/MusicItem.hpp>
+#include <chrono>
 #include <filesystem>
 #include <unordered_map>
+#include <vector>
 
 namespace Game::Audio
 {
@@ -32,10 +34,12 @@ public:
 
   void stop_all();
 
-  //! @brief Pauses every sound effect that is currently playing.
+  //! @brief Pauses every sound effect that is currently playing, fading each out first to avoid clicks.
+  //! @note Blocks for kFadeDuration when anything is playing.
   void pause_effects();
 
-  //! @brief Resumes every sound effect that was paused (e.g. by pause_effects()).
+  //! @brief Resumes every sound effect that was paused (e.g. by pause_effects()), fading each back in to avoid clicks.
+  //! @note Blocks for kFadeDuration when anything is paused.
   void resume_effects();
 
   //! @brief Returns a reference to the pooled sf::Sound instance for `name`.
@@ -53,6 +57,16 @@ public:
   sf::Music &get_music( const std::string &name );
 
 private:
+  //! @brief Total length of the pause/resume fade.
+  static constexpr std::chrono::milliseconds kFadeDuration{ 40 };
+  //! @brief Number of gain steps the fade is split into.
+  static constexpr int kFadeSteps = 8;
+
+  //! @brief Ramps each target's volume between 0 and its paused_volume over kFadeDuration (blocking).
+  //! @param targets Effects to fade
+  //! @param fade_in true ramps 0 -> paused_volume, false ramps paused_volume -> 0
+  static void fade_effects( const std::vector<EffectsData *> &targets, bool fade_in );
+
   //! @brief Synthesizes a sine wave tone into an in-memory sf::SoundBuffer.
   //! @param frequency
   //! @param duration

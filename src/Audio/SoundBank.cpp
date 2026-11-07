@@ -4,6 +4,7 @@
 #include <SFML/Audio/SoundChannel.hpp>
 #include <Utils/JsonDeserializer.hpp>
 #include <spdlog/spdlog.h>
+#include <thread>
 
 namespace Game::Audio
 {
@@ -63,17 +64,63 @@ void SoundBank::stop_all()
 
 void SoundBank::pause_effects()
 {
+  std::vector<EffectsData *> targets;
   for ( auto &[name, effects_data] : sounds )
   {
-    if ( effects_data.control.getStatus() == sf::Sound::Status::Playing ) effects_data.control.pause();
+    if ( effects_data.control.getStatus() == sf::Sound::Status::Playing ) { targets.push_back( &effects_data ); }
+  }
+  if ( targets.empty() ) { return; }
+
+  for ( auto *effects_data : targets )
+  {
+    effects_data->paused_volume = effects_data->control.getVolume();
+  }
+
+  // ramp down before pausing: cutting a source off at full gain is heard as a click
+  fade_effects( targets, false );
+
+  for ( auto *effects_data : targets )
+  {
+    effects_data->control.pause();
+    // a paused source is silent, so restoring its volume now is inaudible and keeps it correct for any later play()
+    effects_data->control.setVolume( effects_data->paused_volume );
   }
 }
 
 void SoundBank::resume_effects()
 {
+  std::vector<EffectsData *> targets;
   for ( auto &[name, effects_data] : sounds )
   {
-    if ( effects_data.control.getStatus() == sf::Sound::Status::Paused ) effects_data.control.play();
+    if ( effects_data.control.getStatus() == sf::Sound::Status::Paused ) { targets.push_back( &effects_data ); }
+  }
+  if ( targets.empty() ) { return; }
+
+  for ( auto *effects_data : targets )
+  {
+    // re-read the volume so changes made while paused (e.g. the pause menu slider) are respected
+    effects_data->paused_volume = effects_data->control.getVolume();
+    effects_data->control.setVolume( 0.f );
+    effects_data->control.play();
+  }
+
+  // ramp up after resuming: restarting every source at full gain at once is heard as a click
+  fade_effects( targets, true );
+}
+
+void SoundBank::fade_effects( const std::vector<EffectsData *> &targets, bool fade_in )
+{
+  constexpr auto step_duration = kFadeDuration / kFadeSteps;
+  for ( int step = 1; step <= kFadeSteps; ++step )
+  {
+    const float progress = static_cast<float>( step ) / static_cast<float>( kFadeSteps );
+    const float gain = fade_in ? progress : 1.f - progress;
+    for ( auto *effects_data : targets )
+    {
+      effects_data->control.setVolume( effects_data->paused_volume * gain );
+    }
+    // give the OpenAL mixer thread time to apply this step before the next one
+    std::this_thread::sleep_for( step_duration );
   }
 }
 
