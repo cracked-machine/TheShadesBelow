@@ -27,6 +27,7 @@ extern const float kUiScalePreset;
 //! @note Defined in SpriteBase.cpp (not inline/constexpr here) so tuning the value only recompiles that one file,
 //        not everything that includes this header.
 extern const float kWorldScalePreset;
+extern const float kAltarScalePreset;
 
 // ============================================================
 // IParticle — individual particle contract
@@ -635,9 +636,7 @@ private:
     if ( m_min_particle_spacing <= 0.f ) return true;
     const float min_spacing_squared = m_min_particle_spacing * m_min_particle_spacing;
     return std::ranges::none_of( m_particles_list, [&]( const TParticle &p )
-    {
-      return p.m_lifetime > sf::Time::Zero and ( p.m_vertex.position - m_emitter_position ).lengthSquared() < min_spacing_squared;
-    } );
+    { return p.m_lifetime > sf::Time::Zero and ( p.m_vertex.position - m_emitter_position ).lengthSquared() < min_spacing_squared; } );
   }
 
   //! @brief See set_min_particle_spacing().

@@ -29,8 +29,8 @@
 #include <Components/Player/Wealth.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
-#include <Components/Stats/PlayerStats.hpp>
 #include <Components/Stats/OfferingAction.hpp>
+#include <Components/Stats/PlayerStats.hpp>
 #include <Components/Toxicity/Bradycadia.hpp>
 #include <Components/Toxicity/Halucinogen.hpp>
 #include <Components/Toxicity/Hypoxia.hpp>
@@ -163,7 +163,7 @@ void AltarSystem::check_player_altar_offering( entt::entity altar_entity, Cmp::A
 }
 
 bool AltarSystem::grant_offering_reward( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid,
-                                          const std::optional<Cmp::ActionReward> &reward )
+                                         const std::optional<Cmp::ActionReward> &reward )
 {
   if ( not reward )
   {
@@ -206,7 +206,7 @@ bool AltarSystem::grant_offering_reward( entt::entity altar_entity, Cmp::Altar::
 }
 
 void AltarSystem::offering_for_item( const Cmp::Altar::MultiBlock &altar_cmp, const Cmp::ActionReward &reward,
-                                      const std::function<void( entt::entity )> &on_created )
+                                     const std::function<void( entt::entity )> &on_created )
 {
   if ( reward.target == Cmp::ActionReward::Target::DEFAULT )
   {
@@ -324,7 +324,7 @@ bool AltarSystem::offering_talisman( entt::entity altar_entity, Cmp::Altar::Mult
   if ( *flame_idx < flame_offsets.size() )
   {
     sf::Vector2f flame_ps_pos = altar_cmp.position + flame_offsets[*flame_idx];
-    Factory::Particle::add_flame( m_reg, Factory::Altar::kCandleFlameParticleTag, altar_uuid, flame_ps_pos, 5000, Cmp::Particle::kWorldScalePreset );
+    Factory::Particle::add_flame( m_reg, Factory::Altar::kCandleFlameParticleTag, altar_uuid, flame_ps_pos, 5000, Cmp::Particle::kAltarScalePreset );
   }
   else { SPDLOG_WARN( "{} has no particle_offsets entry for talisman index {}", inactive_sprite_type.str(), *flame_idx ); }
   SPDLOG_DEBUG( "Altar activated to state {}.", altar_cmp.get_offering_count() );
@@ -385,12 +385,11 @@ void AltarSystem::activate_altar( entt::entity altar_entity, const Cmp::Altar::M
 void AltarSystem::play_offering_anim( const Cmp::Altar::MultiBlock &altar_cmp, OfferingAnimType offering_anim_type )
 {
   Sys::SpriteKey sprite_type = ( offering_anim_type == OfferingAnimType::KEY ) ? "sprite.graveyard.altar.key.anim"
-                                                                                 : "sprite.graveyard.altar.relic.anim";
+                                                                               : "sprite.graveyard.altar.relic.anim";
 
   float altar_offering_anim_height = Sys::SpriteStore::instance().get( sprite_type ).sprite_size().y;
   // get the center (topleft coord), then adjust to center the altar_offering_anim, then adjust for altar_offering_anim height
-  Cmp::Position new_pos( altar_cmp.getCenter() - sf::Vector2{ 7.f, 28.f } - sf::Vector2{ 0.f, altar_offering_anim_height },
-                         Constants::kGridSizePxF );
+  Cmp::Position new_pos( altar_cmp.getCenter() - sf::Vector2{ 7.f, 28.f } - sf::Vector2{ 0.f, altar_offering_anim_height }, Constants::kGridSizePxF );
   m_sound_bank.get_effect( "shrine_lighting" ).play();
   Factory::Altar::create_altar_offering_anim( reg(), new_pos, sprite_type );
 
