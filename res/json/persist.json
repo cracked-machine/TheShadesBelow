@@ -130,14 +130,6 @@
     "detail": "Azazel Fireball Speed",
     "format": "%.0f"
   },
-  "BlastRadius": {
-    "type": "int",
-    "value": 2,
-    "min_value": 1,
-    "max_value": 5,
-    "detail": "Blast Radius",
-    "format": "%d"
-  },
   "BombBonus": {
     "type": "int",
     "value": 3,

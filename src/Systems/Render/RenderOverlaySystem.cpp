@@ -8,7 +8,6 @@
 #include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/FlashUIInventory.hpp>
-#include <Components/Inventory/FlashUIRadius.hpp>
 #include <Components/Inventory/FlashUIWealth.hpp>
 #include <Components/Inventory/Grimoire.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
@@ -20,7 +19,6 @@
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
 #include <Components/Persistent/ToxicImmunityMeterTint.hpp>
-#include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Player/ToxicImmunity.hpp>
@@ -464,8 +462,7 @@ void RenderOverlaySystem::render_ui_labels( sf::Time dt )
   for ( const auto &ui_label : m_main_ui_data->m_labels )
   {
     std::string text_str;
-    if ( ui_label.name == "radius_label" ) { text_str = " =   " + std::to_string( Utils::Player::get_blast_radius( reg() ).value ); }
-    else if ( ui_label.name == "cadaver_label" ) { text_str = " =   " + std::to_string( Utils::Player::get_cadaver_count( reg() ).get_count() ); }
+    if ( ui_label.name == "cadaver_label" ) { text_str = " =   " + std::to_string( Utils::Player::get_cadaver_count( reg() ).get_count() ); }
     else if ( ui_label.name == "wealth_label" ) { text_str = " =   " + std::to_string( Utils::Player::get_wealth( reg() ).wealth ); }
     else if ( ui_label.name == "inventory_label" )
     {
@@ -487,13 +484,6 @@ void RenderOverlaySystem::render_ui_labels( sf::Time dt )
     text.setFillColor( sf::Color::White );
     text.setOutlineColor( sf::Color::Black );
     text.setOutlineThickness( 2.f );
-
-    // flash the text if we just increased the bomb blast radius
-    if ( ui_label.name == "radius_label" and update_flash_toggle<Cmp::FlashUIRadius>( dt ) )
-    {
-      text.setFillColor( sf::Color::White );
-      text.setOutlineColor( sf::Color::White );
-    }
 
     // flash the text if we just picked up a cadaver
     if ( ui_label.name == "cadaver_label" and update_flash_toggle<Cmp::FlashUICadaver>( dt ) )

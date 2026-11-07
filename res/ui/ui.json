@@ -8,34 +8,6 @@
          "name":"overlay",
          "objects":[
                 {
-                 "height":572,
-                 "id":1,
-                 "name":"status_outline",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#40404040"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff000000"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":280,
-                 "x":30,
-                 "y":18
-                }, 
-                {
                  "height":170,
                  "id":2,
                  "name":"inventory_outline",
@@ -62,59 +34,6 @@
                  "width":180,
                  "x":80,
                  "y":650
-                }, 
-                {
-                 "height":0,
-                 "id":8,
-                 "name":"health_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":30
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"health"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":40,
-                 "y":30
-                }, 
-                {
-                 "height":0,
-                 "id":9,
-                 "name":"radius_icon",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"sprite_index",
-                         "type":"int",
-                         "value":2
-                        }, 
-                        {
-                         "name":"sprite_scale",
-                         "type":"int",
-                         "value":2
-                        }, 
-                        {
-                         "name":"sprite_type",
-                         "type":"string",
-                         "value":"sprite.ui.icons"
-                        }],
-                 "rotation":0,
-                 "type":"ui_icon",
-                 "visible":true,
-                 "width":0,
-                 "x":50,
-                 "y":490
                 }, 
                 {
                  "height":0,
@@ -176,30 +95,6 @@
                 }, 
                 {
                  "height":0,
-                 "id":12,
-                 "name":"radius_label",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"align",
-                         "type":"string",
-                         "value":"left"
-                        }, 
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":30
-                        }],
-                 "rotation":0,
-                 "type":"ui_label",
-                 "visible":true,
-                 "width":0,
-                 "x":120,
-                 "y":490
-                }, 
-                {
-                 "height":0,
                  "id":13,
                  "name":"cadaver_label",
                  "opacity":1,
@@ -247,18 +142,6 @@
                  "y":570
                 }, 
                 {
-                 "height":20,
-                 "id":15,
-                 "name":"health_meter",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"ui_meter",
-                 "visible":true,
-                 "width":150,
-                 "x":150,
-                 "y":40
-                }, 
-                {
                  "height":0,
                  "id":17,
                  "name":"inventory_icon",
@@ -300,30 +183,6 @@
                  "y":790
                 }, 
                 {
-                 "height":20,
-                 "id":21,
-                 "name":"fear_meter",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"ui_meter",
-                 "visible":true,
-                 "width":150,
-                 "x":150,
-                 "y":80
-                }, 
-                {
-                 "height":20,
-                 "id":23,
-                 "name":"infamy_meter",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"ui_meter",
-                 "visible":true,
-                 "width":150,
-                 "x":150,
-                 "y":160
-                }, 
-                {
                  "height":0,
                  "id":26,
                  "name":"inventory_label",
@@ -346,10 +205,346 @@
                  "width":0,
                  "x":170,
                  "y":830
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":5,
+         "locked":true,
+         "name":"toxidromes",
+         "objects":[
+                {
+                 "height":20,
+                 "id":71,
+                 "name":"bradycardia_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":120,
+                 "x":40,
+                 "y":292
+                }, 
+                {
+                 "height":20,
+                 "id":72,
+                 "name":"tachycardia_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":120,
+                 "x":180,
+                 "y":292
+                }, 
+                {
+                 "height":20,
+                 "id":73,
+                 "name":"hallucinogen_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":120,
+                 "x":40,
+                 "y":332
+                }, 
+                {
+                 "height":20,
+                 "id":74,
+                 "name":"hypoxia_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":120,
+                 "x":180,
+                 "y":332
+                }, 
+                {
+                 "height":20,
+                 "id":75,
+                 "name":"phototoxia_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":120,
+                 "x":40,
+                 "y":372
+                }, 
+                {
+                 "height":20,
+                 "id":76,
+                 "name":"venom_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":120,
+                 "x":180,
+                 "y":372
                 }, 
                 {
                  "height":0,
-                 "id":27,
+                 "id":77,
+                 "name":"bradycardia_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"bradycardia"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":50,
+                 "y":290
+                }, 
+                {
+                 "height":0,
+                 "id":78,
+                 "name":"tachycardia_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"tachycardia"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":190,
+                 "y":290
+                }, 
+                {
+                 "height":0,
+                 "id":79,
+                 "name":"hypoxia_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"hypoxia"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":210,
+                 "y":330
+                }, 
+                {
+                 "height":0,
+                 "id":80,
+                 "name":"hallucinogen_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"hallucinogen"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":50,
+                 "y":330
+                }, 
+                {
+                 "height":0,
+                 "id":81,
+                 "name":"phototoxia_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"phototoxia"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":60,
+                 "y":370
+                }, 
+                {
+                 "height":0,
+                 "id":82,
+                 "name":"venom_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"venom"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":210,
+                 "y":370
+                }, 
+                {
+                 "height":20,
+                 "id":83,
+                 "name":"vertigo_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":120,
+                 "x":40,
+                 "y":412
+                }, 
+                {
+                 "height":0,
+                 "id":84,
+                 "name":"vertigo_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"vertigo"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":70,
+                 "y":410
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":4,
+         "locked":true,
+         "name":"stats",
+         "objects":[
+                {
+                 "height":0,
+                 "id":59,
+                 "name":"health_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":30
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"health"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":40,
+                 "y":30
+                }, 
+                {
+                 "height":20,
+                 "id":60,
+                 "name":"health_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":150,
+                 "x":150,
+                 "y":40
+                }, 
+                {
+                 "height":20,
+                 "id":61,
+                 "name":"fear_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":150,
+                 "x":150,
+                 "y":80
+                }, 
+                {
+                 "height":20,
+                 "id":62,
+                 "name":"infamy_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":150,
+                 "x":150,
+                 "y":160
+                }, 
+                {
+                 "height":0,
+                 "id":63,
                  "name":"fear_txt",
                  "opacity":1,
                  "point":true,
@@ -373,7 +568,7 @@
                 }, 
                 {
                  "height":0,
-                 "id":29,
+                 "id":64,
                  "name":"infamy_txt",
                  "opacity":1,
                  "point":true,
@@ -397,7 +592,7 @@
                 }, 
                 {
                  "height":20,
-                 "id":30,
+                 "id":65,
                  "name":"despair_meter",
                  "opacity":1,
                  "rotation":0,
@@ -409,7 +604,7 @@
                 }, 
                 {
                  "height":0,
-                 "id":31,
+                 "id":66,
                  "name":"despair_txt",
                  "opacity":1,
                  "point":true,
@@ -433,7 +628,7 @@
                 }, 
                 {
                  "height":20,
-                 "id":34,
+                 "id":67,
                  "name":"luck_meter",
                  "opacity":1,
                  "rotation":0,
@@ -445,7 +640,7 @@
                 }, 
                 {
                  "height":0,
-                 "id":35,
+                 "id":68,
                  "name":"luck_txt",
                  "opacity":1,
                  "point":true,
@@ -469,259 +664,7 @@
                 }, 
                 {
                  "height":20,
-                 "id":36,
-                 "name":"bradycardia_meter",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"ui_meter",
-                 "visible":true,
-                 "width":120,
-                 "x":40,
-                 "y":330
-                }, 
-                {
-                 "height":20,
-                 "id":38,
-                 "name":"tachycardia_meter",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"ui_meter",
-                 "visible":true,
-                 "width":120,
-                 "x":180,
-                 "y":330
-                }, 
-                {
-                 "height":20,
-                 "id":42,
-                 "name":"hallucinogen_meter",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"ui_meter",
-                 "visible":true,
-                 "width":120,
-                 "x":40,
-                 "y":370
-                }, 
-                {
-                 "height":20,
-                 "id":43,
-                 "name":"hypoxia_meter",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"ui_meter",
-                 "visible":true,
-                 "width":120,
-                 "x":180,
-                 "y":370
-                }, 
-                {
-                 "height":20,
-                 "id":44,
-                 "name":"phototoxia_meter",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"ui_meter",
-                 "visible":true,
-                 "width":120,
-                 "x":40,
-                 "y":410
-                }, 
-                {
-                 "height":20,
-                 "id":45,
-                 "name":"venom_meter",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"ui_meter",
-                 "visible":true,
-                 "width":120,
-                 "x":180,
-                 "y":410
-                }, 
-                {
-                 "height":0,
-                 "id":46,
-                 "name":"bradycardia_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"bradycardia"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":50,
-                 "y":328
-                }, 
-                {
-                 "height":0,
-                 "id":47,
-                 "name":"tachycardia_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"tachycardia"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":190,
-                 "y":328
-                }, 
-                {
-                 "height":0,
-                 "id":48,
-                 "name":"hypoxia_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"hypoxia"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":210,
-                 "y":368
-                }, 
-                {
-                 "height":0,
-                 "id":49,
-                 "name":"hallucinogen_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"hallucinogen"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":50,
-                 "y":368
-                }, 
-                {
-                 "height":0,
-                 "id":50,
-                 "name":"phototoxia_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"phototoxia"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":60,
-                 "y":408
-                }, 
-                {
-                 "height":0,
-                 "id":51,
-                 "name":"venom_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"venom"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":210,
-                 "y":408
-                }, 
-                {
-                 "height":20,
-                 "id":54,
-                 "name":"vertigo_meter",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"ui_meter",
-                 "visible":true,
-                 "width":120,
-                 "x":40,
-                 "y":450
-                }, 
-                {
-                 "height":0,
-                 "id":55,
-                 "name":"vertigo_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"vertigo"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":70,
-                 "y":448
-                }, 
-                {
-                 "height":20,
-                 "id":56,
+                 "id":69,
                  "name":"anima_meter",
                  "opacity":1,
                  "rotation":0,
@@ -733,7 +676,7 @@
                 }, 
                 {
                  "height":0,
-                 "id":57,
+                 "id":70,
                  "name":"anima_txt",
                  "opacity":1,
                  "point":true,
@@ -760,9 +703,49 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":3,
+         "locked":true,
+         "name":"outer",
+         "objects":[
+                {
+                 "height":572,
+                 "id":58,
+                 "name":"status_outline",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#40404040"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ff000000"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":280,
+                 "x":30,
+                 "y":20
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":3,
- "nextobjectid":58,
+ "nextlayerid":6,
+ "nextobjectid":85,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

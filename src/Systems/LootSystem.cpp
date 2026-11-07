@@ -6,7 +6,6 @@
 #include <Components/Inventory/FlashUICadaver.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/FlashUIInventory.hpp>
-#include <Components/Inventory/FlashUIRadius.hpp>
 #include <Components/Inventory/FlashUIWealth.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/WearLevel.hpp>
@@ -15,7 +14,6 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
-#include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Wealth.hpp>
@@ -129,7 +127,7 @@ void LootSystem::on_destroy_loot_container_event( const Events::DestroyLootConta
                                  destroyed_pos_cmp.position.y );
 
   // drop loot - 50% chance
-  auto loot_choices = std::vector<Sys::SpriteKey>{ "sprite.graveyard.loot.health", "sprite.graveyard.loot.blast", "sprite.graveyard.loot.repair" };
+  auto loot_choices = std::vector<Sys::SpriteKey>{ "sprite.graveyard.loot.health", "sprite.graveyard.loot.repair" };
   const auto &loot_ss = Sys::SpriteStore::instance().get_random( loot_choices );
   Cmp::RandomInt do_drop( 0, 1 );
   if ( do_drop.gen() == 0 )
@@ -240,21 +238,6 @@ void LootSystem::check_loot_collision( sf::Time dt )
           }
         }
       }
-    }
-    else if ( effect.type == "sprite.graveyard.loot.blast" )
-    {
-      auto *blast_radius = reg().try_get<Cmp::Player::BlastRadius>( effect.player_entity );
-      if ( not blast_radius )
-      {
-        SPDLOG_WARN( "Player entt has no component: Cmp::Player::BlastRadius" );
-        continue;
-      }
-      blast_radius->value = std::clamp( blast_radius->value + 1, 0, 5 );
-      collect_loot( effect.loot_entity );
-
-      // signal UI to flash
-      auto flash_entt = reg().create();
-      reg().emplace_or_replace<Cmp::FlashUIRadius>( flash_entt );
     }
     else if ( effect.type == "sprite.crypt.loot.cadaver" )
     {

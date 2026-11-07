@@ -44,7 +44,6 @@ enum class SceneId;
 namespace Game::Cmp::Player
 {
 class Wealth;
-class BlastRadius;
 class Mortality;
 class LastGraveyardPosition;
 class RuinLocation;

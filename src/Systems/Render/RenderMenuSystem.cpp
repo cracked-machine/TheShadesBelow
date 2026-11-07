@@ -9,7 +9,6 @@
 #include <Components/Persistent/AxeObstacleDigWear.hpp>
 #include <Components/Persistent/AxePotSmashWear.hpp>
 #include <Components/Persistent/AxeSkeletonKillWear.hpp>
-#include <Components/Persistent/BlastRadius.hpp>
 #include <Components/Persistent/BombBonus.hpp>
 #include <Components/Persistent/BombDamage.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
@@ -239,7 +238,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
 
     ImGui::SeparatorText( "Player Settings" );
 
-    Sys::PersistSystem::get<Cmp::Persist::BlastRadius>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerAnimStrideLength>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerRenderOffset>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerMovementSpeed>( reg() ).render_widget();

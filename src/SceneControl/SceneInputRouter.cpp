@@ -5,7 +5,6 @@
 #include <Components/Inventory/Grimoire.hpp>
 #include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>

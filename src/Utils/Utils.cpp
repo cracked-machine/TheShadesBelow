@@ -6,7 +6,6 @@
 #include <Components/Loot.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Persistent/BurrSlowFactor.hpp>
-#include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
 #include <Components/Player/RuinLocation.hpp>

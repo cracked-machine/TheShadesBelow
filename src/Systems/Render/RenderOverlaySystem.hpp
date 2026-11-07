@@ -80,7 +80,7 @@ private:
   //! @brief Render the main UI's static text elements.
   void render_ui_texts();
 
-  //! @brief Render the main UI's dynamic labels (blast radius, cadaver count, wealth, current inventory item) and flash their colour on
+  //! @brief Render the main UI's dynamic labels (cadaver count, wealth, current inventory item) and flash their colour on
   //! recent changes.
   //! @param dt
   void render_ui_labels( sf::Time dt );

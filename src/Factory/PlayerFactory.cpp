@@ -14,10 +14,8 @@
 #include <Components/LastDirection.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Particle/SpriteBase.hpp>
-#include <Components/Persistent/BlastRadius.hpp>
 #include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Curse.hpp>
@@ -74,10 +72,8 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   start_pos = Utils::snap_to_grid( start_pos );
   Cmp::Position player_pos( start_pos, Constants::kGridSizePxF );
   reg.emplace_or_replace<Cmp::Position>( entity, player_pos );
-  auto &blast_radius = Sys::PersistSystem::get<Cmp::Persist::BlastRadius>( reg );
   reg.emplace_or_replace<Cmp::Player::Character>( entity );
   if ( reserved_sm ) reserved_sm->insert( entity, player_pos );
-  reg.emplace_or_replace<Cmp::Player::BlastRadius>( entity, blast_radius.get_value() );
   reg.emplace_or_replace<Cmp::PlayerStats>( entity, Cmp::Stats::Health{ 100 }, Cmp::Stats::Fear{ 0 }, Cmp::Stats::Despair{ 0 },
                                             Cmp::Stats::Infamy{ 0 }, Cmp::Stats::Luck{ 50 }, Cmp::Stats::Anima{ 0 } );
 

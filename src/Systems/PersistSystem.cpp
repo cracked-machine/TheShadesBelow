@@ -9,7 +9,6 @@
 #include <Components/Persistent/AxeObstacleDigWear.hpp>
 #include <Components/Persistent/AxePotSmashWear.hpp>
 #include <Components/Persistent/AxeSkeletonKillWear.hpp>
-#include <Components/Persistent/BlastRadius.hpp>
 #include <Components/Persistent/BombBonus.hpp>
 #include <Components/Persistent/BombDamage.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
@@ -168,7 +167,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ArmedBlockColourBorder>();
   add_component<Cmp::Persist::ArmedOffDelay>();
   add_component<Cmp::Persist::ArmedOnDelay>();
-  add_component<Cmp::Persist::BlastRadius>();
   add_component<Cmp::Persist::BombBonus>();
   add_component<Cmp::Persist::BombDamage>();
   add_component<Cmp::Persist::CameraSmoothSpeed>();

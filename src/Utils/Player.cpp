@@ -15,7 +15,6 @@
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Plant/BurningTimer.hpp>
-#include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
@@ -163,13 +162,6 @@ Cmp::Player::Wealth &get_wealth( entt::registry &reg )
   auto *wealth = reg.try_get<Cmp::Player::Wealth>( get_entity( reg ) );
   if ( not wealth ) throw std::runtime_error( "Player entt has no component: Cmp::Player::Wealth" );
   return *wealth;
-}
-
-Cmp::Player::BlastRadius &get_blast_radius( entt::registry &reg )
-{
-  auto *blast_radius = reg.try_get<Cmp::Player::BlastRadius>( get_entity( reg ) );
-  if ( not blast_radius ) throw std::runtime_error( "Player entt has no component: Cmp::Player::BlastRadius" );
-  return *blast_radius;
 }
 
 Cmp::Player::Mortality &get_mortality( entt::registry &reg )

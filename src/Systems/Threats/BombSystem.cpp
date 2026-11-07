@@ -15,7 +15,6 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/BombDamage.hpp>
-#include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Mortality.hpp>
 #include <Components/Position.hpp>
@@ -42,6 +41,25 @@
 #include <algorithm>
 #include <optional>
 #include <spdlog/spdlog.h>
+
+namespace
+{
+//! @brief Points of player luck per tile of player bomb blast radius.
+constexpr int kLuckPerBlastTile = 20;
+
+//! @brief Grave bomb blast radius (tiles) at zero luck.
+constexpr int kGraveBlastMaxRadius = 6;
+//! @brief Smallest grave bomb blast radius (tiles), reached at kGraveLuckPerBlastTile * (max - min) luck and above.
+constexpr int kGraveBlastMinRadius = 2;
+//! @brief Points of player luck per tile the grave bomb blast radius shrinks by.
+//! Resulting grave bomb blast radius (luck: radius) with the values above:
+//! - 0-9: 6
+//! - 10-19: 5
+//! - 20-29: 4
+//! - 30-39: 3
+//! - 40-100: 2
+constexpr int kGraveLuckPerBlastTile = 10;
+} // namespace
 
 namespace Game::Sys
 {
@@ -302,7 +320,7 @@ void BombSystem::arm_grave_bomb()
   auto new_bomb_entt = reg().create();
   auto realigned_epicenter_pos = Utils::snap_to_grid( Utils::Player::get_position( reg() ) );
   reg().emplace_or_replace<Cmp::Position>( new_bomb_entt, realigned_epicenter_pos.position, realigned_epicenter_pos.size );
-  place_concentric_bomb_pattern( new_bomb_entt, Utils::Player::get_blast_radius( reg() ).value );
+  place_concentric_bomb_pattern( new_bomb_entt, grave_blast_radius() );
   Utils::Player::get_global_bomb_flash_timer( reg() ) = sf::Time::Zero;
 }
 
@@ -331,7 +349,7 @@ void BombSystem::arm_player_bomb()
       auto armed_epicenter_entity = reg().create();
       auto realigned_epicenter_pos = Utils::snap_to_grid( destructable_pos_cmp );
       reg().emplace<Cmp::Position>( armed_epicenter_entity, realigned_epicenter_pos.position, realigned_epicenter_pos.size );
-      place_concentric_bomb_pattern( armed_epicenter_entity, Utils::Player::get_blast_radius( reg() ).value );
+      place_concentric_bomb_pattern( armed_epicenter_entity, player_blast_radius() );
       Factory::Player::destroy_inventory( reg(), "item.bomb" );
       Utils::Player::get_global_bomb_flash_timer( reg() ) = sf::Time::Zero;
     }
@@ -345,8 +363,18 @@ void BombSystem::arm_entt( entt::entity target_entt )
   {
     m_sound_bank.get_effect( "bomb_fuse" ).play();
 
-    place_concentric_bomb_pattern( target_entt, Utils::Player::get_blast_radius( reg() ).value );
+    place_concentric_bomb_pattern( target_entt, player_blast_radius() );
   }
+}
+
+int BombSystem::player_blast_radius()
+{
+  return std::max( 1, Utils::Player::get_stats( reg() ).luck() / kLuckPerBlastTile );
+}
+
+int BombSystem::grave_blast_radius()
+{
+  return std::max( kGraveBlastMinRadius, kGraveBlastMaxRadius - ( Utils::Player::get_stats( reg() ).luck() / kGraveLuckPerBlastTile ) );
 }
 
 } // namespace Game::Sys

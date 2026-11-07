@@ -28,7 +28,6 @@ class TorchRadius;
 namespace Game::Cmp::Player
 {
 class Wealth;
-class BlastRadius;
 class Mortality;
 class LastGraveyardPosition;
 class Curse;
@@ -98,12 +97,6 @@ Cmp::Player::LevelDepth &get_level_depth( entt::registry &reg );
 //! @return Cmp::Player::Wealth& Reference to the player's wealth.
 //! @throws std::runtime_error if the player has no Cmp::Player::Wealth.
 Cmp::Player::Wealth &get_wealth( entt::registry &reg );
-
-//! @brief Get the player's blast radius object.
-//! @param reg reference to the entt registry
-//! @return Cmp::Player::BlastRadius& Reference to the player's blast radius.
-//! @throws std::runtime_error if the player has no Cmp::Player::BlastRadius.
-Cmp::Player::BlastRadius &get_blast_radius( entt::registry &reg );
 
 //! @brief Get the player's mortality object.
 //! @param reg reference to the entt registry

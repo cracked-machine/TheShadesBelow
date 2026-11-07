@@ -90,6 +90,17 @@ private:
   //! @brief Arm a bomb centered on the given target entity (used for chain-reacting nearby explosives).
   //! @param target_entt
   void arm_entt( entt::entity target_entt );
+
+  //! @brief Blast radius (tiles) for player-placed bombs: higher luck means a bigger explosion.
+  //! @note Tuning constants are defined in BombSystem.cpp.
+  //! @return int The blast radius, at least 1.
+  int player_blast_radius();
+
+  //! @brief Blast radius (tiles) for grave bombs: lower luck means a bigger explosion.
+  //! Grave bombs are rare at high luck, so the range is concentrated in the low end.
+  //! @note Tuning constants are defined in BombSystem.cpp.
+  //! @return int The blast radius.
+  int grave_blast_radius();
 };
 
 } // namespace Game::Sys

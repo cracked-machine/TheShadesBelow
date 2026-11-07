@@ -42,7 +42,6 @@
 #include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/ArrowCompass.hpp>
-#include <Components/Player/BlastRadius.hpp>
 #include <Components/Player/CadaverCount.hpp>
 #include <Components/Player/CameraHold.hpp>
 #include <Components/Player/Character.hpp>
