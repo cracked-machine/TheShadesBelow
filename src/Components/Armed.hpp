@@ -67,6 +67,10 @@ public:
   //! @brief Whether this entity is the blast epicenter or a linked/chained block.
   EpiCenter m_epicenter = EpiCenter::NO;
 
+  //! @brief Blast radius (tiles) of the bomb this epicenter belongs to; 0 on linked blocks. Set by
+  //! BombSystem::place_concentric_bomb_pattern() and used to find graves to exhume on detonation.
+  int m_blast_radius{ 0 };
+
 private:
 };
 

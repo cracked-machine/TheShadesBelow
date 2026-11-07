@@ -11,7 +11,7 @@ struct PlayerActionEvent
   enum class GameActions {
     //! @brief Player placed a bomb at their location.
     PLACE_BOMB,
-    //! @brief Player triggered a grave bomb trap at their location.
+    //! @brief A grave bomb trap was triggered: at the player's location, or at m_entt's position if set.
     TRIGGER_BOMB,
     //! @brief Generic interact action, e.g. altars, exits, healing springs, crypt objectives and chests.
     ACTIVATE,

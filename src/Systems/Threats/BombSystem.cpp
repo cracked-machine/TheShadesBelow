@@ -7,7 +7,10 @@
 #include <Components/DeathPosition.hpp>
 #include <Components/DestroyedObstacle.hpp>
 #include <Components/Exit.hpp>
+#include <Components/Grave/Exhumed.hpp>
+#include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/Segment.hpp>
+#include <Components/Inventory/BlastProof.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/Container.hpp>
@@ -15,6 +18,7 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/BombDamage.hpp>
+#include <Components/Persistent/BombsExhumeGraves.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Mortality.hpp>
 #include <Components/Position.hpp>
@@ -22,6 +26,7 @@
 #include <Components/ZOrderValue.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
+#include <Events/ExhumeGraveEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/BombFactory.hpp>
@@ -48,16 +53,16 @@ namespace
 constexpr int kLuckPerBlastTile = 20;
 
 //! @brief Grave bomb blast radius (tiles) at zero luck.
-constexpr int kGraveBlastMaxRadius = 6;
+constexpr int kGraveBlastMaxRadius = 2;
 //! @brief Smallest grave bomb blast radius (tiles), reached at kGraveLuckPerBlastTile * (max - min) luck and above.
-constexpr int kGraveBlastMinRadius = 2;
+//! 0 still detonates the epicenter tile itself (hurting the player if they are on it) but no rings around it, and
+//! does not exhume neighbouring graves.
+constexpr int kGraveBlastMinRadius = 0;
 //! @brief Points of player luck per tile the grave bomb blast radius shrinks by.
 //! Resulting grave bomb blast radius (luck: radius) with the values above:
-//! - 0-9: 6
-//! - 10-19: 5
-//! - 20-29: 4
-//! - 30-39: 3
-//! - 40-100: 2
+//! - 0-9: 2
+//! - 10-19: 1
+//! - 20-100: 0
 constexpr int kGraveLuckPerBlastTile = 10;
 } // namespace
 
@@ -111,6 +116,24 @@ void BombSystem::update( sf::Time dt )
     // reallocate the Cmp::Armed/Cmp::Position pools, which would dangle armed_cmp_ptr/armed_pos_cmp_ptr.
     Cmp::Position armed_pos_cmp = *armed_pos_cmp_ptr;
     bool is_epicenter = ( armed_cmp_ptr->m_epicenter == Cmp::Armed::EpiCenter::YES );
+    const int blast_radius = armed_cmp_ptr->m_blast_radius;
+
+    // exhume every closed grave within the blast radius. Snapshot first: the handlers spawn loot/NPCs and can
+    // arm further grave bombs, all of which reallocate the pools a live view would iterate.
+    if ( is_epicenter and blast_radius > 0 and Sys::PersistSystem::get<Cmp::Persist::BombsExhumeGraves>( reg() ).get_value() )
+    {
+      const sf::Vector2f reach = Constants::kGridSizePxF * static_cast<float>( blast_radius );
+      const sf::FloatRect blast_area( armed_pos_cmp.position - reach, armed_pos_cmp.size + ( reach * 2.f ) );
+      std::vector<entt::entity> blasted_graves;
+      for ( auto [grave_entt, grave_cmp] : reg().view<Cmp::Grave::MultiBlock>( exclude<Cmp::Grave::Exhumed> ).each() )
+      {
+        if ( blast_area.findIntersection( grave_cmp ) ) blasted_graves.push_back( grave_entt );
+      }
+      for ( entt::entity grave_entt : blasted_graves )
+      {
+        get_systems_event_queue().trigger( Events::ExhumeGraveEvent( grave_entt ) );
+      }
+    }
 
     // detonate obstacles - remove all traces of obstacle
     Utils::Collision::for_each_intersect<Cmp::Obstacle>( reg(), armed_pos_cmp,
@@ -146,6 +169,8 @@ void BombSystem::update( sf::Time dt )
                                                           [&]( entt::entity item_entt, Cmp::WorldItem &item_cmp, Cmp::Position &item_pos_cmp )
     {
       if ( item_entt == armed_entt ) return;
+      // e.g. loot dropped by a grave this blast exhumed
+      if ( reg().any_of<Cmp::Inventory::BlastProof>( item_entt ) ) return;
       if ( item_cmp.item_type == "item.pickaxe" or item_cmp.item_type == "item.axe" or item_cmp.item_type == "item.shovel" )
       {
         auto dmg = Sys::PersistSystem::get<Cmp::Persist::BombDamage>( reg() ).get_value();
@@ -235,7 +260,12 @@ void BombSystem::update( sf::Time dt )
   }
 
   auto remaining_armed_view = reg().view<Cmp::Armed>();
-  if ( remaining_armed_view->empty() ) { Utils::Player::get_global_bomb_flash_timer( reg() ) = sf::Time::Zero; }
+  if ( remaining_armed_view->empty() )
+  {
+    Utils::Player::get_global_bomb_flash_timer( reg() ) = sf::Time::Zero;
+    // the explosion sequence is over, so items it spared can be blown up by the next one
+    reg().clear<Cmp::Inventory::BlastProof>();
+  }
 }
 
 void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_entity, const int blast_radius )
@@ -255,6 +285,7 @@ void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_en
   // Mark epicenter as armed FIRST before any recursive processing
   int sequence_counter = 0;
   Factory::Bomb::create_armed( reg(), epicenter_entity, Cmp::Armed::EpiCenter::YES, sequence_counter++, centerTile.y + kZOrderOffset );
+  reg().get<Cmp::Armed>( epicenter_entity ).m_blast_radius = blast_radius;
 
   // We dont detonate reserved positions so dont arm them in the first place
   // Also exclude NPCs since they're handled separately and may be missing Position component during death animation
@@ -311,14 +342,16 @@ void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_en
 void BombSystem::on_bomb_event( const Events::PlayerActionEvent &event )
 {
   if ( event.action == Events::PlayerActionEvent::GameActions::PLACE_BOMB ) { arm_player_bomb(); }
-  else if ( event.action == Events::PlayerActionEvent::GameActions::TRIGGER_BOMB ) { arm_grave_bomb(); }
+  else if ( event.action == Events::PlayerActionEvent::GameActions::TRIGGER_BOMB ) { arm_grave_bomb( event.m_entt ); }
 }
 
-void BombSystem::arm_grave_bomb()
+void BombSystem::arm_grave_bomb( entt::entity source_entt )
 {
   m_sound_bank.get_effect( "bomb_fuse" ).play();
+  // centre on the grave that set it off when there is one (e.g. exhumed by another blast), else on the player
+  const auto *source_pos_cmp = reg().valid( source_entt ) ? reg().try_get<Cmp::Position>( source_entt ) : nullptr;
+  auto realigned_epicenter_pos = Utils::snap_to_grid( source_pos_cmp ? *source_pos_cmp : Utils::Player::get_position( reg() ) );
   auto new_bomb_entt = reg().create();
-  auto realigned_epicenter_pos = Utils::snap_to_grid( Utils::Player::get_position( reg() ) );
   reg().emplace_or_replace<Cmp::Position>( new_bomb_entt, realigned_epicenter_pos.position, realigned_epicenter_pos.size );
   place_concentric_bomb_pattern( new_bomb_entt, grave_blast_radius() );
   Utils::Player::get_global_bomb_flash_timer( reg() ) = sf::Time::Zero;
@@ -367,10 +400,7 @@ void BombSystem::arm_entt( entt::entity target_entt )
   }
 }
 
-int BombSystem::player_blast_radius()
-{
-  return std::max( 1, Utils::Player::get_stats( reg() ).luck() / kLuckPerBlastTile );
-}
+int BombSystem::player_blast_radius() { return std::max( 1, Utils::Player::get_stats( reg() ).luck() / kLuckPerBlastTile ); }
 
 int BombSystem::grave_blast_radius()
 {

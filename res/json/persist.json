@@ -146,6 +146,11 @@
     "detail": "Bomb Damage",
     "format": "%d"
   },
+  "BombsExhumeGraves": {
+    "type": "bool",
+    "value": true,
+    "detail": "Bombs Exhume Graves"
+  },
   "BowReleaseWear": {
     "type": "float",
     "value": 1.0,

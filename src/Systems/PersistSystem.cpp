@@ -11,6 +11,7 @@
 #include <Components/Persistent/AxeSkeletonKillWear.hpp>
 #include <Components/Persistent/BombBonus.hpp>
 #include <Components/Persistent/BombDamage.hpp>
+#include <Components/Persistent/BombsExhumeGraves.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
 #include <Components/Persistent/BurrExpiry.hpp>
 #include <Components/Persistent/BurrSlowFactor.hpp>
@@ -169,6 +170,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ArmedOnDelay>();
   add_component<Cmp::Persist::BombBonus>();
   add_component<Cmp::Persist::BombDamage>();
+  add_component<Cmp::Persist::BombsExhumeGraves>();
   add_component<Cmp::Persist::CameraSmoothSpeed>();
   add_component<Cmp::Persist::CorruptionDamage>();
   add_component<Cmp::Persist::CryptShuffleTimeout>();

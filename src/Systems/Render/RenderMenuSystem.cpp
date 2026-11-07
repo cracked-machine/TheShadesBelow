@@ -11,6 +11,7 @@
 #include <Components/Persistent/AxeSkeletonKillWear.hpp>
 #include <Components/Persistent/BombBonus.hpp>
 #include <Components/Persistent/BombDamage.hpp>
+#include <Components/Persistent/BombsExhumeGraves.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
 #include <Components/Persistent/BurrExpiry.hpp>
 #include <Components/Persistent/BurrSlowFactor.hpp>
@@ -293,6 +294,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
 
     Sys::PersistSystem::get<Cmp::Persist::BombDamage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::FuseDelay>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::BombsExhumeGraves>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ArmedOnDelay>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ArmedOffDelay>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ArmedBlockColourBorder>( reg() ).render_widget();

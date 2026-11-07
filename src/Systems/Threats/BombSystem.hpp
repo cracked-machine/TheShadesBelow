@@ -81,8 +81,9 @@ private:
   //! @param event
   void on_bomb_event( const Events::PlayerActionEvent &event );
 
-  //! @brief Arm a bomb centered on the player's current position (used for grave bombs).
-  void arm_grave_bomb();
+  //! @brief Arm a grave bomb centered on source_entt's position, or on the player's current position if it has none.
+  //! @param source_entt The grave that set the bomb off when it was not dug by the player, else entt::null.
+  void arm_grave_bomb( entt::entity source_entt );
 
   //! @brief Arm a bomb on the destructable tile the player is currently standing on, consuming a bomb item from the player's inventory.
   void arm_player_bomb();

@@ -14,6 +14,7 @@ namespace Game::Cmp { class AnimData; }
 namespace Game::Cmp::Player { class Character; }
 namespace Game::Cmp::Grave { class Consequence; }
 namespace Game::Events { struct AltarActivatedEvent; }
+namespace Game::Events { struct ExhumeGraveEvent; }
 // clang-format on
 
 namespace Game::Sys
@@ -80,18 +81,41 @@ private:
   //! @return TrailStep::NO_GRAVES if no graves are left to point at, otherwise TrailStep::ADVANCED
   TrailStep pick_next_trail_grave( entt::entity source_entt );
 
+  //! @brief What opened a grave, which decides where its loot/key/bomb ends up
+  enum class ExhumedBy
+  {
+    PLAYER, //!< dug by the player: loot drops at the player, keys go into their hands, bombs centre on them
+    BOMB    //!< caught in a blast: loot and keys drop beside the grave (spared by the blast), bombs centre on the grave
+  };
+
+  //! @brief Handler for Events::ExhumeGraveEvent: open a grave that was not dug by the player, e.g. caught in a bomb blast
+  //! @param event
+  void on_exhume_grave( const Events::ExhumeGraveEvent &event );
+
   //! @brief Switch the grave's sprite to its opened state and trigger a random consequence
   //! @param grave_entity
   //! @param grave_anim_cmp
-  void open_grave( entt::entity grave_entity, Cmp::AnimData &grave_anim_cmp );
+  //! @param by what opened the grave
+  void open_grave( entt::entity grave_entity, Cmp::AnimData &grave_anim_cmp, ExhumedBy by );
 
-  //! @brief Put the exhumed key straight into the player's inventory, dropping whatever they were holding at their feet
+  //! @brief Hand over an exhumed key. ExhumedBy::PLAYER: straight into the player's inventory, dropping whatever they
+  //! were holding at their feet. ExhumedBy::BOMB: dropped beside the grave, spared by the blast.
   //! @param key item.exitkey or item.cryptkey
-  void grant_grave_key( const Sys::ItemKey &key );
+  //! @param grave_entity the grave the key came from
+  //! @param by what opened the grave
+  void grant_grave_key( const Sys::ItemKey &key, entt::entity grave_entity, ExhumedBy by );
 
-  //! @brief Pick a random item from the pool, drop it as loot, and apply its Cmp::SpawnAction modifiers to the player
+  //! @brief Pick a random item from the pool, drop it as loot, and apply its Cmp::SpawnAction modifiers to the player.
+  //! ExhumedBy::PLAYER drops it at the player; ExhumedBy::BOMB drops it beside the grave, spared by the blast.
   //! @param loot_pool
-  void spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool );
+  //! @param grave_entity the grave the loot came from
+  //! @param by what opened the grave
+  void spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, entt::entity grave_entity, ExhumedBy by );
+
+  //! @brief Bounds of the grave, as a position for spawning items beside it
+  //! @param grave_entity
+  //! @return Cmp::Position covering the grave's Cmp::Grave::MultiBlock
+  Cmp::Position grave_bounds( entt::entity grave_entity );
 
   bool player_digging{ false };
 };

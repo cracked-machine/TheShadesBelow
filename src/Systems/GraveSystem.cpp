@@ -10,6 +10,7 @@
 #include <Components/Grave/Segment.hpp>
 #include <Components/Grave/TrailMarker.hpp>
 #include <Components/Grave/TrailStart.hpp>
+#include <Components/Inventory/BlastProof.hpp>
 #include <Components/Inventory/FlashUIInventory.hpp>
 #include <Components/Npc/Crow.hpp>
 #include <Components/Particle/GraveHaloParticleSprite.hpp>
@@ -38,6 +39,7 @@
 #include <Events/CreateItemEvent.hpp>
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
+#include <Events/ExhumeGraveEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
@@ -72,6 +74,7 @@ GraveSystem::GraveSystem( entt::registry &reg, sf::RenderWindow &window, Audio::
 {
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&GraveSystem::on_player_action>( this );
   std::ignore = get_systems_event_queue().sink<Events::AltarActivatedEvent>().connect<&GraveSystem::on_altar_activated>( this );
+  std::ignore = get_systems_event_queue().sink<Events::ExhumeGraveEvent>().connect<&GraveSystem::on_exhume_grave>( this );
 }
 
 void GraveSystem::update()
@@ -218,7 +221,24 @@ void GraveSystem::apply_dig_hit( entt::entity grave_entity, Cmp::Grave::MultiBlo
     return;
   }
 
-  open_grave( grave_entity, grave_anim_cmp );
+  open_grave( grave_entity, grave_anim_cmp, ExhumedBy::PLAYER );
+}
+
+void GraveSystem::on_exhume_grave( const Events::ExhumeGraveEvent &event )
+{
+  const entt::entity grave_entity = event.m_grave_entt;
+  if ( not reg().valid( grave_entity ) or not reg().all_of<Cmp::Grave::MultiBlock>( grave_entity ) ) return;
+  if ( reg().all_of<Cmp::Grave::Exhumed>( grave_entity ) ) return;
+  auto *grave_anim_cmp = reg().try_get<Cmp::AnimData>( grave_entity );
+  if ( not grave_anim_cmp ) return;
+  SPDLOG_INFO( "Grave {} exhumed by a bomb blast", static_cast<uint32_t>( grave_entity ) );
+  open_grave( grave_entity, *grave_anim_cmp, ExhumedBy::BOMB );
+}
+
+Cmp::Position GraveSystem::grave_bounds( entt::entity grave_entity )
+{
+  const auto &grave_cmp = reg().get<Cmp::Grave::MultiBlock>( grave_entity );
+  return Cmp::Position( grave_cmp.position, grave_cmp.size );
 }
 
 GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_entt )
@@ -312,15 +332,15 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
   return exit_key_reached ? TrailStep::EXIT_KEY : TrailStep::ADVANCED;
 }
 
-void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_anim_cmp )
+void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_anim_cmp, ExhumedBy by )
 {
   if ( std::string::size_type n = grave_anim_cmp.m_sprite_type.str().find( ".closed" ); n != std::string::npos )
   {
     grave_anim_cmp.m_sprite_type = Sys::SpriteKey( grave_anim_cmp.m_sprite_type.str().substr( 0, n ) + ".opened" );
     SPDLOG_DEBUG( "Grave Cmp::SpriteAnimation changed to opened type: {}", grave_anim_cmp.m_sprite_type );
 
-    // select the final smash sound
-    m_sound_bank.get_effect( "pickaxe_final" ).play();
+    // select the final smash sound; a blast is loud enough on its own
+    if ( by == ExhumedBy::PLAYER ) { m_sound_bank.get_effect( "pickaxe_final" ).play(); }
   }
 
   // exhume early so this grave can never be chosen as its own next target
@@ -332,7 +352,7 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
     reg().clear<Cmp::Grave::TrailStart>();
     SPDLOG_INFO( "Grave {} started the trail", static_cast<uint32_t>( grave_entity ) );
     // nowhere for the trail to go: hand over the key now so the level can still be exited
-    if ( pick_next_trail_grave( grave_entity ) != TrailStep::ADVANCED ) { grant_grave_key( "item.exitkey" ); }
+    if ( pick_next_trail_grave( grave_entity ) != TrailStep::ADVANCED ) { grant_grave_key( "item.exitkey", grave_entity, by ); }
     return;
   }
 
@@ -342,10 +362,10 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
     switch ( pick_next_trail_grave( grave_entity ) )
     {
       case TrailStep::EXIT_KEY:
-        grant_grave_key( "item.exitkey" );
+        grant_grave_key( "item.exitkey", grave_entity, by );
         break;
       case TrailStep::CRYPT_KEY:
-        grant_grave_key( "item.cryptkey" );
+        grant_grave_key( "item.cryptkey", grave_entity, by );
         break;
       case TrailStep::ADVANCED:
       case TrailStep::NO_GRAVES:
@@ -365,15 +385,18 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
       break;
     case Cmp::Grave::Consequence::Type::BOMB_TRAP:
       SPDLOG_DEBUG( "Grave activated bomb trap." );
-      get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::TRIGGER_BOMB ) );
+      // a blasted grave sets its bomb off where it lies, chaining into any graves around it
+      get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::TRIGGER_BOMB,
+                                                                    by == ExhumedBy::BOMB ? grave_entity : entt::null ) );
       break;
     case Cmp::Grave::Consequence::Type::JEWELRY:
       spawn_grave_loot( { "item.jewelry_sapphire_necklace", "item.jewelry_amephyst_ring", "item.jewelry_ruby_ring", "item.jewelry_emerald_necklace",
                           "item.jewelry_emerald_gemstone", "item.jewelry_sapphire_gemstone", "item.jewelry_diamond_gemstone",
-                          "item.jewelry_amephyst_gemstone" } );
+                          "item.jewelry_amephyst_gemstone" },
+                        grave_entity, by );
       break;
     case Cmp::Grave::Consequence::Type::CURSE_TABLET:
-      spawn_grave_loot( { "item.cursetablet" } );
+      spawn_grave_loot( { "item.cursetablet" }, grave_entity, by );
       break;
     case Cmp::Grave::Consequence::Type::TALISMAN: {
       // any talisman that at least one altar takes, biased towards those a partly activated altar still needs so the
@@ -408,16 +431,28 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
         weightss << " " << talisman_key.str() << "=" << weight;
       }
       SPDLOG_DEBUG( "Grave talisman weights:{}", weightss.str() );
-      spawn_grave_loot( loot_pool );
+      spawn_grave_loot( loot_pool, grave_entity, by );
       break;
     }
   }
 }
 
-void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool )
+void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, entt::entity grave_entity, ExhumedBy by )
 {
   Cmp::RandomInt loot_picker( 0, static_cast<int>( loot_pool.size() ) - 1 );
   const auto &selected_item_type = loot_pool.at( static_cast<std::size_t>( loot_picker.gen() ) );
+
+  if ( by == ExhumedBy::BOMB )
+  {
+    // drop on a free cell beside the grave, and spare it from the blast that exhumed it
+    const Cmp::Position bounds = grave_bounds( grave_entity );
+    get_systems_event_queue().trigger( Events::CreateItemEvent( bounds, selected_item_type, "drop_loot", 0.f, true, 0, entt::null,
+                                                                [this]( entt::entity item_entt )
+    { reg().emplace_or_replace<Cmp::Inventory::BlastProof>( item_entt ); } ) );
+    const auto spawn_action = Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), selected_item_type );
+    trigger_side_effects( spawn_action, bounds );
+    return;
+  }
 
   get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), selected_item_type, "drop_loot" ) );
   const auto spawn_action = Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), selected_item_type );
@@ -441,8 +476,21 @@ Utils::Cardinal facing_edge( const sf::FloatRect &altar, sf::Vector2f grave_cent
 
 } // namespace
 
-void GraveSystem::grant_grave_key( const Sys::ItemKey &key )
+void GraveSystem::grant_grave_key( const Sys::ItemKey &key, entt::entity grave_entity, ExhumedBy by )
 {
+  if ( by == ExhumedBy::BOMB )
+  {
+    // the player is not at the grave: leave the key beside it (keys survive blasts anyway) instead of in their hands.
+    // Events::ItemPickedUpEvent is sent when they pick it up.
+    const Cmp::Position bounds = grave_bounds( grave_entity );
+    get_systems_event_queue().trigger( Events::CreateItemEvent( bounds, key, "drop_loot", 0.f, true, 0, entt::null, [this]( entt::entity item_entt )
+    { reg().emplace_or_replace<Cmp::Inventory::BlastProof>( item_entt ); } ) );
+    const auto spawn_action = Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), key );
+    trigger_side_effects( spawn_action, bounds );
+    SPDLOG_INFO( "Bomb blast exhumed {}", key.str() );
+    return;
+  }
+
   // the key goes straight into the player's hands, so whatever they were holding (e.g. the digging tool) is dropped
   get_systems_event_queue().trigger( Events::DropInventoryEvent() );
   get_systems_event_queue().trigger( Events::AddInventoryEvent( key ) );
@@ -488,7 +536,7 @@ void GraveSystem::on_altar_activated( const Events::AltarActivatedEvent &event )
     {
       // nowhere for the trail to start: hand over the key now so the level can still be exited
       SPDLOG_WARN( "No un-exhumed graves left for the trail to start from" );
-      spawn_grave_loot( { "item.exitkey" } );
+      spawn_grave_loot( { "item.exitkey" }, entt::null, ExhumedBy::PLAYER );
       return;
     }
     // every grave is near the altar (e.g. a small map): fall back to the farthest ones on each side
