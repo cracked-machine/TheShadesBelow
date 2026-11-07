@@ -4,6 +4,7 @@
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/DismissTooltipEvent.hpp>
 #include <Events/GrimoireDiscoveryEvent.hpp>
+#include <Events/InsufficientAnimaEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 
@@ -55,6 +56,10 @@ public:
   //! @param event
   void on_grimoire_discovery_event( const Events::GrimoireDiscoveryEvent &event );
 
+  //! @brief Record a candidate for tooltips triggered by "InsufficientAnimaEvent".
+  //! @param event
+  void on_insufficient_anima_event( const Events::InsufficientAnimaEvent &event );
+
   //! @brief Hide the active tooltip before its timer expires.
   //! @param event
   void on_dismiss_tooltip_event( [[maybe_unused]] const Events::DismissTooltipEvent &event ) { m_active.reset(); }
@@ -75,8 +80,8 @@ private:
   {
     //! @brief unique id, stored in Cmp::Persist::TooltipsSeen
     std::string id;
-    //! @brief name of the event that triggers this tooltip, e.g. "AddInventoryEvent", "ItemPickedUpEvent" or
-    //! "GrimoireDiscoveryEvent"
+    //! @brief name of the event that triggers this tooltip, e.g. "AddInventoryEvent", "ItemPickedUpEvent",
+    //! "GrimoireDiscoveryEvent" or "InsufficientAnimaEvent"
     std::string trigger;
     //! @brief optional item key condition, empty matches any item
     std::string item;

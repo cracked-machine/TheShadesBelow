@@ -6,18 +6,20 @@
 namespace Game::Cmp
 {
 
-PlayerStats::PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck )
-    : PlayerStats( health, fear, despair, infamy, luck, Cmp::Toxicity::Toxidrome{} )
+PlayerStats::PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck,
+                          Stats::Anima anima )
+    : PlayerStats( health, fear, despair, infamy, luck, anima, Cmp::Toxicity::Toxidrome{} )
 {
 }
 
 PlayerStats::PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck,
-                          Cmp::Toxicity::Toxidrome toxidrome )
+                          Stats::Anima anima, Cmp::Toxicity::Toxidrome toxidrome )
     : m_health( std::clamp( health.value, 0, 100 ) ),
       m_fear( std::clamp( fear.value, 0, 100 ) ),
       m_despair( std::clamp( despair.value, 0, 100 ) ),
       m_infamy( std::clamp( infamy.value, 0, 100 ) ),
       m_luck( std::clamp( luck.value, 0, 100 ) ),
+      m_anima( std::clamp( anima.value, 0, 100 ) ),
       m_toxidrome( std::make_unique<Cmp::Toxicity::Toxidrome>( std::move( toxidrome ) ) )
 {
 }
@@ -30,6 +32,7 @@ PlayerStats::PlayerStats( const PlayerStats &other )
       m_despair( other.m_despair ),
       m_infamy( other.m_infamy ),
       m_luck( other.m_luck ),
+      m_anima( other.m_anima ),
       m_toxidrome( std::make_unique<Cmp::Toxicity::Toxidrome>( *other.m_toxidrome ) ),
       m_toxic_immune( other.m_toxic_immune )
 {
@@ -43,6 +46,7 @@ PlayerStats &PlayerStats::operator=( const PlayerStats &other )
   m_despair = other.m_despair;
   m_infamy = other.m_infamy;
   m_luck = other.m_luck;
+  m_anima = other.m_anima;
   m_toxidrome = std::make_unique<Cmp::Toxicity::Toxidrome>( *other.m_toxidrome );
   m_toxic_immune = other.m_toxic_immune;
   return *this;
@@ -62,6 +66,7 @@ void PlayerStats::apply( const BaseAction &action )
   m_despair = std::clamp( m_despair + action.despair(), 0, 100 );
   m_infamy = std::clamp( m_infamy + action.infamy(), 0, 100 );
   m_luck = std::clamp( m_luck + action.luck(), 0, 100 );
+  m_anima = std::clamp( m_anima + action.anima(), 0, 100 );
   for ( const auto &[id, toxicity_delta] : action.toxidrome() )
   {
     // toxic immunity blocks increases only; cures still apply

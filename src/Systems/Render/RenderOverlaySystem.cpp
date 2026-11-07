@@ -3,6 +3,7 @@
 #include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Hazard/FieldCell.hpp>
+#include <Components/Inventory/FlashUIAnima.hpp>
 #include <Components/Inventory/FlashUICadaver.hpp>
 #include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
@@ -220,6 +221,15 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
       meter_value = static_cast<float>( Utils::Player::get_stats( reg() ).luck() );
       meter_inner_color = sf::Color::Cyan;
       should_render = true;
+    }
+    else if ( meter.name == "anima_meter" )
+    {
+      meter_value = static_cast<float>( Utils::Player::get_stats( reg() ).anima() );
+      meter_inner_color = sf::Color( 255, 165, 0 ); // orange
+      should_render = true;
+
+      // flash when a talisman is refused for lack of anima
+      if ( update_flash_toggle<Cmp::FlashUIAnima>( dt ) ) { meter_outer_color = sf::Color::Cyan; }
     }
     else if ( meter.name == "tachycardia_meter" )
     {

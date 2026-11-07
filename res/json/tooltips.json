@@ -31,6 +31,13 @@
       "text": "Grimoire updated: {item}\nPress <G> to open the grimoire.",
       "frequency": "always",
       "duration_s": 4.0
+    },
+    {
+      "id": "talisman_no_anima",
+      "trigger": "InsufficientAnimaEvent",
+      "text": "A talisman can only be activated when you have anima.\nOffer or eat plants to gain anima.",
+      "frequency": "always",
+      "duration_s": 4.0
     }
   ]
 }

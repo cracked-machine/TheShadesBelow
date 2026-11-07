@@ -69,9 +69,12 @@ public:
   //! @brief Render the defeat (game over) screen.
   void render_defeat_screen();
 
-  //! @brief Render the victory (level complete) screen, including cadaver count and wealth stats.
+  //! @brief Render the victory (level complete) screen: remaining cadavers and anima, the wealth each has added so far,
+  //! and the player's total wealth.
   //! @param allow_continue Whether to show the "press to continue" prompt.
-  void render_victory_screen( bool allow_continue );
+  //! @param cadaver_wealth Wealth added so far from converting cadavers.
+  //! @param anima_wealth Wealth added so far from converting anima.
+  void render_victory_screen( bool allow_continue, int cadaver_wealth, int anima_wealth );
 };
 
 } // namespace Game::Sys

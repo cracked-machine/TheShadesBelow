@@ -125,6 +125,7 @@
 #include <Systems/ShaderSystem.hpp>
 #include <Systems/Threats/BombSystem.hpp>
 #include <Utils/ImGuiTheme.hpp>
+#include <Components/Stats/PlayerStats.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 
@@ -132,6 +133,7 @@
 #include <SFML/System/Vector2.hpp>
 
 #include "imgui-SFML.h"
+#include <format>
 #include <imgui.h>
 
 namespace Game::Sys
@@ -483,7 +485,7 @@ void RenderMenuSystem::render_defeat_screen()
   }
 }
 
-void RenderMenuSystem::render_victory_screen( bool allow_continue )
+void RenderMenuSystem::render_victory_screen( bool allow_continue, int cadaver_wealth, int anima_wealth )
 {
   sf::Vector2u display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
 
@@ -503,10 +505,17 @@ void RenderMenuSystem::render_victory_screen( bool allow_continue )
   const auto &wealth = Utils::Player::get_wealth( m_reg );
   const auto &cadaver_count = Utils::Player::get_cadaver_count( m_reg );
 
-  sf::Text cadaver_txt( m_font, "Cadaver count: " + std::to_string( cadaver_count.get_count() ), 24 );
+  const int anima = Utils::Player::get_stats( m_reg ).anima();
+
+  sf::Text cadaver_txt( m_font, std::format( "Cadaver count: {}   (+{} wealth)", cadaver_count.get_count(), cadaver_wealth ), 24 );
   cadaver_txt.setFillColor( sf::Color::White );
   cadaver_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, 500.f } );
   m_window.draw( cadaver_txt );
+
+  sf::Text anima_txt( m_font, std::format( "Anima: {}   (+{} wealth)", anima, anima_wealth ), 24 );
+  anima_txt.setFillColor( sf::Color( 255, 165, 0 ) ); // orange, matching the anima meter
+  anima_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, 550.f } );
+  m_window.draw( anima_txt );
 
   sf::Text wealth_txt( m_font, "Player wealth: " + std::to_string( wealth.wealth ), 24 );
   wealth_txt.setFillColor( sf::Color::White );

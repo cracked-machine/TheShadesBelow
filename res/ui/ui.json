@@ -8,7 +8,7 @@
          "name":"overlay",
          "objects":[
                 {
-                 "height":502,
+                 "height":572,
                  "id":1,
                  "name":"status_outline",
                  "opacity":1,
@@ -61,7 +61,7 @@
                  "visible":true,
                  "width":180,
                  "x":80,
-                 "y":560
+                 "y":650
                 }, 
                 {
                  "height":0,
@@ -114,7 +114,7 @@
                  "visible":true,
                  "width":0,
                  "x":50,
-                 "y":400
+                 "y":490
                 }, 
                 {
                  "height":0,
@@ -143,7 +143,7 @@
                  "visible":true,
                  "width":0,
                  "x":50,
-                 "y":440
+                 "y":530
                 }, 
                 {
                  "height":0,
@@ -172,7 +172,7 @@
                  "visible":true,
                  "width":0,
                  "x":50,
-                 "y":480
+                 "y":570
                 }, 
                 {
                  "height":0,
@@ -196,7 +196,7 @@
                  "visible":true,
                  "width":0,
                  "x":120,
-                 "y":400
+                 "y":490
                 }, 
                 {
                  "height":0,
@@ -220,7 +220,7 @@
                  "visible":true,
                  "width":0,
                  "x":120,
-                 "y":440
+                 "y":530
                 }, 
                 {
                  "height":0,
@@ -244,7 +244,7 @@
                  "visible":true,
                  "width":0,
                  "x":120,
-                 "y":480
+                 "y":570
                 }, 
                 {
                  "height":20,
@@ -285,7 +285,7 @@
                  "visible":true,
                  "width":0,
                  "x":130,
-                 "y":590
+                 "y":680
                 }, 
                 {
                  "height":10,
@@ -297,7 +297,7 @@
                  "visible":true,
                  "width":130,
                  "x":100,
-                 "y":700
+                 "y":790
                 }, 
                 {
                  "height":20,
@@ -345,7 +345,7 @@
                  "visible":true,
                  "width":0,
                  "x":170,
-                 "y":740
+                 "y":830
                 }, 
                 {
                  "height":0,
@@ -477,7 +477,7 @@
                  "visible":true,
                  "width":120,
                  "x":40,
-                 "y":240
+                 "y":330
                 }, 
                 {
                  "height":20,
@@ -489,7 +489,7 @@
                  "visible":true,
                  "width":120,
                  "x":180,
-                 "y":240
+                 "y":330
                 }, 
                 {
                  "height":20,
@@ -501,7 +501,7 @@
                  "visible":true,
                  "width":120,
                  "x":40,
-                 "y":280
+                 "y":370
                 }, 
                 {
                  "height":20,
@@ -513,7 +513,7 @@
                  "visible":true,
                  "width":120,
                  "x":180,
-                 "y":280
+                 "y":370
                 }, 
                 {
                  "height":20,
@@ -525,7 +525,7 @@
                  "visible":true,
                  "width":120,
                  "x":40,
-                 "y":320
+                 "y":410
                 }, 
                 {
                  "height":20,
@@ -537,7 +537,7 @@
                  "visible":true,
                  "width":120,
                  "x":180,
-                 "y":320
+                 "y":410
                 }, 
                 {
                  "height":0,
@@ -561,7 +561,7 @@
                  "visible":true,
                  "width":0,
                  "x":50,
-                 "y":238
+                 "y":328
                 }, 
                 {
                  "height":0,
@@ -585,7 +585,7 @@
                  "visible":true,
                  "width":0,
                  "x":190,
-                 "y":238
+                 "y":328
                 }, 
                 {
                  "height":0,
@@ -609,7 +609,7 @@
                  "visible":true,
                  "width":0,
                  "x":210,
-                 "y":278
+                 "y":368
                 }, 
                 {
                  "height":0,
@@ -633,7 +633,7 @@
                  "visible":true,
                  "width":0,
                  "x":50,
-                 "y":278
+                 "y":368
                 }, 
                 {
                  "height":0,
@@ -657,7 +657,7 @@
                  "visible":true,
                  "width":0,
                  "x":60,
-                 "y":318
+                 "y":408
                 }, 
                 {
                  "height":0,
@@ -681,7 +681,7 @@
                  "visible":true,
                  "width":0,
                  "x":210,
-                 "y":318
+                 "y":408
                 }, 
                 {
                  "height":20,
@@ -693,7 +693,7 @@
                  "visible":true,
                  "width":120,
                  "x":40,
-                 "y":360
+                 "y":450
                 }, 
                 {
                  "height":0,
@@ -717,7 +717,43 @@
                  "visible":true,
                  "width":0,
                  "x":70,
-                 "y":358
+                 "y":448
+                }, 
+                {
+                 "height":20,
+                 "id":56,
+                 "name":"anima_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":150,
+                 "x":150,
+                 "y":240
+                }, 
+                {
+                 "height":0,
+                 "id":57,
+                 "name":"anima_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":30
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"anima"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":40,
+                 "y":230
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -726,7 +762,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":56,
+ "nextobjectid":58,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

@@ -129,19 +129,6 @@
          "objects":[
                 {
                  "height":0,
-                 "id":7,
-                 "name":"sprite.graveyard.altar1.inactive",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":128,
-                 "y":112
-                }, 
-                {
-                 "height":0,
                  "id":8,
                  "name":"npc.drknox",
                  "opacity":1,
@@ -163,7 +150,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":48,
+                 "x":96,
                  "y":112
                 }],
          "opacity":1,

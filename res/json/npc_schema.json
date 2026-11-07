@@ -84,7 +84,7 @@
   "definitions": {
     "action_effect": {
       "type": "object",
-      "required": ["health", "fear", "despair", "infamy", "toxidrome", "luck", "tick"],
+      "required": ["health", "fear", "despair", "infamy", "toxidrome", "luck", "anima", "tick"],
       "additionalProperties": false,
       "properties": {
         "health":   { "type": "number" },
@@ -92,6 +92,7 @@
         "despair":  { "type": "number" },
         "infamy":   { "type": "number" },
         "luck":     { "type": "number" },
+        "anima":    { "type": "number" },
         "toxidrome": {
           "type": "object",
           "required": ["type", "toxicity"],
@@ -129,7 +130,7 @@
                   "required": ["stat", "value"],
                   "additionalProperties": false,
                   "properties": {
-                    "stat": { "type": "string", "enum": ["health", "fear", "despair", "infamy", "luck", "tachycardia", "bradycardia", "halucinogen", "hypoxia", "phototoxia", "venom", "vertigo", "all"] },
+                    "stat": { "type": "string", "enum": ["health", "fear", "despair", "infamy", "luck", "anima", "tachycardia", "bradycardia", "halucinogen", "hypoxia", "phototoxia", "venom", "vertigo", "all"] },
                     "value": { "type": "integer" }
                   }
                 }

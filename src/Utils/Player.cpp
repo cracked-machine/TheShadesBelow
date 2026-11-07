@@ -457,7 +457,7 @@ template Cmp::BaseAction apply_action_from_world_item<Cmp::SpawnAction>( entt::r
 template <typename ActionT>
 Cmp::BaseAction apply_action_from_inventory_item( entt::registry &reg )
 {
-  Cmp::BaseAction applied_action( {}, {}, {}, {}, {}, {} );
+  Cmp::BaseAction applied_action( {}, {}, {}, {}, {}, {}, {} );
   auto inventory_view = reg.view<Cmp::PlayerInventorySlot>();
   if ( inventory_view->empty() )
   {

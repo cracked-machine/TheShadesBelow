@@ -9,6 +9,22 @@
 namespace Game::Utils
 {
 
+namespace
+{
+
+//! @brief Describe a Tiled-style object for error messages, e.g. "ui_outline 'tachycardia_txt' (id 47)".
+//! @note Never throws: any of "type", "name" or "id" may be absent.
+std::string describe_object( const nlohmann::json &j )
+{
+  std::string desc;
+  if ( j.contains( "type" ) and j.at( "type" ).is_string() ) desc += j.at( "type" ).get<std::string>() + " ";
+  desc += "'" + ( j.contains( "name" ) and j.at( "name" ).is_string() ? j.at( "name" ).get<std::string>() : std::string( "<unnamed>" ) ) + "'";
+  if ( j.contains( "id" ) and j.at( "id" ).is_number_integer() ) desc += " (id " + std::to_string( j.at( "id" ).get<int>() ) + ")";
+  return desc;
+}
+
+} // namespace
+
 std::string JsonDeserializer::make_loc_string( const std::source_location &loc )
 {
   return std::string( loc.file_name() ) + ":" + std::to_string( loc.line() ) + " ";
@@ -157,37 +173,37 @@ sf::FloatRect JsonDeserializer::get_float_rect( const nlohmann::json &object )
 std::string JsonDeserializer::get_string_property( const nlohmann::json &j, const std::string &field, std::source_location loc )
 {
   if ( not j.contains( "properties" ) )
-    throw std::runtime_error( make_loc_string( loc ) + "Missing JSON property 'properties' in object " + get_string( j, "name" ) );
+    throw std::runtime_error( make_loc_string( loc ) + "Missing JSON 'properties' array in " + describe_object( j ) );
   for ( const auto &prop : j.at( "properties" ) )
     if ( get_string( prop, "name" ) == field ) return get_string( prop, "value" );
-  throw std::runtime_error( make_loc_string( loc ) + "Missing JSON property field in object: " + field );
+  throw std::runtime_error( make_loc_string( loc ) + "Missing JSON property '" + field + "' in " + describe_object( j ) );
 }
 
 int JsonDeserializer::get_int_property( const nlohmann::json &j, const std::string &field, std::source_location loc )
 {
   if ( not j.contains( "properties" ) )
-    throw std::runtime_error( make_loc_string( loc ) + "Missing JSON property 'properties' in object " + get_string( j, "name" ) );
+    throw std::runtime_error( make_loc_string( loc ) + "Missing JSON 'properties' array in " + describe_object( j ) );
   for ( const auto &prop : j.at( "properties" ) )
     if ( get_string( prop, "name" ) == field ) return get_int( prop, "value" );
-  throw std::runtime_error( make_loc_string( loc ) + "Missing JSON property field in object: " + field );
+  throw std::runtime_error( make_loc_string( loc ) + "Missing JSON property '" + field + "' in " + describe_object( j ) );
 }
 
 std::vector<int> JsonDeserializer::get_int_list_property( const nlohmann::json &j, const std::string &field, std::source_location loc )
 {
   if ( not j.contains( "properties" ) )
-    throw std::runtime_error( make_loc_string( loc ) + "Missing JSON property 'properties' in object " + get_string( j, "name" ) );
+    throw std::runtime_error( make_loc_string( loc ) + "Missing JSON 'properties' array in " + describe_object( j ) );
   for ( const auto &prop : j.at( "properties" ) )
     if ( get_string( prop, "name" ) == field ) return get_int_list( prop, "value" );
-  throw std::runtime_error( make_loc_string( loc ) + "Missing JSON property field in object: " + field );
+  throw std::runtime_error( make_loc_string( loc ) + "Missing JSON property '" + field + "' in " + describe_object( j ) );
 }
 
 sf::Color JsonDeserializer::get_color_property( const nlohmann::json &j, const std::string &field, std::source_location loc )
 {
   if ( not j.contains( "properties" ) )
-    throw std::runtime_error( make_loc_string( loc ) + "Missing JSON property 'properties' in object " + get_string( j, "name" ) );
+    throw std::runtime_error( make_loc_string( loc ) + "Missing JSON 'properties' array in " + describe_object( j ) );
   for ( const auto &prop : j.at( "properties" ) )
     if ( get_string( prop, "name" ) == field ) return get_color( prop, "value" );
-  throw std::runtime_error( make_loc_string( loc ) + "Missing JSON property field in object: " + field );
+  throw std::runtime_error( make_loc_string( loc ) + "Missing JSON property '" + field + "' in " + describe_object( j ) );
 }
 
 std::filesystem::path JsonDeserializer::get_abs_path( const std::filesystem::path &rel )

@@ -37,6 +37,7 @@ TooltipSystem::TooltipSystem( entt::registry &reg, sf::RenderWindow &window, Aud
   std::ignore = get_systems_event_queue().sink<Events::AddInventoryEvent>().connect<&TooltipSystem::on_add_inventory_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::ItemPickedUpEvent>().connect<&TooltipSystem::on_item_picked_up_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::GrimoireDiscoveryEvent>().connect<&TooltipSystem::on_grimoire_discovery_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::InsufficientAnimaEvent>().connect<&TooltipSystem::on_insufficient_anima_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::DismissTooltipEvent>().connect<&TooltipSystem::on_dismiss_tooltip_event>( this );
   SPDLOG_DEBUG( "TooltipSystem initialized with {} tooltips", m_definitions.size() );
 }
@@ -121,6 +122,12 @@ void TooltipSystem::on_grimoire_discovery_event( const Events::GrimoireDiscovery
 {
   if ( not m_enabled ) { return; }
   m_candidates.push_back( { "GrimoireDiscoveryEvent", event.m_item.str() } );
+}
+
+void TooltipSystem::on_insufficient_anima_event( const Events::InsufficientAnimaEvent &event )
+{
+  if ( not m_enabled ) { return; }
+  m_candidates.push_back( { "InsufficientAnimaEvent", event.m_item.str() } );
 }
 
 void TooltipSystem::update( sf::Time dt )

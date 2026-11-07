@@ -689,7 +689,7 @@ void PlayerSystem::check_player_mortality()
         on_update_player_position_event( Events::UpdatePlayerPositionEvent( respawn_position ) );
         Factory::Player::remove_player_extra_life( reg() );
         m_sound_bank.get_effect( "player_respawn" ).play();
-        Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 100 }, {}, {}, {}, {}, {}, {} } );
+        Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 100 }, {}, {}, {}, {}, {}, {}, {} } );
         mortality_cmp.state = Cmp::Player::Mortality::State::ALIVE;
         mortality_cmp.last_damage_cause = Cmp::Player::Mortality::State::ALIVE;
         reg().remove<Cmp::NoRender>( entity );
@@ -780,7 +780,7 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
     // health effect decrease per toxidrome
     auto apply_health_dmg = [&]( int dmg, Cmp::Player::Mortality::State cause )
     {
-      const auto modifier = Cmp::BaseAction( Cmp::Stats::Health{ -dmg }, {}, {}, {}, {}, {} );
+      const auto modifier = Cmp::BaseAction( Cmp::Stats::Health{ -dmg }, {}, {}, {}, {}, {}, {} );
       player_stats.apply( modifier );
       reg().emplace_or_replace<Cmp::Player::TookDamage>( player_entt );
       Utils::Player::get_mortality( reg() ).last_damage_cause = cause;
@@ -955,6 +955,7 @@ void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
     auto stat_snapshot = [&]()
     {
       return std::make_tuple( player_stats.health(), player_stats.fear(), player_stats.despair(), player_stats.infamy(), player_stats.luck(),
+                              player_stats.anima(),
                               std::unordered_map<entt::id_type, int>( player_stats.toxidrome().begin(), player_stats.toxidrome().end() ) );
     };
     const auto stats_before = stat_snapshot();
@@ -1118,7 +1119,7 @@ void PlayerSystem::check_burning_particle_collision( std::string_view tag_suffix
   }
   if ( not emitter_pos ) return;
 
-  Cmp::BaseAction burn_action( Cmp::Stats::Health{ -damage }, {}, {}, {}, {}, {} );
+  Cmp::BaseAction burn_action( Cmp::Stats::Health{ -damage }, {}, {}, {}, {}, {}, {} );
   Utils::Player::get_stats( reg() ).apply( burn_action );
   reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
   player_cmp.skip_damage_cooldown_once = false;
@@ -1364,7 +1365,7 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
     }
     reg().emplace_or_replace<Cmp::Player::PostDeathTimer>( Utils::Player::get_entity( reg() ) );
     reg().emplace_or_replace<Cmp::NoRender>( Utils::Player::get_entity( reg() ) );
-    Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ -100 }, {}, {}, {}, {}, {} } );
+    Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ -100 }, {}, {}, {}, {}, {}, {} } );
     SPDLOG_INFO( "Player death code: {}", static_cast<uint8_t>( ev.m_new_state ) );
     Utils::Player::get_mortality( reg() ).state = Cmp::Player::Mortality::State::DEAD;
     SPDLOG_INFO( "Player died" );

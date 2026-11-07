@@ -180,7 +180,8 @@ protected:
     const auto &tox = j.contains( "toxidrome" ) ? j.at( "toxidrome" ) : j;
     Action action( { JsonDeserializer::get_int( j, "health" ) }, { JsonDeserializer::get_int( j, "fear" ) },
                    { JsonDeserializer::get_int( j, "despair" ) }, { JsonDeserializer::get_int( j, "infamy" ) },
-                   { JsonDeserializer::get_int( j, "luck" ) }, { JsonDeserializer::get_float( j, "tick" ) },
+                   { JsonDeserializer::get_int( j, "luck" ) }, { JsonDeserializer::get_int( j, "anima" ) },
+                   { JsonDeserializer::get_float( j, "tick" ) },
                    Game::Factory::Toxicity::create_toxidrome( JsonDeserializer::get_string_or_list( tox, "type" ),
                                                               JsonDeserializer::get_int( tox, "toxicity" ) ),
                    make_side_effects( j ), make_reward( j ) );
@@ -275,6 +276,8 @@ protected:
       condition.stat = Stat::INFAMY;
     else if ( stat == "luck" )
       condition.stat = Stat::LUCK;
+    else if ( stat == "anima" )
+      condition.stat = Stat::ANIMA;
     else if ( stat == "all" )
       condition.stat = Stat::ALL_TOXIDROMES;
     else if ( const auto id = Game::Factory::Toxicity::toxidrome_id( stat ) )

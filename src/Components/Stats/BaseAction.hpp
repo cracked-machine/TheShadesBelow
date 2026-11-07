@@ -57,6 +57,13 @@ struct Luck
   int value{ 0 };
 };
 
+//! @brief Strongly-typed anima delta, used to disambiguate BaseAction/derived-action constructor arguments.
+struct Anima
+{
+  //! @brief The change applied to the anima stat.
+  int value{ 0 };
+};
+
 //! @brief Strongly-typed tick interval, used to disambiguate BaseAction/derived-action constructor arguments.
 struct Tick
 {
@@ -108,6 +115,7 @@ struct SpawnNpcEffect
       DESPAIR,
       INFAMY,
       LUCK,
+      ANIMA,
       //! @brief One toxidrome's toxicity, 0 if inactive (see toxidrome_id).
       TOXIDROME,
       //! @brief The summed toxicity of every active toxidrome.
@@ -370,20 +378,22 @@ public:
   //! @param despair Change applied to the despair stat.
   //! @param infamy Change applied to the infamy stat.
   //! @param luck Change applied to the luck stat.
+  //! @param anima Change applied to the anima stat.
   //! @param tick How often (seconds) the action re-applies, or 0 for a one-shot.
-  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Tick tick );
+  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima, Stats::Tick tick );
   //! @brief Construct a new Base Action object.
   //! @param health Change applied to the health stat.
   //! @param fear Change applied to the fear stat.
   //! @param despair Change applied to the despair stat.
   //! @param infamy Change applied to the infamy stat.
   //! @param luck Change applied to the luck stat.
+  //! @param anima Change applied to the anima stat.
   //! @param tick How often (seconds) the action re-applies, or 0 for a one-shot.
   //! @param toxidrome toxidrome affliction applied alongside the stat changes, if any. Each active
   //! toxidrome carries its own toxicity contribution (see Cmp::Toxicity::Toxidrome).
   //! @param side_effects Optional side effects (NPC spawn, lightning, movement), each with its own probability.
   //! @param rewards Optional rewards granted when the action is applied (e.g. forage/chop/offering output).
-  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Tick tick,
+  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima, Stats::Tick tick,
               Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects = {}, ActionRewards rewards = {} );
   //! @brief Destroy the Base Action object.
   ~BaseAction();
@@ -413,6 +423,9 @@ public:
   //! @brief Get the luck delta.
   //! @return int The change applied to the toxicity stat.
   [[nodiscard]] int luck() const { return m_luck; }
+  //! @brief Get the anima delta.
+  //! @return int The change applied to the anima stat.
+  [[nodiscard]] int anima() const { return m_anima; }
   //! @brief Get the re-apply interval.
   //! @return float How often (seconds) the action re-applies, or 0 for a one-shot.
   [[nodiscard]] float interval() const { return m_tick; }
@@ -455,6 +468,7 @@ public:
     m_despair += rhs.m_despair;
     m_infamy += rhs.m_infamy;
     m_luck += rhs.m_luck;
+    m_anima += rhs.m_anima;
     m_tick += rhs.m_tick;
     return *this;
   }
@@ -470,6 +484,8 @@ private:
   int m_infamy{ 0 };
   //! @brief The change applied to the luck stat.
   int m_luck{ 0 };
+  //! @brief The change applied to the anima stat.
+  int m_anima{ 0 };
   //! @brief The toxidrome affliction applied alongside the stat changes, if any. Never null; held behind
   //! a pointer only so this header need not include Toxidrome.hpp. Copy/move are hand-written in the
   //! .cpp (deep-copy for copy, pointer-steal for move) to keep BaseAction copy-constructible.

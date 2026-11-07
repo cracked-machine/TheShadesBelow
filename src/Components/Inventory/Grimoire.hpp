@@ -142,7 +142,7 @@ private:
   {
     sub_page.sprite_key = "sprite.item.none";
     for_each_action_type( [&]<typename ActionT>()
-    { sub_page.action_map.emplace( std::string( ActionT::kKey ), BaseAction( {}, {}, {}, {}, {}, {} ) ); } );
+    { sub_page.action_map.emplace( std::string( ActionT::kKey ), BaseAction( {}, {}, {}, {}, {}, {}, {} ) ); } );
   }
 };
 

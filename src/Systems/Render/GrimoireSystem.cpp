@@ -322,6 +322,7 @@ bool GrimoireSystem::render_action_stats( TextColumn &draw_line, const Cmp::Base
   draw_stat( "despair", action.despair() );
   draw_stat( "infamy", action.infamy() );
   draw_stat( "luck", action.luck() );
+  draw_stat( "anima", action.anima() );
   // only the toxidromes this action changes; when it changes every toxidrome (a "type": "all" cure, which shares one
   // toxicity) show a single "all" line instead
   const Cmp::Toxicity::Toxidrome &toxidrome = action.toxidrome();

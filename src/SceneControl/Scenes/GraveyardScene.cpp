@@ -31,6 +31,7 @@
 #include <Components/SceneSettings/ShowNavmesh.hpp>
 #include <Components/SceneSettings/ShowPathFinding.hpp>
 #include <Components/SelectedPosition.hpp>
+#include <Components/Stats/PlayerStats.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/AddInventoryEvent.hpp>
@@ -140,6 +141,9 @@ void GraveyardScene::on_init()
   {
     Utils::Player::get_level_depth( m_reg ).increment_count( 1 );
     Utils::Player::trail_position( m_reg ) = Cmp::Player::GraveTrail{};
+    // every level starts with no anima; LevelCompleteScene normally converts it all to wealth already
+    auto &stats = Utils::Player::get_stats( m_reg );
+    stats.apply( { {}, {}, {}, {}, {}, Cmp::Stats::Anima{ -stats.anima() }, {} } );
   }
 
   auto [map_size_grid, map_size_pixel] = m_scene_data->map_size();

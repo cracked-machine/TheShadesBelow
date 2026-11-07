@@ -143,7 +143,7 @@ void LightningSystem::strike_player()
 {
   const auto player_pos = Utils::Player::get_position( reg() );
   int lightning_dmg = Sys::PersistSystem::get<Cmp::Persist::LightningDamage>( reg() ).get_value();
-  Cmp::BaseAction lightning_action( Cmp::Stats::Health{ -lightning_dmg }, {}, {}, {}, {}, {} );
+  Cmp::BaseAction lightning_action( Cmp::Stats::Health{ -lightning_dmg }, {}, {}, {}, {}, {}, {} );
   Utils::Player::get_stats( reg() ).apply( lightning_action );
   reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
 

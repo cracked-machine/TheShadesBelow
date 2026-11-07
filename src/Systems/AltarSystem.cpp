@@ -9,6 +9,7 @@
 #include <Components/AnimData.hpp>
 #include <Components/Armable.hpp>
 #include <Components/DestroyedObstacle.hpp>
+#include <Components/Inventory/FlashUIAnima.hpp>
 #include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/FlashUIInventory.hpp>
@@ -42,6 +43,7 @@
 #include <Events/AltarActivatedEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
+#include <Events/InsufficientAnimaEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Factory/AltarFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
@@ -306,6 +308,18 @@ bool AltarSystem::offering_talisman( entt::entity altar_entity, Cmp::Altar::Mult
     return false;
   }
   if ( talisman_count_cmp->activated( talisman_key ) ) return false;
+
+  // the talisman's (negative) offering anima is its cost, paid by check_player_altar_offering() once the altar accepts it
+  const int anima_cost = -Utils::Player::get_action_from_item_store<Cmp::OfferingAction>( talisman_key ).anima();
+  if ( Utils::Player::get_stats( reg() ).anima() < anima_cost )
+  {
+    SPDLOG_INFO( "Not enough anima to activate {} (need {})", item_type, anima_cost );
+    // signal UI to flash the anima meter and explain why
+    reg().emplace_or_replace<Cmp::FlashUIAnima>( reg().create() );
+    get_systems_event_queue().trigger( Events::InsufficientAnimaEvent( talisman_key ) );
+    return false;
+  }
+
   talisman_count_cmp->activate( talisman_key );
   SPDLOG_INFO( "Activated {} ({} of {})", item_type, talisman_count_cmp->count(), talisman_count_cmp->size() );
 
