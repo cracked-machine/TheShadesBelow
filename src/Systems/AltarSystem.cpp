@@ -253,9 +253,6 @@ bool AltarSystem::offering_for_extra_life( entt::entity altar_entity, const Cmp:
   // refuse the offering while an extra life is already active, so it isn't wasted
   if ( Utils::Player::player_has_extra_life( reg() ) ) return false;
 
-  bool altar_activated = reg().all_of<Cmp::Altar::Activated>( altar_entity );
-  if ( not altar_activated ) return false;
-
   Cmp::Player::ExtraLife extra_life;
   extra_life.altar_uuid = altar_uuid;
   if ( altar_cmp.get_kind() == Cmp::Altar::Kind::CRYPT )
