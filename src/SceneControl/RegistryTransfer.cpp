@@ -23,7 +23,7 @@
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/Player/ArrowCompass.hpp>
-#include <Components/Player/CadaverCount.hpp>
+#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/Curse.hpp>
@@ -280,7 +280,7 @@ void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
   registry.storage<Cmp::Player::Footstep>();
   registry.storage<Cmp::Player::Mortality>();
   registry.storage<Cmp::Player::HeartBeat>();
-  registry.storage<Cmp::Player::CadaverCount>();
+  registry.storage<Cmp::Player::Cadaver>();
   registry.storage<Cmp::AnimData>();
   registry.storage<Cmp::Inventory::DowsingTarget>();
   registry.storage<Cmp::PlayerInventorySlot>();

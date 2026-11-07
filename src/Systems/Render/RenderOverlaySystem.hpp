@@ -51,6 +51,8 @@ private:
   //! @brief Render the main UI's icons, excluding the inventory icon which is handled by render_ui_inventory_icon.
   void render_ui_icons();
 
+  void render_ui_cadaver_icons();
+
   //! @brief Render the sprite in the Inventory UI.
   //! @note ParticleSprites are rendered seperately in render_ui_particles
   void render_ui_inventory_icon();

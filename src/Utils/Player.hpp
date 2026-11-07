@@ -31,7 +31,7 @@ class Wealth;
 class Mortality;
 class LastGraveyardPosition;
 class Curse;
-class CadaverCount;
+class Cadaver;
 class LevelDepth;
 class HeartBeat;
 } // namespace Game::Cmp::Player
@@ -204,7 +204,7 @@ Cmp::Position get_projected_position( entt::registry &reg );
 //! @param reg reference to the entt registry
 //! @return Cmp::Player::CadaverCount& Reference to the player's cadaver count.
 //! @throws std::runtime_error if the player has no Cmp::Player::CadaverCount.
-Cmp::Player::CadaverCount &get_cadaver_count( entt::registry &reg );
+Cmp::Player::Cadaver &get_cadaver( entt::registry &reg );
 
 //! @brief Get the player's torch radius object.
 //! @param reg reference to the entt registry

@@ -134,11 +134,76 @@
         }
       }
     },
-    "sprite.crypt.loot.cadaver": {
+    "sprite.crypt.loot.cadaver.skull": {
       "spritesheet": {
-        "displayname": "Loot: Cadaver",
+        "displayname": "Loot: Cadaver Skull",
         "texture_path": "res/textures/crypt.png",
-        "sprite_indices": [10],
+        "sprite_indices": [50],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.crypt.loot.cadaver.torso": {
+      "spritesheet": {
+        "displayname": "Loot: Cadaver Torso",
+        "texture_path": "res/textures/crypt.png",
+        "sprite_indices": [51],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.crypt.loot.cadaver.leftarm": {
+      "spritesheet": {
+        "displayname": "Loot: Cadaver Left Arm",
+        "texture_path": "res/textures/crypt.png",
+        "sprite_indices": [52],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.crypt.loot.cadaver.rightarm": {
+      "spritesheet": {
+        "displayname": "Loot: Cadaver Arm",
+        "texture_path": "res/textures/crypt.png",
+        "sprite_indices": [53],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.crypt.loot.cadaver.leftleg": {
+      "spritesheet": {
+        "displayname": "Loot: Cadaver Left Leg",
+        "texture_path": "res/textures/crypt.png",
+        "sprite_indices": [54],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.crypt.loot.cadaver.rightleg": {
+      "spritesheet": {
+        "displayname": "Loot: Cadaver Right Leg",
+        "texture_path": "res/textures/crypt.png",
+        "sprite_indices": [55],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {

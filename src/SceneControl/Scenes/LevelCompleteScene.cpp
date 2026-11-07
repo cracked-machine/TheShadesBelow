@@ -1,5 +1,5 @@
 #include <Audio/SoundBank.hpp>
-#include <Components/Player/CadaverCount.hpp>
+#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Stats/PlayerStats.hpp>
 #include <SceneControl/Events/ProcessLevelCompleteSceneInputEvent.hpp>
@@ -38,18 +38,21 @@ void LevelCompleteScene::do_update( sf::Time dt )
   m_sys.find<Sys::Store::Type::FootstepSystem>().stop_footsteps_sound();
 
   auto &wealth = Utils::Player::get_wealth( m_reg );
-  auto &cadaver_count = Utils::Player::get_cadaver_count( m_reg );
+  auto &cadaver_cmp = Utils::Player::get_cadaver( m_reg );
 
   static constexpr float kPlantCheckIntervalHz = 1.0f;
   m_scorecheck_accumulator += dt;
   if ( m_scorecheck_accumulator.asSeconds() >= 1.f / kPlantCheckIntervalHz )
   {
-    if ( cadaver_count.get_count() > 0 )
+    // convert one collected cadaver per tick into wealth
+    for ( auto &[key, collected] : cadaver_cmp )
     {
-      cadaver_count.decrement_count( 1 );
+      if ( not collected ) continue;
+      collected = false;
       wealth.wealth += 10;
       m_cadaver_wealth += 10;
       m_sound_bank.get_effect( "get_loot" ).play();
+      break;
     }
     m_scorecheck_accumulator = sf::Time::Zero;
   }
@@ -68,7 +71,7 @@ void LevelCompleteScene::do_update( sf::Time dt )
   }
   if ( stats.anima() == 0 ) { m_anima_accumulator = sf::Time::Zero; }
 
-  const bool allow_continue = cadaver_count.get_count() == 0 and stats.anima() == 0;
+  const bool allow_continue = cadaver_cmp.count() == 0 and stats.anima() == 0;
   auto &render_menu_sys = m_sys.find<Sys::Store::Type::RenderMenuSystem>();
   render_menu_sys.render_victory_screen( allow_continue, m_cadaver_wealth, m_anima_wealth );
 }

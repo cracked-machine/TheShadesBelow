@@ -15,7 +15,7 @@
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Plant/BurningTimer.hpp>
-#include <Components/Player/CadaverCount.hpp>
+#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/Curse.hpp>
@@ -46,9 +46,9 @@
 #include <Components/Stats/ConsumeAction.hpp>
 #include <Components/Stats/DestroyAction.hpp>
 #include <Components/Stats/ForageAction.hpp>
+#include <Components/Stats/OfferingAction.hpp>
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
-#include <Components/Stats/OfferingAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
@@ -342,13 +342,13 @@ Cmp::Position get_projected_position( entt::registry &reg )
            { 1.f, 1.f } };
 }
 
-Cmp::Player::CadaverCount &get_cadaver_count( entt::registry &reg )
+Cmp::Player::Cadaver &get_cadaver( entt::registry &reg )
 {
 
-  auto *curse = reg.try_get<Cmp::Player::CadaverCount>( get_entity( reg ) );
-  if ( not curse ) throw std::runtime_error( "Player entt has no component: Cmp::Player::CadaverCount" );
+  auto *cadaver = reg.try_get<Cmp::Player::Cadaver>( get_entity( reg ) );
+  if ( not cadaver ) throw std::runtime_error( "Player entt has no component: Cmp::Player::CadaverCount" );
   SPDLOG_DEBUG( "Cmp::Player::CadaverCount == {}", curse->active );
-  return *curse;
+  return *cadaver;
 }
 
 Cmp::TorchRadius &get_torch_radius( entt::registry &reg )

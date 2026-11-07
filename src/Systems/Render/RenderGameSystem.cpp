@@ -42,7 +42,7 @@
 #include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/ArrowCompass.hpp>
-#include <Components/Player/CadaverCount.hpp>
+#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/CameraHold.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Curse.hpp>
@@ -59,6 +59,7 @@
 #include <Components/Weapons/Arrow.hpp>
 #include <Components/Wormhole/MultiBlock.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Factory/AltarFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
 #include <Shaders/BaseShaderSprite.hpp>
@@ -77,7 +78,6 @@
 #include <Systems/Render/RenderPassTypes.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
-#include <Factory/AltarFactory.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Threats/HazardFieldSystemImpl.hpp>
 #include <Utils/Constants.hpp>
@@ -465,8 +465,8 @@ void RenderGameSystem::render_altar_talismans( const Cmp::Altar::TalismanCount &
                                                const sf::FloatRect &body_rect )
 {
   // the altar may be lit by an extra life, but its talisman offsets are defined on the inactive sprite
-  const auto &talisman_offsets =
-      Sys::SpriteStore::instance().get( Factory::Altar::get_altar_sprite( anim_cmp.m_sprite_type, false ) ).talisman_offsets();
+  const auto
+      &talisman_offsets = Sys::SpriteStore::instance().get( Factory::Altar::get_altar_sprite( anim_cmp.m_sprite_type, false ) ).talisman_offsets();
 
   // talismans are always shown, offered or not; iteration order matches TalismanCount::index()
   std::size_t idx = 0;

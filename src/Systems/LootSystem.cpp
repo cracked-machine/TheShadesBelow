@@ -14,7 +14,7 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
-#include <Components/Player/CadaverCount.hpp>
+#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
@@ -63,9 +63,8 @@ void LootSystem::on_create_loot_event( const Events::CreateLootEvent &event )
   auto loot_sm = m_loot_sm.lock();
   auto reserved_sm = m_reserved_sm.lock();
   const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
-  auto cell = Utils::find_random_cell_near( event.m_source, kLootDropSearchRadius,
-                                            [&]( const sf::Vector2f &cell_pos )
-                                            { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); } );
+  auto cell = Utils::find_random_cell_near( event.m_source, kLootDropSearchRadius, [&]( const sf::Vector2f &cell_pos )
+  { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); } );
   if ( not cell )
   {
     SPDLOG_WARN( "No free cell to drop {} near [{},{}].", event.m_loot_type.str(), event.m_source.position.x, event.m_source.position.y );
@@ -92,7 +91,10 @@ void LootSystem::on_create_loot_event( const Events::CreateLootEvent &event )
   {
     reg().get_or_emplace<Cmp::DropCount>( event.m_source_entt ).m_count++;
     // lets the loot be removed along with its source, e.g. when the plant burns
-    if ( const auto *uuid_cmp = reg().try_get<Cmp::UUID>( event.m_source_entt ) ) { reg().emplace_or_replace<Cmp::DroppedBy>( loot_entt, *uuid_cmp ); }
+    if ( const auto *uuid_cmp = reg().try_get<Cmp::UUID>( event.m_source_entt ) )
+    {
+      reg().emplace_or_replace<Cmp::DroppedBy>( loot_entt, *uuid_cmp );
+    }
   }
   if ( not event.m_sfx.empty() ) m_sound_bank.get_effect( event.m_sfx ).play();
 }
@@ -239,15 +241,10 @@ void LootSystem::check_loot_collision( sf::Time dt )
         }
       }
     }
-    else if ( effect.type == "sprite.crypt.loot.cadaver" )
+    else if ( effect.type.contains( "sprite.crypt.loot.cadaver" ) )
     {
-      auto *pc_cadaver_count = reg().try_get<Cmp::Player::CadaverCount>( effect.player_entity );
-      if ( not pc_cadaver_count )
-      {
-        SPDLOG_WARN( "Player entt has no component: Cmp::Player::CadaverCount" );
-        continue;
-      }
-      pc_cadaver_count->increment_count( 1 );
+      Cmp::Player::Cadaver &cadaver_cmp = Utils::Player::get_cadaver( reg() );
+      cadaver_cmp.set( effect.type );
       collect_loot( effect.loot_entity );
       m_sound_bank.get_effect( "secret" ).play();
 

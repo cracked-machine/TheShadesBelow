@@ -5,7 +5,7 @@
 #include <Components/Inventory/Grimoire.hpp>
 #include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Player/CadaverCount.hpp>
+#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -148,7 +148,11 @@ void SceneInputRouter::graveyard_scene_state_handler()
 
         enqueue( Events::SceneManagerEvent::Type::ENTER_RUIN_LOWER );
       }
-      else if ( keyReleased->scancode == sf::Keyboard::Scancode::F8 ) { enqueue( Events::SceneManagerEvent::Type::ENTER_SHOP ); }
+      else if ( keyReleased->scancode == sf::Keyboard::Scancode::F8 )
+      {
+        enqueue( Events::SceneManagerEvent::Type::LEVEL_COMPLETE );
+        Factory::Player::remove_player_last_graveyard_pos( reg() );
+      }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::F12 )
       {
         get_systems_event_queue().trigger( Events::LightningEvent( Utils::Player::get_entity( reg() ) ) );

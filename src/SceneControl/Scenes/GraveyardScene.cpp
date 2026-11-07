@@ -18,6 +18,7 @@
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Persistent/RuinProcGenMaxIterations.hpp>
+#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/GraveTrail.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
@@ -144,6 +145,8 @@ void GraveyardScene::on_init()
     // every level starts with no anima; LevelCompleteScene normally converts it all to wealth already
     auto &stats = Utils::Player::get_stats( m_reg );
     stats.apply( { {}, {}, {}, {}, {}, Cmp::Stats::Anima{ -stats.anima() }, {} } );
+    // every level starts with no cadaver parts collected
+    Utils::Player::get_cadaver( m_reg ).reset();
   }
 
   auto [map_size_grid, map_size_pixel] = m_scene_data->map_size();

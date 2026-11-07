@@ -1,24 +1,29 @@
 
 
+#include <Components/Persistent/AltarOfferingCooldown.hpp>
+#include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
 #include <Components/Persistent/ArmedBlinkFreq.hpp>
 #include <Components/Persistent/ArmedBlockColourBorder.hpp>
 #include <Components/Persistent/ArmedBlockColourFill.hpp>
-#include <Components/Persistent/ReservedArmedBlockColourBorder.hpp>
-#include <Components/Persistent/ReservedArmedBlockColourFill.hpp>
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
 #include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/AxeObstacleDigWear.hpp>
 #include <Components/Persistent/AxePotSmashWear.hpp>
 #include <Components/Persistent/AxeSkeletonKillWear.hpp>
+#include <Components/Persistent/AzazelFireballArc.hpp>
+#include <Components/Persistent/AzazelFireballColour.hpp>
+#include <Components/Persistent/AzazelFireballCooldown.hpp>
+#include <Components/Persistent/AzazelFireballDamage.hpp>
+#include <Components/Persistent/AzazelFireballSpeed.hpp>
 #include <Components/Persistent/BombBonus.hpp>
 #include <Components/Persistent/BombDamage.hpp>
 #include <Components/Persistent/BombsExhumeGraves.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
+#include <Components/Persistent/BradycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/BurrExpiry.hpp>
 #include <Components/Persistent/BurrSlowFactor.hpp>
 #include <Components/Persistent/BurrThrowCooldown.hpp>
-#include <Components/Persistent/BradycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
 #include <Components/Persistent/CorruptionDamage.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
@@ -50,13 +55,6 @@
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
-#include <Components/Persistent/AltarOfferingCooldown.hpp>
-#include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
-#include <Components/Persistent/AzazelFireballArc.hpp>
-#include <Components/Persistent/AzazelFireballColour.hpp>
-#include <Components/Persistent/AzazelFireballCooldown.hpp>
-#include <Components/Persistent/AzazelFireballDamage.hpp>
-#include <Components/Persistent/AzazelFireballSpeed.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
@@ -99,6 +97,8 @@
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
 #include <Components/Persistent/RepelNpcPlayerTint.hpp>
+#include <Components/Persistent/ReservedArmedBlockColourBorder.hpp>
+#include <Components/Persistent/ReservedArmedBlockColourFill.hpp>
 #include <Components/Persistent/ResetTutorial.hpp>
 #include <Components/Persistent/RuinMaxCobwebs.hpp>
 #include <Components/Persistent/RuinMaxSpiders.hpp>
@@ -118,9 +118,10 @@
 #include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
 #include <Components/Persistent/WormholeAbortThreshold.hpp>
 #include <Components/Persistent/WormholeSeed.hpp>
-#include <Components/Player/CadaverCount.hpp>
+#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Player/Wealth.hpp>
+#include <Components/Stats/PlayerStats.hpp>
 #include <Shaders/BaseShaderSprite.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
@@ -128,7 +129,6 @@
 #include <Systems/ShaderSystem.hpp>
 #include <Systems/Threats/BombSystem.hpp>
 #include <Utils/ImGuiTheme.hpp>
-#include <Components/Stats/PlayerStats.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 
@@ -509,11 +509,11 @@ void RenderMenuSystem::render_victory_screen( bool allow_continue, int cadaver_w
   }
 
   const auto &wealth = Utils::Player::get_wealth( m_reg );
-  const auto &cadaver_count = Utils::Player::get_cadaver_count( m_reg );
+  const auto &cadaver_cmp = Utils::Player::get_cadaver( m_reg );
 
   const int anima = Utils::Player::get_stats( m_reg ).anima();
 
-  sf::Text cadaver_txt( m_font, std::format( "Cadaver count: {}   (+{} wealth)", cadaver_count.get_count(), cadaver_wealth ), 24 );
+  sf::Text cadaver_txt( m_font, std::format( "Cadaver count: {}   (+{} wealth)", cadaver_cmp.count(), cadaver_wealth ), 24 );
   cadaver_txt.setFillColor( sf::Color::White );
   cadaver_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, 500.f } );
   m_window.draw( cadaver_txt );

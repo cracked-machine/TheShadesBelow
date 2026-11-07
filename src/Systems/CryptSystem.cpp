@@ -26,7 +26,7 @@
 #include <Components/Particle/LavaFireballParticleSprite.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Player/CadaverCount.hpp>
+#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Player/NoPath.hpp>
@@ -57,6 +57,7 @@
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Crypt.hpp>
 #include <Utils/Maths.hpp>
@@ -371,8 +372,12 @@ void CryptSystem::check_objective_activation( Events::PlayerActionEvent::GameAct
     {
       sf::FloatRect expanded_search( sf::Vector2f{ objective_cmp.position.x, objective_cmp.position.y + objective_cmp.size.y },
                                      sf::Vector2f{ objective_cmp.size.x, Constants::kGridSizePxF.y * 2.f } );
+      const auto &cadaver_cmp = Utils::Player::get_cadaver( reg() );
+      const std::vector<Sys::SpriteKey> cadaver_pool = cadaver_cmp.keys( /*remaining_only=*/true );
+      if ( cadaver_pool.empty() ) return; // no more cadaver parts
+      Cmp::RandomInt cadaver_picker( 0, cadaver_pool.size() - 1 );
       auto obst_entity = Factory::Loot::create_loot_drop(
-          reg(), Cmp::AnimData( Cmp::AnimData::Config{ .sprite_type = "sprite.crypt.loot.cadaver", .enabled = true } ), expanded_search,
+          reg(), Cmp::AnimData( Cmp::AnimData::Config{ .sprite_type = cadaver_pool.at( cadaver_picker.gen() ), .enabled = true } ), expanded_search,
           Factory::IncludePack<>{}, Factory::ExcludePack<Cmp::Player::Character, Cmp::Crypt::ObjectiveSegment>{}, Factory::ExcludePack<>{},
           /*zorder_offset=*/-8.f, /*reserved_sm=*/nullptr, m_loot_sm.lock().get() );
       if ( obst_entity != entt::null )

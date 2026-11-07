@@ -19,7 +19,7 @@
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
 #include <Components/Persistent/ToxicImmunityMeterTint.hpp>
-#include <Components/Player/CadaverCount.hpp>
+#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Player/ToxicImmunity.hpp>
 #include <Components/Player/Wealth.hpp>
@@ -45,6 +45,7 @@
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Crypt.hpp>
 #include <Utils/Optimizations.hpp>
@@ -74,6 +75,7 @@ void RenderOverlaySystem::render_overlay( sf::Time dt )
   PROFILED( render_shop_inventory_overlay() );
   PROFILED( render_ui_outlines() );
   PROFILED( render_ui_icons() );
+  PROFILED( render_ui_cadaver_icons() );
   PROFILED( render_ui_inventory_icon() );
   PROFILED( render_ui_meters( dt ) );
   PROFILED( render_ui_labels( dt ) );
@@ -128,10 +130,29 @@ void RenderOverlaySystem::render_ui_icons()
   }
   for ( const auto &icon : m_main_ui_data->m_icons )
   {
-    // we handle the inventory icon seperately from the others
-    if ( icon.name == "inventory_icon" ) continue;
+    // we handle the other icons seperately
+    if ( icon.name == "inventory_icon" or icon.name.contains( "sprite.crypt.loot.cadaver" ) ) { continue; }
     RenderSystem::safe_render_sprite_screen( icon.type, icon.rect, icon.index,
                                              { static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) } );
+  }
+}
+
+void RenderOverlaySystem::render_ui_cadaver_icons()
+{
+  if ( not m_main_ui_data )
+  {
+    SPDLOG_CRITICAL( "UiData object is not initialised. Cannot draw icon overlay" );
+    return;
+  }
+  for ( const auto &icon : m_main_ui_data->m_icons )
+  {
+    if ( icon.name.contains( "sprite.crypt.loot.cadaver" ) )
+    {
+      const Sys::SpriteKey part_key( icon.name );
+      const sf::Vector2f scale{ static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) };
+      const Cmp::Player::Cadaver &cadaver_cmp = Utils::Player::get_cadaver( reg() );
+      if ( cadaver_cmp.is_set( part_key ) ) { RenderSystem::safe_render_sprite_screen( part_key, icon.rect, 0, scale ); }
+    }
   }
 }
 
@@ -462,8 +483,7 @@ void RenderOverlaySystem::render_ui_labels( sf::Time dt )
   for ( const auto &ui_label : m_main_ui_data->m_labels )
   {
     std::string text_str;
-    if ( ui_label.name == "cadaver_label" ) { text_str = " =   " + std::to_string( Utils::Player::get_cadaver_count( reg() ).get_count() ); }
-    else if ( ui_label.name == "wealth_label" ) { text_str = " =   " + std::to_string( Utils::Player::get_wealth( reg() ).wealth ); }
+    if ( ui_label.name == "wealth_label" ) { text_str = " =   " + std::to_string( Utils::Player::get_wealth( reg() ).wealth ); }
     else if ( ui_label.name == "inventory_label" )
     {
       auto [_, _, inventory_sprite_type] = Utils::Player::get_inventory( reg() );
