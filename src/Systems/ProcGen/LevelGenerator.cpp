@@ -711,7 +711,15 @@ std::vector<entt::entity> LevelGenerator::gen_npc_containers( sf::Vector2u map_g
 {
   std::vector<entt::entity> assigned_entts;
 
-  auto num_npc_containers = map_grid_size.x * map_grid_size.y / 120; // one NPC container per N grid squares
+  // full density (one NPC container per N grid squares) is only reached at the final level depth;
+  // shallower levels get a linear fraction of it, e.g. depth 1 of 9 gets 1/9th.
+  // For the 99x99 graveyard map (81 at full density) with MaxLevelDepth = 9:
+  //   depth: 1   2   3   4   5   6   7   8   9
+  //   npcs:  9  18  27  36  45  54  63  72  81
+  const std::size_t max_npc_containers = map_grid_size.x * map_grid_size.y / 120;
+  const auto max_level_depth = static_cast<std::size_t>( std::max( 1, Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value() ) );
+  const auto level_depth = std::clamp<std::size_t>( Utils::Player::get_level_depth( reg() ).get_count(), 1, max_level_depth );
+  const std::size_t num_npc_containers = std::max<std::size_t>( 1, max_npc_containers * level_depth / max_level_depth );
 
   // keep sampling until the target is met - candidates that land on reserved cells are rejected
   const std::size_t max_attempts = num_npc_containers * 20;
@@ -735,7 +743,7 @@ std::vector<entt::entity> LevelGenerator::gen_npc_containers( sf::Vector2u map_g
   {
     SPDLOG_WARN( "Only placed {} of {} NPC containers after {} attempts.", assigned_entts.size(), num_npc_containers, max_attempts );
   }
-  SPDLOG_INFO( "Added {} NPC containers.", assigned_entts.size() );
+  SPDLOG_INFO( "Added {} NPC containers (level depth {} of {}).", assigned_entts.size(), level_depth, max_level_depth );
   return assigned_entts;
 }
 
