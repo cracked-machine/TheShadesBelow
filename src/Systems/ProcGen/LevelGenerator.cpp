@@ -682,7 +682,9 @@ std::vector<entt::entity> LevelGenerator::gen_loot_containers( sf::Vector2u map_
 
   auto num_loot_containers = map_grid_size.x * map_grid_size.y / 120; // one loot container per N grid squares
 
-  for ( std::size_t i = 0; i < num_loot_containers; ++i )
+  // keep sampling until the target is met - candidates that land on reserved cells are rejected
+  const std::size_t max_attempts = num_loot_containers * 20;
+  for ( std::size_t attempts = 0; assigned_entts.size() < num_loot_containers and attempts < max_attempts; ++attempts )
   {
     auto [random_entity,
           random_origin_position] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 0 );
@@ -697,7 +699,11 @@ std::vector<entt::entity> LevelGenerator::gen_loot_containers( sf::Vector2u map_
       m_reserved_sm->insert( random_entity, random_origin_position );
     }
   }
-
+  if ( assigned_entts.size() < num_loot_containers )
+  {
+    SPDLOG_WARN( "Only placed {} of {} loot containers after {} attempts.", assigned_entts.size(), num_loot_containers, max_attempts );
+  }
+  SPDLOG_INFO( "Added {} loot containers.", assigned_entts.size() );
   return assigned_entts;
 }
 
@@ -707,7 +713,9 @@ std::vector<entt::entity> LevelGenerator::gen_npc_containers( sf::Vector2u map_g
 
   auto num_npc_containers = map_grid_size.x * map_grid_size.y / 120; // one NPC container per N grid squares
 
-  for ( std::size_t i = 0; i < num_npc_containers; ++i )
+  // keep sampling until the target is met - candidates that land on reserved cells are rejected
+  const std::size_t max_attempts = num_npc_containers * 20;
+  for ( std::size_t attempts = 0; assigned_entts.size() < num_npc_containers and attempts < max_attempts; ++attempts )
   {
     auto [random_entity,
           random_origin_position] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 0 );
@@ -723,6 +731,11 @@ std::vector<entt::entity> LevelGenerator::gen_npc_containers( sf::Vector2u map_g
       m_reserved_sm->insert( random_entity, random_origin_position );
     }
   }
+  if ( assigned_entts.size() < num_npc_containers )
+  {
+    SPDLOG_WARN( "Only placed {} of {} NPC containers after {} attempts.", assigned_entts.size(), num_npc_containers, max_attempts );
+  }
+  SPDLOG_INFO( "Added {} NPC containers.", assigned_entts.size() );
   return assigned_entts;
 }
 
