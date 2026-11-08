@@ -81,6 +81,8 @@ public:
     std::vector<sf::FloatRect> solid_objectlayer;
     //! @brief tile index list for the mutliblock layout
     std::multimap<std::string, sf::Vector2f> multiblock_objectlayer;
+    //! @brief tile index list for the developer layout
+    std::multimap<std::string, sf::Vector2f> developer_objectlayer;
 
     //! @brief Player start location
     sf::Vector2u player_start_position{ 0, 0 };
@@ -122,6 +124,7 @@ public:
   //! @brief Get the multiblock object layer, mapping each object's marker name (a sprite, item or npc type) to its position.
   //! @return std::multimap<std::string, sf::Vector2f>
   [[nodiscard]] std::multimap<std::string, sf::Vector2f> multiblock_objectlayer() const { return m_map_data.multiblock_objectlayer; }
+  [[nodiscard]] std::multimap<std::string, sf::Vector2f> developer_objectlayer() const { return m_map_data.developer_objectlayer; }
   //! @brief Get the solid (collidable) object layer bounds.
   //! @return std::vector<sf::FloatRect>
   [[nodiscard]] std::vector<sf::FloatRect> solid_objectlayer() const { return m_map_data.solid_objectlayer; }

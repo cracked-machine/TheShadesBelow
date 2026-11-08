@@ -100,7 +100,7 @@ private:
   //! @brief forwards to ImGui and handles the window Closed/Resized events common to every scene; returns true if the event was consumed
   bool dispatch_common_window_event( const sf::Event &event );
   //! @brief handles the debug/cheat keys shared by every gameplay scene; returns true if the scancode was handled
-  bool try_handle_debug_key( sf::Keyboard::Scancode scancode );
+  void try_handle_debug_key( sf::Keyboard::Scancode scancode );
 
   //! @brief Resize the render window's view to match the new window size.
   //! @param size New window size in pixels

@@ -167,6 +167,25 @@ void SceneData::deserialize_tilelayers( const nlohmann::json &json )
     }
   };
 
+  //! @brief Multiblock layer
+  auto get_developer_list = [&]( const nlohmann::json &j, std::multimap<std::string, sf::Vector2f> &out )
+  {
+    if ( not j.contains( "objects" ) ) throw std::runtime_error( "Missing JSON property 'objects' in developer layer" );
+    try
+    {
+      for ( const auto &object : j.at( "objects" ) )
+      {
+        if ( not object.contains( "name" ) ) throw std::runtime_error( "Missing JSON property 'name' in developer object layer" );
+        std::string type = object.at( "name" ).get<std::string>();
+        sf::Vector2f pos( get_float( object, "x" ), get_float( object, "y" ) );
+        out.insert( { type, pos } );
+      }
+    } catch ( const nlohmann::json::type_error &e )
+    {
+      throw std::runtime_error( std::string( "JSON Error: object layer - " ) + e.what() );
+    }
+  };
+
   m_map_data.map_size = sf::Vector2u( get_int( json, "width" ), get_int( json, "height" ) );
 
   if ( json.contains( "layers" ) )
@@ -179,6 +198,7 @@ void SceneData::deserialize_tilelayers( const nlohmann::json &json )
       if ( layer.at( "name" ).get<std::string>() == "wall" ) { get_list( layer, "data", m_map_data.wall_tilelayer ); }
       if ( layer.at( "name" ).get<std::string>() == "solid" ) { get_solid_list( layer, m_map_data.solid_objectlayer ); }
       if ( layer.at( "name" ).get<std::string>() == "multiblock" ) { get_multiblock_list( layer, m_map_data.multiblock_objectlayer ); }
+      if ( layer.at( "name" ).get<std::string>() == "developer" ) { get_developer_list( layer, m_map_data.developer_objectlayer ); }
     }
     if ( m_map_data.levelgen_tilelayer.empty() ) { throw std::runtime_error( "Missing JSON property tilelayer: 'levelgen'" ); }
   }

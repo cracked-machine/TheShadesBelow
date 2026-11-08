@@ -127,8 +127,8 @@ void SceneInputRouter::graveyard_scene_state_handler()
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
-      if ( try_handle_debug_key( keyReleased->scancode ) ) {}
-      else if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
+      try_handle_debug_key( keyReleased->scancode );
+      if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::F5 )
       {
         Factory::Player::add_player_last_graveyard_pos( reg(), Utils::Player::get_position( reg() ), { 0.f, 0.f } );
@@ -218,8 +218,8 @@ void SceneInputRouter::crypt_scene_state_handler()
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
-      if ( try_handle_debug_key( keyReleased->scancode ) ) {}
-      else if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
+      try_handle_debug_key( keyReleased->scancode );
+      if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Escape )
       {
         // Prevent skipping the death animation and leaving the game in a bad state
@@ -267,8 +267,8 @@ void SceneInputRouter::healing_spring_scene_state_handler()
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
-      if ( try_handle_debug_key( keyReleased->scancode ) ) {}
-      else if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
+      try_handle_debug_key( keyReleased->scancode );
+      if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Escape ) { queue_quit_game_event(); }
     }
     else if ( const auto *keyPressed = event->getIf<sf::Event::KeyPressed>() )
@@ -299,8 +299,8 @@ void SceneInputRouter::shop_scene_state_handler()
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
-      if ( try_handle_debug_key( keyReleased->scancode ) ) {}
-      else if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
+      try_handle_debug_key( keyReleased->scancode );
+      if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Escape ) { queue_quit_game_event(); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Num1 ) { queue_buy_item_event( 1 ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Num2 ) { queue_buy_item_event( 2 ); }
@@ -336,8 +336,8 @@ void SceneInputRouter::ruin_scene_state_handler()
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
-      if ( try_handle_debug_key( keyReleased->scancode ) ) {}
-      else if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
+      try_handle_debug_key( keyReleased->scancode );
+      if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Escape ) { queue_quit_game_event(); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Space )
       {
@@ -505,8 +505,9 @@ void SceneInputRouter::toggle_setting( std::string_view log_prefix )
   SPDLOG_INFO( "{} now {}", log_prefix, current_setting ? "ENABLED" : "DISABLED" );
 }
 
-bool SceneInputRouter::try_handle_debug_key( sf::Keyboard::Scancode scancode )
+void SceneInputRouter::try_handle_debug_key( [[maybe_unused]] sf::Keyboard::Scancode scancode )
 {
+#ifndef NDEBUG
   using namespace sf::Keyboard;
   if ( scancode == Scancode::F1 ) { toggle_setting<Cmp::SceneSettings::CollisionDetection>( "Collisions are" ); }
   else if ( scancode == Scancode::F2 ) { toggle_setting<Cmp::SceneSettings::ShowPathFinding>( "Show pathfinding is" ); }
@@ -548,8 +549,7 @@ bool SceneInputRouter::try_handle_debug_key( sf::Keyboard::Scancode scancode )
   else if ( scancode == Scancode::Numpad6 ) { Utils::Player::get_stats( reg() ).apply( { {}, Cmp::Stats::Fear{ -10 }, {}, {}, {}, {}, {} } ); }
   else if ( scancode == Scancode::Numpad8 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, Cmp::Stats::Anima{ 10 }, {} } ); }
   else if ( scancode == Scancode::Numpad5 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, Cmp::Stats::Anima{ -10 }, {} } ); }
-  else { return false; }
-  return true;
+#endif // NDEBUG
 }
 
 void SceneInputRouter::resize_window( sf::Vector2u size )

@@ -25,13 +25,13 @@
 #include <Components/Npc/Footprint.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/ObstacleCap.hpp>
-#include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveCountMargin.hpp>
+#include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveTrailNominalSize.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
-#include <Components/Persistent/TalismanMinChance.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
+#include <Components/Persistent/TalismanMinChance.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/LevelDepth.hpp>
@@ -280,6 +280,58 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
       }
     }
   }
+
+#ifndef NDEBUG
+  for ( const auto &[ms_type, pos] : scene_data.developer_objectlayer() )
+  {
+    // allow "npc." markers in the multiblock layer
+    if ( ms_type.contains( "npc." ) )
+    {
+      // keep level generation from placing obstacles under the NPC - released again in cleanup_reserved()
+      auto reserve_npc_cells = [this]( entt::entity new_npc_entt )
+      {
+        const auto &[npc_footprint_cmp, npc_pos_cmp] = reg().get<Cmp::Npc::Footprint, Cmp::Position>( new_npc_entt );
+        for ( const auto &cell_pos : npc_footprint_cmp.world_cells( npc_pos_cmp.position ) )
+        {
+          m_reserved_sm->insert( new_npc_entt, cell_pos );
+        }
+      };
+      get_systems_event_queue().trigger(
+          Events::CreateNpcEvent( Sys::NpcKey( ms_type ), Cmp::Position( pos, Constants::kGridSizePxF ), 0, {}, reserve_npc_cells ) );
+      continue;
+    }
+
+    // Item markers share this layer but are named by item id (e.g. "item.axe"), which isn't
+    // itself a valid sprite key - resolve the item's actual sprite type before lookup.
+    const Sys::SpriteKey sprite_lookup_type = ms_type.contains( "item." ) ? Sys::ItemStore::instance().get( Sys::ItemKey( ms_type ) ).sprite_type
+                                                                          : Sys::SpriteKey( ms_type );
+    const auto &ms = Sys::SpriteStore::instance().get( sprite_lookup_type );
+
+    if ( auto it = kMultiblockFactories.find( ms_type ); it != kMultiblockFactories.end() )
+    {
+      auto mb_entt = it->second( reg(), pos, ms );
+      m_reserved_sm->insert( mb_entt, Cmp::Position( pos, Constants::kGridSizePxF ) );
+    }
+    else if ( ms_type.contains( "item.plant" ) )
+    {
+      get_systems_event_queue().trigger( Events::CreatePlantEvent( Sys::ItemKey( ms_type ), Cmp::Position( pos, Constants::kGridSizePxF ) ) );
+    }
+    else if ( ms_type.contains( "item." ) )
+    {
+      // prevent infinite respawns in the RuinSceneUpperFloor
+      auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+      if ( inventory_type == "item.witchesjar" and ms.type().contains( "witchesjar" ) ) continue;
+
+      // make sure we mark the *world* entt as reserved
+      auto world_pos_entt = Utils::get_world_pos_entt( reg(), Cmp::Position( pos, ms.sprite_size() ) );
+      if ( world_pos_entt != entt::null )
+      {
+        m_reserved_sm->insert( world_pos_entt, Cmp::Position( pos, ms.sprite_size() ) );
+        get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( pos, ms.sprite_size() ), Sys::ItemKey( ms_type ) ) );
+      }
+    }
+  }
+#endif // NDEBUG
 }
 
 void LevelGenerator::try_place_obstacle( entt::entity entity, const Cmp::Position &pos_cmp, float init_chance, bool pass_navmesh_to_factory )
@@ -519,8 +571,8 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
     }
     if ( placed_num_graves < base_num_graves )
     {
-      SPDLOG_ERROR( "Only added {} of the {} graves required: the level may run out of graves before every cadaver part is found",
-                    placed_num_graves, base_num_graves );
+      SPDLOG_ERROR( "Only added {} of the {} graves required: the level may run out of graves before every cadaver part is found", placed_num_graves,
+                    base_num_graves );
     }
     else if ( placed_num_graves < required_num_graves )
     {
