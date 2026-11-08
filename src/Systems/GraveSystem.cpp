@@ -259,8 +259,8 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
 
   if ( trail_position.size() >= static_cast<size_t>( max_trail_size ) * 2 )
   {
-    // crypt key trail is complete: the caller drops the crypt key instead
-    reg().remove<Cmp::Grave::TrailMarker>( source_entt );
+    // crypt key trail is complete: the caller drops the crypt key instead, and the trail's last arrow goes with it
+    reg().clear<Cmp::Grave::TrailMarker>();
     return TrailStep::CRYPT_KEY;
   }
   // exit key trail is complete: the caller drops the exit key, but the trail carries on towards the crypt key
@@ -271,6 +271,8 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
   if ( interred_view.begin() == interred_view.end() )
   {
     SPDLOG_WARN( "No un-exhumed graves left, skipping trail marker for {}", static_cast<uint32_t>( source_entt ) );
+    // nowhere left to point: drop the arrow that led here and this grave's own (angle-less) target marker
+    reg().clear<Cmp::Grave::TrailMarker>();
     return exit_key_reached ? TrailStep::EXIT_KEY : TrailStep::NO_GRAVES;
   }
 
@@ -311,6 +313,9 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
   Cmp::RandomInt candidate_picker( 0, static_cast<int>( forward_candidates.size() ) - 1 );
   auto [target_entt, target_pos] = forward_candidates.at( static_cast<std::size_t>( candidate_picker.gen() ) );
   auto angle = Utils::Maths::angle( target_pos.getCenter() - source_pos.getCenter() ).value_or( sf::Angle::Zero );
+  // only the latest arrow is shown: older arrows would send a backtracking player the wrong way. The trail's history is
+  // kept in Utils::Player::trail_position(), not in the markers
+  reg().clear<Cmp::Grave::TrailMarker>();
   reg().emplace_or_replace<Cmp::Grave::TrailMarker>( source_entt, angle );
   // the only un-exhumed grave with a marker is the current target; its angle is set once it is exhumed
   reg().emplace_or_replace<Cmp::Grave::TrailMarker>( target_entt );

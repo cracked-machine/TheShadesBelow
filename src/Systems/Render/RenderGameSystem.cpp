@@ -417,7 +417,7 @@ void RenderGameSystem::render_trail_markers()
 {
   const auto view_bounds = Utils::calculate_view_bounds( RenderSystem::get_world_view() );
   const sf::Vector2f half_grid = Constants::kGridSizePxF / 2.f;
-  // an un-exhumed marker is the hidden target grave, so only exhumed markers have an arrow to show
+  // an un-exhumed marker is the hidden target grave, so only the exhumed marker (GraveSystem keeps just the latest) shows an arrow
   for ( auto [grave_entt, marker_cmp, grave_pos_cmp] : reg().view<Cmp::Grave::TrailMarker, Cmp::Position, Cmp::Grave::Exhumed>().each() )
   {
     if ( not Utils::is_visible_in_view( view_bounds, grave_pos_cmp ) ) continue;

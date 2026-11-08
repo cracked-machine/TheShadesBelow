@@ -75,6 +75,7 @@ private:
   };
 
   //! @brief Point source_entt's Cmp::Grave::TrailMarker arrow at a random un-exhumed grave and give that grave the next Cmp::Grave::TrailMarker
+  //! @details Every other Cmp::Grave::TrailMarker is removed first, so only the latest arrow is shown.
   //! @param source_entt the grave just exhumed
   //! @return TrailStep::EXIT_KEY or TrailStep::CRYPT_KEY if that trail is complete (one or two times the trail size:
   //! Cmp::Persist::GraveTrailNominalSize plus the level depth), the caller drops the key
