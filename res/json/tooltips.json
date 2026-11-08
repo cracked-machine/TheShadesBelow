@@ -40,6 +40,13 @@
       "duration_s": 4.0
     },
     {
+      "id": "talisman_trail_in_progress",
+      "trigger": "TalismanRefusedEvent",
+      "text": "An altar has already been activated.\nComplete its grave trail before activating another altar.",
+      "frequency": "always",
+      "duration_s": 4.0
+    },
+    {
       "id": "crypt_all_cadavers",
       "trigger": "CryptEntryRefusedEvent",
       "text": "You have already collected every cadaver part.\nThis crypt holds nothing more for you.",

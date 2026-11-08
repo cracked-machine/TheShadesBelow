@@ -45,8 +45,12 @@
 #include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveTrailGuideColour.hpp>
-#include <Components/Persistent/GraveTrailSizeMultiplier.hpp>
+#include <Components/Persistent/GraveTrailNominalSize.hpp>
 #include <Components/Persistent/GraveTrailStartCount.hpp>
+#include <Components/Persistent/MaxLevelDepth.hpp>
+#include <Components/Player/LevelDepth.hpp>
+#include <Components/Persistent/TalismanMinChance.hpp>
+#include <Components/Persistent/GraveCountMargin.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
@@ -58,8 +62,6 @@
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
-#include <Components/Persistent/MinNumAltars.hpp>
-#include <Components/Persistent/MinNumCrypts.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MissingTalismanBias.hpp>
@@ -391,14 +393,15 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     // Procedural Generation
     ImGui::SeparatorText( "Procedural Generation" );
 
-    Sys::PersistSystem::get<Cmp::Persist::MinNumAltars>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::GraveTrailSizeMultiplier>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalSize>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailStartCount>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MissingTalismanBias>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::TalismanMinChance>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::GraveCountMargin>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailGuideColour>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ExitKeyRequirement>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::MinNumCrypts>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MinNumHealingSprings>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MinNumRuins>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RuinProcGenInitChance>( reg() ).render_widget();
@@ -495,14 +498,17 @@ void RenderMenuSystem::render_victory_screen( bool allow_continue, int cadaver_w
 {
   sf::Vector2u display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
 
-  sf::Text title_text( m_font, "Level Complete!", 96 );
+  const unsigned int depth = Utils::Player::get_level_depth( m_reg ).get_count();
+  const bool final_depth = Utils::Player::is_final_level_depth( m_reg );
+
+  sf::Text title_text( m_font, final_depth ? std::format( "Final Depth {} Complete!", depth ) : std::format( "Depth {} Complete!", depth ), 96 );
   title_text.setFillColor( sf::Color::White );
   title_text.setPosition( { static_cast<float>( display_size.x ) / 4.f, 100.f } );
   m_window.draw( title_text );
 
   if ( allow_continue )
   {
-    sf::Text start_text( m_font, "Press <R> key to continue", 48 );
+    sf::Text start_text( m_font, final_depth ? "Press <R> key to return to the title" : "Press <R> key to continue", 48 );
     start_text.setFillColor( sf::Color::White );
     start_text.setPosition( { static_cast<float>( display_size.x ) / 4.f, 200.f } );
     m_window.draw( start_text );

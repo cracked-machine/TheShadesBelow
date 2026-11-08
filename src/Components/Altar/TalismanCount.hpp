@@ -65,6 +65,15 @@ public:
 
   [[nodiscard]] size_t size() const { return m_data.size(); }
 
+  //! @brief Mark every talisman as not offered, so the altar takes all of them again
+  void reset()
+  {
+    for ( auto &[key, val] : m_data )
+    {
+      val = false;
+    }
+  }
+
   //! @brief Iterate the talismans in index order as (key, activated) pairs.
   [[nodiscard]] auto begin() const { return m_data.cbegin(); }
   [[nodiscard]] auto end() const { return m_data.cend(); }

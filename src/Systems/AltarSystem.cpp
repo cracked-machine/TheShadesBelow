@@ -20,6 +20,7 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/SummonOffering.hpp>
 #include <Components/Particle/FlameParticleSprite.hpp>
+#include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Persistent/AltarOfferingCooldown.hpp>
 #include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
 #include <Components/Player/Character.hpp>
@@ -43,8 +44,10 @@
 #include <Events/AltarActivatedEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
+#include <Events/GraveTrailCompleteEvent.hpp>
 #include <Events/InsufficientAnimaEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
+#include <Events/TalismanRefusedEvent.hpp>
 #include <Factory/AltarFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
@@ -62,6 +65,7 @@
 #include <Utils/Utils.hpp>
 
 #include <stdexcept>
+#include <vector>
 
 namespace Game::Sys
 {
@@ -70,6 +74,28 @@ AltarSystem::AltarSystem( entt::registry &reg, sf::RenderWindow &window, Audio::
     : BaseSystem( reg, window, sound_bank )
 {
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&AltarSystem::on_player_action>( this );
+  std::ignore = get_systems_event_queue().sink<Events::GraveTrailCompleteEvent>().connect<&AltarSystem::on_grave_trail_complete>( this );
+}
+
+void AltarSystem::on_grave_trail_complete( [[maybe_unused]] const Events::GraveTrailCompleteEvent &event )
+{
+  // reset the activated altar to unlit, so it takes its four talismans again for another trail
+  for ( auto [altar_entt, talisman_cmp, altar_uuid] : reg().view<Cmp::Altar::Activated, Cmp::Altar::TalismanCount, Cmp::UUID>().each() )
+  {
+    talisman_cmp.reset();
+    // put out its candles; an extra life's particles on the same altar are left alone. Collected first, so the
+    // particle view is not modified while it is iterated
+    std::vector<entt::entity> candle_entts;
+    for ( auto [particle_entt, particle_cmp, particle_uuid] : reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID>().each() )
+    {
+      if ( particle_uuid != altar_uuid ) continue;
+      if ( particle_cmp.sprite->get_tag() != Factory::Altar::kCandleFlameParticleTag ) continue;
+      candle_entts.push_back( particle_entt );
+    }
+    reg().destroy( candle_entts.begin(), candle_entts.end() );
+    SPDLOG_INFO( "Grave trail complete, altar {} reset", static_cast<uint32_t>( altar_entt ) );
+  }
+  reg().clear<Cmp::Altar::Activated>();
 }
 
 void AltarSystem::on_player_action( Events::PlayerActionEvent ev )
@@ -186,7 +212,6 @@ bool AltarSystem::grant_offering_reward( entt::entity altar_entity, Cmp::Altar::
   {
     case AltarEffect::TALISMAN:
       return offering_talisman( altar_entity, altar_cmp, altar_uuid );
-      return false;
     case AltarEffect::BANISH:
       offering_for_banish( altar_cmp );
       return true;
@@ -273,13 +298,6 @@ bool AltarSystem::offering_for_extra_life( entt::entity altar_entity, const Cmp:
 
 bool AltarSystem::offering_talisman( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
 {
-
-  bool altar_activated = reg().view<Cmp::Altar::Activated>().size() != 0;
-  if ( altar_activated )
-  {
-    SPDLOG_WARN( "Altar already activated. Skipping" );
-    return false;
-  }
   auto *talisman_count_cmp = reg().try_get<Cmp::Altar::TalismanCount>( altar_entity );
   if ( not talisman_count_cmp ) { throw std::runtime_error( "Altar does not have an Cmp::Altar::TalismanCount component" ); }
 
@@ -302,6 +320,13 @@ bool AltarSystem::offering_talisman( entt::entity altar_entity, Cmp::Altar::Mult
   if ( not flame_idx )
   {
     SPDLOG_WARN( "{} is not a talisman for this altar", item_type );
+    return false;
+  }
+  // once an altar is fully activated its grave trail must be completed first, so no altar takes talismans until then
+  if ( not reg().view<Cmp::Altar::Activated>().empty() )
+  {
+    SPDLOG_INFO( "An altar is already activated, refusing {} until its grave trail is complete", item_type );
+    get_systems_event_queue().trigger( Events::TalismanRefusedEvent( talisman_key ) );
     return false;
   }
   if ( talisman_count_cmp->activated( talisman_key ) ) return false;

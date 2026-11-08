@@ -38,6 +38,7 @@ TooltipSystem::TooltipSystem( entt::registry &reg, sf::RenderWindow &window, Aud
   std::ignore = get_systems_event_queue().sink<Events::ItemPickedUpEvent>().connect<&TooltipSystem::on_item_picked_up_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::GrimoireDiscoveryEvent>().connect<&TooltipSystem::on_grimoire_discovery_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::InsufficientAnimaEvent>().connect<&TooltipSystem::on_insufficient_anima_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::TalismanRefusedEvent>().connect<&TooltipSystem::on_talisman_refused_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::CryptEntryRefusedEvent>().connect<&TooltipSystem::on_crypt_entry_refused_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::DismissTooltipEvent>().connect<&TooltipSystem::on_dismiss_tooltip_event>( this );
   SPDLOG_DEBUG( "TooltipSystem initialized with {} tooltips", m_definitions.size() );
@@ -129,6 +130,12 @@ void TooltipSystem::on_insufficient_anima_event( const Events::InsufficientAnima
 {
   if ( not m_enabled ) { return; }
   m_candidates.push_back( { "InsufficientAnimaEvent", event.m_item.str() } );
+}
+
+void TooltipSystem::on_talisman_refused_event( const Events::TalismanRefusedEvent &event )
+{
+  if ( not m_enabled ) { return; }
+  m_candidates.push_back( { "TalismanRefusedEvent", event.m_item.str() } );
 }
 
 void TooltipSystem::on_crypt_entry_refused_event( [[maybe_unused]] const Events::CryptEntryRefusedEvent &event )

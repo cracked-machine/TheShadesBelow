@@ -1,24 +1,29 @@
 
 
+#include <Components/Persistent/AltarOfferingCooldown.hpp>
+#include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
 #include <Components/Persistent/ArmedBlinkFreq.hpp>
 #include <Components/Persistent/ArmedBlockColourBorder.hpp>
 #include <Components/Persistent/ArmedBlockColourFill.hpp>
-#include <Components/Persistent/ReservedArmedBlockColourBorder.hpp>
-#include <Components/Persistent/ReservedArmedBlockColourFill.hpp>
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
 #include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/AxeObstacleDigWear.hpp>
 #include <Components/Persistent/AxePotSmashWear.hpp>
 #include <Components/Persistent/AxeSkeletonKillWear.hpp>
+#include <Components/Persistent/AzazelFireballArc.hpp>
+#include <Components/Persistent/AzazelFireballColour.hpp>
+#include <Components/Persistent/AzazelFireballCooldown.hpp>
+#include <Components/Persistent/AzazelFireballDamage.hpp>
+#include <Components/Persistent/AzazelFireballSpeed.hpp>
 #include <Components/Persistent/BombBonus.hpp>
 #include <Components/Persistent/BombDamage.hpp>
 #include <Components/Persistent/BombsExhumeGraves.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
+#include <Components/Persistent/BradycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/BurrExpiry.hpp>
 #include <Components/Persistent/BurrSlowFactor.hpp>
 #include <Components/Persistent/BurrThrowCooldown.hpp>
-#include <Components/Persistent/BradycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
 #include <Components/Persistent/CorruptionDamage.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
@@ -40,8 +45,11 @@
 #include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveTrailGuideColour.hpp>
-#include <Components/Persistent/GraveTrailSizeMultiplier.hpp>
+#include <Components/Persistent/GraveTrailNominalSize.hpp>
 #include <Components/Persistent/GraveTrailStartCount.hpp>
+#include <Components/Persistent/MaxLevelDepth.hpp>
+#include <Components/Persistent/TalismanMinChance.hpp>
+#include <Components/Persistent/GraveCountMargin.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
@@ -50,18 +58,9 @@
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
-#include <Components/Persistent/AltarOfferingCooldown.hpp>
-#include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
-#include <Components/Persistent/AzazelFireballArc.hpp>
-#include <Components/Persistent/AzazelFireballColour.hpp>
-#include <Components/Persistent/AzazelFireballCooldown.hpp>
-#include <Components/Persistent/AzazelFireballDamage.hpp>
-#include <Components/Persistent/AzazelFireballSpeed.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
-#include <Components/Persistent/MinNumAltars.hpp>
-#include <Components/Persistent/MinNumCrypts.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MissingTalismanBias.hpp>
@@ -98,9 +97,11 @@
 #include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Persistent/ResetTutorial.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
 #include <Components/Persistent/RepelNpcPlayerTint.hpp>
+#include <Components/Persistent/ReservedArmedBlockColourBorder.hpp>
+#include <Components/Persistent/ReservedArmedBlockColourFill.hpp>
+#include <Components/Persistent/ResetTutorial.hpp>
 #include <Components/Persistent/RuinMaxCobwebs.hpp>
 #include <Components/Persistent/RuinMaxSpiders.hpp>
 #include <Components/Persistent/RuinProcGenBirthThreshold.hpp>
@@ -188,9 +189,12 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ExitKeyRequirement>();
   add_component<Cmp::Persist::FuseDelay>();
   add_component<Cmp::Persist::GraveNumMultiplier>();
-  add_component<Cmp::Persist::GraveTrailSizeMultiplier>();
+  add_component<Cmp::Persist::GraveTrailNominalSize>();
   add_component<Cmp::Persist::GraveTrailStartCount>();
   add_component<Cmp::Persist::MissingTalismanBias>();
+  add_component<Cmp::Persist::MaxLevelDepth>();
+  add_component<Cmp::Persist::TalismanMinChance>();
+  add_component<Cmp::Persist::GraveCountMargin>();
   add_component<Cmp::Persist::GraveTrailGuideColour>();
   add_component<Cmp::Persist::GraveyardProcGenInitChance>();
   add_component<Cmp::Persist::GraveyardProcGenMaxIterations>();
@@ -207,8 +211,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::AltarOfferingCooldown>();
   add_component<Cmp::Persist::AltarSummonOfferingCooldown>();
   add_component<Cmp::Persist::LightningDamage>();
-  add_component<Cmp::Persist::MinNumAltars>();
-  add_component<Cmp::Persist::MinNumCrypts>();
   add_component<Cmp::Persist::MinNumHealingSprings>();
   add_component<Cmp::Persist::MinNumRuins>();
   add_component<Cmp::Persist::MusicVolume>();

@@ -40,7 +40,7 @@ public:
     return count;
   }
 
-  std::vector<Sys::SpriteKey> keys( bool remaining_only = false ) const
+  [[nodiscard]] std::vector<Sys::SpriteKey> keys( bool remaining_only = false ) const
   {
     std::vector<Sys::SpriteKey> keys;
     keys.reserve( m_cadaver.size() );
@@ -54,6 +54,7 @@ public:
 
   auto begin() { return m_cadaver.begin(); }
   auto end() { return m_cadaver.end(); }
+  auto size() { return m_cadaver.size(); }
   void reset()
   {
     for ( auto &[key, value] : m_cadaver )

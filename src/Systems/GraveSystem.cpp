@@ -17,7 +17,7 @@
 #include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
-#include <Components/Persistent/GraveTrailSizeMultiplier.hpp>
+#include <Components/Persistent/GraveTrailNominalSize.hpp>
 #include <Components/Persistent/GraveTrailStartCount.hpp>
 #include <Components/Persistent/MissingTalismanBias.hpp>
 #include <Components/Persistent/PickaxeGraveDigWear.hpp>
@@ -40,6 +40,7 @@
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/ExhumeGraveEvent.hpp>
+#include <Events/GraveTrailCompleteEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
@@ -246,8 +247,9 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
   constexpr float kTrailBacktrackExclusionDeg = 35.f;
 
   auto &trail_position = Utils::Player::trail_position( reg() );
-  const unsigned int max_trail_size = Utils::Player::get_level_depth( reg() ).get_count() *
-                                      Sys::PersistSystem::get<Cmp::Persist::GraveTrailSizeMultiplier>( reg() ).get_value();
+  const size_t trail_size = Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalSize>( reg() ).get_value();
+  const size_t level_depth = Utils::Player::get_level_depth( reg() ).get_count();
+  const unsigned int max_trail_size = trail_size + level_depth;
 
   // the crow perched on the grave just opened flies away, so at most one crow is ever perched on the trail
   for ( auto [crow_entt, crow_cmp] : reg().view<Cmp::Npc::Crow>().each() )
@@ -366,6 +368,10 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
         break;
       case TrailStep::CRYPT_KEY:
         grant_grave_key( "item.cryptkey", grave_entity, by );
+        // the trail is over: restart it so the next altar's trail runs its full length, and let AltarSystem release
+        // the activated altar so the player can activate another. Enqueued as the caller may be iterating registry views
+        Utils::Player::trail_position( reg() ) = Cmp::Player::GraveTrail{};
+        get_systems_event_queue().enqueue( Events::GraveTrailCompleteEvent{} );
         break;
       case TrailStep::ADVANCED:
       case TrailStep::NO_GRAVES:
@@ -386,8 +392,8 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
     case Cmp::Grave::Consequence::Type::BOMB_TRAP:
       SPDLOG_DEBUG( "Grave activated bomb trap." );
       // a blasted grave sets its bomb off where it lies, chaining into any graves around it
-      get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::TRIGGER_BOMB,
-                                                                    by == ExhumedBy::BOMB ? grave_entity : entt::null ) );
+      get_systems_event_queue().trigger(
+          Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::TRIGGER_BOMB, by == ExhumedBy::BOMB ? grave_entity : entt::null ) );
       break;
     case Cmp::Grave::Consequence::Type::JEWELRY:
       spawn_grave_loot( { "item.jewelry_sapphire_necklace", "item.jewelry_amephyst_ring", "item.jewelry_ruby_ring", "item.jewelry_emerald_necklace",
@@ -556,7 +562,8 @@ void GraveSystem::on_altar_activated( const Events::AltarActivatedEvent &event )
   std::array<std::size_t, Utils::Cardinal::Count> side_order{ 0, 1, 2, 3 };
   std::shuffle( side_order.begin(), side_order.end(), shuffle_rng );
 
-  const auto start_count = static_cast<std::size_t>( std::max( 1, Sys::PersistSystem::get<Cmp::Persist::GraveTrailStartCount>( reg() ).get_value() ) );
+  const auto start_count = static_cast<std::size_t>(
+      std::max( 1, Sys::PersistSystem::get<Cmp::Persist::GraveTrailStartCount>( reg() ).get_value() ) );
   std::array<std::size_t, Utils::Cardinal::Count> taken{};
   std::size_t assigned = 0;
   bool took_any = true;
@@ -573,8 +580,8 @@ void GraveSystem::on_altar_activated( const Events::AltarActivatedEvent &event )
       took_any = true;
     }
   }
-  SPDLOG_INFO( "Altar activated: {} trail start graves assigned (E/S/W/N: {}/{}/{}/{})", assigned, taken[Utils::Cardinal::East], taken[Utils::Cardinal::South],
-               taken[Utils::Cardinal::West], taken[Utils::Cardinal::North] );
+  SPDLOG_INFO( "Altar activated: {} trail start graves assigned (E/S/W/N: {}/{}/{}/{})", assigned, taken[Utils::Cardinal::East],
+               taken[Utils::Cardinal::South], taken[Utils::Cardinal::West], taken[Utils::Cardinal::North] );
 }
 
 void GraveSystem::on_player_action( const Events::PlayerActionEvent &event )

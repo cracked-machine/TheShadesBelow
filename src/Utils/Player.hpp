@@ -92,6 +92,11 @@ Cmp::Player::LastGraveyardPosition *get_last_graveyard_pos( entt::registry &reg 
 //! @throws std::runtime_error if the player has no Cmp::Player::LevelDepth.
 Cmp::Player::LevelDepth &get_level_depth( entt::registry &reg );
 
+//! @brief Whether the player's current level is the last of the run (Cmp::Persist::MaxLevelDepth or deeper).
+//! @param reg
+//! @return true if completing this level ends the run
+bool is_final_level_depth( entt::registry &reg );
+
 //! @brief Get the player's wealth object.
 //! @param reg reference to the entt registry
 //! @return Cmp::Player::Wealth& Reference to the player's wealth.

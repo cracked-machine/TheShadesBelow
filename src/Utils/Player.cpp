@@ -14,6 +14,7 @@
 #include <Components/Npc/Wisp.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
+#include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
@@ -155,6 +156,12 @@ Cmp::Player::LevelDepth &get_level_depth( entt::registry &reg )
   auto *level_depth = reg.try_get<Cmp::Player::LevelDepth>( get_entity( reg ) );
   if ( not level_depth ) throw std::runtime_error( "Player entt has no component: Cmp::Player::LevelDepth" );
   return *level_depth;
+}
+
+bool is_final_level_depth( entt::registry &reg )
+{
+  const int max_depth = std::max( 1, Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg ).get_value() );
+  return get_level_depth( reg ).get_count() >= static_cast<unsigned int>( max_depth );
 }
 
 Cmp::Player::Wealth &get_wealth( entt::registry &reg )

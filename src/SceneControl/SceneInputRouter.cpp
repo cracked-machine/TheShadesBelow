@@ -405,7 +405,12 @@ void SceneInputRouter::level_complete_scene_state_handler()
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( const auto *keyPressed = event->getIf<sf::Event::KeyPressed>() )
     {
-      if ( keyPressed->scancode == sf::Keyboard::Scancode::R ) { enqueue( Events::SceneManagerEvent::Type::ENTER_SHOP ); }
+      if ( keyPressed->scancode == sf::Keyboard::Scancode::R )
+      {
+        // the deepest level ends the run, otherwise the player restocks at the shop before the next level
+        enqueue( Utils::Player::is_final_level_depth( reg() ) ? Events::SceneManagerEvent::Type::RETURN_TO_TITLE
+                                                              : Events::SceneManagerEvent::Type::ENTER_SHOP );
+      }
     }
   }
   // Even though there is no player movement in this scene, this function implicitly resets the Cmp::Direction.

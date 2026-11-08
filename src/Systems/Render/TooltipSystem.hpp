@@ -7,6 +7,7 @@
 #include <Events/GrimoireDiscoveryEvent.hpp>
 #include <Events/InsufficientAnimaEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
+#include <Events/TalismanRefusedEvent.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 
 #include <SFML/Graphics/Color.hpp>
@@ -61,6 +62,10 @@ public:
   //! @param event
   void on_insufficient_anima_event( const Events::InsufficientAnimaEvent &event );
 
+  //! @brief Record a candidate for tooltips triggered by "TalismanRefusedEvent".
+  //! @param event
+  void on_talisman_refused_event( const Events::TalismanRefusedEvent &event );
+
   //! @brief Record a candidate for tooltips triggered by "CryptEntryRefusedEvent".
   //! @param event
   void on_crypt_entry_refused_event( [[maybe_unused]] const Events::CryptEntryRefusedEvent &event );
@@ -86,7 +91,7 @@ private:
     //! @brief unique id, stored in Cmp::Persist::TooltipsSeen
     std::string id;
     //! @brief name of the event that triggers this tooltip, e.g. "AddInventoryEvent", "ItemPickedUpEvent",
-    //! "GrimoireDiscoveryEvent", "InsufficientAnimaEvent" or "CryptEntryRefusedEvent"
+    //! "GrimoireDiscoveryEvent", "InsufficientAnimaEvent", "TalismanRefusedEvent" or "CryptEntryRefusedEvent"
     std::string trigger;
     //! @brief optional item key condition, empty matches any item
     std::string item;

@@ -26,11 +26,15 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/ObstacleCap.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
-#include <Components/Persistent/MinNumAltars.hpp>
-#include <Components/Persistent/MinNumCrypts.hpp>
+#include <Components/Persistent/GraveCountMargin.hpp>
+#include <Components/Persistent/GraveTrailNominalSize.hpp>
+#include <Components/Persistent/MaxLevelDepth.hpp>
+#include <Components/Persistent/TalismanMinChance.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
+#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/LevelDepth.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
@@ -425,57 +429,26 @@ void LevelGenerator::add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scen
 
 void LevelGenerator::gen_graveyard_exterior_multiblocks()
 {
-  const auto &grave_num_multiplier = Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() );
-  const auto &min_num_altars = Sys::PersistSystem::get<Cmp::Persist::MinNumAltars>( reg() );
-  const auto &min_num_crypts = Sys::PersistSystem::get<Cmp::Persist::MinNumCrypts>( reg() );
+  // const size_t grave_num_multiplier = Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() ).get_value();
+  const size_t max_num_altars = 1;
+  const size_t max_num_crypts = 1;
   const auto &min_num_healing_springs = Sys::PersistSystem::get<Cmp::Persist::MinNumHealingSprings>( reg() );
   const auto &min_num_ruins = Sys::PersistSystem::get<Cmp::Persist::MinNumRuins>( reg() );
 
   // minimum clearance (in grid cells, both axes) between altars, crypts, healing springs and ruins
   constexpr int kMinBuildingSpacingCells = 10;
 
-  // shared spawn-location lookup for every multiblock placed below
+  // spawn-location lookup for the graves; a failure is reported once, by the grave count check
   auto find_spawn_pos = [&]( const Sprites::SpriteSheet &ms ) -> std::optional<Cmp::Position>
   {
     auto [random_entity, random_origin_position] = find_spawn_location( ms, 0 );
-    if ( random_entity == entt::null )
-    {
-      SPDLOG_ERROR( "Failed to find valid spawn position for {}.", ms.type() );
-      return std::nullopt;
-    }
+    if ( random_entity == entt::null ) { return std::nullopt; }
     return random_origin_position;
   };
 
-  // GRAVES
-  auto grave_meta_types = Sys::SpriteStore::instance().get_pattern( R"(graves\.\w+\.closed$)" );
-  if ( grave_meta_types.size() < 2 ) { SPDLOG_WARN( "No GRAVE spritesheets found in SpriteStore" ); }
-  else
-  {
-    std::map<Cmp::Grave::Consequence::Type, int> grave_consequences_distribution;
-    auto required_num_graves = static_cast<size_t>( min_num_altars.get_value() * grave_num_multiplier.get_value() );
-    for ( std::size_t i = 0; i < required_num_graves; ++i )
-    {
-      const auto &spritesheet = Sys::SpriteStore::instance().get_random( grave_meta_types );
-      auto index = spritesheet.get_random_texture_index();
-      SPDLOG_DEBUG( "Selected {}, {}", spritesheet.get_sprite_type(), index );
-      if ( auto pos = find_spawn_pos( spritesheet ) )
-      {
-        auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<Cmp::Grave::MultiBlock, Cmp::Grave::Segment>(
-            reg(), pos->position, spritesheet, index, 0, m_reserved_sm.get() );
-        m_reserved_sm->insert( mb_entt, pos.value() );
-        // fix the roll at creation; the consequence is resolved against the player's current luck when needed
-        auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 99 ).gen() );
-        // simulate the rolls now to get an idea of the distribution with game start player luck
-        grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck() )]++;
-      }
-    }
-    SPDLOG_INFO( "Grave Consequences dist at current luck: {}", grave_consequences_distribution );
-  }
-
   // ALTARS
   const auto &altar1_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.altar.inactive" );
-  auto altar_mb_entts = spawn_multiblocks<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( static_cast<std::size_t>( min_num_altars.get_value() ),
-                                                                                        altar1_spritesheet,
+  auto altar_mb_entts = spawn_multiblocks<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( max_num_altars, altar1_spritesheet,
                                                                                         /*log=*/true, kMinBuildingSpacingCells );
   // each altar draws its own talismans, so the sets may overlap between altars
   for ( auto entt : altar_mb_entts )
@@ -486,8 +459,8 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
 
   // CRYPTS - note: we use keys from altars to open crypts so the number should be equal
   const auto &crypt_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.crypt.closed" );
-  spawn_multiblocks<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( static_cast<std::size_t>( min_num_crypts.get_value() ),
-                                                                                  crypt_spritesheet, /*log=*/true, kMinBuildingSpacingCells );
+  spawn_multiblocks<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( max_num_crypts, crypt_spritesheet,
+                                                                                  /*log=*/true, kMinBuildingSpacingCells );
 
   const auto &healingspring_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.building.healingspring" );
   spawn_multiblocks<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>(
@@ -497,6 +470,66 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
   spawn_multiblocks<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>( static_cast<std::size_t>( min_num_ruins.get_value() ),
                                                                                 ruin_spritesheet,
                                                                                 /*log=*/true, kMinBuildingSpacingCells );
+
+  // GRAVES - placed last, so the larger buildings above get first pick of the space
+  auto grave_meta_types = Sys::SpriteStore::instance().get_pattern( R"(graves\.\w+\.closed$)" );
+  if ( grave_meta_types.size() < 2 ) { SPDLOG_WARN( "No GRAVE spritesheets found in SpriteStore" ); }
+  else
+  {
+    const size_t trail_size = Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalSize>( reg() ).get_value();
+    const size_t max_cadaver_count = Utils::Player::get_cadaver( reg() ).size();
+    // const size_t level_depth = Utils::Player::get_level_depth( reg() ).get_count();
+    const size_t exit_and_crypt_key_multiplier = 2;
+    const size_t trail_start_count = 1;
+    // sized for the longest trail of the run, at the deepest level
+    const auto max_level_depth = static_cast<size_t>( std::max( 1, Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value() ) );
+    const size_t altar_activation_count = Cmp::Altar::TalismanCount::kAltarTalismanCount;
+    // trail graves skip their consequence, so each altar activation's talismans are dug from graves off the trail.
+    // Sized for the worst case: the talisman chance never drops below Cmp::Persist::TalismanMinChance
+    const int min_talisman_chance_pct = std::max( 1, Sys::PersistSystem::get<Cmp::Persist::TalismanMinChance>( reg() ).get_value() );
+    const auto min_talisman_chance = static_cast<size_t>( min_talisman_chance_pct );
+    const size_t talisman_graves = ( altar_activation_count * 100 + min_talisman_chance - 1 ) / min_talisman_chance;
+    const size_t trail_graves = ( trail_size + max_level_depth ) * exit_and_crypt_key_multiplier + trail_start_count;
+    const size_t base_num_graves = ( trail_graves + talisman_graves ) * max_cadaver_count;
+    // the talisman graves above are only the average needed, and bombs blast graves open, so add a margin on top
+    const auto margin_pct = static_cast<size_t>( std::max( 0, Sys::PersistSystem::get<Cmp::Persist::GraveCountMargin>( reg() ).get_value() ) );
+    const size_t required_num_graves = ( base_num_graves * ( 100 + margin_pct ) + 99 ) / 100;
+    SPDLOG_INFO( "Graves required: {} = ({} trail + {} talisman per cadaver part) x {} parts + {}% margin", required_num_graves, trail_graves,
+                 talisman_graves, max_cadaver_count, margin_pct );
+
+    std::map<Cmp::Grave::Consequence::Type, int> grave_consequences_distribution;
+    std::size_t placed_num_graves = 0;
+    for ( std::size_t i = 0; i < required_num_graves; ++i )
+    {
+      const auto &spritesheet = Sys::SpriteStore::instance().get_random( grave_meta_types );
+      auto index = spritesheet.get_random_texture_index();
+      SPDLOG_DEBUG( "Selected {}, {}", spritesheet.get_sprite_type(), index );
+      auto pos = find_spawn_pos( spritesheet );
+      // find_spawn_location() already made many random attempts, so the graveyard is full: further graves will not fit either
+      if ( not pos ) break;
+
+      auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<Cmp::Grave::MultiBlock, Cmp::Grave::Segment>(
+          reg(), pos->position, spritesheet, index, 0, m_reserved_sm.get() );
+      m_reserved_sm->insert( mb_entt, pos.value() );
+      // fix the roll at creation; the consequence is resolved against the player's current luck when needed
+      auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 99 ).gen(), min_talisman_chance_pct );
+      // simulate the rolls now to get an idea of the distribution with game start player luck
+      grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck() )]++;
+      placed_num_graves++;
+    }
+    if ( placed_num_graves < base_num_graves )
+    {
+      SPDLOG_ERROR( "Only added {} of the {} graves required: the level may run out of graves before every cadaver part is found",
+                    placed_num_graves, base_num_graves );
+    }
+    else if ( placed_num_graves < required_num_graves )
+    {
+      SPDLOG_ERROR( "Only added {} of the {} graves required with the {}% margin (baseline of {} met)", placed_num_graves, required_num_graves,
+                    margin_pct, base_num_graves );
+    }
+    else { SPDLOG_INFO( "Added {} graves", placed_num_graves ); }
+    SPDLOG_INFO( "Grave Consequences dist at current luck: {}", grave_consequences_distribution );
+  }
 }
 
 template <typename MULTIBLOCK, typename MBSEGMENT>

@@ -10,7 +10,7 @@
 // clang-format off
 namespace Game::Cmp::Altar { class MultiBlock; }
 namespace Game::Cmp { struct ActionReward; struct UUID; }
-namespace Game::Events { class PlayerActionEvent; }
+namespace Game::Events { class PlayerActionEvent; struct GraveTrailCompleteEvent; }
 // clang-format on
 
 namespace Game::Sys
@@ -32,6 +32,10 @@ public:
 private:
   //! @brief Capture Events::PlayerActionEvent::GameActions::ACTIVATE. Calls check_player_altar_offering().
   void on_player_action( Events::PlayerActionEvent ev );
+
+  //! @brief Capture Events::GraveTrailCompleteEvent. Resets the activated altar: puts out its candles, clears its
+  //! Cmp::Altar::TalismanCount and removes Cmp::Altar::Activated, so it (or any other altar) takes four talismans again.
+  void on_grave_trail_complete( const Events::GraveTrailCompleteEvent &event );
 
   //! @brief Rewards player for offering various items at the altar
   //! @param altar_entity
