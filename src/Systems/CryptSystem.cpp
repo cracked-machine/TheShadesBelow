@@ -4,6 +4,7 @@
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/BuildingSegment.hpp>
 #include <Components/Crypt/Chest.hpp>
+#include <Components/Crypt/EnteredDoor.hpp>
 #include <Components/Crypt/Entrance.hpp>
 #include <Components/Crypt/Lever.hpp>
 #include <Components/Crypt/ObjectiveMultiBlock.hpp>
@@ -40,6 +41,7 @@
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateLootEvent.hpp>
 #include <Events/CreateNpcEvent.hpp>
+#include <Events/CryptEntryRefusedEvent.hpp>
 #include <Events/CryptRoomEvent.hpp>
 #include <Events/PassageEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
@@ -249,6 +251,8 @@ void CryptSystem::check_entrance_collision()
 
     if ( not player_pos.findIntersection( decreased_entrance_bounds.getBounds() ) ) continue;
     m_scenemanager_event_dispatcher.enqueue<Events::SceneManagerEvent>( Events::SceneManagerEvent::Type::ENTER_CRYPT );
+    // lock this door again when the player comes back out, see lock_entered_crypt_doors()
+    reg().emplace_or_replace<Cmp::Crypt::EnteredDoor>( door_entity );
 
     auto [_, inventory_slot_type, _] = Utils::Player::get_inventory( reg() );
 
@@ -331,6 +335,13 @@ void CryptSystem::unlock_crypt_door()
       }
     }
 
+    // every cadaver part is already collected, so the crypt has nothing left to give; keep the key
+    if ( Utils::Player::get_cadaver( reg() ).keys( /*remaining_only=*/true ).empty() )
+    {
+      get_systems_event_queue().trigger( Events::CryptEntryRefusedEvent{} );
+      continue;
+    }
+
     // unlock the crypt door
     SPDLOG_DEBUG( "Player unlocked a crypt door at ({}, {})", door_pos_cmp.position.x, door_pos_cmp.position.y );
     Factory::Player::destroy_inventory( reg(), "item.cryptkey" );
@@ -353,6 +364,41 @@ void CryptSystem::unlock_crypt_door()
       SPDLOG_DEBUG( "Updated crypt multi-block sprite to open state at ({}, {})", crypt_cmp.position.x, crypt_cmp.position.y );
       break;
     }
+  }
+}
+
+void CryptSystem::lock_entered_crypt_doors()
+{
+  // collect first: close_crypt_door() replaces components on the door entities
+  std::vector<entt::entity> entered_doors;
+  for ( auto [door_entity, door_cmp, door_pos_cmp] : reg().view<Cmp::Crypt::Entrance, Cmp::Crypt::EnteredDoor, Cmp::Position>().each() )
+  {
+    entered_doors.push_back( door_entity );
+  }
+
+  for ( auto door_entity : entered_doors )
+  {
+    close_crypt_door( door_entity, reg().get<Cmp::Position>( door_entity ) );
+    reg().remove<Cmp::Crypt::EnteredDoor>( door_entity );
+  }
+}
+
+void CryptSystem::close_crypt_door( entt::entity door_entity, const Cmp::Position &door_pos_cmp )
+{
+  SPDLOG_DEBUG( "Locking crypt door at ({}, {})", door_pos_cmp.position.x, door_pos_cmp.position.y );
+  reg().get<Cmp::Crypt::Entrance>( door_entity ).set_is_open( false );
+
+  // make the doorway solid again so the player can't walk through it
+  reg().emplace_or_replace<Cmp::Crypt::BuildingSegment>( door_entity, Cmp::Crypt::BuildingSegment( true ) );
+  reg().emplace_or_replace<Cmp::Player::NoPath>( door_entity );
+
+  // find the crypt multi-block this door belongs to and restore the closed sprite
+  auto crypt_view = reg().view<Cmp::Crypt::BuildingMultiBlock, Cmp::AnimData>();
+  for ( auto [crypt_entity, crypt_cmp, anim_cmp] : crypt_view.each() )
+  {
+    if ( not door_pos_cmp.findIntersection( crypt_cmp ) ) continue;
+    anim_cmp.m_sprite_type = "sprite.graveyard.crypt.closed";
+    break;
   }
 }
 

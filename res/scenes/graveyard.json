@@ -1975,6 +1975,19 @@
                  "width":0,
                  "x":752,
                  "y":848
+                }, 
+                {
+                 "height":0,
+                 "id":284,
+                 "name":"item.cryptkey",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":832,
+                 "y":848
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1983,7 +1996,7 @@
          "y":0
         }],
  "nextlayerid":11,
- "nextobjectid":284,
+ "nextobjectid":285,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

@@ -2,6 +2,7 @@
 #define SRC_SYSTEMS_RENDER_TOOLTIPSYSTEM_HPP__
 
 #include <Events/AddInventoryEvent.hpp>
+#include <Events/CryptEntryRefusedEvent.hpp>
 #include <Events/DismissTooltipEvent.hpp>
 #include <Events/GrimoireDiscoveryEvent.hpp>
 #include <Events/InsufficientAnimaEvent.hpp>
@@ -60,6 +61,10 @@ public:
   //! @param event
   void on_insufficient_anima_event( const Events::InsufficientAnimaEvent &event );
 
+  //! @brief Record a candidate for tooltips triggered by "CryptEntryRefusedEvent".
+  //! @param event
+  void on_crypt_entry_refused_event( [[maybe_unused]] const Events::CryptEntryRefusedEvent &event );
+
   //! @brief Hide the active tooltip before its timer expires.
   //! @param event
   void on_dismiss_tooltip_event( [[maybe_unused]] const Events::DismissTooltipEvent &event ) { m_active.reset(); }
@@ -81,7 +86,7 @@ private:
     //! @brief unique id, stored in Cmp::Persist::TooltipsSeen
     std::string id;
     //! @brief name of the event that triggers this tooltip, e.g. "AddInventoryEvent", "ItemPickedUpEvent",
-    //! "GrimoireDiscoveryEvent" or "InsufficientAnimaEvent"
+    //! "GrimoireDiscoveryEvent", "InsufficientAnimaEvent" or "CryptEntryRefusedEvent"
     std::string trigger;
     //! @brief optional item key condition, empty matches any item
     std::string item;

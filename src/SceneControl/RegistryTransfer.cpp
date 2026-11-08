@@ -3,6 +3,7 @@
 #include <Components/AbsoluteRotation.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Armable.hpp>
+#include <Components/Crypt/EnteredDoor.hpp>
 #include <Components/Crypt/Lever.hpp>
 #include <Components/Crypt/ObjectiveMultiBlock.hpp>
 #include <Components/Crypt/PassageBlock.hpp>
@@ -281,6 +282,7 @@ void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
   registry.storage<Cmp::Player::Mortality>();
   registry.storage<Cmp::Player::HeartBeat>();
   registry.storage<Cmp::Player::Cadaver>();
+  registry.storage<Cmp::Crypt::EnteredDoor>();
   registry.storage<Cmp::AnimData>();
   registry.storage<Cmp::Inventory::DowsingTarget>();
   registry.storage<Cmp::PlayerInventorySlot>();

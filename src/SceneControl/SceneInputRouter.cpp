@@ -530,6 +530,13 @@ bool SceneInputRouter::try_handle_debug_key( sf::Keyboard::Scancode scancode )
     Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, {}, vertigo } );
   }
   else if ( scancode == Scancode::NumpadMultiply ) { Utils::Player::get_wealth( reg() ).wealth += 1; }
+  else if ( scancode == Scancode::NumpadDivide )
+  {
+    auto &cadaver_cmp = Utils::Player::get_cadaver( reg() );
+    auto pool = cadaver_cmp.keys( /*remaining_only=*/true );
+    auto pick = pool.at( Cmp::RandomInt( 0, pool.size() - 1 ).gen() );
+    cadaver_cmp.set( pick );
+  }
   else if ( scancode == Scancode::Numpad7 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Luck{ 10 }, {}, {} } ); }
   else if ( scancode == Scancode::Numpad4 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Luck{ -10 }, {}, {} } ); }
   else if ( scancode == Scancode::Numpad9 ) { Utils::Player::get_stats( reg() ).apply( { {}, Cmp::Stats::Fear{ 10 }, {}, {}, {}, {}, {} } ); }

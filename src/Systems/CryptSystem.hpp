@@ -80,8 +80,13 @@ public:
   //! @brief Check for collisions with the exit
   void check_exit_collision();
 
-  //! @brief Unlock the crypt door
+  //! @brief Unlock the crypt door. Refused (key kept, Events::CryptEntryRefusedEvent sent) when the player has already
+  //! collected every cadaver part.
   void unlock_crypt_door();
+
+  //! @brief Lock again every crypt door tagged with Cmp::Crypt::EnteredDoor, i.e. the door the player walked through
+  //! into the crypt. Called from GraveyardScene::on_enter() when the player returns to the graveyard.
+  void lock_entered_crypt_doors();
 
   //! @brief Check for objective activation
   //! @param action
@@ -126,6 +131,12 @@ public:
   }
 
 private:
+  //! @brief Return an opened graveyard crypt door to its locked state: solid, blocks the player, closed sprite.
+  //! Reverses the open steps in unlock_crypt_door().
+  //! @param door_entity entity with Cmp::Crypt::Entrance
+  //! @param door_pos_cmp the door's position
+  void close_crypt_door( entt::entity door_entity, const Cmp::Position &door_pos_cmp );
+
   //! @brief Build a map of Cmp::UUID -> entity for all entities that are not Cmp::Obstacle
   Factory::Obstacle::UUIDEntityMap build_non_obstacle_uuid_map();
 

@@ -234,6 +234,9 @@ void GraveyardScene::on_enter()
   // the extra life may have been spent in another scene (e.g. the crypt), so put out any altar still showing it
   if ( not Utils::Player::player_has_extra_life( m_reg ) ) Factory::Altar::deactivate_altars( m_reg );
 
+  // the crypt door the player came out of locks behind them
+  m_sys.find<Sys::Store::Type::CryptSystem>().lock_entered_crypt_doors();
+
   // Respawn player back in the graveyard: either at the last position when they left, or fallback to their start position
   const auto &player_pos = Utils::Player::get_position( m_reg );
   auto *player_last_graveyard_pos = Utils::Player::get_last_graveyard_pos( m_reg );

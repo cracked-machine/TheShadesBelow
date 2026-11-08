@@ -38,6 +38,13 @@
       "text": "A talisman can only be activated when you have anima.\nOffer or eat plants to gain anima.",
       "frequency": "always",
       "duration_s": 4.0
+    },
+    {
+      "id": "crypt_all_cadavers",
+      "trigger": "CryptEntryRefusedEvent",
+      "text": "You have already collected every cadaver part.\nThis crypt holds nothing more for you.",
+      "frequency": "always",
+      "duration_s": 4.0
     }
   ]
 }
