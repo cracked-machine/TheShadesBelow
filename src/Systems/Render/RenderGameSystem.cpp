@@ -27,6 +27,7 @@
 #include <Components/Greyscale.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
+#include <Components/Hazard/SinkholeCorners.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
@@ -286,6 +287,7 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
   // per-entity decorations drawn on top of the sprite
   if ( const auto *wear_cmp = reg().try_get<Cmp::Inventory::WearLevel>( entity ) ) render_wear_level( wear_cmp->m_level, pos_cmp );
   if ( const auto *armed_cmp = reg().try_get<Cmp::Armed>( entity ) ) render_armed_indicator( *armed_cmp, pos_cmp );
+  if ( const auto *corners_cmp = reg().try_get<Cmp::Hazard::SinkholeCorners>( entity ) ) render_sinkhole_corners( *corners_cmp, pos_cmp );
   if ( const auto *burr_cmp = reg().try_get<Cmp::BurrCount>( entity ); burr_cmp and reg().all_of<Cmp::Npc::NPC>( entity ) )
   {
     render_attached_burrs( *burr_cmp, body_rect );
@@ -508,6 +510,20 @@ void RenderGameSystem::render_flight_shadow()
   shadow.setPosition( FlyingSystem::shadow_bounds( reg() ).getCenter() );
   shadow.setFillColor( sf::Color( 0, 0, 0, FlyingSystem::kFlightShadowAlpha ) );
   draw_world( shadow );
+}
+
+void RenderGameSystem::render_sinkhole_corners( const Cmp::Hazard::SinkholeCorners &corners_cmp, const Cmp::Position &pos_cmp )
+{
+  static const std::array<std::pair<uint8_t, Sys::SpriteKey>, 4> corner_sprites{ {
+      { Cmp::Hazard::SinkholeCorners::kNorthEast, "sprite.graveyard.hazard.sinkhole_corner_north_east" },
+      { Cmp::Hazard::SinkholeCorners::kNorthWest, "sprite.graveyard.hazard.sinkhole_corner_north_west" },
+      { Cmp::Hazard::SinkholeCorners::kSouthEast, "sprite.graveyard.hazard.sinkhole_corner_south_east" },
+      { Cmp::Hazard::SinkholeCorners::kSouthWest, "sprite.graveyard.hazard.sinkhole_corner_south_west" },
+  } };
+  for ( const auto &[corner, sprite_key] : corner_sprites )
+  {
+    if ( corners_cmp.mask & corner ) safe_render_sprite_world( sprite_key, pos_cmp, 0 );
+  }
 }
 
 void RenderGameSystem::render_armed_indicator( const Cmp::Armed &armed_cmp, const Cmp::Position &pos_cmp )

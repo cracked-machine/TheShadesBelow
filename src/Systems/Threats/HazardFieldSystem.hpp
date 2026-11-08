@@ -10,6 +10,7 @@
 #include <Components/Player/Mortality.hpp>
 #include <Components/Position.hpp>
 #include <PathFinding/SmartPointers.hpp>
+#include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Utils/Random.hpp>
 
@@ -91,9 +92,32 @@ private:
   //! attaches the hazard/anim/z-order/pathfinding components, and (unless this hazard type only applies
   //! gradual damage) an initial pushback-collision resist.
   //! @param entity The obstacle entity to promote.
-  //! @param pos The entity's current position.
+  //! @param pos The entity's current position. Taken by value: remove_obstacle() destroys cap entities, which can
+  //! swap-and-pop the Cmp::Position storage a caller's reference points into.
   //! @param reserved_sm The locked reserved-positions grid, or nullptr if it has expired.
-  void promote_to_hazard_cell( entt::entity entity, const Cmp::Position &pos, const PathFinding::SpatialHashGridSharedPtr &reserved_sm );
+  void promote_to_hazard_cell( entt::entity entity, const Cmp::Position pos, const PathFinding::SpatialHashGridSharedPtr &reserved_sm );
+
+  //! @brief Clear m_field_sm and repopulate it from every HazardType entity currently in the registry.
+  void rebuild_field_sm();
+
+  //! @brief Check whether m_field_sm holds a valid HazardType entity at `pos` + `offset`.
+  //! @param pos The reference cell position.
+  //! @param offset Pixel offset from `pos` of the cell to check.
+  //! @return true if that cell is part of this hazard field.
+  bool has_hazard_at( const Cmp::Position &pos, sf::Vector2f offset ) const;
+
+  //! @brief Pick the sinkhole edge sprite for `entity` from which of its 4 cardinal neighbours are also
+  //! hazard cells (looked up in m_field_sm), and swap its AnimData sprite to match. Also sets/removes
+  //! Cmp::Hazard::SinkholeCorners for any inner corners (both adjacent sides open, diagonal not).
+  //! @param entity The hazard cell entity to re-sprite.
+  //! @param pos The entity's position.
+  void update_sinkhole_sprite( entt::entity entity, const Cmp::Position &pos );
+
+  //! @brief Re-sprite a newly added sinkhole cell and each of its 8 surrounding sinkhole neighbours so the
+  //! shared edges open up and the field reads as one continuous sinkhole.
+  //! @param entity The newly added hazard cell entity.
+  //! @param pos The entity's position.
+  void retile_sinkhole_cell_and_neighbours( entt::entity entity, const Cmp::Position &pos );
 
   //! @brief Gameplay time elapsed since the last hazard field update.
   //!
@@ -107,6 +131,10 @@ private:
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
+
+  //! @brief Spatial index of this system's hazard cells (one bucket per grid cell), used to track the
+  //! structure of the field as it spreads.
+  PathFinding::SpatialHashGrid m_field_sm;
 };
 
 } // namespace Game::Sys

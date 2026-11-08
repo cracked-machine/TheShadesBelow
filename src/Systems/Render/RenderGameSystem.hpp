@@ -45,6 +45,7 @@ struct AnimData;
 } // namespace Game::Cmp
 
 namespace Game::Cmp::Altar { class TalismanCount; }
+namespace Game::Cmp::Hazard { struct SinkholeCorners; }
 
 namespace Game::Cmp::Npc { struct Burryman; }
 namespace Game::Cmp::Particle { class IParticleSprite; struct SpriteOwner; }
@@ -144,6 +145,11 @@ private:
 
   //! @brief Renders the flashing warning square over an armed obstacle in the game world
   void render_armed_indicator( const Cmp::Armed &armed_cmp, const Cmp::Position &pos_cmp );
+
+  //! @brief Draw the inner-corner overlay sprites flagged in `corners_cmp` on top of a sinkhole cell.
+  //! @param corners_cmp Which corners to draw.
+  //! @param pos_cmp The sinkhole cell's position.
+  void render_sinkhole_corners( const Cmp::Hazard::SinkholeCorners &corners_cmp, const Cmp::Position &pos_cmp );
 
   //! @brief Draws the zigzag vertex sequence shared by lightning strikes and obstacle cracks: a thick
   //! main line through the zero-index vertex of each row, with thinner lines to/from the other vertices.

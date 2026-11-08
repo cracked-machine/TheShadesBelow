@@ -5,6 +5,7 @@
 #include <Components/Exit.hpp>
 #include <Components/Hazard/CollisionResist.hpp>
 #include <Components/Hazard/CorruptionCell.hpp>
+#include <Components/Hazard/SinkholeCorners.hpp>
 #include <Components/Npc/ElderMother.hpp>
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
@@ -26,6 +27,11 @@
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 
+#include <array>
+#include <string_view>
+#include <type_traits>
+#include <utility>
+
 namespace Game::Sys
 {
 
@@ -35,6 +41,52 @@ namespace Detail
 //! enclosing `if constexpr` branch is actually instantiated, not for every instantiation of the template.
 template <typename T>
 inline constexpr bool dependent_false = false;
+
+//! @brief Bit flags for a sinkhole cell's open sides - a set bit means the neighbour on that side is also a sinkhole.
+enum SinkholeSide : unsigned { kNorth = 1u, kSouth = 2u, kEast = 4u, kWest = 8u };
+
+//! @brief Sinkhole edge sprite keys indexed by SinkholeSide bitmask (N=1, S=2, E=4, W=8).
+inline constexpr std::array<std::string_view, 16> kSinkholeSprites{
+    "sprite.graveyard.hazard.sinkhole_all_sides",           // 0
+    "sprite.graveyard.hazard.sinkhole_no_north",            // N
+    "sprite.graveyard.hazard.sinkhole_no_south",            // S
+    "sprite.graveyard.hazard.sinkhole_no_north_south",      // N|S
+    "sprite.graveyard.hazard.sinkhole_no_east",             // E
+    "sprite.graveyard.hazard.sinkhole_no_east_north",       // N|E
+    "sprite.graveyard.hazard.sinkhole_no_south_east",       // S|E
+    "sprite.graveyard.hazard.sinkhole_no_north_south_east", // N|S|E
+    "sprite.graveyard.hazard.sinkhole_no_west",             // W
+    "sprite.graveyard.hazard.sinkhole_no_west_north",       // N|W
+    "sprite.graveyard.hazard.sinkhole_no_south_west",       // S|W
+    "sprite.graveyard.hazard.sinkhole_no_north_south_west", // N|S|W
+    "sprite.graveyard.hazard.sinkhole_no_east_west",        // E|W
+    "sprite.graveyard.hazard.sinkhole_no_north_east_west",  // N|E|W
+    "sprite.graveyard.hazard.sinkhole_no_south_east_west",  // S|E|W
+    "sprite.graveyard.hazard.sinkhole_no_sides",            // N|S|E|W
+};
+
+//! @brief Cardinal grid offsets paired with the SinkholeSide bit they set.
+inline const std::array<std::pair<sf::Vector2f, unsigned>, 4> kSinkholeNeighbourOffsets{ {
+    { { 0.f, -Constants::kGridSizePxF.y }, kNorth },
+    { { 0.f, Constants::kGridSizePxF.y }, kSouth },
+    { { Constants::kGridSizePxF.x, 0.f }, kEast },
+    { { -Constants::kGridSizePxF.x, 0.f }, kWest },
+} };
+
+//! @brief Diagonal grid offsets, each paired with the two SinkholeSide bits that must be open for an inner
+//! corner and the Cmp::Hazard::SinkholeCorners bit set when the diagonal itself is not a sinkhole.
+struct SinkholeDiagonal
+{
+  sf::Vector2f offset;
+  unsigned sides;
+  uint8_t corner;
+};
+inline const std::array<SinkholeDiagonal, 4> kSinkholeDiagonalOffsets{ {
+    { { Constants::kGridSizePxF.x, -Constants::kGridSizePxF.y }, kNorth | kEast, Cmp::Hazard::SinkholeCorners::kNorthEast },
+    { { -Constants::kGridSizePxF.x, -Constants::kGridSizePxF.y }, kNorth | kWest, Cmp::Hazard::SinkholeCorners::kNorthWest },
+    { { Constants::kGridSizePxF.x, Constants::kGridSizePxF.y }, kSouth | kEast, Cmp::Hazard::SinkholeCorners::kSouthEast },
+    { { -Constants::kGridSizePxF.x, Constants::kGridSizePxF.y }, kSouth | kWest, Cmp::Hazard::SinkholeCorners::kSouthWest },
+} };
 } // namespace Detail
 
 //! @copydoc HazardFieldSystem::HazardFieldSystem(entt::registry&,sf::RenderWindow&,Audio::SoundBank&)
@@ -66,6 +118,10 @@ sf::Vector2f HazardFieldSystem<HazardType>::update( sf::Time dt )
 template <ValidHazard HazardType>
 sf::Vector2f HazardFieldSystem<HazardType>::init_hazard_field()
 {
+  // keep the field index in sync with the registry: re-entering the scene keeps existing cells,
+  // a new level starts with none
+  rebuild_field_sm();
+
   auto hazard_field_view = reg().template view<HazardType>( entt::exclude<typename Traits::ExcludeHazard> );
   if ( hazard_field_view.size_hint() > 0 ) { return {}; }
 
@@ -84,7 +140,7 @@ sf::Vector2f HazardFieldSystem<HazardType>::init_hazard_field()
 
 //! @copydoc HazardFieldSystem::promote_to_hazard_cell()
 template <ValidHazard HazardType>
-void HazardFieldSystem<HazardType>::promote_to_hazard_cell( entt::entity entity, const Cmp::Position &pos,
+void HazardFieldSystem<HazardType>::promote_to_hazard_cell( entt::entity entity, const Cmp::Position pos,
                                                             const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
 {
   Factory::Obstacle::remove_obstacle( reg(), entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
@@ -100,12 +156,82 @@ void HazardFieldSystem<HazardType>::promote_to_hazard_cell( entt::entity entity,
   // clang-format on
   reg().template emplace_or_replace<Cmp::ZOrderValue>( entity, pos.position.y - 1.f );
   reg().template emplace_or_replace<Cmp::Npc::NoPathFinding>( entity );
+
+  m_field_sm.insert( entity, pos );
+  if constexpr ( std::is_same_v<HazardType, Cmp::SinkholeCell> ) { retile_sinkhole_cell_and_neighbours( entity, pos ); }
   // corruption is a gradual damage field, not an instant kill, so it never gets an initial pushback
   if constexpr ( not std::is_same_v<HazardType, Cmp::CorruptionCell> )
   {
     auto resist_seconds = Sys::PersistSystem::get<Cmp::Persist::HazardPushbackResist>( reg() ).get_value();
     reg().template emplace_or_replace<Cmp::Hazard::CollisionResist>( entity, resist_seconds );
   }
+}
+
+//! @copydoc HazardFieldSystem::rebuild_field_sm()
+template <ValidHazard HazardType>
+void HazardFieldSystem<HazardType>::rebuild_field_sm()
+{
+  m_field_sm.clear();
+  for ( auto [entity, hazard_cmp, pos_cmp] : reg().template view<HazardType, Cmp::Position>().each() )
+  {
+    m_field_sm.insert( entity, pos_cmp );
+  }
+}
+
+//! @copydoc HazardFieldSystem::has_hazard_at()
+template <ValidHazard HazardType>
+bool HazardFieldSystem<HazardType>::has_hazard_at( const Cmp::Position &pos, sf::Vector2f offset ) const
+{
+  for ( auto entity : m_field_sm.at( Cmp::Position( pos.position + offset, Constants::kGridSizePxF ) ) )
+  {
+    if ( reg().valid( entity ) and reg().template all_of<HazardType>( entity ) ) return true;
+  }
+  return false;
+}
+
+//! @copydoc HazardFieldSystem::update_sinkhole_sprite()
+template <ValidHazard HazardType>
+void HazardFieldSystem<HazardType>::update_sinkhole_sprite( entt::entity entity, const Cmp::Position &pos )
+{
+  unsigned mask = 0;
+  for ( const auto &[offset, side] : Detail::kSinkholeNeighbourOffsets )
+  {
+    if ( has_hazard_at( pos, offset ) ) mask |= side;
+  }
+
+  uint8_t corner_mask = 0;
+  for ( const auto &diagonal : Detail::kSinkholeDiagonalOffsets )
+  {
+    if ( ( mask & diagonal.sides ) == diagonal.sides and not has_hazard_at( pos, diagonal.offset ) ) corner_mask |= diagonal.corner;
+  }
+  if ( corner_mask != 0 ) { reg().template emplace_or_replace<Cmp::Hazard::SinkholeCorners>( entity, corner_mask ); }
+  else { reg().template remove<Cmp::Hazard::SinkholeCorners>( entity ); }
+
+  if ( auto *anim_cmp = reg().template try_get<Cmp::AnimData>( entity ) )
+  {
+    anim_cmp->m_sprite_type = Sys::SpriteKey( std::string( Detail::kSinkholeSprites[mask] ) );
+  }
+}
+
+//! @copydoc HazardFieldSystem::retile_sinkhole_cell_and_neighbours()
+template <ValidHazard HazardType>
+void HazardFieldSystem<HazardType>::retile_sinkhole_cell_and_neighbours( entt::entity entity, const Cmp::Position &pos )
+{
+  update_sinkhole_sprite( entity, pos );
+
+  auto retile_at = [&]( sf::Vector2f offset )
+  {
+    for ( auto neighbour : m_field_sm.at( Cmp::Position( pos.position + offset, Constants::kGridSizePxF ) ) )
+    {
+      if ( neighbour == entity or not reg().valid( neighbour ) ) continue;
+      const auto *neighbour_pos = reg().template try_get<Cmp::Position>( neighbour );
+      if ( not neighbour_pos or not reg().template all_of<HazardType>( neighbour ) ) continue;
+      update_sinkhole_sprite( neighbour, *neighbour_pos );
+    }
+  };
+  // side neighbours gain an open edge; diagonal neighbours may lose an inner corner
+  for ( const auto &[offset, side] : Detail::kSinkholeNeighbourOffsets ) retile_at( offset );
+  for ( const auto &diagonal : Detail::kSinkholeDiagonalOffsets ) retile_at( diagonal.offset );
 }
 
 //! @copydoc HazardFieldSystem::update_hazard_field()

@@ -953,6 +953,270 @@
         }
       }
     },
+    "sprite.graveyard.hazard.sinkhole_all_sides": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [50],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_no_north": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [51],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_no_south": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [52],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_no_west": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [53],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_no_east": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [54],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_no_north_south": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [55],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_no_east_west": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [56],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_no_sides": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [57],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+
+    "sprite.graveyard.hazard.sinkhole_no_east_north": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [60],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_no_west_north": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [61],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_no_south_east": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [62],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_no_south_west": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [63],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+
+    "sprite.graveyard.hazard.sinkhole_no_north_south_west": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [64],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_no_north_east_west": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [65],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_no_north_south_east": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [66],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_no_south_east_west": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [67],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+
+    "sprite.graveyard.hazard.sinkhole_corner_north_east": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [58],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_corner_north_west": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [59],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_corner_south_east": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [68],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.hazard.sinkhole_corner_south_west": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.hazard.sinkhole",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [69],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+
     "sprite.graveyard.hazard.wormhole": {
       "spritesheet": {
         "displayname": "sprite.graveyard.hazard.wormhole",
