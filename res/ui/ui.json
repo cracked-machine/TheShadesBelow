@@ -4,8 +4,84 @@
  "layers":[
         {
          "draworder":"topdown",
+         "id":7,
+         "name":"inventory",
+         "objects":[
+                {
+                 "height":0,
+                 "id":88,
+                 "name":"inventory_icon",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"sprite_index",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"sprite_scale",
+                         "type":"int",
+                         "value":5
+                        }, 
+                        {
+                         "name":"sprite_type",
+                         "type":"string",
+                         "value":""
+                        }],
+                 "rotation":0,
+                 "type":"ui_icon",
+                 "visible":true,
+                 "width":0,
+                 "x":120,
+                 "y":320
+                }, 
+                {
+                 "height":10,
+                 "id":89,
+                 "name":"inventory_meter",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_meter",
+                 "visible":true,
+                 "width":130,
+                 "x":90,
+                 "y":440
+                }, 
+                {
+                 "height":0,
+                 "id":90,
+                 "name":"inventory_label",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"center"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":30
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":160,
+                 "y":460
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
          "id":2,
-         "name":"skeleton",
+         "name":"cadaver",
          "objects":[
                 {
                  "height":0,
@@ -33,8 +109,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":160,
-                 "y":490
+                 "x":139,
+                 "y":602
                 }, 
                 {
                  "height":0,
@@ -62,8 +138,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":130,
-                 "y":510
+                 "x":110,
+                 "y":640
                 }, 
                 {
                  "height":0,
@@ -91,8 +167,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":190,
-                 "y":510
+                 "x":170,
+                 "y":640
                 }, 
                 {
                  "height":0,
@@ -120,8 +196,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":140,
-                 "y":550
+                 "x":125,
+                 "y":680
                 }, 
                 {
                  "height":0,
@@ -149,8 +225,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":180,
-                 "y":550
+                 "x":155,
+                 "y":680
                 }, 
                 {
                  "height":0,
@@ -178,11 +254,11 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":160,
-                 "y":520
+                 "x":140,
+                 "y":638
                 }, 
                 {
-                 "height":20,
+                 "height":25.125,
                  "id":98,
                  "name":"",
                  "opacity":1,
@@ -200,14 +276,14 @@
                         {
                          "name":"line_thickness",
                          "type":"int",
-                         "value":5
+                         "value":4
                         }],
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
-                 "width":20,
-                 "x":160,
-                 "y":490
+                 "width":23.875,
+                 "x":142,
+                 "y":605
                 }, 
                 {
                  "height":30,
@@ -228,14 +304,14 @@
                         {
                          "name":"line_thickness",
                          "type":"int",
-                         "value":5
+                         "value":4
                         }],
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
                  "width":20,
-                 "x":130,
-                 "y":510
+                 "x":114,
+                 "y":640
                 }, 
                 {
                  "height":30,
@@ -256,14 +332,14 @@
                         {
                          "name":"line_thickness",
                          "type":"int",
-                         "value":5
+                         "value":4
                         }],
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
                  "width":20,
-                 "x":190,
-                 "y":510
+                 "x":174,
+                 "y":640
                 }, 
                 {
                  "height":30,
@@ -284,14 +360,14 @@
                         {
                          "name":"line_thickness",
                          "type":"int",
-                         "value":5
+                         "value":4
                         }],
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
                  "width":20,
-                 "x":180,
-                 "y":550
+                 "x":159,
+                 "y":680
                 }, 
                 {
                  "height":30,
@@ -312,17 +388,17 @@
                         {
                          "name":"line_thickness",
                          "type":"int",
-                         "value":5
+                         "value":4
                         }],
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
                  "width":20,
-                 "x":140,
-                 "y":550
+                 "x":129,
+                 "y":680
                 }, 
                 {
-                 "height":20,
+                 "height":30,
                  "id":103,
                  "name":"",
                  "opacity":1,
@@ -340,119 +416,14 @@
                         {
                          "name":"line_thickness",
                          "type":"int",
-                         "value":5
+                         "value":4
                         }],
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
                  "width":20,
-                 "x":160,
-                 "y":520
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "draworder":"topdown",
-         "id":7,
-         "locked":true,
-         "name":"inventory",
-         "objects":[
-                {
-                 "height":170,
-                 "id":87,
-                 "name":"inventory_outline",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#40aa55ff"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff000000"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":180,
-                 "x":80,
+                 "x":144,
                  "y":640
-                }, 
-                {
-                 "height":0,
-                 "id":88,
-                 "name":"inventory_icon",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"sprite_index",
-                         "type":"int",
-                         "value":0
-                        }, 
-                        {
-                         "name":"sprite_scale",
-                         "type":"int",
-                         "value":5
-                        }, 
-                        {
-                         "name":"sprite_type",
-                         "type":"string",
-                         "value":""
-                        }],
-                 "rotation":0,
-                 "type":"ui_icon",
-                 "visible":true,
-                 "width":0,
-                 "x":130,
-                 "y":670
-                }, 
-                {
-                 "height":10,
-                 "id":89,
-                 "name":"inventory_meter",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"ui_meter",
-                 "visible":true,
-                 "width":130,
-                 "x":100,
-                 "y":780
-                }, 
-                {
-                 "height":0,
-                 "id":90,
-                 "name":"inventory_label",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"align",
-                         "type":"string",
-                         "value":"center"
-                        }, 
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":30
-                        }],
-                 "rotation":0,
-                 "type":"ui_label",
-                 "visible":true,
-                 "width":0,
-                 "x":170,
-                 "y":820
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -491,8 +462,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":130,
-                 "y":450
+                 "x":100,
+                 "y":545
                 }, 
                 {
                  "height":0,
@@ -515,8 +486,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":210,
-                 "y":450
+                 "x":140,
+                 "y":540
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -527,7 +498,6 @@
         {
          "draworder":"topdown",
          "id":5,
-         "locked":true,
          "name":"toxidromes",
          "objects":[
                 {
@@ -538,9 +508,9 @@
                  "rotation":0,
                  "type":"ui_meter",
                  "visible":true,
-                 "width":120,
-                 "x":40,
-                 "y":292
+                 "width":190,
+                 "x":60,
+                 "y":772
                 }, 
                 {
                  "height":20,
@@ -550,9 +520,9 @@
                  "rotation":0,
                  "type":"ui_meter",
                  "visible":true,
-                 "width":120,
-                 "x":180,
-                 "y":292
+                 "width":190,
+                 "x":60,
+                 "y":812
                 }, 
                 {
                  "height":20,
@@ -562,9 +532,9 @@
                  "rotation":0,
                  "type":"ui_meter",
                  "visible":true,
-                 "width":120,
-                 "x":40,
-                 "y":332
+                 "width":190,
+                 "x":60,
+                 "y":852
                 }, 
                 {
                  "height":20,
@@ -574,9 +544,9 @@
                  "rotation":0,
                  "type":"ui_meter",
                  "visible":true,
-                 "width":120,
-                 "x":180,
-                 "y":332
+                 "width":190,
+                 "x":60,
+                 "y":972
                 }, 
                 {
                  "height":20,
@@ -586,9 +556,9 @@
                  "rotation":0,
                  "type":"ui_meter",
                  "visible":true,
-                 "width":120,
-                 "x":40,
-                 "y":372
+                 "width":190,
+                 "x":60,
+                 "y":892
                 }, 
                 {
                  "height":20,
@@ -598,9 +568,9 @@
                  "rotation":0,
                  "type":"ui_meter",
                  "visible":true,
-                 "width":120,
-                 "x":180,
-                 "y":372
+                 "width":190,
+                 "x":60,
+                 "y":1012
                 }, 
                 {
                  "height":0,
@@ -623,8 +593,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":50,
-                 "y":290
+                 "x":100,
+                 "y":770
                 }, 
                 {
                  "height":0,
@@ -647,8 +617,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":190,
-                 "y":290
+                 "x":100,
+                 "y":810
                 }, 
                 {
                  "height":0,
@@ -671,8 +641,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":210,
-                 "y":330
+                 "x":120,
+                 "y":970
                 }, 
                 {
                  "height":0,
@@ -695,8 +665,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":50,
-                 "y":330
+                 "x":100,
+                 "y":850
                 }, 
                 {
                  "height":0,
@@ -719,8 +689,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":60,
-                 "y":370
+                 "x":110,
+                 "y":890
                 }, 
                 {
                  "height":0,
@@ -743,8 +713,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":210,
-                 "y":370
+                 "x":120,
+                 "y":1010
                 }, 
                 {
                  "height":20,
@@ -754,9 +724,9 @@
                  "rotation":0,
                  "type":"ui_meter",
                  "visible":true,
-                 "width":120,
-                 "x":40,
-                 "y":412
+                 "width":190,
+                 "x":60,
+                 "y":932
                 }, 
                 {
                  "height":0,
@@ -779,8 +749,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":70,
-                 "y":410
+                 "x":120,
+                 "y":930
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -804,7 +774,7 @@
                         {
                          "name":"font_size",
                          "type":"int",
-                         "value":30
+                         "value":20
                         }, 
                         {
                          "name":"value",
@@ -816,7 +786,7 @@
                  "visible":true,
                  "width":0,
                  "x":40,
-                 "y":30
+                 "y":35
                 }, 
                 {
                  "height":20,
@@ -827,7 +797,7 @@
                  "type":"ui_meter",
                  "visible":true,
                  "width":150,
-                 "x":150,
+                 "x":120,
                  "y":40
                 }, 
                 {
@@ -839,7 +809,7 @@
                  "type":"ui_meter",
                  "visible":true,
                  "width":150,
-                 "x":150,
+                 "x":120,
                  "y":80
                 }, 
                 {
@@ -851,7 +821,7 @@
                  "type":"ui_meter",
                  "visible":true,
                  "width":150,
-                 "x":150,
+                 "x":120,
                  "y":160
                 }, 
                 {
@@ -864,7 +834,7 @@
                         {
                          "name":"font_size",
                          "type":"int",
-                         "value":30
+                         "value":20
                         }, 
                         {
                          "name":"value",
@@ -876,7 +846,7 @@
                  "visible":true,
                  "width":0,
                  "x":40,
-                 "y":70
+                 "y":75
                 }, 
                 {
                  "height":0,
@@ -888,7 +858,7 @@
                         {
                          "name":"font_size",
                          "type":"int",
-                         "value":30
+                         "value":20
                         }, 
                         {
                          "name":"value",
@@ -900,7 +870,7 @@
                  "visible":true,
                  "width":0,
                  "x":40,
-                 "y":150
+                 "y":155
                 }, 
                 {
                  "height":20,
@@ -911,7 +881,7 @@
                  "type":"ui_meter",
                  "visible":true,
                  "width":150,
-                 "x":150,
+                 "x":120,
                  "y":120
                 }, 
                 {
@@ -924,7 +894,7 @@
                         {
                          "name":"font_size",
                          "type":"int",
-                         "value":30
+                         "value":20
                         }, 
                         {
                          "name":"value",
@@ -936,7 +906,7 @@
                  "visible":true,
                  "width":0,
                  "x":40,
-                 "y":110
+                 "y":115
                 }, 
                 {
                  "height":20,
@@ -947,7 +917,7 @@
                  "type":"ui_meter",
                  "visible":true,
                  "width":150,
-                 "x":150,
+                 "x":120,
                  "y":200
                 }, 
                 {
@@ -960,7 +930,7 @@
                         {
                          "name":"font_size",
                          "type":"int",
-                         "value":30
+                         "value":20
                         }, 
                         {
                          "name":"value",
@@ -972,7 +942,7 @@
                  "visible":true,
                  "width":0,
                  "x":40,
-                 "y":190
+                 "y":195
                 }, 
                 {
                  "height":20,
@@ -983,7 +953,7 @@
                  "type":"ui_meter",
                  "visible":true,
                  "width":150,
-                 "x":150,
+                 "x":120,
                  "y":240
                 }, 
                 {
@@ -996,7 +966,7 @@
                         {
                          "name":"font_size",
                          "type":"int",
-                         "value":30
+                         "value":20
                         }, 
                         {
                          "name":"value",
@@ -1008,7 +978,7 @@
                  "visible":true,
                  "width":0,
                  "x":40,
-                 "y":230
+                 "y":235
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1019,11 +989,10 @@
         {
          "draworder":"topdown",
          "id":3,
-         "locked":true,
-         "name":"outer",
+         "name":"outlines",
          "objects":[
                 {
-                 "height":572,
+                 "height":260,
                  "id":58,
                  "name":"status_outline",
                  "opacity":1,
@@ -1046,9 +1015,93 @@
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
-                 "width":280,
+                 "width":250,
                  "x":30,
                  "y":20
+                }, 
+                {
+                 "height":200,
+                 "id":109,
+                 "name":"inventory_outline",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#40aa55ff"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ff000000"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":210,
+                 "x":50,
+                 "y":300
+                }, 
+                {
+                 "height":300,
+                 "id":110,
+                 "name":"status_outline",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#40404040"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ff000000"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":230,
+                 "x":40,
+                 "y":750
+                }, 
+                {
+                 "height":210,
+                 "id":111,
+                 "name":"status_outline",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"fill_color",
+                         "type":"color",
+                         "value":"#40404040"
+                        }, 
+                        {
+                         "name":"line_color",
+                         "type":"color",
+                         "value":"#ff000000"
+                        }, 
+                        {
+                         "name":"line_thickness",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"ui_outline",
+                 "visible":true,
+                 "width":170,
+                 "x":70,
+                 "y":520
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1057,7 +1110,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":104,
+ "nextobjectid":112,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",
