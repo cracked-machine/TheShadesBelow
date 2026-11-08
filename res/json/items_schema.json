@@ -17,6 +17,11 @@
           "enum": ["none", "edible", "drinkable"],
           "description": "Can the item be eaten or drunk."
         },
+        "shop": {
+          "type": "boolean",
+          "default": false,
+          "description": "Optional. Whether the item can be stocked by the shop. Defaults to false."
+        },
         "damage_to_weapon": {
           "type": "object",
           "description": "Wear damage this item inflicts on each weapon when the weapon is used against it.",

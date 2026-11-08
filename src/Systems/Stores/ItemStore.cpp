@@ -35,6 +35,13 @@ Game::Cmp::WorldItem::Consumable make_consumable_property( const std::string &co
 namespace Game::Sys
 {
 
+std::vector<ItemStore::key_type> ItemStore::get_all( ItemFilter filter ) const
+{
+  auto types = StoreSingleton::get_all();
+  if ( filter == ItemFilter::SHOP_ONLY ) { std::erase_if( types, [this]( const key_type &type ) { return not get( type ).is_shop_item(); } ); }
+  return types;
+}
+
 ItemStore::ItemStore( std::filesystem::path json_file_path )
     : StoreSingleton<ItemStore, Cmp::WorldItem>( std::move( json_file_path ) )
 {
@@ -55,6 +62,7 @@ void ItemStore::init_store()
     auto bow_damage = damage_to_weapon.at( "bow" ).get<int>();
     auto consumable = make_consumable_property( item_value.at( "consumable" ).get<std::string>() );
     Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, pickaxe_damage, axe_damage, shovel_damage, bow_damage, consumable );
+    worlditem.set_shop_item( item_value.value( "shop", false ) );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )

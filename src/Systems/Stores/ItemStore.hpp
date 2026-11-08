@@ -19,6 +19,19 @@ public:
   //! @brief Destroy the Item Store object
   ~ItemStore() {}
 
+  //! @brief Selects which items get_all() returns.
+  enum class ItemFilter {
+    //! @brief All items.
+    ALL,
+    //! @brief Only items with "shop": true in items.json.
+    SHOP_ONLY
+  };
+
+  //! @brief Get all item keys in the store, excluding the "ERROR_SPRITE" sentinel key.
+  //! @param filter Pass ItemFilter::SHOP_ONLY to exclude items that are not shop items.
+  //! @return The list of keys.
+  [[nodiscard]] std::vector<key_type> get_all( ItemFilter filter = ItemFilter::ALL ) const;
+
   //! @brief Get the item keys a reward item refers to (see Cmp::ActionReward::item).
   //! @param key An item key, or an item key prefix ending with '*', e.g. "item.jewelry*".
   //! @return All item keys starting with the prefix, else the key itself if it exists, else empty.

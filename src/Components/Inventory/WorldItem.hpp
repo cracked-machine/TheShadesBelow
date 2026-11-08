@@ -211,6 +211,10 @@ public:
   //! @brief Whether the item can be eaten, drunk or neither.
   Consumable consumable_type() const { return m_consumable; }
 
+  //! @brief Whether the item can be stocked by the shop, see "shop" in items.json. Defaults to false.
+  bool is_shop_item() const { return m_shop; }
+  void set_shop_item( bool shop ) { m_shop = shop; }
+
   //! @brief Whether the item's spawn_action or carry_action damages the player (negative "health" in items.json), i.e.
   //! whether a Cmp::Inventory::StingDamage is added when the item is created.
   bool stings() const
@@ -246,6 +250,9 @@ private:
 
   //! @brief Whether the item can be eaten, drunk or neither. Imported from items.json.
   Consumable m_consumable{ Consumable::NONE };
+
+  //! @brief Whether the item can be stocked by the shop. Imported from items.json.
+  bool m_shop{ false };
 };
 
 } // namespace Game::Cmp
