@@ -43,14 +43,11 @@
 #include <Components/Persistent/FlyingTransitionTime.hpp>
 #include <Components/Persistent/FuseDelay.hpp>
 #include <Components/Persistent/GlovesWearPerForage.hpp>
+#include <Components/Persistent/GraveCountMargin.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveTrailGuideColour.hpp>
 #include <Components/Persistent/GraveTrailNominalSize.hpp>
 #include <Components/Persistent/GraveTrailStartCount.hpp>
-#include <Components/Persistent/MaxLevelDepth.hpp>
-#include <Components/Player/LevelDepth.hpp>
-#include <Components/Persistent/TalismanMinChance.hpp>
-#include <Components/Persistent/GraveCountMargin.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
@@ -62,6 +59,7 @@
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
+#include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MissingTalismanBias.hpp>
@@ -112,10 +110,11 @@
 #include <Components/Persistent/ShovelObstacleDigWear.hpp>
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
+#include <Components/Persistent/StatChangeDisplayDuration.hpp>
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/TalismanMinChance.hpp>
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
-#include <Components/Persistent/StatChangeDisplayDuration.hpp>
 #include <Components/Persistent/ToxicImmunityMeterTint.hpp>
 #include <Components/Persistent/VenomHealthDmgPerSec.hpp>
 #include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
@@ -123,6 +122,7 @@
 #include <Components/Persistent/WormholeSeed.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/KeysCount.hpp>
+#include <Components/Player/LevelDepth.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Stats/PlayerStats.hpp>
 #include <Shaders/BaseShaderSprite.hpp>
@@ -503,7 +503,7 @@ void RenderMenuSystem::render_victory_screen( bool allow_continue, int cadaver_w
   const unsigned int depth = Utils::Player::get_level_depth( m_reg ).get_count();
   const bool final_depth = Utils::Player::is_final_level_depth( m_reg );
 
-  sf::Text title_text( m_font, final_depth ? std::format( "Final Depth {} Complete!", depth ) : std::format( "Depth {} Complete!", depth ), 96 );
+  sf::Text title_text( m_font, final_depth ? std::format( "Final Level {} Complete!", depth ) : std::format( "Level {} Complete!", depth ), 96 );
   title_text.setFillColor( sf::Color::White );
   title_text.setPosition( { static_cast<float>( display_size.x ) / 4.f, 100.f } );
   m_window.draw( title_text );
