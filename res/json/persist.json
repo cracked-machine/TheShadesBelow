@@ -215,6 +215,57 @@
     "detail": "Broom flight: take-off/landing transition time (s)",
     "format": "%.2f"
   },
+  "HeldItemOffset": {
+    "type": "sf::Vector2f",
+    "value": {
+      "x": 0.0,
+      "y": 2.7
+    },
+    "min_value": -16.0,
+    "max_value": 16.0,
+    "detail": "Held item offset",
+    "format": "%.1f"
+  },
+  "HeldItemScale": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.1,
+    "max_value": 2.0,
+    "detail": "Held item scale facing south",
+    "format": "%.2f"
+  },
+  "HeldItemSideOffsetX": {
+    "type": "float",
+    "value": 8.0,
+    "min_value": 0.0,
+    "max_value": 16.0,
+    "detail": "Held item offset facing east/west",
+    "format": "%.1f"
+  },
+  "HeldItemRotation": {
+    "type": "float",
+    "value": 45.0,
+    "min_value": -180.0,
+    "max_value": 180.0,
+    "detail": "Held item rotation facing east",
+    "format": "%.0f"
+  },
+  "HeldItemRotationSouth": {
+    "type": "float",
+    "value": 45.0,
+    "min_value": 0.0,
+    "max_value": 360.0,
+    "detail": "Held item rotation facing south",
+    "format": "%.0f"
+  },
+  "HeldItemRotationWest": {
+    "type": "float",
+    "value": 315.0,
+    "min_value": 0.0,
+    "max_value": 360.0,
+    "detail": "Held item rotation facing north",
+    "format": "%.0f"
+  },
   "PlayerRenderOffset": {
     "type": "float",
     "value": -4.0,

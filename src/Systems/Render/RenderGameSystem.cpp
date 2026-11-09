@@ -39,6 +39,12 @@
 #include <Components/ObstacleCap.hpp>
 #include <Components/Persistent/ArmedBlinkFreq.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
+#include <Components/Persistent/HeldItemOffset.hpp>
+#include <Components/Persistent/HeldItemRotation.hpp>
+#include <Components/Persistent/HeldItemRotationSouth.hpp>
+#include <Components/Persistent/HeldItemRotationWest.hpp>
+#include <Components/Persistent/HeldItemScale.hpp>
+#include <Components/Persistent/HeldItemSideOffsetX.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
@@ -281,6 +287,14 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
 
   if ( scale_cmp ) scale *= scale_cmp->getScale();
 
+  // the player's held inventory item: drawn in front of the player, or behind them while they face north
+  const bool is_player = reg().all_of<Cmp::Player::Character>( entity );
+  const auto *facing_cmp = is_player ? reg().try_get<Cmp::LastDirection>( entity ) : nullptr;
+  const sf::Vector2f facing = facing_cmp ? sf::Vector2f( *facing_cmp ) : sf::Vector2f{ 0.f, 0.f };
+  const sf::Vector2f held_item_scale = sf::Vector2f{ 1.f, 1.f } * ( scale_cmp ? scale_cmp->getScale() : 1.f );
+  const bool held_item_behind = facing.y < 0.f;
+  if ( is_player and held_item_behind ) render_held_item( body_rect, facing, held_item_scale, alpha );
+
   safe_render_sprite_world( anim_cmp.m_sprite_type, render_rect, anim_cmp.getFrameIndexOffset() + anim_cmp.m_current_frame, scale, alpha, origin,
                             angle, tint, shader );
 
@@ -293,6 +307,7 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
     render_attached_burrs( *burr_cmp, body_rect );
   }
   if ( const auto *burryman_cmp = reg().try_get<Cmp::Npc::Burryman>( entity ) ) render_carried_items( *burryman_cmp, body_rect );
+  if ( is_player and not held_item_behind ) render_held_item( body_rect, facing, held_item_scale, alpha );
   if ( const auto *talisman_cmp = reg().try_get<Cmp::Altar::TalismanCount>( entity ) ) render_altar_talismans( *talisman_cmp, anim_cmp, body_rect );
 }
 
@@ -460,6 +475,29 @@ void RenderGameSystem::render_carried_items( const Cmp::Npc::Burryman &burryman_
     const sf::Vector2f offset = Cmp::Npc::Burryman::carried_offset( i, count, body_rect.size );
     safe_render_sprite_world( item_cmp->sprite_type, sf::FloatRect( centre + offset - half_cell, Constants::kGridSizePxF ), 0,
                               { Cmp::Npc::Burryman::kCarriedScale, Cmp::Npc::Burryman::kCarriedScale }, 255, half_cell );
+  }
+}
+
+void RenderGameSystem::render_held_item( const sf::FloatRect &body_rect, sf::Vector2f facing, sf::Vector2f scale, uint8_t alpha )
+{
+  sf::Vector2f offset = Sys::PersistSystem::get<Cmp::Persist::HeldItemOffset>( reg() );
+  // facing east/west: shift the item towards the facing side
+  if ( facing.x != 0.f ) { offset.x += ( facing.x > 0.f ? 1.f : -1.f ) * Sys::PersistSystem::get<Cmp::Persist::HeldItemSideOffsetX>( reg() ).get_value(); }
+  // facing west: mirror the item about its centre rather than only rotating it, so its art isn't upside down
+  const bool facing_west = facing.x < 0.f;
+  float rotation_deg = Sys::PersistSystem::get<Cmp::Persist::HeldItemRotation>( reg() ).get_value();
+  if ( facing_west ) rotation_deg = Sys::PersistSystem::get<Cmp::Persist::HeldItemRotationWest>( reg() ).get_value();
+  else if ( facing.y > 0.f ) rotation_deg = Sys::PersistSystem::get<Cmp::Persist::HeldItemRotationSouth>( reg() ).get_value();
+  const sf::Angle rotation = sf::degrees( rotation_deg );
+  if ( facing_west ) scale.x = -scale.x;
+  scale *= Sys::PersistSystem::get<Cmp::Persist::HeldItemScale>( reg() ).get_value();
+
+  // same sprite as the UI inventory icon (see RenderOverlaySystem::render_ui_inventory_icon)
+  for ( auto [inventory_entt, inventory_cmp, anim_cmp] : reg().view<Cmp::PlayerInventorySlot, Cmp::AnimData>().each() )
+  {
+    // the origin is the sprite centre, so the item is scaled and tilted in place
+    safe_render_sprite_world( anim_cmp.m_sprite_type, sf::FloatRect( body_rect.position + offset, Constants::kGridSizePxF ), 0, scale, alpha,
+                              Constants::kGridSizePxF / 2.f, rotation );
   }
 }
 

@@ -25,6 +25,12 @@
 #include <Components/Persistent/BurrSlowFactor.hpp>
 #include <Components/Persistent/BurrThrowCooldown.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
+#include <Components/Persistent/HeldItemOffset.hpp>
+#include <Components/Persistent/HeldItemRotation.hpp>
+#include <Components/Persistent/HeldItemRotationSouth.hpp>
+#include <Components/Persistent/HeldItemRotationWest.hpp>
+#include <Components/Persistent/HeldItemScale.hpp>
+#include <Components/Persistent/HeldItemSideOffsetX.hpp>
 #include <Components/Persistent/CorruptionDamage.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
@@ -178,6 +184,12 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::BombDamage>();
   add_component<Cmp::Persist::BombsExhumeGraves>();
   add_component<Cmp::Persist::CameraSmoothSpeed>();
+  add_component<Cmp::Persist::HeldItemOffset>();
+  add_component<Cmp::Persist::HeldItemRotation>();
+  add_component<Cmp::Persist::HeldItemRotationWest>();
+  add_component<Cmp::Persist::HeldItemRotationSouth>();
+  add_component<Cmp::Persist::HeldItemScale>();
+  add_component<Cmp::Persist::HeldItemSideOffsetX>();
   add_component<Cmp::Persist::CorruptionDamage>();
   add_component<Cmp::Persist::CryptShuffleTimeout>();
   add_component<Cmp::Persist::CryptNpcSpawnCount>();

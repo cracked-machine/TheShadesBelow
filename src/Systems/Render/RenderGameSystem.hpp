@@ -128,6 +128,14 @@ private:
   //! @param body_rect The Burryman's on-screen bounds.
   void render_carried_items( const Cmp::Npc::Burryman &burryman_cmp, const sf::FloatRect &body_rect );
 
+  //! @brief Draw the item in the player's inventory slot on the player, at the player's top-left and scale plus
+  //! Cmp::Persist::HeldItemOffset, shifted by Cmp::Persist::HeldItemSideOffsetX towards the facing side when facing east/west.
+  //! @param body_rect The player's on-screen bounds.
+  //! @param facing The player's Cmp::LastDirection.
+  //! @param scale The player's Cmp::AbsoluteScale (without any mirroring); multiplied by Cmp::Persist::HeldItemScale.
+  //! @param alpha The player's alpha, so the item fades with the player.
+  void render_held_item( const sf::FloatRect &body_rect, sf::Vector2f facing, sf::Vector2f scale, uint8_t alpha );
+
   //! @brief Draw every talisman of an altar (offered or not) at its slot in the altar's `talisman_offsets`.
   //! @param talisman_cmp The altar's talismans; each one's index picks its offset.
   //! @param anim_cmp The altar's current sprite, used to find its inactive variant, which holds the offsets.

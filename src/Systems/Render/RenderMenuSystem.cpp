@@ -25,6 +25,12 @@
 #include <Components/Persistent/BurrSlowFactor.hpp>
 #include <Components/Persistent/BurrThrowCooldown.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
+#include <Components/Persistent/HeldItemOffset.hpp>
+#include <Components/Persistent/HeldItemRotation.hpp>
+#include <Components/Persistent/HeldItemRotationSouth.hpp>
+#include <Components/Persistent/HeldItemRotationWest.hpp>
+#include <Components/Persistent/HeldItemScale.hpp>
+#include <Components/Persistent/HeldItemSideOffsetX.hpp>
 #include <Components/Persistent/CorruptionDamage.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
@@ -246,6 +252,12 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
 
     Sys::PersistSystem::get<Cmp::Persist::PlayerAnimStrideLength>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerRenderOffset>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::HeldItemOffset>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::HeldItemSideOffsetX>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::HeldItemRotation>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::HeldItemRotationWest>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::HeldItemRotationSouth>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::HeldItemScale>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerMovementSpeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerDiagonalLerpSpeedModifier>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerFootstepAddDelay>( reg() ).render_widget();
