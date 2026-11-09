@@ -62,7 +62,7 @@
                 "allOf": [{ "$ref": "#/definitions/action_effect" }, { "$ref": "#/definitions/no_altar_reward" }]
               },
               "carry_action": {
-                "description": "Applied repeatedly, at its own tick interval, while the item is held in the player's inventory (e.g. a carried candle accumulating darkness fear over time).",
+                "description": "Applied repeatedly, at its own tick interval, while the item is held in the player's inventory (e.g. a carried torch accumulating darkness fear over time).",
                 "allOf": [{ "$ref": "#/definitions/action_effect" }, { "$ref": "#/definitions/no_altar_reward" }]
               },
               "consume_action": {

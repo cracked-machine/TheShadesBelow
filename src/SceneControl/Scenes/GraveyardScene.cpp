@@ -209,7 +209,7 @@ void GraveyardScene::on_init()
   m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().init_hazard_field();
   m_sys.find<Sys::Store::Type::WormholeSystem>().spawn_wormhole( Sys::WormholeSystem::SpawnPhase::InitialSpawn );
 
-  Factory::Particle::add_flame_for_world_items( m_reg, "graveyard.candle.particle.flame" );
+  Factory::Particle::add_flame_for_world_items( m_reg, "graveyard.torch.particle.flame" );
 }
 
 void GraveyardScene::on_enter()
@@ -257,7 +257,7 @@ void GraveyardScene::on_enter()
   auto &player_dir = Utils::Player::get_direction( m_reg );
   player_dir = Cmp::Direction{ { 0.f, 0.f } };
 
-  // check if the player inventory has a candle, if so light it up!
+  // check if the player inventory has a torch, if so light it up!
   Factory::Particle::add_flame_for_player_inventory_slot( m_reg );
 
   m_scene_exit_cooldown_timer = sf::Time::Zero;

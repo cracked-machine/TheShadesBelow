@@ -11,7 +11,7 @@ namespace Game::Cmp
 {
 
 //! @brief Player-stat modifier applied repeatedly, at its own tick interval, while an item is held in
-//! the player's inventory (e.g. a carried candle accumulating darkness fear over time).
+//! the player's inventory (e.g. a carried torch accumulating darkness fear over time).
 class CarryAction : public BaseAction
 {
 public:

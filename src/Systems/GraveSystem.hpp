@@ -114,12 +114,12 @@ private:
   //! @param by what opened the grave
   void spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, entt::entity grave_entity, ExhumedBy by );
 
-  //! @brief Give a candle dropped by a grave its flame particle sprite. Does nothing for any other item.
+  //! @brief Give a torch dropped by a grave its flame particle sprite. Does nothing for any other item.
   //! @param item_entt the world item just created by Events::CreateItemEvent
-  void light_candle_loot( entt::entity item_entt );
+  void light_torch_loot( entt::entity item_entt );
 
-  //! @brief Tag of the flame on a candle dropped by a grave, matching the graveyard's scene-load candle flames
-  inline static const std::string kCandleFlameTag{ "graveyard.candle.particle.flame" };
+  //! @brief Tag of the flame on a torch dropped by a grave, matching the graveyard's scene-load torch flames
+  inline static const std::string kTorchFlameTag{ "graveyard.torch.particle.flame" };
 
   //! @brief Bounds of the grave, as a position for spawning items beside it
   //! @param grave_entity

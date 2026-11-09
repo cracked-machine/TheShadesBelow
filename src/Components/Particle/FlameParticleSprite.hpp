@@ -9,7 +9,7 @@ namespace Game::Cmp::Particle
 //! @brief Implementation detail — do not use externally
 namespace detail
 {
-//! @brief Individual particle for the flame effect (candle/altar fire). Rises and sways, fading
+//! @brief Individual particle for the flame effect (torch/altar fire). Rises and sways, fading
 //!        from white through the sprite's target colour before guttering out as smoke.
 struct FlameParticle : public Cmp::Particle::ParticleBase
 {
@@ -26,7 +26,7 @@ private:
 };
 } // namespace detail
 
-//! @brief Particle sprite for a flame effect (candle/altar fire): particles rise, sway, and fade
+//! @brief Particle sprite for a flame effect (torch/altar fire): particles rise, sway, and fade
 //!        from white through Flame::m_final_flame_color before a sparse smoke tail finishes them off.
 class FlameParticleSprite : public SpriteBase<detail::FlameParticle>
 {

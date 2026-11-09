@@ -126,7 +126,7 @@ void ShopScene::on_enter()
     m_just_spawned = false;
   }
 
-  // check if the player inventory has a candle, if so light it up!
+  // check if the player inventory has a torch, if so light it up!
   Factory::Particle::add_flame_for_player_inventory_slot( m_reg );
 
   // Set the default footstep SFX for this scene

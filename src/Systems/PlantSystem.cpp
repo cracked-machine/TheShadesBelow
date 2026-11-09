@@ -371,7 +371,7 @@ void PlantSystem::player_plant_interact()
 void PlantSystem::try_burn_plant()
 {
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-  if ( inventory_type == "item.candle" )
+  if ( inventory_type == "item.torch" )
   {
     for ( auto [plant_entt, plant_cmp] : reg().view<Cmp::PlantMultiBlock>().each() )
     {

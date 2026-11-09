@@ -383,14 +383,14 @@ void add_ember_ps( entt::registry &reg, const std::string &tag, int particle_cou
 
 void add_flame_for_player_inventory_slot( entt::registry &reg )
 {
-  // Add a flame ParticleSprite for a candle in the player inventory
+  // Add a flame ParticleSprite for a torch in the player inventory
   for ( auto [inventory_entt, inventory_cmp, inventory_uuid_cmp] : reg.view<Cmp::PlayerInventorySlot, Cmp::UUID>().each() )
   {
-    if ( inventory_cmp.m_item.item_type != "item.candle" ) continue;
+    if ( inventory_cmp.m_item.item_type != "item.torch" ) continue;
 
-    Factory::Particle::add_flame( reg, "ui.candle.particle.flame", inventory_uuid_cmp, Utils::Player::get_position( reg ).getCenter(), 50000,
+    Factory::Particle::add_flame( reg, "ui.torch.particle.flame", inventory_uuid_cmp, Utils::Player::get_position( reg ).getCenter(), 50000,
                                   Cmp::Particle::kUiScalePreset );
-    SPDLOG_DEBUG( "add_flame_for_player_inventory_slot: created flame for candle uuid {}", inventory_uuid_cmp.str() );
+    SPDLOG_DEBUG( "add_flame_for_player_inventory_slot: created flame for torch uuid {}", inventory_uuid_cmp.str() );
 
     for ( auto [ps_entt, ps_owner, ps_uuid_cmp] : reg.view<Cmp::Particle::SpriteOwner, Cmp::UUID>().each() )
     {
@@ -407,12 +407,12 @@ void add_flame_for_player_inventory_slot( entt::registry &reg )
 
 void add_flame_for_world_items( entt::registry &reg, const std::string &ps_tag )
 {
-  // add flame particle sprites for any candle items in the new game world. Use the Candle item UUID to initialise the ParticleSprite.
-  // Take the flame zorder from the candle (not the player) so the flame always draws just above its own candle.
+  // add flame particle sprites for any torch items in the new game world. Use the Torch item UUID to initialise the ParticleSprite.
+  // Take the flame zorder from the torch (not the player) so the flame always draws just above its own torch.
   for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp, worlditem_uuid_cmp, worlditem_zorder_cmp] :
         reg.view<Cmp::WorldItem, Cmp::Position, Cmp::UUID, Cmp::ZOrderValue>().each() )
   {
-    if ( worlditem_cmp.item_type != "item.candle" ) continue;
+    if ( worlditem_cmp.item_type != "item.torch" ) continue;
     Factory::Particle::add_flame(
         reg, ps_tag, worlditem_uuid_cmp,
         { worlditem_pos_cmp.getCenter().x, worlditem_pos_cmp.getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset },
@@ -425,10 +425,10 @@ void sync_flames_for_shop_inventory( entt::registry &reg )
   std::ptrdiff_t missing = 0;
   for ( auto [inventory_entt, inventory_cmp] : reg.view<Cmp::Shop::Inventory>().each() )
   {
-    missing += std::ranges::count( inventory_cmp.m_slots, "item.candle", []( const auto &slot ) { return slot.first; } );
+    missing += std::ranges::count( inventory_cmp.m_slots, "item.torch", []( const auto &slot ) { return slot.first; } );
   }
 
-  // existing flames are reused; destroy any that no longer have a candle to sit on
+  // existing flames are reused; destroy any that no longer have a torch to sit on
   for ( auto [ps_entt, ps_owner] : reg.view<Cmp::Particle::SpriteOwner>().each() )
   {
     if ( ps_owner.sprite->get_tag() != kShopSlotFlameTag ) continue;

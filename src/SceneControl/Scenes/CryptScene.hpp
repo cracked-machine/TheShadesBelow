@@ -33,7 +33,7 @@ public:
   {
   }
 
-  //! @brief Builds the crypt level (rooms, navmeshes, floor tiles, candle flame particles) and initializes persistent state
+  //! @brief Builds the crypt level (rooms, navmeshes, floor tiles, torch flame particles) and initializes persistent state
   void on_init() override;
 
   //! @brief Restores player position and starts the crypt shuffle timer on first entry, and locks player movement until the scene has loaded

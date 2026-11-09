@@ -23,7 +23,7 @@ public:
     CURSE_TABLET,
     //! @brief Drops a talisman that an altar takes.
     TALISMAN,
-    //! @brief Drops a torch (candle) item.
+    //! @brief Drops a torch item.
     TORCH
   };
 

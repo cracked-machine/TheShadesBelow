@@ -43,7 +43,7 @@ public:
   void render_overlay( sf::Time dt );
 
 private:
-  //! @brief Draw the screen-space particle sprites, i.e. the candle flame flickering over the UI inventory icon.
+  //! @brief Draw the screen-space particle sprites, i.e. the torch flame flickering over the UI inventory icon.
   void render_ui_particles();
 
   //! @brief Render the main UI's outline rectangles (e.g. panel borders).

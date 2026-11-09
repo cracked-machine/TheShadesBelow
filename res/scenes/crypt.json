@@ -294,7 +294,7 @@
                 {
                  "height":0,
                  "id":16,
-                 "name":"item.candle",
+                 "name":"item.torch",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
@@ -307,7 +307,7 @@
                 {
                  "height":0,
                  "id":17,
-                 "name":"item.candle",
+                 "name":"item.torch",
                  "opacity":1,
                  "point":true,
                  "rotation":0,

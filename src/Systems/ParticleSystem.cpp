@@ -50,7 +50,7 @@ std::vector<entt::entity> ParticleSystem::add_to_registry( Cmp::Particle::Sprite
 
 void ParticleSystem::update( sf::Time dt )
 {
-  // Cap the candle flame zorder to prevent it showing in front of the player sprite.
+  // Cap the torch flame zorder to prevent it showing in front of the player sprite.
   float max_flame_zorder = std::numeric_limits<float>::max();
   auto player_view = reg().view<Cmp::Player::Character, Cmp::ZOrderValue>();
   for ( auto player_entt : player_view )
@@ -58,39 +58,39 @@ void ParticleSystem::update( sf::Time dt )
     max_flame_zorder = player_view.get<Cmp::ZOrderValue>( player_entt ).get() - 1.f;
   }
 
-  for ( auto [candle_entt, candle_cmp, candle_pos_cmp, candle_uuid_cmp, candle_zorder_cmp] :
+  for ( auto [torch_entt, torch_cmp, torch_pos_cmp, torch_uuid_cmp, torch_zorder_cmp] :
         reg().view<Cmp::WorldItem, Cmp::Position, Cmp::UUID, Cmp::ZOrderValue>().each() )
   {
-    if ( not candle_cmp.sprite_type.contains( "candle" ) ) continue;
+    if ( not torch_cmp.sprite_type.contains( "torch" ) ) continue;
     for ( auto [ps_entt, ps_owner, ps_uuid_cmp, ps_zorder_cmp] : reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID, Cmp::ZOrderValue>().each() )
     {
-      if ( ps_uuid_cmp != candle_uuid_cmp ) continue;
+      if ( ps_uuid_cmp != torch_uuid_cmp ) continue;
       ps_owner.sprite->set_emitter_position(
-          { candle_pos_cmp.getCenter().x, candle_pos_cmp.getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset } );
-      ps_zorder_cmp.set( std::min( candle_zorder_cmp.get() + 1.f, max_flame_zorder ) );
+          { torch_pos_cmp.getCenter().x, torch_pos_cmp.getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset } );
+      ps_zorder_cmp.set( std::min( torch_zorder_cmp.get() + 1.f, max_flame_zorder ) );
     }
   }
 
-  // a candle carried by the Burryman keeps burning on the small candle drawn round his edge
+  // a torch carried by the Burryman keeps burning on the small torch drawn round his edge
   for ( auto [burryman_entt, burryman_cmp, burryman_pos_cmp, burryman_zorder_cmp] :
         reg().view<Cmp::Npc::Burryman, Cmp::Position, Cmp::ZOrderValue>().each() )
   {
     const std::size_t count = burryman_cmp.carried.size();
     for ( std::size_t i = 0; i < count; ++i )
     {
-      const entt::entity candle_entt = burryman_cmp.carried[i];
-      if ( not reg().valid( candle_entt ) ) continue;
-      const auto *candle_cmp = reg().try_get<Cmp::WorldItem>( candle_entt );
-      const auto *candle_uuid_cmp = reg().try_get<Cmp::UUID>( candle_entt );
-      if ( not candle_cmp or not candle_uuid_cmp or not candle_cmp->sprite_type.contains( "candle" ) ) continue;
+      const entt::entity torch_entt = burryman_cmp.carried[i];
+      if ( not reg().valid( torch_entt ) ) continue;
+      const auto *torch_cmp = reg().try_get<Cmp::WorldItem>( torch_entt );
+      const auto *torch_uuid_cmp = reg().try_get<Cmp::UUID>( torch_entt );
+      if ( not torch_cmp or not torch_uuid_cmp or not torch_cmp->sprite_type.contains( "torch" ) ) continue;
 
-      const sf::Vector2f candle_centre = burryman_pos_cmp.getCenter() + Cmp::Npc::Burryman::carried_offset( i, count, burryman_pos_cmp.size );
+      const sf::Vector2f torch_centre = burryman_pos_cmp.getCenter() + Cmp::Npc::Burryman::carried_offset( i, count, burryman_pos_cmp.size );
       for ( auto [ps_entt, ps_owner, ps_uuid_cmp, ps_zorder_cmp] : reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID, Cmp::ZOrderValue>().each() )
       {
-        if ( ps_uuid_cmp != *candle_uuid_cmp ) continue;
+        if ( ps_uuid_cmp != *torch_uuid_cmp ) continue;
         ps_owner.sprite->set_emitter_position(
-            { candle_centre.x,
-              candle_centre.y - ( Cmp::Particle::FlameParticleSprite::kVerticalOffset * Cmp::Npc::Burryman::kCarriedScale ) } );
+            { torch_centre.x,
+              torch_centre.y - ( Cmp::Particle::FlameParticleSprite::kVerticalOffset * Cmp::Npc::Burryman::kCarriedScale ) } );
         ps_zorder_cmp.set( std::min( burryman_zorder_cmp.get() + 1.f, max_flame_zorder ) );
       }
     }

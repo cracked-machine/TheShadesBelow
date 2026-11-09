@@ -49,14 +49,14 @@ void NightStaticShader::update( entt::registry &reg, sf::Time dt )
   std::vector<sf::Glsl::Vec4> torch_colors;
 
   // add the radius for each flame particle sprite so the shader can render a circle of light
-  for ( auto [candle_entt, particle_cmp] : reg.view<Cmp::Particle::SpriteOwner>().each() )
+  for ( auto [torch_entt, particle_cmp] : reg.view<Cmp::Particle::SpriteOwner>().each() )
   {
     auto ps_tag = particle_cmp.sprite->get_tag();
     // an altar activated by an extra life glows until the extra life is spent and its particles are destroyed
     const bool is_extra_life = ps_tag == Factory::Altar::kExtraLifeParticleTag;
     if ( not ps_tag.contains( "particle.flame" ) and not is_extra_life ) continue;
     if ( particle_cmp.sprite->get_view_type() != Cmp::Particle::ViewType::WORLD )
-      continue; // skip UI-space particles (e.g. candle shown in inventory icon)
+      continue; // skip UI-space particles (e.g. torch shown in inventory icon)
     torch_positions.push_back( particle_cmp.sprite->get_emitter_position() );
     // blue to match the altar's extra life particle effect
     torch_colors.push_back( is_extra_life ? EERIE_BLUE : WARM_YELLOW );
@@ -92,8 +92,8 @@ void NightStaticShader::update( entt::registry &reg, sf::Time dt )
     m_ghost_grave_fade = sf::Time::Zero;
   }
 
-  // flame particle sprites are paused when candle is in inventory so we need to add the radius explicitly
-  if ( inventory_type.contains( "candle" ) )
+  // flame particle sprites are paused when torch is in inventory so we need to add the radius explicitly
+  if ( inventory_type.contains( "torch" ) )
   {
     torch_positions.push_back( Utils::Player::get_position( reg ).getCenter() );
     torch_colors.push_back( WARM_YELLOW );

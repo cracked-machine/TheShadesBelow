@@ -106,7 +106,7 @@ void ShopSystem::buy_shop_item( uint8_t item_idx )
 
       // add new carryitem into player inventory
       get_systems_event_queue().trigger( Events::AddInventoryEvent( item ) );
-      // check if the player inventory has a candle, if so light it up!
+      // check if the player inventory has a torch, if so light it up!
       Factory::Particle::add_flame_for_player_inventory_slot( m_reg );
 
       // delete item from shop inventory
@@ -126,7 +126,7 @@ void ShopSystem::buy_shop_item( uint8_t item_idx )
     }
   }
 
-  // the stock may have gained or lost a candle
+  // the stock may have gained or lost a torch
   Factory::Particle::sync_flames_for_shop_inventory( reg() );
 }
 

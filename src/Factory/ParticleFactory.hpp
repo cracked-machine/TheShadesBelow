@@ -216,7 +216,7 @@ void add_aimed_fireball_ps( entt::registry &reg, const std::string &tag, float l
 void add_ember_ps( entt::registry &reg, const std::string &tag, int particle_count, float lifetime_seconds, float speed, float size,
                    Cmp::UUID &uuid_cmp, sf::Vector2f pos, float zorder );
 
-//! @brief Spawn a flame particle sprite (candle/altar fire).
+//! @brief Spawn a flame particle sprite (torch/altar fire).
 //! @param reg
 //! @param tag <location>.<item>.particle.<sprite>
 //! @param uuid_cmp UUID assigned to the created entity, so it can be tracked/updated later (e.g. via update_position()).
@@ -228,24 +228,24 @@ void add_ember_ps( entt::registry &reg, const std::string &tag, int particle_cou
 void add_flame( entt::registry &reg, const std::string &tag, Cmp::UUID &uuid_cmp, sf::Vector2f initial_pos, float zorder, float scale,
                 float psize = 3.f, float speed = 40.f, float plifetime = 0.5, size_t pcount = 220 );
 
-//! @brief Create (or move) a flame particle sprite for a candle currently equipped in the player's inventory,
+//! @brief Create (or move) a flame particle sprite for a torch currently equipped in the player's inventory,
 //! switching it to render in the UI/inventory view instead of the game world.
 //! @param reg
 void add_flame_for_player_inventory_slot( entt::registry &reg );
 
-//! @brief Create a flame particle sprite for a candle spawned in the game world upon scene creation.
+//! @brief Create a flame particle sprite for a torch spawned in the game world upon scene creation.
 //! @param reg
 void add_flame_for_world_items( entt::registry &reg, const std::string &ps_tag );
 
 //! @brief Tag of the screen-space flames created by sync_flames_for_shop_inventory().
-//! @note Deliberately does not contain "candle": RenderOverlaySystem::render_ui_particles() pins
-//! any screen-space "candle" sprite to the player inventory icon.
+//! @note Deliberately does not contain "torch": RenderOverlaySystem::render_ui_particles() pins
+//! any screen-space "torch" sprite to the player inventory icon.
 inline const std::string kShopSlotFlameTag{ "ui.shopslot.particle.flame" };
 
-//! @brief Make the number of screen-space shop flames match the number of candles currently stocked in
+//! @brief Make the number of screen-space shop flames match the number of torches currently stocked in
 //! the shop inventory, creating or destroying flames as needed. Call whenever the shop stock changes.
 //! The flames are not bound to a slot or position: RenderOverlaySystem::render_shop_inventory_overlay()
-//! hands one to each candle slot and positions it over the icon each frame.
+//! hands one to each torch slot and positions it over the icon each frame.
 //! @param reg
 void sync_flames_for_shop_inventory( entt::registry &reg );
 

@@ -96,13 +96,13 @@ private:
 };
 
 //! @brief Gather all currently visible light sources
-//! (inventory candle, visible candle, altar flame, lava pit, burning plant, or wisp).
+//! (inventory torch, visible torch, altar flame, lava pit, burning plant, or wisp).
 //! @param reg reference to the entt registry
 //! @return LightSources the snapshot
 LightSources collect_light_sources( entt::registry &reg );
 
 //! @brief Check whether the given position is within torch radius of any active light source
-//! (visible candle, altar flame, lava pit, burning plant, or wisp), including sources just off-screen whose light reaches on-screen.
+//! (visible torch, altar flame, lava pit, burning plant, or wisp), including sources just off-screen whose light reaches on-screen.
 //! @param reg reference to the entt registry
 //! @param pos_cmp The position to test.
 //! @return bool true if `pos_cmp` is within range of any light source.

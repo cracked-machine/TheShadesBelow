@@ -10,7 +10,7 @@ namespace Game::Sprites
 {
 
 //! @brief Full-screen overlay shader that darkens the scene except for circles of light around
-//! torches/candles/lava pits and Watchman searchlight cones, scaled by the player's fear level.
+//! torches/lava pits and Watchman searchlight cones, scaled by the player's fear level.
 class NightStaticShader : public BaseShaderSprite
 {
 public:
@@ -38,7 +38,7 @@ public:
 
   //! @brief Refresh the torch positions, Watchman searchlight cones, view bounds and fear-level
   //! uniforms each frame.
-  //! @param reg The entt registry, used to source torch/candle particles, Watchman searchlights and player state.
+  //! @param reg The entt registry, used to source torch/torch particles, Watchman searchlights and player state.
   void update( entt::registry &reg, sf::Time dt ) override;
 
 private:

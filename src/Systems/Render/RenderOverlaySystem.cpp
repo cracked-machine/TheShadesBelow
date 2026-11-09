@@ -94,14 +94,14 @@ void RenderOverlaySystem::render_ui_particles()
 {
   if ( not m_main_ui_data ) return;
 
-  // only candles are moved into screen-space, they flicker over the inventory icon
+  // only torches are moved into screen-space, they flicker over the inventory icon
   auto view = reg().view<Cmp::Particle::SpriteOwner>( entt::exclude<Cmp::NoRender> );
   for ( auto [entity, particle_owner] : view.each() )
   {
     if ( not particle_owner.sprite ) continue;
     auto &sprite = *particle_owner.sprite;
     if ( sprite.get_view_type() != Cmp::Particle::ViewType::SCREEN ) continue;
-    if ( not sprite.get_tag().contains( "candle" ) ) continue;
+    if ( not sprite.get_tag().contains( "torch" ) ) continue;
 
     sprite.set_view_transform( m_window, m_window.getDefaultView() );
     for ( auto &icon : m_main_ui_data->m_icons )
@@ -625,7 +625,7 @@ void RenderOverlaySystem::render_shop_inventory_overlay()
   render_outlines( m_shop_ui_data->m_outlines );
 
   // The shop flames are an unassigned pool (see Factory::Particle::sync_flames_for_shop_inventory):
-  // each candle slot just takes the next unused one.
+  // each torch slot just takes the next unused one.
   auto flame_view = reg().view<Cmp::Particle::SpriteOwner>();
   auto flame_it = flame_view.begin();
   auto next_slot_flame = [&]() -> Cmp::Particle::SpriteOwner *
@@ -655,7 +655,7 @@ void RenderOverlaySystem::render_shop_inventory_overlay()
 
     RenderSystem::safe_render_sprite_screen( sprite_type, sprite_pos, 0, sprite_scale );
 
-    if ( item != "item.candle" ) continue;
+    if ( item != "item.torch" ) continue;
     auto *flame_owner = next_slot_flame();
     if ( not flame_owner ) continue;
     auto &flame = *flame_owner->sprite;

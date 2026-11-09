@@ -712,7 +712,7 @@ void NpcSystem::update_pathfinding( sf::Time dt )
       }
 
       // the mimic flees out of view, drawing the NPCs that chase it away from the player.
-      // Lights are ignored: they only hold back threats, and the mimic may spawn inside the player's candle light.
+      // Lights are ignored: they only hold back threats, and the mimic may spawn inside the player's torch light.
       if ( reg().all_of<Cmp::Npc::Mimic>( npc_entt ) )
       {
         const auto &npc_pos_cmp = reg().get<Cmp::Position>( npc_entt );

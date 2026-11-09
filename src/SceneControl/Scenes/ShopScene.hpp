@@ -35,7 +35,7 @@ public:
 
   //! @brief Builds the shop level (level geometry, shop inventory, floor tiles, navmeshes) and initializes persistent state
   void on_init() override;
-  //! @brief Restores player position on first entry and lights the player's candle if carried
+  //! @brief Restores player position on first entry and lights the player's torch if carried
   void on_enter() override;
   //! @brief Clears the registry and stops footstep audio
   void on_exit() override;

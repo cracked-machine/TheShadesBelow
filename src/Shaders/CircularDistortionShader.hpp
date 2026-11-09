@@ -48,7 +48,7 @@ private:
   //! @brief Frame-rate independent exponential smoothing (Utils::Maths::exp_decay) of the raw `hallucinogen toxicity`
   //! stat towards the value fed into the shader as its `hallucinogen toxicity` uniform.
   //! @note The `hallucinogen toxicity` stat (see Cmp::PlayerStats) only changes in coarse, discrete steps as gameplay ticks
-  //! apply +/-N modifiers - most notably a -6/second drop while carrying a lit candle, six times the
+  //! apply +/-N modifiers - most notably a -6/second drop while carrying a lit torch, six times the
   //! size of the +1/second darkness gain. FREQUENCY_EXP_K/VIGNETTE_LOG_K in CircularDistortion.frag both
   //! curve steeply at low hallucinogen toxicity, so feeding that raw step straight into the shader every frame produced
   //! a visible snap in the wave whenever hallucinogen toxicity dropped. These smooth it into a continuous ramp instead.

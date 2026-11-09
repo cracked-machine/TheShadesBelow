@@ -32,30 +32,30 @@ LightSources collect_light_sources( entt::registry &reg )
   light_bounds.position -= sf::Vector2f( reach, reach );
   light_bounds.size += sf::Vector2f( reach * 2.f, reach * 2.f );
 
-  // the inventory candle's flame particle is paused (UI-space only) while carried, so it never
+  // the inventory torch's flame particle is paused (UI-space only) while carried, so it never
   // shows up in the Cmp::WorldItem loop below — check it explicitly, same as NightStaticShader does
   auto [inventory_entt, inventory_type, inventory_sprite_type] = Utils::Player::get_inventory( reg );
-  if ( inventory_type.contains( "candle" ) ) { lights.circles.push_back( Utils::Player::get_position( reg ).getCenter() ); }
+  if ( inventory_type.contains( "torch" ) ) { lights.circles.push_back( Utils::Player::get_position( reg ).getCenter() ); }
 
-  for ( auto [candle_entt, candle_cmp, candle_pos] : reg.view<Cmp::WorldItem, Cmp::Position>().each() )
+  for ( auto [torch_entt, torch_cmp, torch_pos] : reg.view<Cmp::WorldItem, Cmp::Position>().each() )
   {
-    if ( not Utils::is_visible_in_view( light_bounds, candle_pos ) ) continue;
-    if ( not candle_cmp.item_type.contains( "candle" ) ) continue;
-    lights.circles.push_back( candle_pos.getCenter() );
+    if ( not Utils::is_visible_in_view( light_bounds, torch_pos ) ) continue;
+    if ( not torch_cmp.item_type.contains( "torch" ) ) continue;
+    lights.circles.push_back( torch_pos.getCenter() );
   }
 
-  // a candle the Burryman has stolen lights his way
+  // a torch the Burryman has stolen lights his way
   for ( auto [burryman_entt, burryman_cmp, burryman_pos] : reg.view<Cmp::Npc::Burryman, Cmp::Position>().each() )
   {
     if ( not Utils::is_visible_in_view( light_bounds, burryman_pos ) ) continue;
-    const bool has_candle = std::ranges::any_of( burryman_cmp.carried,
+    const bool has_torch = std::ranges::any_of( burryman_cmp.carried,
                                                  [&]( entt::entity item_entt )
                                                  {
                                                    if ( not reg.valid( item_entt ) ) return false;
                                                    const auto *item_cmp = reg.try_get<Cmp::WorldItem>( item_entt );
-                                                   return item_cmp and item_cmp->item_type.contains( "candle" );
+                                                   return item_cmp and item_cmp->item_type.contains( "torch" );
                                                  } );
-    if ( has_candle ) lights.circles.push_back( burryman_pos.getCenter() );
+    if ( has_torch ) lights.circles.push_back( burryman_pos.getCenter() );
   }
 
   for ( auto [altar_entt, altar_cmp, altar_uuid_cmp] : reg.view<Cmp::Altar::MultiBlock, Cmp::UUID>().each() )

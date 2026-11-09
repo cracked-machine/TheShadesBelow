@@ -72,7 +72,7 @@ private:
   void update_dmg( entt::entity entt, float amount, Events::UpdateDmgEvent::Type type );
 
   //! @brief Create a new player inventory slot entity for `item`, attaching any item-specific components
-  //! (wear level if the item has one, UUID for candles).
+  //! (wear level if the item has one, UUID for torches).
   //! @param item Item identifier, e.g. "item.pickaxe". See res/json/items.json.
   void add_inventory_item( const Sys::ItemKey &item );
 

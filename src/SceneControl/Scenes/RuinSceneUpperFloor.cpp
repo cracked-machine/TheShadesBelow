@@ -116,7 +116,7 @@ void RuinSceneUpperFloor::on_init()
   m_loot_sm = Factory::Pathfinding::create_loot_grid( m_reg );
   reinit_navmesh();
 
-  // Add a flame ParticleSprite for a candle in the player inventory
+  // Add a flame ParticleSprite for a torch in the player inventory
   Factory::Particle::add_flame_for_player_inventory_slot( m_reg );
 }
 

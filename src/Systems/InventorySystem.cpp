@@ -148,7 +148,7 @@ void InventorySystem::add_inventory_item( const Sys::ItemKey &item )
   if ( inventory_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, 100.f ); }
   if ( inventory_item.stings() ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( inventory_entity ); }
 
-  if ( item.contains( "candle" ) ) { reg().emplace_or_replace<Cmp::UUID>( inventory_entity, Cmp::UUID::generate() ); }
+  if ( item.contains( "torch" ) ) { reg().emplace_or_replace<Cmp::UUID>( inventory_entity, Cmp::UUID::generate() ); }
 
   // clang-format off
   reg().emplace_or_replace<Cmp::AnimData>( inventory_entity, Cmp::AnimData::Config{ 
@@ -314,7 +314,7 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
       {
         ps_owner.sprite->set_view_type( Cmp::Particle::ViewType::WORLD );
         ps_owner.sprite->set_scale( Cmp::Particle::kWorldScalePreset );
-        // one above the dropped item zorder so the flame never ties with its own candle
+        // one above the dropped item zorder so the flame never ties with its own torch
         reg().emplace_or_replace<Cmp::ZOrderValue>( ps_entt, pos.y );
       }
     }

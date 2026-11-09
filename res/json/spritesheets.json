@@ -1448,9 +1448,9 @@
         }
       }
     },
-    "sprite.item.candle": {
+    "sprite.item.torch": {
       "spritesheet": {
-        "displayname": "Candle",
+        "displayname": "Torch",
         "texture_path": "res/textures/inventoryitems.png",
         "sprite_indices": [350],
         "indices_per_sequence": 1,
