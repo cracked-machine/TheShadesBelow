@@ -12,7 +12,9 @@
 #include <Components/Grave/TrailStart.hpp>
 #include <Components/Inventory/BlastProof.hpp>
 #include <Components/Inventory/FlashUIInventory.hpp>
+#include <Components/Inventory/WorldItem.hpp>
 #include <Components/Npc/Crow.hpp>
+#include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Particle/GraveHaloParticleSprite.hpp>
 #include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
@@ -409,6 +411,9 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
     case Cmp::Grave::Consequence::Type::CURSE_TABLET:
       spawn_grave_loot( { "item.cursetablet" }, grave_entity, by );
       break;
+    case Cmp::Grave::Consequence::Type::TORCH:
+      spawn_grave_loot( { "item.candle" }, grave_entity, by );
+      break;
     case Cmp::Grave::Consequence::Type::TALISMAN: {
       // any talisman that at least one altar takes, biased towards those a partly activated altar still needs so the
       // player is not left digging up talismans they have already offered. Once any altar is activated, no altar takes
@@ -448,6 +453,20 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
   }
 }
 
+void GraveSystem::light_candle_loot( entt::entity item_entt )
+{
+  const auto *world_item_cmp = reg().try_get<Cmp::WorldItem>( item_entt );
+  if ( not world_item_cmp or world_item_cmp->item_type != "item.candle" ) return;
+  auto *uuid_cmp = reg().try_get<Cmp::UUID>( item_entt );
+  const auto *pos_cmp = reg().try_get<Cmp::Position>( item_entt );
+  const auto *zorder_cmp = reg().try_get<Cmp::ZOrderValue>( item_entt );
+  if ( not uuid_cmp or not pos_cmp or not zorder_cmp ) return;
+  // shares the candle's UUID so ParticleSystem keeps the flame on it and pickup/drop moves the flame with it
+  Factory::Particle::add_flame( reg(), kCandleFlameTag, *uuid_cmp,
+                                { pos_cmp->getCenter().x, pos_cmp->getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset },
+                                zorder_cmp->get() + 1.f, Cmp::Particle::kWorldScalePreset );
+}
+
 void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, entt::entity grave_entity, ExhumedBy by )
 {
   Cmp::RandomInt loot_picker( 0, static_cast<int>( loot_pool.size() ) - 1 );
@@ -459,13 +478,17 @@ void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, 
     const Cmp::Position bounds = grave_bounds( grave_entity );
     get_systems_event_queue().trigger( Events::CreateItemEvent( bounds, selected_item_type, "drop_loot", 0.f, true, 0, entt::null,
                                                                 [this]( entt::entity item_entt )
-    { reg().emplace_or_replace<Cmp::Inventory::BlastProof>( item_entt ); } ) );
+    {
+      reg().emplace_or_replace<Cmp::Inventory::BlastProof>( item_entt );
+      light_candle_loot( item_entt );
+    } ) );
     const auto spawn_action = Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), selected_item_type );
     trigger_side_effects( spawn_action, bounds );
     return;
   }
 
-  get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), selected_item_type, "drop_loot" ) );
+  get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), selected_item_type, "drop_loot", 0.f, false, 0,
+                                                              entt::null, [this]( entt::entity item_entt ) { light_candle_loot( item_entt ); } ) );
   const auto spawn_action = Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), selected_item_type );
   trigger_side_effects( spawn_action, Utils::Player::get_position( reg() ) );
 }

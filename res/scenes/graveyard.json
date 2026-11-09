@@ -1831,7 +1831,20 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":784,
+                 "x":768,
+                 "y":784
+                }, 
+                {
+                 "height":0,
+                 "id":297,
+                 "name":"item.pickaxe",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":800,
                  "y":784
                 }],
          "opacity":1,
@@ -1843,6 +1856,7 @@
         {
          "draworder":"topdown",
          "id":11,
+         "locked":true,
          "name":"developer",
          "objects":[
                 {
@@ -2003,12 +2017,12 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }],
  "nextlayerid":12,
- "nextobjectid":297,
+ "nextobjectid":298,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

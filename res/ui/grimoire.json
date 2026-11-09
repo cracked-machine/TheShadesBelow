@@ -539,7 +539,6 @@
         {
          "draworder":"topdown",
          "id":2,
-         "locked":true,
          "name":"DropOverlay",
          "objects":[
                 {
@@ -640,7 +639,7 @@
                  "visible":true,
                  "width":0,
                  "x":920,
-                 "y":840
+                 "y":860
                 }, 
                 {
                  "height":0,
@@ -712,7 +711,7 @@
                  "visible":true,
                  "width":0,
                  "x":1020,
-                 "y":840
+                 "y":860
                 }, 
                 {
                  "height":0,
@@ -794,6 +793,54 @@
                  "width":100,
                  "x":1120,
                  "y":600
+                }, 
+                {
+                 "height":0,
+                 "id":194,
+                 "name":"offering_txt",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"Offering:"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":920,
+                 "y":900
+                }, 
+                {
+                 "height":0,
+                 "id":195,
+                 "name":"drop_offering_action",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":1020,
+                 "y":900
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -804,6 +851,7 @@
         {
          "draworder":"topdown",
          "id":5,
+         "locked":true,
          "name":"ForageOverlay",
          "objects":[
                 {
@@ -904,7 +952,7 @@
                  "visible":true,
                  "width":0,
                  "x":920,
-                 "y":470
+                 "y":490
                 }, 
                 {
                  "height":0,
@@ -1000,7 +1048,7 @@
                  "visible":true,
                  "width":0,
                  "x":1020,
-                 "y":470
+                 "y":490
                 }, 
                 {
                  "height":0,
@@ -1106,54 +1154,6 @@
                  "width":100,
                  "x":1120,
                  "y":240
-                }, 
-                {
-                 "height":0,
-                 "id":147,
-                 "name":"offering_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"Offering:"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":920,
-                 "y":890
-                }, 
-                {
-                 "height":0,
-                 "id":148,
-                 "name":"drop_offering_action",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"align",
-                         "type":"string",
-                         "value":"left"
-                        }, 
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }],
-                 "rotation":0,
-                 "type":"ui_label",
-                 "visible":true,
-                 "width":0,
-                 "x":1020,
-                 "y":890
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1310,7 +1310,7 @@
                         {
                          "name":"value",
                          "type":"string",
-                         "value":"Destroy:"
+                         "value":"Chop:"
                         }],
                  "rotation":0,
                  "type":"ui_text",
@@ -1562,6 +1562,102 @@
                  "width":0,
                  "x":580,
                  "y":790
+                }, 
+                {
+                 "height":0,
+                 "id":196,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"FORAGE"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":810,
+                 "y":406
+                }, 
+                {
+                 "height":0,
+                 "id":197,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"CHOP"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":810,
+                 "y":666
+                }, 
+                {
+                 "height":0,
+                 "id":198,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"OFFERING"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":1250,
+                 "y":702
+                }, 
+                {
+                 "height":0,
+                 "id":199,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }, 
+                        {
+                         "name":"value",
+                         "type":"string",
+                         "value":"OFFERING"
+                        }],
+                 "rotation":0,
+                 "type":"ui_text",
+                 "visible":true,
+                 "width":0,
+                 "x":1250,
+                 "y":372
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1572,6 +1668,7 @@
         {
          "draworder":"topdown",
          "id":7,
+         "locked":true,
          "name":"ArrowOverlay",
          "objects":[
                 {
@@ -2029,7 +2126,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":194,
+ "nextobjectid":200,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

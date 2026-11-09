@@ -538,7 +538,9 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
     const size_t altar_activation_count = Cmp::Altar::TalismanCount::kAltarTalismanCount;
     // trail graves skip their consequence, so each altar activation's talismans are dug from graves off the trail.
     // Sized for the worst case: the talisman chance never drops below Cmp::Persist::TalismanMinChance
-    const int min_talisman_chance_pct = std::max( 1, Sys::PersistSystem::get<Cmp::Persist::TalismanMinChance>( reg() ).get_value() );
+    // Consequence caps the floor at the talisman band width, so size for the capped value
+    const int min_talisman_chance_pct = std::clamp( Sys::PersistSystem::get<Cmp::Persist::TalismanMinChance>( reg() ).get_value(), 1,
+                                                    Cmp::Grave::Consequence::max_talisman_floor_pct() );
     const auto min_talisman_chance = static_cast<size_t>( min_talisman_chance_pct );
     const size_t talisman_graves = ( altar_activation_count * 100 + min_talisman_chance - 1 ) / min_talisman_chance;
     const size_t trail_graves = ( trail_size + max_level_depth ) * exit_and_crypt_key_multiplier + trail_start_count;
@@ -564,7 +566,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
           reg(), pos->position, spritesheet, index, 0, m_reserved_sm.get() );
       m_reserved_sm->insert( mb_entt, pos.value() );
       // fix the roll at creation; the consequence is resolved against the player's current luck when needed
-      auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 99 ).gen(), min_talisman_chance_pct );
+      auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 100 ).gen(), min_talisman_chance_pct );
       // simulate the rolls now to get an idea of the distribution with game start player luck
       grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck() )]++;
       placed_num_graves++;

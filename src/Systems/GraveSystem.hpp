@@ -1,6 +1,7 @@
 #ifndef SRC_SYSTEMS_GRAVESYSTEM_HPP__
 #define SRC_SYSTEMS_GRAVESYSTEM_HPP__
 
+#include <string>
 #include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Events/PlayerActionEvent.hpp>
@@ -112,6 +113,13 @@ private:
   //! @param grave_entity the grave the loot came from
   //! @param by what opened the grave
   void spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, entt::entity grave_entity, ExhumedBy by );
+
+  //! @brief Give a candle dropped by a grave its flame particle sprite. Does nothing for any other item.
+  //! @param item_entt the world item just created by Events::CreateItemEvent
+  void light_candle_loot( entt::entity item_entt );
+
+  //! @brief Tag of the flame on a candle dropped by a grave, matching the graveyard's scene-load candle flames
+  inline static const std::string kCandleFlameTag{ "graveyard.candle.particle.flame" };
 
   //! @brief Bounds of the grave, as a position for spawning items beside it
   //! @param grave_entity
