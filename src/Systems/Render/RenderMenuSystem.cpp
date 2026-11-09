@@ -115,6 +115,7 @@
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
+#include <Components/Persistent/StatChangeDisplayDuration.hpp>
 #include <Components/Persistent/ToxicImmunityMeterTint.hpp>
 #include <Components/Persistent/VenomHealthDmgPerSec.hpp>
 #include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
@@ -263,6 +264,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterFill>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterTint>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterShimmer>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::StatChangeDisplayDuration>( reg() ).render_widget();
 
     ImGui::SeparatorText( "Weapon Wear Settings" );
 

@@ -16,6 +16,7 @@
 
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 // clang-format off
 namespace Game::Sprites { class SpriteSheet; }
@@ -104,6 +105,19 @@ private:
   template <typename FlashComponent>
   bool update_flash_toggle( sf::Time dt );
 
+  //! @brief Get the current value of the player stat or toxidrome named by a "<stat>_delta_lbl" UI label.
+  //! @param label_name the UI label name, e.g. "health_delta_lbl" or "venom_delta_lbl"
+  //! @return std::optional<int> the stat's current value (an inactive toxidrome reads as 0), or nullopt if the name is unknown
+  std::optional<int> get_change_label_stat( const std::string &label_name );
+
+  //! @brief Track the stat behind a "<stat>_delta_lbl" UI label and return its recent change as text.
+  //! A change shows as a signed delta (e.g. "+5", "-3") for Cmp::Persist::StatChangeDisplayDuration seconds; further
+  //! changes while it is showing accumulate into the delta and restart the duration.
+  //! @param label_name the UI label name
+  //! @param dt
+  //! @return std::string the delta text, or an empty string once the duration has elapsed
+  std::string update_stat_change_text( const std::string &label_name, sf::Time dt );
+
   //! @brief Draw a list of UI outline rectangles (panel borders).
   //! @param outlines
   void render_outlines( const std::vector<Render::UiData::Outline> &outlines )
@@ -129,6 +143,21 @@ private:
 
   //! @brief Screen flash frequency
   int m_ui_flash_factor{ 300 };
+
+  //! @brief Display state for one "<stat>_delta_lbl" UI label, see update_stat_change_text()
+  struct StatChange
+  {
+    //! @brief The stat's value when last checked
+    int last_value{ 0 };
+    //! @brief Accumulated change shown in the label
+    int delta{ 0 };
+    //! @brief Time the current delta has been shown for
+    sf::Time elapsed{ sf::Time::Zero };
+  };
+  //! @brief Per-label change state, keyed by UI label name
+  std::unordered_map<std::string, StatChange> m_stat_changes;
+  //! @brief Player entity the m_stat_changes baselines were taken from; a new player re-baselines instead of showing a change
+  entt::entity m_stat_changes_player{ entt::null };
 
   //! @brief Frost overlay shader for the toxidrome meters, see load_frost_shader()
   sf::Shader m_frost_shader;

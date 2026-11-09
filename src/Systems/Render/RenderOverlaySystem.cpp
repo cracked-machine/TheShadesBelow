@@ -16,6 +16,7 @@
 #include <Components/NoRender.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
+#include <Components/Persistent/StatChangeDisplayDuration.hpp>
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
 #include <Components/Persistent/ToxicImmunityMeterTint.hpp>
@@ -27,6 +28,7 @@
 #include <Components/Shop/Inventory.hpp>
 #include <Components/Toxicity/Bradycadia.hpp>
 #include <Components/Toxicity/Halucinogen.hpp>
+#include <Components/Toxicity/Hypoxia.hpp>
 #include <Components/Toxicity/Phototoxia.hpp>
 #include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
@@ -62,6 +64,7 @@
 #include <array>
 #include <cmath>
 #include <filesystem>
+#include <format>
 #include <string>
 #include <utility>
 
@@ -490,6 +493,11 @@ void RenderOverlaySystem::render_ui_labels( sf::Time dt )
       if ( inventory_sprite_type == "" ) { text_str = ""; }
       else { text_str = Sys::SpriteStore::instance().get( inventory_sprite_type ).display_name(); }
     }
+    else if ( ui_label.name.ends_with( "_delta_lbl" ) )
+    {
+      text_str = update_stat_change_text( ui_label.name, dt );
+      if ( text_str.empty() ) { continue; }
+    }
     text.setCharacterSize( ui_label.font_size );
     text.setString( text_str );
     if ( ui_label.align == "center" )
@@ -528,6 +536,62 @@ void RenderOverlaySystem::render_ui_labels( sf::Time dt )
 
     draw_screen( text );
   }
+}
+
+std::optional<int> RenderOverlaySystem::get_change_label_stat( const std::string &label_name )
+{
+  const auto &stats = Utils::Player::get_stats( reg() );
+  const auto &toxidrome = stats.toxidrome();
+  if ( label_name == "health_delta_lbl" ) { return stats.health(); }
+  if ( label_name == "fear_delta_lbl" ) { return stats.fear(); }
+  if ( label_name == "infamy_delta_lbl" ) { return stats.infamy(); }
+  if ( label_name == "despair_delta_lbl" ) { return stats.despair(); }
+  if ( label_name == "luck_delta_lbl" ) { return stats.luck(); }
+  if ( label_name == "anima_delta_lbl" ) { return stats.anima(); }
+  if ( label_name == "tachycardia_delta_lbl" ) { return toxidrome.at<Cmp::Toxicity::Tachycardia>().value_or( 0 ); }
+  if ( label_name == "bradycardia_delta_lbl" ) { return toxidrome.at<Cmp::Toxicity::Bradycardia>().value_or( 0 ); }
+  if ( label_name == "hallucinogen_delta_lbl" ) { return toxidrome.at<Cmp::Toxicity::Hallucinogen>().value_or( 0 ); }
+  if ( label_name == "hypoxia_delta_lbl" ) { return toxidrome.at<Cmp::Toxicity::Hypoxia>().value_or( 0 ); }
+  if ( label_name == "phototoxia_delta_lbl" ) { return toxidrome.at<Cmp::Toxicity::Phototoxia>().value_or( 0 ); }
+  if ( label_name == "venom_delta_lbl" ) { return toxidrome.at<Cmp::Toxicity::Venom>().value_or( 0 ); }
+  if ( label_name == "vertigo_delta_lbl" ) { return toxidrome.at<Cmp::Toxicity::Vertigo>().value_or( 0 ); }
+  return std::nullopt;
+}
+
+std::string RenderOverlaySystem::update_stat_change_text( const std::string &label_name, sf::Time dt )
+{
+  const auto current_value = get_change_label_stat( label_name );
+  if ( not current_value )
+  {
+    SPDLOG_WARN( "No player stat matches UI label '{}'", label_name );
+    return "";
+  }
+
+  // a new player (e.g. a new game) starts a fresh baseline rather than showing the reset as a change
+  const auto player_entity = Utils::Player::get_entity( reg() );
+  if ( player_entity != m_stat_changes_player )
+  {
+    m_stat_changes.clear();
+    m_stat_changes_player = player_entity;
+  }
+
+  auto [it, inserted] = m_stat_changes.try_emplace( label_name, StatChange{ .last_value = *current_value } );
+  auto &change = it->second;
+  if ( inserted ) { return ""; }
+
+  const auto kDisplayDuration = sf::seconds( Sys::PersistSystem::get<Cmp::Persist::StatChangeDisplayDuration>( reg() ).get_value() );
+  if ( *current_value != change.last_value )
+  {
+    // restart the display, accumulating into a delta that is still showing
+    if ( change.elapsed >= kDisplayDuration ) { change.delta = 0; }
+    change.delta += *current_value - change.last_value;
+    change.last_value = *current_value;
+    change.elapsed = sf::Time::Zero;
+  }
+  else if ( change.elapsed < kDisplayDuration ) { change.elapsed += dt; }
+
+  if ( change.elapsed >= kDisplayDuration or change.delta == 0 ) { return ""; }
+  return std::format( "{:+}", change.delta );
 }
 
 void RenderOverlaySystem::render_level_depth()

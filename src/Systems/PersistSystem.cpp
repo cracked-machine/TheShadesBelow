@@ -119,6 +119,7 @@
 #include <Components/Persistent/TooltipsSeen.hpp>
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
+#include <Components/Persistent/StatChangeDisplayDuration.hpp>
 #include <Components/Persistent/ToxicImmunityMeterTint.hpp>
 #include <Components/Persistent/VenomHealthDmgPerSec.hpp>
 #include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
@@ -262,6 +263,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ToxicImmunityMeterFill>();
   add_component<Cmp::Persist::ToxicImmunityMeterShimmer>();
   add_component<Cmp::Persist::ToxicImmunityMeterTint>();
+  add_component<Cmp::Persist::StatChangeDisplayDuration>();
   add_component<Cmp::Persist::BradycardiaHealthDmgPerSec>();
   add_component<Cmp::Persist::VenomHealthDmgPerSec>();
   add_component<Cmp::Persist::VertigoHealthDmgPerSec>();

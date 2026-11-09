@@ -47,11 +47,11 @@
 #include <Utils/Utils.hpp>
 
 #include <algorithm>
-#include <optional>
 #include <map>
+#include <optional>
 #include <set>
-#include <utility>
 #include <spdlog/spdlog.h>
+#include <utility>
 
 namespace
 {
@@ -59,16 +59,16 @@ namespace
 constexpr int kLuckPerBlastTile = 20;
 
 //! @brief Grave bomb blast radius (tiles) at zero luck.
-constexpr int kGraveBlastMaxRadius = 2;
+constexpr int kGraveBlastMaxRadius = 3;
 //! @brief Smallest grave bomb blast radius (tiles), reached at kGraveLuckPerBlastTile * (max - min) luck and above.
 //! 0 still detonates the epicenter tile itself (hurting the player if they are on it) but no rings around it, and
 //! does not exhume neighbouring graves.
-constexpr int kGraveBlastMinRadius = 0;
+constexpr int kGraveBlastMinRadius = 1;
 //! @brief Points of player luck per tile the grave bomb blast radius shrinks by.
 //! Resulting grave bomb blast radius (luck: radius) with the values above:
-//! - 0-9: 2
-//! - 10-19: 1
-//! - 20-100: 0
+//! - 0-9: 3
+//! - 10-19: 2
+//! - 20-100: 1
 constexpr int kGraveLuckPerBlastTile = 10;
 } // namespace
 

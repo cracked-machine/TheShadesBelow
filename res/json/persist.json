@@ -874,6 +874,14 @@
     "detail": "Shovel wear: smashing pot",
     "format": "%.1f"
   },
+  "StatChangeDisplayDuration": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.1,
+    "max_value": 5.0,
+    "detail": "Stat change text display duration",
+    "format": "%.1f seconds"
+  },
   "TachycardiaHealthDmgPerSec": {
     "type": "int",
     "value": 5,

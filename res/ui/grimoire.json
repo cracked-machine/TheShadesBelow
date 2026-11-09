@@ -804,7 +804,6 @@
         {
          "draworder":"topdown",
          "id":5,
-         "locked":true,
          "name":"ForageOverlay",
          "objects":[
                 {
@@ -929,7 +928,7 @@
                  "visible":true,
                  "width":0,
                  "x":920,
-                 "y":520
+                 "y":530
                 }, 
                 {
                  "height":0,
@@ -1025,7 +1024,7 @@
                  "visible":true,
                  "width":0,
                  "x":1020,
-                 "y":520
+                 "y":530
                 }, 
                 {
                  "height":0,
