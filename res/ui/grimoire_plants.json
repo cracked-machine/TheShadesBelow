@@ -5,6 +5,7 @@
         {
          "draworder":"topdown",
          "id":3,
+         "locked":true,
          "name":"MainOverlay",
          "objects":[
                 {
@@ -107,7 +108,7 @@
          "name":"SpecialOverlay",
          "objects":[
                 {
-                 "height":180,
+                 "height":220,
                  "id":95,
                  "name":"special_effects_outline",
                  "opacity":1,
@@ -131,11 +132,11 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":420,
-                 "x":1360,
-                 "y":460
+                 "x":1350,
+                 "y":480
                 }, 
                 {
-                 "height":140,
+                 "height":200,
                  "id":206,
                  "name":"drop_special_actions",
                  "opacity":1,
@@ -154,7 +155,7 @@
                  "type":"ui_table",
                  "visible":true,
                  "width":290,
-                 "x":1370,
+                 "x":1360,
                  "y":490
                 }, 
                 {
@@ -183,8 +184,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":1680,
-                 "y":480
+                 "x":1670,
+                 "y":500
                 }, 
                 {
                  "height":0,
@@ -207,11 +208,11 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":1370,
-                 "y":480
+                 "x":1360,
+                 "y":500
                 }, 
                 {
-                 "height":180,
+                 "height":220,
                  "id":126,
                  "name":"special_effects_outline",
                  "opacity":1,
@@ -235,11 +236,11 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":420,
-                 "x":1360,
+                 "x":1350,
                  "y":230
                 }, 
                 {
-                 "height":140,
+                 "height":180,
                  "id":205,
                  "name":"forage_special_actions",
                  "opacity":1,
@@ -258,7 +259,7 @@
                  "type":"ui_table",
                  "visible":true,
                  "width":290,
-                 "x":1370,
+                 "x":1360,
                  "y":260
                 }, 
                 {
@@ -287,7 +288,7 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":1680,
+                 "x":1670,
                  "y":270
                 }, 
                 {
@@ -311,7 +312,7 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":1370,
+                 "x":1360,
                  "y":250
                 }, 
                 {
@@ -339,7 +340,7 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":100,
-                 "x":1670,
+                 "x":1660,
                  "y":260
                 }, 
                 {
@@ -367,11 +368,11 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":100,
-                 "x":1670,
-                 "y":470
+                 "x":1660,
+                 "y":490
                 }, 
                 {
-                 "height":190,
+                 "height":180,
                  "id":212,
                  "name":"special_plant_outline",
                  "opacity":1,
@@ -395,11 +396,11 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":420,
-                 "x":830,
-                 "y":690
+                 "x":820,
+                 "y":730
                 }, 
                 {
-                 "height":140,
+                 "height":130,
                  "id":213,
                  "name":"plant_special_actions",
                  "opacity":1,
@@ -418,8 +419,8 @@
                  "type":"ui_table",
                  "visible":true,
                  "width":290,
-                 "x":840,
-                 "y":730
+                 "x":830,
+                 "y":770
                 }, 
                 {
                  "height":0,
@@ -447,8 +448,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":1150,
-                 "y":740
+                 "x":1140,
+                 "y":780
                 }, 
                 {
                  "height":0,
@@ -471,8 +472,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":840,
-                 "y":710
+                 "x":830,
+                 "y":750
                 }, 
                 {
                  "height":100,
@@ -499,8 +500,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":100,
-                 "x":1140,
-                 "y":730
+                 "x":1130,
+                 "y":770
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -514,7 +515,7 @@
          "name":"DropOverlay",
          "objects":[
                 {
-                 "height":180,
+                 "height":220,
                  "id":34,
                  "name":"drop_effects_outline",
                  "opacity":1,
@@ -538,8 +539,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":420,
-                 "x":830,
-                 "y":460
+                 "x":820,
+                 "y":480
                 }, 
                 {
                  "height":0,
@@ -567,8 +568,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":1150,
-                 "y":500
+                 "x":1140,
+                 "y":520
                 }, 
                 {
                  "height":0,
@@ -591,8 +592,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":840,
-                 "y":480
+                 "x":830,
+                 "y":500
                 }, 
                 {
                  "height":100,
@@ -619,11 +620,11 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":100,
-                 "x":1140,
-                 "y":490
+                 "x":1130,
+                 "y":510
                 }, 
                 {
-                 "height":140,
+                 "height":180,
                  "id":204,
                  "name":"drop_actions",
                  "opacity":1,
@@ -642,8 +643,8 @@
                  "type":"ui_table",
                  "visible":true,
                  "width":290,
-                 "x":840,
-                 "y":490
+                 "x":830,
+                 "y":510
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -657,7 +658,7 @@
          "name":"ForageOverlay",
          "objects":[
                 {
-                 "height":180,
+                 "height":220,
                  "id":80,
                  "name":"forage_effects_outline",
                  "opacity":1,
@@ -681,11 +682,11 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":420,
-                 "x":830,
+                 "x":820,
                  "y":230
                 }, 
                 {
-                 "height":140,
+                 "height":180,
                  "id":203,
                  "name":"forage_actions",
                  "opacity":1,
@@ -704,7 +705,7 @@
                  "type":"ui_table",
                  "visible":true,
                  "width":290,
-                 "x":840,
+                 "x":830,
                  "y":260
                 }, 
                 {
@@ -733,7 +734,7 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":1150,
+                 "x":1140,
                  "y":270
                 }, 
                 {
@@ -757,7 +758,7 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":840,
+                 "x":830,
                  "y":250
                 }, 
                 {
@@ -785,7 +786,7 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":100,
-                 "x":1140,
+                 "x":1130,
                  "y":260
                 }],
          "opacity":1,
@@ -797,6 +798,7 @@
         {
          "draworder":"topdown",
          "id":4,
+         "locked":true,
          "name":"PlantOverlay",
          "objects":[
                 {
@@ -1080,7 +1082,7 @@
                  "visible":true,
                  "width":81.0811178813632,
                  "x":725,
-                 "y":545.943112688238
+                 "y":565.943112688238
                 }, 
                 {
                  "height":8.10811178813632,
@@ -1108,7 +1110,7 @@
                  "visible":true,
                  "width":24.324335364409,
                  "x":789.702732069328,
-                 "y":524.664184111452
+                 "y":544.664184111452
                 }, 
                 {
                  "height":8.10811178813632,
@@ -1136,7 +1138,7 @@
                  "visible":true,
                  "width":24.324335364409,
                  "x":783.9670537904,
-                 "y":569.572582872403
+                 "y":589.572582872403
                 }, 
                 {
                  "height":11.4665727719003,
@@ -1164,7 +1166,7 @@
                  "visible":true,
                  "width":11.4665727719003,
                  "x":798.78381727204,
-                 "y":549.997168582306
+                 "y":569.997168582306
                 }, 
                 {
                  "height":9.00898896558408,
@@ -1191,8 +1193,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":90.0898896558408,
-                 "x":1260,
-                 "y":545.829883286713
+                 "x":1250,
+                 "y":565.829883286713
                 }, 
                 {
                  "height":9.00898896558408,
@@ -1219,8 +1221,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":27.0269335635009,
-                 "x":1331.89204550015,
-                 "y":522.186608072309
+                 "x":1321.89204550015,
+                 "y":542.186608072309
                 }, 
                 {
                  "height":9.00898896558408,
@@ -1247,8 +1249,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":27.0269335635009,
-                 "x":1325.51872783344,
-                 "y":572.085374302098
+                 "x":1315.51872783344,
+                 "y":592.085374302098
                 }, 
                 {
                  "height":12.7406353481596,
@@ -1275,8 +1277,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":12.7406353481596,
-                 "x":1341.98202069738,
-                 "y":550.334316658544
+                 "x":1331.98202069738,
+                 "y":570.334316658544
                 }, 
                 {
                  "height":9.00898896558408,
@@ -1303,7 +1305,7 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":90.0898896558408,
-                 "x":1260,
+                 "x":1250,
                  "y":314.829883286713
                 }, 
                 {
@@ -1331,7 +1333,7 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":27.0269335635009,
-                 "x":1331.89204550015,
+                 "x":1321.89204550015,
                  "y":291.186608072309
                 }, 
                 {
@@ -1359,7 +1361,7 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":27.0269335635009,
-                 "x":1325.51872783344,
+                 "x":1315.51872783344,
                  "y":341.085374302098
                 }, 
                 {
@@ -1387,7 +1389,7 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":12.7406353481596,
-                 "x":1341.98202069738,
+                 "x":1331.98202069738,
                  "y":319.334316658544
                 }, 
                 {
@@ -1436,7 +1438,7 @@
                  "visible":true,
                  "width":0,
                  "x":730,
-                 "y":556
+                 "y":576
                 }, 
                 {
                  "height":0,
@@ -1459,8 +1461,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":1260,
-                 "y":557
+                 "x":1250,
+                 "y":577
                 }, 
                 {
                  "height":0,
@@ -1483,7 +1485,7 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":1260,
+                 "x":1250,
                  "y":326
                 }, 
                 {
