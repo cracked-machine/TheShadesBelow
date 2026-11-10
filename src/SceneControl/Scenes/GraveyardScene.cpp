@@ -377,7 +377,7 @@ void GraveyardScene::do_update( sf::Time dt )
   // real dt even while paused, so the grimoire's debounce timers still run and it can be closed/paged
   PROFILED( m_sys.find<Sys::Store::Type::GrimoireSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::GrimoireSystem>().render() );
-  PROFILED( m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug() );
+  PROFILED( m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug( dt ) );
 }
 
 void GraveyardScene::reinit_system_spatial_maps()

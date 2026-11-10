@@ -179,6 +179,7 @@
             }
           },
           "then": {
+            "description": "min_value/max_value are scalars bounding both axes, see BasePersistentVector2f",
             "properties": {
               "value": {
                 "type": "object",
@@ -189,25 +190,10 @@
                 "required": ["x", "y"],
                 "additionalProperties": false
               },
-              "min_value": {
-                "type": "object",
-                "properties": {
-                  "x": {"type": "number"},
-                  "y": {"type": "number"}
-                },
-                "required": ["x", "y"],
-                "additionalProperties": false
-              },
-              "max_value": {
-                "type": "object",
-                "properties": {
-                  "x": {"type": "number"},
-                  "y": {"type": "number"}
-                },
-                "required": ["x", "y"],
-                "additionalProperties": false
-              }
-            }
+              "min_value": {"type": "number"},
+              "max_value": {"type": "number"}
+            },
+            "required": ["value", "min_value", "max_value", "detail", "format"]
           }
         },
         {

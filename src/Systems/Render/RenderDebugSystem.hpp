@@ -10,11 +10,11 @@
 #include <span>
 
 #include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/RenderTexture.hpp>
-#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
 
 #include <memory>
+#include <string_view>
 
 // clang-format off
 namespace Game::PathFinding { enum class QueryCompass; }
@@ -44,7 +44,8 @@ public:
   //! @brief Entrypoint for rendering whichever debug visualisations are enabled in the current scene settings.
   //! Must be called after RenderGameSystem::render_game() in the same frame, as the debug stats overlay lists
   //! the z-order queue (`s_zorder_queue`) that call refreshes.
-  void render_debug();
+  //! @param dt Real (unpaused) frame time, used to advance the ImGui frame for the debug stats panels.
+  void render_debug( sf::Time dt );
 
 private:
   //! @brief Debug-draw the spatial hash grid navmesh: the neighbour bucket size and cell edges at every position in view.
@@ -53,47 +54,36 @@ private:
   //! @brief Draw the player/NPC spatial grid neighbours, NPC lerp positions and the A* path from each NPC to the player.
   void render_pathfinding();
 
-  //! @brief Draw the crypt room outlines and the debug overlay panels (misc stats, Z-order list, NPC list, entity inspector),
-  //! plus selected positions, particle emitter positions and the half-view bounds.
-  void render_debug_stats();
+  //! @brief Draw the crypt room outlines, selected positions, particle emitter positions and the half-view bounds, then the
+  //! debug overlay panels (misc stats, Z-order list, NPC list, entity inspector) as semi-transparent ImGui windows on top.
+  //! @param dt Real (unpaused) frame time, used to advance the ImGui frame.
+  void render_debug_stats( sf::Time dt );
 
-  //! @brief Initialise the debug texture and use it to override the render target
-  //!        Call this before using draw_screen()/draw_world()
-  //! @param size
-  void begin_debug_overlay( sf::Vector2u size )
-  {
-    if ( m_debug_overlay_tex.getSize() != size ) { [[maybe_unused]] auto _ = m_debug_overlay_tex.resize( size ); }
-    m_debug_overlay_tex.clear( sf::Color::Transparent );
-    set_render_target( m_debug_overlay_tex );
-  }
+  //! @brief Begin one of the debug overlay's ImGui windows, placed at the matching "res/ui/dbg.json" label position on first use.
+  //!        Must always be paired with ImGui::End(), whatever this returns.
+  //! @param title The ImGui window title (also its persisted-layout id)
+  //! @param label_name The dbg.json ui_label that gives the window's initial position
+  //! @param initial_size The window's initial size in pixels; the height is clamped to fit below the window's position
+  //! @param start_collapsed Start with only the title bar showing. Like the position and size, this only applies on first use;
+  //!        after that the collapsed state saved in res/imgui.ini wins.
+  //! @return true if the window is expanded and its contents should be submitted
+  bool begin_debug_window( const char *title, std::string_view label_name, sf::Vector2f initial_size, bool start_collapsed = false );
 
-  //! @brief reset the render target and finialise the debug texture
-  //!        Call this after using draw_screen()/draw_world()
-  void end_debug_overlay()
-  {
-    restore_render_target();
-    m_debug_overlay_tex.display();
-    m_debug_overlay_ready = true;
-  }
+  //! @brief Render the debug "Highlights" ImGui window: one checkbox (with a swatch of its colour) per debug rectangle type
+  //! drawn by render_debug_stats(). Must be called before those rectangles are drawn so a toggle applies in the same frame.
+  void render_ui_highlight_options();
 
-  //! @brief Render the debug texture to the window.
-  //!        Call this after using end_debug_overlay()
-  void draw_debug_overlay() const
-  {
-    if ( m_debug_overlay_ready ) m_window.draw( sf::Sprite( m_debug_overlay_tex.getTexture() ) );
-  }
-
-  //! @brief Render the debug "entity_stats" panel: player/mouse position and direction, plus various entity counts.
+  //! @brief Render the debug "Stats" ImGui window: player/mouse position and direction, plus various entity counts.
   void render_ui_misc_stats();
 
-  //! @brief Render the debug "zorder_list" panel: the Z-order and entity id of each queued render entry, excluding a fixed set of
+  //! @brief Render the debug "Z Order" ImGui window as a scrollable, clipped list: the Z-order and entity id of each queued render entry, excluding a fixed set of
   //! noisy sprite types.
   void render_ui_zorder_list();
 
-  //! @brief Render the debug "npc_list" panel listing each NPC's entity id, position and sprite type.
+  //! @brief Render the debug "NPCs" ImGui window as a scrollable, clipped list of each NPC's entity id, position and sprite type.
   void render_ui_npc_list();
 
-  //! @brief Render the debug "inspect_list" panel: a breakdown of the components and stats of the entity currently under the mouse
+  //! @brief Render the debug "Inspect" ImGui window: a breakdown of the components and stats of the entity currently under the mouse
   //! cursor.
   void render_ui_entity_inspect();
 
@@ -146,11 +136,27 @@ private:
   //! @brief Layout data object for the debug UI
   std::unique_ptr<Render::UiData> m_dbg_ui_data;
 
-  //! @brief Draw the debug ui to this texture.
-  sf::RenderTexture m_debug_overlay_tex;
+  //! @brief Which debug rectangles render_debug_stats() draws, toggled from the "Highlights" window. All off by default.
+  struct HighlightToggles
+  {
+    bool lava_pit_cells{ false };
+    bool open_rooms{ false };
+    bool start_room{ false };
+    bool end_room{ false };
+    bool closed_rooms{ false };
+    bool passage_blocks{ false };
+    bool selected_positions{ false };
+    bool half_view_bounds{ false };
+    bool grave_npc_traps{ false };
+    bool grave_trail_markers{ false };
+    bool grave_trail_start{ false };
+  };
 
-  //! @brief Signals when the texture is ready to be drawn to the sf::RenderWindow
-  bool m_debug_overlay_ready{ false };
+  //! @brief The current debug rectangle toggles.
+  HighlightToggles m_highlights;
+
+  //! @brief Whether an ImGui frame was pumped for the debug stats overlay last frame, so turning it off can flush ImGui's event queue.
+  bool m_debug_imgui_active{ false };
 
   //! @brief tracks the npc pathfinding navmesh i.e. where the NPC cannot move to
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;

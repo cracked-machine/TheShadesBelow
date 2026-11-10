@@ -97,7 +97,18 @@ private:
   //! @param event The polled window event
   void process_grimoire_wheel( const sf::Event &event );
 
-  //! @brief forwards to ImGui and handles the window Closed/Resized events common to every scene; returns true if the event was consumed
+  //! @brief Forward the event to ImGui only while the debug stats overlay (an ImGui frame pumped by RenderDebugSystem) is shown.
+  //! @param event The polled window event
+  void forward_to_debug_imgui( const sf::Event &event );
+  //! @brief Check whether the mouse is over (or dragging) a debug overlay window, so gameplay should ignore mouse input.
+  //! @return true if the debug stats overlay is shown and ImGui wants the mouse
+  bool debug_ui_wants_mouse();
+  //! @brief Check whether the event is a mouse button press/release or wheel scroll.
+  //! @param event The polled window event
+  //! @return true for mouse button and wheel events
+  static bool is_mouse_event( const sf::Event &event );
+
+  //! @brief handles the window Closed/Resized events common to every scene; returns true if the event was consumed
   bool dispatch_common_window_event( const sf::Event &event );
   //! @brief handles the debug/cheat keys shared by every gameplay scene; returns true if the scancode was handled
   void try_handle_debug_key( sf::Keyboard::Scancode scancode );

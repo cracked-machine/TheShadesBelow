@@ -52,8 +52,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":1149,
-                 "y":20
+                 "x":1600,
+                 "y":402
                 }, 
                 {
                  "height":0,
@@ -102,6 +102,30 @@
                  "width":0,
                  "x":400,
                  "y":300
+                }, 
+                {
+                 "height":0,
+                 "id":7,
+                 "name":"highlight_options",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"left"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":30
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":1600,
+                 "y":500
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -110,7 +134,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":7,
+ "nextobjectid":8,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

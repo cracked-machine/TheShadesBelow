@@ -160,7 +160,7 @@ void HealingSpringScene::do_update( sf::Time dt )
   m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_overlay( dt );
   m_sys.find<Sys::Store::Type::TooltipSystem>().update( dt );
   m_sys.find<Sys::Store::Type::TooltipSystem>().render();
-  m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug();
+  m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug( dt );
 }
 
 void HealingSpringScene::reinit_navmesh()

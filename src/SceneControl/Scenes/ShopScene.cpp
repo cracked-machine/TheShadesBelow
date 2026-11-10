@@ -144,7 +144,7 @@ void ShopScene::on_exit()
   std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 }
 
-void ShopScene::do_update( [[maybe_unused]] sf::Time dt )
+void ShopScene::do_update( sf::Time dt )
 {
   // m_sys.find<Sys::Store::Type::HealingSpringSystem>().check_inventory_deposit( dt );
   m_sys.find<Sys::Store::Type::AnimSystem>().update( dt );
@@ -172,7 +172,7 @@ void ShopScene::do_update( [[maybe_unused]] sf::Time dt )
   m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_overlay( dt );
   m_sys.find<Sys::Store::Type::TooltipSystem>().update( dt );
   m_sys.find<Sys::Store::Type::TooltipSystem>().render();
-  m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug();
+  m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug( dt );
 }
 
 void ShopScene::open_overlay()

@@ -54,6 +54,7 @@
 #include <Utils/Utils.hpp>
 
 #include <imgui-SFML.h>
+#include <imgui.h>
 
 namespace Game::Sys
 {
@@ -124,7 +125,9 @@ void SceneInputRouter::graveyard_scene_state_handler()
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
   {
+    forward_to_debug_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
+    if ( is_mouse_event( *event ) and debug_ui_wants_mouse() ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -200,7 +203,7 @@ void SceneInputRouter::graveyard_scene_state_handler()
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::SWAP_INVENTORY ) );
   }
-  if ( sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not debug_ui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     // get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::DRAW_BOW ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::BURN ) );
@@ -215,7 +218,9 @@ void SceneInputRouter::crypt_scene_state_handler()
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
   {
+    forward_to_debug_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
+    if ( is_mouse_event( *event ) and debug_ui_wants_mouse() ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -252,7 +257,7 @@ void SceneInputRouter::crypt_scene_state_handler()
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::SWAP_INVENTORY ) );
   }
-  if ( sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not debug_ui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     // get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::DIG ) );
   }
@@ -264,7 +269,9 @@ void SceneInputRouter::healing_spring_scene_state_handler()
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
   {
+    forward_to_debug_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
+    if ( is_mouse_event( *event ) and debug_ui_wants_mouse() ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -284,7 +291,7 @@ void SceneInputRouter::healing_spring_scene_state_handler()
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
     // get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::DROP_CARRYITEM ) );
   }
-  if ( sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not debug_ui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ATTACK ) );
   }
@@ -296,7 +303,9 @@ void SceneInputRouter::shop_scene_state_handler()
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
   {
+    forward_to_debug_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
+    if ( is_mouse_event( *event ) and debug_ui_wants_mouse() ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -321,7 +330,7 @@ void SceneInputRouter::shop_scene_state_handler()
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::SWAP_INVENTORY ) );
   }
-  if ( sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not debug_ui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ATTACK ) );
   }
@@ -333,7 +342,9 @@ void SceneInputRouter::ruin_scene_state_handler()
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
   {
+    forward_to_debug_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
+    if ( is_mouse_event( *event ) and debug_ui_wants_mouse() ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -361,7 +372,7 @@ void SceneInputRouter::ruin_scene_state_handler()
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::SELECT_POSITION ) );
   }
-  if ( sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not debug_ui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ATTACK ) );
   }
@@ -480,6 +491,24 @@ void SceneInputRouter::process_move_keys()
     if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::D ) ) { direction.x = 1.0f; }  // move player right
     if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::S ) ) { direction.y = 1.0f; }  // move player down
   }
+}
+
+void SceneInputRouter::forward_to_debug_imgui( const sf::Event &event )
+{
+  // Paired with RenderDebugSystem, which pumps an ImGui frame only while ShowDebugStats is on. Forwarding at any other time
+  // would let events pile up in ImGui's queue (see comment in settings_scene_state_handler).
+  if ( Utils::scene_setting<Cmp::SceneSettings::ShowDebugStats>( reg() ).enabled ) { ImGui::SFML::ProcessEvent( m_window, event ); }
+}
+
+bool SceneInputRouter::debug_ui_wants_mouse()
+{
+  // WantCaptureMouse is left over from the last ImGui frame, so it is only meaningful while the debug windows are being pumped.
+  return Utils::scene_setting<Cmp::SceneSettings::ShowDebugStats>( reg() ).enabled and ImGui::GetIO().WantCaptureMouse;
+}
+
+bool SceneInputRouter::is_mouse_event( const sf::Event &event )
+{
+  return event.is<sf::Event::MouseButtonPressed>() or event.is<sf::Event::MouseButtonReleased>() or event.is<sf::Event::MouseWheelScrolled>();
 }
 
 bool SceneInputRouter::dispatch_common_window_event( const sf::Event &event )

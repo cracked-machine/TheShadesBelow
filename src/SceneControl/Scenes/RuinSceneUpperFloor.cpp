@@ -201,7 +201,7 @@ void RuinSceneUpperFloor::do_update( sf::Time dt )
   m_sys.find<Store::Type::RenderOverlaySystem>().render_overlay( dt );
   m_sys.find<Store::Type::TooltipSystem>().update( dt );
   m_sys.find<Store::Type::TooltipSystem>().render();
-  m_sys.find<Store::Type::RenderDebugSystem>().render_debug();
+  m_sys.find<Store::Type::RenderDebugSystem>().render_debug( dt );
 }
 
 void RuinSceneUpperFloor::reinit_navmesh()

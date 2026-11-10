@@ -220,7 +220,7 @@ void RuinSceneLowerFloor::on_exit()
   std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 }
 
-void RuinSceneLowerFloor::do_update( [[maybe_unused]] sf::Time dt )
+void RuinSceneLowerFloor::do_update( sf::Time dt )
 {
   using namespace Sys;
   m_sys.find<Store::Type::AnimSystem>().update( dt );
@@ -257,7 +257,7 @@ void RuinSceneLowerFloor::do_update( [[maybe_unused]] sf::Time dt )
   m_sys.find<Store::Type::RenderOverlaySystem>().render_overlay( dt );
   m_sys.find<Store::Type::TooltipSystem>().update( dt );
   m_sys.find<Store::Type::TooltipSystem>().render();
-  m_sys.find<Store::Type::RenderDebugSystem>().render_debug();
+  m_sys.find<Store::Type::RenderDebugSystem>().render_debug( dt );
 }
 
 void RuinSceneLowerFloor::reinit_navmesh()
