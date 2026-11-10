@@ -2,6 +2,7 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/DropCount.hpp>
+#include <Components/Grave/CurseTablet.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/StingDamage.hpp>
@@ -13,7 +14,9 @@
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
+#include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
+#include <SFML/Audio/Sound.hpp>
 #include <Systems/ItemSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Utils/Constants.hpp>
@@ -21,6 +24,7 @@
 #include <Utils/Utils.hpp>
 
 #include <algorithm>
+#include <entt/entity/entity.hpp>
 
 namespace Game::Sys
 {
@@ -30,16 +34,29 @@ ItemSystem::ItemSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
 {
   SPDLOG_DEBUG( "ItemSystem initialized" );
   std::ignore = get_systems_event_queue().sink<Events::CreateItemEvent>().connect<&ItemSystem::on_create_item_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::DestroyItemEvent>().connect<&ItemSystem::on_destroy_item_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::SwapWorldItemEvent>().connect<&ItemSystem::on_swap_world_item_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::UpdateDmgEvent>().connect<&ItemSystem::on_update_dmg_event>( this );
 }
 
 void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev )
 {
+  // post-creation tagging and callback, shared by both spawn paths
+  auto on_created = [&]( entt::entity item_entt )
+  {
+    if ( item_entt == entt::null ) return;
+    if ( ev.m_item.contains( "cursetablet" ) )
+    {
+      auto item_type = ev.m_item.str();
+      auto hits_required = std::stoi( item_type.substr( item_type.find_last_of( '.' ) + 1 ) );
+      reg().emplace_or_replace<Cmp::Grave::CurseTablet>( item_entt, hits_required );
+    }
+    if ( ev.m_on_created ) { ev.m_on_created( item_entt ); }
+  };
+
   if ( not ev.m_spawn_nearby )
   {
-    auto item_entt = create_world_item( ev.m_pos, ev.m_item, ev.m_sfx, ev.m_zorder, ev.m_sting );
-    if ( item_entt != entt::null and ev.m_on_created ) { ev.m_on_created( item_entt ); }
+    on_created( create_world_item( ev.m_pos, ev.m_item, ev.m_sfx, ev.m_zorder, ev.m_sting ) );
     return;
   }
 
@@ -54,20 +71,27 @@ void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev )
   auto ghost_navmesh = m_ghost_navmesh.lock();
   auto loot_sm = m_loot_sm.lock();
   auto reserved_sm = m_reserved_sm.lock();
-  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
-  auto cell = Utils::find_random_cell_near( ev.m_pos, kItemDropSearchRadius,
-                                            [&]( const sf::Vector2f &cell_pos )
-                                            { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); } );
+  const Utils::SpawnGrids grids{
+      .navmesh = npc_navmesh.get(), .ghost_navmesh = ghost_navmesh.get(), .loot_sm = loot_sm.get(), .reserved_sm = reserved_sm.get() };
+  auto cell = Utils::find_random_cell_near( ev.m_pos, kItemDropSearchRadius, [&]( const sf::Vector2f &cell_pos )
+  { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); } );
   if ( not cell )
   {
     SPDLOG_WARN( "No free cell to drop {} near [{},{}].", ev.m_item.str(), ev.m_pos.position.x, ev.m_pos.position.y );
     return;
   }
 
-  auto item_entt = create_world_item( Cmp::Position( *cell, Constants::kGridSizePxF ), ev.m_item, ev.m_sfx, ev.m_zorder, ev.m_sting );
+  const entt::entity item_entt = create_world_item( Cmp::Position( *cell, Constants::kGridSizePxF ), ev.m_item, ev.m_sfx, ev.m_zorder, ev.m_sting );
   // counted over the source's lifetime, so picking the item up doesn't free a slot
   if ( item_entt != entt::null and has_source ) { reg().get_or_emplace<Cmp::DropCount>( ev.m_source_entt ).m_count++; }
-  if ( item_entt != entt::null and ev.m_on_created ) { ev.m_on_created( item_entt ); }
+  on_created( item_entt );
+}
+
+void ItemSystem::on_destroy_item_event( Game::Events::DestroyItemEvent ev )
+{
+  if ( not reg().valid( ev.m_item_entity ) ) return;
+  SPDLOG_DEBUG( "Destroying world item {}", static_cast<uint32_t>( ev.m_item_entity ) );
+  reg().destroy( ev.m_item_entity );
 }
 
 void ItemSystem::on_swap_world_item_event( const Events::SwapWorldItemEvent &ev ) { swap_world_item( ev.m_entt, ev.m_new_item, ev.m_sfx ); }
@@ -92,10 +116,12 @@ void ItemSystem::on_update_dmg_event( const Events::UpdateDmgEvent &ev )
     {
       swap_world_item( ev.m_item_entt, "item.rottenfood" );
     }
+
+    return;
   }
 }
 
-entt::entity ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKey &item, std::string sfx, float zorder, bool sting )
+entt::entity ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKey &item, const std::string &sfx, float zorder, bool sting )
 {
 
   if ( item == "item.bomb" )
@@ -110,14 +136,17 @@ entt::entity ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKe
   Cmp::Position world_item_pos( pos.position, pos.size );
   reg().emplace_or_replace<Cmp::Position>( world_item_entt, world_item_pos );
   if ( auto reserved_sm = m_reserved_sm.lock() ) reserved_sm->insert( world_item_entt, world_item_pos );
+
   // clang-format off
   reg().emplace_or_replace<Cmp::AnimData>( world_item_entt, Cmp::AnimData::Config{ 
         .sprite_type =  world_item.sprite_type, 
         .enabled = true
   });
   // clang-format on
+
   reg().emplace_or_replace<Cmp::ZOrderValue>( world_item_entt, pos.position.y - 1.f + zorder );
   reg().emplace_or_replace<Cmp::Npc::NoPathFinding>( world_item_entt );
+
   // Use a UUID to identify the InventoryItem/PlayerInventorySlot when the entity is destroyed.
   reg().emplace_or_replace<Cmp::UUID>( world_item_entt, Cmp::UUID::generate() );
   if ( world_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( world_item_entt, 100.f ); }

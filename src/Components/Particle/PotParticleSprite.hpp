@@ -1,5 +1,5 @@
-#ifndef SRC_COMPONENTS_PARTICLE_PotParticleSprite_HPP__
-#define SRC_COMPONENTS_PARTICLE_PotParticleSprite_HPP__
+#ifndef SRC_COMPONENTS_PARTICLE_POTPARTICLESPRITE_HPP__
+#define SRC_COMPONENTS_PARTICLE_POTPARTICLESPRITE_HPP__
 
 #include <Components/Particle/SpriteBase.hpp>
 #include <SFML/Graphics/BlendMode.hpp>
@@ -59,4 +59,4 @@ public:
 
 } // namespace Game::Cmp::Particle
 
-#endif // SRC_COMPONENTS_PARTICLE_PotParticleSprite_HPP__
+#endif // SRC_COMPONENTS_PARTICLE_POTPARTICLESPRITE_HPP__

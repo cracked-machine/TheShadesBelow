@@ -81,6 +81,7 @@
         {
          "draworder":"topdown",
          "id":2,
+         "locked":true,
          "name":"cadaver",
          "objects":[
                 {
@@ -434,6 +435,7 @@
         {
          "draworder":"topdown",
          "id":6,
+         "locked":true,
          "name":"gold",
          "objects":[
                 {
@@ -498,6 +500,7 @@
         {
          "draworder":"topdown",
          "id":5,
+         "locked":true,
          "name":"toxidromes",
          "objects":[
                 {
@@ -761,6 +764,7 @@
         {
          "draworder":"topdown",
          "id":4,
+         "locked":true,
          "name":"stats",
          "objects":[
                 {

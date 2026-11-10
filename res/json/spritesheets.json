@@ -1478,11 +1478,102 @@
         }
       }
     },
-    "sprite.item.cursetablet": {
+    "sprite.item.cursetablet.ghost.1": {
       "spritesheet": {
-        "displayname": "Curse Tablet",
+        "displayname": "Curse Tablet: Ghost",
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [220],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.cursetablet.ghost.2": {
+      "spritesheet": {
+        "displayname": "Curse Tablet: Ghost",
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [221],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.cursetablet.ghost.3": {
+      "spritesheet": {
+        "displayname": "Curse Tablet: Ghost",
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [222],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.cursetablet.ghost.4": {
+      "spritesheet": {
+        "displayname": "Curse Tablet: Ghost",
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [223],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.cursetablet.skeleton.1": {
+      "spritesheet": {
+        "displayname": "Curse Tablet: Skeleton",
         "texture_path": "res/textures/inventoryitems.png",
         "sprite_indices": [230],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.cursetablet.skeleton.2": {
+      "spritesheet": {
+        "displayname": "Curse Tablet: Skeleton",
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [231],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.cursetablet.skeleton.3": {
+      "spritesheet": {
+        "displayname": "Curse Tablet: Skeleton",
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [232],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.cursetablet.skeleton.4": {
+      "spritesheet": {
+        "displayname": "Curse Tablet: Skeleton",
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [233],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2096,19 +2187,6 @@
         "displayname": "Rowan Wine",
         "texture_path": "res/textures/plants_loot.png",
         "sprite_indices": [12],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.item.seeingstone": {
-      "spritesheet": {
-        "displayname": "Seeing Stone",
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [220],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {

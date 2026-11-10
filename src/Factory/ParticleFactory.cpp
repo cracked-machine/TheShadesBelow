@@ -1,6 +1,7 @@
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Particle/AshPileParticleSprite.hpp>
 #include <Components/Particle/CryptAltarParticleSprite.hpp>
+#include <Components/Particle/CurseTabletParticleSprite.hpp>
 #include <Components/Particle/EatingCrumbsParticleSprite.hpp>
 #include <Components/Particle/EmberParticleSprite.hpp>
 #include <Components/Particle/FlameParticleSprite.hpp>
@@ -194,7 +195,27 @@ void add_pot_ps( entt::registry &reg, const std::string &tag, int particle_count
   reg.emplace_or_replace<Cmp::Particle::SpriteOwner>( entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::PotParticleSprite>( ps ) ) );
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
   reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
-  SPDLOG_DEBUG( "Created obstacle ParticleSprite {}", static_cast<uint32_t>( entt ) );
+  SPDLOG_DEBUG( "Created pot ParticleSprite {}", static_cast<uint32_t>( entt ) );
+}
+
+void add_cursetablet_ps( entt::registry &reg, const std::string &tag, int particle_count, float lifetime_seconds, float speed, float size,
+                         Cmp::UUID &uuid_cmp, sf::Vector2f pos, float zorder )
+{
+  auto ps = Cmp::Particle::CurseTabletParticleSprite( particle_count );
+  ps.set_tag( tag );
+  ps.set_generations( 1 );
+  ps.set_particle_size_range( std::uniform_real_distribution<float>( size, size ) );
+  ps.set_emitter_position( { pos.x + Cmp::RandomFloat( 4.f, 12.f ).gen(), pos.y + Cmp::RandomFloat( 4.f, 12.f ).gen() } );
+  ps.set_lifetime_ms( std::uniform_int_distribution<int>( 0, sf::seconds( lifetime_seconds ).asMilliseconds() ) );
+  ps.set_speed( std::uniform_real_distribution<float>( speed, speed ) );
+  ps.set_angle( std::uniform_real_distribution<float>( 1.f, 360.f ) );
+
+  auto entt = reg.create();
+  reg.emplace_or_replace<Cmp::Particle::SpriteOwner>(
+      entt, Cmp::Particle::SpriteOwner( std::make_unique<Cmp::Particle::CurseTabletParticleSprite>( ps ) ) );
+  reg.emplace_or_replace<Cmp::ZOrderValue>( entt, zorder );
+  reg.emplace_or_replace<Cmp::UUID>( entt, uuid_cmp.data );
+  SPDLOG_DEBUG( "Created curse tablet ParticleSprite {}", static_cast<uint32_t>( entt ) );
 }
 
 void add_lightningrod_ps( entt::registry &reg, const std::string &tag, int particle_count, float lifetime_seconds, float speed, float size,
@@ -326,8 +347,8 @@ void add_lava_fireball_ps( entt::registry &reg, const std::string &tag, int part
   SPDLOG_DEBUG( "Created lava fireball ParticleSprite {}", static_cast<uint32_t>( entt ) );
 }
 
-void add_aimed_fireball_ps( entt::registry &reg, const std::string &tag, float lifetime_seconds, float speed, float gravity, float size, Cmp::UUID &uuid_cmp,
-                               sf::Vector2f from, sf::Vector2f to, float zorder, const Cmp::Particle::FireballPalette &palette )
+void add_aimed_fireball_ps( entt::registry &reg, const std::string &tag, float lifetime_seconds, float speed, float gravity, float size,
+                            Cmp::UUID &uuid_cmp, sf::Vector2f from, sf::Vector2f to, float zorder, const Cmp::Particle::FireballPalette &palette )
 {
   auto ps = Cmp::Particle::LavaFireballParticleSprite( 1 );
   ps.set_tag( tag );

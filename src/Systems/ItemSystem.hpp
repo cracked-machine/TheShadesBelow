@@ -2,6 +2,7 @@
 #define SRC_SYSTEMS_ITEMSYSTEM_HPP__
 
 #include <Events/CreateItemEvent.hpp>
+#include <Events/DestroyitemEvent.hpp>
 #include <Events/SwapWorldItemEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <PathFinding/SmartPointers.hpp>
@@ -51,6 +52,9 @@ public:
   //! @param ev
   void on_create_item_event( Game::Events::CreateItemEvent ev );
 
+  //! @param ev
+  void on_destroy_item_event( Game::Events::DestroyItemEvent ev );
+
   //! @brief Event handler that forwards to swap_world_item().
   //! @param ev
   void on_swap_world_item_event( const Events::SwapWorldItemEvent &ev );
@@ -66,7 +70,7 @@ public:
   //! @param zorder
   //! @param sting false: never add a Cmp::Inventory::StingDamage, e.g. the item was foraged with gloves.
   //! @return entt::entity The new world item, or entt::null for explosives.
-  entt::entity create_world_item( Cmp::Position pos, const Sys::ItemKey &item, std::string sfx, float zorder = 0.f, bool sting = true );
+  entt::entity create_world_item( Cmp::Position pos, const Sys::ItemKey &item, const std::string &sfx, float zorder = 0.f, bool sting = true );
 
   //! @brief Replace an existing world item in place with another item type, keeping its position, UUID, etc.
   //! @note The Cmp::Inventory::WearLevel is reset if the new item wears, otherwise it is removed.

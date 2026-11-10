@@ -50,9 +50,11 @@ private:
   //! @brief Uses Cmp::SelectedPosition to mark the targetted Cmp::Obstacle then applies digging damage until the obstacle is destroyed.
   void check_player_dig_obstacle_collision();
 
-  //! @brief Break the targetted Cmp::LootContainer with a tool via Events::DestroyLootContainerEvent (see
-  //! LootSystem::on_destroy_loot_container_event)
+  //! @brief Break the targetted Cmp::LootContainer with a tool via Events::UpdateDmgEvent and DestroyLootContainerEvent
   void check_player_smash_pot();
+
+  //! @brief Break the targetted Curse Tablet (Cmp::WorldItem) with a tool via Events::UpdateDmgEvent
+  void check_player_smash_tablet();
 
   //! @brief If player is carry suitable weapon did the action event occur in NPC vicinity?
   void check_player_axe_npc_kill();

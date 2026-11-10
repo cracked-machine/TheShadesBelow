@@ -5,8 +5,10 @@
 #include <Components/DestroyedObstacle.hpp>
 #include <Components/Direction.hpp>
 #include <Components/FractalCurve.hpp>
+#include <Components/Grave/CurseTablet.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/WearLevel.hpp>
+#include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Moveable.hpp>
@@ -31,6 +33,7 @@
 #include <Components/UUID.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
+#include <Events/DestroyitemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/BombFactory.hpp>
@@ -93,6 +96,7 @@ void ActionSystem::on_player_action( const Events::PlayerActionEvent &event )
     // Check for collisions with diggable obstacles
     check_player_dig_obstacle_collision();
     check_player_smash_pot();
+    check_player_smash_tablet();
   }
   else if ( event.action == Game::Events::PlayerActionEvent::GameActions::ATTACK )
   {
@@ -305,12 +309,10 @@ void ActionSystem::check_player_smash_pot()
   if ( Utils::Player::is_digging_on_cooldown( reg() ) ) { return; }
 
   auto mouse_position_bounds = Utils::get_mouse_bounds_in_gameview( m_window, RenderSystem::get_world_view() );
-  // Cmp::LootContainer is an empty tag type, so the view yields only the entity and its Cmp::Position
-  auto loot_container_view = reg().view<Cmp::LootContainer, Cmp::Position>();
-
   entt::entity smashed_loot_entity = entt::null;
 
-  for ( auto [loot_entity, loot_container_pos] : loot_container_view.each() )
+  // Cmp::LootContainer is an empty tag type, so the view yields only the entity and its Cmp::Position
+  for ( auto [loot_entity, loot_container_pos] : reg().view<Cmp::LootContainer, Cmp::Position>().each() )
   {
     if ( mouse_position_bounds.findIntersection( loot_container_pos ) )
     {
@@ -341,6 +343,71 @@ void ActionSystem::check_player_smash_pot()
   }
 
   if ( smashed_loot_entity != entt::null ) get_systems_event_queue().trigger( Events::DestroyLootContainerEvent( smashed_loot_entity ) );
+}
+
+void ActionSystem::check_player_smash_tablet()
+{
+
+  auto [_, inventory_slot_type, _] = Utils::Player::get_inventory( reg() );
+  if ( inventory_slot_type != "item.pickaxe" and inventory_slot_type != "item.axe" and inventory_slot_type != "item.shovel" ) { return; }
+
+  // a broken pickaxe still smashes pots, other broken tools are useless
+  const bool tool_broken = Utils::Player::get_inventory_wear_level( reg() ) <= 0;
+  if ( tool_broken and inventory_slot_type != "item.pickaxe" ) { return; }
+
+  // abort if still in cooldown
+  if ( Utils::Player::is_digging_on_cooldown( reg() ) ) { return; }
+
+  auto mouse_position_bounds = Utils::get_mouse_bounds_in_gameview( m_window, RenderSystem::get_world_view() );
+
+  // Cmp::LootContainer is an empty tag type, so the view yields only the entity and its Cmp::Position
+  for ( auto [curse_tablet_entt, curse_tablet_cmp, curse_tablet_pos, curse_tablet_wear_cmp] :
+        reg().view<Cmp::Grave::CurseTablet, Cmp::Position, Cmp::Inventory::WearLevel>().each() )
+  {
+    if ( mouse_position_bounds.findIntersection( curse_tablet_pos ) )
+    {
+      SPDLOG_DEBUG( "Found curse tablet at position: [{}, {}]!", curse_tablet_pos.position.x, curse_tablet_pos.position.y );
+
+      // check player is near obstacle that was mouse-selected
+      if ( not Utils::Player::is_player_near( reg(), curse_tablet_pos ) ) continue;
+
+      // check player is facing the obstacle
+      if ( not Utils::Player::get_projected_position( reg() ).findIntersection( curse_tablet_pos ) ) continue;
+
+      reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
+
+      // already broken: no further wear, otherwise the break sound replays on every smash
+      if ( not tool_broken )
+      {
+        float dmg = 0.f;
+        if ( inventory_slot_type == "item.pickaxe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::PickaxePotSmashWear>( reg() ).get_value(); }
+        else if ( inventory_slot_type == "item.axe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::AxePotSmashWear>( reg() ).get_value(); }
+        else if ( inventory_slot_type == "item.shovel" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::ShovelPotSmashWear>( reg() ).get_value(); }
+        get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
+      }
+
+      SPDLOG_INFO( "Required hits {}", curse_tablet_cmp.m_required_hits );
+      get_systems_event_queue().trigger(
+          Events::UpdateDmgEvent( curse_tablet_entt, 100.f / static_cast<float>( curse_tablet_cmp.m_required_hits ) ) );
+
+      if ( curse_tablet_wear_cmp.m_level > 0 )
+      {
+        Cmp::RandomInt random_picker( 1, 6 );
+        m_sound_bank.get_effect( "pickaxe" + std::to_string( random_picker.gen() ) ).play();
+      }
+      else
+      {
+        auto sfx = m_sound_bank.get_effect( "pickaxe_final" );
+        if ( sfx.getStatus() != sf::Sound::Status::Playing ) m_sound_bank.get_effect( "pickaxe_final" ).play();
+        auto pot_particle_uuid = Cmp::UUID::generate();
+        Factory::Particle::add_cursetablet_ps( reg(), "graveyard.cursetablet.particle.dig", 20, 2.f, 50.f, 10.f, pot_particle_uuid,
+                                               curse_tablet_pos.position, curse_tablet_pos.position.y );
+        get_systems_event_queue().trigger( Events::DestroyItemEvent( curse_tablet_entt ) );
+      }
+
+      break;
+    }
+  }
 }
 
 void ActionSystem::check_player_axe_npc_kill()

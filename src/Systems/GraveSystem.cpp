@@ -411,7 +411,10 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
                         grave_entity, by );
       break;
     case Cmp::Grave::Consequence::Type::CURSE_TABLET:
-      spawn_grave_loot( { "item.cursetablet" }, grave_entity, by );
+      spawn_grave_loot( { "item.cursetablet.ghost.1", "item.cursetablet.ghost.2", "item.cursetablet.ghost.3", "item.cursetablet.ghost.4",
+                          "item.cursetablet.skeleton.1", "item.cursetablet.skeleton.2", "item.cursetablet.skeleton.3",
+                          "item.cursetablet.skeleton.4" },
+                        grave_entity, by );
       break;
     case Cmp::Grave::Consequence::Type::TORCH:
       spawn_grave_loot( { "item.torch" }, grave_entity, by );

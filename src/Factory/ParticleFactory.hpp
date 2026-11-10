@@ -92,7 +92,7 @@ void add_wormhole_ps( entt::registry &reg, const std::string &tag, float lifetim
 void add_obstacledig_ps( entt::registry &reg, const std::string &tag, int particle_count, float lifetime_seconds, float speed, float size,
                          Cmp::UUID &uuid_cmp, sf::Vector2f pos, float zorder );
 
-//! @brief Spawn the debris particle effect for an pot being broken.
+//! @brief Spawn the debris particle effect for a pot being broken.
 //! @param reg
 //! @param tag <location>.<item>.particle.<sprite>
 //! @param particle_count Number of particles in the sprite.
@@ -104,6 +104,19 @@ void add_obstacledig_ps( entt::registry &reg, const std::string &tag, int partic
 //! @param zorder Draw order relative to other entities.
 void add_pot_ps( entt::registry &reg, const std::string &tag, int particle_count, float lifetime_seconds, float speed, float size,
                  Cmp::UUID &uuid_cmp, sf::Vector2f pos, float zorder );
+
+//! @brief Spawn the debris particle effect for a curse tablet being broken.
+//! @param reg
+//! @param tag <location>.<item>.particle.<sprite>
+//! @param particle_count Number of particles in the sprite.
+//! @param lifetime_seconds Maximum particle lifetime, in seconds.
+//! @param speed Particle speed (fixed, not randomised).
+//! @param size Per-particle dot size.
+//! @param uuid_cmp UUID assigned to the created entity, so it can be tracked/updated later (e.g. via update_position()).
+//! @param pos World position of the emitter (jittered slightly per call).
+//! @param zorder Draw order relative to other entities.
+void add_cursetablet_ps( entt::registry &reg, const std::string &tag, int particle_count, float lifetime_seconds, float speed, float size,
+                         Cmp::UUID &uuid_cmp, sf::Vector2f pos, float zorder );
 
 //! @brief Spawn the copper debris particle effect for a lightning rod worn out by lightning. The debris damages the player on contact.
 //! @param reg
@@ -199,8 +212,8 @@ void add_lava_fireball_ps( entt::registry &reg, const std::string &tag, int part
 //! @param to World position the fireball is aimed at.
 //! @param zorder Draw order relative to other entities.
 //! @param palette The flame colours, e.g. Cmp::Particle::LavaFireballParticleSprite::kPurplePalette.
-void add_aimed_fireball_ps( entt::registry &reg, const std::string &tag, float lifetime_seconds, float speed, float gravity, float size, Cmp::UUID &uuid_cmp,
-                               sf::Vector2f from, sf::Vector2f to, float zorder, const Cmp::Particle::FireballPalette &palette );
+void add_aimed_fireball_ps( entt::registry &reg, const std::string &tag, float lifetime_seconds, float speed, float gravity, float size,
+                            Cmp::UUID &uuid_cmp, sf::Vector2f from, sf::Vector2f to, float zorder, const Cmp::Particle::FireballPalette &palette );
 
 //! @brief Spawn an ember particle effect: each particle is launched upwards with a random spread, travels
 //! in a parabola and is destroyed when it falls back to the y position of `pos`.
