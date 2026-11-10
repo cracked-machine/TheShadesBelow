@@ -68,6 +68,7 @@
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
+#include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MissingTalismanBias.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
@@ -229,6 +230,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::AltarSummonOfferingCooldown>();
   add_component<Cmp::Persist::LightningDamage>();
   add_component<Cmp::Persist::MinNumHealingSprings>();
+  add_component<Cmp::Persist::NumAltars>();
   add_component<Cmp::Persist::MinNumRuins>();
   add_component<Cmp::Persist::MusicVolume>();
   add_component<Cmp::Persist::NpcActivateScale>();

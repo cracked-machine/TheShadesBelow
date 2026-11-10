@@ -30,6 +30,7 @@
 #include <Components/Persistent/GraveTrailNominalSize.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
+#include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/TalismanMinChance.hpp>
 #include <Components/Player/Cadaver.hpp>
@@ -482,7 +483,8 @@ void LevelGenerator::add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scen
 void LevelGenerator::gen_graveyard_exterior_multiblocks()
 {
   // const size_t grave_num_multiplier = Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() ).get_value();
-  const size_t max_num_altars = 1;
+  // only one altar can be activated at a time, so more altars mean less backtracking, not more graves (see below)
+  const auto max_num_altars = static_cast<size_t>( std::max( 1, static_cast<int>( Sys::PersistSystem::get<Cmp::Persist::NumAltars>( reg() ).get_value() ) ) );
   const size_t max_num_crypts = 1;
   const auto &min_num_healing_springs = Sys::PersistSystem::get<Cmp::Persist::MinNumHealingSprings>( reg() );
   const auto &min_num_ruins = Sys::PersistSystem::get<Cmp::Persist::MinNumRuins>( reg() );
@@ -509,7 +511,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
         entt, Sys::ItemStore::instance().pick_distinct_items( "item.talisman*", Cmp::Altar::TalismanCount::kAltarTalismanCount ) );
   }
 
-  // CRYPTS - note: we use keys from altars to open crypts so the number should be equal
+  // CRYPTS - one crypt serves every grave trail's crypt key, whichever altar started it
   const auto &crypt_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.crypt.closed" );
   spawn_multiblocks<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( max_num_crypts, crypt_spritesheet,
                                                                                   /*log=*/true, kMinBuildingSpacingCells );
@@ -533,7 +535,8 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
     // const size_t level_depth = Utils::Player::get_level_depth( reg() ).get_count();
     const size_t exit_and_crypt_key_multiplier = 2;
     const size_t trail_start_count = 1;
-    // sized for the longest trail of the run, at the deepest level
+    // sized per cadaver part, not per altar: each part takes one altar activation and one trail, whichever altar is used.
+    // Sized for the longest trail of the run, at the deepest level
     const auto max_level_depth = static_cast<size_t>( std::max( 1, Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value() ) );
     const size_t altar_activation_count = Cmp::Altar::TalismanCount::kAltarTalismanCount;
     // trail graves skip their consequence, so each altar activation's talismans are dug from graves off the trail.

@@ -67,6 +67,7 @@
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
+#include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MissingTalismanBias.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
@@ -424,6 +425,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::GraveCountMargin>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailGuideColour>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ExitKeyRequirement>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::NumAltars>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MinNumHealingSprings>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MinNumRuins>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RuinProcGenInitChance>( reg() ).render_widget();
