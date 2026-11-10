@@ -38,12 +38,12 @@ public:
   //! its neighbours. Keep it sorted by value. To add a consequence, add a row.
   // clang-format off
   static constexpr std::array k_line{
-      Slot{ .type=Type::BOMB_TRAP, .value=10 },    
-      Slot{ .type=Type::CURSE_TABLET, .value=25 }, 
-      Slot{ .type=Type::NPC_TRAP, .value=40 },     
-      Slot{ .type=Type::TALISMAN, .value=60 },     
-      Slot{ .type=Type::TORCH, .value=70 },        
-      Slot{ .type=Type::JEWELRY, .value=90 },      
+      Slot{ .type=Type::CURSE_TABLET, .value=10 }, 
+      Slot{ .type=Type::BOMB_TRAP,    .value=30 },    
+      Slot{ .type=Type::TORCH,        .value=35 },        
+      Slot{ .type=Type::NPC_TRAP,     .value=40 },     
+      Slot{ .type=Type::TALISMAN,     .value=60 },     
+      Slot{ .type=Type::JEWELRY,      .value=70 },      
   };
   // clang-format on
 
