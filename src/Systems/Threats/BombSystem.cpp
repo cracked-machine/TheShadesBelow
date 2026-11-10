@@ -12,6 +12,7 @@
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/Segment.hpp>
 #include <Components/Inventory/BlastProof.hpp>
+#include <Components/ObstacleCap.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/Container.hpp>
@@ -150,8 +151,10 @@ void BombSystem::update( sf::Time dt )
 
     // detonate obstacles - remove all traces of obstacle
     Utils::Collision::for_each_intersect<Cmp::Obstacle>( reg(), armed_pos_cmp,
-                                                         [&]( entt::entity obst_entity, Cmp::Obstacle &, Cmp::Position &obst_pos_cmp )
+                                                         [&]( entt::entity obst_entity, Cmp::Obstacle &, Cmp::Position &obst_pos_ref )
     {
+      // copied: remove_obstacle() destroys the cap entity, which can swap-and-pop the Position pool under the reference
+      const Cmp::Position obst_pos_cmp = obst_pos_ref;
       if ( reserved_sm && not reserved_sm->at( obst_pos_cmp ).empty() ) return;
       Factory::Obstacle::remove_obstacle( reg(), obst_entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
       pathfinding_navmesh->insert( obst_entity, obst_pos_cmp );
@@ -302,8 +305,12 @@ void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_en
 
   // We dont detonate reserved positions (or the exit) so dont arm them, but they still get a visual-only
   // Cmp::BlastMarker so the blast pattern has no holes.
-  // Also exclude NPCs since they're handled separately and may be missing Position component during death animation
-  auto all_obstacle_view = reg().view<Cmp::Armable, Cmp::Position>( exclude<Cmp::Npc::NPC> );
+  // Also exclude NPCs since they're handled separately and may be missing Position component during death animation.
+  // Obstacle caps are excluded too: a cap is only ever removed with its obstacle main (see
+  // Factory::Obstacle::remove_obstacle()), so an obstacle is hit only when its main's cell is in the blast. Arming a cap
+  // on its own would strip its sprite and leave the main standing, with the scorched cap still selecting it for digging.
+  // The cap's cell is still armed and scorched through its own floor entity.
+  auto all_obstacle_view = reg().view<Cmp::Armable, Cmp::Position>( exclude<Cmp::Npc::NPC, Cmp::ObstacleCap> );
   auto reserved_sm = m_reserved_sm.lock();
 
   // cells already showing a marker (e.g. from an overlapping blast), so each cell gets at most one
@@ -424,7 +431,8 @@ void BombSystem::arm_player_bomb()
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_type != "item.bomb" ) return;
 
-  auto destructable_view = reg().view<Cmp::Armable, Cmp::Position>();
+  // caps share a cell with the floor entity beneath them, so skip them or one bomb would plant two epicentres
+  auto destructable_view = reg().view<Cmp::Armable, Cmp::Position>( exclude<Cmp::ObstacleCap> );
   for ( auto [destructable_entity, destructable_cmp, destructable_pos_cmp] : destructable_view.each() )
   {
     // make a copy and reduce/center the player hitbox to avoid arming a neighbouring location
@@ -445,6 +453,8 @@ void BombSystem::arm_player_bomb()
       place_concentric_bomb_pattern( armed_epicenter_entity, player_blast_radius() );
       Factory::Player::destroy_inventory( reg(), "item.bomb" );
       Utils::Player::get_global_bomb_flash_timer( reg() ) = sf::Time::Zero;
+      // one bomb, one epicentre; arming also created entities, so don't keep iterating the view
+      break;
     }
   }
 }
