@@ -71,6 +71,10 @@
 #include <Components/Persistent/MissingTalismanBias.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
+#include <Components/Persistent/NpcCrowFlightSpeed.hpp>
+#include <Components/Persistent/NpcCrowPerchSpeed.hpp>
+#include <Components/Persistent/NpcCrowPerchRange.hpp>
+#include <Components/Persistent/NpcCrowMaxPerchWait.hpp>
 #include <Components/Persistent/NpcMimicTint.hpp>
 #include <Components/Persistent/NpcPushBack.hpp>
 #include <Components/Persistent/NpcShockwaveFreq.hpp>
@@ -393,6 +397,10 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
 
     Sys::PersistSystem::get<Cmp::Persist::NpcActivateScale>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::NpcMimicTint>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::NpcCrowFlightSpeed>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::NpcCrowPerchSpeed>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::NpcCrowPerchRange>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::NpcCrowMaxPerchWait>( reg() ).render_widget();
 
     // Audio
     ImGui::SeparatorText( "Audio" );

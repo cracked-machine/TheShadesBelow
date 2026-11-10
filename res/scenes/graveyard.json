@@ -1767,6 +1767,7 @@
         {
          "draworder":"topdown",
          "id":9,
+         "locked":true,
          "name":"multiblock",
          "objects":[
                 {
@@ -1856,7 +1857,6 @@
         {
          "draworder":"topdown",
          "id":11,
-         "locked":true,
          "name":"developer",
          "objects":[
                 {
@@ -2014,15 +2014,41 @@
                  "width":0,
                  "x":832,
                  "y":848
+                }, 
+                {
+                 "height":0,
+                 "id":298,
+                 "name":"item.pickaxe",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":816,
+                 "y":784
+                }, 
+                {
+                 "height":0,
+                 "id":299,
+                 "name":"item.exitkey",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":832,
+                 "y":816
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }],
  "nextlayerid":12,
- "nextobjectid":298,
+ "nextobjectid":300,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

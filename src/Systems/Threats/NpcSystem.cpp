@@ -51,6 +51,10 @@
 #include <Components/Persistent/AzazelFireballSpeed.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
+#include <Components/Persistent/NpcCrowFlightSpeed.hpp>
+#include <Components/Persistent/NpcCrowPerchSpeed.hpp>
+#include <Components/Persistent/NpcCrowPerchRange.hpp>
+#include <Components/Persistent/NpcCrowMaxPerchWait.hpp>
 #include <Components/Persistent/NpcMimicTint.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
@@ -72,6 +76,7 @@
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateNpcEvent.hpp>
+#include <Events/CrowDeliveryEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/DestroyPlantEvent.hpp>
 #include <Events/GrimoireUpdateEvent.hpp>
@@ -108,6 +113,7 @@
 #include <cmath>
 #include <limits>
 #include <spdlog/spdlog.h>
+#include <utility>
 #include <vector>
 
 namespace Game::Sys
@@ -120,6 +126,7 @@ NpcSystem::NpcSystem( entt::registry &reg, sf::RenderWindow &window, Audio::Soun
   std::ignore = get_systems_event_queue().sink<Events::UpdateNpcPositionEvent>().connect<&NpcSystem::on_update_npc_position_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::DestroyNpcEvent>().connect<&NpcSystem::on_destroy_npc_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::CreateNpcEvent>().connect<&NpcSystem::on_create_npc_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::CrowDeliveryEvent>().connect<&NpcSystem::on_crow_delivery_event>( this );
 }
 
 void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
@@ -158,6 +165,117 @@ void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
     reg().emplace_or_replace<Cmp::Npc::SpawnedBy>( npc_entt, event.m_source_uuid );
   }
   if ( event.m_on_created ) { event.m_on_created( npc_entt ); }
+}
+
+void NpcSystem::on_crow_delivery_event( const Events::CrowDeliveryEvent &event )
+{
+  // the least worn matching item in the world. Items carried by NPCs or the player have no Cmp::Position
+  entt::entity item_entt = entt::null;
+  float best_level = -1.0f;
+  for ( auto [cand_entt, cand_cmp, cand_pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>( entt::exclude<Cmp::PlantMultiBlock> ).each() )
+  {
+    if ( cand_cmp.item_type != event.m_item ) continue;
+    const auto *wear_cmp = reg().try_get<Cmp::Inventory::WearLevel>( cand_entt );
+    const float level = wear_cmp ? wear_cmp->m_level : 100.0f;
+    if ( level > best_level )
+    {
+      best_level = level;
+      item_entt = cand_entt;
+    }
+  }
+  if ( item_entt == entt::null )
+  {
+    SPDLOG_INFO( "No {} in the world for the crow to deliver", event.m_item.str() );
+    return;
+  }
+
+  auto npc_navmesh = m_npc_navmesh.lock();
+  auto ghost_navmesh = m_ghost_navmesh.lock();
+  auto loot_sm = m_loot_sm.lock();
+  auto reserved_sm = m_reserved_sm.lock();
+  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
+  const Cmp::Position player_pos = Utils::Player::get_position( reg() );
+  auto cell = Utils::find_random_cell_near( player_pos, kCrowDropRadius, [&]( const sf::Vector2f &cell_pos )
+  { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); } );
+  if ( not cell )
+  {
+    SPDLOG_WARN( "No free cell for the crow to drop {} near [{},{}]", event.m_item.str(), player_pos.position.x, player_pos.position.y );
+    return;
+  }
+
+  // moved, not copied: the item leaves its old spot now and can't be picked up while it is carried
+  lift_world_item( item_entt );
+
+  // start far enough back along a random heading that the crow is always outside the view
+  const sf::Vector2f drop_centre = *cell + Constants::kGridSizePxF / 2.0f;
+  const sf::FloatRect view_bounds = Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() );
+  const sf::Vector2f crow_size = npc_sprite_size( "npc.crow" );
+  const sf::Vector2f dir = sf::Vector2f( 1.0f, sf::degrees( Cmp::RandomFloat( 0.0f, 360.0f ).gen() ) );
+  const float dist = ( view_bounds.size.length() / 2.0f ) + ( drop_centre - view_bounds.getCenter() ).length() + crow_size.length();
+  const sf::Vector2f start_centre = drop_centre - dir * dist;
+
+  // NpcSystem owns the factory. The crow flies over everything, so it never goes on a navmesh
+  auto crow_entt = Factory::Npc::create_npc( reg(), Cmp::Position( start_centre - crow_size / 2.0f, crow_size ), "npc.crow" );
+  if ( crow_entt == entt::null )
+  {
+    // better back where it was than lost
+    place_world_item( item_entt, *cell );
+    return;
+  }
+  auto &crow_cmp = reg().get<Cmp::Npc::Crow>( crow_entt );
+  crow_cmp.carried = item_entt;
+  crow_cmp.drop_position = *cell;
+  crow_cmp.flight_direction = dir;
+  reg().emplace_or_replace<Cmp::Direction>( crow_entt, dir );
+  auto &anim_cmp = reg().get<Cmp::AnimData>( crow_entt );
+  anim_cmp.m_sprite_type = "sprite.crow.fly";
+  // the sprite faces east, so mirror it to fly west
+  anim_cmp.m_flip_x = dir.x < 0.0f;
+  anim_cmp.m_enabled = true;
+  SPDLOG_INFO( "Crow {} delivering {} ({}%) to [{},{}]", static_cast<int>( crow_entt ), event.m_item.str(), best_level, cell->x, cell->y );
+}
+
+void NpcSystem::drop_crow_item( Cmp::Npc::Crow &crow_cmp )
+{
+  const entt::entity item_entt = std::exchange( crow_cmp.carried, entt::null );
+  if ( not reg().valid( item_entt ) or not reg().all_of<Cmp::WorldItem>( item_entt ) ) return;
+
+  // something may have landed on the drop cell during the flight
+  auto npc_navmesh = m_npc_navmesh.lock();
+  auto ghost_navmesh = m_ghost_navmesh.lock();
+  auto loot_sm = m_loot_sm.lock();
+  auto reserved_sm = m_reserved_sm.lock();
+  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
+  const auto is_free = [&]( const sf::Vector2f &cell_pos )
+  { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); };
+  sf::Vector2f drop_pos = crow_cmp.drop_position;
+  if ( not is_free( drop_pos ) )
+  {
+    // better on the original cell than lost
+    drop_pos = Utils::find_random_cell_near( Cmp::Position( drop_pos, Constants::kGridSizePxF ), kCrowDropRadius, is_free ).value_or( drop_pos );
+  }
+  place_world_item( item_entt, drop_pos );
+  m_sound_bank.get_effect( "drop_inventory" ).play();
+}
+
+void NpcSystem::lift_world_item( entt::entity item_entt )
+{
+  if ( auto reserved_sm = m_reserved_sm.lock() )
+  {
+    if ( const auto *pos_cmp = reg().try_get<Cmp::Position>( item_entt ) ) reserved_sm->remove( item_entt, *pos_cmp );
+  }
+  // keeps every other component (wear level, uuid, dowsing target...) for when it is put back
+  reg().remove<Cmp::Position, Cmp::AnimData, Cmp::ZOrderValue>( item_entt );
+}
+
+void NpcSystem::place_world_item( entt::entity item_entt, sf::Vector2f cell )
+{
+  const Cmp::Position item_pos( cell, Constants::kGridSizePxF );
+  reg().emplace_or_replace<Cmp::Position>( item_entt, item_pos );
+  reg().emplace_or_replace<Cmp::AnimData>(
+      item_entt, Cmp::AnimData::Config{ .sprite_type = reg().get<Cmp::WorldItem>( item_entt ).sprite_type, .enabled = false } );
+  reg().emplace_or_replace<Cmp::ZOrderValue>( item_entt, cell.y - 1.f );
+  if ( auto reserved_sm = m_reserved_sm.lock() ) reserved_sm->insert( item_entt, item_pos );
 }
 
 sf::Vector2f NpcSystem::npc_sprite_size( const Sys::NpcKey &npc_type )
@@ -556,16 +674,38 @@ void NpcSystem::update_sfx( sf::Time dt )
 
 void NpcSystem::update_crows( sf::Time dt )
 {
-  static constexpr float kCrowFlightSpeed = Constants::kGridSizePxF.x * 6.0f;
-  static constexpr float kCrowPerchSpeed = 6.0f;
-  static constexpr float kCrowPerchRange = 8.0f;
-  static constexpr float kCrowMaxPerchWait = 1.0f;
+  const float flight_speed = Constants::kGridSizePxF.x * Sys::PersistSystem::get<Cmp::Persist::NpcCrowFlightSpeed>( reg() ).get_value();
+  const float perch_speed = Sys::PersistSystem::get<Cmp::Persist::NpcCrowPerchSpeed>( reg() ).get_value();
+  const float perch_range = Sys::PersistSystem::get<Cmp::Persist::NpcCrowPerchRange>( reg() ).get_value();
+  const float max_perch_wait = Sys::PersistSystem::get<Cmp::Persist::NpcCrowMaxPerchWait>( reg() ).get_value();
   const sf::FloatRect view_bounds = Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() );
   const Cmp::Position player_pos = Utils::Player::get_position( reg() );
 
   std::vector<entt::entity> kill_list;
   for ( auto [crow_entt, crow_cmp, pos_cmp, anim_cmp] : reg().view<Cmp::Npc::Crow, Cmp::Position, Cmp::AnimData>().each() )
   {
+    // courier: fly in to the drop cell, drop the item, then fly back out the way it came
+    if ( crow_cmp.carried != entt::null and crow_cmp.flight_direction )
+    {
+      const sf::Vector2f drop_centre = crow_cmp.drop_position + Constants::kGridSizePxF / 2.0f;
+      const float step = flight_speed * dt.asSeconds();
+      const float remaining = ( drop_centre - pos_cmp.getCenter() ).dot( *crow_cmp.flight_direction );
+      if ( remaining > step ) { pos_cmp.position += *crow_cmp.flight_direction * step; }
+      else
+      {
+        pos_cmp.position = drop_centre - pos_cmp.size / 2.0f;
+        drop_crow_item( crow_cmp );
+        crow_cmp.flee = true;
+        crow_cmp.flight_direction = -*crow_cmp.flight_direction;
+        reg().emplace_or_replace<Cmp::Direction>( crow_entt, *crow_cmp.flight_direction );
+        anim_cmp.m_flip_x = crow_cmp.flight_direction->x < 0.0f;
+      }
+      const float zorder = Sys::SpriteStore::instance().get( anim_cmp.m_sprite_type ).zorder( 0, pos_cmp.position.y );
+      reg().patch<Cmp::ZOrderValue>( crow_entt, [&]( auto &zorder_cmp ) { zorder_cmp.set( zorder ); } );
+      // still flying in from off screen, so no off-view kill check
+      continue;
+    }
+
     if ( not crow_cmp.flee )
     {
       // the crow only animates while standing still. AnimSystem only steps an NPC's frames while its Cmp::Direction
@@ -589,13 +729,13 @@ void NpcSystem::update_crows( sf::Time dt )
         continue;
       }
 
-      // done moving or waiting: either wait a while, or move to a random spot within kCrowPerchRange of the grave centre
+      // done moving or waiting: either wait a while, or move to a random spot within perch_range of the grave centre
       if ( not crow_cmp.perch_target_x )
       {
-        if ( Cmp::RandomInt( 0, 1 ).gen() == 0 ) { crow_cmp.perch_wait = sf::seconds( Cmp::RandomFloat( 0.0f, kCrowMaxPerchWait ).gen() ); }
+        if ( Cmp::RandomInt( 0, 1 ).gen() == 0 ) { crow_cmp.perch_wait = sf::seconds( Cmp::RandomFloat( 0.0f, max_perch_wait ).gen() ); }
         else
         {
-          crow_cmp.perch_target_x = crow_cmp.perch_center_x + Cmp::RandomFloat( -kCrowPerchRange, kCrowPerchRange ).gen();
+          crow_cmp.perch_target_x = crow_cmp.perch_center_x + Cmp::RandomFloat( -perch_range, perch_range ).gen();
           // the sprite faces east, so mirror it to walk west
           anim_cmp.m_flip_x = *crow_cmp.perch_target_x < pos_cmp.getCenter().x;
         }
@@ -605,7 +745,7 @@ void NpcSystem::update_crows( sf::Time dt )
 
       const Cmp::Position old_position = pos_cmp;
       const float remaining = *crow_cmp.perch_target_x - pos_cmp.getCenter().x;
-      const float step = kCrowPerchSpeed * dt.asSeconds();
+      const float step = perch_speed * dt.asSeconds();
       if ( std::abs( remaining ) <= step )
       {
         pos_cmp.position.x = *crow_cmp.perch_target_x - pos_cmp.size.x / 2.0f;
@@ -637,7 +777,7 @@ void NpcSystem::update_crows( sf::Time dt )
       anim_cmp.m_enabled = true;
     }
 
-    pos_cmp.position += *crow_cmp.flight_direction * kCrowFlightSpeed * dt.asSeconds();
+    pos_cmp.position += *crow_cmp.flight_direction * flight_speed * dt.asSeconds();
     const float zorder = Sys::SpriteStore::instance().get( anim_cmp.m_sprite_type ).zorder( 0, pos_cmp.position.y );
     reg().patch<Cmp::ZOrderValue>( crow_entt, [&]( auto &zorder_cmp ) { zorder_cmp.set( zorder ); } );
 
@@ -816,7 +956,6 @@ void NpcSystem::update_burryman_pathfinding( PathFinding::SpatialHashGrid &navme
 
 void NpcSystem::update_burryman_pickup( sf::Time dt )
 {
-  auto reserved_sm = m_reserved_sm.lock();
   for ( auto [npc_entt, burryman_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::Burryman, Cmp::Position>().each() )
   {
     burryman_cmp.sfx_cooldown += dt;
@@ -835,9 +974,7 @@ void NpcSystem::update_burryman_pickup( sf::Time dt )
 
     for ( auto item_entt : picked_up )
     {
-      if ( reserved_sm ) reserved_sm->remove( item_entt, reg().get<Cmp::Position>( item_entt ) );
-      // keeps every other component (wear level, uuid, dowsing target...) for when he drops it again
-      reg().remove<Cmp::Position, Cmp::AnimData, Cmp::ZOrderValue>( item_entt );
+      lift_world_item( item_entt );
       burryman_cmp.carried.push_back( item_entt );
       SPDLOG_INFO( "Burryman {} picked up {}", static_cast<int>( npc_entt ), reg().get<Cmp::WorldItem>( item_entt ).item_type );
     }
@@ -878,12 +1015,7 @@ void NpcSystem::drop_burryman_items( entt::entity burryman_entity, const Cmp::Po
     const sf::Vector2f drop_pos = cell ? *cell : Utils::snap_to_grid( burryman_pos.position );
     used_cells.push_back( drop_pos );
 
-    const Cmp::Position item_pos( drop_pos, Constants::kGridSizePxF );
-    reg().emplace_or_replace<Cmp::Position>( item_entt, item_pos );
-    reg().emplace_or_replace<Cmp::AnimData>(
-        item_entt, Cmp::AnimData::Config{ .sprite_type = reg().get<Cmp::WorldItem>( item_entt ).sprite_type, .enabled = false } );
-    reg().emplace_or_replace<Cmp::ZOrderValue>( item_entt, drop_pos.y - 1.f );
-    if ( reserved_sm ) reserved_sm->insert( item_entt, item_pos );
+    place_world_item( item_entt, drop_pos );
     dropped_any = true;
   }
   burryman_cmp.carried.clear();

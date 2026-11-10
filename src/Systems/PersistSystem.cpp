@@ -72,6 +72,10 @@
 #include <Components/Persistent/MissingTalismanBias.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
+#include <Components/Persistent/NpcCrowFlightSpeed.hpp>
+#include <Components/Persistent/NpcCrowPerchSpeed.hpp>
+#include <Components/Persistent/NpcCrowPerchRange.hpp>
+#include <Components/Persistent/NpcCrowMaxPerchWait.hpp>
 #include <Components/Persistent/NpcMimicTint.hpp>
 #include <Components/Persistent/NpcPushBack.hpp>
 #include <Components/Persistent/NpcShockwaveFreq.hpp>
@@ -228,6 +232,10 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::MinNumRuins>();
   add_component<Cmp::Persist::MusicVolume>();
   add_component<Cmp::Persist::NpcActivateScale>();
+  add_component<Cmp::Persist::NpcCrowFlightSpeed>();
+  add_component<Cmp::Persist::NpcCrowPerchSpeed>();
+  add_component<Cmp::Persist::NpcCrowPerchRange>();
+  add_component<Cmp::Persist::NpcCrowMaxPerchWait>();
   add_component<Cmp::Persist::NpcMimicTint>();
   add_component<Cmp::Persist::NpcPushBack>();
   add_component<Cmp::Persist::NpcShockwaveFreq>();

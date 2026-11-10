@@ -586,6 +586,38 @@
     "detail": "NPC Activation Bounding Box Scale Factor",
     "format": "%.1f pixels"
     },
+  "NpcCrowFlightSpeed": {
+    "type": "float",
+    "value": 4.0,
+    "min_value": 0.5,
+    "max_value": 20.0,
+    "detail": "Crow Flight Speed",
+    "format": "%.1f tiles/s"
+  },
+  "NpcCrowMaxPerchWait": {
+    "type": "float",
+    "value": 1.0,
+    "min_value": 0.0,
+    "max_value": 10.0,
+    "detail": "Crow Max Perch Wait",
+    "format": "%.1f s"
+  },
+  "NpcCrowPerchRange": {
+    "type": "float",
+    "value": 8.0,
+    "min_value": 0.0,
+    "max_value": 32.0,
+    "detail": "Crow Perch Range",
+    "format": "%.1f pixels"
+  },
+  "NpcCrowPerchSpeed": {
+    "type": "float",
+    "value": 6.0,
+    "min_value": 0.5,
+    "max_value": 32.0,
+    "detail": "Crow Perch Speed",
+    "format": "%.1f pixels/s"
+    },
   "NpcMimicTint": {
     "type": "sf::Color",
     "value" : {

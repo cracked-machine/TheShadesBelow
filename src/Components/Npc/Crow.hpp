@@ -3,6 +3,7 @@
 
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <entt/entity/entity.hpp>
 
 #include <optional>
 
@@ -12,6 +13,9 @@ namespace Game::Cmp::Npc
 //! @brief Marker component tagging an entity as the Crow NPC (a passive NPC type).
 struct Crow
 {
+  //! @brief Scale the carried item is drawn at, hanging under the crow.
+  static constexpr float kCarriedScale = 0.75f;
+
   sf::Time sfx_cooldown{ sf::Time::Zero };
   //! @brief World x of the centre of the grave the crow is perched on, which it moves either side of.
   float perch_center_x{ 0.0f };
@@ -23,6 +27,11 @@ struct Crow
   bool flee{ false };
   //! @brief Unit vector the crow flies along, set by NpcSystem when it takes off. std::nullopt while perched.
   std::optional<sf::Vector2f> flight_direction{ std::nullopt };
+  //! @brief World item the crow is flying in to drop beside the player, or entt::null. It keeps its components minus
+  //! Cmp::Position, Cmp::AnimData and Cmp::ZOrderValue (as for Cmp::Npc::Burryman::carried) until it is dropped.
+  entt::entity carried{ entt::null };
+  //! @brief Top-left of the grid cell the carried item is dropped on.
+  sf::Vector2f drop_position{};
 };
 
 } // namespace Game::Cmp::Npc

@@ -16,6 +16,7 @@
 #include <Components/SpawnArea.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/CrowDeliveryEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Factory/MultiblockFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
@@ -132,6 +133,8 @@ void ExitSystem::unlock_exit()
 
     if ( m_sound_bank.get_effect( "secret" ).getStatus() == sf::Sound::Status::Stopped ) m_sound_bank.get_effect( "secret" ).play();
     Factory::Player::destroy_inventory( reg(), "item.exitkey" );
+    // enqueued: the delivery lifts the pickaxe's Cmp::Position while this view is still being iterated
+    get_systems_event_queue().enqueue( Events::CrowDeliveryEvent( "item.pickaxe" ) );
   }
 }
 

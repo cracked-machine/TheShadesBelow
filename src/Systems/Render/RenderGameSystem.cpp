@@ -33,6 +33,7 @@
 #include <Components/LastDirection.hpp>
 #include <Components/Moveable.hpp>
 #include <Components/Npc/Burryman.hpp>
+#include <Components/Npc/Crow.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/Shockwave.hpp>
@@ -307,6 +308,7 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
     render_attached_burrs( *burr_cmp, body_rect );
   }
   if ( const auto *burryman_cmp = reg().try_get<Cmp::Npc::Burryman>( entity ) ) render_carried_items( *burryman_cmp, body_rect );
+  if ( const auto *crow_cmp = reg().try_get<Cmp::Npc::Crow>( entity ) ) render_carried_items( *crow_cmp, body_rect );
   if ( is_player and not held_item_behind ) render_held_item( body_rect, facing, held_item_scale, alpha );
   if ( const auto *talisman_cmp = reg().try_get<Cmp::Altar::TalismanCount>( entity ) ) render_altar_talismans( *talisman_cmp, anim_cmp, body_rect );
 }
@@ -476,6 +478,18 @@ void RenderGameSystem::render_carried_items( const Cmp::Npc::Burryman &burryman_
     safe_render_sprite_world( item_cmp->sprite_type, sf::FloatRect( centre + offset - half_cell, Constants::kGridSizePxF ), 0,
                               { Cmp::Npc::Burryman::kCarriedScale, Cmp::Npc::Burryman::kCarriedScale }, 255, half_cell );
   }
+}
+
+void RenderGameSystem::render_carried_items( const Cmp::Npc::Crow &crow_cmp, const sf::FloatRect &body_rect )
+{
+  if ( crow_cmp.carried == entt::null or not reg().valid( crow_cmp.carried ) ) return;
+  const auto *item_cmp = reg().try_get<Cmp::WorldItem>( crow_cmp.carried );
+  if ( not item_cmp ) return;
+  // the origin is the sprite centre, so the item is scaled down in place, centred on the crow's bottom edge
+  const sf::Vector2f half_cell = Constants::kGridSizePxF / 2.f;
+  const sf::Vector2f hang_point( body_rect.getCenter().x, body_rect.position.y + body_rect.size.y );
+  safe_render_sprite_world( item_cmp->sprite_type, sf::FloatRect( hang_point - half_cell, Constants::kGridSizePxF ), 0,
+                            { Cmp::Npc::Crow::kCarriedScale, Cmp::Npc::Crow::kCarriedScale }, 255, half_cell );
 }
 
 void RenderGameSystem::render_held_item( const sf::FloatRect &body_rect, sf::Vector2f facing, sf::Vector2f scale, uint8_t alpha )

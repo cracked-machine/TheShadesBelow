@@ -17,11 +17,11 @@
 // clang-format off
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
-namespace Game::Events { class UpdateNpcPositionEvent; class DestroyNpcEvent; struct CreateNpcEvent; }
+namespace Game::Events { class UpdateNpcPositionEvent; class DestroyNpcEvent; struct CreateNpcEvent; struct CrowDeliveryEvent; }
 namespace Game::Cmp { class Position; }
 namespace Game::Cmp { class Direction; class LerpPosition; } 
 namespace Game::Cmp::Player { class Mortality; } 
-namespace Game::Cmp::Npc { class NPC; class Shockwave; }
+namespace Game::Cmp::Npc { class NPC; class Shockwave; struct Crow; }
 namespace Game::PathFinding { class SpatialHashGrid; }
 namespace Game::Utils::Collision { struct LightSources; }
 // clang-format on
@@ -76,6 +76,26 @@ private:
   //! @param event
   void on_create_npc_event( const Game::Events::CreateNpcEvent &event );
 
+  //! @brief Lift the least worn world item of type `event.m_item` out of the world and send a courier crow in from
+  //! off screen to drop it on a free cell beside the player. No op if there is no such item or no free cell.
+  //! @param event
+  void on_crow_delivery_event( const Game::Events::CrowDeliveryEvent &event );
+
+  //! @brief Drop a courier crow's carried item on its drop cell, or on the nearest free cell if that one has been taken
+  //! since, and clear Cmp::Npc::Crow::carried.
+  //! @param crow_cmp
+  void drop_crow_item( Cmp::Npc::Crow &crow_cmp );
+
+  //! @brief Take a world item out of the world while an NPC carries it: it leaves the reserved grid and loses its
+  //! Cmp::Position, Cmp::AnimData and Cmp::ZOrderValue, keeping every other component (wear level, uuid...).
+  //! @param item_entt
+  void lift_world_item( entt::entity item_entt );
+
+  //! @brief Put a world item lifted by lift_world_item() back into the world on the grid cell at `cell`.
+  //! @param item_entt
+  //! @param cell Top-left of the grid cell.
+  void place_world_item( entt::entity item_entt, sf::Vector2f cell );
+
   //! @brief Find a random free cell for `npc_type` in the nearest ring around `source` that has one,
   //! searching outwards up to kNpcSpawnSearchRadius rings.
   //! @param source The spawning source's bounds, e.g. a plant's whole footprint.
@@ -115,7 +135,8 @@ private:
   void update_sfx( sf::Time dt );
 
   //! @brief Each perched Cmp::Npc::Crow randomly waits a while or moves to a random spot along its grave. Fly any fleeing crow in a straight
-  //! line away from the player, over all obstacles, and destroy it once it has left the current view.
+  //! line away from the player, over all obstacles, and destroy it once it has left the current view. A courier crow
+  //! (Cmp::Npc::Crow::carried) flies in to its drop cell, drops its item and flies back out the way it came.
   void update_crows( sf::Time dt );
 
   //! @brief Azazel shoots a straight fireball at the player every Cmp::Persist::AzazelFireballCooldown while on screen,
@@ -211,6 +232,9 @@ private:
 
   //! @brief How many rings out from the Burryman drop_burryman_items() searches for free cells.
   static constexpr int kBurrymanDropRadius = 4;
+
+  //! @brief How many rings out from the player on_crow_delivery_event() searches for a free drop cell.
+  static constexpr int kCrowDropRadius = 3;
 
   //! @brief Update NPC animation
   void update_animation();

@@ -47,7 +47,7 @@ struct AnimData;
 namespace Game::Cmp::Altar { class TalismanCount; }
 namespace Game::Cmp::Hazard { struct SinkholeCorners; }
 
-namespace Game::Cmp::Npc { struct Burryman; }
+namespace Game::Cmp::Npc { struct Burryman; struct Crow; }
 namespace Game::Cmp::Particle { class IParticleSprite; struct SpriteOwner; }
 namespace Game::Cmp::Shader { struct SpriteOwner; }
 // clang-format on
@@ -127,6 +127,11 @@ private:
   //! @param burryman_cmp The Burryman's carried items.
   //! @param body_rect The Burryman's on-screen bounds.
   void render_carried_items( const Cmp::Npc::Burryman &burryman_cmp, const sf::FloatRect &body_rect );
+
+  //! @brief Draw the world item a courier crow is carrying, scaled down and hanging under its body.
+  //! @param crow_cmp The crow, see Cmp::Npc::Crow::carried.
+  //! @param body_rect The crow's on-screen bounds.
+  void render_carried_items( const Cmp::Npc::Crow &crow_cmp, const sf::FloatRect &body_rect );
 
   //! @brief Draw the item in the player's inventory slot on the player, at the player's top-left and scale plus
   //! Cmp::Persist::HeldItemOffset, shifted by Cmp::Persist::HeldItemSideOffsetX towards the facing side when facing east/west.

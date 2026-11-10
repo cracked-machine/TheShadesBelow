@@ -256,6 +256,8 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
   // the crow perched on the grave just opened flies away, so at most one crow is ever perched on the trail
   for ( auto [crow_entt, crow_cmp] : reg().view<Cmp::Npc::Crow>().each() )
   {
+    // a courier crow still flying in keeps going until it has dropped its item
+    if ( crow_cmp.carried != entt::null ) continue;
     crow_cmp.flee = true;
   }
 
