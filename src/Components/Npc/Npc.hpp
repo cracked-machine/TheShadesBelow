@@ -64,6 +64,12 @@ public:
   {
     return actions.at( std::type_index( typeid( ActionT ) ) );
   }
+  //! @brief Whether the NPC has an ActionT, see res/json/npc.json.
+  template <typename ActionT>
+  [[nodiscard]] bool has_action() const
+  {
+    return actions.contains( std::type_index( typeid( ActionT ) ) );
+  }
   template <typename ActionT>
   void emplace( ActionT action )
   {

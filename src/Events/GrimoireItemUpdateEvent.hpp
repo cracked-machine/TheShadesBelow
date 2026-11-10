@@ -1,5 +1,5 @@
-#ifndef SRC_EVENTS_GRIMOIREUPDATEEVENT_HPP__
-#define SRC_EVENTS_GRIMOIREUPDATEEVENT_HPP__
+#ifndef SRC_EVENTS_GRIMOIREITEMUPDATEEVENT_HPP__
+#define SRC_EVENTS_GRIMOIREITEMUPDATEEVENT_HPP__
 
 #include <Components/Stats/BaseAction.hpp>
 #include <Systems/Stores/StoreKey.hpp>
@@ -15,13 +15,13 @@ namespace Game::Events
 //! discovered in the grimoire.
 //! @note Sent by the Utils::Player::apply_action_from_* helpers after the stats have been updated.
 //! Repeating actions (e.g. burn/proximity ticks) send this on every application.
-struct GrimoireUpdateEvent
+struct GrimoireItemUpdateEvent
 {
-  //! @brief Construct a new GrimoireUpdateEvent object
+  //! @brief Construct a new GrimoireItemUpdateEvent object
   //! @param item Item identifier, e.g. "item.plant.nightshade". See res/json/items.json.
   //! @param action_key Action identifier, e.g. Cmp::BurnAction::kKey.
   //! @param action The action that was applied.
-  GrimoireUpdateEvent( Sys::ItemKey item, std::string_view action_key, Cmp::BaseAction action )
+  GrimoireItemUpdateEvent( Sys::ItemKey item, std::string_view action_key, Cmp::BaseAction action )
       : m_item( std::move( item ) ),
         m_action_key( action_key ),
         m_action( std::move( action ) )
@@ -38,4 +38,4 @@ struct GrimoireUpdateEvent
 
 } // namespace Game::Events
 
-#endif // SRC_EVENTS_GRIMOIREUPDATEEVENT_HPP__
+#endif // SRC_EVENTS_GRIMOIREITEMUPDATEEVENT_HPP__

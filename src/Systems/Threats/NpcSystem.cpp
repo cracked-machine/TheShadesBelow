@@ -60,6 +60,7 @@
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
 #include <Components/Plant/KillNpcTimer.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/Mortality.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Player/RepelNpc.hpp>
 #include <Components/Player/TookDamage.hpp>
@@ -71,7 +72,10 @@
 #include <Components/SpawnArea.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/CollisionAction.hpp>
+#include <Components/Stats/DestroyAction.hpp>
+#include <Components/Stats/ProjectileAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
+#include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
@@ -79,7 +83,11 @@
 #include <Events/CrowDeliveryEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/DestroyPlantEvent.hpp>
-#include <Events/GrimoireUpdateEvent.hpp>
+#include <Events/GrimoireItemUpdateEvent.hpp>
+#include <Events/GrimoireNpcUpdateEvent.hpp>
+#include <Events/NpcCollisionEvent.hpp>
+#include <Events/NpcProjectileEvent.hpp>
+#include <Events/NpcProximityEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/TeleportEntityEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
@@ -127,6 +135,63 @@ NpcSystem::NpcSystem( entt::registry &reg, sf::RenderWindow &window, Audio::Soun
   std::ignore = get_systems_event_queue().sink<Events::DestroyNpcEvent>().connect<&NpcSystem::on_destroy_npc_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::CreateNpcEvent>().connect<&NpcSystem::on_create_npc_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::CrowDeliveryEvent>().connect<&NpcSystem::on_crow_delivery_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::NpcProximityEvent>().connect<&NpcSystem::on_npc_proximity_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::NpcCollisionEvent>().connect<&NpcSystem::on_npc_collision_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::NpcProjectileEvent>().connect<&NpcSystem::on_npc_projectile_event>( this );
+}
+
+template <typename ActionT>
+Cmp::BaseAction NpcSystem::apply_npc_action( const Sys::NpcKey &npc_type, const Cmp::BaseAction &action )
+{
+  if ( action.health() < 0 ) { Utils::Player::get_mortality( reg() ).last_damage_cause = Cmp::Player::Mortality::State::HAUNTED; }
+  Utils::Player::get_stats( reg() ).apply( action );
+  get_systems_event_queue().trigger( Events::GrimoireNpcUpdateEvent( npc_type, ActionT::kKey, action ) );
+  return action;
+}
+
+void NpcSystem::apply_npc_spawn_action( entt::entity npc_entt )
+{
+  if ( npc_entt == entt::null ) return;
+  const auto &npc_cmp = reg().get<Cmp::Npc::NPC>( npc_entt );
+  apply_npc_action<Cmp::SpawnAction>( npc_cmp.npc_type, npc_cmp.at<Cmp::SpawnAction>().action );
+}
+
+void NpcSystem::on_npc_proximity_event( const Events::NpcProximityEvent &event )
+{
+  const auto &action = Sys::NpcStore::instance().get( event.m_npc_type ).at<Cmp::ProximityAction>().action;
+  if ( action.health() < 0 ) { reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) ); }
+  trigger_side_effects( apply_npc_action<Cmp::ProximityAction>( event.m_npc_type, action ), event.m_source );
+}
+
+void NpcSystem::on_npc_collision_event( const Events::NpcCollisionEvent &event )
+{
+  const auto &action = Sys::NpcStore::instance().get( event.m_npc_type ).at<Cmp::CollisionAction>().action;
+  trigger_side_effects( apply_npc_action<Cmp::CollisionAction>( event.m_npc_type, action ), event.m_source );
+}
+
+void NpcSystem::on_npc_projectile_event( const Events::NpcProjectileEvent &event )
+{
+  const auto &action = Sys::NpcStore::instance().get( event.m_npc_type ).at<Cmp::ProjectileAction>().action;
+  trigger_side_effects( apply_npc_action<Cmp::ProjectileAction>( event.m_npc_type, action ), event.m_source );
+}
+
+void NpcSystem::check_npc_proximity( sf::Time dt )
+{
+  // NPC proximity modifiers are only applied when they are within this rectangle
+  auto half_view = Cmp::RectBounds::scaled( Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() ), 0.5f );
+
+  for ( auto [npc_entt, npc_cmp, npc_pos_cmp, npc_anim_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::AnimData>().each() )
+  {
+    auto &[proximity_action, proximity_timer] = npc_cmp.at<Cmp::ProximityAction>();
+    if ( proximity_action.interval() == 0.f ) continue;
+    // the timer keeps running while the NPC is out of range
+    proximity_timer += dt;
+
+    if ( not Utils::is_visible_in_view( half_view.getBounds(), npc_pos_cmp ) ) continue;
+    if ( proximity_timer.asSeconds() < proximity_action.interval() ) continue;
+    proximity_timer = sf::Time::Zero;
+    get_systems_event_queue().trigger( Events::NpcProximityEvent( npc_cmp.npc_type, npc_pos_cmp ) );
+  }
 }
 
 void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
@@ -157,6 +222,7 @@ void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
 
   auto npc_entt = Factory::Npc::create_npc( reg(), spawn_pos, event.m_npc_type );
   if ( npc_entt == entt::null ) return;
+  apply_npc_spawn_action( npc_entt );
   // insert now rather than on its first move, so spawn searches see it straight away
   if ( auto navmesh = navmesh_for( npc_entt ) ) { navmesh->insert( npc_entt, reg().get<Cmp::Position>( npc_entt ) ); }
   if ( not event.m_source_uuid.empty() )
@@ -222,6 +288,7 @@ void NpcSystem::on_crow_delivery_event( const Events::CrowDeliveryEvent &event )
     place_world_item( item_entt, *cell );
     return;
   }
+  apply_npc_spawn_action( crow_entt );
   auto &crow_cmp = reg().get<Cmp::Npc::Crow>( crow_entt );
   crow_cmp.carried = item_entt;
   crow_cmp.drop_position = *cell;
@@ -356,6 +423,10 @@ void NpcSystem::on_destroy_npc_event( const Events::DestroyNpcEvent &event )
   if ( event.m_death_anim ) { create_death_anim( *pos_cmp, *event.m_death_anim ); }
   if ( event.m_death_sfx ) { m_sound_bank.get_effect( *event.m_death_sfx ).play(); }
 
+  if ( const auto *npc_cmp = reg().try_get<Cmp::Npc::NPC>( npc_entity ) )
+  {
+    apply_npc_action<Cmp::DestroyAction>( npc_cmp->npc_type, npc_cmp->at<Cmp::DestroyAction>().action );
+  }
   Factory::Npc::destroy_npc( reg(), npc_entity );
 }
 
@@ -413,6 +484,7 @@ void NpcSystem::update( sf::Time dt )
   // before the collision checks, so the ElderMother can't hurt the player on the frame she is banished
   check_elderflute_banish();
   check_plant_kill_npc( dt );
+  check_npc_proximity( dt );
 
   if ( Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled )
   {
@@ -519,6 +591,7 @@ void NpcSystem::check_npc_container_collision()
     if ( player_pos.findIntersection( npc_activate_bounds.getBounds() ) )
     {
       auto npc_entt = Factory::Npc::create_npc( reg(), npccontainer_pos_cmp, "npc.skeleton" );
+      apply_npc_spawn_action( npc_entt );
       if ( auto navmesh = navmesh_for( npc_entt ); navmesh and npc_entt != entt::null )
       {
         navmesh->insert( npc_entt, reg().get<Cmp::Position>( npc_entt ) );
@@ -1162,13 +1235,12 @@ void NpcSystem::check_once_collision()
 
       if ( not player_cmp.skip_damage_cooldown_once && player_cmp.m_damage_cooldown_timer < player_cmp.damage_cooldown_timeout() ) continue;
 
-      auto npc_collision_action = npc_cmp.at<Cmp::CollisionAction>();
-      auto &[action, timer] = npc_collision_action;
+      const auto &action = npc_cmp.at<Cmp::CollisionAction>().action;
       if ( action.interval() > 0.f ) continue;
 
       if ( not touching_player ) continue;
 
-      Utils::Player::get_stats( reg() ).apply( action );
+      get_systems_event_queue().trigger( Events::NpcCollisionEvent( npc_cmp.npc_type, player_pos ) );
       reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
       player_cmp.skip_damage_cooldown_once = false;
 
@@ -1208,7 +1280,7 @@ void NpcSystem::check_timed_collision( sf::Time dt )
     // a flying player is out of reach of 1x1 NPCs
     if ( is_flying_over( *npc_collision_bounds ) ) continue;
 
-    Utils::Player::get_stats( reg() ).apply( npc_action );
+    get_systems_event_queue().trigger( Events::NpcCollisionEvent( npc_cmp.npc_type, player_pos ) );
     reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
     if ( m_sound_bank.get_effect( "damage_player" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "damage_player" ).play(); }
 
@@ -1261,7 +1333,7 @@ void NpcSystem::check_plant_kill_npc( sf::Time dt )
       get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, kill_npc->death_anim, "shrine_lighting" ) );
       if ( kill_npc->wear_per_kill > 0.f ) get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, kill_npc->wear_per_kill ) );
     }
-    get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_worlditem_cmp.item_type, Cmp::ProximityAction::kKey, proximity_action ) );
+    get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( plant_worlditem_cmp.item_type, Cmp::ProximityAction::kKey, proximity_action ) );
     // a plant worn out by its kills withers away, like a fully foraged one
     if ( Utils::is_plant_depleted( reg(), plant_entt ) ) worn_out_plants.push_back( plant_entt );
   }

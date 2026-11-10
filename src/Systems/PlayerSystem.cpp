@@ -103,7 +103,7 @@
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateLootEvent.hpp>
 #include <Events/DestroyPlantEvent.hpp>
-#include <Events/GrimoireUpdateEvent.hpp>
+#include <Events/GrimoireItemUpdateEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
@@ -767,8 +767,8 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
   auto player_entt = Utils::Player::get_entity( reg() );
   if ( auto *suppress_timer = reg().try_get<Cmp::Player::MovementSuppressTimer>( player_entt ) ) *suppress_timer += dt;
 
-  // NPC/inventory modifiers keep their own per-action timers, so they are updated every frame
-  apply_npc_modifiers( dt );
+  // inventory modifiers keep their own per-action timers, so they are updated every frame.
+  // NPC proximity modifiers are applied by NpcSystem
   apply_inventory_modifiers( dt );
   apply_plant_proximity_modifiers( dt );
 
@@ -859,31 +859,6 @@ void PlayerSystem::apply_healing_spring_modifiers()
   }
 }
 
-void PlayerSystem::apply_npc_modifiers( sf::Time dt )
-{
-  // See NpcSystem for collision health damage
-  // NPC proximity modifiers are only applied when they are within this rectangle
-  auto half_view = Cmp::RectBounds::scaled( Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() ), 0.5f );
-
-  for ( auto [npc_entt, npc_cmp, npc_pos_cmp, npc_anim_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::AnimData>().each() )
-  {
-    auto &[proximity_action, proximity_timer] = npc_cmp.at<Cmp::ProximityAction>();
-    if ( proximity_action.interval() == 0.f ) continue;
-    // the timer keeps running while the NPC is out of range
-    proximity_timer += dt;
-
-    if ( not Utils::is_visible_in_view( half_view.getBounds(), npc_pos_cmp ) ) continue;
-    if ( proximity_timer.asSeconds() < proximity_action.interval() ) continue;
-    if ( proximity_action.health() < 0 )
-    {
-      reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
-      Utils::Player::get_mortality( reg() ).last_damage_cause = Cmp::Player::Mortality::State::HAUNTED;
-    }
-    Utils::Player::get_stats( reg() ).apply( proximity_action );
-    proximity_timer = sf::Time::Zero;
-  }
-}
-
 void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
 {
   // We need the inventory component not the types
@@ -902,7 +877,7 @@ void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
       Utils::Player::get_mortality( reg() ).last_damage_cause = Cmp::Player::Mortality::State::SKEWERED;
     }
     Utils::Player::get_stats( reg() ).apply( carry_action );
-    get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( slot_cmp.m_item.item_type, Cmp::CarryAction::kKey, carry_action ) );
+    get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( slot_cmp.m_item.item_type, Cmp::CarryAction::kKey, carry_action ) );
     carry_timer = sf::Time::Zero;
   }
 }
@@ -942,7 +917,7 @@ void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
 
     if ( triggered )
     {
-      get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_worlditem_cmp.item_type, Cmp::ProximityAction::kKey, proximity_action ) );
+      get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( plant_worlditem_cmp.item_type, Cmp::ProximityAction::kKey, proximity_action ) );
       // reset now, otherwise side effects and rewards re-trigger every frame while the player is outside the closer range check below
       proximity_timer = sf::Time::Zero;
     }

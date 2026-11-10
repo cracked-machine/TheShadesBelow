@@ -30,9 +30,6 @@
 #include <Components/Persistent/NpcShockwaveFreq.hpp>
 #include <Components/Persistent/NpcShockwaveResolution.hpp>
 #include <Components/Player/Character.hpp>
-#include <Components/Player/Mortality.hpp>
-#include <Components/Stats/DestroyAction.hpp>
-#include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Factory/Factory.hpp>
 #include <Factory/LootFactory.hpp>
@@ -217,22 +214,10 @@ entt::entity create_npc( entt::registry &reg, Cmp::Position pos_cmp, const Sys::
     reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 0, 0 } );
     reg.emplace_or_replace<Cmp::Npc::Friendly>( new_pos_entity );
   }
-  Utils::Player::apply_action_from_npc_store<Cmp::SpawnAction>( reg, npc_type );
   return new_pos_entity;
 }
 
-void destroy_npc( entt::registry &reg, entt::entity npc_entity )
-{
-  // apply destroy action effect to player
-  auto *npc_cmp = reg.try_get<Cmp::Npc::NPC>( npc_entity );
-  if ( npc_cmp )
-  {
-    auto action_timer_pair = npc_cmp->at<Cmp::DestroyAction>();
-    if ( action_timer_pair.action.health() < 0 ) Utils::Player::get_mortality( reg ).last_damage_cause = Cmp::Player::Mortality::State::HAUNTED;
-    Utils::Player::get_stats( reg ).apply( action_timer_pair.action );
-  }
-  reg.destroy( npc_entity );
-}
+void destroy_npc( entt::registry &reg, entt::entity npc_entity ) { reg.destroy( npc_entity ); }
 
 void remove_npc_death_anim( entt::registry &registry, entt::entity entity )
 {

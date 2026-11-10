@@ -3,7 +3,8 @@
 
 #include <Components/Inventory/Grimoire.hpp>
 #include <Events/AddInventoryEvent.hpp>
-#include <Events/GrimoireUpdateEvent.hpp>
+#include <Events/GrimoireItemUpdateEvent.hpp>
+#include <Events/GrimoireNpcUpdateEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -13,11 +14,15 @@
 
 #include <functional>
 #include <memory>
+#include <string>
+#include <string_view>
+#include <utility>
 
 namespace Game::Sys
 {
 
-//! @brief Toggles and drives the player's grimoire (spellbook) overlay. Gameplay is paused while the overlay is open.
+//! @brief Toggles and drives the player's grimoire (spellbook) overlay: the NPC pages, then the plant pages. Gameplay is
+//! paused while the overlay is open.
 class GrimoireSystem : public RenderSystem
 {
 public:
@@ -59,7 +64,16 @@ private:
   //! @brief Discover an action on a plant's grimoire page once it has been applied to the player. Triggers
   //! Events::GrimoireDiscoveryEvent the first time the action (or the item) is revealed.
   //! @param ev
-  void on_grimoire_update_event( const Events::GrimoireUpdateEvent &ev );
+  void on_grimoire_item_update_event( const Events::GrimoireItemUpdateEvent &ev );
+
+  //! @brief Discover an action on an NPC's grimoire page once it has been applied to the player, revealing the NPC's
+  //! sprite and name. Triggers Events::GrimoireDiscoveryEvent the first time the action (or the NPC) is revealed.
+  //! @param ev
+  void on_grimoire_npc_update_event( const Events::GrimoireNpcUpdateEvent &ev );
+
+  //! @brief Maps a layout object name (e.g. "npc_spawn_action") to the current page's subpage and the rest of the
+  //! name (e.g. "spawn_action"), or nullptr if the name belongs to no subpage.
+  using SubPageResolver = std::function<std::pair<const Cmp::Grimoire::SubPage *, std::string_view>( std::string_view )>;
 
   //! @brief Get the display name of an NPC for the grimoire, from its first sprite.
   //! @param npc_type See res/json/npc.json.
@@ -72,16 +86,20 @@ private:
   static std::string reward_display_name( const Cmp::ActionReward &reward );
 
   //! @brief Draw the page's outline boxes.
-  void render_outlines();
+  //! @param ui_data The layout of the page currently shown.
+  void render_outlines( const Render::UiData &ui_data );
 
   //! @brief Draw each subpage's sprite icon.
-  //! @param current_page The page currently shown.
-  void render_icons( const Cmp::Grimoire::Page &current_page );
+  //! @param ui_data The layout of the page currently shown.
+  //! @param resolver Maps the layout's object names to the current page's subpages.
+  void render_icons( const Render::UiData &ui_data, const SubPageResolver &resolver );
 
   //! @brief Draw the page number and, for each discovered action, its reward, stat changes and side effects.
-  //! @param current_page The page currently shown.
+  //! @param ui_data The layout of the page currently shown.
+  //! @param cache_prefix Prefix of the layout's TextColumn cache keys.
+  //! @param resolver Maps the layout's object names to the current page's subpages.
   //! @param page_count Total number of pages, for the page label.
-  void render_labels( const Cmp::Grimoire::Page &current_page, std::size_t page_count );
+  void render_labels( const Render::UiData &ui_data, const std::string &cache_prefix, const SubPageResolver &resolver, std::size_t page_count );
 
   //! @brief Draw an action's reward, in brackets, e.g. "(Elder Flute)".
   //! @param draw_line The label's text column.
@@ -101,15 +119,17 @@ private:
   //! @return true if a line was drawn.
   bool render_action_side_effects( TextColumn &draw_line, const Cmp::BaseAction &action );
 
-  //! @brief Draw the static texts and each subpage's item name.
-  //! @param current_page The page currently shown.
-  void render_texts( const Cmp::Grimoire::Page &current_page );
+  //! @brief Draw the static texts and each subpage's item or NPC name.
+  //! @param ui_data The layout of the page currently shown.
+  //! @param cache_prefix Prefix of the layout's TextColumn cache keys.
+  //! @param resolver Maps the layout's object names to the current page's subpages.
+  void render_texts( const Render::UiData &ui_data, const std::string &cache_prefix, const SubPageResolver &resolver );
 
   //! @brief Get the grimoire component.
   //! @return Pointer to the component (held by the player entity), or nullptr if no player exists.
   Cmp::Grimoire *find_grimoire();
 
-  //! @brief Call fn on every grimoire subpage (across all pages) that belongs to the given item.
+  //! @brief Call fn on every grimoire subpage (across all plant pages) that belongs to the given item.
   //! @param item_key
   //! @param fn Called with the index of the page holding the subpage, and the subpage itself.
   void for_each_subpage( const Sys::ItemKey &item_key, const std::function<void( std::size_t, Cmp::Grimoire::SubPage & )> &fn );
@@ -119,8 +139,10 @@ private:
   //! @brief Time since the page was last turned, used to debounce rapid page turning.
   sf::Time m_navigate_debounce;
 
-  //! @brief Layout data object for the main UI
-  std::unique_ptr<Render::UiData> m_ui_data;
+  //! @brief Layout of the plant pages, see res/ui/grimoire_plants.json.
+  std::unique_ptr<Render::UiData> m_plant_ui_data;
+  //! @brief Layout of the NPC pages, see res/ui/grimoire_npc.json.
+  std::unique_ptr<Render::UiData> m_npc_ui_data;
 
   //! @brief Index of the page currently shown.
   std::size_t m_current_page_idx{ 0 };

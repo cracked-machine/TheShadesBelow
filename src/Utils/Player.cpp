@@ -53,11 +53,10 @@
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
-#include <Events/GrimoireUpdateEvent.hpp>
+#include <Events/GrimoireItemUpdateEvent.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
-#include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
@@ -436,7 +435,7 @@ Cmp::BaseAction apply_action_from_world_item( entt::registry &reg, entt::entity 
   remove_damage_if_no_sting<ActionT>( reg, world_item_entt, action );
   record_item_damage_cause<ActionT>( reg, action );
   Utils::Player::get_stats( reg ).apply( action );
-  Sys::BaseSystem::get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_item->item_type, ActionT::kKey, action ) );
+  Sys::BaseSystem::get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( plant_item->item_type, ActionT::kKey, action ) );
   return action;
 }
 
@@ -471,7 +470,7 @@ Cmp::BaseAction apply_action_from_inventory_item( entt::registry &reg )
     if ( action.health() < 0 ) reg.emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg ) );
     record_item_damage_cause<ActionT>( reg, action );
     player_stats.apply( action );
-    Sys::BaseSystem::get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( inventory_cmp.m_item.item_type, ActionT::kKey, action ) );
+    Sys::BaseSystem::get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( inventory_cmp.m_item.item_type, ActionT::kKey, action ) );
     applied_action = action;
   }
   return applied_action;
@@ -497,7 +496,7 @@ Cmp::BaseAction apply_action_from_item_store( entt::registry &reg, const Sys::It
   auto action = item.at<ActionT>().action;
   record_item_damage_cause<ActionT>( reg, action );
   Utils::Player::get_stats( reg ).apply( action );
-  Sys::BaseSystem::get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( item_type, ActionT::kKey, action ) );
+  Sys::BaseSystem::get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( item_type, ActionT::kKey, action ) );
   return action;
 }
 
@@ -533,29 +532,6 @@ template Cmp::BaseAction get_action_from_item_store<Cmp::ProjectileAction>( cons
 template Cmp::BaseAction get_action_from_item_store<Cmp::ProximityAction>( const Sys::ItemKey & );
 template Cmp::BaseAction get_action_from_item_store<Cmp::OfferingAction>( const Sys::ItemKey & );
 template Cmp::BaseAction get_action_from_item_store<Cmp::SpawnAction>( const Sys::ItemKey & );
-
-template <typename ActionT>
-Cmp::BaseAction apply_action_from_npc_store( entt::registry &reg, const Sys::NpcKey &npc_type )
-{
-  const auto &npc = Sys::NpcStore::instance().get( npc_type );
-  const auto &action = npc.at<ActionT>().action;
-  if ( action.health() < 0 ) get_mortality( reg ).last_damage_cause = Cmp::Player::Mortality::State::HAUNTED;
-  Utils::Player::get_stats( reg ).apply( action );
-  return action;
-}
-
-// Explicit instantiations for every Cmp::BaseAction subclass (see src/Components/Stats) - keeps the
-// template body out of Player.hpp while still allowing all known action kinds to be applied.
-template Cmp::BaseAction apply_action_from_npc_store<Cmp::BurnAction>( entt::registry &, const Sys::NpcKey & );
-template Cmp::BaseAction apply_action_from_npc_store<Cmp::CarryAction>( entt::registry &, const Sys::NpcKey & );
-template Cmp::BaseAction apply_action_from_npc_store<Cmp::CollisionAction>( entt::registry &, const Sys::NpcKey & );
-template Cmp::BaseAction apply_action_from_npc_store<Cmp::ConsumeAction>( entt::registry &, const Sys::NpcKey & );
-template Cmp::BaseAction apply_action_from_npc_store<Cmp::DestroyAction>( entt::registry &, const Sys::NpcKey & );
-template Cmp::BaseAction apply_action_from_npc_store<Cmp::ForageAction>( entt::registry &, const Sys::NpcKey & );
-template Cmp::BaseAction apply_action_from_npc_store<Cmp::ProjectileAction>( entt::registry &, const Sys::NpcKey & );
-template Cmp::BaseAction apply_action_from_npc_store<Cmp::ProximityAction>( entt::registry &, const Sys::NpcKey & );
-template Cmp::BaseAction apply_action_from_npc_store<Cmp::OfferingAction>( entt::registry &, const Sys::NpcKey & );
-template Cmp::BaseAction apply_action_from_npc_store<Cmp::SpawnAction>( entt::registry &, const Sys::NpcKey & );
 
 Cmp::Player::HeartBeat &get_heartbeat( entt::registry &reg )
 {

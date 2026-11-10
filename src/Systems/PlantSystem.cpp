@@ -28,7 +28,7 @@
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/DestroyPlantEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
-#include <Events/GrimoireUpdateEvent.hpp>
+#include <Events/GrimoireItemUpdateEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
@@ -501,7 +501,7 @@ void PlantSystem::update_burning_plants( sf::Time dt )
         const auto burn_action = plant_item->get_action<Cmp::BurnAction>();
         if ( not burn_action.side_effects().empty() )
         {
-          get_systems_event_queue().trigger( Events::GrimoireUpdateEvent( plant_item->item_type, Cmp::BurnAction::kKey, burn_action ) );
+          get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( plant_item->item_type, Cmp::BurnAction::kKey, burn_action ) );
           trigger_side_effects( burn_action, Cmp::Position( plant_cmp.position, Constants::kGridSizePxF ), plant_entt );
         }
       }

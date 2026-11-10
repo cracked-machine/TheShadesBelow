@@ -84,8 +84,8 @@ private:
   //! @note This checks if the Cmp::Player::Mortality == State::DEAD, not check Cmp:PlayerStats (that is other system responsibility).
   void check_player_mortality();
 
-  //! @brief Update InventoryItem/NPC action effects on player for Tick::SLOW.
-  //! @note Cmp::CollisionAction and Cmp::ProjectileAction are excluded. See NpcSystem.
+  //! @brief Update InventoryItem action effects on player for Tick::SLOW.
+  //! @note NPC actions (e.g. Cmp::ProximityAction, Cmp::CollisionAction and Cmp::ProjectileAction) are excluded. See NpcSystem.
   //! @param dt
   void apply_timed_action_side_effects( sf::Time dt );
 
@@ -110,10 +110,6 @@ private:
 
   //! @brief Apply the stat modifiers for the healing spring
   void apply_healing_spring_modifiers();
-
-  //! @brief Update the proximity action timers and apply the stat modifiers for visible NPCs
-  //! @param dt
-  void apply_npc_modifiers( sf::Time dt );
 
   //! @brief Update the carry action timers and apply the stat modifiers for inventory item
   //! @param dt

@@ -417,7 +417,7 @@
     },
     "sprite.drknox": {
       "spritesheet": {
-        "displayname": "sprite.drknox",
+        "displayname": "Dr Knox, MD",
         "texture_path": "res/textures/npcdrknox.png",
         "sprite_indices": [0],
         "walking_collision_mask": [true],
@@ -450,7 +450,7 @@
     },
     "sprite.ghost.walk.east": {
       "spritesheet": {
-        "displayname": "sprite.ghost.walk.east",
+        "displayname": "Ghost",
         "texture_path": "res/textures/npcghost.png",
         "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
         "walking_collision_mask": [true],
@@ -464,7 +464,7 @@
     },
     "sprite.ghost.walk.north": {
       "spritesheet": {
-        "displayname": "sprite.ghost.walk.north",
+        "displayname": "Ghost",
         "texture_path": "res/textures/npcghost.png",
         "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
         "walking_collision_mask": [true],
@@ -478,7 +478,7 @@
     },
     "sprite.ghost.walk.south": {
       "spritesheet": {
-        "displayname": "sprite.ghost.walk.south",
+        "displayname": "Ghost",
         "texture_path": "res/textures/npcghost.png",
         "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
         "walking_collision_mask": [true],
@@ -492,7 +492,7 @@
     },
     "sprite.ghost.walk.west": {
       "spritesheet": {
-        "displayname": "sprite.ghost.walk.west",
+        "displayname": "Ghost",
         "texture_path": "res/textures/npcghost.png",
         "sprite_indices": [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
         "walking_collision_mask": [true],
@@ -1947,6 +1947,20 @@
         "walking_collision_mask": [false, true]
       }
     },
+    "sprite.npc.unknown": {
+      "spritesheet": {
+        "displayname": "Unknown",
+        "texture_path": "res/textures/plants_loot.png",
+        "sprite_indices": [46],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        },
+        "walking_collision_mask": [false, true]
+      }
+    },
     "sprite.item.preservedcat": {
       "spritesheet": {
         "displayname": "Preserved Cat",
@@ -2131,7 +2145,7 @@
     },
     "sprite.nightwatchman.walk.east": {
       "spritesheet": {
-        "displayname": "sprite.player.walk.east",
+        "displayname": "Night Watchman",
         "texture_path": "res/textures/npcwatchman.png",
         "sprite_indices": [6, 7, 8],
         "walking_collision_mask": [true],
@@ -2145,7 +2159,7 @@
     },
     "sprite.nightwatchman.walk.north": {
       "spritesheet": {
-        "displayname": "sprite.player.walk.north",
+        "displayname": "Night Watchman",
         "texture_path": "res/textures/npcwatchman.png",
         "sprite_indices": [3, 4, 5],
         "walking_collision_mask": [true],
@@ -2159,7 +2173,7 @@
     },
     "sprite.nightwatchman.walk.south": {
       "spritesheet": {
-        "displayname": "sprite.player.walk.south",
+        "displayname": "Night Watchman",
         "texture_path": "res/textures/npcwatchman.png",
         "sprite_indices": [0, 1, 2],
         "walking_collision_mask": [true],
@@ -2173,7 +2187,7 @@
     },
     "sprite.nightwatchman.walk.west": {
       "spritesheet": {
-        "displayname": "sprite.player.walk.west",
+        "displayname": "Night Watchman",
         "texture_path": "res/textures/npcwatchman.png",
         "sprite_indices": [9, 10, 11],
         "walking_collision_mask": [true],
@@ -2553,7 +2567,7 @@
     },
     "sprite.priest": {
       "spritesheet": {
-        "displayname": "sprite.priest",
+        "displayname": "Cursed Priest",
         "texture_path": "res/textures/npcpriest.png",
         "sprite_indices": [0],
         "walking_collision_mask": [true],
@@ -2815,7 +2829,7 @@
 
     "sprite.shadowhand": {
       "spritesheet": {
-        "displayname": "ShadowHand",
+        "displayname": "Shadow Hand",
         "AbsoluteZOrder": [1000],
         "texture_path": "res/textures/npcshadowhand.png",
         "sprite_indices": [
@@ -2857,7 +2871,7 @@
 
     "sprite.skeleton.walk.east": {
       "spritesheet": {
-        "displayname": "sprite.skeleton.walk.east",
+        "displayname": "Skeleton",
         "texture_path": "res/textures/npcskele.png",
         "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
         "walking_collision_mask": [true],
@@ -2871,7 +2885,7 @@
     },
     "sprite.skeleton.walk.north": {
       "spritesheet": {
-        "displayname": "sprite.skeleton.walk.north",
+        "displayname": "Skeleton",
         "texture_path": "res/textures/npcskele.png",
         "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
         "walking_collision_mask": [true],
@@ -2885,7 +2899,7 @@
     },
     "sprite.skeleton.walk.south": {
       "spritesheet": {
-        "displayname": "sprite.skeleton.walk.south",
+        "displayname": "Skeleton",
         "texture_path": "res/textures/npcskele.png",
         "sprite_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
         "walking_collision_mask": [true],
@@ -2899,7 +2913,7 @@
     },
     "sprite.skeleton.walk.west": {
       "spritesheet": {
-        "displayname": "sprite.skeleton.walk.west",
+        "displayname": "Skeleton",
         "texture_path": "res/textures/npcskele.png",
         "sprite_indices": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
         "walking_collision_mask": [true],
@@ -2914,7 +2928,7 @@
 
     "sprite.spider": {
       "spritesheet": {
-        "displayname": "sprite.spider",
+        "displayname": "Spider",
         "texture_path": "res/textures/npcspider.png",
         "sprite_indices": [0, 1, 2, 3],
         "walking_collision_mask": [true],
@@ -2964,7 +2978,7 @@
     },
     "sprite.wisp.east": {
       "spritesheet": {
-        "displayname": "sprite.wisp.east",
+        "displayname": "Wisp",
         "RelativeZOrder": [100000],
         "texture_path": "res/textures/npcwisp_east.png",
         "sprite_indices": [0,1,2,3],
@@ -2979,7 +2993,7 @@
     },
     "sprite.wisp.west": {
       "spritesheet": {
-        "displayname": "sprite.wisp.west",
+        "displayname": "Wisp",
         "RelativeZOrder": [100000],
         "texture_path": "res/textures/npcwisp_west.png",
         "sprite_indices": [0,1,2,3],
@@ -2994,7 +3008,7 @@
     },
     "sprite.witch": {
       "spritesheet": {
-        "displayname": "sprite.witch",
+        "displayname": "Witch",
         "texture_path": "res/textures/npcwitch.png",
         "sprite_indices": [0, 1, 2, 3],
         "walking_collision_mask": [true],

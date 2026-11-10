@@ -278,16 +278,6 @@ Cmp::BaseAction apply_action_from_item_store( entt::registry &reg, const Sys::It
 template <typename ActionT>
 Cmp::BaseAction get_action_from_item_store( const Sys::ItemKey &item_type );
 
-//! @brief Lookup up and apply the ActionT stat-modifier from the npc store.
-//! @tparam ActionT The Cmp::BaseAction subclass to apply (e.g. Cmp::DestroyAction). Only the subclasses
-//! in src/Components/Stats are explicitly instantiated in Player.cpp - using any other type is a link error.
-//! @param reg reference to the entt registry
-//! @param npc_type string identifier (see npc.json)
-//! @return Cmp::BaseAction The applied action, so the calling system can trigger its side effects (see Cmp::SideEffects).
-//! @throws std::runtime_error if the key is not present in the store.
-template <typename ActionT>
-Cmp::BaseAction apply_action_from_npc_store( entt::registry &reg, const Sys::NpcKey &npc_type );
-
 //! @brief Get the heartbeat object
 //! @param reg
 //! @return Cmp::Player::HeartBeat&

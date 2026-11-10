@@ -5,6 +5,7 @@
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/TooltipSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
+#include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 
 #include <SFML/Graphics/RectangleShape.hpp>
@@ -123,7 +124,7 @@ void TooltipSystem::on_item_picked_up_event( const Events::ItemPickedUpEvent &ev
 void TooltipSystem::on_grimoire_discovery_event( const Events::GrimoireDiscoveryEvent &event )
 {
   if ( not m_enabled ) { return; }
-  m_candidates.push_back( { "GrimoireDiscoveryEvent", event.m_item.str() } );
+  m_candidates.push_back( { "GrimoireDiscoveryEvent", event.m_key } );
 }
 
 void TooltipSystem::on_insufficient_anima_event( const Events::InsufficientAnimaEvent &event )
@@ -220,8 +221,11 @@ std::string TooltipSystem::format_text( const TooltipDef &def, const Candidate &
   const auto pos = text.find( kItemPlaceholder );
   if ( pos == std::string::npos or candidate.item.empty() ) { return text; }
 
-  const auto &item = Sys::ItemStore::instance().get( Sys::ItemKey( candidate.item ) );
-  text.replace( pos, kItemPlaceholder.size(), Sys::SpriteStore::instance().get( item.sprite_type ).display_name() );
+  // the candidate is an item or, for grimoire NPC pages, an NPC
+  const Sys::SpriteKey sprite_key = candidate.item.starts_with( "npc." )
+                                        ? Sys::NpcStore::instance().get( Sys::NpcKey( candidate.item ) ).sprite_type_list.front()
+                                        : Sys::ItemStore::instance().get( Sys::ItemKey( candidate.item ) ).sprite_type;
+  text.replace( pos, kItemPlaceholder.size(), Sys::SpriteStore::instance().get( sprite_key ).display_name() );
   return text;
 }
 

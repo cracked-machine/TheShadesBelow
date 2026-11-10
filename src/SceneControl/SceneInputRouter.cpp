@@ -472,8 +472,8 @@ void SceneInputRouter::process_grimoire_wheel( const sf::Event &event )
   // scroll up/away for the previous grimoire page, down/towards for the next, like scrolling a document
   if ( wheelScrolled and wheelScrolled->wheel == sf::Mouse::Wheel::Vertical and wheelScrolled->delta != 0.f )
   {
-    const auto action = wheelScrolled->delta > 0.f ? Events::PlayerActionEvent::GameActions::GRIMOIRE_PREV
-                                                   : Events::PlayerActionEvent::GameActions::GRIMOIRE_NEXT;
+    const auto action = wheelScrolled->delta > 0.f ? Events::PlayerActionEvent::GameActions::GRIMOIRE_NEXT
+                                                   : Events::PlayerActionEvent::GameActions::GRIMOIRE_PREV;
     get_systems_event_queue().trigger( Events::PlayerActionEvent( action ) );
   }
 }

@@ -30,12 +30,12 @@
 #include <Components/Ruin/StairsUpperMultiBlock.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/Stats/BaseAction.hpp>
-#include <Components/Stats/CollisionAction.hpp>
 
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
+#include <Events/NpcCollisionEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <Factory/RuinFactory.hpp>
@@ -501,17 +501,14 @@ void RuinSystem::check_player_shadow_hand_collision( sf::Time dt )
   m_shadowhand_action_effects_time += dt;
   if ( m_shadowhand_action_effects_time.asSeconds() < kActionEffectInterval ) { return; }
 
-  const auto &npc_shadowhand_cmp = Sys::NpcStore::instance().get( "npc.shadowhand" );
-  auto npc_collision_action = npc_shadowhand_cmp.at<Cmp::CollisionAction>();
-
   // only trigger PlayerMortalityEvents if player is alive
   if ( Utils::Player::get_mortality( reg() ).state == Cmp::Player::Mortality::State::DEAD ) { return; }
 
   const auto player_pos = Utils::Player::get_position( reg() );
   if ( Utils::Collision::any_intersects<Cmp::Npc::NPC>( reg(), Cmp::RectBounds::scaled( player_pos.position, Constants::kGridSizePxF, 1.f ) ) )
   {
-    // damage player
-    Utils::Player::get_stats( reg() ).apply( npc_collision_action.action );
+    // damage player: NpcSystem applies the shadow hand's collision action
+    get_systems_event_queue().trigger( Events::NpcCollisionEvent( "npc.shadowhand", player_pos ) );
     reg().emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg() ) );
   }
   if ( Utils::Player::get_stats( reg() ).health() <= 0 )

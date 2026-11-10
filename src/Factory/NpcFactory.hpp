@@ -35,17 +35,18 @@ void destroy_npc_container( entt::registry &registry, entt::entity npc_container
 //! @brief Create a new NPC entity at `pos_cmp`. Returns the new entity.
 //! @note Only NpcSystem may call this, as it keeps the NPC's navmesh in sync. Trigger an Events::CreateNpcEvent instead.
 //! Hatching from a container does not remove the container: call destroy_npc_container() for that.
+//! Does not apply the NPC's Cmp::SpawnAction to the player: the calling system does that.
 //! @param registry
 //! @param pos_cmp The spawn position. The size is replaced by the NPC sprite's size.
 //! @param npc_type See npc.json
 //! @return entt::entity
 entt::entity create_npc( entt::registry &registry, Cmp::Position pos_cmp, const Sys::NpcKey &npc_type );
 
-//! @brief Remove an NPC's components (applying its DestroyAction stat modifiers to the player first).
+//! @brief Destroy an NPC entity.
+//! @note Does not apply the NPC's Cmp::DestroyAction to the player: the calling system does that first.
 //! @note Only NpcSystem may call this, as it keeps the NPC's navmesh in sync. Trigger an Events::DestroyNpcEvent instead.
 //! @param registry
 //! @param npc_entity
-//! @return entt::null. Kept for symmetry with create_npc(); no loot entity is created here.
 void destroy_npc( entt::registry &registry, entt::entity npc_entity );
 
 //! @brief Remove the components of an NPC death animation (see NpcSystem), without destroying the entity.

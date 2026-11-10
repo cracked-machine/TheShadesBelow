@@ -17,8 +17,8 @@
 // clang-format off
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
-namespace Game::Events { class UpdateNpcPositionEvent; class DestroyNpcEvent; struct CreateNpcEvent; struct CrowDeliveryEvent; }
-namespace Game::Cmp { class Position; }
+namespace Game::Events { class UpdateNpcPositionEvent; class DestroyNpcEvent; struct CreateNpcEvent; struct CrowDeliveryEvent; struct NpcProximityEvent; struct NpcCollisionEvent; struct NpcProjectileEvent; }
+namespace Game::Cmp { class Position; class BaseAction; }
 namespace Game::Cmp { class Direction; class LerpPosition; } 
 namespace Game::Cmp::Player { class Mortality; } 
 namespace Game::Cmp::Npc { class NPC; class Shockwave; struct Crow; }
@@ -75,6 +75,38 @@ private:
   //! allowed to call Factory::Npc::create_npc. Everything else must trigger an Events::CreateNpcEvent.
   //! @param event
   void on_create_npc_event( const Game::Events::CreateNpcEvent &event );
+
+  //! @brief Apply an NPC's Cmp::ProximityAction to the player (see check_npc_proximity()).
+  //! @param event
+  void on_npc_proximity_event( const Game::Events::NpcProximityEvent &event );
+
+  //! @brief Apply an NPC's Cmp::CollisionAction to the player. Triggered by this system's collision checks and by
+  //! systems that own their own NPC collisions (e.g. RuinSystem's shadow hand). The caller handles cooldowns, sfx and death.
+  //! @param event
+  void on_npc_collision_event( const Game::Events::NpcCollisionEvent &event );
+
+  //! @brief Apply an NPC's Cmp::ProjectileAction to the player, e.g. for the priest's shockwave or the watchman's
+  //! gunfire. The caller handles cooldowns, sfx and death.
+  //! @param event
+  void on_npc_projectile_event( const Game::Events::NpcProjectileEvent &event );
+
+  //! @brief Apply an NPC action to the player stats and notify the grimoire via Events::GrimoireNpcUpdateEvent.
+  //! This is the only place NPC actions are applied to the player.
+  //! @tparam ActionT The Cmp::BaseAction subclass being applied, e.g. Cmp::SpawnAction.
+  //! @param npc_type See res/json/npc.json.
+  //! @param action The action to apply.
+  //! @return Cmp::BaseAction The applied action, so its side effects can be triggered.
+  template <typename ActionT>
+  Cmp::BaseAction apply_npc_action( const Sys::NpcKey &npc_type, const Cmp::BaseAction &action );
+
+  //! @brief Apply an NPC's Cmp::SpawnAction once it has been created by Factory::Npc::create_npc.
+  //! @param npc_entt The new NPC, or entt::null if creation failed (then nothing is applied).
+  void apply_npc_spawn_action( entt::entity npc_entt );
+
+  //! @brief Advance the Cmp::ProximityAction timers of all NPCs, and trigger an Events::NpcProximityEvent for each
+  //! NPC in range of the player whose timer has elapsed.
+  //! @param dt
+  void check_npc_proximity( sf::Time dt );
 
   //! @brief Lift the least worn world item of type `event.m_item` out of the world and send a courier crow in from
   //! off screen to drop it on a free cell beside the player. No op if there is no such item or no free cell.

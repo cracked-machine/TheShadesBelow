@@ -19,10 +19,10 @@
 #include <Components/Player/NoPath.hpp>
 #include <Components/Position.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
-#include <Components/Stats/ProjectileAction.hpp>
 #include <Components/UUID.hpp>
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
+#include <Events/NpcProjectileEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
@@ -31,7 +31,6 @@
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
-#include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Threats/WatchmanSystem.hpp>
 #include <Utils/Cardinal.hpp>
 #include <Utils/Maths.hpp>
@@ -260,8 +259,8 @@ void WatchmanSystem::check_gunfire_player_collision()
     }
     if ( not hit ) continue;
 
-    const auto projectile_action = Utils::Player::apply_action_from_npc_store<Cmp::ProjectileAction>( reg(), "npc.nightwatchman" );
-    trigger_side_effects( projectile_action, player_pos_cmp );
+    // NpcSystem applies the watchman's projectile action
+    get_systems_event_queue().trigger( Events::NpcProjectileEvent( "npc.nightwatchman", player_pos_cmp ) );
     player_cmp.skip_damage_cooldown_once = false;
     m_sound_bank.get_effect( "damage_player" ).play();
     player_cmp.m_damage_cooldown_timer = sf::Time::Zero;

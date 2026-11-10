@@ -25,7 +25,6 @@
 #include <cmath>
 #include <entt/entity/fwd.hpp>
 #include <functional>
-#include <ranges>
 #include <source_location>
 #include <span>
 #include <spdlog/spdlog.h>
