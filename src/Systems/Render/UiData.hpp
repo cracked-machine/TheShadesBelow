@@ -6,6 +6,10 @@
 #include <Utils/JsonDeserializer.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+#include <string>
+#include <utility>
+#include <vector>
+
 namespace Game::Render
 {
 
@@ -80,6 +84,29 @@ public:
     int font_size;
   };
 
+  //! @brief A table element in the UI layout: one row per entry of `rows`, drawn as an ImGui table.
+  struct Table
+  {
+    //! @brief Position and size of the table.
+    sf::FloatRect rect;
+    //! @brief Identifying name of this table, as given in the UI layout file.
+    std::string name;
+    //! @brief The table's rows, in order, as (key, caption) pairs, e.g. ("destroy_action", "Chop"). Parsed from the
+    //! "rows" property, a comma separated list of "key=Caption" entries.
+    std::vector<std::pair<std::string, std::string>> rows;
+    //! @brief Font size, in pixels, for the table text.
+    int font_size;
+  };
+
+  //! @brief A tab bar element in the UI layout, drawn as an ImGui tab bar.
+  struct Tab
+  {
+    //! @brief Position and size of the tab bar.
+    sf::FloatRect rect;
+    //! @brief Identifying name of this tab bar, as given in the UI layout file.
+    std::string name;
+  };
+
   //! @brief Construct a new UiData object and deserialize the given UI map file.
   //! @param map_file
   UiData( const std::filesystem::path &map_file );
@@ -102,6 +129,18 @@ public:
 
   //! @brief Sprite icon elements parsed from the UI layout file.
   std::vector<Icon> m_icons;
+
+  //! @brief Table elements parsed from the UI layout file.
+  std::vector<Table> m_tables;
+
+  //! @brief Tab bar elements parsed from the UI layout file.
+  std::vector<Tab> m_tabs;
+
+private:
+  //! @brief Parse a ui_table "rows" property, e.g. "burn_action=Burn, destroy_action=Chop".
+  //! @param rows The property value.
+  //! @return The (key, caption) pairs, in order. An entry without '=' uses the key as its caption.
+  static std::vector<std::pair<std::string, std::string>> parse_table_rows( const std::string &rows );
 };
 
 } // namespace Game::Render

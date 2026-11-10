@@ -1,9 +1,17 @@
 #include <Utils/ImGuiTheme.hpp>
 
+#include <imgui-SFML.h>
 #include <imgui.h>
+#include <spdlog/spdlog.h>
 
 namespace Game::Utils
 {
+
+namespace
+{
+//! @brief The font added by load_imgui_fonts(). Owned by the current ImGui context's font atlas.
+ImFont *s_grimoire_font = nullptr;
+} // namespace
 
 void apply_imgui_theme()
 {
@@ -81,5 +89,21 @@ void apply_imgui_theme()
   colors[ImGuiCol_TabHovered] = kAccentHover;
   colors[ImGuiCol_TabActive] = kAccent;
 }
+
+void load_imgui_fonts()
+{
+  ImGuiIO &io = ImGui::GetIO();
+  s_grimoire_font = io.Fonts->AddFontFromFileTTF( "res/fonts/tuffy.ttf", kImGuiGrimoireFontPx );
+  if ( not s_grimoire_font )
+  {
+    SPDLOG_ERROR( "Failed to load the ImGui grimoire font res/fonts/tuffy.ttf" );
+    return;
+  }
+  // cancel the global scale applied to every font, so this one draws at exactly the size it was rasterised at
+  s_grimoire_font->Scale = 1.f / io.FontGlobalScale;
+  if ( not ImGui::SFML::UpdateFontTexture() ) { SPDLOG_ERROR( "Failed to update the ImGui font texture" ); }
+}
+
+ImFont *imgui_grimoire_font() { return s_grimoire_font; }
 
 } // namespace Game::Utils

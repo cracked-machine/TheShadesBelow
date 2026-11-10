@@ -22,7 +22,6 @@
 #include <map>
 #include <set>
 #include <string>
-#include <variant>
 #include <vector>
 
 namespace Game::Cmp
@@ -45,12 +44,14 @@ public:
     std::set<std::string> discovered_actions;
   };
 
-  //! @brief A plant page: the plant, its forage and chop (drop) outputs, and their offering rewards.
+  //! @brief A plant page: the plant, its forage and chop (drop) outputs, and the rewards for offering each of them.
   struct PlantPage
   {
     SubPage plant_subpage;
     SubPage forage_subpage;
     SubPage drop_subpage;
+    //! @brief Reward for offering the plant item.
+    SubPage plant_offering_subpage;
     //! @brief Reward for offering the forage item.
     SubPage forage_offering_subpage;
     //! @brief Reward for offering the drop item.
@@ -65,14 +66,14 @@ public:
     SubPage npc_subpage;
   };
 
-  //! @brief A grimoire page, either an NPC page or a plant page.
-  using Page = std::variant<NpcPage, PlantPage>;
+  //! @brief The grimoire's tab groups. Each tab pages through its own page list.
+  enum class Tab { NPCS, PLANTS };
 
-  //! @brief Page list type: the NPC pages in Sys::NpcStore order, then the plant pages in Sys::ItemStore plant order.
-  using Pages = std::vector<Page>;
+  //! @brief The NPC pages, one per NPC in Sys::NpcStore order.
+  std::vector<NpcPage> npc_pages;
 
-  //! @brief The grimoire's pages, one per NPC followed by one per plant item.
-  Pages pages;
+  //! @brief The plant pages, one per plant item in Sys::ItemStore plant order.
+  std::vector<PlantPage> plant_pages;
 
   //! @brief Construct a new Grimoire object, populating one page per NPC in Sys::NpcStore, then one page per plant
   //! item in Sys::ItemStore.
@@ -83,7 +84,7 @@ public:
       NpcPage npc_page{ .npc_key = npc_key,
                         .npc_subpage = { .item_key = "", .sprite_key = "sprite.npc.unknown", .action_map = {}, .discovered_actions = {} } };
       prefill_empty_npc_actions( npc_key, npc_page.npc_subpage );
-      pages.emplace_back( std::move( npc_page ) );
+      npc_pages.push_back( std::move( npc_page ) );
     }
 
     const auto &item_store = Sys::ItemStore::instance();
@@ -102,10 +103,14 @@ public:
     for ( const Sys::ItemKey &item_key : item_store.get_pattern( "^item\\.plant\\." ) )
     {
       const auto &item = item_store.get( item_key );
-      auto &page = std::get<PlantPage>( pages.emplace_back( PlantPage{
+      auto &page = plant_pages.emplace_back( PlantPage{
           .plant_subpage = { .item_key = item_key, .sprite_key = "sprite.plant.unknown", .action_map = {}, .discovered_actions = {} },
           .forage_subpage = { .item_key = item.get_forage_output(), .sprite_key = "sprite.item.unknown", .action_map = {}, .discovered_actions = {} },
           .drop_subpage = { .item_key = item.get_axe_output(), .sprite_key = "sprite.item.unknown", .action_map = {}, .discovered_actions = {} },
+          .plant_offering_subpage = { .item_key = offering_subpage_key( item_key ),
+                                      .sprite_key = "sprite.item.unknown",
+                                      .action_map = {},
+                                      .discovered_actions = {} },
           .forage_offering_subpage = { .item_key = offering_subpage_key( item.get_forage_output() ),
                                        .sprite_key = "sprite.item.unknown",
                                        .action_map = {},
@@ -113,21 +118,18 @@ public:
           .drop_offering_subpage = { .item_key = offering_subpage_key( item.get_axe_output() ),
                                      .sprite_key = "sprite.item.unknown",
                                      .action_map = {},
-                                     .discovered_actions = {} } } ) );
-      for ( SubPage *sub_page :
-            { &page.plant_subpage, &page.forage_subpage, &page.drop_subpage, &page.forage_offering_subpage, &page.drop_offering_subpage } )
+                                     .discovered_actions = {} } } );
+      for ( SubPage *sub_page : { &page.plant_subpage, &page.forage_subpage, &page.drop_subpage, &page.plant_offering_subpage,
+                                  &page.forage_offering_subpage, &page.drop_offering_subpage } )
       {
         prefill_empty_actions( *sub_page );
       }
-      // an item whose offering does nothing, or rewards a wildcard item, has no offering reward subpage, so every
-      // action of its offering subpage is "none"
-      for ( const auto &[item_subpage, offering_subpage] :
-            { std::pair{ &page.forage_subpage, &page.forage_offering_subpage }, std::pair{ &page.drop_subpage, &page.drop_offering_subpage } } )
+      // an item whose offering rewards no item (it does nothing, only changes stats, triggers an altar effect such as
+      // Nightshade's extra life, or rewards a wildcard item) has no offering reward subpage, so every action of its
+      // offering subpage is "none". The offering's own effects are shown on the item's offering_action instead.
+      for ( SubPage *offering_subpage : { &page.plant_offering_subpage, &page.forage_offering_subpage, &page.drop_offering_subpage } )
       {
-        if ( item_subpage->action_map.contains( std::string( OfferingAction::kKey ) ) or is_wildcard_reward( item_subpage->item_key ) )
-        {
-          prefill_none_actions( *offering_subpage );
-        }
+        if ( offering_subpage->item_key.empty() ) { prefill_none_actions( *offering_subpage ); }
       }
     }
   }

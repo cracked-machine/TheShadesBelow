@@ -21,7 +21,7 @@
                         {
                          "name":"line_color",
                          "type":"color",
-                         "value":"#ffffffff"
+                         "value":"#ff555500"
                         }, 
                         {
                          "name":"line_thickness",
@@ -31,9 +31,21 @@
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
-                 "width":1400,
-                 "x":400,
+                 "width":1450,
+                 "x":350,
                  "y":100
+                }, 
+                {
+                 "height":40,
+                 "id":219,
+                 "name":"tab_bar",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"ui_tab",
+                 "visible":true,
+                 "width":1410,
+                 "x":370,
+                 "y":165
                 }, 
                 {
                  "height":0,
@@ -56,7 +68,7 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":430,
+                 "x":380,
                  "y":910
                 }],
          "opacity":1,
@@ -95,7 +107,7 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":550,
-                 "x":850,
+                 "x":800,
                  "y":240
                 }, 
                 {
@@ -124,7 +136,7 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":1120,
+                 "x":1070,
                  "y":310
                 }, 
                 {
@@ -148,7 +160,7 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":900,
+                 "x":850,
                  "y":300
                 }, 
                 {
@@ -176,15 +188,14 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":100,
-                 "x":1110,
+                 "x":1060,
                  "y":300
                 }, 
                 {
-                 "height":0,
-                 "id":205,
-                 "name":"spawn_txt",
+                 "height":360,
+                 "id":218,
+                 "name":"npc_actions",
                  "opacity":1,
-                 "point":true,
                  "properties":[
                         {
                          "name":"font_size",
@@ -192,232 +203,16 @@
                          "value":20
                         }, 
                         {
-                         "name":"value",
+                         "name":"rows",
                          "type":"string",
-                         "value":"Spawn:"
+                         "value":"spawn_action=Spawn, collision_action=Collision, destroy_action=Destroy, proximity_action=Proximity, projectile_action=Projectile"
                         }],
                  "rotation":0,
-                 "type":"ui_text",
+                 "type":"ui_table",
                  "visible":true,
-                 "width":0,
-                 "x":900,
-                 "y":500
-                }, 
-                {
-                 "height":0,
-                 "id":206,
-                 "name":"collision_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"Collision:"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":900,
-                 "y":560
-                }, 
-                {
-                 "height":0,
-                 "id":207,
-                 "name":"destroy_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"Destroy:"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":900,
-                 "y":620
-                }, 
-                {
-                 "height":0,
-                 "id":208,
-                 "name":"proximity_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"Proximity:"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":900,
-                 "y":680
-                }, 
-                {
-                 "height":0,
-                 "id":209,
-                 "name":"npc_spawn_action",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"align",
-                         "type":"string",
-                         "value":"left"
-                        }, 
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }],
-                 "rotation":0,
-                 "type":"ui_label",
-                 "visible":true,
-                 "width":0,
-                 "x":1000,
-                 "y":500
-                }, 
-                {
-                 "height":0,
-                 "id":210,
-                 "name":"npc_collision_action",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"align",
-                         "type":"string",
-                         "value":"left"
-                        }, 
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }],
-                 "rotation":0,
-                 "type":"ui_label",
-                 "visible":true,
-                 "width":0,
-                 "x":1000,
-                 "y":560
-                }, 
-                {
-                 "height":0,
-                 "id":211,
-                 "name":"npc_destroy_action",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"align",
-                         "type":"string",
-                         "value":"left"
-                        }, 
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }],
-                 "rotation":0,
-                 "type":"ui_label",
-                 "visible":true,
-                 "width":0,
-                 "x":1000,
-                 "y":620
-                }, 
-                {
-                 "height":0,
-                 "id":212,
-                 "name":"npc_proximity_action",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"align",
-                         "type":"string",
-                         "value":"left"
-                        }, 
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }],
-                 "rotation":0,
-                 "type":"ui_label",
-                 "visible":true,
-                 "width":0,
-                 "x":1000,
-                 "y":680
-                }, 
-                {
-                 "height":0,
-                 "id":213,
-                 "name":"projectile_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"Projectile:"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":900,
-                 "y":740
-                }, 
-                {
-                 "height":0,
-                 "id":214,
-                 "name":"npc_projectile_action",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"align",
-                         "type":"string",
-                         "value":"left"
-                        }, 
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }],
-                 "rotation":0,
-                 "type":"ui_label",
-                 "visible":true,
-                 "width":0,
-                 "x":1000,
-                 "y":740
+                 "width":500,
+                 "x":840,
+                 "y":470
                 }, 
                 {
                  "height":0,
@@ -440,7 +235,7 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":450,
+                 "x":370,
                  "y":150
                 }],
          "opacity":1,
@@ -462,7 +257,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":218,
+ "nextobjectid":220,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

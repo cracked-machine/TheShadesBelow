@@ -457,6 +457,8 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     // ImGui::SFML::Init creates a brand new ImGuiContext, so the theme applied at startup
     // (Engine.cpp) doesn't carry over - it has to be re-applied here.
     Game::Utils::apply_imgui_theme();
+    // the new context's font atlas only has the default font, so the grimoire's font has to be re-added too
+    Game::Utils::load_imgui_fonts();
 
     auto shader_view = reg().view<Cmp::Shader::SpriteOwner>();
     for ( auto [entt, shader] : shader_view.each() )

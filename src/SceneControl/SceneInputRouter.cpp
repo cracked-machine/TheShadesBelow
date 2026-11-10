@@ -435,8 +435,12 @@ void SceneInputRouter::grimoire_overlay_input_handler()
 {
   // gameplay is paused while the grimoire is open, so only the grimoire's own controls get through.
   // The pause menu is blocked too: leaving it resumes the sound effects the grimoire paused.
+  // The F3 debug keys are not handled here either: the grimoire and the debug panels both pump the one ImGui frame
+  // allowed per frame, so they are never shown together (see GrimoireSystem::on_player_action).
   while ( const std::optional event = m_window.pollEvent() )
   {
+    // GrimoireSystem pumps an ImGui frame while the grimoire is open (its tab bar), so the events can go to ImGui
+    ImGui::SFML::ProcessEvent( m_window, *event );
     if ( dispatch_common_window_event( *event ) ) continue;
     process_grimoire_wheel( *event );
   }

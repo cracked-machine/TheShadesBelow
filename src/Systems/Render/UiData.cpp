@@ -2,6 +2,8 @@
 #include <Systems/Stores/StoreKey.hpp>
 
 #include <filesystem>
+#include <ranges>
+#include <string_view>
 #include <nlohmann/json.hpp>
 
 namespace Game::Render
@@ -57,8 +59,42 @@ void UiData::deserialize( const std::filesystem::path &scene_tiledata_path )
         m_icons.emplace_back( get_float_rect( object ), get_string( object, "name" ), Sys::SpriteKey( get_string_property( object, "sprite_type" ) ),
                               get_int_property( object, "sprite_index" ), get_int_property( object, "sprite_scale" ) );
       }
+      if ( get_string( object, "type" ) == "ui_table" )
+      {
+        SPDLOG_DEBUG( "Found ui_table: {}", get_string( object, "name" ) );
+        m_tables.emplace_back( get_float_rect( object ), get_string( object, "name" ), parse_table_rows( get_string_property( object, "rows" ) ),
+                               get_int_property( object, "font_size" ) );
+      }
+      if ( get_string( object, "type" ) == "ui_tab" )
+      {
+        SPDLOG_DEBUG( "Found ui_tab: {}", get_string( object, "name" ) );
+        m_tabs.emplace_back( get_float_rect( object ), get_string( object, "name" ) );
+      }
     }
   }
+}
+
+std::vector<std::pair<std::string, std::string>> UiData::parse_table_rows( const std::string &rows )
+{
+  const auto trim = []( std::string_view str )
+  {
+    const auto first = str.find_first_not_of( " \t" );
+    if ( first == std::string_view::npos ) return std::string();
+    const auto last = str.find_last_not_of( " \t" );
+    return std::string( str.substr( first, last - first + 1 ) );
+  };
+
+  std::vector<std::pair<std::string, std::string>> parsed;
+  for ( const auto entry : std::views::split( rows, ',' ) )
+  {
+    const std::string_view entry_view( entry.begin(), entry.end() );
+    const auto equals = entry_view.find( '=' );
+    std::string key = trim( entry_view.substr( 0, equals ) );
+    if ( key.empty() ) continue;
+    std::string caption = equals == std::string_view::npos ? key : trim( entry_view.substr( equals + 1 ) );
+    parsed.emplace_back( std::move( key ), std::move( caption ) );
+  }
+  return parsed;
 }
 
 } // namespace Game::Render

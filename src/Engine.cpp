@@ -52,7 +52,8 @@ Engine::Engine()
   ImGuiIO &io = ImGui::GetIO();
   io.FontGlobalScale = 1.5f;
   io.IniFilename = "res/imgui.ini";
-  std::ignore = ImGui::SFML::UpdateFontTexture();
+  // also rebuilds the font texture
+  Utils::load_imgui_fonts();
 
   // SPDLOG does not allow formatting raw pointers as strings for safety reasons.
   SPDLOG_INFO( "OpenGL: {}", reinterpret_cast<const char *>( glGetString( GL_VERSION ) ) );
