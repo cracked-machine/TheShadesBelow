@@ -25,6 +25,7 @@
 #include <Systems/ProcGen/PassageSystem.hpp>
 #include <Systems/ProcGen/TrailGuideSystem.hpp>
 #include <Systems/Render/GrimoireSystem.hpp>
+#include <Systems/Render/PauseOverlaySystem.hpp>
 #include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderMenuSystem.hpp>
@@ -85,6 +86,7 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
   emplace<Type::NpcSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::ParticleSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::PassageSystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::PauseOverlaySystem>( m_initial_reg, window, sound_bank );
   emplace<Type::PlayerSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );
   emplace<Type::PersistSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::LevelGenerator>( m_initial_reg, window, sound_bank );

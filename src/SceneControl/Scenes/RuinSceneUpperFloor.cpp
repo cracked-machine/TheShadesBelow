@@ -13,6 +13,7 @@
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/SceneSettings/Footsteps.hpp>
+#include <Components/SceneSettings/Paused.hpp>
 #include <Components/SceneSettings/Shaders.hpp>
 #include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/SceneSettings/ShowNavmesh.hpp>
@@ -40,6 +41,7 @@
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/PlayerSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
+#include <Systems/Render/PauseOverlaySystem.hpp>
 #include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderOverlaySystem.hpp>
@@ -74,6 +76,7 @@ void RuinSceneUpperFloor::on_init()
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowPathFinding>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowNavmesh>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowDebugStats>( scene_settings_entt, false );
+  m_reg.emplace_or_replace<Cmp::SceneSettings::Paused>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::Shaders>( scene_settings_entt, true );
   m_reg.emplace_or_replace<Cmp::SceneSettings::Footsteps>( scene_settings_entt, true );
 
@@ -168,6 +171,8 @@ void RuinSceneUpperFloor::on_enter()
 
 void RuinSceneUpperFloor::on_exit()
 {
+  // never leave the scene paused, e.g. with its sound effects still paused
+  m_sys.find<Sys::Store::Type::PauseOverlaySystem>().force_resume();
   SPDLOG_DEBUG( "Exiting {}", get_name() );
   m_sound_bank.get_music( "ruin_creaking_rope" ).stop();
   m_sound_bank.get_music( "ruin_music" ).stop();
@@ -177,31 +182,45 @@ void RuinSceneUpperFloor::on_exit()
 void RuinSceneUpperFloor::do_update( sf::Time dt )
 {
   using namespace Sys;
-  m_sys.find<Store::Type::AnimSystem>().update( dt );
-  m_sys.find<Store::Type::NpcSystem>().update( dt );
-  m_sys.find<Sys::Store::Type::FootstepSystem>().update( dt );
-  m_sys.find<Store::Type::LootSystem>().check_loot_collision( dt );
-  m_sys.find<Store::Type::RuinSystem>().check_floor_access_collision( dt, Cmp::Ruin::FloorAccess::Direction::TO_LOWER );
-  m_sys.find<Store::Type::RuinSystem>().check_movement_slowdowns();
+  // the pause overlay pauses gameplay: the world is still drawn, but nothing in it advances
+  auto &pause_overlay = m_sys.find<Sys::Store::Type::PauseOverlaySystem>();
+  const bool paused = pause_overlay.is_paused();
+  const sf::Time world_dt = paused ? sf::Time::Zero : dt;
 
-  m_sys.find<Store::Type::PlayerSystem>().update( dt );
-  m_sys.find<Store::Type::InventorySystem>().update( dt );
-  m_sys.find<Store::Type::ShaderSystem>().update( dt );
-  m_sys.find<Store::Type::PlayerSystem>().disable_damage_cooldown();
+  if ( not paused )
+  {
+    m_sys.find<Store::Type::AnimSystem>().update( dt );
+    m_sys.find<Store::Type::NpcSystem>().update( dt );
+    m_sys.find<Sys::Store::Type::FootstepSystem>().update( dt );
+    m_sys.find<Store::Type::LootSystem>().check_loot_collision( dt );
+    m_sys.find<Store::Type::RuinSystem>().check_floor_access_collision( dt, Cmp::Ruin::FloorAccess::Direction::TO_LOWER );
+    m_sys.find<Store::Type::RuinSystem>().check_movement_slowdowns();
 
-  auto [_, map_size_pixel] = m_scene_data->map_size();
-  [[maybe_unused]] bool player_curse_active = m_sys.find<Store::Type::RuinSystem>().check_activate_player_curse( map_size_pixel );
-  // if ( player_curse_active ) { Factory::Shader::add_curse( m_sys.find<Sys::Store::Type::ShaderSystem>(), map_size_pixel ); }
+    m_sys.find<Store::Type::PlayerSystem>().update( dt );
+    m_sys.find<Store::Type::InventorySystem>().update( dt );
+    m_sys.find<Store::Type::ShaderSystem>().update( dt );
+    m_sys.find<Store::Type::PlayerSystem>().disable_damage_cooldown();
 
-  m_sys.find<Store::Type::RuinSystem>().update_shadow_hand_pos( map_size_pixel );
-  m_sys.find<Store::Type::RuinSystem>().check_player_shadow_hand_collision( dt );
+    auto [_, map_size_pixel] = m_scene_data->map_size();
+    [[maybe_unused]] bool player_curse_active = m_sys.find<Store::Type::RuinSystem>().check_activate_player_curse( map_size_pixel );
+    // if ( player_curse_active ) { Factory::Shader::add_curse( m_sys.find<Sys::Store::Type::ShaderSystem>(), map_size_pixel ); }
 
-  m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
-  m_sys.find<Store::Type::RenderGameSystem>().render_game( dt );
-  m_sys.find<Store::Type::RenderOverlaySystem>().render_overlay( dt );
-  m_sys.find<Store::Type::TooltipSystem>().update( dt );
-  m_sys.find<Store::Type::TooltipSystem>().render();
-  m_sys.find<Store::Type::RenderDebugSystem>().render_debug( dt );
+    m_sys.find<Store::Type::RuinSystem>().update_shadow_hand_pos( map_size_pixel );
+    m_sys.find<Store::Type::RuinSystem>().check_player_shadow_hand_collision( dt );
+
+    m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
+  }
+
+  m_sys.find<Store::Type::RenderGameSystem>().render_game( world_dt );
+  m_sys.find<Store::Type::RenderOverlaySystem>().render_overlay( world_dt );
+  if ( not paused )
+  {
+    m_sys.find<Store::Type::TooltipSystem>().update( dt );
+    m_sys.find<Store::Type::TooltipSystem>().render();
+  }
+  // real dt even while paused, for ImGui. The debug panels are hidden while paused: both pump the one ImGui frame allowed per frame
+  pause_overlay.render( dt );
+  if ( not paused ) { m_sys.find<Store::Type::RenderDebugSystem>().render_debug( dt ); }
 }
 
 void RuinSceneUpperFloor::reinit_navmesh()

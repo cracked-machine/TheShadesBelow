@@ -66,6 +66,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/UiData.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/ZOrderQueue.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/GrimoireSystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/PauseOverlaySystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/AnimSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/BaseSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ActionSystem.cpp
@@ -104,7 +105,6 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/SceneControl/SceneManager.cpp
     ${CMAKE_SOURCE_DIR}/src/SceneControl/Scenes/GraveyardScene.cpp
     ${CMAKE_SOURCE_DIR}/src/SceneControl/Scenes/SettingsMenuScene.cpp
-    ${CMAKE_SOURCE_DIR}/src/SceneControl/Scenes/PausedMenuScene.cpp
     ${CMAKE_SOURCE_DIR}/src/SceneControl/Scenes/GameOverScene.cpp
     ${CMAKE_SOURCE_DIR}/src/SceneControl/Scenes/TitleScene.cpp
     ${CMAKE_SOURCE_DIR}/src/SceneControl/Scenes/LevelCompleteScene.cpp

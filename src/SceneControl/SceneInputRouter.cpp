@@ -13,6 +13,7 @@
 #include <Components/Position.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SceneSettings/Footsteps.hpp>
+#include <Components/SceneSettings/Paused.hpp>
 #include <Components/SceneSettings/Shaders.hpp>
 #include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/SceneSettings/ShowNavmesh.hpp>
@@ -39,7 +40,6 @@
 #include <SceneControl/Events/ProcessGraveyardSceneInputEvent.hpp>
 #include <SceneControl/Events/ProcessHealingSpringSceneInputEvent.hpp>
 #include <SceneControl/Events/ProcessLevelCompleteSceneInputEvent.hpp>
-#include <SceneControl/Events/ProcessPausedMenuSceneInputEvent.hpp>
 #include <SceneControl/Events/ProcessRuinSceneLowerInputEvent.hpp>
 #include <SceneControl/Events/ProcessRuinSceneUpperInputEvent.hpp>
 #include <SceneControl/Events/ProcessSettingsMenuSceneInputEvent.hpp>
@@ -69,7 +69,6 @@ SceneInputRouter::SceneInputRouter( entt::registry &reg, sf::RenderWindow &m_win
   m_nav_event_dispatcher.sink<Events::ProcessTitleSceneInputEvent>().connect<&SceneInputRouter::title_scene_input_handler>( this );
   m_nav_event_dispatcher.sink<Events::ProcessSettingsMenuSceneInputEvent>().connect<&SceneInputRouter::settings_scene_state_handler>( this );
   m_nav_event_dispatcher.sink<Events::ProcessGraveyardSceneInputEvent>().connect<&SceneInputRouter::graveyard_scene_state_handler>(this );
-  m_nav_event_dispatcher.sink<Events::ProcessPausedMenuSceneInputEvent>().connect<&SceneInputRouter::paused_scene_state_handler>(this );
   m_nav_event_dispatcher.sink<Events::ProcessGameoverSceneInputEvent>().connect<&SceneInputRouter::game_over_scene_state_handler>(this );
   m_nav_event_dispatcher.sink<Events::ProcessLevelCompleteSceneInputEvent>().connect<&SceneInputRouter::level_complete_scene_state_handler>( this );
   m_nav_event_dispatcher.sink<Events::ProcessCryptSceneInputEvent>().connect<&SceneInputRouter::crypt_scene_state_handler>( this );
@@ -116,6 +115,11 @@ void SceneInputRouter::settings_scene_state_handler()
 
 void SceneInputRouter::graveyard_scene_state_handler()
 {
+  if ( is_paused() )
+  {
+    pause_overlay_input_handler();
+    return;
+  }
   if ( is_grimoire_open() )
   {
     grimoire_overlay_input_handler();
@@ -138,7 +142,7 @@ void SceneInputRouter::graveyard_scene_state_handler()
     }
     else if ( const auto *keyPressed = event->getIf<sf::Event::KeyPressed>() )
     {
-      if ( keyPressed->scancode == sf::Keyboard::Scancode::P ) { enqueue( Events::SceneManagerEvent::Type::PAUSE_GAME ); }
+      if ( keyPressed->scancode == sf::Keyboard::Scancode::P ) { toggle_pause(); }
     }
     else if ( const auto *mouseReleased = event->getIf<sf::Event::MouseButtonReleased>() )
     {
@@ -186,6 +190,11 @@ void SceneInputRouter::graveyard_scene_state_handler()
 
 void SceneInputRouter::crypt_scene_state_handler()
 {
+  if ( is_paused() )
+  {
+    pause_overlay_input_handler();
+    return;
+  }
 
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
@@ -218,7 +227,7 @@ void SceneInputRouter::crypt_scene_state_handler()
     }
     else if ( const auto *keyPressed = event->getIf<sf::Event::KeyPressed>() )
     {
-      if ( keyPressed->scancode == sf::Keyboard::Scancode::P ) { enqueue( Events::SceneManagerEvent::Type::PAUSE_GAME ); }
+      if ( keyPressed->scancode == sf::Keyboard::Scancode::P ) { toggle_pause(); }
     }
   }
 
@@ -237,6 +246,11 @@ void SceneInputRouter::crypt_scene_state_handler()
 
 void SceneInputRouter::healing_spring_scene_state_handler()
 {
+  if ( is_paused() )
+  {
+    pause_overlay_input_handler();
+    return;
+  }
 
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
@@ -252,7 +266,7 @@ void SceneInputRouter::healing_spring_scene_state_handler()
     }
     else if ( const auto *keyPressed = event->getIf<sf::Event::KeyPressed>() )
     {
-      if ( keyPressed->scancode == sf::Keyboard::Scancode::P ) { enqueue( Events::SceneManagerEvent::Type::PAUSE_GAME ); }
+      if ( keyPressed->scancode == sf::Keyboard::Scancode::P ) { toggle_pause(); }
     }
   }
 
@@ -271,6 +285,11 @@ void SceneInputRouter::healing_spring_scene_state_handler()
 
 void SceneInputRouter::shop_scene_state_handler()
 {
+  if ( is_paused() )
+  {
+    pause_overlay_input_handler();
+    return;
+  }
 
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
@@ -291,7 +310,7 @@ void SceneInputRouter::shop_scene_state_handler()
     }
     else if ( const auto *keyPressed = event->getIf<sf::Event::KeyPressed>() )
     {
-      if ( keyPressed->scancode == sf::Keyboard::Scancode::P ) { enqueue( Events::SceneManagerEvent::Type::PAUSE_GAME ); }
+      if ( keyPressed->scancode == sf::Keyboard::Scancode::P ) { toggle_pause(); }
     }
   }
 
@@ -310,6 +329,11 @@ void SceneInputRouter::shop_scene_state_handler()
 
 void SceneInputRouter::ruin_scene_state_handler()
 {
+  if ( is_paused() )
+  {
+    pause_overlay_input_handler();
+    return;
+  }
 
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
@@ -329,7 +353,7 @@ void SceneInputRouter::ruin_scene_state_handler()
     }
     else if ( const auto *keyPressed = event->getIf<sf::Event::KeyPressed>() )
     {
-      if ( keyPressed->scancode == sf::Keyboard::Scancode::P ) { enqueue( Events::SceneManagerEvent::Type::PAUSE_GAME ); }
+      if ( keyPressed->scancode == sf::Keyboard::Scancode::P ) { toggle_pause(); }
     }
   }
 
@@ -347,23 +371,6 @@ void SceneInputRouter::ruin_scene_state_handler()
   if ( not debug_ui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ATTACK ) );
-  }
-}
-
-void SceneInputRouter::paused_scene_state_handler()
-{
-
-  using namespace sf::Keyboard;
-  while ( const std::optional event = m_window.pollEvent() )
-  {
-    // See comment in settings_scene_state_handler: only scenes that pump an ImGui frame
-    // should forward events into ImGui's queue.
-    ImGui::SFML::ProcessEvent( m_window, *event );
-    if ( dispatch_common_window_event( *event ) ) continue;
-    if ( const auto *keyPressed = event->getIf<sf::Event::KeyPressed>() )
-    {
-      if ( keyPressed->scancode == sf::Keyboard::Scancode::P ) { enqueue( Events::SceneManagerEvent::Type::RESUME_GAME ); }
-    }
   }
 }
 
@@ -403,10 +410,38 @@ void SceneInputRouter::level_complete_scene_state_handler()
 
 // PRIVATE
 
+void SceneInputRouter::pause_overlay_input_handler()
+{
+  // gameplay is paused, so only the pause overlay's own controls get through. The grimoire and the F3 debug keys are
+  // blocked: PauseOverlaySystem pumps the one ImGui frame allowed per frame while paused.
+  while ( const std::optional event = m_window.pollEvent() )
+  {
+    // PauseOverlaySystem pumps an ImGui frame while paused (the volume sliders), so the events can go to ImGui
+    ImGui::SFML::ProcessEvent( m_window, *event );
+    if ( dispatch_common_window_event( *event ) ) continue;
+    if ( const auto *keyPressed = event->getIf<sf::Event::KeyPressed>() )
+    {
+      if ( keyPressed->scancode == sf::Keyboard::Scancode::P ) { toggle_pause(); }
+    }
+  }
+}
+
+bool SceneInputRouter::is_paused()
+{
+  auto paused_view = reg().view<const Cmp::SceneSettings::Paused>();
+  if ( paused_view.empty() ) { return false; }
+  return paused_view.get<const Cmp::SceneSettings::Paused>( paused_view.front() ).enabled;
+}
+
+void SceneInputRouter::toggle_pause()
+{
+  get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::PAUSE_TOGGLE ) );
+}
+
 void SceneInputRouter::grimoire_overlay_input_handler()
 {
   // gameplay is paused while the grimoire is open, so only the grimoire's own controls get through.
-  // The pause menu is blocked too: leaving it resumes the sound effects the grimoire paused.
+  // P (pause) is blocked too: the pause overlay and the grimoire both pump the one ImGui frame allowed per frame.
   // The F3 debug keys are not handled here either: the grimoire and the debug panels both pump the one ImGui frame
   // allowed per frame, so they are never shown together (see GrimoireSystem::on_player_action).
   while ( const std::optional event = m_window.pollEvent() )

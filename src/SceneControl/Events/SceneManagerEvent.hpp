@@ -19,10 +19,6 @@ struct SceneManagerEvent
     START_GAME,
     //! @brief Quit the current game, returning to the title scene.
     QUIT_GAME,
-    //! @brief Enter the paused-menu scene.
-    PAUSE_GAME,
-    //! @brief Leave the paused-menu scene, resuming gameplay.
-    RESUME_GAME,
     //! @brief Enter the game-over scene, e.g. after the player dies.
     GAME_OVER,
     //! @brief Enter the level-complete scene.

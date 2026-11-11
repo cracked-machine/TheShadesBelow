@@ -36,10 +36,6 @@ public:
     SETTINGS,
     //! @brief Navigate to the crypt scene
     CRYPT,
-    //! @brief Pause the game
-    PAUSE,
-    //! @brief Resume the game
-    RESUME,
     //! @brief Navigate to the game over scene
     GAMEOVER,
     //! @brief Exit the game
@@ -69,8 +65,6 @@ public:
   void shop_scene_state_handler();
   //! @brief Process input while a ruin scene (upper or lower floor) is active.
   void ruin_scene_state_handler();
-  //! @brief Process input while the paused menu scene is active.
-  void paused_scene_state_handler();
   //! @brief Process input while the game over scene is active.
   void game_over_scene_state_handler();
   //! @brief Process input while the level complete scene is active.
@@ -85,6 +79,15 @@ private:
   //! @brief reset and process new user direction input
   void process_move_keys();
 
+  //! @brief Process input while the pause overlay is shown. Gameplay is paused, so only P (resume), the volume sliders
+  //!        (via ImGui) and the common window events are handled.
+  void pause_overlay_input_handler();
+  //! @brief Check whether the current scene is paused (see Cmp::SceneSettings::Paused).
+  //! @return true if paused, false if not or the scene has no pause setting.
+  bool is_paused();
+  //! @brief Trigger a PAUSE_TOGGLE player action.
+  void toggle_pause();
+
   //! @brief Process input while the grimoire overlay is open. Gameplay is paused, so only the grimoire's own
   //!        controls (process_grimoire_keys, process_grimoire_wheel) and the common window events are handled.
   void grimoire_overlay_input_handler();
@@ -93,6 +96,7 @@ private:
   bool is_grimoire_open();
   //! @brief Trigger the held-key grimoire actions: G toggles the overlay, Left/Right turn pages.
   void process_grimoire_keys();
+
   //! @brief Turn the grimoire page if the event is a vertical mouse wheel scroll; otherwise does nothing.
   //! @param event The polled window event
   void process_grimoire_wheel( const sf::Event &event );

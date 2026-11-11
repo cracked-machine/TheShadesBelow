@@ -475,33 +475,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
   }
 }
 
-void RenderMenuSystem::render_paused( sf::Time dt )
-{
-  ImGui::SFML::Update( m_window, dt );
-  ImGui::Begin( "PausedMenu", nullptr, kImGuiWindowOptions );
-
-  sf::Vector2u display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
-
-  sf::Text title_text( m_font, "Paused", 96 );
-  title_text.setFillColor( sf::Color::White );
-  title_text.setPosition( { static_cast<float>( display_size.x ) / 4.f, 100.f } );
-  m_window.draw( title_text );
-
-  sf::Text start_text( m_font, "Press P to continue", 48 );
-  start_text.setFillColor( sf::Color::White );
-  start_text.setPosition( { static_cast<float>( display_size.x ) / 4.f, 200.f } );
-  m_window.draw( start_text );
-
-  auto &music_volume = Sys::PersistSystem::get<Cmp::Persist::MusicVolume>( reg() );
-  ImGui::SliderFloat( "Music Volume", &music_volume.get_value(), 0.f, 100.f, "%.1f" );
-
-  auto &effects_volume = Sys::PersistSystem::get<Cmp::Persist::EffectsVolume>( reg() );
-  ImGui::SliderFloat( "Effects Volume", &effects_volume.get_value(), 0.f, 100.f, "%.1f" );
-
-  ImGui::End();
-  ImGui::SFML::Render( m_window );
-}
-
 void RenderMenuSystem::render_defeat_screen()
 {
   {

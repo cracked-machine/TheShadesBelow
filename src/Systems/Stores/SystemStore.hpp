@@ -38,6 +38,7 @@ class ItemStore;
 class ItemSystem;
 class LightningSystem;
 class LootSystem;
+class PauseOverlaySystem;
 class NpcStore;
 class NpcSystem;
 class ParticleSystem;
@@ -119,6 +120,8 @@ public:
     NpcSystem,
     //! @brief Key for ParticleSystem.
     ParticleSystem,
+    //! @brief Key for PauseOverlaySystem.
+    PauseOverlaySystem,
     //! @brief Key for PassageSystem.
     PassageSystem,
     //! @brief Key for PersistSystem.
@@ -253,6 +256,7 @@ template<> struct Store::SystemTraits<Store::Type::RuinSystem>             { usi
 template<> struct Store::SystemTraits<Store::Type::LootSystem>             { using type = LootSystem; };
 template<> struct Store::SystemTraits<Store::Type::LightningSystem>        { using type = LightningSystem; };
 template<> struct Store::SystemTraits<Store::Type::NpcSystem>              { using type = NpcSystem; };
+template<> struct Store::SystemTraits<Store::Type::PauseOverlaySystem>     { using type = PauseOverlaySystem; };
 template<> struct Store::SystemTraits<Store::Type::ParticleSystem>         { using type = ParticleSystem; };
 template<> struct Store::SystemTraits<Store::Type::PassageSystem>          { using type = Game::Sys::PassageSystem; };
 template<> struct Store::SystemTraits<Store::Type::PersistSystem>          { using type = PersistSystem; };

@@ -5,6 +5,7 @@
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/SceneSettings/Footsteps.hpp>
+#include <Components/SceneSettings/Paused.hpp>
 #include <Components/SceneSettings/Shaders.hpp>
 #include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/SceneSettings/ShowNavmesh.hpp>
@@ -29,6 +30,7 @@
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/PlayerSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
+#include <Systems/Render/PauseOverlaySystem.hpp>
 #include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderOverlaySystem.hpp>
@@ -58,6 +60,7 @@ void HealingSpringScene::on_init()
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowPathFinding>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowNavmesh>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowDebugStats>( scene_settings_entt, false );
+  m_reg.emplace_or_replace<Cmp::SceneSettings::Paused>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::Shaders>( scene_settings_entt, true );
   m_reg.emplace_or_replace<Cmp::SceneSettings::Footsteps>( scene_settings_entt, true );
 
@@ -134,6 +137,8 @@ void HealingSpringScene::on_enter()
 
 void HealingSpringScene::on_exit()
 {
+  // never leave the scene paused, e.g. with its sound effects still paused
+  m_sys.find<Sys::Store::Type::PauseOverlaySystem>().force_resume();
   SPDLOG_DEBUG( "Exiting {}", get_name() );
   m_sound_bank.get_music( "healing_spring" ).stop();
   m_sys.find<Sys::Store::Type::FootstepSystem>().stop_footsteps_sound();
@@ -145,22 +150,35 @@ void HealingSpringScene::on_exit()
 
 void HealingSpringScene::do_update( sf::Time dt )
 {
-  m_sys.find<Sys::Store::Type::AnimSystem>().update( dt );
-  m_sys.find<Sys::Store::Type::NpcSystem>().update( dt );
-  m_sys.find<Sys::Store::Type::FootstepSystem>().update( dt );
-  m_sys.find<Sys::Store::Type::LootSystem>().check_loot_collision( dt );
-  m_sys.find<Sys::Store::Type::HealingSpringSystem>().check_exit_collision();
-  m_sys.find<Sys::Store::Type::InventorySystem>().update( dt );
+  // the pause overlay pauses gameplay: the world is still drawn, but nothing in it advances
+  auto &pause_overlay = m_sys.find<Sys::Store::Type::PauseOverlaySystem>();
+  const bool paused = pause_overlay.is_paused();
+  const sf::Time world_dt = paused ? sf::Time::Zero : dt;
 
-  m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt );
-  m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt );
-  m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
+  if ( not paused )
+  {
+    m_sys.find<Sys::Store::Type::AnimSystem>().update( dt );
+    m_sys.find<Sys::Store::Type::NpcSystem>().update( dt );
+    m_sys.find<Sys::Store::Type::FootstepSystem>().update( dt );
+    m_sys.find<Sys::Store::Type::LootSystem>().check_loot_collision( dt );
+    m_sys.find<Sys::Store::Type::HealingSpringSystem>().check_exit_collision();
+    m_sys.find<Sys::Store::Type::InventorySystem>().update( dt );
 
-  m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( dt );
-  m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_overlay( dt );
-  m_sys.find<Sys::Store::Type::TooltipSystem>().update( dt );
-  m_sys.find<Sys::Store::Type::TooltipSystem>().render();
-  m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug( dt );
+    m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt );
+    m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt );
+    m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
+  }
+
+  m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( world_dt );
+  m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_overlay( world_dt );
+  if ( not paused )
+  {
+    m_sys.find<Sys::Store::Type::TooltipSystem>().update( dt );
+    m_sys.find<Sys::Store::Type::TooltipSystem>().render();
+  }
+  // real dt even while paused, for ImGui. The debug panels are hidden while paused: both pump the one ImGui frame allowed per frame
+  pause_overlay.render( dt );
+  if ( not paused ) { m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug( dt ); }
 }
 
 void HealingSpringScene::reinit_navmesh()

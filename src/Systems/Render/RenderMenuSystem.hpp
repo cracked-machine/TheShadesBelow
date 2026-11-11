@@ -15,7 +15,7 @@ class TitleScreenShader;
 namespace Game::Sys
 {
 
-//! @brief Renders the non-gameplay menu screens: the title screen, settings menu, pause menu, defeat screen and victory screen.
+//! @brief Renders the non-gameplay menu screens: the title screen, settings menu, defeat screen and victory screen.
 class RenderMenuSystem : public RenderSystem
 {
 public:
@@ -61,10 +61,6 @@ public:
   //! @brief Render the settings screen: title/hint text plus the settings ImGui widgets.
   //! @param dt
   void render_settings( sf::Time dt );
-
-  //! @brief Render the pause menu overlay: title/hint text and music/effects volume sliders.
-  //! @param dt
-  void render_paused( sf::Time dt );
 
   //! @brief Render the defeat (game over) screen.
   void render_defeat_screen();

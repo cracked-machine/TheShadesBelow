@@ -12,7 +12,6 @@
 #include <SceneControl/Scenes/GraveyardScene.hpp>
 #include <SceneControl/Scenes/HealingSpringScene.hpp>
 #include <SceneControl/Scenes/LevelCompleteScene.hpp>
-#include <SceneControl/Scenes/PausedMenuScene.hpp>
 #include <SceneControl/Scenes/RuinSceneLowerFloor.hpp>
 #include <SceneControl/Scenes/RuinSceneUpperFloor.hpp>
 #include <SceneControl/Scenes/SettingsMenuScene.hpp>
@@ -293,17 +292,6 @@ void SceneManager::handle_events( const Events::SceneManagerEvent &event )
     case Events::SceneManagerEvent::Type::QUIT_GAME: {
       SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::QUIT_GAME requested" );
       pop();
-      break;
-    }
-    case Events::SceneManagerEvent::Type::PAUSE_GAME: {
-      SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::PAUSE_GAME requested" );
-      auto paused_scene = std::make_unique<PausedMenuScene>( m_sound_bank, m_system_store, m_nav_event_dispatcher );
-      push_no_exit( std::move( paused_scene ) );
-      break;
-    }
-    case Events::SceneManagerEvent::Type::RESUME_GAME: {
-      SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::RESUME_GAME requested" );
-      pop_no_enter();
       break;
     }
     case Events::SceneManagerEvent::Type::GAME_OVER: {

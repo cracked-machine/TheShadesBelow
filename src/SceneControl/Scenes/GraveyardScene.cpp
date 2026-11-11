@@ -27,6 +27,7 @@
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/SceneSettings/Footsteps.hpp>
+#include <Components/SceneSettings/Paused.hpp>
 #include <Components/SceneSettings/Shaders.hpp>
 #include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/SceneSettings/ShowNavmesh.hpp>
@@ -77,6 +78,7 @@
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/ProcGen/TrailGuideSystem.hpp>
 #include <Systems/Render/GrimoireSystem.hpp>
+#include <Systems/Render/PauseOverlaySystem.hpp>
 #include <Systems/Render/RenderDebugSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderOverlaySystem.hpp>
@@ -115,6 +117,7 @@ void GraveyardScene::on_init()
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowPathFinding>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowNavmesh>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowDebugStats>( scene_settings_entt, false );
+  m_reg.emplace_or_replace<Cmp::SceneSettings::Paused>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::Shaders>( scene_settings_entt, true );
   m_reg.emplace_or_replace<Cmp::SceneSettings::Footsteps>( scene_settings_entt, true );
 
@@ -269,6 +272,8 @@ void GraveyardScene::on_enter()
 void GraveyardScene::on_exit()
 {
   SPDLOG_DEBUG( "Exiting {}", get_name() );
+  // never leave the scene paused, e.g. with its sound effects still paused. Before the registry is cleared.
+  m_sys.find<Sys::Store::Type::PauseOverlaySystem>().force_resume();
   m_reg.clear();
   m_sound_bank.get_music( "graveyard_music" ).stop();
 
@@ -287,8 +292,9 @@ void GraveyardScene::do_update( sf::Time dt )
 {
   ZoneScoped;
 
-  // the grimoire pauses gameplay: the world is still drawn, but nothing in it advances
-  const bool paused = m_sys.find<Sys::Store::Type::GrimoireSystem>().is_grimoire_overlay_open();
+  // the grimoire and the pause overlay pause gameplay: the world is still drawn, but nothing in it advances
+  auto &pause_overlay = m_sys.find<Sys::Store::Type::PauseOverlaySystem>();
+  const bool paused = pause_overlay.is_paused() or m_sys.find<Sys::Store::Type::GrimoireSystem>().is_grimoire_overlay_open();
   const sf::Time world_dt = paused ? sf::Time::Zero : dt;
 
   Utils::Player::get_level_depth( m_reg ).display_timer += world_dt;
@@ -377,7 +383,9 @@ void GraveyardScene::do_update( sf::Time dt )
   // real dt even while paused, so the grimoire's debounce timers still run and it can be closed/paged
   PROFILED( m_sys.find<Sys::Store::Type::GrimoireSystem>().update( dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::GrimoireSystem>().render( dt ) );
-  PROFILED( m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug( dt ) );
+  // the debug panels are hidden while paused: both pump the one ImGui frame allowed per frame
+  PROFILED( pause_overlay.render( dt ) );
+  if ( not pause_overlay.is_paused() ) { PROFILED( m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug( dt ) ); }
 }
 
 void GraveyardScene::reinit_system_spatial_maps()
