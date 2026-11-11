@@ -1,12 +1,12 @@
 #ifndef SRC_SYSTEMS_GRAVESYSTEM_HPP__
 #define SRC_SYSTEMS_GRAVESYSTEM_HPP__
 
-#include <string>
 #include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Stores/StoreKey.hpp>
+#include <string>
 
 #include <vector>
 
@@ -67,8 +67,7 @@ private:
   void apply_dig_hit( entt::entity grave_entity, Cmp::Grave::MultiBlock &grave_cmp, Cmp::AnimData &grave_anim_cmp );
 
   //! @brief Outcome of pick_next_trail_grave(), telling the caller which key (if any) to drop
-  enum class TrailStep
-  {
+  enum class TrailStep {
     ADVANCED,  //!< the trail moved on to a new grave
     EXIT_KEY,  //!< the exit key trail is complete; the trail still moves on if graves remain
     CRYPT_KEY, //!< the crypt key trail is complete and the trail ends
@@ -84,8 +83,7 @@ private:
   TrailStep pick_next_trail_grave( entt::entity source_entt );
 
   //! @brief What opened a grave, which decides where its loot/key/bomb ends up
-  enum class ExhumedBy
-  {
+  enum class ExhumedBy {
     PLAYER, //!< dug by the player: loot drops at the player, keys go into their hands, bombs centre on them
     BOMB    //!< caught in a blast: loot and keys drop beside the grave (spared by the blast), bombs centre on the grave
   };
@@ -112,7 +110,7 @@ private:
   //! @param loot_pool
   //! @param grave_entity the grave the loot came from
   //! @param by what opened the grave
-  void spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, entt::entity grave_entity, ExhumedBy by );
+  void spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, entt::entity grave_entity, ExhumedBy exhumedby );
 
   //! @brief Give a torch dropped by a grave its flame particle sprite. Does nothing for any other item.
   //! @param item_entt the world item just created by Events::CreateItemEvent

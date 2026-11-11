@@ -475,12 +475,12 @@ void GraveSystem::light_torch_loot( entt::entity item_entt )
                                 zorder_cmp->get() + 1.f, Cmp::Particle::kWorldScalePreset );
 }
 
-void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, entt::entity grave_entity, ExhumedBy by )
+void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, entt::entity grave_entity, ExhumedBy exhumedby )
 {
   Cmp::RandomInt loot_picker( 0, static_cast<int>( loot_pool.size() ) - 1 );
   const auto &selected_item_type = loot_pool.at( static_cast<std::size_t>( loot_picker.gen() ) );
 
-  if ( by == ExhumedBy::BOMB )
+  if ( exhumedby == ExhumedBy::BOMB )
   {
     // drop on a free cell beside the grave, and spare it from the blast that exhumed it
     const Cmp::Position bounds = grave_bounds( grave_entity );

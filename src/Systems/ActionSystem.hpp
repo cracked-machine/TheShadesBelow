@@ -56,6 +56,13 @@ private:
   //! @brief Break the targetted Curse Tablet (Cmp::WorldItem) with a tool via Events::UpdateDmgEvent
   void check_player_smash_tablet();
 
+  //! @brief Apply wear to the equipped tool via Events::UpdateDmgEvent. No-op if the tool is already broken.
+  //! @tparam PickaxeWear Persistent wear component used when the pickaxe is equipped
+  //! @tparam AxeWear Persistent wear component used when the axe is equipped
+  //! @tparam ShovelWear Persistent wear component used when the shovel is equipped
+  template <typename PickaxeWear, typename AxeWear, typename ShovelWear>
+  void apply_tool_wear();
+
   //! @brief Banish up to `max_count` NPCs of type NpcType that are visible in the world view, nearest to `origin` first.
   //! @tparam NpcType NPC tag component, e.g. Cmp::Npc::Ghost
   //! @param origin Distances are measured from here, e.g. the player position.
