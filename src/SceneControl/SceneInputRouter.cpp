@@ -132,34 +132,6 @@ void SceneInputRouter::graveyard_scene_state_handler()
     {
       try_handle_debug_key( keyReleased->scancode );
       if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
-      else if ( keyReleased->scancode == sf::Keyboard::Scancode::F5 )
-      {
-        Factory::Player::add_player_last_graveyard_pos( reg(), Utils::Player::get_position( reg() ), { 0.f, 0.f } );
-
-        enqueue( Events::SceneManagerEvent::Type::ENTER_CRYPT );
-      }
-      else if ( keyReleased->scancode == sf::Keyboard::Scancode::F6 )
-      {
-        Factory::Player::add_player_last_graveyard_pos( reg(), Utils::Player::get_position( reg() ), { 0.f, 0.f } );
-
-        enqueue( Events::SceneManagerEvent::Type::ENTER_SACREDSPRING );
-      }
-      else if ( keyReleased->scancode == sf::Keyboard::Scancode::F7 )
-      {
-
-        Factory::Player::add_player_last_graveyard_pos( reg(), Utils::Player::get_position( reg() ), { 0.f, 0.f } );
-
-        enqueue( Events::SceneManagerEvent::Type::ENTER_RUIN_LOWER );
-      }
-      else if ( keyReleased->scancode == sf::Keyboard::Scancode::F8 )
-      {
-        enqueue( Events::SceneManagerEvent::Type::LEVEL_COMPLETE );
-        Factory::Player::remove_player_last_graveyard_pos( reg() );
-      }
-      else if ( keyReleased->scancode == sf::Keyboard::Scancode::F12 )
-      {
-        get_systems_event_queue().trigger( Events::LightningEvent( Utils::Player::get_entity( reg() ) ) );
-      }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Home ) { toggle_particle_test( true ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::End ) { toggle_particle_test( false ); }
       else if ( keyReleased->scancode == sf::Keyboard::Scancode::Escape ) { queue_quit_game_event(); }
@@ -582,6 +554,27 @@ void SceneInputRouter::try_handle_debug_key( [[maybe_unused]] sf::Keyboard::Scan
   else if ( scancode == Scancode::Numpad6 ) { Utils::Player::get_stats( reg() ).apply( { {}, Cmp::Stats::Fear{ -10 }, {}, {}, {}, {}, {} } ); }
   else if ( scancode == Scancode::Numpad8 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, Cmp::Stats::Anima{ 10 }, {} } ); }
   else if ( scancode == Scancode::Numpad5 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, Cmp::Stats::Anima{ -10 }, {} } ); }
+  else if ( scancode == Scancode::F5 )
+  {
+    Factory::Player::add_player_last_graveyard_pos( reg(), Utils::Player::get_position( reg() ), { 0.f, 0.f } );
+    enqueue( Events::SceneManagerEvent::Type::ENTER_CRYPT );
+  }
+  else if ( scancode == Scancode::F6 )
+  {
+    Factory::Player::add_player_last_graveyard_pos( reg(), Utils::Player::get_position( reg() ), { 0.f, 0.f } );
+    enqueue( Events::SceneManagerEvent::Type::ENTER_SACREDSPRING );
+  }
+  else if ( scancode == Scancode::F7 )
+  {
+    Factory::Player::add_player_last_graveyard_pos( reg(), Utils::Player::get_position( reg() ), { 0.f, 0.f } );
+    enqueue( Events::SceneManagerEvent::Type::ENTER_RUIN_LOWER );
+  }
+  else if ( scancode == Scancode::F8 )
+  {
+    enqueue( Events::SceneManagerEvent::Type::LEVEL_COMPLETE );
+    Factory::Player::remove_player_last_graveyard_pos( reg() );
+  }
+  else if ( scancode == Scancode::F12 ) { get_systems_event_queue().trigger( Events::LightningEvent( Utils::Player::get_entity( reg() ) ) ); }
 #endif // NDEBUG
 }
 
