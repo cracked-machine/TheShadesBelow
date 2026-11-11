@@ -113,6 +113,7 @@
 #include <Components/Persistent/ReservedArmedBlockColourBorder.hpp>
 #include <Components/Persistent/ReservedArmedBlockColourFill.hpp>
 #include <Components/Persistent/ResetTutorial.hpp>
+#include <Components/Persistent/RetainAnimaBetweenLevels.hpp>
 #include <Components/Persistent/RuinMaxCobwebs.hpp>
 #include <Components/Persistent/RuinMaxSpiders.hpp>
 #include <Components/Persistent/RuinProcGenBirthThreshold.hpp>
@@ -265,6 +266,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::PlayerStartPosition>();
   add_component<Cmp::Persist::PostPullMovementDelay>();
   add_component<Cmp::Persist::RepelNpcPlayerTint>();
+  add_component<Cmp::Persist::RetainAnimaBetweenLevels>();
   add_component<Cmp::Persist::RuinMaxCobwebs>();
   add_component<Cmp::Persist::RuinMaxSpiders>();
   add_component<Cmp::Persist::RuinProcGenInitChance>();

@@ -70,7 +70,8 @@ public:
   //! @param allow_continue Whether to show the "press to continue" prompt.
   //! @param cadaver_wealth Wealth added so far from converting cadavers.
   //! @param anima_wealth Wealth added so far from converting anima.
-  void render_victory_screen( bool allow_continue, int cadaver_wealth, int anima_wealth );
+  //! @param retain_anima Whether unspent anima carries over to the next level instead of being sold for wealth.
+  void render_victory_screen( bool allow_continue, int cadaver_wealth, int anima_wealth, bool retain_anima );
 };
 
 } // namespace Game::Sys

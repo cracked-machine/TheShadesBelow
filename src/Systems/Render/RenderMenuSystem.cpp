@@ -111,6 +111,7 @@
 #include <Components/Persistent/ReservedArmedBlockColourBorder.hpp>
 #include <Components/Persistent/ReservedArmedBlockColourFill.hpp>
 #include <Components/Persistent/ResetTutorial.hpp>
+#include <Components/Persistent/RetainAnimaBetweenLevels.hpp>
 #include <Components/Persistent/RuinMaxCobwebs.hpp>
 #include <Components/Persistent/RuinMaxSpiders.hpp>
 #include <Components/Persistent/RuinProcGenBirthThreshold.hpp>
@@ -274,6 +275,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::CameraSmoothSpeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerLerpInterruptThreshold>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PostPullMovementDelay>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::RetainAnimaBetweenLevels>( reg() ).render_widget();
 
     ImGui::SeparatorText( "Item Effect Settings" );
 
@@ -493,7 +495,7 @@ void RenderMenuSystem::render_defeat_screen()
   }
 }
 
-void RenderMenuSystem::render_victory_screen( bool allow_continue, int cadaver_wealth, int anima_wealth )
+void RenderMenuSystem::render_victory_screen( bool allow_continue, int cadaver_wealth, int anima_wealth, bool retain_anima )
 {
   sf::Vector2u display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
 
@@ -523,7 +525,10 @@ void RenderMenuSystem::render_victory_screen( bool allow_continue, int cadaver_w
   cadaver_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, 500.f } );
   m_window.draw( cadaver_txt );
 
-  sf::Text anima_txt( m_font, std::format( "Anima: {}   (+{} wealth)", anima, anima_wealth ), 24 );
+  sf::Text anima_txt( m_font,
+                      retain_anima ? std::format( "Anima: {}   (carried to next level)", anima )
+                                   : std::format( "Anima: {}   (+{} wealth)", anima, anima_wealth ),
+                      24 );
   anima_txt.setFillColor( sf::Color( 255, 165, 0 ) ); // orange, matching the anima meter
   anima_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, 550.f } );
   m_window.draw( anima_txt );

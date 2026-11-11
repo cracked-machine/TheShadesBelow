@@ -13,8 +13,9 @@ namespace Game::Scene
 {
 
 //! @brief The victory screen shown when the player wins: periodically converts any remaining collected
-//! cadavers and unspent anima into wealth while the victory screen is displayed. The player can only
-//! continue once both have run out, so every level starts with zero anima.
+//! cadavers into wealth while the victory screen is displayed. Unspent anima either carries over to the
+//! next level or, if Cmp::Persist::RetainAnimaBetweenLevels is off, is also converted into wealth.
+//! The player can only continue once everything being converted has run out.
 class LevelCompleteScene : public Scene<Events::ProcessLevelCompleteSceneInputEvent>
 {
 public:
@@ -47,8 +48,9 @@ public:
   entt::registry &registry() override;
 
 protected:
-  //! @brief Every second, converts one collected cadaver into 10 wealth, and every kAnimaTickSeconds converts one
-  //! anima into 1 wealth (playing a loot sound), until none remain, then renders the victory screen
+  //! @brief Every second, converts one collected cadaver into 10 wealth, and (unless anima is retained between levels)
+  //! every kAnimaTickSeconds converts one anima into 1 wealth (playing a loot sound), until none remain, then renders
+  //! the victory screen
   //! @param dt The time elapsed since the last update
   void do_update( [[maybe_unused]] sf::Time dt ) override;
 
