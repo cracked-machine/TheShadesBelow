@@ -12,8 +12,11 @@
 #include <Components/LastDirection.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Moveable.hpp>
+#include <Components/Npc/Adder.hpp>
 #include <Components/Npc/Burryman.hpp>
+#include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Npc/Skeleton.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
 #include <Components/Persistent/AxeObstacleDigWear.hpp>
@@ -53,6 +56,7 @@
 #include <Systems/Threats/WormholeSystem.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
+#include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -345,6 +349,29 @@ void ActionSystem::check_player_smash_pot()
   if ( smashed_loot_entity != entt::null ) get_systems_event_queue().trigger( Events::DestroyLootContainerEvent( smashed_loot_entity ) );
 }
 
+template <typename NpcType>
+void ActionSystem::banish_nearest_npcs( sf::Vector2f origin, int max_count )
+{
+  // collect first, destroy after: DestroyNpcEvent is triggered synchronously and must not run inside the view loop
+  std::vector<std::pair<float, entt::entity>> candidates;
+  const auto &world_view = Sys::RenderSystem::get_world_view();
+  auto npc_view = reg().view<NpcType, Cmp::Position>();
+  for ( auto npc_entt : npc_view )
+  {
+    const auto &pos_cmp = npc_view.template get<Cmp::Position>( npc_entt );
+    if ( not Utils::is_visible_in_view( world_view, pos_cmp ) ) continue;
+    candidates.emplace_back( Utils::Maths::getEuclideanDistance( origin, pos_cmp.position ), npc_entt );
+  }
+
+  // only the nearest `n` need ordering; nearest-first keeps the banish order stable
+  const auto n = std::min<std::ptrdiff_t>( std::max( max_count, 0 ), std::ssize( candidates ) );
+  std::partial_sort( candidates.begin(), candidates.begin() + n, candidates.end() );
+  for ( const auto &[dist, npc_entt] : std::views::take( candidates, n ) )
+  {
+    get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, "sprite.death.anim.banish" ) );
+  }
+}
+
 void ActionSystem::check_player_smash_tablet()
 {
 
@@ -360,7 +387,6 @@ void ActionSystem::check_player_smash_tablet()
 
   auto mouse_position_bounds = Utils::get_mouse_bounds_in_gameview( m_window, RenderSystem::get_world_view() );
 
-  // Cmp::LootContainer is an empty tag type, so the view yields only the entity and its Cmp::Position
   for ( auto [curse_tablet_entt, curse_tablet_cmp, curse_tablet_pos, curse_tablet_wear_cmp] :
         reg().view<Cmp::Grave::CurseTablet, Cmp::Position, Cmp::Inventory::WearLevel>().each() )
   {
@@ -376,7 +402,7 @@ void ActionSystem::check_player_smash_tablet()
 
       reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
-      // already broken: no further wear, otherwise the break sound replays on every smash
+      // update the tool damage
       if ( not tool_broken )
       {
         float dmg = 0.f;
@@ -386,18 +412,39 @@ void ActionSystem::check_player_smash_tablet()
         get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
       }
 
-      SPDLOG_INFO( "Required hits {}", curse_tablet_cmp.m_required_hits );
-      get_systems_event_queue().trigger(
-          Events::UpdateDmgEvent( curse_tablet_entt, 100.f / static_cast<float>( curse_tablet_cmp.m_required_hits ) ) );
+      SPDLOG_DEBUG( "Required hits {}", curse_tablet_cmp.m_required_hits );
+      const float hit_dmg = 100.f / static_cast<float>( curse_tablet_cmp.m_required_hits );
 
-      if ( curse_tablet_wear_cmp.m_level > 0 )
+      // Decide here, before any event fires: ItemSystem silently removes a tablet whose wear reaches 0 (the expiry path),
+      // so the breaking hit must not go through UpdateDmgEvent. The epsilon absorbs float error (3 x 33.33.. != 100).
+      constexpr float kBreakEpsilon = 0.01f;
+      const bool breaks = curse_tablet_wear_cmp.m_level - hit_dmg <= kBreakEpsilon;
+
+      if ( not breaks )
       {
+        get_systems_event_queue().trigger( Events::UpdateDmgEvent( curse_tablet_entt, hit_dmg ) );
         Cmp::RandomInt random_picker( 1, 6 );
         m_sound_bank.get_effect( "pickaxe" + std::to_string( random_picker.gen() ) ).play();
       }
       else
       {
-        auto sfx = m_sound_bank.get_effect( "pickaxe_final" );
+        // banish the nearest NPCs of the tablet's type, one per required hit
+        const auto origin = Utils::Player::get_position( reg() ).position;
+        const int count = curse_tablet_cmp.m_required_hits;
+        switch ( curse_tablet_cmp.m_type )
+        {
+          case Cmp::Grave::CurseTablet::Type::GHOST:
+            banish_nearest_npcs<Cmp::Npc::Ghost>( origin, count );
+            break;
+          case Cmp::Grave::CurseTablet::Type::SKELETON:
+            banish_nearest_npcs<Cmp::Npc::Skeleton>( origin, count );
+            break;
+          case Cmp::Grave::CurseTablet::Type::ADDER:
+            banish_nearest_npcs<Cmp::Npc::Adder>( origin, count );
+            break;
+        }
+
+        auto &sfx = m_sound_bank.get_effect( "pickaxe_final" );
         if ( sfx.getStatus() != sf::Sound::Status::Playing ) m_sound_bank.get_effect( "pickaxe_final" ).play();
         auto pot_particle_uuid = Cmp::UUID::generate();
         Factory::Particle::add_cursetablet_ps( reg(), "graveyard.cursetablet.particle.dig", 20, 2.f, 50.f, 10.f, pot_particle_uuid,

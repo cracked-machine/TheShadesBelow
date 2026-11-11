@@ -56,6 +56,13 @@ private:
   //! @brief Break the targetted Curse Tablet (Cmp::WorldItem) with a tool via Events::UpdateDmgEvent
   void check_player_smash_tablet();
 
+  //! @brief Banish up to `max_count` NPCs of type NpcType that are visible in the world view, nearest to `origin` first.
+  //! @tparam NpcType NPC tag component, e.g. Cmp::Npc::Ghost
+  //! @param origin Distances are measured from here, e.g. the player position.
+  //! @param max_count Maximum number of NPCs to banish.
+  template <typename NpcType>
+  void banish_nearest_npcs( sf::Vector2f origin, int max_count );
+
   //! @brief If player is carry suitable weapon did the action event occur in NPC vicinity?
   void check_player_axe_npc_kill();
 

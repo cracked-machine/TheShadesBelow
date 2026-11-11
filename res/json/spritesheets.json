@@ -1478,11 +1478,11 @@
         }
       }
     },
-    "sprite.item.cursetablet.ghost.1": {
+    "sprite.item.cursetablet.ghost": {
       "spritesheet": {
         "displayname": "Curse Tablet: Ghost",
         "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [220],
+        "sprite_indices": [70, 71, 72, 73],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1491,50 +1491,11 @@
         }
       }
     },
-    "sprite.item.cursetablet.ghost.2": {
-      "spritesheet": {
-        "displayname": "Curse Tablet: Ghost",
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [221],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.item.cursetablet.ghost.3": {
-      "spritesheet": {
-        "displayname": "Curse Tablet: Ghost",
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [222],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.item.cursetablet.ghost.4": {
-      "spritesheet": {
-        "displayname": "Curse Tablet: Ghost",
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [223],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.item.cursetablet.skeleton.1": {
+    "sprite.item.cursetablet.skeleton": {
       "spritesheet": {
         "displayname": "Curse Tablet: Skeleton",
         "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [230],
+        "sprite_indices": [80, 81, 82, 83],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1543,11 +1504,12 @@
         }
       }
     },
-    "sprite.item.cursetablet.skeleton.2": {
+
+    "sprite.item.cursetablet.adder": {
       "spritesheet": {
-        "displayname": "Curse Tablet: Skeleton",
+        "displayname": "Curse Tablet: Adder",
         "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [231],
+        "sprite_indices": [90, 91, 92, 93],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -1556,32 +1518,7 @@
         }
       }
     },
-    "sprite.item.cursetablet.skeleton.3": {
-      "spritesheet": {
-        "displayname": "Curse Tablet: Skeleton",
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [232],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.item.cursetablet.skeleton.4": {
-      "spritesheet": {
-        "displayname": "Curse Tablet: Skeleton",
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [233],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
+
     "sprite.item.dowsingrod": {
       "spritesheet": {
         "displayname": "Dowsing Rod",

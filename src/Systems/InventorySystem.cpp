@@ -3,6 +3,7 @@
 #include <Components/AnimData.hpp>
 #include <Components/Crypt/Chest.hpp>
 #include <Components/Crypt/ObjectiveMultiBlock.hpp>
+#include <Components/Grave/CurseTablet.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
@@ -29,6 +30,7 @@
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
+#include <Factory/ItemFactory.hpp>
 #include <Factory/MultiblockFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
@@ -141,18 +143,26 @@ void InventorySystem::update_dmg( entt::entity entt, float amount, Events::Updat
 
 void InventorySystem::add_inventory_item( const Sys::ItemKey &item )
 {
-  const auto &inventory_item = Sys::ItemStore::instance().get( item );
+  const auto &item_cmp = Sys::ItemStore::instance().get( item );
 
-  auto inventory_entity = reg().create();
-  reg().emplace_or_replace<Cmp::PlayerInventorySlot>( inventory_entity, inventory_item );
-  if ( inventory_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, 100.f ); }
-  if ( inventory_item.stings() ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( inventory_entity ); }
+  auto inventory_entt = reg().create();
+  reg().emplace_or_replace<Cmp::PlayerInventorySlot>( inventory_entt, item_cmp );
+  if ( item_cmp.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entt, 100.f ); }
+  if ( item_cmp.stings() ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( inventory_entt ); }
 
-  if ( item.contains( "torch" ) ) { reg().emplace_or_replace<Cmp::UUID>( inventory_entity, Cmp::UUID::generate() ); }
+  if ( item.contains( "torch" ) ) { reg().emplace_or_replace<Cmp::UUID>( inventory_entt, Cmp::UUID::generate() ); }
+
+  size_t sprite_idx = 0;
+  if ( item.contains( "cursetablet" ) )
+  {
+    sprite_idx = Sys::SpriteStore::instance().get( item_cmp.sprite_type ).get_random_texture_index();
+    Factory::Item::add_curse_tablet( reg(), inventory_entt, item, sprite_idx );
+  }
 
   // clang-format off
-  reg().emplace_or_replace<Cmp::AnimData>( inventory_entity, Cmp::AnimData::Config{ 
-        .sprite_type = inventory_item.sprite_type, 
+  reg().emplace_or_replace<Cmp::AnimData>( inventory_entt, Cmp::AnimData::Config{ 
+        .sprite_type = item_cmp.sprite_type, 
+        .frame_index_offset = sprite_idx,
         .enabled = true
   });
   // clang-format on
@@ -275,12 +285,12 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
   // otherwise just drop it as a world item
   auto world_item_entt = reg().create();
   reg().emplace_or_replace<Cmp::Position>( world_item_entt, pos, Constants::kGridSizePxF );
-  // clang-format off
-  reg().emplace_or_replace<Cmp::AnimData>( world_item_entt, Cmp::AnimData::Config{
-        .sprite_type =  inventory_slot_cmp->m_item.sprite_type,
-        .enabled = false
-  });
-  // clang-format on
+
+  // Copy the animdata over to avoid losing ref data
+  auto *existing_anim_data = reg().try_get<Cmp::AnimData>( inventory_slot_entt );
+  if ( existing_anim_data ) { reg().emplace_or_replace<Cmp::AnimData>( world_item_entt, *existing_anim_data ); }
+  else { SPDLOG_WARN( "Dropped item {} has no AnimData", inventory_slot_cmp->m_item.item_type.str() ); }
+
   reg().emplace_or_replace<Cmp::ZOrderValue>( world_item_entt, pos.y - 1.f );
   reg().emplace_or_replace<Cmp::WorldItem>( world_item_entt, inventory_slot_cmp->m_item );
   reg().emplace_or_replace<Cmp::Npc::NoPathFinding>( world_item_entt );
@@ -296,6 +306,11 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
   if ( const auto *offering_cmp = reg().try_get<Cmp::Npc::SummonOffering>( inventory_slot_entt ) )
   {
     reg().emplace_or_replace<Cmp::Npc::SummonOffering>( world_item_entt, Cmp::Npc::SummonOffering{ offering_cmp->m_summoner } );
+  }
+
+  if ( const auto *curse_tablet_cmp = reg().try_get<Cmp::Grave::CurseTablet>( inventory_slot_entt ) )
+  {
+    reg().emplace_or_replace<Cmp::Grave::CurseTablet>( world_item_entt, *curse_tablet_cmp );
   }
 
   auto *inventory_slot_dowsing_cmp = reg().try_get<Cmp::Inventory::DowsingTarget>( inventory_slot_entt );
@@ -374,9 +389,6 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
     trigger_side_effects( spawn_action, *world_item_pos_cmp, world_item_entt );
   }
 
-  auto *anim_data_cmp = reg.try_get<Cmp::AnimData>( world_item_entt );
-  if ( not anim_data_cmp ) return;
-
   auto *world_item_cmp = reg.try_get<Cmp::WorldItem>( world_item_entt );
   if ( not world_item_cmp )
     throw std::runtime_error( "InventorySystem::pickup_world_item - Unable to get world item component from " +
@@ -388,7 +400,10 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
   // create the basic inventory slot entt
   auto inventory_entity = reg.create();
   reg.emplace_or_replace<Cmp::PlayerInventorySlot>( inventory_entity, *world_item_cmp );
-  reg.emplace_or_replace<Cmp::AnimData>( inventory_entity, Cmp::AnimData::Config{ .sprite_type = world_item_cmp->sprite_type, .enabled = false } );
+
+  // Copy the animdata over to avoid losing ref data
+  auto *existing_anim_data = reg.try_get<Cmp::AnimData>( world_item_entt );
+  if ( existing_anim_data ) { reg.emplace_or_replace<Cmp::AnimData>( inventory_entity, *existing_anim_data ); }
 
   // If the worlditem has a particle sprite set the scale, zorder and view type.
   auto *uuid_cmp = reg.try_get<Cmp::UUID>( world_item_entt );
@@ -418,6 +433,11 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
   if ( const auto *offering_cmp = reg.try_get<Cmp::Npc::SummonOffering>( world_item_entt ) )
   {
     reg.emplace_or_replace<Cmp::Npc::SummonOffering>( inventory_entity, Cmp::Npc::SummonOffering{ offering_cmp->m_summoner } );
+  }
+
+  if ( const auto *curse_tablet_cmp = reg.try_get<Cmp::Grave::CurseTablet>( world_item_entt ) )
+  {
+    reg.emplace_or_replace<Cmp::Grave::CurseTablet>( inventory_entity, *curse_tablet_cmp );
   }
 
   // transfer the wear level from the worlditem to the new player inventory item

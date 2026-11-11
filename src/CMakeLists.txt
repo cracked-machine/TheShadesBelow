@@ -120,6 +120,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Factory/LootFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/ObstacleFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/BombFactory.cpp
+    ${CMAKE_SOURCE_DIR}/src/Factory/ItemFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/CryptFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/AltarFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/WallFactory.cpp

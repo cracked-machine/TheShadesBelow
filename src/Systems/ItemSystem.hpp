@@ -67,10 +67,12 @@ public:
   //! @param pos
   //! @param item Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
   //! @param sfx Sound effect to play on placement, if not empty.
+  //! @param sprite_idx Base frame within the item's sprite sheet, e.g. a random variant.
   //! @param zorder
   //! @param sting false: never add a Cmp::Inventory::StingDamage, e.g. the item was foraged with gloves.
   //! @return entt::entity The new world item, or entt::null for explosives.
-  entt::entity create_world_item( Cmp::Position pos, const Sys::ItemKey &item, const std::string &sfx, float zorder = 0.f, bool sting = true );
+  entt::entity create_world_item( Cmp::Position pos, const Sys::ItemKey &item, const std::string &sfx, size_t sprite_idx = 0, float zorder = 0.f,
+                                  bool sting = true );
 
   //! @brief Replace an existing world item in place with another item type, keeping its position, UUID, etc.
   //! @note The Cmp::Inventory::WearLevel is reset if the new item wears, otherwise it is removed.

@@ -13,12 +13,15 @@
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateItemEvent.hpp>
+#include <Events/DestroyitemEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
+#include <Factory/ItemFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SFML/Audio/Sound.hpp>
 #include <Systems/ItemSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -41,50 +44,52 @@ ItemSystem::ItemSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
 
 void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev )
 {
-  // post-creation tagging and callback, shared by both spawn paths
-  auto on_created = [&]( entt::entity item_entt )
-  {
-    if ( item_entt == entt::null ) return;
-    if ( ev.m_item.contains( "cursetablet" ) )
-    {
-      auto item_type = ev.m_item.str();
-      auto hits_required = std::stoi( item_type.substr( item_type.find_last_of( '.' ) + 1 ) );
-      reg().emplace_or_replace<Cmp::Grave::CurseTablet>( item_entt, hits_required );
-    }
-    if ( ev.m_on_created ) { ev.m_on_created( item_entt ); }
-  };
-
-  if ( not ev.m_spawn_nearby )
-  {
-    on_created( create_world_item( ev.m_pos, ev.m_item, ev.m_sfx, ev.m_zorder, ev.m_sting ) );
-    return;
-  }
-
+  // 1. where to spawn: the exact position, or a random free cell beside the source
+  Cmp::Position spawn_pos = ev.m_pos;
   const bool has_source = reg().valid( ev.m_source_entt );
-  if ( has_source and ev.m_max_instances > 0 )
+  if ( ev.m_spawn_nearby )
   {
-    const auto *drop_count_cmp = reg().try_get<Cmp::DropCount>( ev.m_source_entt );
-    if ( drop_count_cmp and drop_count_cmp->m_count >= ev.m_max_instances ) return;
+    if ( has_source and ev.m_max_instances > 0 )
+    {
+      const auto *drop_count_cmp = reg().try_get<Cmp::DropCount>( ev.m_source_entt );
+      if ( drop_count_cmp and drop_count_cmp->m_count >= ev.m_max_instances ) return;
+    }
+
+    auto npc_navmesh = m_npc_navmesh.lock();
+    auto ghost_navmesh = m_ghost_navmesh.lock();
+    auto loot_sm = m_loot_sm.lock();
+    auto reserved_sm = m_reserved_sm.lock();
+    const Utils::SpawnGrids grids{
+        .navmesh = npc_navmesh.get(), .ghost_navmesh = ghost_navmesh.get(), .loot_sm = loot_sm.get(), .reserved_sm = reserved_sm.get() };
+    auto cell = Utils::find_random_cell_near( ev.m_pos, kItemDropSearchRadius, [&]( const sf::Vector2f &cell_pos )
+    { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); } );
+    if ( not cell )
+    {
+      SPDLOG_WARN( "No free cell to drop {} near [{},{}].", ev.m_item.str(), ev.m_pos.position.x, ev.m_pos.position.y );
+      return;
+    }
+    spawn_pos = Cmp::Position( *cell, Constants::kGridSizePxF );
   }
 
-  auto npc_navmesh = m_npc_navmesh.lock();
-  auto ghost_navmesh = m_ghost_navmesh.lock();
-  auto loot_sm = m_loot_sm.lock();
-  auto reserved_sm = m_reserved_sm.lock();
-  const Utils::SpawnGrids grids{
-      .navmesh = npc_navmesh.get(), .ghost_navmesh = ghost_navmesh.get(), .loot_sm = loot_sm.get(), .reserved_sm = reserved_sm.get() };
-  auto cell = Utils::find_random_cell_near( ev.m_pos, kItemDropSearchRadius, [&]( const sf::Vector2f &cell_pos )
-  { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); } );
-  if ( not cell )
+  // 2. which sprite: curse tablets pick a random variant, everything else uses the first frame
+  const bool is_curse_tablet = ev.m_item.contains( "cursetablet" );
+  size_t sprite_idx = 0;
+  if ( is_curse_tablet )
   {
-    SPDLOG_WARN( "No free cell to drop {} near [{},{}].", ev.m_item.str(), ev.m_pos.position.x, ev.m_pos.position.y );
-    return;
+    const auto &item_cmp = Sys::ItemStore::instance().get( ev.m_item );
+    sprite_idx = Sys::SpriteStore::instance().get( item_cmp.sprite_type ).get_random_texture_index();
   }
 
-  const entt::entity item_entt = create_world_item( Cmp::Position( *cell, Constants::kGridSizePxF ), ev.m_item, ev.m_sfx, ev.m_zorder, ev.m_sting );
+  // 3. create it
+  const entt::entity item_entt = create_world_item( spawn_pos, ev.m_item, ev.m_sfx, sprite_idx, ev.m_zorder, ev.m_sting );
+  if ( item_entt == entt::null ) return;
+
   // counted over the source's lifetime, so picking the item up doesn't free a slot
-  if ( item_entt != entt::null and has_source ) { reg().get_or_emplace<Cmp::DropCount>( ev.m_source_entt ).m_count++; }
-  on_created( item_entt );
+  if ( ev.m_spawn_nearby and has_source ) { reg().get_or_emplace<Cmp::DropCount>( ev.m_source_entt ).m_count++; }
+
+  // 4. post-creation tagging
+  if ( is_curse_tablet ) { Factory::Item::add_curse_tablet( reg(), item_entt, ev.m_item, sprite_idx ); }
+  if ( ev.m_on_created ) { ev.m_on_created( item_entt ); }
 }
 
 void ItemSystem::on_destroy_item_event( Game::Events::DestroyItemEvent ev )
@@ -111,17 +116,23 @@ void ItemSystem::on_update_dmg_event( const Events::UpdateDmgEvent &ev )
         break;
     }
 
-    // depleted plants stay in the world, they just can't be foraged any more
-    if ( wearlevel_cmp.m_level <= 0 and not reg().all_of<Cmp::PlantMultiBlock>( ev.m_item_entt ) )
+    // worn out: expired curse tablets vanish silently (the smash that breaks one is handled by
+    // ActionSystem::check_player_smash_tablet, which never lets wear reach 0), plants stay depleted, everything else rots
+    if ( wearlevel_cmp.m_level <= 0 )
     {
-      swap_world_item( ev.m_item_entt, "item.rottenfood" );
+      if ( reg().any_of<Cmp::Grave::CurseTablet>( ev.m_item_entt ) )
+      {
+        get_systems_event_queue().trigger( Events::DestroyItemEvent( ev.m_item_entt ) );
+      }
+      else if ( not reg().any_of<Cmp::PlantMultiBlock>( ev.m_item_entt ) ) { swap_world_item( ev.m_item_entt, "item.rottenfood" ); }
     }
 
     return;
   }
 }
 
-entt::entity ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKey &item, const std::string &sfx, float zorder, bool sting )
+entt::entity ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKey &item, const std::string &sfx, size_t sprite_idx, float zorder,
+                                            bool sting )
 {
 
   if ( item == "item.bomb" )
@@ -140,6 +151,7 @@ entt::entity ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKe
   // clang-format off
   reg().emplace_or_replace<Cmp::AnimData>( world_item_entt, Cmp::AnimData::Config{ 
         .sprite_type =  world_item.sprite_type, 
+        .frame_index_offset = sprite_idx,
         .enabled = true
   });
   // clang-format on
