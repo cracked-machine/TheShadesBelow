@@ -643,7 +643,8 @@ void RenderOverlaySystem::render_shop_inventory_overlay()
   for ( auto [icon, slot] : std::views::zip( m_shop_ui_data->m_icons, inventory_cmp.m_slots ) )
   {
     auto &[item, price] = slot;
-    auto sprite_type = Sys::ItemStore::instance().get( item ).sprite_type;
+    const auto &world_item = Sys::ItemStore::instance().get( item );
+    const auto &sprite_type = world_item.sprite_type;
     // Use the default scale/size unless its a plant then its need to be resized/repositioned to fit in the UI box
     auto sprite_scale = sf::Vector2f{ static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) };
     auto sprite_pos = Cmp::Position( icon.rect.position, Constants::kGridSizePxF );
@@ -653,7 +654,7 @@ void RenderOverlaySystem::render_shop_inventory_overlay()
       sprite_pos = Cmp::Position( { icon.rect.position.x, icon.rect.position.y - 8 }, Constants::kGridSizePxF );
     }
 
-    RenderSystem::safe_render_sprite_screen( sprite_type, sprite_pos, 0, sprite_scale );
+    RenderSystem::safe_render_sprite_screen( sprite_type, sprite_pos, world_item.sprite_index, sprite_scale );
 
     if ( item != "item.torch" ) continue;
     auto *flame_owner = next_slot_flame();

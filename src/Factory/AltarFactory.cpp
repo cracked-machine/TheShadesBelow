@@ -45,7 +45,8 @@ Sys::SpriteKey get_altar_talisman_sprite( const Sys::ItemKey &item_key )
   constexpr std::string_view kItemPrefix = "sprite.item.";
   constexpr std::string_view kAltarPrefix = "sprite.altar.";
 
-  const std::string &item_sprite = Sys::ItemStore::instance().get( item_key ).sprite_type.str();
+  const auto &item = Sys::ItemStore::instance().get( item_key );
+  const std::string &item_sprite = item.sprite_type.str();
   if ( not item_sprite.starts_with( kItemPrefix ) )
   {
     throw std::runtime_error( "Talisman '" + item_key.str() + "' has sprite '" + item_sprite + "', which does not start with '" +
@@ -54,7 +55,13 @@ Sys::SpriteKey get_altar_talisman_sprite( const Sys::ItemKey &item_key )
 
   const Sys::SpriteKey altar_sprite( std::string( kAltarPrefix ) + item_sprite.substr( kItemPrefix.size() ) );
   // throws if there is no altar variant of this talisman's sprite
-  [[maybe_unused]] const auto &sheet = Sys::SpriteStore::instance().get( altar_sprite );
+  const auto &sheet = Sys::SpriteStore::instance().get( altar_sprite );
+  // the altar variant is drawn at the same frame as the item
+  if ( item.sprite_index >= sheet.sheet_size() )
+  {
+    throw std::runtime_error( "Talisman '" + item_key.str() + "' has sprite index " + std::to_string( item.sprite_index ) + ", but '" +
+                              altar_sprite.str() + "' only has " + std::to_string( sheet.sheet_size() ) + " frames" );
+  }
   return altar_sprite;
 }
 

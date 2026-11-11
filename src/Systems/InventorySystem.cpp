@@ -152,7 +152,7 @@ void InventorySystem::add_inventory_item( const Sys::ItemKey &item )
 
   if ( item.contains( "torch" ) ) { reg().emplace_or_replace<Cmp::UUID>( inventory_entt, Cmp::UUID::generate() ); }
 
-  size_t sprite_idx = 0;
+  size_t sprite_idx = item_cmp.sprite_index;
   if ( item.contains( "cursetablet" ) )
   {
     sprite_idx = Sys::SpriteStore::instance().get( item_cmp.sprite_type ).get_random_texture_index();

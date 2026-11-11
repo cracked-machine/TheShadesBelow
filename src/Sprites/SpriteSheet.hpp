@@ -16,8 +16,7 @@ namespace Game::Sprites
 {
 
 //! @brief How a sprite sheet's zorder list is applied, set by the property used in spritesheets.json.
-enum class ZOrderMode
-{
+enum class ZOrderMode {
   //! @brief No zorder property: every sprite sorts at its base y.
   None,
   //! @brief `AbsoluteZOrder`: a non-zero entry is the zorder itself.
@@ -50,10 +49,9 @@ public:
   //! @param talisman_offsets Talisman draw points, as pixel offsets from the sprite's top-left corner.
   explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderMode zorder_mode, std::vector<float> zorder_list,
                         const std::filesystem::path &spritesheet_png, const std::vector<uint32_t> &spritesheet_selections,
-                        sf::Vector2i grid_size = { 1, 1 }, unsigned int indices_per_sequence = 1,
-                        std::vector<bool> walking_collision_mask = {}, std::vector<bool> flying_collision_mask = {},
-                        sf::Vector2i door_position = {}, std::vector<sf::Vector2f> particle_offsets = {},
-                        float framerate = 0.f, std::vector<sf::Vector2f> talisman_offsets = {} );
+                        sf::Vector2i grid_size = { 1, 1 }, unsigned int indices_per_sequence = 1, std::vector<bool> walking_collision_mask = {},
+                        std::vector<bool> flying_collision_mask = {}, sf::Vector2i door_position = {},
+                        std::vector<sf::Vector2f> particle_offsets = {}, float framerate = 0.f, std::vector<sf::Vector2f> talisman_offsets = {} );
 
   //! @brief Construct a new Multi Sprite object using texture object
   //! @param type
@@ -70,12 +68,11 @@ public:
   //! @param particle_offsets Particle spawn points, as pixel offsets from the sprite's top-left corner.
   //! @param framerate Animation framerate in frames per second. Forced to 0 for single-frame sheets.
   //! @param talisman_offsets Talisman draw points, as pixel offsets from the sprite's top-left corner.
-  explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderMode zorder_mode, std::vector<float> zorder_list, sf::Texture spritesheet_texture,
-                        const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size = { 1, 1 },
+  explicit SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderMode zorder_mode, std::vector<float> zorder_list,
+                        sf::Texture spritesheet_texture, const std::vector<uint32_t> &spritesheet_selections, sf::Vector2i grid_size = { 1, 1 },
                         unsigned int indices_per_sequence = 1, std::vector<bool> walking_collision_mask = {},
                         std::vector<bool> flying_collision_mask = {}, sf::Vector2i door_position = {},
-                        std::vector<sf::Vector2f> particle_offsets = {}, float framerate = 0.f,
-                        std::vector<sf::Vector2f> talisman_offsets = {} );
+                        std::vector<sf::Vector2f> particle_offsets = {}, float framerate = 0.f, std::vector<sf::Vector2f> talisman_offsets = {} );
 
   SpriteSheet( SpriteSheet && ) = default;
   SpriteSheet &operator=( SpriteSheet && ) = default;
@@ -105,6 +102,11 @@ public:
   //! @brief Pick a random texture index within this sprite sheet.
   //! @return A texture index in the range [0, sprite count)
   [[nodiscard]] std::size_t get_random_texture_index() const;
+
+  //! @brief Get a list of unique random texture indices
+  //! @param count
+  //! @return std::vector<std::size_t>
+  [[nodiscard]] std::vector<std::size_t> get_random_texture_indices( std::size_t count ) const;
 
   //! @brief How many `sprite_indices` entries the animation loops over, one per animation frame. Each entry
   //! already selects a whole `grid_size` area, including for multi-block sprites.

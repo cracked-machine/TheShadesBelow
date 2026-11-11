@@ -146,8 +146,9 @@ void GrimoireSystem::discover_item( const Sys::ItemKey &item_key )
   bool changed = false;
   for_each_subpage( item_key, [&]( std::size_t page_idx, Cmp::Grimoire::SubPage &sub_page )
   {
-    if ( sub_page.sprite_key != item.sprite_type ) { changed = true; }
+    if ( sub_page.sprite_key != item.sprite_type or sub_page.sprite_index != item.sprite_index ) { changed = true; }
     sub_page.sprite_key = item.sprite_type;
+    sub_page.sprite_index = item.sprite_index;
     if ( item.has_action<Cmp::CarryAction>() )
     {
       sub_page.action_map.insert_or_assign( std::string( Cmp::CarryAction::kKey ), item.get_action<Cmp::CarryAction>() );
@@ -166,8 +167,9 @@ void GrimoireSystem::on_grimoire_item_update_event( const Events::GrimoireItemUp
   bool changed = false;
   for_each_subpage( ev.m_item, [&]( std::size_t page_idx, Cmp::Grimoire::SubPage &sub_page )
   {
-    if ( sub_page.sprite_key != item.sprite_type ) { changed = true; }
+    if ( sub_page.sprite_key != item.sprite_type or sub_page.sprite_index != item.sprite_index ) { changed = true; }
     sub_page.sprite_key = item.sprite_type;
+    sub_page.sprite_index = item.sprite_index;
     sub_page.action_map.insert_or_assign( ev.m_action_key, ev.m_action );
     // repeating actions send an update on every application; only the first one is a discovery
     if ( sub_page.discovered_actions.insert( ev.m_action_key ).second ) { changed = true; }
@@ -190,6 +192,7 @@ void GrimoireSystem::on_grimoire_npc_update_event( const Events::GrimoireNpcUpda
   const Sys::SpriteKey &sprite_key = Sys::NpcStore::instance().get( ev.m_npc ).sprite_type_list.front();
   bool changed = sub_page.sprite_key != sprite_key;
   sub_page.sprite_key = sprite_key;
+  sub_page.sprite_index = 0;
   sub_page.action_map.insert_or_assign( ev.m_action_key, ev.m_action );
   // repeating actions send an update on every application; only the first one is a discovery
   if ( sub_page.discovered_actions.insert( ev.m_action_key ).second ) { changed = true; }
@@ -410,7 +413,7 @@ void GrimoireSystem::render_outlines( const Render::UiData &ui_data )
 void GrimoireSystem::render_icon( const Render::UiData::Icon &icon, const Cmp::Grimoire::SubPage &sub_page )
 {
   Sys::SpriteKey sprite_key = sub_page.sprite_key;
-  RenderSystem::safe_render_sprite_screen( sprite_key, { icon.rect.position, Constants::kGridSizePxF }, 0,
+  RenderSystem::safe_render_sprite_screen( sprite_key, { icon.rect.position, Constants::kGridSizePxF }, sub_page.sprite_index,
                                            { static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) } );
 }
 

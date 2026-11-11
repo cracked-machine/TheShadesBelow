@@ -42,6 +42,7 @@ class Armed;
 class BurrCount;
 struct FractalCurve;
 struct AnimData;
+class WorldItem;
 } // namespace Game::Cmp
 
 namespace Game::Cmp::Altar { class TalismanCount; }
@@ -132,6 +133,12 @@ private:
   //! @param crow_cmp The crow, see Cmp::Npc::Crow::carried.
   //! @param body_rect The crow's on-screen bounds.
   void render_carried_items( const Cmp::Npc::Crow &crow_cmp, const sf::FloatRect &body_rect );
+
+  //! @brief The sprite frame to draw a carried world item at.
+  //! @param item_entt The carried item entity.
+  //! @param item_cmp The carried item's WorldItem component.
+  //! @return The entity's AnimData frame offset (e.g. a curse tablet's random variant), else the item's sprite.index.
+  [[nodiscard]] std::size_t carried_item_frame( entt::entity item_entt, const Cmp::WorldItem &item_cmp );
 
   //! @brief Draw the item in the player's inventory slot on the player, at the player's top-left and scale plus
   //! Cmp::Persist::HeldItemOffset, shifted by Cmp::Persist::HeldItemSideOffsetX towards the facing side when facing east/west.

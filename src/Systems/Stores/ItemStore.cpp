@@ -54,14 +54,23 @@ void ItemStore::init_store()
   nlohmann::json json = Utils::JsonDeserializer::load_json_file( m_json_file_path );
   for ( const auto &[item_key, item_value] : json.items() )
   {
-    Sys::SpriteKey sprite_mtype( item_value.at( "sprite" ).get<std::string>() );
+    const auto &sprite_json = item_value.at( "sprite" );
+    Sys::SpriteKey sprite_mtype( Utils::JsonDeserializer::get_string( sprite_json, "name" ) );
+    const int sprite_index = sprite_json.value( "index", 0 );
+    // index 0 is always valid, so only look the sheet up for a non-zero index (the ERROR_SPRITE item has no sheet)
+    if ( sprite_index < 0 or
+         ( sprite_index > 0 and static_cast<std::size_t>( sprite_index ) >= Sys::SpriteStore::instance().get( sprite_mtype ).sheet_size() ) )
+    {
+      throw std::runtime_error( "Item '" + item_key + "' sprite.index " + std::to_string( sprite_index ) + " is out of range for '" +
+                                sprite_mtype.str() + "' in " + m_json_file_path.string() );
+    }
     auto damage_to_weapon = item_value.at( "damage_to_weapon" );
     auto pickaxe_damage = damage_to_weapon.at( "pickaxe" ).get<int>();
     auto axe_damage = damage_to_weapon.at( "axe" ).get<int>();
     auto shovel_damage = damage_to_weapon.at( "shovel" ).get<int>();
     auto bow_damage = damage_to_weapon.at( "bow" ).get<int>();
     auto consumable = make_consumable_property( item_value.at( "consumable" ).get<std::string>() );
-    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, pickaxe_damage, axe_damage, shovel_damage, bow_damage, consumable );
+    Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, static_cast<std::size_t>( sprite_index ), pickaxe_damage, axe_damage, shovel_damage, bow_damage, consumable );
     worlditem.set_shop_item( item_value.value( "shop", false ) );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
@@ -144,7 +153,7 @@ void ItemStore::init_store()
       throw std::runtime_error( "Item '" + item_key + "' proximity_action.reward must set exactly one of item or loot in " + m_json_file_path.string() );
     }
     m_store.emplace( key_type( item_key ), std::move( worlditem ) );
-    SPDLOG_DEBUG( "Loaded item: {} ({})", item_key, sprite_mtype );
+    SPDLOG_DEBUG( "Loaded item: {} ({}[{}])", item_key, sprite_mtype, sprite_index );
   }
 
   // output properties must reference items that exist, otherwise the forage/chop/offering silently spawns nothing

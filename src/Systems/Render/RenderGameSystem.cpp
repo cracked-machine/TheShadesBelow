@@ -86,6 +86,7 @@
 #include <Systems/Render/RenderPassTypes.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
+#include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Threats/HazardFieldSystemImpl.hpp>
 #include <Utils/Constants.hpp>
@@ -475,9 +476,16 @@ void RenderGameSystem::render_carried_items( const Cmp::Npc::Burryman &burryman_
     if ( not item_cmp ) continue;
     // the origin is the sprite centre, so the item is scaled down in place
     const sf::Vector2f offset = Cmp::Npc::Burryman::carried_offset( i, count, body_rect.size );
-    safe_render_sprite_world( item_cmp->sprite_type, sf::FloatRect( centre + offset - half_cell, Constants::kGridSizePxF ), 0,
+    safe_render_sprite_world( item_cmp->sprite_type, sf::FloatRect( centre + offset - half_cell, Constants::kGridSizePxF ),
+                              carried_item_frame( burryman_cmp.carried[i], *item_cmp ),
                               { Cmp::Npc::Burryman::kCarriedScale, Cmp::Npc::Burryman::kCarriedScale }, 255, half_cell );
   }
+}
+
+std::size_t RenderGameSystem::carried_item_frame( entt::entity item_entt, const Cmp::WorldItem &item_cmp )
+{
+  if ( const auto *anim_cmp = reg().try_get<Cmp::AnimData>( item_entt ) ) { return anim_cmp->getFrameIndexOffset(); }
+  return item_cmp.sprite_index;
 }
 
 void RenderGameSystem::render_carried_items( const Cmp::Npc::Crow &crow_cmp, const sf::FloatRect &body_rect )
@@ -488,7 +496,8 @@ void RenderGameSystem::render_carried_items( const Cmp::Npc::Crow &crow_cmp, con
   // the origin is the sprite centre, so the item is scaled down in place, centred on the crow's bottom edge
   const sf::Vector2f half_cell = Constants::kGridSizePxF / 2.f;
   const sf::Vector2f hang_point( body_rect.getCenter().x, body_rect.position.y + body_rect.size.y );
-  safe_render_sprite_world( item_cmp->sprite_type, sf::FloatRect( hang_point - half_cell, Constants::kGridSizePxF ), 0,
+  safe_render_sprite_world( item_cmp->sprite_type, sf::FloatRect( hang_point - half_cell, Constants::kGridSizePxF ),
+                            carried_item_frame( crow_cmp.carried, *item_cmp ),
                             { Cmp::Npc::Crow::kCarriedScale, Cmp::Npc::Crow::kCarriedScale }, 255, half_cell );
 }
 
@@ -533,7 +542,8 @@ void RenderGameSystem::render_altar_talismans( const Cmp::Altar::TalismanCount &
   {
     if ( idx >= talisman_offsets.size() ) break;
     safe_render_sprite_world( Factory::Altar::get_altar_talisman_sprite( talisman_key ),
-                              sf::FloatRect( body_rect.position + talisman_offsets[idx], Constants::kGridSizePxF ), 0 );
+                              sf::FloatRect( body_rect.position + talisman_offsets[idx], Constants::kGridSizePxF ),
+                              Sys::ItemStore::instance().get( talisman_key ).sprite_index );
     ++idx;
   }
 }

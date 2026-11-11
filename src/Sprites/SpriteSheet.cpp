@@ -4,6 +4,10 @@
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Utils/Constants.hpp>
+#include <algorithm>
+#include <iterator>
+#include <numeric>
+#include <ranges>
 #include <utility>
 
 #include <spdlog/spdlog.h>
@@ -44,8 +48,8 @@ SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderM
   }
 }
 
-SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderMode zorder_mode, std::vector<float> zorder_list, sf::Texture tilemap_texture,
-                          const std::vector<uint32_t> &tilemap_picks, sf::Vector2i grid_size,
+SpriteSheet::SpriteSheet( Sys::SpriteKey type, std::string display_name, ZOrderMode zorder_mode, std::vector<float> zorder_list,
+                          sf::Texture tilemap_texture, const std::vector<uint32_t> &tilemap_picks, sf::Vector2i grid_size,
                           unsigned int indices_per_sequence, std::vector<bool> walking_collision_mask, std::vector<bool> flying_collision_mask,
                           sf::Vector2i door_position, std::vector<sf::Vector2f> particle_offsets, float framerate,
                           std::vector<sf::Vector2f> talisman_offsets )
@@ -90,7 +94,7 @@ float SpriteSheet::normalise_framerate( float framerate, unsigned int indices_pe
 }
 
 std::vector<bool> SpriteSheet::normalise_collision_mask( std::vector<bool> collision_mask, sf::Vector2i grid_size, const Sys::SpriteKey &type,
-                                                       std::string_view field )
+                                                         std::string_view field )
 {
   const auto cell_count = static_cast<std::size_t>( grid_size.x * grid_size.y );
 
@@ -164,6 +168,24 @@ bool SpriteSheet::add_sprite( const std::vector<uint32_t> &tilemap_picks )
 std::size_t SpriteSheet::get_random_texture_index() const
 {
   return static_cast<std::size_t>( Cmp::RandomInt( 0, static_cast<int>( sheet_size() ) - 1 ).gen() );
+}
+
+std::vector<std::size_t> SpriteSheet::get_random_texture_indices( std::size_t count ) const
+{
+  count = std::min( count, sheet_size() );
+  std::vector<std::size_t> result( sheet_size() );
+  std::iota( result.begin(), result.end(), std::size_t{ 0 } );
+
+  // Cmp::Random satisfies UniformRandomBitGenerator, so it can drive the STL algorithms directly
+  // and still honours the global seed. The arguments here are not used.
+  Cmp::RandomInt rng( 0, 1 );
+
+  // Sample without replacement: shuffle all indices and keep the first `count`.
+  // (std::ranges::sample over views::iota<size_t> fails on MinGW: its difference type is __int128,
+  // so the iterator isn't a legacy ForwardIterator and libstdc++'s std::sample rejects it.)
+  std::ranges::shuffle( result, rng );
+  result.resize( count );
+  return result;
 }
 
 } // namespace Game::Sprites

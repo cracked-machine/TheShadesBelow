@@ -51,15 +51,17 @@ public:
   //! @brief Construct a new World Item object.
   //! @param item_type Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
   //! @param sprite_type The sprite used to render this item.
+  //! @param sprite_index The frame of sprite_type to draw.
   //! @param pickaxe_dmg Damage done to a pickaxe by this item.
   //! @param axe_dmg Damage done to an axe by this item.
   //! @param shovel_dmg Damage done to a shovel by this item.
   //! @param bow_dmg Damage done to a bow by this item.
   //! @param consumable Whether the item can be eaten, drunk or neither.
-  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, int pickaxe_dmg, int axe_dmg, int shovel_dmg, int bow_dmg,
+  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, std::size_t sprite_index, int pickaxe_dmg, int axe_dmg, int shovel_dmg, int bow_dmg,
              Consumable consumable = Consumable::NONE )
       : item_type( std::move( item_type ) ),
         sprite_type( std::move( sprite_type ) ),
+        sprite_index( sprite_index ),
         m_pickaxe_damage( pickaxe_dmg ),
         m_axe_damage( axe_dmg ),
         m_shovel_damage( shovel_dmg ),
@@ -228,6 +230,9 @@ public:
 
   //! @brief The associated sprite. Imported from items.json.
   Sys::SpriteKey sprite_type;
+
+  //! @brief The frame of sprite_type to draw. Imported from items.json sprite.index (defaults to 0).
+  std::size_t sprite_index{ 0 };
 
 private:
   //! @brief The actions and their effects that can be applied to the player. Imported from items.json.

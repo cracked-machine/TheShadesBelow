@@ -2002,11 +2002,11 @@
         }
       }
     },
-    "sprite.item.talisman1": {
+    "sprite.item.talisman": {
       "spritesheet": {
-        "displayname": "Talisman1",
+        "displayname": "Talisman",
         "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [180],
+        "sprite_indices": [110, 111, 112, 113, 114, 115, 116, 117, 118, 119],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2015,11 +2015,11 @@
         }
       }
     },
-    "sprite.altar.talisman1": {
+    "sprite.altar.talisman": {
       "spritesheet": {
-        "displayname": "Talisman1",
+        "displayname": "Talisman",
         "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [540],
+        "sprite_indices": [540, 541, 542, 543, 544, 545, 546, 547, 548, 549],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2027,85 +2027,7 @@
           "y": 1
         }
       }
-    },
-    "sprite.item.talisman2": {
-      "spritesheet": {
-        "displayname": "Talisman2",
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [190],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.altar.talisman2": {
-      "spritesheet": {
-        "displayname": "Talisman1",
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [541],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.item.talisman3": {
-      "spritesheet": {
-        "displayname": "Talisman3",
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [200],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.altar.talisman3": {
-      "spritesheet": {
-        "displayname": "Talisman1",
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [542],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.item.talisman4": {
-      "spritesheet": {
-        "displayname": "Talisman4",
-        "texture_path": "res/textures/inventoryitems.png",
-        "sprite_indices": [210],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
-    "sprite.altar.talisman4": {
-      "spritesheet": {
-        "displayname": "Talisman1",
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [543],
-        "indices_per_sequence": 1,
-        "framerate": 0,
-        "grid_size": {
-          "x": 1,
-          "y": 1
-        }
-      }
-    },
+    },    
     "sprite.item.rottenfood": {
       "spritesheet": {
         "displayname": "Rotten Substance",

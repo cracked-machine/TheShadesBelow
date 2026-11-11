@@ -9,8 +9,14 @@
       "additionalProperties": false,
       "properties": {
         "sprite": {
-          "type": "string",
-          "description": "The sprite identifier for the item"
+          "type": "object",
+          "required": ["name"],
+          "additionalProperties": false,
+          "description": "The sprite used to render the item",
+          "properties": {
+            "name": { "type": "string", "description": "Sprite key in spritesheets.json, e.g. sprite.item.axe" },
+            "index": { "type": "integer", "minimum": 0, "default": 0, "description": "Frame of the sprite sheet to use. Defaults to 0." }
+          }
         },
         "consumable": {
           "type": "string",

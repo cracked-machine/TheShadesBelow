@@ -38,6 +38,8 @@ public:
     //! @brief The item this subpage describes. Empty for an NPC subpage, see NpcPage::npc_key.
     Sys::ItemKey item_key = "";
     Sys::SpriteKey sprite_key = "";
+    //! @brief The frame of sprite_key to draw, e.g. the item's sprite.index from items.json.
+    std::size_t sprite_index = 0;
     ActionMap action_map;
     //! @brief Keys of the actions revealed by discovery. Excludes the prefilled "none" entries, which are in action_map
     //! from the start.
@@ -184,6 +186,7 @@ private:
   static void prefill_none_actions( SubPage &sub_page )
   {
     sub_page.sprite_key = "sprite.item.none";
+    sub_page.sprite_index = 0;
     for_each_action_type( [&]<typename ActionT>()
     { sub_page.action_map.emplace( std::string( ActionT::kKey ), BaseAction( {}, {}, {}, {}, {}, {}, {} ) ); } );
   }
