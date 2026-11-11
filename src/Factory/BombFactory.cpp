@@ -15,6 +15,7 @@
 #include <Systems/PersistSystem.hpp>
 
 #include <Systems/BaseSystem.hpp>
+#include <Systems/Stores/ItemStore.hpp>
 
 namespace Game::Factory::Bomb
 {
@@ -53,7 +54,9 @@ entt::entity create_armed( entt::registry &reg, entt::entity entity, Cmp::Armed:
 
   if ( epi_center == Cmp::Armed::EpiCenter::YES )
   {
-    reg.emplace_or_replace<Cmp::AnimData>( entity, Cmp::AnimData::Config{ .sprite_type = "sprite.item.bomb" } );
+    const auto &item_cmp = Sys::ItemStore::instance().get( "item.bomb" );
+    reg.emplace_or_replace<Cmp::AnimData>(
+        entity, Cmp::AnimData::Config{ .sprite_type = item_cmp.sprite_type, .frame_index_offset = item_cmp.sprite_index() } );
     reg.emplace_or_replace<Cmp::ZOrderValue>( entity, zorder );
     reg.emplace_or_replace<Cmp::Npc::NoPathFinding>( entity );
   }

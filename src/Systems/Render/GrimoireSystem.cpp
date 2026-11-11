@@ -146,9 +146,9 @@ void GrimoireSystem::discover_item( const Sys::ItemKey &item_key )
   bool changed = false;
   for_each_subpage( item_key, [&]( std::size_t page_idx, Cmp::Grimoire::SubPage &sub_page )
   {
-    if ( sub_page.sprite_key != item.sprite_type or sub_page.sprite_index != item.sprite_index ) { changed = true; }
+    if ( sub_page.sprite_key != item.sprite_type or sub_page.sprite_index != item.icon_sprite_index() ) { changed = true; }
     sub_page.sprite_key = item.sprite_type;
-    sub_page.sprite_index = item.sprite_index;
+    sub_page.sprite_index = item.icon_sprite_index();
     if ( item.has_action<Cmp::CarryAction>() )
     {
       sub_page.action_map.insert_or_assign( std::string( Cmp::CarryAction::kKey ), item.get_action<Cmp::CarryAction>() );
@@ -167,9 +167,9 @@ void GrimoireSystem::on_grimoire_item_update_event( const Events::GrimoireItemUp
   bool changed = false;
   for_each_subpage( ev.m_item, [&]( std::size_t page_idx, Cmp::Grimoire::SubPage &sub_page )
   {
-    if ( sub_page.sprite_key != item.sprite_type or sub_page.sprite_index != item.sprite_index ) { changed = true; }
+    if ( sub_page.sprite_key != item.sprite_type or sub_page.sprite_index != item.icon_sprite_index() ) { changed = true; }
     sub_page.sprite_key = item.sprite_type;
-    sub_page.sprite_index = item.sprite_index;
+    sub_page.sprite_index = item.icon_sprite_index();
     sub_page.action_map.insert_or_assign( ev.m_action_key, ev.m_action );
     // repeating actions send an update on every application; only the first one is a discovery
     if ( sub_page.discovered_actions.insert( ev.m_action_key ).second ) { changed = true; }

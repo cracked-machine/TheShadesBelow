@@ -654,7 +654,7 @@ void RenderOverlaySystem::render_shop_inventory_overlay()
       sprite_pos = Cmp::Position( { icon.rect.position.x, icon.rect.position.y - 8 }, Constants::kGridSizePxF );
     }
 
-    RenderSystem::safe_render_sprite_screen( sprite_type, sprite_pos, world_item.sprite_index, sprite_scale );
+    RenderSystem::safe_render_sprite_screen( sprite_type, sprite_pos, world_item.icon_sprite_index(), sprite_scale );
 
     if ( item != "item.torch" ) continue;
     auto *flame_owner = next_slot_flame();

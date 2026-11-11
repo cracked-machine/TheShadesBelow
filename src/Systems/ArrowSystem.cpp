@@ -67,9 +67,9 @@ void ArrowSystem::on_player_action_event( Game::Events::PlayerActionEvent ev )
     // release an arrow; how far it flies depends on how long the bow was held drawn
     m_sound_bank.get_effect( "release_bow" ).play();
 
-    float charge_fraction = m_bow_drawing ? std::clamp( m_bow_draw_timer.asSeconds() / Constants::kFullChargeSeconds,
-                                                        Constants::kMinChargeFraction, 1.f )
-                                          : 1.f;
+    float charge_fraction = m_bow_drawing
+                                ? std::clamp( m_bow_draw_timer.asSeconds() / Constants::kFullChargeSeconds, Constants::kMinChargeFraction, 1.f )
+                                : 1.f;
     m_bow_drawing = false;
 
     create_player_arrow( charge_fraction );
@@ -276,11 +276,11 @@ void ArrowSystem::create_player_arrow( float charge_fraction )
     reg().emplace_or_replace<Cmp::AbsoluteRotation>( arrow_entt, angle->asDegrees() );
   }
   // clang-format off
-    reg().emplace_or_replace<Cmp::AnimData>( arrow_entt, Cmp::AnimData::Config{
+  reg().emplace_or_replace<Cmp::AnimData>( arrow_entt, Cmp::AnimData::Config{
           .sprite_type = "sprite.item.arrow",
           .frame_index_offset = 0,
-          .enabled = true
-    });
+        .enabled = true
+  });
   // clang-format on
 }
 

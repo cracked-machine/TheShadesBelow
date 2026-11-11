@@ -485,7 +485,7 @@ void RenderGameSystem::render_carried_items( const Cmp::Npc::Burryman &burryman_
 std::size_t RenderGameSystem::carried_item_frame( entt::entity item_entt, const Cmp::WorldItem &item_cmp )
 {
   if ( const auto *anim_cmp = reg().try_get<Cmp::AnimData>( item_entt ) ) { return anim_cmp->getFrameIndexOffset(); }
-  return item_cmp.sprite_index;
+  return item_cmp.icon_sprite_index();
 }
 
 void RenderGameSystem::render_carried_items( const Cmp::Npc::Crow &crow_cmp, const sf::FloatRect &body_rect )
@@ -543,7 +543,7 @@ void RenderGameSystem::render_altar_talismans( const Cmp::Altar::TalismanCount &
     if ( idx >= talisman_offsets.size() ) break;
     safe_render_sprite_world( Factory::Altar::get_altar_talisman_sprite( talisman_key ),
                               sf::FloatRect( body_rect.position + talisman_offsets[idx], Constants::kGridSizePxF ),
-                              Sys::ItemStore::instance().get( talisman_key ).sprite_index );
+                              Sys::ItemStore::instance().get( talisman_key ).icon_sprite_index() );
     ++idx;
   }
 }

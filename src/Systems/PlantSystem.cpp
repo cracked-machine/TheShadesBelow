@@ -136,12 +136,13 @@ entt::entity PlantSystem::gen_plant( const Sys::ItemKey &plant_type, const Cmp::
   }
   const auto &pos = pos_cmp.position;
 
-  const auto &plant_ss = Sys::SpriteStore::instance().get( Sys::SpriteKey( "sprite." + plant_type.str() ) );
+  const auto &item_cmp = Sys::ItemStore::instance().get( plant_type );
+  const auto &plant_spritesheet = Sys::SpriteStore::instance().get( item_cmp.sprite_type );
 
   // Plants can span more than one grid row (e.g. 1x2), so every cell in the footprint - not
   // just the origin - must be a real, unreserved world tile. Otherwise a plant can overlap a
   // reserved tile it doesn't share an entity with, e.g. the player spawn.
-  auto plant_grid_size = plant_ss.get_grid_size();
+  auto plant_grid_size = plant_spritesheet.get_grid_size();
   bool footprint_clear = true;
   for ( int gy = 0; gy < plant_grid_size.y and footprint_clear; ++gy )
   {
@@ -160,8 +161,8 @@ entt::entity PlantSystem::gen_plant( const Sys::ItemKey &plant_type, const Cmp::
   if ( footprint_clear )
   {
     // now create the plant at a new entt
-    auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>( reg(), pos, plant_ss, 0, 0,
-                                                                                                                    reserved_sm.get() );
+    auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>(
+        reg(), pos, plant_spritesheet, item_cmp.sprite_index(), /*zorder=*/0, reserved_sm.get() );
 
     // Add the worlditem now so we don't have to look it up later when digging up the plant
     const auto &plant_item = Sys::ItemStore::instance().get( plant_type );
@@ -286,10 +287,9 @@ void PlantSystem::player_plant_interact()
                                                  plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
           if ( forage_reward->target == Cmp::ActionReward::Target::DEFAULT )
           {
-            get_systems_event_queue().trigger(
-                Events::CreateItemEvent( Cmp::Position( find_forage_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
-                                         Sys::ItemStore::instance().pick_item( forage_reward->item ), "drop_loot", 0.f, false, 0, entt::null, {},
-                                         false ) );
+            get_systems_event_queue().trigger( Events::CreateItemEvent(
+                Cmp::Position( find_forage_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
+                Sys::ItemStore::instance().pick_item( forage_reward->item ), "drop_loot", 0.f, false, 0, entt::null, {}, false ) );
           }
           // the gloves occupy the inventory, so an inventory reward is dropped nearby
           else { grant_item_reward( *forage_reward, plant_bounds, plant_entt ); }

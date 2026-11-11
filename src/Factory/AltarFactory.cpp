@@ -56,10 +56,11 @@ Sys::SpriteKey get_altar_talisman_sprite( const Sys::ItemKey &item_key )
   const Sys::SpriteKey altar_sprite( std::string( kAltarPrefix ) + item_sprite.substr( kItemPrefix.size() ) );
   // throws if there is no altar variant of this talisman's sprite
   const auto &sheet = Sys::SpriteStore::instance().get( altar_sprite );
-  // the altar variant is drawn at the same frame as the item
-  if ( item.sprite_index >= sheet.sheet_size() )
+  // the altar variant is drawn at the item's frame, so it needs every frame the item can use
+  const std::size_t frames_needed = std::max( item.icon_sprite_index() + 1, item.sprite_random_count() );
+  if ( frames_needed > sheet.sheet_size() )
   {
-    throw std::runtime_error( "Talisman '" + item_key.str() + "' has sprite index " + std::to_string( item.sprite_index ) + ", but '" +
+    throw std::runtime_error( "Talisman '" + item_key.str() + "' uses " + std::to_string( frames_needed ) + " sprite frames, but '" +
                               altar_sprite.str() + "' only has " + std::to_string( sheet.sheet_size() ) + " frames" );
   }
   return altar_sprite;

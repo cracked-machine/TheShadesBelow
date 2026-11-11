@@ -71,11 +71,9 @@ void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev )
     spawn_pos = Cmp::Position( *cell, Constants::kGridSizePxF );
   }
 
-  // 2. which sprite: curse tablets pick a random variant, everything else uses the item's sprite.index
+  // 2. which sprite: a random frame if the item's sprite.random is set, else its sprite.index
   const bool is_curse_tablet = ev.m_item.contains( "cursetablet" );
-  const auto &item_cmp = Sys::ItemStore::instance().get( ev.m_item );
-  size_t sprite_idx = item_cmp.sprite_index;
-  if ( is_curse_tablet ) { sprite_idx = Sys::SpriteStore::instance().get( item_cmp.sprite_type ).get_random_texture_index(); }
+  const size_t sprite_idx = Sys::ItemStore::instance().get( ev.m_item ).sprite_index();
 
   // 3. create it
   const entt::entity item_entt = create_world_item( spawn_pos, ev.m_item, ev.m_sfx, sprite_idx, ev.m_zorder, ev.m_sting );
@@ -184,7 +182,7 @@ void ItemSystem::swap_world_item( entt::entity entt, const Sys::ItemKey &item, c
   const auto &new_item = Sys::ItemStore::instance().get( item );
   SPDLOG_INFO( "Swapped {} for {}", reg().get<Cmp::WorldItem>( entt ).item_type, item );
   reg().emplace_or_replace<Cmp::WorldItem>( entt, new_item );
-  reg().emplace_or_replace<Cmp::AnimData>( entt, Cmp::AnimData::Config{ .sprite_type = new_item.sprite_type, .frame_index_offset = new_item.sprite_index, .enabled = false } );
+  reg().emplace_or_replace<Cmp::AnimData>( entt, Cmp::AnimData::Config{ .sprite_type = new_item.sprite_type, .frame_index_offset = new_item.sprite_index(), .enabled = false } );
   if ( new_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( entt, 100.f ); }
   else { reg().remove<Cmp::Inventory::WearLevel>( entt ); }
   if ( new_item.stings() ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( entt ); }
@@ -202,7 +200,7 @@ void ItemSystem::create_explosive( Cmp::Position pos, const Sys::ItemKey &item, 
   // clang-format off
   reg().emplace_or_replace<Cmp::AnimData>( world_carry_item_entt, Cmp::AnimData::Config{  
         .sprite_type = world_item.sprite_type,
-        .frame_index_offset = world_item.sprite_index
+        .frame_index_offset = world_item.sprite_index()
   });
   // clang-format on
   reg().emplace_or_replace<Cmp::ZOrderValue>( world_carry_item_entt, pos.position.y - 1.f + zorder );

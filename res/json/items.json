@@ -110,7 +110,7 @@
     ]
   },
   "item.cursetablet.ghost": {
-    "sprite": { "name": "sprite.item.cursetablet.ghost" },
+    "sprite": { "name": "sprite.item.cursetablet.ghost", "random": true },
     "consumable": "none",
     "shop": false,
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
@@ -127,7 +127,7 @@
   },
 
   "item.cursetablet.skeleton": {
-    "sprite": { "name": "sprite.item.cursetablet.skeleton" },
+    "sprite": { "name": "sprite.item.cursetablet.skeleton", "random": true },
     "consumable": "none",
     "shop": false,
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
@@ -144,7 +144,7 @@
   },
 
   "item.cursetablet.adder": {
-    "sprite": { "name": "sprite.item.cursetablet.adder" },
+    "sprite": { "name": "sprite.item.cursetablet.adder", "random": true },
     "consumable": "none",
     "shop": false,
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },

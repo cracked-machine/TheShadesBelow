@@ -1,6 +1,7 @@
 #ifndef SRC_COMPONENTS_INVENTORY_WORLDITEM_HPP__
 #define SRC_COMPONENTS_INVENTORY_WORLDITEM_HPP__
 
+#include <Components/Random.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/DestroyAction.hpp>
@@ -51,17 +52,20 @@ public:
   //! @brief Construct a new World Item object.
   //! @param item_type Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
   //! @param sprite_type The sprite used to render this item.
-  //! @param sprite_index The frame of sprite_type to draw.
+  //! @param sprite_index The frame of sprite_type to draw (items.json sprite.index).
+  //! @param sprite_random_count If non-zero, each new sprite of this item is a random frame in [0, sprite_random_count) instead
+  //! of sprite_index (items.json sprite.random; the frame count of sprite_type).
   //! @param pickaxe_dmg Damage done to a pickaxe by this item.
   //! @param axe_dmg Damage done to an axe by this item.
   //! @param shovel_dmg Damage done to a shovel by this item.
   //! @param bow_dmg Damage done to a bow by this item.
   //! @param consumable Whether the item can be eaten, drunk or neither.
-  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, std::size_t sprite_index, int pickaxe_dmg, int axe_dmg, int shovel_dmg, int bow_dmg,
+  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, std::size_t sprite_index, std::size_t sprite_random_count, int pickaxe_dmg, int axe_dmg, int shovel_dmg, int bow_dmg,
              Consumable consumable = Consumable::NONE )
       : item_type( std::move( item_type ) ),
         sprite_type( std::move( sprite_type ) ),
-        sprite_index( sprite_index ),
+        m_sprite_index( sprite_index ),
+        m_sprite_random_count( sprite_random_count ),
         m_pickaxe_damage( pickaxe_dmg ),
         m_axe_damage( axe_dmg ),
         m_shovel_damage( shovel_dmg ),
@@ -231,10 +235,29 @@ public:
   //! @brief The associated sprite. Imported from items.json.
   Sys::SpriteKey sprite_type;
 
-  //! @brief The frame of sprite_type to draw. Imported from items.json sprite.index (defaults to 0).
-  std::size_t sprite_index{ 0 };
+  //! @brief The frame of sprite_type to give a new sprite of this item, as set by items.json.
+  //! @details sprite.random: a fresh random frame on every call. sprite.index: that frame. Neither: 0.
+  //! Call once when creating the item's AnimData; the entity's AnimData then holds the frame (and travels with it, e.g. on
+  //! pickup). For an icon redrawn every frame with no entity behind it, use icon_sprite_index() so it doesn't flicker.
+  [[nodiscard]] std::size_t sprite_index() const
+  {
+    if ( m_sprite_random_count == 0 ) return m_sprite_index;
+    return static_cast<std::size_t>( RandomInt( 0, static_cast<int>( m_sprite_random_count ) - 1 ).gen() );
+  }
+
+  //! @brief A stable frame for icons with no entity behind them (shop, grimoire, altar): sprite.index, else 0.
+  [[nodiscard]] std::size_t icon_sprite_index() const { return m_sprite_index; }
+
+  //! @brief The number of frames sprite_index() picks from when items.json sprite.random is set, else 0.
+  [[nodiscard]] std::size_t sprite_random_count() const { return m_sprite_random_count; }
 
 private:
+  //! @brief items.json sprite.index. See sprite_index().
+  std::size_t m_sprite_index{ 0 };
+
+  //! @brief Frame count of sprite_type if items.json sprite.random is set, else 0. See sprite_index().
+  std::size_t m_sprite_random_count{ 0 };
+
   //! @brief The actions and their effects that can be applied to the player. Imported from items.json.
   std::unordered_map<std::type_index, ActionTimePair> m_actions;
 

@@ -15,8 +15,10 @@
           "description": "The sprite used to render the item",
           "properties": {
             "name": { "type": "string", "description": "Sprite key in spritesheets.json, e.g. sprite.item.axe" },
-            "index": { "type": "integer", "minimum": 0, "default": 0, "description": "Frame of the sprite sheet to use. Defaults to 0." }
-          }
+            "index": { "type": "integer", "minimum": 0, "default": 0, "description": "Frame of the sprite sheet to use. Defaults to 0. Mutually exclusive with random." },
+            "random": { "type": "boolean", "default": false, "description": "Pick a random frame of the sprite sheet each time the item is spawned. Mutually exclusive with index." }
+          },
+          "not": { "required": ["index", "random"] }
         },
         "consumable": {
           "type": "string",

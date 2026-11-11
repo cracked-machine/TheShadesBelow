@@ -152,12 +152,8 @@ void InventorySystem::add_inventory_item( const Sys::ItemKey &item )
 
   if ( item.contains( "torch" ) ) { reg().emplace_or_replace<Cmp::UUID>( inventory_entt, Cmp::UUID::generate() ); }
 
-  size_t sprite_idx = item_cmp.sprite_index;
-  if ( item.contains( "cursetablet" ) )
-  {
-    sprite_idx = Sys::SpriteStore::instance().get( item_cmp.sprite_type ).get_random_texture_index();
-    Factory::Item::add_curse_tablet( reg(), inventory_entt, item, sprite_idx );
-  }
+  const size_t sprite_idx = item_cmp.sprite_index();
+  if ( item.contains( "cursetablet" ) ) { Factory::Item::add_curse_tablet( reg(), inventory_entt, item, sprite_idx ); }
 
   // clang-format off
   reg().emplace_or_replace<Cmp::AnimData>( inventory_entt, Cmp::AnimData::Config{ 
@@ -237,8 +233,13 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
     // don't allow plants to be dropped at all in the player spawn area
     if ( Utils::Player::is_in_spawn( reg(), Utils::Player::get_position( reg() ) ) ) return;
 
+    const auto &spritesheet = Sys::SpriteStore::instance().get( inventory_slot_cmp->m_item.sprite_type );
+    // keep the frame the item already has (e.g. rolled by sprite.random when it first spawned)
+    const auto *slot_anim_cmp = reg().try_get<Cmp::AnimData>( inventory_slot_entt );
+    const std::size_t sprite_idx = slot_anim_cmp ? slot_anim_cmp->getFrameIndexOffset() : inventory_slot_cmp->m_item.sprite_index();
     auto [mb_entt, segment_entt_list] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>(
-        reg(), plant_pos, Sys::SpriteStore::instance().get( inventory_slot_cmp->m_item.sprite_type ), 0, 0, m_reserved_sm.lock().get() );
+        reg(), plant_pos, spritesheet, /*ss_index=*/sprite_idx, /*zorder=*/0, m_reserved_sm.lock().get() );
+
     // Preserve the item this plant was grown from, so digging it back up (see the DIG handler in
     // on_player_action_event) can hand it back via the normal pickup_world_item path instead of
     // having to re-derive an item id from the multiblock's sprite.
