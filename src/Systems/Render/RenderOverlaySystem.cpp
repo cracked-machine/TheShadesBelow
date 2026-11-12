@@ -177,8 +177,9 @@ void RenderOverlaySystem::render_ui_inventory_icon()
     auto inventory_view = reg().view<Cmp::PlayerInventorySlot, Cmp::AnimData>();
     for ( auto [inventory_entt, inventory_cmp, anim_cmp] : inventory_view.each() )
     {
-      RenderSystem::safe_render_sprite_screen( anim_cmp.m_sprite_type, { icon.rect.position, Constants::kGridSizePxF }, 0,
-                                               { icon.scale, icon.scale } );
+      // the slot keeps its item's frame (items.json sprite.index, or the frame rolled by sprite.random) as the anim offset
+      RenderSystem::safe_render_sprite_screen( anim_cmp.m_sprite_type, { icon.rect.position, Constants::kGridSizePxF },
+                                               anim_cmp.getFrameIndexOffset(), { icon.scale, icon.scale } );
     }
   }
 }
