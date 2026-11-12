@@ -15,6 +15,7 @@
 #include <Components/Font.hpp>
 #include <SceneControl/SceneManager.hpp>
 #include <Systems/Stores/SystemStore.hpp>
+#include <Utils/LoadingScreen.hpp>
 
 #include <future>
 #include <memory>
@@ -58,15 +59,16 @@ private:
   //! asynchronously, pumping window events so the app doesn't appear to hang.
   //! @tparam Callable Callable type invoked on a worker thread via std::async.
   //! @param callable The work to perform while the loading screen is shown.
-  //! @param loading_texture Currently unused by the loading screen itself.
+  //! @param loading_texture The splash background, scaled to fit the window.
   template <typename Callable>
-  void loading_screen( Callable &&callable, [[maybe_unused]] const sf::Texture &loading_texture )
+  void loading_screen( Callable &&callable, const sf::Texture &loading_texture )
   {
     Cmp::Font font( "res/fonts/tuffy.ttf" );
     sf::Text loading_text( font, "Loading", 48 );
     loading_text.setFillColor( sf::Color::White );
-    // use fallback resolution for loading screen position since we dont have registry access at this point
-    loading_text.setPosition( { ( Constants::kFallbackDisplaySize.x / 2.f ) - 50.f, ( Constants::kFallbackDisplaySize.y / 2.f ) + 100.f } );
+    loading_text.setOutlineColor( sf::Color::Black );
+    // sized and placed from the window's actual resolution, see Utils::layout_loading_text()
+    Utils::layout_loading_text( *m_window, loading_text );
 
     sf::Clock clock;
     const float text_update_interval = 1.f; // 1 second between dot updates
@@ -99,7 +101,7 @@ private:
       }
 
       m_window->clear( sf::Color::Black );
-      m_window->draw( loading_text );
+      Utils::draw_loading_frame( *m_window, loading_texture, loading_text );
       m_window->display();
     }
 

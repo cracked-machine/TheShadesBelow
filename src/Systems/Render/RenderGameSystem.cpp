@@ -110,15 +110,24 @@ namespace Game::Sys
 RenderGameSystem::RenderGameSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
     : RenderSystem( reg, window, sound_bank )
 {
-  // the compass arrow avoids the UI panels down the left of the screen: use the right edge of the widest ui_outline
-  const Render::UiData ui_data( "res/ui/ui.json" );
-  const auto widest = std::ranges::max_element( ui_data.m_outlines, {}, []( const auto &outline ) { return outline.rect.size.x; } );
-  if ( widest != ui_data.m_outlines.end() ) m_compass_left_inset_px = widest->rect.position.x + widest->rect.size.x;
+  // the compass arrow avoids the UI panels down the left of the screen, see update_compass_left_inset()
+  m_hud_ui_data = std::make_unique<Render::UiData>( "res/ui/ui.json" );
+  update_compass_left_inset();
 
   SPDLOG_DEBUG( "RenderGameSystem initialized" );
 }
 
 RenderGameSystem::~RenderGameSystem() = default;
+
+void RenderGameSystem::update_compass_left_inset()
+{
+  if ( not m_hud_ui_data ) return;
+  m_hud_ui_data->sync_to( m_window.getSize() );
+  // the right edge of the widest ui_outline, in screen pixels at the current UI scale
+  const auto &outlines = m_hud_ui_data->m_outlines;
+  const auto widest = std::ranges::max_element( outlines, {}, []( const auto &outline ) { return outline.rect.size.x; } );
+  if ( widest != outlines.end() ) m_compass_left_inset_px = widest->rect.position.x + widest->rect.size.x;
+}
 
 void RenderGameSystem::render_game( sf::Time dt, const PathFinding::SpatialHashGridSharedPtr &render_position_grid )
 {
@@ -434,6 +443,7 @@ void RenderGameSystem::render_arrow_compass()
     compass.refresh_target( reg(), player_center );
 
     // UI outlines are in screen pixels; scale the inset into world units
+    update_compass_left_inset();
     const float left_inset = m_compass_left_inset_px * s_world_view.getSize().x / get_screen_view().getSize().x;
     auto placement = compass.placement( player_center, s_world_view, left_inset );
     if ( not placement ) return;

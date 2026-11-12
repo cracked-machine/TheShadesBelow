@@ -17,9 +17,15 @@
 #include <entt/core/type_traits.hpp>
 #include <entt/entity/fwd.hpp>
 
+#include <memory>
 #include <optional>
 
 // clang-format off
+namespace Game::Render
+{
+class UiData;
+} // namespace Game::Render
+
 namespace Game::Sprites
 {
 class SpriteSheet;
@@ -190,9 +196,15 @@ private:
   //! @param color
   void render_screen_flash( sf::Color color );
 
+  //! @brief The main HUD layout (res/ui/ui.json), kept so the compass inset follows display resolution changes.
+  std::unique_ptr<Render::UiData> m_hud_ui_data;
+
   //! @brief Right edge (screen pixels) of the widest ui_outline in res/ui/ui.json. The compass arrow is kept to the right
   //! of this so it isn't lost among the UI panels on the left of the screen.
   float m_compass_left_inset_px{ 0.f };
+
+  //! @brief Rescale the HUD layout to the current window size and recompute `m_compass_left_inset_px` (no-op if unchanged).
+  void update_compass_left_inset();
 
   //! @brief Smoothed camera position, lerped towards the player's position each frame.
   sf::Vector2f m_camera_position{ 0.f, 0.f };

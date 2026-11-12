@@ -14,6 +14,8 @@
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Vector2.hpp>
 
+#include <algorithm>
+#include <cmath>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -104,6 +106,17 @@ private:
 
   template <typename FlashComponent>
   bool update_flash_toggle( sf::Time dt );
+
+  //! @brief The main UI layout's current design-to-screen scale, for hard-coded HUD pixel values (outline widths, font sizes).
+  [[nodiscard]] float ui_scale() const { return m_main_ui_data ? m_main_ui_data->scale() : 1.f; }
+
+  //! @brief Scale a design-space (1920x1080) character size to the current UI scale.
+  //! @param design_size character size in pixels at the layout's design resolution
+  //! @return the scaled character size, at least 1
+  [[nodiscard]] unsigned int scaled_char_size( unsigned int design_size ) const
+  {
+    return std::max( 1u, static_cast<unsigned int>( std::lround( static_cast<float>( design_size ) * ui_scale() ) ) );
+  }
 
   //! @brief Get the current value of the player stat or toxidrome named by a "<stat>_delta_lbl" UI label.
   //! @param label_name the UI label name, e.g. "health_delta_lbl" or "venom_delta_lbl"

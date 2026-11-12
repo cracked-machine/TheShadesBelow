@@ -26,6 +26,8 @@ namespace Game
 
 Engine::Engine()
 {
+  // the splash is drawn scaled to the window resolution, so filter it rather than sampling nearest-pixel
+  m_splash_texture.setSmooth( true );
 
   if ( !m_window->isOpen() )
   {

@@ -303,6 +303,10 @@ void GrimoireSystem::render( sf::Time dt )
   ImGui::SFML::Update( m_window, std::max( dt, sf::microseconds( 1 ) ) );
   ImGui::PushFont( Utils::imgui_grimoire_font() );
 
+  // the layouts are authored at their Tiled map size; rescale them if the window resolution has changed (no-op otherwise)
+  m_npc_ui_data->sync_to( m_window.getSize() );
+  m_plant_ui_data->sync_to( m_window.getSize() );
+
   // one invisible window over the layout's main_outline holds the tab bar and the tables, each placed by its layout
   // object. Widgets are clipped to it, and the tab bar stretches to its right edge. Without a main_outline it covers the screen.
   const Render::UiData &current_ui_data = m_tab == Cmp::Grimoire::Tab::NPCS ? *m_npc_ui_data : *m_plant_ui_data;
@@ -414,7 +418,7 @@ void GrimoireSystem::render_icon( const Render::UiData::Icon &icon, const Cmp::G
 {
   Sys::SpriteKey sprite_key = sub_page.sprite_key;
   RenderSystem::safe_render_sprite_screen( sprite_key, { icon.rect.position, Constants::kGridSizePxF }, sub_page.sprite_index,
-                                           { static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) } );
+                                           { icon.scale, icon.scale } );
 }
 
 void GrimoireSystem::render_page_label( const Render::UiData &ui_data, const std::string &cache_prefix, std::size_t page_count )

@@ -91,10 +91,6 @@ namespace
 //! @brief Background opacity of the debug overlay windows: low enough to see the game through, high enough to read the text.
 constexpr float kDebugBgAlpha = 0.3f;
 
-//! @brief The resolution "res/ui/dbg.json" was laid out at (192x108 tiles of 10px). Label positions are scaled from this to the
-//! current window size so the windows start on-screen at any display resolution.
-constexpr sf::Vector2f kDbgLayoutSize{ 1920.f, 1080.f };
-
 //! @brief Colours of the debug rectangles, shared by the draw calls and the "Highlights" window swatches.
 constexpr sf::Color kLavaPitCellColour{ 254, 128, 32 };
 constexpr sf::Color kOpenRoomColour = sf::Color::Green;
@@ -295,7 +291,9 @@ bool RenderDebugSystem::begin_debug_window( const char *title, std::string_view 
     auto it = std::ranges::find_if( m_dbg_ui_data->m_labels, [&]( const auto &label ) { return label.name == label_name; } );
     if ( it != m_dbg_ui_data->m_labels.end() )
     {
-      pos = { it->rect.position.x * window_size.x / kDbgLayoutSize.x, it->rect.position.y * window_size.y / kDbgLayoutSize.y };
+      // debug windows are free-floating, so stretch the design-space position per axis (keeps edge-anchored panels on the edges)
+      const sf::Vector2f design = m_dbg_ui_data->design_size();
+      pos = { it->rect.position.x * window_size.x / design.x, it->rect.position.y * window_size.y / design.y };
     }
   }
   // fit the initial size inside the window from that position, so the panel's scrollbar is reachable at any resolution

@@ -15,7 +15,6 @@
 #include <Components/LastDirection.hpp>
 #include <Components/NoRender.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
-#include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/StatChangeDisplayDuration.hpp>
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
@@ -73,6 +72,10 @@ namespace Game::Sys
 
 void RenderOverlaySystem::render_overlay( sf::Time dt )
 {
+  // the layouts are authored at their Tiled map size; rescale them if the window resolution has changed (no-op otherwise)
+  if ( m_main_ui_data ) m_main_ui_data->sync_to( m_window.getSize() );
+  if ( m_shop_ui_data ) m_shop_ui_data->sync_to( m_window.getSize() );
+
   PROFILED( render_ui_particles() );
 
   PROFILED( render_shop_inventory_overlay() );
@@ -86,8 +89,8 @@ void RenderOverlaySystem::render_overlay( sf::Time dt )
   PROFILED( render_level_depth() );
   PROFILED( render_ghost_grave_halos() );
 
-  const auto &display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
-  render_crypt_maze_timer( { static_cast<float>( display_size.x ) / 2.f, 0.f }, 100 );
+  const auto display_size = sf::Vector2f( m_window.getSize() );
+  render_crypt_maze_timer( { display_size.x / 2.f, 0.f }, scaled_char_size( 100 ) );
 }
 
 void RenderOverlaySystem::render_ui_particles()
@@ -136,7 +139,7 @@ void RenderOverlaySystem::render_ui_icons()
     // we handle the other icons seperately
     if ( icon.name == "inventory_icon" or icon.name.contains( "sprite.crypt.loot.cadaver" ) ) { continue; }
     RenderSystem::safe_render_sprite_screen( icon.type, icon.rect, icon.index,
-                                             { static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) } );
+                                             { icon.scale, icon.scale } );
   }
 }
 
@@ -152,7 +155,7 @@ void RenderOverlaySystem::render_ui_cadaver_icons()
     if ( icon.name.contains( "sprite.crypt.loot.cadaver" ) )
     {
       const Sys::SpriteKey part_key( icon.name );
-      const sf::Vector2f scale{ static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) };
+      const sf::Vector2f scale{ icon.scale, icon.scale };
       const Cmp::Player::Cadaver &cadaver_cmp = Utils::Player::get_cadaver( reg() );
       if ( cadaver_cmp.is_set( part_key ) ) { RenderSystem::safe_render_sprite_screen( part_key, icon.rect, 0, scale ); }
     }
@@ -175,7 +178,7 @@ void RenderOverlaySystem::render_ui_inventory_icon()
     for ( auto [inventory_entt, inventory_cmp, anim_cmp] : inventory_view.each() )
     {
       RenderSystem::safe_render_sprite_screen( anim_cmp.m_sprite_type, { icon.rect.position, Constants::kGridSizePxF }, 0,
-                                               { static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) } );
+                                               { icon.scale, icon.scale } );
     }
   }
 }
@@ -198,7 +201,7 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
   const sf::Color toxidrome_glint = Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterShimmer>( reg() );
   // gives each frozen meter its own frost pattern
   int toxidrome_index = 0;
-  constexpr float kMeterOutlineThickness = 5.f;
+  const float kMeterOutlineThickness = 5.f * ui_scale();
 
   sf::RectangleShape innermeter;
   sf::RectangleShape outermeter;
@@ -361,7 +364,7 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
 
 void RenderOverlaySystem::render_meter_shimmer( const sf::FloatRect &rect, float progress, sf::Color colour )
 {
-  constexpr float kShimmerHalfWidth = 10.f;
+  const float kShimmerHalfWidth = 10.f * ui_scale();
   // the band leans like "/": its top edge is offset right of its bottom edge by the slant
   const float half_slant = rect.size.y * 0.25f;
   const float left = rect.position.x;
@@ -446,7 +449,7 @@ void RenderOverlaySystem::render_ui_texts()
     text.setPosition( ui_text.rect.position );
     text.setFillColor( sf::Color::White );
     text.setOutlineColor( sf::Color::Black );
-    text.setOutlineThickness( 2.f );
+    text.setOutlineThickness( 2.f * ui_scale() );
     draw_screen( text );
   }
 }
@@ -511,7 +514,7 @@ void RenderOverlaySystem::render_ui_labels( sf::Time dt )
     }
     text.setFillColor( sf::Color::White );
     text.setOutlineColor( sf::Color::Black );
-    text.setOutlineThickness( 2.f );
+    text.setOutlineThickness( 2.f * ui_scale() );
 
     // flash the text if we just picked up a cadaver
     if ( ui_label.name == "cadaver_label" and update_flash_toggle<Cmp::FlashUICadaver>( dt ) )
@@ -599,9 +602,9 @@ void RenderOverlaySystem::render_level_depth()
   const auto &player_level_cmp = Utils::Player::get_level_depth( reg() );
   if ( player_level_cmp.display_timer >= player_level_cmp.display_cooldown ) { return; }
 
-  const auto &display_res = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
-  sf::Text level_txt( m_font, "Nekropolis " + std::to_string( player_level_cmp.get_count() ), 100 );
-  level_txt.setPosition( sf::Vector2f( ( static_cast<float>( display_res.x ) / 2.f ) - level_txt.getLocalBounds().getCenter().x, 100.f ) );
+  const auto display_res = sf::Vector2f( m_window.getSize() );
+  sf::Text level_txt( m_font, "Nekropolis " + std::to_string( player_level_cmp.get_count() ), scaled_char_size( 100 ) );
+  level_txt.setPosition( sf::Vector2f( ( display_res.x / 2.f ) - level_txt.getLocalBounds().getCenter().x, 100.f * ui_scale() ) );
   level_txt.setFillColor( sf::Color::White );
   draw_screen( level_txt );
 }
@@ -646,12 +649,14 @@ void RenderOverlaySystem::render_shop_inventory_overlay()
     const auto &world_item = Sys::ItemStore::instance().get( item );
     const auto &sprite_type = world_item.sprite_type;
     // Use the default scale/size unless its a plant then its need to be resized/repositioned to fit in the UI box
-    auto sprite_scale = sf::Vector2f{ static_cast<float>( icon.scale ), static_cast<float>( icon.scale ) };
+    const float shop_scale = m_shop_ui_data->scale();
+    auto sprite_scale = sf::Vector2f{ icon.scale, icon.scale };
     auto sprite_pos = Cmp::Position( icon.rect.position, Constants::kGridSizePxF );
     if ( sprite_type.contains( "plant" ) )
     {
-      sprite_scale = sf::Vector2f{ static_cast<float>( icon.scale ), static_cast<float>( icon.scale - 1 ) };
-      sprite_pos = Cmp::Position( { icon.rect.position.x, icon.rect.position.y - 8 }, Constants::kGridSizePxF );
+      // one design-space step shorter, i.e. (sprite_scale - 1) before the UI scale was applied
+      sprite_scale = sf::Vector2f{ icon.scale, icon.scale - shop_scale };
+      sprite_pos = Cmp::Position( { icon.rect.position.x, icon.rect.position.y - ( 8.f * shop_scale ) }, Constants::kGridSizePxF );
     }
 
     RenderSystem::safe_render_sprite_screen( sprite_type, sprite_pos, world_item.icon_sprite_index(), sprite_scale );
@@ -688,14 +693,15 @@ void RenderOverlaySystem::render_shop_inventory_overlay()
   {
     auto &[item, price] = slot;
 
-    sf::Text slot_idx_txt( m_font, std::to_string( i + 1 ), 30 );
+    const unsigned int slot_char_size = std::max( 1u, static_cast<unsigned int>( std::lround( 30.f * m_shop_ui_data->scale() ) ) );
+    sf::Text slot_idx_txt( m_font, std::to_string( i + 1 ), slot_char_size );
     slot_idx_txt.setFillColor( sf::Color::Black );
 
     Sys::SpriteKey sprite_mtype = Sys::ItemStore::instance().get( item ).sprite_type;
-    sf::Text slot_desc_txt( m_font, Sys::SpriteStore::instance().get( sprite_mtype ).display_name(), 30 );
+    sf::Text slot_desc_txt( m_font, Sys::SpriteStore::instance().get( sprite_mtype ).display_name(), slot_char_size );
     slot_desc_txt.setFillColor( sf::Color::Black );
 
-    sf::Text slot_price_txt( m_font, std::to_string( price ), 30 );
+    sf::Text slot_price_txt( m_font, std::to_string( price ), slot_char_size );
     slot_price_txt.setFillColor( sf::Color::Black );
 
     const std::string idx_key = "slot" + std::to_string( i + 1 ) + "_idx";
@@ -745,7 +751,7 @@ void RenderOverlaySystem::render_crypt_maze_timer( sf::Vector2f pos, unsigned in
       clock_text.setPosition( { pos.x - ( clock_text.getLocalBounds().size.x / 2 ), pos.y } );
       clock_text.setFillColor( sf::Color::Red );
       clock_text.setOutlineColor( sf::Color::Black );
-      clock_text.setOutlineThickness( 2.f );
+      clock_text.setOutlineThickness( 2.f * ui_scale() );
       draw_screen( clock_text );
     }
   }

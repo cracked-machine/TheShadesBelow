@@ -34,6 +34,8 @@ SceneManager::SceneManager( sf::RenderWindow &w, Audio::SoundBank &sound_bank, S
       m_scenemanager_event_dispatcher( scenemanager_event_dispatcher )
 {
   m_scenemanager_event_dispatcher.sink<Events::SceneManagerEvent>().connect<&SceneManager::handle_events>( this );
+  // the splash is drawn scaled to the window resolution, so filter it rather than sampling nearest-pixel
+  m_splash_texture.setSmooth( true );
 }
 
 void SceneManager::update( sf::Time dt )
