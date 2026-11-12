@@ -21,6 +21,7 @@
 #include <Components/Persistent/BombsExhumeGraves.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
 #include <Components/Persistent/BradycardiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/BradycardiaMovementSpeed.hpp>
 #include <Components/Persistent/BurrExpiry.hpp>
 #include <Components/Persistent/BurrSlowFactor.hpp>
 #include <Components/Persistent/BurrThrowCooldown.hpp>
@@ -124,6 +125,7 @@
 #include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Persistent/StatChangeDisplayDuration.hpp>
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/TachycardiaMovementSpeed.hpp>
 #include <Components/Persistent/TalismanMinChance.hpp>
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
@@ -265,6 +267,8 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::HeldItemRotationSouth>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::HeldItemScale>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerMovementSpeed>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::TachycardiaMovementSpeed>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::BradycardiaMovementSpeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerDiagonalLerpSpeedModifier>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerFootstepAddDelay>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerFootstepFadeDelay>( reg() ).render_widget();

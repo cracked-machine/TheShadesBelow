@@ -6,14 +6,13 @@
 namespace Game::Cmp
 {
 
-PlayerStats::PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck,
-                          Stats::Anima anima )
+PlayerStats::PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima )
     : PlayerStats( health, fear, despair, infamy, luck, anima, Cmp::Toxicity::Toxidrome{} )
 {
 }
 
-PlayerStats::PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck,
-                          Stats::Anima anima, Cmp::Toxicity::Toxidrome toxidrome )
+PlayerStats::PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima,
+                          Cmp::Toxicity::Toxidrome toxidrome )
     : m_health( std::clamp( health.value, 0, 100 ) ),
       m_fear( std::clamp( fear.value, 0, 100 ) ),
       m_despair( std::clamp( despair.value, 0, 100 ) ),
@@ -71,7 +70,7 @@ void PlayerStats::apply( const BaseAction &action )
   {
     // toxic immunity blocks increases only; cures still apply
     if ( m_toxic_immune and toxicity_delta > 0 ) continue;
-    if ( m_toxidrome->apply( id, toxicity_delta ) ) { SPDLOG_INFO( "Applied {} toxicity", toxicity_delta ); }
+    if ( m_toxidrome->apply( id, toxicity_delta ) ) { SPDLOG_DEBUG( "Applied {} toxicity", toxicity_delta ); }
   }
 }
 

@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <cmath>
+
 #include <Components/AbsoluteAlpha.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
@@ -14,7 +17,10 @@
 #include <Components/Npc/Wisp.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
+#include <Components/Persistent/BradycardiaMovementSpeed.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
+#include <Components/Persistent/PlayerMovementSpeed.hpp>
+#include <Components/Persistent/TachycardiaMovementSpeed.hpp>
 #include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
@@ -51,6 +57,8 @@
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
+#include <Components/Toxicity/Bradycadia.hpp>
+#include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/GrimoireItemUpdateEvent.hpp>
@@ -210,6 +218,25 @@ void reset_curse( entt::registry &reg )
   curse->active = false;
   curse->shader_alpha.reset();
   SPDLOG_DEBUG( "Cmp::Player::Curse == {}", curse->active );
+}
+
+float get_movement_speed( entt::registry &reg )
+{
+  const float base_speed = Sys::PersistSystem::get<Cmp::Persist::PlayerMovementSpeed>( reg ).get_value();
+  const auto &toxidrome = get_stats( reg ).toxidrome();
+
+  // Tachycardia/Bradycardia are mutually exclusive, normalise within -1.0 to 1.0 (see PlayerSystem::update_heartbeat)
+  const float tachycardia = static_cast<float>( toxidrome.at<Cmp::Toxicity::Tachycardia>().value_or( 0 ) );
+  const float bradycardia = static_cast<float>( toxidrome.at<Cmp::Toxicity::Bradycardia>().value_or( 0 ) );
+  const float severity = std::clamp( ( tachycardia - bradycardia ) / 100.f, -1.f, 1.f );
+
+  if ( severity >= 0.f )
+  {
+    const float tachy_speed = Sys::PersistSystem::get<Cmp::Persist::TachycardiaMovementSpeed>( reg ).get_value();
+    return std::lerp( base_speed, tachy_speed, severity );
+  }
+  const float brady_speed = Sys::PersistSystem::get<Cmp::Persist::BradycardiaMovementSpeed>( reg ).get_value();
+  return std::lerp( base_speed, brady_speed, -severity );
 }
 
 float get_speed_penalty( entt::registry &reg )

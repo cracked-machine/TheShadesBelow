@@ -21,6 +21,7 @@
 #include <Components/Persistent/BombsExhumeGraves.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
 #include <Components/Persistent/BradycardiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/BradycardiaMovementSpeed.hpp>
 #include <Components/Persistent/BurrExpiry.hpp>
 #include <Components/Persistent/BurrSlowFactor.hpp>
 #include <Components/Persistent/BurrThrowCooldown.hpp>
@@ -128,6 +129,7 @@
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/TachycardiaMovementSpeed.hpp>
 #include <Components/Persistent/TooltipsSeen.hpp>
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
@@ -262,6 +264,8 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::PlayerFootstepSfxStrideLength>();
   add_component<Cmp::Persist::PlayerLerpInterruptThreshold>();
   add_component<Cmp::Persist::PlayerMovementSpeed>();
+  add_component<Cmp::Persist::TachycardiaMovementSpeed>();
+  add_component<Cmp::Persist::BradycardiaMovementSpeed>();
   add_component<Cmp::Persist::PlayerShortcutLerpSpeedModifier>();
   add_component<Cmp::Persist::PlayerStartPosition>();
   add_component<Cmp::Persist::PostPullMovementDelay>();

@@ -132,6 +132,14 @@ Cmp::Player::Curse &get_curse( entt::registry &reg );
 //! @throws std::runtime_error if the player has no Cmp::Player::Curse.
 void reset_curse( entt::registry &reg );
 
+//! @brief Get the player's base movement speed, adjusted for tachycardia/bradycardia toxicity.
+//! Linearly interpolates from Cmp::Persist::PlayerMovementSpeed (no toxicity) towards
+//! Cmp::Persist::TachycardiaMovementSpeed or Cmp::Persist::BradycardiaMovementSpeed (toxicity 100).
+//! Does not include Utils::Player::get_speed_penalty.
+//! @param reg reference to the entt registry
+//! @return float The movement speed in pixels/second.
+float get_movement_speed( entt::registry &reg );
+
 //! @brief Get the player's current movement speed multiplier from Cmp::Player::SpeedPenalty and any burrs on the ground
 //! under the player (see Utils::get_burr_speed_multiplier).
 //! @param reg reference to the entt registry

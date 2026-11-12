@@ -48,7 +48,6 @@
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
-#include <Components/Persistent/PlayerMovementSpeed.hpp>
 #include <Components/Persistent/PlayerOnFireHealthDmgPerSec.hpp>
 #include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
@@ -300,8 +299,7 @@ std::optional<Cmp::Direction> PlayerSystem::compute_step_direction( sf::Time dt,
   const Cmp::Direction raw_direction = Utils::Player::get_direction( reg() );
   if ( raw_direction == sf::Vector2f( 0.f, 0.f ) ) return std::nullopt; // optimization
 
-  auto &player_movement_speed = Sys::PersistSystem::get<Cmp::Persist::PlayerMovementSpeed>( reg() );
-  float speed = player_movement_speed.get_value();
+  float speed = Utils::Player::get_movement_speed( reg() );
   if ( apply_speed_penalty ) speed *= Utils::Player::get_speed_penalty( reg() );
   const float step = speed * dt.asSeconds();
 
@@ -609,7 +607,7 @@ void PlayerSystem::update_player_animation()
   // automatically, including any active Cmp::Player::SpeedPenalty (see FootstepSystem for the
   // same pattern applied to footstep sfx).
   const float stride_length = Sys::PersistSystem::get<Cmp::Persist::PlayerAnimStrideLength>( reg() ).get_value();
-  const float movement_speed = Sys::PersistSystem::get<Cmp::Persist::PlayerMovementSpeed>( reg() ).get_value();
+  const float movement_speed = Utils::Player::get_movement_speed( reg() );
   const float speed_penalty = Utils::Player::get_speed_penalty( reg() );
   const float effective_speed = movement_speed * speed_penalty;
   anim_cmp.set_framerate_override( effective_speed > 0.f ? effective_speed / stride_length : 1.f / stride_length );
