@@ -85,6 +85,7 @@
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderPassTypes.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Render/UiData.hpp>
 #include <Systems/ShaderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
@@ -96,6 +97,7 @@
 #include <Utils/Profiling.hpp>
 #include <Utils/Utils.hpp>
 
+#include <algorithm>
 #include <filesystem>
 #include <memory>
 #include <optional>
@@ -108,6 +110,11 @@ namespace Game::Sys
 RenderGameSystem::RenderGameSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
     : RenderSystem( reg, window, sound_bank )
 {
+  // the compass arrow avoids the UI panels down the left of the screen: use the right edge of the widest ui_outline
+  const Render::UiData ui_data( "res/ui/ui.json" );
+  const auto widest = std::ranges::max_element( ui_data.m_outlines, {}, []( const auto &outline ) { return outline.rect.size.x; } );
+  if ( widest != ui_data.m_outlines.end() ) m_compass_left_inset_px = widest->rect.position.x + widest->rect.size.x;
+
   SPDLOG_DEBUG( "RenderGameSystem initialized" );
 }
 
@@ -426,7 +433,9 @@ void RenderGameSystem::render_arrow_compass()
     const sf::Vector2f player_center = pc_pos_cmp.getCenter();
     compass.refresh_target( reg(), player_center );
 
-    auto placement = compass.placement( player_center, s_world_view );
+    // UI outlines are in screen pixels; scale the inset into world units
+    const float left_inset = m_compass_left_inset_px * s_world_view.getSize().x / get_screen_view().getSize().x;
+    auto placement = compass.placement( player_center, s_world_view, left_inset );
     if ( not placement ) return;
     safe_render_sprite_world( Cmp::Player::ArrowCompass::kSpriteType, placement->rect, 0, placement->scale, 255, placement->origin,
                               placement->angle );

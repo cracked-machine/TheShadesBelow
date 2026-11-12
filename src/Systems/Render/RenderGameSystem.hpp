@@ -190,6 +190,10 @@ private:
   //! @param color
   void render_screen_flash( sf::Color color );
 
+  //! @brief Right edge (screen pixels) of the widest ui_outline in res/ui/ui.json. The compass arrow is kept to the right
+  //! of this so it isn't lost among the UI panels on the left of the screen.
+  float m_compass_left_inset_px{ 0.f };
+
   //! @brief Smoothed camera position, lerped towards the player's position each frame.
   sf::Vector2f m_camera_position{ 0.f, 0.f };
 

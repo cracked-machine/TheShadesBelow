@@ -7,6 +7,7 @@
 #include <Components/Crypt/Entrance.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Position.hpp>
+#include <Components/RectBounds.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
@@ -51,6 +52,9 @@ struct ArrowCompass
 
   //! @brief Inset from the view edge at which the arrow is placed
   static constexpr float kEdgeMargin{ 32.f };
+
+  //! @brief Scale of the view-centered region the target must enter before the arrow is hidden
+  static constexpr float kTargetRegionScale{ 0.5f };
 
   //! @brief Recompute the mode if the inventory item type or its offering eligibility has changed since the last call.
   //! @param item_type The item type currently in the player's inventory slot (empty if none)
@@ -148,20 +152,24 @@ struct ArrowCompass
   //! @brief Compute where to draw the arrow: on the view edge (inset by kEdgeMargin) along the ray from the player to the target.
   //! @param player_center The player's center position
   //! @param world_view The current world view
-  //! @return std::nullopt if there is no target or the target is already visible in the view
-  [[nodiscard]] std::optional<Placement> placement( sf::Vector2f player_center, const sf::View &world_view ) const
+  //! @param left_inset Extra inset (world units) from the view's left edge, so the arrow stays clear of the UI panels
+  //! @return std::nullopt if there is no target or the target is inside the view-centered kTargetRegionScale region
+  [[nodiscard]] std::optional<Placement> placement( sf::Vector2f player_center, const sf::View &world_view, float left_inset = 0.f ) const
   {
     if ( not m_target ) return std::nullopt;
 
-    // dont show the compass arrow if the target is on-screen....we can see it
-    if ( Utils::is_visible_in_view( world_view, *m_target ) ) return std::nullopt;
+    // dont show the compass arrow once the target is well inside the view....we can see it.
+    // Only a reduced region centered in the view counts, so the arrow stays while the target is near the screen edges
+    // or hidden behind the UI panels on the left.
+    const auto target_region = Cmp::RectBounds::scaled( Utils::calculate_view_bounds( world_view ), kTargetRegionScale );
+    if ( Utils::is_visible_in_view( target_region.getBounds(), *m_target ) ) return std::nullopt;
 
     const sf::Vector2f direction = ( m_target->getCenter() - player_center ).normalized();
 
-    // view bounds in world coordinates, inset by the edge margin
+    // view bounds in world coordinates, inset by the edge margin (plus the UI panel width on the left)
     sf::FloatRect view_bounds = Utils::calculate_view_bounds( world_view );
-    view_bounds.position += { kEdgeMargin, kEdgeMargin };
-    view_bounds.size -= { kEdgeMargin * 2.f, kEdgeMargin * 2.f };
+    view_bounds.position += { kEdgeMargin + left_inset, kEdgeMargin };
+    view_bounds.size -= { kEdgeMargin * 2.f + left_inset, kEdgeMargin * 2.f };
 
     // distances along the ray to each edge
     const float t_left = ( view_bounds.position.x - player_center.x ) / direction.x;
