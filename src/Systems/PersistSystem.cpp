@@ -85,6 +85,7 @@
 #include <Components/Persistent/NpcCrowPerchRange.hpp>
 #include <Components/Persistent/NpcCrowMaxPerchWait.hpp>
 #include <Components/Persistent/NpcMimicTint.hpp>
+#include <Components/Persistent/NpcRenderOffset.hpp>
 #include <Components/Persistent/NpcPushBack.hpp>
 #include <Components/Persistent/NpcShockwaveFreq.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
@@ -256,6 +257,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::NpcCrowPerchRange>();
   add_component<Cmp::Persist::NpcCrowMaxPerchWait>();
   add_component<Cmp::Persist::NpcMimicTint>();
+  add_component<Cmp::Persist::NpcRenderOffset>();
   add_component<Cmp::Persist::NpcPushBack>();
   add_component<Cmp::Persist::NpcShockwaveFreq>();
   add_component<Cmp::Persist::NpcShockwaveMaxRadius>();

@@ -1,5 +1,6 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/AbsoluteAlpha.hpp>
+#include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AbsoluteTint.hpp>
 #include <Components/Altar/Segment.hpp>
 #include <Components/AnimData.hpp>
@@ -51,6 +52,7 @@
 #include <Components/Persistent/AzazelFireballSpeed.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
+#include <Components/Persistent/NpcRenderOffset.hpp>
 #include <Components/Persistent/NpcCrowFlightSpeed.hpp>
 #include <Components/Persistent/NpcCrowPerchSpeed.hpp>
 #include <Components/Persistent/NpcCrowPerchRange.hpp>
@@ -468,6 +470,13 @@ void NpcSystem::update( sf::Time dt )
   }
 
   update_pathfinding( dt );
+
+  // resting render offset, refreshed every frame so tuning applies immediately
+  const sf::Vector2f npc_render_offset{ 0.f, Sys::PersistSystem::get<Cmp::Persist::NpcRenderOffset>( reg() ).get_value() };
+  for ( auto npc_entt : reg().view<Cmp::Npc::NPC>() )
+  {
+    reg().emplace_or_replace<Cmp::AbsoluteRenderOffset>( npc_entt, npc_render_offset );
+  }
 
   static constexpr float kAnimInterval = 0.05f;
   m_anim_timer += dt;

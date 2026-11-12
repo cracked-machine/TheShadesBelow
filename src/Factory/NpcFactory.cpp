@@ -1,3 +1,4 @@
+#include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Armable.hpp>
 #include <Components/Armed.hpp>
@@ -27,6 +28,7 @@
 #include <Components/Npc/WatchmanSearchlight.hpp>
 #include <Components/Npc/Wisp.hpp>
 #include <Components/Npc/Witch.hpp>
+#include <Components/Persistent/NpcRenderOffset.hpp>
 #include <Components/Persistent/NpcShockwaveFreq.hpp>
 #include <Components/Persistent/NpcShockwaveResolution.hpp>
 #include <Components/Player/Character.hpp>
@@ -123,6 +125,9 @@ entt::entity create_npc( entt::registry &reg, Cmp::Position pos_cmp, const Sys::
   reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 0, 0 } );
   reg.emplace_or_replace<Cmp::UUID>( new_pos_entity, Cmp::UUID::generate() );
   reg.emplace_or_replace<Cmp::Npc::NPC>( new_pos_entity, npc_cmp );
+  // lift the sprite so it looks centred on its grid cell, as the player does. Visual only
+  reg.emplace_or_replace<Cmp::AbsoluteRenderOffset>(
+      new_pos_entity, sf::Vector2f{ 0.f, Sys::PersistSystem::get<Cmp::Persist::NpcRenderOffset>( reg ).get_value() } );
 
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( new_pos_entity, Cmp::AnimData::Config{ 
