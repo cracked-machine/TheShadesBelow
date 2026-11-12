@@ -109,4 +109,16 @@ void add_dolly_zoom( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayR
   dolly_zoom_shader->set_tag( "DollyZoom" );
   shader_sys.add( std::move( dolly_zoom_shader ), Cmp::ZOrderValue( 1500000.f ) );
 }
+
+void add_screen_shudder( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res )
+{
+  constexpr sf::Time duration = sf::seconds( 1.5f );
+  constexpr float amplitude = 6.f;
+  constexpr float frequency = 18.f;
+  auto screen_shudder_shader = std::make_unique<Sprites::ScreenShudderShader>( "res/shaders/Generic.vert", "res/shaders/ScreenShudder.frag",
+                                                                               display_res, duration, amplitude, frequency );
+
+  screen_shudder_shader->set_tag( "ScreenShudder" );
+  shader_sys.add( std::move( screen_shudder_shader ), Cmp::ZOrderValue( 1750000.f ) );
+}
 } // namespace Game::Factory::Shader

@@ -5,6 +5,12 @@
 #include <Components/ZOrderValue.hpp>
 #include <Shaders/IShaderSprite.hpp>
 #include <Systems/BaseSystem.hpp>
+
+#include <functional>
+#include <optional>
+#include <string>
+#include <type_traits>
+
 namespace Game::Sys
 {
 
@@ -30,17 +36,31 @@ public:
   //! Skipped while the player has a Cmp::Player::CameraHold, so the effects stay in step with the held camera.
   void update( sf::Time dt );
 
-  //! @brief Find a ShaderSpriteOwner by tag and return a pointer to ShaderSpriteBase, or nullptr if not found
+  //! @brief Find a shader sprite by tag.
+  //! @tparam T The shader type to return, e.g. Sprites::ScreenShudderShader. Defaults to the Sprites::IShaderSprite
+  //! interface; a more derived type is checked with dynamic_cast.
   //! @param reg
   //! @param tag
-  //! @return Sprites::IShaderSprite*
-  [[nodiscard]] static Sprites::IShaderSprite *find( entt::registry &reg, const std::string &tag );
-
-  //! @brief Collect every active post-process shader (IShaderSprite::is_post_process()), ordered by ascending
-  //! ZOrderValue so the result is the order in which the passes are chained.
-  //! @param reg
-  //! @return std::vector<Sprites::IShaderSprite *>
-  [[nodiscard]] static std::vector<Sprites::IShaderSprite *> find_post_process_chain( entt::registry &reg );
+  //! @return A reference to the first shader with this tag, or std::nullopt if none is registered or it is not a T.
+  //! @code
+  //! if ( auto shudder = Sys::ShaderSystem::find<Sprites::ScreenShudderShader>( reg(), "ScreenShudder" ) )
+  //!   shudder->get().trigger( sf::seconds( 2.5f ) );
+  //! @endcode
+  template <typename T = Sprites::IShaderSprite>
+  [[nodiscard]] static std::optional<std::reference_wrapper<T>> find( entt::registry &reg, const std::string &tag )
+  {
+    for ( auto [entt, owner] : reg.view<Cmp::Shader::SpriteOwner>().each() )
+    {
+      if ( not owner.sprite or owner.sprite->get_tag() != tag ) continue;
+      if constexpr ( std::is_same_v<T, Sprites::IShaderSprite> ) { return std::ref( *owner.sprite ); }
+      else
+      {
+        if ( auto *typed = dynamic_cast<T *>( owner.sprite.get() ) ) return std::ref( *typed );
+        return std::nullopt;
+      }
+    }
+    return std::nullopt;
+  }
 
 private:
   //! @brief Add a wrapped shader sprite and zorder component to the registry

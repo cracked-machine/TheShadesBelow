@@ -43,6 +43,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Shaders/TunnelVisionShader.cpp
     ${CMAKE_SOURCE_DIR}/src/Shaders/DizzyEchoShader.cpp
     ${CMAKE_SOURCE_DIR}/src/Shaders/DollyZoomShader.cpp
+    ${CMAKE_SOURCE_DIR}/src/Shaders/ScreenShudderShader.cpp
     ${CMAKE_SOURCE_DIR}/src/Sprites/SpriteSheet.cpp
     ${CMAKE_SOURCE_DIR}/src/Sprites/VertexFloor.cpp
     ${CMAKE_SOURCE_DIR}/src/Sprites/Shockwave.cpp

@@ -53,11 +53,13 @@
 #include <Factory/PlayerFactory.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>
 #include <SceneControl/Scenes/CryptScene.hpp>
+#include <Shaders/ScreenShudderShader.hpp>
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/ShaderSystem.hpp>
 #include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
@@ -116,6 +118,8 @@ void CryptSystem::update( sf::Time dt )
 
 void CryptSystem::shuffle_rooms_passages()
 {
+  if ( auto shudder = Sys::ShaderSystem::find<Sprites::ScreenShudderShader>( reg(), "ScreenShudder" ) )
+    shudder->get().trigger( /*duration=*/sf::seconds( 0.5f ), /*amplitude=*/3.f, /*frequency=*/16.f );
   auto uuid_map = build_non_obstacle_uuid_map();
 
   auto selected_rooms = Utils::Rnd::get_n_rand_components<Cmp::Crypt::RoomClosed>(
@@ -342,6 +346,9 @@ void CryptSystem::unlock_crypt_door()
       get_systems_event_queue().trigger( Events::CryptEntryRefusedEvent{} );
       continue;
     }
+
+    if ( auto shudder = Sys::ShaderSystem::find<Sprites::ScreenShudderShader>( reg(), "ScreenShudder" ) )
+      shudder->get().trigger( /*duration=*/sf::seconds( 1.5f ), /*amplitude=*/3.f, /*frequency=*/16.f );
 
     // unlock the crypt door
     SPDLOG_DEBUG( "Player unlocked a crypt door at ({}, {})", door_pos_cmp.position.x, door_pos_cmp.position.y );

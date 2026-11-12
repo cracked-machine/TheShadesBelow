@@ -34,13 +34,4 @@ void ShaderSystem::update( sf::Time dt )
   }
 }
 
-[[nodiscard]] Sprites::IShaderSprite *ShaderSystem::find( entt::registry &reg, const std::string &tag )
-{
-  for ( auto [entt, owner] : reg.view<Cmp::Shader::SpriteOwner>().each() )
-  {
-    if ( owner.sprite->get_tag() == tag ) return owner.sprite.get();
-  }
-  return nullptr;
-}
-
 } // namespace Game::Sys

@@ -11,6 +11,7 @@
 #include <Shaders/MistShader.hpp>
 #include <Shaders/NightStaticShader.hpp>
 #include <Shaders/RedVignetteShader.hpp>
+#include <Shaders/ScreenShudderShader.hpp>
 #include <Shaders/TunnelVisionShader.hpp>
 #include <Systems/ShaderSystem.hpp>
 
@@ -85,6 +86,15 @@ void add_dizzy_echo( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayR
 //! @param shader_sys
 //! @param display_res
 void add_dolly_zoom( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res );
+
+//! @brief Register the screen shudder full-screen post-process shader, sized to the display resolution. It shakes the
+//! frame like a heavy door grinding open. It is registered idle (inactive, so it costs nothing) and only runs once
+//! triggered, for a caller-supplied duration; see Sprites::ScreenShudderShader::trigger. Its z-order sits between
+//! add_dolly_zoom's and add_tunnel_vision's, so the world shakes but the tunnel vision aperture and red vignette
+//! stay put. Look it up with Sys::ShaderSystem::find using the "ScreenShudder" tag.
+//! @param shader_sys
+//! @param display_res
+void add_screen_shudder( Sys::ShaderSystem &shader_sys, const Cmp::Persist::DisplayResolution &display_res );
 
 } // namespace Game::Factory::Shader
 
