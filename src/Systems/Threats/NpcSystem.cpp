@@ -237,6 +237,14 @@ void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
 
 void NpcSystem::on_crow_delivery_event( const Events::CrowDeliveryEvent &event )
 {
+  // one courier per item type: the player may activate again while the crow is still on its way
+  for ( auto [crow_entt, crow_cmp] : reg().view<Cmp::Npc::Crow>().each() )
+  {
+    if ( crow_cmp.carried == entt::null or not reg().valid( crow_cmp.carried ) ) continue;
+    const auto *carried_cmp = reg().try_get<Cmp::WorldItem>( crow_cmp.carried );
+    if ( carried_cmp and carried_cmp->item_type == event.m_item ) return;
+  }
+
   // the least worn matching item in the world. Items carried by NPCs or the player have no Cmp::Position
   entt::entity item_entt = entt::null;
   float best_level = -1.0f;
@@ -257,6 +265,15 @@ void NpcSystem::on_crow_delivery_event( const Events::CrowDeliveryEvent &event )
     return;
   }
 
+  // the player can see it, so they can fetch it themselves
+  const sf::FloatRect view_bounds = Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() );
+  const sf::Vector2f item_centre = reg().get<Cmp::Position>( item_entt ).getCenter();
+  if ( Utils::is_visible_in_view( view_bounds, reg().get<Cmp::Position>( item_entt ) ) )
+  {
+    SPDLOG_INFO( "{} is in view, no crow delivery", event.m_item.str() );
+    return;
+  }
+
   auto npc_navmesh = m_npc_navmesh.lock();
   auto ghost_navmesh = m_ghost_navmesh.lock();
   auto loot_sm = m_loot_sm.lock();
@@ -274,13 +291,11 @@ void NpcSystem::on_crow_delivery_event( const Events::CrowDeliveryEvent &event )
   // moved, not copied: the item leaves its old spot now and can't be picked up while it is carried
   lift_world_item( item_entt );
 
-  // start far enough back along a random heading that the crow is always outside the view
+  // take off from where the item lay (always off screen), so the further away it is the longer the delivery takes
   const sf::Vector2f drop_centre = *cell + Constants::kGridSizePxF / 2.0f;
-  const sf::FloatRect view_bounds = Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() );
   const sf::Vector2f crow_size = npc_sprite_size( "npc.crow" );
-  const sf::Vector2f dir = sf::Vector2f( 1.0f, sf::degrees( Cmp::RandomFloat( 0.0f, 360.0f ).gen() ) );
-  const float dist = ( view_bounds.size.length() / 2.0f ) + ( drop_centre - view_bounds.getCenter() ).length() + crow_size.length();
-  const sf::Vector2f start_centre = drop_centre - dir * dist;
+  const sf::Vector2f start_centre = item_centre;
+  const sf::Vector2f dir = ( drop_centre - start_centre ).normalized();
 
   // NpcSystem owns the factory. The crow flies over everything, so it never goes on a navmesh
   auto crow_entt = Factory::Npc::create_npc( reg(), Cmp::Position( start_centre - crow_size / 2.0f, crow_size ), "npc.crow" );

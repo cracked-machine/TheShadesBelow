@@ -98,7 +98,9 @@
 #include <Utils/Utils.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <filesystem>
+#include <format>
 #include <memory>
 #include <optional>
 #include <tracy/Tracy.hpp>
@@ -142,6 +144,7 @@ void RenderGameSystem::render_game( sf::Time dt, const PathFinding::SpatialHashG
   PROFILED( render_zorder_queue() );
   PROFILED( render_shockwaves() );
   PROFILED( render_arrow_compass() );
+  PROFILED( render_crow_delivery_indicators() );
   PROFILED( render_trail_markers() );
 
   PROFILED( render_lightning_strike( dt ) );
@@ -455,29 +458,77 @@ void RenderGameSystem::render_arrow_compass()
   }
 }
 
-void RenderGameSystem::render_compass_label( std::string_view label, sf::Color color, const Cmp::Player::ArrowCompass::Placement &placement )
+sf::Text RenderGameSystem::make_world_label( const std::string &str, sf::Color fill ) const
 {
   // rasterise the glyphs large and scale down into world units, so the text stays crisp when the world view is magnified
   constexpr unsigned int kCharSize{ 48 };
   constexpr float kWorldScale{ 0.15f };
 
+  sf::Text text( m_font, str, kCharSize );
+  text.setFillColor( fill );
+  text.setOutlineColor( sf::Color::Black );
+  text.setOutlineThickness( 4.f );
+  text.setScale( { kWorldScale, kWorldScale } );
+  centre_text_origin( text );
+  return text;
+}
+
+void RenderGameSystem::centre_text_origin( sf::Text &text )
+{
+  const sf::FloatRect bounds = text.getLocalBounds();
+  text.setOrigin( bounds.position + bounds.size / 2.f );
+}
+
+void RenderGameSystem::render_compass_label( std::string_view label, sf::Color color, const Cmp::Player::ArrowCompass::Placement &placement )
+{
   auto it = m_compass_label_texts.find( label );
-  if ( it == m_compass_label_texts.end() )
-  {
-    sf::Text text( m_font, std::string( label ), kCharSize );
-    text.setFillColor( color );
-    text.setOutlineColor( sf::Color::Black );
-    text.setOutlineThickness( 4.f );
-    text.setScale( { kWorldScale, kWorldScale } );
-    const sf::FloatRect bounds = text.getLocalBounds();
-    text.setOrigin( bounds.position + bounds.size / 2.f );
-    it = m_compass_label_texts.emplace( label, std::move( text ) ).first;
-  }
+  if ( it == m_compass_label_texts.end() ) { it = m_compass_label_texts.emplace( label, make_world_label( std::string( label ), color ) ).first; }
 
   // pulled inward from the arrow (back towards the player) so the label doesn't clip at the view edge
   const sf::Vector2f arrow_center = placement.rect.position + placement.origin;
   it->second.setPosition( arrow_center - placement.direction * Constants::kGridSizePxF.x );
   draw_world( it->second );
+}
+
+void RenderGameSystem::render_crow_delivery_indicators()
+{
+  auto crow_view = reg().view<Cmp::Npc::Crow, Cmp::Position>();
+  if ( crow_view.begin() == crow_view.end() ) return;
+
+  const sf::Vector2f player_center = Utils::Player::get_position( reg() ).getCenter();
+  // UI outlines are in screen pixels; scale the inset into world units (m_compass_left_inset_px is kept current by render_arrow_compass)
+  const float left_inset = m_compass_left_inset_px * s_world_view.getSize().x / get_screen_view().getSize().x;
+
+  for ( auto [crow_entt, crow_cmp, crow_pos_cmp] : crow_view.each() )
+  {
+    // only couriers still flying in with their item
+    if ( crow_cmp.carried == entt::null or crow_cmp.flee or not reg().valid( crow_cmp.carried ) ) continue;
+    const auto *item_cmp = reg().try_get<Cmp::WorldItem>( crow_cmp.carried );
+    if ( not item_cmp ) continue;
+
+    // hidden once the crow is in view
+    const auto edge = Cmp::Player::ArrowCompass::edge_point( crow_pos_cmp, player_center, s_world_view, left_inset );
+    if ( not edge ) continue;
+
+    const sf::Vector2f drop_centre = crow_cmp.drop_position + Constants::kGridSizePxF / 2.f;
+    const int tiles_left = static_cast<int>( std::ceil( ( drop_centre - crow_pos_cmp.getCenter() ).length() / Constants::kGridSizePxF.x ) );
+    const std::string_view key_name = item_cmp->item_type.contains( "exitkey" ) ? "exit key" : item_cmp->item_type.contains( "cryptkey" ) ? "crypt key" : "item";
+    const std::string str = std::format( "{} {}", key_name, tiles_left );
+
+    auto it = m_crow_delivery_texts.find( item_cmp->item_type.str() );
+    if ( it == m_crow_delivery_texts.end() )
+    {
+      it = m_crow_delivery_texts.emplace( item_cmp->item_type.str(), make_world_label( str, sf::Color::White ) ).first;
+    }
+    else if ( it->second.getString() != str )
+    {
+      // only regenerate the glyph geometry when the count changes
+      it->second.setString( str );
+      centre_text_origin( it->second );
+    }
+    it->second.setPosition( edge->first );
+    draw_world( it->second );
+  }
 }
 
 void RenderGameSystem::render_trail_markers()

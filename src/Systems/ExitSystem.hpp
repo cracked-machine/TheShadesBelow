@@ -8,6 +8,8 @@
 
 #include <SFML/System/Vector2.hpp>
 
+namespace Game::Cmp { class Exit; }
+
 namespace Game::Sys
 {
 
@@ -47,6 +49,9 @@ private:
   //! @brief  This function is called via event trigger:
   //!         `Events::PlayerActionEvent` from `SceneInputRouter::graveyard_scene_state_handler()`
   void unlock_exit();
+
+  //! @brief The exit the player is standing in front of, or nullptr.
+  Cmp::Exit *player_at_exit();
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;

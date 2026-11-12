@@ -104,8 +104,26 @@ void ExitSystem::create_exit()
 
 void ExitSystem::on_player_action( Events::PlayerActionEvent ev )
 {
+  if ( ev.action != Events::PlayerActionEvent::GameActions::ACTIVATE ) return;
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-  if ( ev.action == Events::PlayerActionEvent::GameActions::ACTIVATE && inventory_type == "item.exitkey" ) { unlock_exit(); }
+  if ( inventory_type == "item.exitkey" ) { unlock_exit(); }
+  else if ( auto *exit_cmp = player_at_exit(); exit_cmp and exit_cmp->m_locked )
+  {
+    // no key in hand: send a crow to fetch it (NpcSystem ignores this if the key is in view or already on its way)
+    get_systems_event_queue().enqueue( Events::CrowDeliveryEvent( "item.exitkey" ) );
+  }
+}
+
+Cmp::Exit *ExitSystem::player_at_exit()
+{
+  auto player_pos = Utils::Player::get_position( reg() );
+  // the player can't intersect the exit itself so expand their hitbox to facilitate collision detection
+  auto player_hitbox = Cmp::RectBounds::scaled( player_pos, 5.f );
+  for ( auto [entity, exit_cmp, exit_pos_cmp] : reg().view<Cmp::Exit, Cmp::Position>().each() )
+  {
+    if ( player_hitbox.findIntersection( exit_pos_cmp ) ) return &exit_cmp;
+  }
+  return nullptr;
 }
 
 void ExitSystem::unlock_exit()
@@ -133,8 +151,6 @@ void ExitSystem::unlock_exit()
 
     if ( m_sound_bank.get_effect( "secret" ).getStatus() == sf::Sound::Status::Stopped ) m_sound_bank.get_effect( "secret" ).play();
     Factory::Player::destroy_inventory( reg(), "item.exitkey" );
-    // enqueued: the delivery lifts the pickaxe's Cmp::Position while this view is still being iterated
-    get_systems_event_queue().enqueue( Events::CrowDeliveryEvent( "item.pickaxe" ) );
   }
 }
 

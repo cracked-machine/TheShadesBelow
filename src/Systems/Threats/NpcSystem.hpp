@@ -108,8 +108,9 @@ private:
   //! @param dt
   void check_npc_proximity( sf::Time dt );
 
-  //! @brief Lift the least worn world item of type `event.m_item` out of the world and send a courier crow in from
-  //! off screen to drop it on a free cell beside the player. No op if there is no such item or no free cell.
+  //! @brief Lift the least worn world item of type `event.m_item` out of the world and send a courier crow from where it
+  //! lay to drop it on a free cell beside the player, so delivery time grows with distance. No op if there is no such item,
+  //! the item is in view, a crow is already carrying one, or there is no free cell.
   //! @param event
   void on_crow_delivery_event( const Game::Events::CrowDeliveryEvent &event );
 

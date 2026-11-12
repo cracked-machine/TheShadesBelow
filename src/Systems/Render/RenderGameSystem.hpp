@@ -21,6 +21,7 @@
 
 #include <memory>
 #include <optional>
+#include <string>
 #include <string_view>
 #include <unordered_map>
 
@@ -126,6 +127,15 @@ private:
   //! @brief Used by GraveyardScene when player has key and relic carryitems
   void render_arrow_compass();
 
+  //! @brief Draw "<key> <tiles left>" at the screen edge towards each off-screen courier crow (see NpcSystem::on_crow_delivery_event).
+  void render_crow_delivery_indicators();
+
+  //! @brief Build a world-space label: large glyphs scaled down into world units, black outline, origin centred.
+  sf::Text make_world_label( const std::string &str, sf::Color fill ) const;
+
+  //! @brief Centre a text's origin on its local bounds (call again after setString()).
+  static void centre_text_origin( sf::Text &text );
+
   //! @brief Draw a compass needle's label beside its arrow, in world space.
   void render_compass_label( std::string_view label, sf::Color color, const Cmp::Player::ArrowCompass::Placement &placement );
 
@@ -215,6 +225,8 @@ private:
 
   //! @brief Persistent compass label texts keyed by label, so their glyph geometry isn't regenerated every frame.
   std::unordered_map<std::string_view, sf::Text> m_compass_label_texts;
+  //! @brief Persistent crow delivery distance texts keyed by carried item type; only re-strung when the distance changes.
+  std::unordered_map<std::string, sf::Text> m_crow_delivery_texts;
 
   //! @brief Smoothed camera position, lerped towards the player's position each frame.
   sf::Vector2f m_camera_position{ 0.f, 0.f };

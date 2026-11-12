@@ -8,8 +8,10 @@
 namespace Game::Events
 {
 
-//! @brief Send a crow to fetch the least worn world item of type m_item and drop it beside the player.
-//! @note Consumed by Sys::NpcSystem. The item is moved, not copied. No op if there is no such item in the world.
+//! @brief Send a crow to fetch the least worn world item of type m_item and drop it beside the player. The crow takes off
+//! from the item, so the further away it is the longer it takes.
+//! @note Consumed by Sys::NpcSystem. The item is moved, not copied. No op if there is no such item in the world, the item
+//! is in view, or a crow is already carrying one.
 //! Enqueue rather than trigger when the caller may still be iterating a Cmp::Position view.
 struct CrowDeliveryEvent
 {

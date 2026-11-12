@@ -84,6 +84,9 @@ public:
   //! collected every cadaver part.
   void unlock_crypt_door();
 
+  //! @brief If the player is in front of a closed crypt door without the crypt key, send a crow to fetch it.
+  void request_cryptkey_delivery();
+
   //! @brief Lock again every crypt door tagged with Cmp::Crypt::EnteredDoor, i.e. the door the player walked through
   //! into the crypt. Called from GraveyardScene::on_enter() when the player returns to the graveyard.
   void lock_entered_crypt_doors();

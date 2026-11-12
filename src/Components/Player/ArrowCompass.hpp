@@ -31,6 +31,7 @@
 #include <optional>
 #include <string_view>
 #include <tuple>
+#include <utility>
 
 namespace Game::Cmp::Player
 {
@@ -145,24 +146,22 @@ struct ArrowCompass
     }
   }
 
-  //! @brief Compute where to draw a needle's arrow: on the view edge (inset by kEdgeMargin) along the ray from the player to the target.
-  //! @param needle The needle to place
+  //! @brief Point on the view edge (inset by kEdgeMargin) along the ray from the player towards a target.
+  //! @param target The target bounds
   //! @param player_center The player's center position
   //! @param world_view The current world view
-  //! @param left_inset Extra inset (world units) from the view's left edge, so the arrow stays clear of the UI panels
-  //! @return std::nullopt if there is no target or the target is inside the view-centered kTargetRegionScale region
-  [[nodiscard]] std::optional<Placement> placement( const Needle &needle, sf::Vector2f player_center, const sf::View &world_view,
-                                                    float left_inset = 0.f ) const
+  //! @param left_inset Extra inset (world units) from the view's left edge, so the point stays clear of the UI panels
+  //! @return The edge point and the unit direction from the player to the target, or std::nullopt if the target is inside
+  //!         the view-centered kTargetRegionScale region (i.e. the player can already see it)
+  [[nodiscard]] static std::optional<std::pair<sf::Vector2f, sf::Vector2f>> edge_point( const sf::FloatRect &target, sf::Vector2f player_center,
+                                                                                         const sf::View &world_view, float left_inset = 0.f )
   {
-    if ( not needle.target ) return std::nullopt;
-
-    // dont show the compass arrow once the target is well inside the view....we can see it.
-    // Only a reduced region centered in the view counts, so the arrow stays while the target is near the screen edges
-    // or hidden behind the UI panels on the left.
+    // Only a reduced region centered in the view counts as "visible", so the indicator stays while the target is near
+    // the screen edges or hidden behind the UI panels on the left.
     const auto target_region = Cmp::RectBounds::scaled( Utils::calculate_view_bounds( world_view ), kTargetRegionScale );
-    if ( Utils::is_visible_in_view( target_region.getBounds(), *needle.target ) ) return std::nullopt;
+    if ( Utils::is_visible_in_view( target_region.getBounds(), target ) ) return std::nullopt;
 
-    const sf::Vector2f offset = needle.target->getCenter() - player_center;
+    const sf::Vector2f offset = target.getCenter() - player_center;
     if ( offset.lengthSquared() == 0.f ) return std::nullopt;
     const sf::Vector2f direction = offset.normalized();
 
@@ -184,8 +183,24 @@ struct ArrowCompass
     if ( t_top > 0 ) t = std::min( t, t_top );
     if ( t_bottom > 0 ) t = std::min( t, t_bottom );
 
-    sf::Vector2f arrow_position = player_center;
-    if ( t < std::numeric_limits<float>::max() ) { arrow_position = player_center + direction * t; }
+    sf::Vector2f point = player_center;
+    if ( t < std::numeric_limits<float>::max() ) { point = player_center + direction * t; }
+    return std::pair{ point, direction };
+  }
+
+  //! @brief Compute where to draw a needle's arrow: on the view edge (see edge_point()) along the ray from the player to the target.
+  //! @param needle The needle to place
+  //! @param player_center The player's center position
+  //! @param world_view The current world view
+  //! @param left_inset Extra inset (world units) from the view's left edge, so the arrow stays clear of the UI panels
+  //! @return std::nullopt if there is no target or the target is inside the view-centered kTargetRegionScale region
+  [[nodiscard]] std::optional<Placement> placement( const Needle &needle, sf::Vector2f player_center, const sf::View &world_view,
+                                                    float left_inset = 0.f ) const
+  {
+    if ( not needle.target ) return std::nullopt;
+    const auto edge = edge_point( *needle.target, player_center, world_view, left_inset );
+    if ( not edge ) return std::nullopt;
+    const auto &[arrow_position, direction] = *edge;
 
     // Map sin(time) from [-1, 1] to [min_scale, max_scale]
     const float sine = std::sin( m_freq * m_osc_timer.asSeconds() );

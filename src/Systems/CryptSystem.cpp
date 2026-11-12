@@ -210,6 +210,25 @@ void CryptSystem::on_player_action( Events::PlayerActionEvent &event )
 
   if ( event.action == Events::PlayerActionEvent::GameActions::ACTIVATE ) check_objective_activation( event.action );
   if ( event.action == Events::PlayerActionEvent::GameActions::ACTIVATE ) check_chest_activation( event.action );
+  if ( event.action == Events::PlayerActionEvent::GameActions::ACTIVATE ) request_cryptkey_delivery();
+}
+
+void CryptSystem::request_cryptkey_delivery()
+{
+  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+  if ( inventory_type == "item.cryptkey" ) return;
+  // the door would refuse entry anyway (see unlock_crypt_door), so don't fetch the key
+  if ( Utils::Player::get_cadaver( reg() ).keys( /*remaining_only=*/true ).empty() ) return;
+
+  // Player can't intersect with a closed crypt door so expand their hitbox to facilitate collision detection
+  auto player_hitbox = Cmp::RectBounds::scaled( Utils::Player::get_position( reg() ), 5.f );
+  for ( auto [door_entity, cryptdoor_cmp, door_pos_cmp] : reg().view<Cmp::Crypt::Entrance, Cmp::Position>().each() )
+  {
+    if ( cryptdoor_cmp.is_open() or not player_hitbox.findIntersection( door_pos_cmp ) ) continue;
+    // NpcSystem ignores this if the key is in view or already on its way
+    get_systems_event_queue().enqueue( Events::CrowDeliveryEvent( "item.cryptkey" ) );
+    return;
+  }
 }
 
 void CryptSystem::on_room_event( Events::CryptRoomEvent &event )
@@ -353,8 +372,6 @@ void CryptSystem::unlock_crypt_door()
     // unlock the crypt door
     SPDLOG_DEBUG( "Player unlocked a crypt door at ({}, {})", door_pos_cmp.position.x, door_pos_cmp.position.y );
     Factory::Player::destroy_inventory( reg(), "item.cryptkey" );
-    // enqueued: the delivery lifts the pickaxe's Cmp::Position while this view is still being iterated
-    get_systems_event_queue().enqueue( Events::CrowDeliveryEvent( "item.pickaxe" ) );
 
     // player_key_count->decrement_count( 1 );
     m_sound_bank.get_effect( "crypt_open" ).play();
