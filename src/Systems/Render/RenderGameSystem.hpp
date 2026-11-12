@@ -3,6 +3,7 @@
 
 #include <Components/AnimData.hpp>
 #include <Components/NoRender.hpp>
+#include <Components/Player/ArrowCompass.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/ParticleSystem.hpp>
@@ -11,6 +12,7 @@
 #include <Utils/Optimizations.hpp>
 
 #include <SFML/Graphics/Shader.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -19,6 +21,8 @@
 
 #include <memory>
 #include <optional>
+#include <string_view>
+#include <unordered_map>
 
 // clang-format off
 namespace Game::Render
@@ -122,6 +126,9 @@ private:
   //! @brief Used by GraveyardScene when player has key and relic carryitems
   void render_arrow_compass();
 
+  //! @brief Draw a compass needle's label beside its arrow, in world space.
+  void render_compass_label( std::string_view label, sf::Color color, const Cmp::Player::ArrowCompass::Placement &placement );
+
   //! @brief Used by GraveyardScene to point each Cmp::Grave::TrailMarker grave towards its target grave
   void render_trail_markers();
 
@@ -205,6 +212,9 @@ private:
 
   //! @brief Rescale the HUD layout to the current window size and recompute `m_compass_left_inset_px` (no-op if unchanged).
   void update_compass_left_inset();
+
+  //! @brief Persistent compass label texts keyed by label, so their glyph geometry isn't regenerated every frame.
+  std::unordered_map<std::string_view, sf::Text> m_compass_label_texts;
 
   //! @brief Smoothed camera position, lerped towards the player's position each frame.
   sf::Vector2f m_camera_position{ 0.f, 0.f };

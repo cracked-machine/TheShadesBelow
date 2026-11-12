@@ -6,6 +6,8 @@
 #include <Components/Altar/TalismanCount.hpp>
 #include <Components/Crypt/Entrance.hpp>
 #include <Components/Exit.hpp>
+#include <Components/Inventory/PlayerInventorySlot.hpp>
+#include <Components/Inventory/WorldItem.hpp>
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
 #include <Systems/Stores/StoreKey.hpp>
@@ -13,6 +15,7 @@
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
 
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/View.hpp>
 #include <SFML/System/Angle.hpp>
@@ -22,22 +25,43 @@
 #include <entt/entity/registry.hpp>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <limits>
 #include <optional>
+#include <string_view>
 #include <tuple>
 
 namespace Game::Cmp::Player
 {
 
-//! @brief Caches the player's compass arrow state: what is being pointed at (driven by the inventory item) and the
-//!        resolved target position. Target resolution is throttled via `m_retarget_timer`, which PlayerSystem advances
-//!        each frame. Not transferred between scenes (see RegistryTransfer) so a stale target never carries over.
+//! @brief Caches the player's compass arrow state. The compass has several needles, each pointing at its own target:
+//!        - an "exit" needle, active while an exit key exists anywhere in the scene (world item or inventory)
+//!        - a "crypt" needle, active while a crypt key exists anywhere in the scene (world item or inventory)
+//!        - a "held" needle, driven by the item in the player's inventory slot (altar / talisman targets)
+//!        Key needles are therefore shown whether or not the player holds the key, and turn off once the key is used
+//!        (destroyed). Target resolution is throttled via `m_retarget_timer`, which PlayerSystem advances each frame.
+//!        Not transferred between scenes (see RegistryTransfer) so a stale target never carries over.
 struct ArrowCompass
 {
-  //! @brief What the compass is pointing at, derived from the player's inventory item type.
+  //! @brief What a needle is pointing at.
   //!        TALISMAN points only at an altar that still needs the held talisman (most talismans lit first, then nearest).
   enum class Mode { NONE, EXIT, CRYPT, ALTAR, TALISMAN };
+
+  //! @brief One compass arrow: its target type, label, colour and resolved target.
+  struct Needle
+  {
+    Mode mode{ Mode::NONE };
+    //! @brief Text drawn beside the arrow (empty = no label)
+    std::string_view label;
+    //! @brief Arrow sprite drawn for this needle
+    Sys::SpriteKey sprite;
+    //! @brief Fill colour of the label
+    sf::Color color{ sf::Color::White };
+    //! @brief Whether this needle is currently shown
+    bool active{ false };
+    std::optional<Cmp::Position> target;
+  };
 
   //! @brief Where and how to draw the arrow sprite this frame
   struct Placement
@@ -46,9 +70,16 @@ struct ArrowCompass
     sf::Angle angle;
     sf::Vector2f scale;
     sf::Vector2f origin;
+    //! @brief Unit vector from the player towards the target
+    sf::Vector2f direction;
   };
 
-  inline static const Sys::SpriteKey kSpriteType{ "sprite.graveyard.arrowcompass" };
+  //! @brief Colour of the altar/talisman needle's label (matches sprite.graveyard.arrowcompass.altar)
+  static constexpr sf::Color kAltarColor{ 200, 30, 30 };
+  //! @brief Colour of the exit key needle's label (matches sprite.graveyard.arrowcompass.exit)
+  static constexpr sf::Color kExitColor{ 0, 200, 0 };
+  //! @brief Colour of the crypt key needle's label (matches sprite.graveyard.arrowcompass.crypt)
+  static constexpr sf::Color kCryptColor{ 20, 40, 140 };
 
   //! @brief Inset from the view edge at which the arrow is placed
   static constexpr float kEdgeMargin{ 32.f };
@@ -56,115 +87,84 @@ struct ArrowCompass
   //! @brief Scale of the view-centered region the target must enter before the arrow is hidden
   static constexpr float kTargetRegionScale{ 0.5f };
 
-  //! @brief Recompute the mode if the inventory item type or its offering eligibility has changed since the last call.
+  //! @brief Recompute the held needle's mode if the inventory item type or its offering eligibility has changed since the last call.
+  //!        Keys are ignored here: their needles are driven by the key's existence (see refresh_targets()).
   //! @param item_type The item type currently in the player's inventory slot (empty if none)
   //! @param is_offerable Whether the inventory item can currently be offered at the altar (tools only once spent)
-  //! @return true if the mode was recomputed (forces a retarget on the next refresh_target())
+  //! @return true if the mode was recomputed (forces a retarget on the next refresh_targets())
   bool update_mode( const Sys::ItemKey &item_type, bool is_offerable )
   {
     if ( item_type == m_cached_item_type and is_offerable == m_cached_is_offerable ) return false;
     m_cached_item_type = item_type;
     m_cached_is_offerable = is_offerable;
 
-    // keys take precedence so the (offering) exitkey still points at the exit
-    if ( item_type.contains( "cryptkey" ) )
-      m_mode = Mode::CRYPT;
-    else if ( item_type.contains( "exitkey" ) )
-      m_mode = Mode::EXIT;
+    // keys have their own needles, so the (offerable) exitkey does not also point at the altar
+    if ( item_type.contains( "cryptkey" ) or item_type.contains( "exitkey" ) )
+      m_held.mode = Mode::NONE;
     else if ( item_type.contains( "talisman" ) )
-      m_mode = Mode::TALISMAN;
+      m_held.mode = Mode::TALISMAN;
     else if ( is_offerable or item_type.contains( "relic" ) )
-      m_mode = Mode::ALTAR;
+      m_held.mode = Mode::ALTAR;
     else
-      m_mode = Mode::NONE;
+      m_held.mode = Mode::NONE;
 
-    m_target.reset();
+    m_held.active = m_held.mode != Mode::NONE;
+    m_held.target.reset();
     m_retarget_pending = true;
     return true;
   }
 
-  [[nodiscard]] Mode mode() const { return m_mode; }
-
-  //! @brief Re-resolve `m_target` if the mode changed or the retarget interval has elapsed.
+  //! @brief Re-resolve which key needles are active and every active needle's target, if a retarget is pending or the
+  //!        retarget interval has elapsed.
   //! @param reg The current scene registry
   //! @param player_center The player's center position, used for nearest-target searches
-  void refresh_target( entt::registry &reg, sf::Vector2f player_center )
+  void refresh_targets( entt::registry &reg, sf::Vector2f player_center )
   {
     if ( not m_retarget_pending and m_retarget_timer < m_retarget_interval ) return;
     m_retarget_pending = false;
     m_retarget_timer = sf::Time::Zero;
 
-    switch ( m_mode )
-    {
-      case Mode::EXIT: {
-        m_target.reset();
-        for ( auto [exit_entt, exit_cmp, exit_pos_cmp] : reg.view<Cmp::Exit, Cmp::Position>().each() )
-        {
-          m_target = exit_pos_cmp;
-        }
-        break;
-      }
-      case Mode::CRYPT: {
-        m_target = nearest(
-            reg.view<Cmp::Crypt::Entrance, Cmp::Position>(), player_center,
-            []( entt::entity, const Cmp::Crypt::Entrance &crypt_cmp, const Cmp::Position &crypt_pos_cmp ) -> std::optional<Cmp::Position>
-        {
-          if ( crypt_cmp.is_open() ) return std::nullopt;
-          return crypt_pos_cmp;
-        } );
-        break;
-      }
-      case Mode::ALTAR: {
-        m_target = nearest( reg.view<Cmp::Altar::MultiBlock>(), player_center,
-                            []( entt::entity, const Cmp::Altar::MultiBlock &altar_cmp ) -> std::optional<Cmp::Position>
-        {
-          if ( altar_cmp.is_exitkey_lockout() ) return std::nullopt;
-          return Cmp::Position( altar_cmp.position, altar_cmp.size );
-        } );
-        break;
-      }
-      case Mode::TALISMAN: {
-        // mirrors AltarSystem::offering_talisman(): once any altar is activated, no altar accepts talismans
-        m_target.reset();
-        if ( not reg.view<Cmp::Altar::Activated>().empty() ) break;
+    m_exit.active = key_exists( reg, kExitKey );
+    m_crypt.active = key_exists( reg, kCryptKey );
 
-        std::size_t best_count = 0;
-        float best_distance = std::numeric_limits<float>::max();
-        for ( auto [altar_entt, altar_cmp, talisman_cmp] : reg.view<Cmp::Altar::MultiBlock, Cmp::Altar::TalismanCount>().each() )
-        {
-          if ( not talisman_cmp.index( m_cached_item_type ) or talisman_cmp.activated( m_cached_item_type ) ) continue;
-          // prefer the altar closest to completion, then the nearest
-          const std::size_t count = talisman_cmp.count();
-          const float distance = Utils::Maths::getEuclideanDistance( altar_cmp.position, player_center );
-          if ( m_target and ( count < best_count or ( count == best_count and distance >= best_distance ) ) ) continue;
-          best_count = count;
-          best_distance = distance;
-          m_target = Cmp::Position( altar_cmp.position, altar_cmp.size );
-        }
-        break;
-      }
-      case Mode::NONE:
-        m_target.reset();
-        break;
+    for ( Needle *needle : needles() )
+    {
+      if ( needle->active ) resolve( *needle, reg, player_center );
+      else needle->target.reset();
     }
   }
 
-  //! @brief Compute where to draw the arrow: on the view edge (inset by kEdgeMargin) along the ray from the player to the target.
+  //! @brief Visit every active needle.
+  //! @param fn Callable taking (const Needle &)
+  template <typename Fn>
+  void for_each_needle( Fn &&fn ) const
+  {
+    for ( const Needle *needle : needles() )
+    {
+      if ( needle->active and needle->mode != Mode::NONE ) fn( *needle );
+    }
+  }
+
+  //! @brief Compute where to draw a needle's arrow: on the view edge (inset by kEdgeMargin) along the ray from the player to the target.
+  //! @param needle The needle to place
   //! @param player_center The player's center position
   //! @param world_view The current world view
   //! @param left_inset Extra inset (world units) from the view's left edge, so the arrow stays clear of the UI panels
   //! @return std::nullopt if there is no target or the target is inside the view-centered kTargetRegionScale region
-  [[nodiscard]] std::optional<Placement> placement( sf::Vector2f player_center, const sf::View &world_view, float left_inset = 0.f ) const
+  [[nodiscard]] std::optional<Placement> placement( const Needle &needle, sf::Vector2f player_center, const sf::View &world_view,
+                                                    float left_inset = 0.f ) const
   {
-    if ( not m_target ) return std::nullopt;
+    if ( not needle.target ) return std::nullopt;
 
     // dont show the compass arrow once the target is well inside the view....we can see it.
     // Only a reduced region centered in the view counts, so the arrow stays while the target is near the screen edges
     // or hidden behind the UI panels on the left.
     const auto target_region = Cmp::RectBounds::scaled( Utils::calculate_view_bounds( world_view ), kTargetRegionScale );
-    if ( Utils::is_visible_in_view( target_region.getBounds(), *m_target ) ) return std::nullopt;
+    if ( Utils::is_visible_in_view( target_region.getBounds(), *needle.target ) ) return std::nullopt;
 
-    const sf::Vector2f direction = ( m_target->getCenter() - player_center ).normalized();
+    const sf::Vector2f offset = needle.target->getCenter() - player_center;
+    if ( offset.lengthSquared() == 0.f ) return std::nullopt;
+    const sf::Vector2f direction = offset.normalized();
 
     // view bounds in world coordinates, inset by the edge margin (plus the UI panel width on the left)
     sf::FloatRect view_bounds = Utils::calculate_view_bounds( world_view );
@@ -195,19 +195,99 @@ struct ArrowCompass
     return Placement{ .rect = { arrow_position - half_grid, Constants::kGridSizePxF },
                       .angle = Utils::Maths::angle( direction ).value_or( sf::Angle::Zero ),
                       .scale = { oscillating_scale, oscillating_scale },
-                      .origin = half_grid };
+                      .origin = half_grid,
+                      .direction = direction };
   }
 
   //! @brief Accumulated time since the last retarget. Advanced by PlayerSystem::update().
   sf::Time m_retarget_timer{ sf::Time::Zero };
 
-  //! @brief How often the target is re-resolved (nearest crypt/altar depends on player position)
+  //! @brief How often the targets (and key needle activity) are re-resolved
   sf::Time m_retarget_interval{ sf::milliseconds( 250 ) };
 
   //! @brief Time component of the sine wave for the arrow's pulsing scale
   sf::Time m_osc_timer;
 
 private:
+  inline static const Sys::ItemKey kExitKey{ "item.exitkey" };
+  inline static const Sys::ItemKey kCryptKey{ "item.cryptkey" };
+
+  [[nodiscard]] std::array<Needle *, 3> needles() { return { &m_exit, &m_crypt, &m_held }; }
+  [[nodiscard]] std::array<const Needle *, 3> needles() const { return { &m_exit, &m_crypt, &m_held }; }
+
+  //! @brief Whether the given key exists in the scene, either as a world item or in the player's inventory.
+  //!        Keys are blast proof and only destroyed when used, so this is "the key has spawned and not been used".
+  static bool key_exists( entt::registry &reg, const Sys::ItemKey &key )
+  {
+    for ( auto [item_entt, item_cmp] : reg.view<Cmp::WorldItem>().each() )
+    {
+      if ( item_cmp.item_type == key ) return true;
+    }
+    for ( auto [slot_entt, slot_cmp] : reg.view<Cmp::PlayerInventorySlot>().each() )
+    {
+      if ( slot_cmp.m_item.item_type == key ) return true;
+    }
+    return false;
+  }
+
+  //! @brief Resolve the needle's target for its mode.
+  void resolve( Needle &needle, entt::registry &reg, sf::Vector2f player_center ) const
+  {
+    switch ( needle.mode )
+    {
+      case Mode::EXIT: {
+        needle.target.reset();
+        for ( auto [exit_entt, exit_cmp, exit_pos_cmp] : reg.view<Cmp::Exit, Cmp::Position>().each() )
+        {
+          needle.target = exit_pos_cmp;
+        }
+        break;
+      }
+      case Mode::CRYPT: {
+        needle.target = nearest(
+            reg.view<Cmp::Crypt::Entrance, Cmp::Position>(), player_center,
+            []( entt::entity, const Cmp::Crypt::Entrance &crypt_cmp, const Cmp::Position &crypt_pos_cmp ) -> std::optional<Cmp::Position>
+        {
+          if ( crypt_cmp.is_open() ) return std::nullopt;
+          return crypt_pos_cmp;
+        } );
+        break;
+      }
+      case Mode::ALTAR: {
+        needle.target = nearest( reg.view<Cmp::Altar::MultiBlock>(), player_center,
+                                 []( entt::entity, const Cmp::Altar::MultiBlock &altar_cmp ) -> std::optional<Cmp::Position>
+        {
+          if ( altar_cmp.is_exitkey_lockout() ) return std::nullopt;
+          return Cmp::Position( altar_cmp.position, altar_cmp.size );
+        } );
+        break;
+      }
+      case Mode::TALISMAN: {
+        // mirrors AltarSystem::offering_talisman(): once any altar is activated, no altar accepts talismans
+        needle.target.reset();
+        if ( not reg.view<Cmp::Altar::Activated>().empty() ) break;
+
+        std::size_t best_count = 0;
+        float best_distance = std::numeric_limits<float>::max();
+        for ( auto [altar_entt, altar_cmp, talisman_cmp] : reg.view<Cmp::Altar::MultiBlock, Cmp::Altar::TalismanCount>().each() )
+        {
+          if ( not talisman_cmp.index( m_cached_item_type ) or talisman_cmp.activated( m_cached_item_type ) ) continue;
+          // prefer the altar closest to completion, then the nearest
+          const std::size_t count = talisman_cmp.count();
+          const float distance = Utils::Maths::getEuclideanDistance( altar_cmp.position, player_center );
+          if ( needle.target and ( count < best_count or ( count == best_count and distance >= best_distance ) ) ) continue;
+          best_count = count;
+          best_distance = distance;
+          needle.target = Cmp::Position( altar_cmp.position, altar_cmp.size );
+        }
+        break;
+      }
+      case Mode::NONE:
+        needle.target.reset();
+        break;
+    }
+  }
+
   //! @brief Allocation-free nearest-position search over an entt view, skipping entities `to_position` rejects.
   //! @param view The entt view to search
   //! @param from The point to measure distance from
@@ -232,10 +312,13 @@ private:
     return best;
   }
 
-  Mode m_mode{ Mode::NONE };
+  Needle m_exit{ .mode = Mode::EXIT, .label = "exit", .sprite = "sprite.graveyard.arrowcompass.exit", .color = kExitColor };
+  Needle m_crypt{ .mode = Mode::CRYPT, .label = "crypt", .sprite = "sprite.graveyard.arrowcompass.crypt", .color = kCryptColor };
+  //! @brief Altar and talisman targets share the altar arrow
+  Needle m_held{ .label = "altar", .sprite = "sprite.graveyard.arrowcompass.altar", .color = kAltarColor };
+
   Sys::ItemKey m_cached_item_type;
   bool m_cached_is_offerable{ false };
-  std::optional<Cmp::Position> m_target;
   bool m_retarget_pending{ true };
 
   //! @brief Frequency of the sine wave for the arrow's pulsing scale

@@ -594,11 +594,37 @@
         }
       }
     },
-    "sprite.graveyard.arrowcompass": {
+    "sprite.graveyard.arrowcompass.altar": {
       "spritesheet": {
         "displayname": "sprite.graveyard.arrowcompass",
         "texture_path": "res/textures/graveyard.png",
         "sprite_indices": [22],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.arrowcompass.exit": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.arrowcompass",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [25],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.graveyard.arrowcompass.crypt": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.arrowcompass",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [26],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {

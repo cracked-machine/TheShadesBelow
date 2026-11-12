@@ -437,19 +437,47 @@ void RenderGameSystem::render_arrow_compass()
       }
     }
     compass.update_mode( inv_slot ? inv_slot->m_item.item_type : kNoItem, is_offerable );
-    if ( compass.mode() == Cmp::Player::ArrowCompass::Mode::NONE ) return;
 
     const sf::Vector2f player_center = pc_pos_cmp.getCenter();
-    compass.refresh_target( reg(), player_center );
+    compass.refresh_targets( reg(), player_center );
 
     // UI outlines are in screen pixels; scale the inset into world units
     update_compass_left_inset();
     const float left_inset = m_compass_left_inset_px * s_world_view.getSize().x / get_screen_view().getSize().x;
-    auto placement = compass.placement( player_center, s_world_view, left_inset );
-    if ( not placement ) return;
-    safe_render_sprite_world( Cmp::Player::ArrowCompass::kSpriteType, placement->rect, 0, placement->scale, 255, placement->origin,
-                              placement->angle );
+
+    compass.for_each_needle( [&]( const Cmp::Player::ArrowCompass::Needle &needle )
+    {
+      auto placement = compass.placement( needle, player_center, s_world_view, left_inset );
+      if ( not placement ) return;
+      safe_render_sprite_world( needle.sprite, placement->rect, 0, placement->scale, 255, placement->origin, placement->angle );
+      if ( not needle.label.empty() ) render_compass_label( needle.label, needle.color, *placement );
+    } );
   }
+}
+
+void RenderGameSystem::render_compass_label( std::string_view label, sf::Color color, const Cmp::Player::ArrowCompass::Placement &placement )
+{
+  // rasterise the glyphs large and scale down into world units, so the text stays crisp when the world view is magnified
+  constexpr unsigned int kCharSize{ 48 };
+  constexpr float kWorldScale{ 0.15f };
+
+  auto it = m_compass_label_texts.find( label );
+  if ( it == m_compass_label_texts.end() )
+  {
+    sf::Text text( m_font, std::string( label ), kCharSize );
+    text.setFillColor( color );
+    text.setOutlineColor( sf::Color::Black );
+    text.setOutlineThickness( 4.f );
+    text.setScale( { kWorldScale, kWorldScale } );
+    const sf::FloatRect bounds = text.getLocalBounds();
+    text.setOrigin( bounds.position + bounds.size / 2.f );
+    it = m_compass_label_texts.emplace( label, std::move( text ) ).first;
+  }
+
+  // pulled inward from the arrow (back towards the player) so the label doesn't clip at the view edge
+  const sf::Vector2f arrow_center = placement.rect.position + placement.origin;
+  it->second.setPosition( arrow_center - placement.direction * Constants::kGridSizePxF.x );
+  draw_world( it->second );
 }
 
 void RenderGameSystem::render_trail_markers()

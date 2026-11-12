@@ -1767,61 +1767,8 @@
         {
          "draworder":"topdown",
          "id":9,
-         "locked":true,
          "name":"multiblock",
          "objects":[
-                {
-                 "height":0,
-                 "id":251,
-                 "name":"item.pickaxe",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":48,
-                 "y":784
-                }, 
-                {
-                 "height":0,
-                 "id":256,
-                 "name":"item.pickaxe",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":784,
-                 "y":48
-                }, 
-                {
-                 "height":0,
-                 "id":257,
-                 "name":"item.pickaxe",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":1520,
-                 "y":784
-                }, 
-                {
-                 "height":0,
-                 "id":258,
-                 "name":"item.pickaxe",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":784,
-                 "y":1520
-                }, 
                 {
                  "height":0,
                  "id":269,
