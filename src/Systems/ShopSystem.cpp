@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <optional>
 
 #include <Components/Exit.hpp>
 #include <Components/Persistent/ShopMaxItems.hpp>
@@ -31,7 +32,7 @@ void ShopSystem::create_shop_inventory()
 
   for ( auto _ : std::views::iota( 0, shop_inventory_cmp.m_config.max_items ) )
   {
-    add_shop_inventory_item( shop_inventory_cmp );
+    if ( not add_shop_inventory_item( shop_inventory_cmp ) ) break;
   }
 
   auto shop_inventory_entt = reg().create();
@@ -50,14 +51,28 @@ int32_t ShopSystem::shop_price( int base_price )
   return static_cast<int32_t>( std::lround( static_cast<float>( base_price ) * ( 1.f + fluctuation ) ) );
 }
 
-void ShopSystem::add_shop_inventory_item( Cmp::Shop::Inventory &shop_inventory_cmp )
+bool ShopSystem::add_shop_inventory_item( Cmp::Shop::Inventory &shop_inventory_cmp, const std::optional<Sys::ItemKey> &exclude )
 {
   auto item_types = Sys::ItemStore::instance().get_all( Sys::ItemStore::ItemFilter::SHOP_ONLY );
+  // keep the stock unique: never offer an item type that is already in the shop
+  std::erase_if( item_types, [&shop_inventory_cmp]( const Sys::ItemKey &type )
+                 { return std::ranges::any_of( shop_inventory_cmp.m_slots, [&type]( const auto &slot ) { return slot.first == type; } ); } );
+  // avoid the excluded type (e.g. the item just bought), unless it is the only one left to keep the shop full
+  if ( exclude and std::ranges::any_of( item_types, [&exclude]( const Sys::ItemKey &type ) { return type != *exclude; } ) )
+  {
+    std::erase( item_types, *exclude );
+  }
+  if ( item_types.empty() )
+  {
+    SPDLOG_WARN( "No unique shop items left to stock ({} slots filled)", shop_inventory_cmp.m_slots.size() );
+    return false;
+  }
   Cmp::RandomInt item_picker( 0, static_cast<int>( item_types.size() ) - 1 );
   const auto &selected_item_type = item_types.at( item_picker.gen() );
   const int32_t price = shop_price( Sys::ItemStore::instance().get( selected_item_type ).get_shop_base_price() );
   SPDLOG_INFO( "Adding shop item - {} - for {}", selected_item_type, price );
   shop_inventory_cmp.m_slots.emplace_back( selected_item_type, price );
+  return true;
 }
 
 void ShopSystem::check_exit_collision()
@@ -99,6 +114,8 @@ void ShopSystem::buy_shop_item( uint8_t item_idx )
     if ( not inventory_cmp.is_enabled ) continue;
     if ( item_idx == 0 ) return;
 
+    std::optional<Sys::ItemKey> bought_item;
+
     // auto && required: std::views::enumerate returns a temporary tuple, auto & cannot bind to it
     for ( auto &&[i, slot] : std::views::enumerate( inventory_cmp.m_slots ) )
     {
@@ -122,20 +139,19 @@ void ShopSystem::buy_shop_item( uint8_t item_idx )
       // check if the player inventory has a torch, if so light it up!
       Factory::Particle::add_flame_for_player_inventory_slot( m_reg );
 
-      // delete item from shop inventory
+      // delete item from shop inventory, its replacement must be a different item
+      bought_item = item;
       auto &slots = inventory_cmp.m_slots;
       auto it = std::next( slots.begin(), i );
       slots.erase( it );
 
-      // replace the shop stock
-      add_shop_inventory_item( inventory_cmp );
       break;
     }
 
     // ensure that the shop is always fully stocked.
     while ( inventory_cmp.m_slots.size() < static_cast<size_t>( inventory_cmp.m_config.max_items ) )
     {
-      add_shop_inventory_item( inventory_cmp );
+      if ( not add_shop_inventory_item( inventory_cmp, bought_item ) ) break;
     }
   }
 

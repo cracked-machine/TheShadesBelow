@@ -1,6 +1,8 @@
 #ifndef SRC_SYSTEMS_SHOPSYSTEM_HPP__
 #define SRC_SYSTEMS_SHOPSYSTEM_HPP__
 
+#include <optional>
+
 #include <Components/Shop/Inventory.hpp>
 #include <Events/BuyShopItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
@@ -31,7 +33,9 @@ public:
 
   //! @brief Pick a random "sprite.item." sprite and price and insert in the inventory component
   //! @param shop_inventory_cmp The inventory component
-  void add_shop_inventory_item( Cmp::Shop::Inventory &shop_inventory_cmp );
+  //! @param exclude Item type to avoid if any other unstocked type is available, e.g. the item just bought
+  //! @return false if every shop item type is already stocked, so no item was added
+  bool add_shop_inventory_item( Cmp::Shop::Inventory &shop_inventory_cmp, const std::optional<Sys::ItemKey> &exclude = std::nullopt );
 
   //! @brief Shop price for an item: base_price fluctuated by up to +/-kPriceFluctuation, biased by player luck.
   //! Low luck biases the fluctuation towards +kPriceFluctuation, high luck towards -kPriceFluctuation.
