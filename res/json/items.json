@@ -2,7 +2,7 @@
   "ERROR_SPRITE": {
     "sprite": { "name": "ERROR_SPRITE" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -18,7 +18,7 @@
   "item.axe": {
     "sprite": { "name": "sprite.item.axe" },
     "consumable": "none",
-    "shop": true,
+    "shop": { "enabled": true, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -35,7 +35,7 @@
   "item.bomb": {
     "sprite": { "name": "sprite.item.bomb" },
     "consumable": "none",
-    "shop": true,
+    "shop": { "enabled": true, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -50,7 +50,7 @@
   "item.boots": {
     "sprite": { "name": "sprite.item.boots" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -65,7 +65,7 @@
   "item.longbow": {
     "sprite": { "name": "sprite.item.longbow" },
     "consumable": "none",
-    "shop": true,
+    "shop": { "enabled": true, "base_price": 40 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -82,7 +82,7 @@
   "item.torch": {
     "sprite": { "name": "sprite.item.torch" },
     "consumable": "none",
-    "shop": true,
+    "shop": { "enabled": true, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -97,7 +97,7 @@
   "item.cryptkey": {
     "sprite": { "name": "sprite.item.cryptkey" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -112,7 +112,7 @@
   "item.cursetablet.ghost": {
     "sprite": { "name": "sprite.item.cursetablet.ghost", "random": true },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -129,7 +129,7 @@
   "item.cursetablet.skeleton": {
     "sprite": { "name": "sprite.item.cursetablet.skeleton", "random": true },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -146,7 +146,7 @@
   "item.cursetablet.adder": {
     "sprite": { "name": "sprite.item.cursetablet.adder", "random": true },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -163,7 +163,7 @@
   "item.dowsingrod": {
     "sprite": { "name": "sprite.item.dowsingrod" },
     "consumable": "none",
-    "shop": true,
+    "shop": { "enabled": true, "base_price": 20 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -179,7 +179,7 @@
   "item.elderflute": {
     "sprite": { "name": "sprite.item.elderflute" },
     "consumable": "none",
-    "shop": true,
+    "shop": { "enabled": true, "base_price": 30 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -195,7 +195,7 @@
   "item.elderwine": {
     "sprite": { "name": "sprite.item.elderwine" },
     "consumable": "drinkable",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -211,7 +211,7 @@
   "item.exitkey": {
     "sprite": { "name": "sprite.item.exitkey" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -227,7 +227,7 @@
   "item.gloves": {
     "sprite": { "name": "sprite.item.gloves" },
     "consumable": "none",
-    "shop": true,
+    "shop": { "enabled": true, "base_price": 20 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -244,7 +244,7 @@
   "item.hawthorntea": {
     "sprite": { "name": "sprite.item.hawthorntea" },
     "consumable": "drinkable",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -259,7 +259,7 @@
   "item.jewelry_amephyst_gemstone": {
     "sprite": { "name": "sprite.item.jewelry_amephyst_gemstone" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -275,7 +275,7 @@
   "item.jewelry_amephyst_ring": {
     "sprite": { "name": "sprite.item.jewelry_amephyst_ring" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -291,7 +291,7 @@
   "item.jewelry_diamond_gemstone": {
     "sprite": { "name": "sprite.item.jewelry_diamond_gemstone" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -307,7 +307,7 @@
   "item.jewelry_emerald_gemstone": {
     "sprite": { "name": "sprite.item.jewelry_emerald_gemstone" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -323,7 +323,7 @@
   "item.jewelry_emerald_necklace": {
     "sprite": { "name": "sprite.item.jewelry_emerald_necklace" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -339,7 +339,7 @@
   "item.jewelry_ruby_ring": {
     "sprite": { "name": "sprite.item.jewelry_ruby_ring" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -355,7 +355,7 @@
   "item.jewelry_sapphire_gemstone": {
     "sprite": { "name": "sprite.item.jewelry_sapphire_gemstone" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -371,7 +371,7 @@
   "item.jewelry_sapphire_necklace": {
     "sprite": { "name": "sprite.item.jewelry_sapphire_necklace" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -387,7 +387,7 @@
   "item.lightningrod": {
     "sprite": { "name": "sprite.item.lightningrod" },
     "consumable": "none",
-    "shop": true,
+    "shop": { "enabled": true, "base_price": 20 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -404,7 +404,7 @@
   "item.lightningrod.broken": {
     "sprite": { "name": "sprite.item.lightningrod.broken" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -419,7 +419,7 @@
   "item.pickaxe": {
     "sprite": { "name": "sprite.item.pickaxe" },
     "consumable": "none",
-    "shop": true,
+    "shop": { "enabled": true, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -436,7 +436,7 @@
   "item.plant.burdock": {
     "sprite": { "name": "sprite.item.plant.burdock" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -456,7 +456,7 @@
   "item.burdockroot": {
     "sprite": { "name": "sprite.burdockroot" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -472,7 +472,7 @@
   "item.burr": {
     "sprite": { "name": "sprite.burr" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -489,7 +489,7 @@
   "item.plant.elder": {
     "sprite": { "name": "sprite.item.plant.elder" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 10, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
@@ -511,7 +511,7 @@
   "item.elderstick": {
     "sprite": { "name": "sprite.elderstick" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -527,7 +527,7 @@
   "item.elderberries": {
     "sprite": { "name": "sprite.elderberries" },
     "consumable": "edible",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -545,7 +545,7 @@
   "item.plant.foxglove": {
     "sprite": { "name": "sprite.item.plant.foxglove" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": ["halucinogen", "bradycardia"], "toxicity": 5 }, "tick": 1 }},
@@ -565,7 +565,7 @@
   "item.foxgloveflower": {
     "sprite": { "name": "sprite.foxgloveflower" },
     "consumable": "edible",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -583,7 +583,7 @@
   "item.plant.hawthorn": {
     "sprite": { "name": "sprite.item.plant.hawthorn" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 25, "shovel": 10, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
@@ -605,7 +605,7 @@
   "item.hawthornstick": {
     "sprite": { "name": "sprite.hawthornstick" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -621,7 +621,7 @@
   "item.hawthornflower": {
     "sprite": { "name": "sprite.hawthornflower" },
     "consumable": "edible",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -639,7 +639,7 @@
   "item.plant.henbane": {
     "sprite": { "name": "sprite.item.plant.henbane" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 10, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": ["halucinogen", "tachycardia"], "toxicity": 5 }, "tick": 1 }},
@@ -659,7 +659,7 @@
   "item.henbanestick": {
     "sprite": { "name": "sprite.henbanestick" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -675,7 +675,7 @@
   "item.henbaneseed": {
     "sprite": { "name": "sprite.henbaneseed" },
     "consumable": "edible",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -693,7 +693,7 @@
   "item.plant.hogweed": {
     "sprite": { "name": "sprite.item.plant.hogweed" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "phototoxia", "toxicity": 5 }, "tick": 3 }},
@@ -713,7 +713,7 @@
   "item.hogweedseed": {
     "sprite": { "name": "sprite.hogweedseed" },
     "consumable": "edible",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -730,7 +730,7 @@
   "item.plant.nettle": {
     "sprite": { "name": "sprite.item.plant.nettle" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -750,7 +750,7 @@
   "item.nettlefiber": {
     "sprite": { "name": "sprite.nettlefiber" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -766,7 +766,7 @@
   "item.nettleleaf": {
     "sprite": { "name": "sprite.nettleleaf" },
     "consumable": "edible",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -783,7 +783,7 @@
   "item.plant.nightshade": {
     "sprite": { "name": "sprite.item.plant.nightshade" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "tachycardia", "toxicity": 10 }, "tick": 1 }},
@@ -803,7 +803,7 @@
   "item.nightshadeflower": {
     "sprite": { "name": "sprite.nightshadeflower" },
     "consumable": "edible",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -822,7 +822,7 @@
   "item.plant.redcampion": {
     "sprite": { "name": "sprite.item.plant.redcampion" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 5 },
     "axe_hits": 3,
     "actions": [
@@ -844,7 +844,7 @@
   "item.antivenom": {
     "sprite": { "name": "sprite.antivenom" },
     "consumable": "drinkable",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -859,7 +859,7 @@
   "item.digitalis": {
     "sprite": { "name": "sprite.digitalis" },
     "consumable": "drinkable",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -874,7 +874,7 @@
   "item.plant.rowan": {
     "sprite": { "name": "sprite.item.plant.rowan" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 10, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": -25, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -894,7 +894,7 @@
   "item.rowanstick": {
     "sprite": { "name": "sprite.rowanstick" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -910,7 +910,7 @@
   "item.rowanberries": {
     "sprite": { "name": "sprite.rowanberries" },
     "consumable": "edible",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -928,7 +928,7 @@
   "item.plant.stjohnswort": {
     "sprite": { "name": "sprite.item.plant.stjohnswort" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -948,7 +948,7 @@
   "item.bloodoil": {
     "sprite": { "name": "sprite.bloodoil" },
     "consumable": "drinkable",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -964,7 +964,7 @@
   "item.stjohnswortflower": {
     "sprite": { "name": "sprite.stjohnswortflower" },
     "consumable": "edible",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -981,7 +981,7 @@
   "item.plant.yew": {
     "sprite": { "name": "sprite.item.plant.yew" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 10, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "bradycardia", "toxicity": 10 }, "tick": 2 }},
@@ -1001,7 +1001,7 @@
   "item.yewstick": {
     "sprite": { "name": "sprite.yewstick" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1017,7 +1017,7 @@
   "item.yewberry": {
     "sprite": { "name": "sprite.yewberry" },
     "consumable": "edible",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1034,7 +1034,7 @@
   "item.preservedcat": {
     "sprite": { "name": "sprite.item.preservedcat" },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1049,7 +1049,7 @@
   "item.talisman0": {
     "sprite": { "name": "sprite.item.talisman", "index": 0 },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1065,7 +1065,7 @@
   "item.talisman1": {
     "sprite": { "name": "sprite.item.talisman", "index": 1 },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1081,7 +1081,7 @@
   "item.talisman2": {
     "sprite": { "name": "sprite.item.talisman", "index": 2 },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1097,7 +1097,7 @@
   "item.talisman3": {
     "sprite": { "name": "sprite.item.talisman", "index": 3 },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1113,7 +1113,7 @@
   "item.talisman4": {
     "sprite": { "name": "sprite.item.talisman", "index": 4 },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1129,7 +1129,7 @@
   "item.talisman5": {
     "sprite": { "name": "sprite.item.talisman", "index": 5 },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1145,7 +1145,7 @@
   "item.talisman6": {
     "sprite": { "name": "sprite.item.talisman", "index": 6 },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1161,7 +1161,7 @@
   "item.talisman7": {
     "sprite": { "name": "sprite.item.talisman", "index": 7 },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1177,7 +1177,7 @@
   "item.talisman8": {
     "sprite": { "name": "sprite.item.talisman", "index": 8 },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1193,7 +1193,7 @@
   "item.talisman9": {
     "sprite": { "name": "sprite.item.talisman", "index": 9 },
     "consumable": "none",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1209,7 +1209,7 @@
   "item.rottenfood": {
     "sprite": { "name": "sprite.item.rottenfood" },
     "consumable": "edible",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1224,7 +1224,7 @@
   "item.rowanwine": {
     "sprite": { "name": "sprite.item.rowanwine" },
     "consumable": "drinkable",
-    "shop": false,
+    "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1239,7 +1239,7 @@
   "item.shovel": {
     "sprite": { "name": "sprite.item.shovel" },
     "consumable": "none",
-    "shop": true,
+    "shop": { "enabled": true, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1256,7 +1256,7 @@
   "item.witchesbroom": {
     "sprite": { "name": "sprite.item.witchesbroom" },
     "consumable": "none",
-    "shop": true,
+    "shop": { "enabled": true, "base_price": 40 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1272,7 +1272,7 @@
   "item.witchesjar": {
     "sprite": { "name": "sprite.item.witchesjar" },
     "consumable": "none",
-    "shop": true,
+    "shop": { "enabled": true, "base_price": 20 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},

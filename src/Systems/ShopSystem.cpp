@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <cmath>
+
 #include <Components/Exit.hpp>
 #include <Components/Persistent/ShopMaxItems.hpp>
 #include <Components/Persistent/ShopMaxPrice.hpp>
@@ -36,15 +39,25 @@ void ShopSystem::create_shop_inventory()
   Factory::Particle::sync_flames_for_shop_inventory( reg() );
 }
 
+int32_t ShopSystem::shop_price( int base_price )
+{
+  // luck [0, 100] shifts the fluctuation window: 0 luck -> [0%, +20%], 50 luck -> [-20%, +20%], 100 luck -> [-20%, 0%]
+  const float luck_ratio = static_cast<float>( std::clamp( Utils::Player::get_stats( reg() ).luck(), 0, 100 ) ) / 100.f;
+  const float bias = kPriceFluctuation - ( 2.f * kPriceFluctuation * luck_ratio );
+  const float min_fluctuation = std::max( -kPriceFluctuation, bias - kPriceFluctuation );
+  const float max_fluctuation = std::min( kPriceFluctuation, bias + kPriceFluctuation );
+  const float fluctuation = Cmp::RandomFloat( min_fluctuation, max_fluctuation ).gen();
+  return static_cast<int32_t>( std::lround( static_cast<float>( base_price ) * ( 1.f + fluctuation ) ) );
+}
+
 void ShopSystem::add_shop_inventory_item( Cmp::Shop::Inventory &shop_inventory_cmp )
 {
   auto item_types = Sys::ItemStore::instance().get_all( Sys::ItemStore::ItemFilter::SHOP_ONLY );
   Cmp::RandomInt item_picker( 0, static_cast<int>( item_types.size() ) - 1 );
-  Cmp::RandomInt price_picker( shop_inventory_cmp.m_config.min_price, shop_inventory_cmp.m_config.max_price );
-  auto selected_item = item_picker.gen();
-  auto price = price_picker.gen();
-  SPDLOG_INFO( "Adding shop item - {} - for {}", item_types.at( selected_item ), price );
-  shop_inventory_cmp.m_slots.emplace_back( item_types.at( selected_item ), price );
+  const auto &selected_item_type = item_types.at( item_picker.gen() );
+  const int32_t price = shop_price( Sys::ItemStore::instance().get( selected_item_type ).get_shop_base_price() );
+  SPDLOG_INFO( "Adding shop item - {} - for {}", selected_item_type, price );
+  shop_inventory_cmp.m_slots.emplace_back( selected_item_type, price );
 }
 
 void ShopSystem::check_exit_collision()

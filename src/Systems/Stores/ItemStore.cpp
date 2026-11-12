@@ -77,7 +77,12 @@ void ItemStore::init_store()
     auto consumable = make_consumable_property( item_value.at( "consumable" ).get<std::string>() );
     Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, static_cast<std::size_t>( sprite_index ),
                               sprite_random ? Sys::SpriteStore::instance().get( sprite_mtype ).sheet_size() : 0, pickaxe_damage, axe_damage, shovel_damage, bow_damage, consumable );
-    worlditem.set_shop_item( item_value.value( "shop", false ) );
+    if ( item_value.contains( "shop" ) )
+    {
+      const auto &shop_json = item_value.at( "shop" );
+      worlditem.set_shop_item( shop_json.value( "enabled", false ) );
+      worlditem.set_shop_base_price( shop_json.value( "base_price", 0 ) );
+    }
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )

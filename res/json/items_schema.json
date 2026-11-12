@@ -26,9 +26,14 @@
           "description": "Can the item be eaten or drunk."
         },
         "shop": {
-          "type": "boolean",
-          "default": false,
-          "description": "Optional. Whether the item can be stocked by the shop. Defaults to false."
+          "type": "object",
+          "description": "Optional. Shop settings for the item. Omitted means the item is never stocked by the shop.",
+          "required": ["enabled", "base_price"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean", "default": false, "description": "Whether the item can be stocked by the shop." },
+            "base_price": { "type": "integer", "minimum": 0, "description": "Base price. The shop price fluctuates +/-20% from this: low luck biases it up, high luck biases it down." }
+          }
         },
         "damage_to_weapon": {
           "type": "object",

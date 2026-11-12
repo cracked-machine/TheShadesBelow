@@ -33,6 +33,15 @@ public:
   //! @param shop_inventory_cmp The inventory component
   void add_shop_inventory_item( Cmp::Shop::Inventory &shop_inventory_cmp );
 
+  //! @brief Shop price for an item: base_price fluctuated by up to +/-kPriceFluctuation, biased by player luck.
+  //! Low luck biases the fluctuation towards +kPriceFluctuation, high luck towards -kPriceFluctuation.
+  //! @param base_price The item's "shop.base_price" from items.json
+  //! @return The randomised shop price
+  int32_t shop_price( int base_price );
+
+  //! @brief Maximum fraction the shop price may fluctuate from the base price, in either direction.
+  static constexpr float kPriceFluctuation = 0.2f;
+
   //! @brief Check for collisions with the exit
   void check_exit_collision();
 

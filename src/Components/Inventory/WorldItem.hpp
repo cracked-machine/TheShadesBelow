@@ -217,9 +217,13 @@ public:
   //! @brief Whether the item can be eaten, drunk or neither.
   Consumable consumable_type() const { return m_consumable; }
 
-  //! @brief Whether the item can be stocked by the shop, see "shop" in items.json. Defaults to false.
+  //! @brief Whether the item can be stocked by the shop, see "shop.enabled" in items.json. Defaults to false.
   bool is_shop_item() const { return m_shop; }
   void set_shop_item( bool shop ) { m_shop = shop; }
+
+  //! @brief Shop base price, see "shop.base_price" in items.json. The shop price fluctuates +/-20% from this, biased by player luck.
+  int get_shop_base_price() const { return m_shop_base_price; }
+  void set_shop_base_price( int base_price ) { m_shop_base_price = base_price; }
 
   //! @brief Whether the item's spawn_action or carry_action damages the player (negative "health" in items.json), i.e.
   //! whether a Cmp::Inventory::StingDamage is added when the item is created.
@@ -281,6 +285,9 @@ private:
 
   //! @brief Whether the item can be stocked by the shop. Imported from items.json.
   bool m_shop{ false };
+
+  //! @brief Shop base price, fluctuated +/-20% by luck to get the shop price. Imported from items.json.
+  int m_shop_base_price{ 0 };
 };
 
 } // namespace Game::Cmp
