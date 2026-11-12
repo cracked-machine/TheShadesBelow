@@ -27,7 +27,7 @@
 #include <Systems/AnimSystem.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
-#include <Systems/HealingSpringSystem.hpp>
+#include <Components/Stats/BaseAction.hpp>
 #include <Systems/InventorySystem.hpp>
 #include <Systems/ItemSystem.hpp>
 #include <Systems/LootSystem.hpp>
@@ -126,6 +126,12 @@ void ShopScene::on_enter()
     Sys::BaseSystem::get_systems_event_queue().trigger(
         Events::UpdatePlayerPositionEvent( sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( m_reg ) ) ) );
     SPDLOG_DEBUG( "player_start_pos_px: {},{}", Utils::Player::get_position( m_reg ).position.x, Utils::Player::get_position( m_reg ).position.y );
+
+    // restore the player between levels; infamy and anima carry over to the next level
+    auto &stats = Utils::Player::get_stats( m_reg );
+    stats.apply( { Cmp::Stats::Health{ +100 }, Cmp::Stats::Fear{ -100 }, Cmp::Stats::Despair{ -100 }, {}, {}, {}, {} } );
+    stats.decay_all_toxidrome( 100 );
+
     m_just_spawned = false;
   }
 
@@ -158,7 +164,6 @@ void ShopScene::do_update( sf::Time dt )
 
   if ( not paused )
   {
-    // m_sys.find<Sys::Store::Type::HealingSpringSystem>().check_inventory_deposit( dt );
     m_sys.find<Sys::Store::Type::AnimSystem>().update( dt );
     m_sys.find<Sys::Store::Type::FootstepSystem>().update( dt );
     m_sys.find<Sys::Store::Type::ShopSystem>().check_exit_collision();

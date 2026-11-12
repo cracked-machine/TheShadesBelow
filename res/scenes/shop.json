@@ -139,19 +139,6 @@
                  "width":0,
                  "x":112,
                  "y":32
-                }, 
-                {
-                 "height":0,
-                 "id":10,
-                 "name":"sprite.graveyard.healingspring",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":96,
-                 "y":112
                 }],
          "opacity":1,
          "type":"objectgroup",
