@@ -19,7 +19,8 @@
 #include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
-#include <Components/Persistent/GraveTrailNominalSize.hpp>
+#include <Components/Persistent/GraveTrailNominalHopCount.hpp>
+#include <Components/Persistent/GraveTrailNominalHopDistance.hpp>
 #include <Components/Persistent/GraveTrailStartCount.hpp>
 #include <Components/Persistent/MissingTalismanBias.hpp>
 #include <Components/Persistent/PickaxeGraveDigWear.hpp>
@@ -64,7 +65,9 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 #include <map>
+#include <optional>
 #include <sstream>
 #include <utility>
 #include <vector>
@@ -249,9 +252,12 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
   constexpr float kTrailBacktrackExclusionDeg = 35.f;
 
   auto &trail_position = Utils::Player::trail_position( reg() );
-  const size_t trail_size = Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalSize>( reg() ).get_value();
+  const size_t trail_size = Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalHopCount>( reg() ).get_value();
+  const size_t hop_distance = Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalHopDistance>( reg() ).get_value();
   const size_t level_depth = Utils::Player::get_level_depth( reg() ).get_count();
   const unsigned int max_trail_size = trail_size + level_depth;
+  // deeper levels spread the trail further apart
+  const float max_hop_px = static_cast<float>( hop_distance + level_depth ) * Constants::kGridSizePxF.x;
 
   // the crow perched on the grave just opened flies away, so at most one crow is ever perched on the trail
   for ( auto [crow_entt, crow_cmp] : reg().view<Cmp::Npc::Crow>().each() )
@@ -293,10 +299,21 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
     }
   }
 
+  // only graves within hop range are candidates, so each hop is a short walk rather than a trek across the map
   std::vector<std::pair<entt::entity, Cmp::Position>> all_candidates;
   std::vector<std::pair<entt::entity, Cmp::Position>> forward_candidates;
+  std::optional<std::pair<entt::entity, Cmp::Position>> nearest;
+  float nearest_distance = std::numeric_limits<float>::max();
   for ( auto [cand_entt, cand_pos, cand_mb] : interred_view.each() )
   {
+    const float distance = Utils::Maths::getEuclideanDistance( cand_pos.getCenter(), source_pos.getCenter() );
+    if ( distance < nearest_distance )
+    {
+      nearest_distance = distance;
+      nearest.emplace( cand_entt, cand_pos );
+    }
+    if ( distance > max_hop_px ) continue;
+
     all_candidates.emplace_back( cand_entt, cand_pos );
     auto cand_angle = Utils::Maths::angle( cand_pos.getCenter() - source_pos.getCenter() );
     if ( backtrack_angle and cand_angle and std::abs( ( *cand_angle - *backtrack_angle ).wrapSigned().asDegrees() ) <= kTrailBacktrackExclusionDeg )
@@ -306,11 +323,17 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
     forward_candidates.emplace_back( cand_entt, cand_pos );
   }
 
-  // every remaining grave lies back the way the player came: allow backtracking rather than stall the trail
-  if ( forward_candidates.empty() )
+  // every grave in range lies back the way the player came: allow backtracking rather than stall the trail
+  if ( forward_candidates.empty() and not all_candidates.empty() )
   {
-    SPDLOG_DEBUG( "No trail candidates outside the backtrack cone, falling back to all {} graves", all_candidates.size() );
+    SPDLOG_DEBUG( "No trail candidates outside the backtrack cone, falling back to all {} graves in range", all_candidates.size() );
     forward_candidates = std::move( all_candidates );
+  }
+  // no grave within hop range: head for the nearest one rather than stall the trail
+  if ( forward_candidates.empty() and nearest )
+  {
+    SPDLOG_DEBUG( "No trail candidates within {} px, falling back to the nearest grave at {} px", max_hop_px, nearest_distance );
+    forward_candidates.push_back( *nearest );
   }
 
   // point the source grave's arrow at a random un-exhumed grave

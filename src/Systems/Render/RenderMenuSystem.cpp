@@ -53,7 +53,8 @@
 #include <Components/Persistent/GraveCountMargin.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveTrailGuideColour.hpp>
-#include <Components/Persistent/GraveTrailNominalSize.hpp>
+#include <Components/Persistent/GraveTrailNominalHopDistance.hpp>
+#include <Components/Persistent/GraveTrailNominalHopCount.hpp>
 #include <Components/Persistent/GraveTrailStartCount.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
@@ -427,7 +428,8 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     ImGui::SeparatorText( "Procedural Generation" );
 
     Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalSize>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalHopDistance>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalHopCount>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailStartCount>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MissingTalismanBias>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).render_widget();

@@ -52,7 +52,8 @@
 #include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveTrailGuideColour.hpp>
-#include <Components/Persistent/GraveTrailNominalSize.hpp>
+#include <Components/Persistent/GraveTrailNominalHopDistance.hpp>
+#include <Components/Persistent/GraveTrailNominalHopCount.hpp>
 #include <Components/Persistent/GraveTrailStartCount.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/TalismanMinChance.hpp>
@@ -212,7 +213,8 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ExitKeyRequirement>();
   add_component<Cmp::Persist::FuseDelay>();
   add_component<Cmp::Persist::GraveNumMultiplier>();
-  add_component<Cmp::Persist::GraveTrailNominalSize>();
+  add_component<Cmp::Persist::GraveTrailNominalHopDistance>();
+  add_component<Cmp::Persist::GraveTrailNominalHopCount>();
   add_component<Cmp::Persist::GraveTrailStartCount>();
   add_component<Cmp::Persist::MissingTalismanBias>();
   add_component<Cmp::Persist::MaxLevelDepth>();

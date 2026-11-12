@@ -27,7 +27,7 @@
 #include <Components/ObstacleCap.hpp>
 #include <Components/Persistent/GraveCountMargin.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
-#include <Components/Persistent/GraveTrailNominalSize.hpp>
+#include <Components/Persistent/GraveTrailNominalHopCount.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
 #include <Components/Persistent/NumAltars.hpp>
@@ -530,7 +530,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
   if ( grave_meta_types.size() < 2 ) { SPDLOG_WARN( "No GRAVE spritesheets found in SpriteStore" ); }
   else
   {
-    const size_t trail_size = Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalSize>( reg() ).get_value();
+    const size_t trail_size = Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalHopCount>( reg() ).get_value();
     const size_t max_cadaver_count = Utils::Player::get_cadaver( reg() ).size();
     // const size_t level_depth = Utils::Player::get_level_depth( reg() ).get_count();
     const size_t exit_and_crypt_key_multiplier = 2;
