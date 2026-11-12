@@ -72,7 +72,6 @@
 #include <Components/Persistent/MinNumHealingSprings.hpp>
 #include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
-#include <Components/Persistent/MissingTalismanBias.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcCrowFlightSpeed.hpp>
@@ -216,7 +215,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::GraveTrailNominalHopDistance>();
   add_component<Cmp::Persist::GraveTrailNominalHopCount>();
   add_component<Cmp::Persist::GraveTrailStartCount>();
-  add_component<Cmp::Persist::MissingTalismanBias>();
   add_component<Cmp::Persist::MaxLevelDepth>();
   add_component<Cmp::Persist::TalismanMinChance>();
   add_component<Cmp::Persist::GraveCountMargin>();

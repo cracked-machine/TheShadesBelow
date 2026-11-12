@@ -71,7 +71,6 @@
 #include <Components/Persistent/MinNumHealingSprings.hpp>
 #include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
-#include <Components/Persistent/MissingTalismanBias.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcCrowFlightSpeed.hpp>
@@ -431,7 +430,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalHopDistance>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalHopCount>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailStartCount>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::MissingTalismanBias>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::TalismanMinChance>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveCountMargin>( reg() ).render_widget();

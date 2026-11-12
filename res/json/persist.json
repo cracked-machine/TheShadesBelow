@@ -425,12 +425,20 @@
     "detail": "Grave Number Multiplier",
     "format": "%d"
   },
-  "GraveTrailNominalSize": {
+  "GraveTrailNominalHopDistance": {
+    "type": "int",
+    "value": 10,
+    "min_value": 3,
+    "max_value": 50,
+    "detail": "Grave Trail Nominal Hop Distance (grid)",
+    "format": "%d"
+  },
+  "GraveTrailNominalHopCount": {
     "type": "int",
     "value": 3,
     "min_value": 1,
     "max_value": 10,
-    "detail": "Grave Trail Size Multiplier",
+    "detail": "Grave Trail Nominal Hop Count",
     "format": "%d"
   },
   "GraveTrailStartCount": {
@@ -464,14 +472,6 @@
     "max_value": 100,
     "detail": "Grave Count Margin",
     "format": "%d%%"
-  },
-  "MissingTalismanBias": {
-    "type": "int",
-    "value": 3,
-    "min_value": 0,
-    "max_value": 10,
-    "detail": "Missing Talisman Bias",
-    "format": "%d"
   },
   "GraveTrailGuideColour": {
     "type": "sf::Color",

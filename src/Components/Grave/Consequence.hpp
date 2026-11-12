@@ -42,8 +42,8 @@ public:
       Slot{ .type=Type::BOMB_TRAP,    .value=30 },    
       Slot{ .type=Type::TORCH,        .value=35 },        
       Slot{ .type=Type::NPC_TRAP,     .value=40 },     
+      Slot{ .type=Type::JEWELRY,      .value=50 },      
       Slot{ .type=Type::TALISMAN,     .value=60 },     
-      Slot{ .type=Type::JEWELRY,      .value=61 },      
   };
   // clang-format on
 
