@@ -427,7 +427,7 @@
   },
   "GraveTrailNominalHopDistance": {
     "type": "int",
-    "value": 10,
+    "value": 15,
     "min_value": 3,
     "max_value": 50,
     "detail": "Grave Trail Nominal Hop Distance (grid)",
