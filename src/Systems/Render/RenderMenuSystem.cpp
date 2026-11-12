@@ -102,6 +102,8 @@
 #include <Components/Persistent/PlayerFootstepAddDelay.hpp>
 #include <Components/Persistent/PlayerFootstepFadeDelay.hpp>
 #include <Components/Persistent/PlayerFootstepSfxStrideLength.hpp>
+#include <Components/Persistent/PlayerCornerAssistTolerance.hpp>
+#include <Components/Persistent/PlayerDiagonalGapCatch.hpp>
 #include <Components/Persistent/PlayerLerpInterruptThreshold.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
 #include <Components/Persistent/PlayerOnFireHealthDmgPerSec.hpp>
@@ -277,6 +279,8 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::DiggingCooldownThreshold>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::CameraSmoothSpeed>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::PlayerCornerAssistTolerance>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::PlayerDiagonalGapCatch>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerLerpInterruptThreshold>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PostPullMovementDelay>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RetainAnimaBetweenLevels>( reg() ).render_widget();

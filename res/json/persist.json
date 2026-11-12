@@ -306,6 +306,14 @@
     "detail": "Bradycardia Health Dmg Per Sec",
     "format": "%d"
   },
+  "BradycardiaMovementSpeed": {
+    "type": "float",
+    "value": 50.0,
+    "min_value": 1.0,
+    "max_value": 120.0,
+    "detail": "Bradycardia Max Movement Speed",
+    "format": "%.1f"
+  },
   "CameraSmoothSpeed": {
     "type": "float",
     "value": 8.0,
@@ -820,6 +828,19 @@
     "detail": "Player Footstep Sfx Stride Length",
     "format": "%.1f px"
   },
+  "PlayerCornerAssistTolerance": {
+    "type": "float",
+    "value": 6.0,
+    "min_value": 0.0,
+    "max_value": 8.0,
+    "detail": "Player Corner Assist Tolerance",
+    "format": "%.1f px"
+  },
+  "PlayerDiagonalGapCatch": {
+    "type": "bool",
+    "value": true,
+    "detail": "Player Diagonal Gap Catch (stop at openings when sliding)"
+  },
   "PlayerLerpInterruptThreshold": {
     "type": "float",
     "value": 0.3,
@@ -830,7 +851,7 @@
   },
   "PlayerMovementSpeed": {
     "type": "float",
-    "value": 75.0,
+    "value": 70.0,
     "min_value": 1.0,
     "max_value": 120.0,
     "detail": "Player Movement Speed",
@@ -868,6 +889,11 @@
       "b": 90,
       "a": 255
     }
+  },
+  "RetainAnimaBetweenLevels": {
+    "type": "bool",
+    "value": true,
+    "detail": "Retain Anima Between Levels (off = sell for wealth)"
   },
   "RuinMaxCobwebs": {
     "type": "int",
@@ -980,6 +1006,14 @@
     "max_value": 100,
     "detail": "Tachycardia Health Dmg Per Sec",
     "format": "%d"
+  },
+  "TachycardiaMovementSpeed": {
+    "type": "float",
+    "value": 90.0,
+    "min_value": 1.0,
+    "max_value": 120.0,
+    "detail": "Tachycardia Max Movement Speed",
+    "format": "%.1f"
   },
   "ToxicImmunityMeterFill": {
     "type": "sf::Color",

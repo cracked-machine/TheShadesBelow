@@ -47,6 +47,8 @@
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
+#include <Components/Persistent/PlayerCornerAssistTolerance.hpp>
+#include <Components/Persistent/PlayerDiagonalGapCatch.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerOnFireHealthDmgPerSec.hpp>
 #include <Components/Persistent/PlayerRenderOffset.hpp>
@@ -495,59 +497,73 @@ void PlayerSystem::update_player_position( sf::Time dt )
 
   bool collision_detect_enabled = Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled;
 
+  // Max perpendicular misalignment that the corner assist will correct (0 disables it).
+  const float corner_assist_tolerance = Sys::PersistSystem::get<Cmp::Persist::PlayerCornerAssistTolerance>( reg() ).get_value();
+
+  // Corner assist: the player hitbox is exactly one grid cell, so a 1-cell gap only admits the player at one
+  // exact perpendicular offset, which continuous movement steps rarely land on. When the forward move along
+  // `axis` is blocked, check whether the same move would be valid from the nearest grid-aligned row/column;
+  // if so (and the misalignment is within tolerance) slide perpendicular towards alignment this frame instead.
+  // The forward move then succeeds on a later frame once aligned. Probing from the aligned position means this
+  // only triggers when there really is an opening, so sliding along a solid wall never drifts sideways.
+  // Returns true if a perpendicular nudge was applied.
+  auto try_corner_assist = [&]( bool horizontal ) -> bool
+  {
+    if ( moved_perp or corner_assist_tolerance <= 0.f ) return false;
+    // another axis is already moving freely this frame (diagonal input sliding along a wall): don't fight it
+    if ( horizontal ? resolved_dir_vector.y != 0.f : resolved_dir_vector.x != 0.f ) return false;
+
+    const sf::Vector2f snapped = Utils::snap_to_grid( player_pos ).position;
+    const float offset = horizontal ? snapped.y - player_pos.position.y : snapped.x - player_pos.position.x;
+    if ( offset == 0.f or std::abs( offset ) > corner_assist_tolerance ) return false;
+
+    const sf::FloatRect aligned_move = horizontal
+                                           ? sf::FloatRect( { player_pos.position.x + direction.x, snapped.y }, player_pos.size )
+                                           : sf::FloatRect( { snapped.x, player_pos.position.y + direction.y }, player_pos.size );
+    if ( not is_valid_move( aligned_move ) ) return false;
+
+    const float nudge = std::copysign( std::min( std::abs( offset ), step ), offset );
+    if ( horizontal ) { resolved_dir_vector.y = nudge; }
+    else { resolved_dir_vector.x = nudge; }
+    moved_perp = true;
+    can_move = true;
+    return true;
+  };
+
   auto try_horizontal = [&]()
   {
+    // No horizontal input: nothing to resolve. Must not touch resolved_dir_vector here, otherwise a
+    // perpendicular nudge applied by the vertical axis' corner assist would be overwritten.
+    if ( direction.x == 0.0f ) return;
+
     if ( not collision_detect_enabled or is_valid_move( next_horizontal_move ) )
     {
       can_move = true;
       resolved_dir_vector.x = direction.x;
     }
-    else if ( direction.x != 0.0f )
+    else if ( not try_corner_assist( true ) and resolved_dir_vector.x == 0.0f )
     {
-      const float y_offset = Utils::snap_to_grid( player_pos ).position.y - player_pos.position.y;
-      const float nudge = std::copysign( std::min( std::abs( y_offset ), step ), y_offset );
-      const sf::FloatRect nudged( { player_pos.position.x + direction.x, player_pos.position.y + nudge }, player_pos.size );
-      if ( is_valid_move( nudged ) and not moved_perp )
-      {
-        moved_perp = true;
-        can_move = true;
-        resolved_dir_vector.x = direction.x;
-        resolved_dir_vector.y = nudge;
-      }
-      else
-      {
-        // ensure player moves fully against obstacle edge
-        on_update_player_position_event(
-            Events::UpdatePlayerPositionEvent( { Utils::snap_to_grid( player_pos ).position.x, player_pos.position.y } ) );
-      }
+      // ensure player moves fully against obstacle edge (skipped if x already carries a corner-assist nudge)
+      on_update_player_position_event(
+          Events::UpdatePlayerPositionEvent( { Utils::snap_to_grid( player_pos ).position.x, player_pos.position.y } ) );
     }
   };
 
   auto try_vertical = [&]()
   {
+    // No vertical input: see try_horizontal.
+    if ( direction.y == 0.0f ) return;
+
     if ( not collision_detect_enabled or is_valid_move( next_vertical_move ) )
     {
       can_move = true;
       resolved_dir_vector.y = direction.y;
     }
-    else if ( direction.y != 0.0f )
+    else if ( not try_corner_assist( false ) and resolved_dir_vector.y == 0.0f )
     {
-      const float x_offset = Utils::snap_to_grid( player_pos ).position.x - player_pos.position.x;
-      const float nudge = std::copysign( std::min( std::abs( x_offset ), step ), x_offset );
-      const sf::FloatRect nudged( { player_pos.position.x + nudge, player_pos.position.y + direction.y }, player_pos.size );
-      if ( is_valid_move( nudged ) and not moved_perp )
-      {
-        moved_perp = true;
-        can_move = true;
-        resolved_dir_vector.x = nudge;
-        resolved_dir_vector.y = direction.y;
-      }
-      else
-      {
-        // else ensure player moves fully against obstacle edge
-        on_update_player_position_event(
-            Events::UpdatePlayerPositionEvent( { player_pos.position.x, Utils::snap_to_grid( player_pos ).position.y } ) );
-      }
+      // ensure player moves fully against obstacle edge (skipped if y already carries a corner-assist nudge)
+      on_update_player_position_event(
+          Events::UpdatePlayerPositionEvent( { player_pos.position.x, Utils::snap_to_grid( player_pos ).position.y } ) );
     }
   };
 
@@ -562,6 +578,41 @@ void PlayerSystem::update_player_position( sf::Time dt )
   {
     try_vertical();
     try_horizontal();
+  }
+
+  // Diagonal gap catch: with two perpendicular directions held, one axis slides freely along a wall while the
+  // other is blocked. Without this, catching a 1-cell opening in that wall depends on a frame happening to land
+  // within the sub-pixel window where the player fits, so at speed the slide frequently steps straight past it.
+  // If this frame's slide would reach or cross the next grid-aligned position, and the blocked axis' move is
+  // valid from there (i.e. there is an opening), clamp the slide to stop exactly aligned with the opening.
+  // Next frame both axes pass individually but the combined diagonal step doesn't (see below), so the player
+  // holds at the opening until one key is released.
+  if ( can_move and collision_detect_enabled and direction.x != 0.0f and direction.y != 0.0f and
+       Sys::PersistSystem::get<Cmp::Persist::PlayerDiagonalGapCatch>( reg() ).get_value() )
+  {
+    auto catch_gap = [&]( bool slide_horizontal )
+    {
+      const float grid = Constants::kGridSizePxF.x;
+      const float pos = slide_horizontal ? player_pos.position.x : player_pos.position.y;
+      const float slide = slide_horizontal ? resolved_dir_vector.x : resolved_dir_vector.y;
+
+      // next grid line strictly ahead in the slide direction (an aligned player whose blocked axis still
+      // failed has no opening here, so look for the next one)
+      const float next_line = slide > 0.f ? ( std::floor( pos / grid ) + 1.f ) * grid : ( std::ceil( pos / grid ) - 1.f ) * grid;
+      if ( std::abs( next_line - pos ) > std::abs( slide ) ) return;
+
+      const sf::FloatRect opening_probe = slide_horizontal
+                                              ? sf::FloatRect( { next_line, player_pos.position.y + direction.y }, player_pos.size )
+                                              : sf::FloatRect( { player_pos.position.x + direction.x, next_line }, player_pos.size );
+      if ( not is_valid_move( opening_probe ) ) return;
+
+      if ( slide_horizontal ) { resolved_dir_vector.x = next_line - pos; }
+      else { resolved_dir_vector.y = next_line - pos; }
+    };
+
+    // exactly one axis moving freely means the other one was blocked
+    if ( resolved_dir_vector.x != 0.0f and resolved_dir_vector.y == 0.0f ) { catch_gap( true ); }
+    else if ( resolved_dir_vector.y != 0.0f and resolved_dir_vector.x == 0.0f ) { catch_gap( false ); }
   }
 
   if ( can_move and collision_detect_enabled and resolved_dir_vector.x != 0.0f and resolved_dir_vector.y != 0.0f )
@@ -1241,7 +1292,11 @@ void PlayerSystem::blink_player()
 
 bool PlayerSystem::is_valid_move( const sf::FloatRect &target_position )
 {
-  auto search_bounds = Cmp::RectBounds::scaled( target_position.position, target_position.size, 1 );
+  // Shrink the collision query by a sub-pixel margin on each side (centred) so float error at exact grid
+  // alignment (e.g. 47.9999 vs 48) doesn't register as an overlap with a neighbouring obstacle.
+  constexpr float kCollisionInsetPx = 0.5f;
+  const float inset_scale = target_position.size.x > 0.f ? 1.f - ( 2.f * kCollisionInsetPx ) / target_position.size.x : 1.f;
+  auto search_bounds = Cmp::RectBounds::scaled( target_position.position, target_position.size, inset_scale );
 
   // while flying only walls, level boundaries and multiblocks larger than 1x1 block the player
   const bool flying = Utils::Player::is_flying( reg() );
