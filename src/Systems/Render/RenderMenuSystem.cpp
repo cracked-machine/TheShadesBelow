@@ -128,6 +128,12 @@
 #include <Components/Persistent/StatChangeDisplayDuration.hpp>
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/TachycardiaMovementSpeed.hpp>
+#include <Components/Persistent/GraveOddsBombTrap.hpp>
+#include <Components/Persistent/GraveOddsCurseTablet.hpp>
+#include <Components/Persistent/GraveOddsJewelry.hpp>
+#include <Components/Persistent/GraveOddsNpcTrap.hpp>
+#include <Components/Persistent/GraveOddsTalisman.hpp>
+#include <Components/Persistent/GraveOddsTorch.hpp>
 #include <Components/Persistent/TalismanMinChance.hpp>
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
@@ -432,6 +438,45 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailStartCount>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::TalismanMinChance>( reg() ).render_widget();
+
+    // Grave consequence odds line, one vertical slider per consequence, worst (0) to best (100)
+    ImGui::TextUnformatted( "Grave Consequence Odds" );
+    ImGui::TextDisabled( "0 = worst, 100 = best; equal values share a band; applies next level" );
+    {
+      const std::array<Cmp::Persist::BasePersistent<int> *, 6> odds_settings{
+          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsCurseTablet>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsBombTrap>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsTorch>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsNpcTrap>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsJewelry>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsTalisman>( reg() ),
+      };
+      // every column is as wide as the widest slider or label, so the sliders sit at equal x intervals
+      const ImVec2 slider_size( 48.0f, 160.0f );
+      float column_width = slider_size.x;
+      for ( auto *setting : odds_settings )
+        column_width = std::max( column_width, ImGui::CalcTextSize( setting->get_detail_ptr()->c_str() ).x );
+      column_width += ImGui::GetStyle().ItemSpacing.x;
+
+      const float row_start_x = ImGui::GetCursorPosX();
+      for ( std::size_t i = 0; i < odds_settings.size(); ++i )
+      {
+        auto &setting = *odds_settings[i];
+        const float column_x = row_start_x + column_width * static_cast<float>( i );
+        if ( i > 0 ) ImGui::SameLine( column_x );
+        ImGui::PushID( &setting );
+        ImGui::BeginGroup();
+        // centre the slider and its label within the column
+        ImGui::SetCursorPosX( column_x + ( column_width - slider_size.x ) * 0.5f );
+        ImGui::VSliderScalar( "##odds", slider_size, ImGuiDataType_S32, setting.get_value_ptr(), setting.get_min_value_ptr(),
+                              setting.get_max_value_ptr(), setting.get_format().empty() ? "%d" : setting.get_format().c_str() );
+        const char *label = setting.get_detail_ptr()->c_str();
+        ImGui::SetCursorPosX( column_x + ( column_width - ImGui::CalcTextSize( label ).x ) * 0.5f );
+        ImGui::TextUnformatted( label );
+        ImGui::EndGroup();
+        ImGui::PopID();
+      }
+    }
     Sys::PersistSystem::get<Cmp::Persist::GraveCountMargin>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailGuideColour>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ExitKeyRequirement>( reg() ).render_widget();

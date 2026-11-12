@@ -56,6 +56,12 @@
 #include <Components/Persistent/GraveTrailNominalHopCount.hpp>
 #include <Components/Persistent/GraveTrailStartCount.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
+#include <Components/Persistent/GraveOddsBombTrap.hpp>
+#include <Components/Persistent/GraveOddsCurseTablet.hpp>
+#include <Components/Persistent/GraveOddsJewelry.hpp>
+#include <Components/Persistent/GraveOddsNpcTrap.hpp>
+#include <Components/Persistent/GraveOddsTalisman.hpp>
+#include <Components/Persistent/GraveOddsTorch.hpp>
 #include <Components/Persistent/TalismanMinChance.hpp>
 #include <Components/Persistent/GraveCountMargin.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
@@ -217,6 +223,12 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::GraveTrailStartCount>();
   add_component<Cmp::Persist::MaxLevelDepth>();
   add_component<Cmp::Persist::TalismanMinChance>();
+  add_component<Cmp::Persist::GraveOddsCurseTablet>();
+  add_component<Cmp::Persist::GraveOddsBombTrap>();
+  add_component<Cmp::Persist::GraveOddsTorch>();
+  add_component<Cmp::Persist::GraveOddsNpcTrap>();
+  add_component<Cmp::Persist::GraveOddsJewelry>();
+  add_component<Cmp::Persist::GraveOddsTalisman>();
   add_component<Cmp::Persist::GraveCountMargin>();
   add_component<Cmp::Persist::GraveTrailGuideColour>();
   add_component<Cmp::Persist::GraveyardProcGenInitChance>();

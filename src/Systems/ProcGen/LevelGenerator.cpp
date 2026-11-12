@@ -32,6 +32,12 @@
 #include <Components/Persistent/MinNumHealingSprings.hpp>
 #include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
+#include <Components/Persistent/GraveOddsBombTrap.hpp>
+#include <Components/Persistent/GraveOddsCurseTablet.hpp>
+#include <Components/Persistent/GraveOddsJewelry.hpp>
+#include <Components/Persistent/GraveOddsNpcTrap.hpp>
+#include <Components/Persistent/GraveOddsTalisman.hpp>
+#include <Components/Persistent/GraveOddsTorch.hpp>
 #include <Components/Persistent/TalismanMinChance.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
@@ -541,9 +547,26 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
     const size_t altar_activation_count = Cmp::Altar::TalismanCount::kAltarTalismanCount;
     // trail graves skip their consequence, so each altar activation's talismans are dug from graves off the trail.
     // Sized for the worst case: the talisman chance never drops below Cmp::Persist::TalismanMinChance
+    // the odds line is fixed per level, so settings changes take effect from the next level
+    using Slot = Cmp::Grave::Consequence::Slot;
+    using ConsequenceType = Cmp::Grave::Consequence::Type;
+    const auto consequence_line = Cmp::Grave::Consequence::make_line( {
+        Slot{ .type = ConsequenceType::CURSE_TABLET, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsCurseTablet>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::BOMB_TRAP, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsBombTrap>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::TORCH, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsTorch>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::NPC_TRAP, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsNpcTrap>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::JEWELRY, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsJewelry>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::TALISMAN, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsTalisman>( reg() ).get_value() },
+    } );
     // Consequence caps the floor at the talisman band width, so size for the capped value
+    int max_talisman_floor_pct = Cmp::Grave::Consequence::max_talisman_floor_pct( consequence_line );
+    if ( max_talisman_floor_pct < 1 )
+    {
+      SPDLOG_WARN( "Grave odds leave no band for talismans (width {}): the talisman min chance cannot be guaranteed", max_talisman_floor_pct );
+      max_talisman_floor_pct = 1;
+    }
     const int min_talisman_chance_pct = std::clamp( Sys::PersistSystem::get<Cmp::Persist::TalismanMinChance>( reg() ).get_value(), 1,
-                                                    Cmp::Grave::Consequence::max_talisman_floor_pct() );
+                                                    max_talisman_floor_pct );
     const auto min_talisman_chance = static_cast<size_t>( min_talisman_chance_pct );
     const size_t talisman_graves = ( altar_activation_count * 100 + min_talisman_chance - 1 ) / min_talisman_chance;
     const size_t trail_graves = ( trail_size + max_level_depth ) * exit_and_crypt_key_multiplier + trail_start_count;
@@ -569,7 +592,8 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
           reg(), pos->position, spritesheet, index, 0, m_reserved_sm.get() );
       m_reserved_sm->insert( mb_entt, pos.value() );
       // fix the roll at creation; the consequence is resolved against the player's current luck when needed
-      auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 100 ).gen(), min_talisman_chance_pct );
+      auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 100 ).gen(), min_talisman_chance_pct,
+                                                                              consequence_line );
       // simulate the rolls now to get an idea of the distribution with game start player luck
       grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck() )]++;
       placed_num_graves++;
