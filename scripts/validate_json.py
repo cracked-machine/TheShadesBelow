@@ -18,6 +18,7 @@ SCHEMA_SUFFIX = "_schema.json"
 # <fields> (if a string) must be a name from <target>.json, or one of the allowed sentinels.
 # (key, fields, target, label, names_from_target, sentinels)
 REF_CHECKS = [
+    # Applies to every action "sfx" object, in items.json and npc.json alike.
     # sfx names are looked up via SoundBank::get_effect(), so only "sounds" (not "music") counts.
     # Empty string means "play nothing".
     ("sfx", ("loop", "final"), "audio", "sound",

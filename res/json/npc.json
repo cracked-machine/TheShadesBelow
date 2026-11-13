@@ -25,7 +25,8 @@
     "sprites": [ "sprite.burryman"],
     "lerpspeed": 1.5,
     "actions": [
-      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
+                                "sfx": { "final": "chopping_final" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 1, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 5 }},
       { "projectile_action":  { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -124,7 +125,8 @@
     "sprites": ["sprite.skeleton.walk.south", "sprite.skeleton.walk.north", "sprite.skeleton.walk.east", "sprite.skeleton.walk.west"],
     "lerpspeed": 0.8,
     "actions": [
-      { "destroy_action":     { "health": 0, "fear": -10, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": -10, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
+                                "sfx": { "final": "rattling_bones" } }},
       { "spawn_action":       { "health": 0, "fear": 1, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 1, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 5 }},
       { "projectile_action":  { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},

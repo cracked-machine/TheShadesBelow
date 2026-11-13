@@ -210,10 +210,8 @@ void ArrowSystem::check_npc_arrow_collision()
       if ( not npc_pos_cmp.findIntersection( arrow_pos_cmp ) ) continue;
       cached_npc_pos_cmp = npc_pos_cmp;
       cached_npc_type = npc_cmp.npc_type;
-      std::optional<std::string> death_sfx;
-      if ( npc_cmp.npc_type == "npc.skeleton" ) { death_sfx = "rattling_bones"; }
-      else if ( npc_cmp.npc_type == "npc.burryman" ) { death_sfx = "chopping_final"; }
-      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, std::nullopt, death_sfx, Events::DestroyNpcEvent::Cause::ARROW ) );
+      // the death sfx is the NPC's destroy_action sfx (see npc.json), played by the DestroyNpcEvent handler
+      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, std::nullopt, std::nullopt, Events::DestroyNpcEvent::Cause::ARROW ) );
     }
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::Container, Cmp::Position>().each() )
     {
@@ -237,7 +235,6 @@ void ArrowSystem::check_npc_arrow_collision()
 
   if ( cached_npc_pos_cmp.position != sf::Vector2f{ -100.f, -100.f } )
   {
-    // the death sfx is played by the DestroyNpcEvent handler
     if ( cached_npc_type == "npc.skeleton" )
     {
       auto skelebones_particle_uuid = Cmp::UUID::generate();
