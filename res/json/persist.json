@@ -507,7 +507,7 @@
   },
   "GraveOddsTalisman": {
     "type": "int",
-    "value": 60,
+    "value": 50,
     "min_value": 0,
     "max_value": 100,
     "detail": "Talisman",
@@ -564,7 +564,7 @@
   },
   "HazardPushbackResist": {
     "type": "float",
-    "value": 0.25,
+    "value": 0.3,
     "min_value": 0.0,
     "max_value": 2.0,
     "detail": "How long the player must keep pushing into a lethal hazard cell before falling in",

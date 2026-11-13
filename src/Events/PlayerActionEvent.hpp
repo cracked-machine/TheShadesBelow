@@ -44,7 +44,9 @@ struct PlayerActionEvent
     //! @brief Attempt to burn the nearest/facing plant object.
     BURN,
     //! @brief Fly key is held this frame (witchesbroom). See Sys::FlyingSystem.
-    FLY
+    FLY,
+    //! @brief Attempt to forage the mouse-selected plant the player is facing. See Sys::PlantSystem::forage_plant().
+    FORAGE
   };
 
   //! @brief Construct a new PlayerActionEvent object
