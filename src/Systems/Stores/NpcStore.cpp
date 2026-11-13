@@ -9,6 +9,7 @@
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
+#include <Systems/Stores/ActionJson.hpp>
 #include <Systems/Stores/NpcStore.hpp>
 #include <Utils/JsonDeserializer.hpp>
 
@@ -46,16 +47,16 @@ void NpcStore::init_store()
       {
         try
         {
-          if ( action_key == Cmp::BurnAction::kKey ) { npc.emplace( make_action<Cmp::BurnAction>( action_value ) ); }
-          else if ( action_key == Cmp::CarryAction::kKey ) { npc.emplace( make_action<Cmp::CarryAction>( action_value ) ); }
-          else if ( action_key == Cmp::ConsumeAction::kKey ) { npc.emplace( make_action<Cmp::ConsumeAction>( action_value ) ); }
-          else if ( action_key == Cmp::DestroyAction::kKey ) { npc.emplace( make_action<Cmp::DestroyAction>( action_value ) ); }
-          else if ( action_key == Cmp::ForageAction::kKey ) { npc.emplace( make_action<Cmp::ForageAction>( action_value ) ); }
-          else if ( action_key == Cmp::SpawnAction::kKey ) { npc.emplace( make_action<Cmp::SpawnAction>( action_value ) ); }
-          else if ( action_key == Cmp::ProximityAction::kKey ) { npc.emplace( make_action<Cmp::ProximityAction>( action_value ) ); }
-          else if ( action_key == Cmp::OfferingAction::kKey ) { npc.emplace( make_action<Cmp::OfferingAction>( action_value ) ); }
-          else if ( action_key == Cmp::ProjectileAction::kKey ) { npc.emplace( make_action<Cmp::ProjectileAction>( action_value ) ); }
-          else if ( action_key == Cmp::CollisionAction::kKey ) { npc.emplace( make_action<Cmp::CollisionAction>( action_value ) ); }
+          if ( action_key == Cmp::BurnAction::kKey ) { npc.emplace( Detail::make_action<Cmp::BurnAction>( action_value ) ); }
+          else if ( action_key == Cmp::CarryAction::kKey ) { npc.emplace( Detail::make_action<Cmp::CarryAction>( action_value ) ); }
+          else if ( action_key == Cmp::ConsumeAction::kKey ) { npc.emplace( Detail::make_action<Cmp::ConsumeAction>( action_value ) ); }
+          else if ( action_key == Cmp::DestroyAction::kKey ) { npc.emplace( Detail::make_action<Cmp::DestroyAction>( action_value ) ); }
+          else if ( action_key == Cmp::ForageAction::kKey ) { npc.emplace( Detail::make_action<Cmp::ForageAction>( action_value ) ); }
+          else if ( action_key == Cmp::SpawnAction::kKey ) { npc.emplace( Detail::make_action<Cmp::SpawnAction>( action_value ) ); }
+          else if ( action_key == Cmp::ProximityAction::kKey ) { npc.emplace( Detail::make_action<Cmp::ProximityAction>( action_value ) ); }
+          else if ( action_key == Cmp::OfferingAction::kKey ) { npc.emplace( Detail::make_action<Cmp::OfferingAction>( action_value ) ); }
+          else if ( action_key == Cmp::ProjectileAction::kKey ) { npc.emplace( Detail::make_action<Cmp::ProjectileAction>( action_value ) ); }
+          else if ( action_key == Cmp::CollisionAction::kKey ) { npc.emplace( Detail::make_action<Cmp::CollisionAction>( action_value ) ); }
           else { SPDLOG_WARN( "Unknown action key: {}", action_key ); }
         } catch ( const std::exception &e )
         {

@@ -1,10 +1,13 @@
 #ifndef SRC_COMPONENTS_NPC_NPC_HPP__
 #define SRC_COMPONENTS_NPC_NPC_HPP__
 
-#include <Components/Stats/BaseAction.hpp>
+#include <Components/Stats/ActionSet.hpp>
+#include <Components/Stats/BaseActionFwd.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
 #include <typeindex>
+#include <typeinfo>
+#include <vector>
 
 namespace Game::Cmp::Npc
 {
@@ -45,48 +48,37 @@ public:
   //! @brief Interpolation speed used when smoothing this NPC's movement.
   float m_lerp_speed{ 0 };
 
-  //! @brief Object holding a list of action modifiers and time object
-  struct ActionTimePair
-  {
-    //! @brief Record of player stat modifiers for a specific action.
-    BaseAction action;
-    //! @brief Time elapsed for a specific action. This can be used for applying modifiers from a specific NPC instance.
-    sf::Time time;
-  };
-
   //! @brief Get the action/time pair keyed by ActionT. Every action is optional in npc.json: if absent, a zeroed
   //! (no effect) action is inserted, so the returned timer is owned by this NPC. Use has_action() beforehand if
   //! "absent" must be told apart from "present but no effect".
+  //! @note The caller includes the ActionT header (e.g. ProximityAction.hpp), which completes ActionTimePair.
   template <typename ActionT>
   ActionTimePair &at()
   {
-    return actions.try_emplace( std::type_index( typeid( ActionT ) ), ActionTimePair{ no_action(), sf::Time::Zero } ).first->second;
+    return m_actions.at( std::type_index( typeid( ActionT ) ) );
   }
   //! @brief Get the action/time pair keyed by ActionT, or a shared zeroed (no effect) pair if absent.
   template <typename ActionT>
   const ActionTimePair &at() const
   {
-    static const ActionTimePair kNone{ no_action(), sf::Time::Zero };
-    const auto it = actions.find( std::type_index( typeid( ActionT ) ) );
-    return it != actions.end() ? it->second : kNone;
+    return m_actions.at( std::type_index( typeid( ActionT ) ) );
   }
   //! @brief Whether the NPC has an ActionT, see res/json/npc.json.
   template <typename ActionT>
   [[nodiscard]] bool has_action() const
   {
-    return actions.contains( std::type_index( typeid( ActionT ) ) );
+    return m_actions.contains( std::type_index( typeid( ActionT ) ) );
   }
+  //! @brief Add an action keyed by its concrete type.
   template <typename ActionT>
-  void emplace( ActionT action )
+  void emplace( const ActionT &action )
   {
-    actions.emplace( std::type_index( typeid( ActionT ) ), ActionTimePair{ action, sf::Time::Zero } );
+    m_actions.emplace( std::type_index( typeid( ActionT ) ), action );
   }
-  auto begin() { return actions.begin(); }
-  auto end() { return actions.end(); }
 
 private:
-  //! @brief The list of action modifiers and their current elapsed time
-  std::unordered_map<std::type_index, ActionTimePair> actions;
+  //! @brief The action modifiers and their current elapsed time
+  ActionSet m_actions;
 };
 } // namespace Game::Cmp::Npc
 

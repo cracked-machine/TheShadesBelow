@@ -14,6 +14,7 @@
 #include <Components/Player/Character.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
+#include <Components/Stats/BaseAction.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/DestroyNpcEvent.hpp>

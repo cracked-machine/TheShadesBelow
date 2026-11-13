@@ -7,6 +7,7 @@
 #include <Components/Stats/OfferingAction.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <SFML/System/Time.hpp>
+#include <Systems/Stores/ActionJson.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/JsonDeserializer.hpp>
@@ -89,14 +90,14 @@ void ItemStore::init_store()
       {
         try
         {
-          if ( action_key == Cmp::BurnAction::kKey ) { worlditem.emplace( make_action<Cmp::BurnAction>( action_value ) ); }
-          else if ( action_key == Cmp::CarryAction::kKey ) { worlditem.emplace( make_action<Cmp::CarryAction>( action_value ) ); }
-          else if ( action_key == Cmp::ConsumeAction::kKey ) { worlditem.emplace( make_action<Cmp::ConsumeAction>( action_value ) ); }
-          else if ( action_key == Cmp::DestroyAction::kKey ) { worlditem.emplace( make_action<Cmp::DestroyAction>( action_value ) ); }
-          else if ( action_key == Cmp::ForageAction::kKey ) { worlditem.emplace( make_action<Cmp::ForageAction>( action_value ) ); }
-          else if ( action_key == Cmp::SpawnAction::kKey ) { worlditem.emplace( make_action<Cmp::SpawnAction>( action_value ) ); }
-          else if ( action_key == Cmp::ProximityAction::kKey ) { worlditem.emplace( make_action<Cmp::ProximityAction>( action_value ) ); }
-          else if ( action_key == Cmp::OfferingAction::kKey ) { worlditem.emplace( make_action<Cmp::OfferingAction>( action_value ) ); }
+          if ( action_key == Cmp::BurnAction::kKey ) { worlditem.emplace( Detail::make_action<Cmp::BurnAction>( action_value ) ); }
+          else if ( action_key == Cmp::CarryAction::kKey ) { worlditem.emplace( Detail::make_action<Cmp::CarryAction>( action_value ) ); }
+          else if ( action_key == Cmp::ConsumeAction::kKey ) { worlditem.emplace( Detail::make_action<Cmp::ConsumeAction>( action_value ) ); }
+          else if ( action_key == Cmp::DestroyAction::kKey ) { worlditem.emplace( Detail::make_action<Cmp::DestroyAction>( action_value ) ); }
+          else if ( action_key == Cmp::ForageAction::kKey ) { worlditem.emplace( Detail::make_action<Cmp::ForageAction>( action_value ) ); }
+          else if ( action_key == Cmp::SpawnAction::kKey ) { worlditem.emplace( Detail::make_action<Cmp::SpawnAction>( action_value ) ); }
+          else if ( action_key == Cmp::ProximityAction::kKey ) { worlditem.emplace( Detail::make_action<Cmp::ProximityAction>( action_value ) ); }
+          else if ( action_key == Cmp::OfferingAction::kKey ) { worlditem.emplace( Detail::make_action<Cmp::OfferingAction>( action_value ) ); }
           else { SPDLOG_WARN( "Unknown action key: {}", action_key ); }
         } catch ( const std::exception &e )
         {
@@ -143,7 +144,7 @@ void ItemStore::init_store()
       }
     }
     // only an offering reward can be altar specific
-    for ( const auto &[action_type, action_pair] : worlditem )
+    for ( const auto &[action_type, action_pair] : worlditem.actions() )
     {
       if ( action_type == std::type_index( typeid( Cmp::OfferingAction ) ) ) continue;
       const auto &rewards = action_pair.action.rewards();

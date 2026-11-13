@@ -1,7 +1,7 @@
 #ifndef SRC_COMPONENTS_STATS_PLAYERSTATS_HPP__
 #define SRC_COMPONENTS_STATS_PLAYERSTATS_HPP__
 
-#include <Components/Stats/BaseAction.hpp>
+#include <Components/Stats/StatDeltas.hpp>
 #include <algorithm>
 #include <memory>
 
@@ -12,6 +12,7 @@ class Toxidrome;
 
 namespace Game::Cmp
 {
+class BaseAction;
 
 //! @brief Holds the player's core stats (health, fear, despair, infamy, toxicity, toxidrome), each
 //! clamped to [0, 100], and applies BaseAction-derived modifiers to them.

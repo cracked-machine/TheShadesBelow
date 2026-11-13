@@ -2,6 +2,9 @@
 #define SRC_COMPONENTS_STATS_BASEACTION_HPP__
 
 #include <Components/Altar/Kind.hpp>
+#include <Components/Stats/BaseActionFwd.hpp>
+#include <Components/Stats/StatDeltas.hpp>
+#include <SFML/System/Time.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
 #include <algorithm>
@@ -9,6 +12,8 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <typeindex>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -20,60 +25,6 @@ class Toxidrome;
 namespace Game::Cmp
 {
 class PlayerStats;
-
-namespace Stats
-{
-
-//! @brief Strongly-typed health delta, used to disambiguate BaseAction/derived-action constructor arguments.
-struct Health
-{
-  //! @brief The change applied to the health stat.
-  int value{ 0 };
-};
-
-//! @brief Strongly-typed fear delta, used to disambiguate BaseAction/derived-action constructor arguments.
-struct Fear
-{
-  //! @brief The change applied to the fear stat.
-  int value{ 0 };
-};
-
-//! @brief Strongly-typed despair delta, used to disambiguate BaseAction/derived-action constructor arguments.
-struct Despair
-{
-  //! @brief The change applied to the despair stat.
-  int value{ 0 };
-};
-
-//! @brief Strongly-typed infamy delta, used to disambiguate BaseAction/derived-action constructor arguments.
-struct Infamy
-{
-  //! @brief The change applied to the infamy stat.
-  int value{ 0 };
-};
-
-//! @brief Strongly-typed luck delta, used to disambiguate BaseAction/derived-action constructor arguments.
-struct Luck
-{
-  //! @brief The change applied to the luck stat.
-  int value{ 0 };
-};
-
-//! @brief Strongly-typed anima delta, used to disambiguate BaseAction/derived-action constructor arguments.
-struct Anima
-{
-  //! @brief The change applied to the anima stat.
-  int value{ 0 };
-};
-
-//! @brief Strongly-typed tick interval, used to disambiguate BaseAction/derived-action constructor arguments.
-struct Tick
-{
-  //! @brief How often (seconds) the action re-applies, or 0 for a one-shot.
-  float value{ 0 };
-};
-
-} // namespace Stats
 
 //! @brief How likely a side effect is to fire each time its action is applied.
 enum class Probability {
@@ -348,8 +299,7 @@ struct ActionReward
   }
 };
 
-//! @brief The rewards of an action. Only an offering_action may have more than one, each for a different altar location.
-using ActionRewards = std::vector<ActionReward>;
+// ActionRewards (std::vector<ActionReward>) is declared in BaseActionFwd.hpp
 
 //! @brief How an item wears while one of its actions is in effect. See "wear" in res/json/items.json: on spawn_action it
 //! wears in the world, on carry_action in the inventory, on proximity_action each time the action is applied.
@@ -521,6 +471,21 @@ private:
 //! @brief An action with no effect: zero stat deltas, one-shot tick, and no toxidrome, side effects, rewards, wear
 //! or sfx. Returned for any action an item or NPC omits from res/json/items.json or res/json/npc.json.
 [[nodiscard]] inline BaseAction no_action() { return BaseAction( { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0.f } ); }
+
+//! @brief Pairs a stat-modifier action with the timestamp/duration used to schedule its re-application.
+struct ActionTimePair
+{
+  //! @brief The stat modifier to apply.
+  BaseAction action;
+  //! @brief The time associated with the action (e.g. last-applied time or remaining duration).
+  sf::Time time;
+};
+
+//! @brief The actions of an item or NPC keyed by the std::type_index of their concrete type, see Cmp::ActionSet.
+//! A struct rather than an alias so it can be forward declared in BaseActionFwd.hpp.
+struct ActionMap : std::unordered_map<std::type_index, ActionTimePair>
+{
+};
 
 } // namespace Game::Cmp
 

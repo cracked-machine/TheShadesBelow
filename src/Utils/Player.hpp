@@ -15,6 +15,7 @@
 
 namespace Game::Cmp
 {
+class BaseAction;
 class Position;
 class RectBounds;
 class PlayerHealth;

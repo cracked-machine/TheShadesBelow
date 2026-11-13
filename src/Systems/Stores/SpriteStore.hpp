@@ -24,6 +24,9 @@ private:
   void init_store();
 };
 
+//! @brief Instantiated once in StoreSingleton.cpp; stops every includer compiling its own copy.
+extern template class StoreSingleton<SpriteStore, Sprites::SpriteSheet>;
+
 } // namespace Game::Sys
 
 #endif // SRC_SYSTEMS_STORES_SPRITESTORE_HPP__

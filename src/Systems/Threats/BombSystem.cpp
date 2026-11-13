@@ -27,6 +27,7 @@
 #include <Components/Player/Mortality.hpp>
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
+#include <Components/Stats/BaseAction.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>

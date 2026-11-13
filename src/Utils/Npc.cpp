@@ -12,7 +12,6 @@
 #include <PathFinding/AStar.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/Render/RenderSystem.hpp>
-#include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>

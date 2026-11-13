@@ -20,7 +20,6 @@
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
-#include <Systems/Stores/SpriteStore.hpp>
 
 namespace Game::Scene
 {

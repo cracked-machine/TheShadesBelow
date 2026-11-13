@@ -148,6 +148,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Components/Font.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Persistent/BasePersistent.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Persistent/PlayerStartPosition.cpp
+    ${CMAKE_SOURCE_DIR}/src/Components/Stats/ActionSet.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Stats/BaseAction.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Stats/PlayerStats.cpp
     ${CMAKE_SOURCE_DIR}/src/PathFinding/SpatialHashGrid.cpp
@@ -155,6 +156,8 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/PathFinding/BreadthFirst.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Toxicity/Toxidrome.cpp
     ${CMAKE_SOURCE_DIR}/src/Components/Npc/Footprint.cpp
+    ${CMAKE_SOURCE_DIR}/src/Components/Inventory/Grimoire.cpp
+    ${CMAKE_SOURCE_DIR}/src/Components/Inventory/WorldItem.cpp
 )
 
 target_precompile_headers(TheShadesBelow PRIVATE

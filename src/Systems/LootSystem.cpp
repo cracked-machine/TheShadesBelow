@@ -20,6 +20,7 @@
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
+#include <Components/Stats/BaseAction.hpp>
 #include <Components/UUID.hpp>
 #include <Events/CryptRoomEvent.hpp>
 #include <Factory/LootFactory.hpp>

@@ -55,6 +55,9 @@ private:
   void init_store();
 };
 
+//! @brief Instantiated once in StoreSingleton.cpp; stops every includer compiling its own copy.
+extern template class StoreSingleton<ItemStore, Cmp::WorldItem>;
+
 } // namespace Game::Sys
 
 #endif // SRC_SYSTEMS_STORES_ITEMSTORE_HPP__

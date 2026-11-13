@@ -1,3 +1,4 @@
+#include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/PlayerStats.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <spdlog/spdlog.h>

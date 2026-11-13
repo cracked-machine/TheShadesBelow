@@ -2,6 +2,7 @@
 #include <Components/Persistent/RetainAnimaBetweenLevels.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Wealth.hpp>
+#include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/PlayerStats.hpp>
 #include <SceneControl/Events/ProcessLevelCompleteSceneInputEvent.hpp>
 #include <SceneControl/Scenes/LevelCompleteScene.hpp>

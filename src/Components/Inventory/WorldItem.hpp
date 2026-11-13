@@ -1,22 +1,17 @@
 #ifndef SRC_COMPONENTS_INVENTORY_WORLDITEM_HPP__
 #define SRC_COMPONENTS_INVENTORY_WORLDITEM_HPP__
 
+#include <Components/Altar/Kind.hpp>
 #include <Components/Random.hpp>
-#include <Components/Stats/BaseAction.hpp>
-#include <Components/Stats/CarryAction.hpp>
-#include <Components/Stats/DestroyAction.hpp>
-#include <Components/Stats/ForageAction.hpp>
-#include <Components/Stats/OfferingAction.hpp>
-#include <Components/Stats/SpawnAction.hpp>
+#include <Components/Stats/ActionSet.hpp>
+#include <Components/Stats/BaseActionFwd.hpp>
 #include <SFML/System/Time.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
-#include <algorithm>
 #include <optional>
 #include <string>
 #include <typeindex>
 #include <typeinfo>
-#include <unordered_map>
 #include <utility>
 
 namespace Game::Cmp
@@ -35,15 +30,6 @@ public:
     EDIBLE,
     //! @brief The item can be drunk by the player.
     DRINKABLE
-  };
-
-  //! @brief Pairs a stat-modifier action with the timestamp/duration used to schedule its re-application.
-  struct ActionTimePair
-  {
-    //! @brief The stat modifier to apply.
-    BaseAction action;
-    //! @brief The time associated with the action (e.g. last-applied time or remaining duration).
-    sf::Time time;
   };
 
   //! @brief Construct a new, empty World Item object.
@@ -77,20 +63,18 @@ public:
   //! @brief Get the action/time pair keyed by ActionT. Every action is optional in items.json: if absent, a zeroed
   //! (no effect) action is inserted, so the returned timer is owned by this item. Use has_action() beforehand if
   //! "absent" must be told apart from "present but no effect".
+  //! @note The caller includes the ActionT header (e.g. CarryAction.hpp), which completes ActionTimePair.
   template <typename ActionT>
   ActionTimePair &at()
   {
-    return m_actions.try_emplace( std::type_index( typeid( ActionT ) ), ActionTimePair{ .action = no_action(), .time = sf::Time::Zero } )
-        .first->second;
+    return m_actions.at( std::type_index( typeid( ActionT ) ) );
   }
 
   //! @brief Get the action/time pair keyed by ActionT, or a shared zeroed (no effect) pair if absent.
   template <typename ActionT>
   const ActionTimePair &at() const
   {
-    static const ActionTimePair kNone{ .action = no_action(), .time = sf::Time::Zero };
-    const auto it = m_actions.find( std::type_index( typeid( ActionT ) ) );
-    return it != m_actions.end() ? it->second : kNone;
+    return m_actions.at( std::type_index( typeid( ActionT ) ) );
   }
 
   //! @brief Whether the item has an action keyed by ActionT.
@@ -100,114 +84,98 @@ public:
     return m_actions.contains( std::type_index( typeid( ActionT ) ) );
   }
 
-  //! @brief Get a copy of the action keyed by ActionT, or a zeroed (no effect) action if absent.
+  // The getters below deduce their return types: a spelled-out BaseAction / std::optional<ActionReward> would need
+  // BaseAction.hpp here. A missing action reads as no_action(), whose reward, rewards, spawn_npc and wear are empty.
+
+  //! @brief Get a copy of the action keyed by ActionT (a Cmp::BaseAction), or a zeroed (no effect) action if absent.
   template <typename ActionT>
-  BaseAction get_action() const
+  [[nodiscard]] auto get_action() const
   {
-    return std::as_const( *this ).template at<ActionT>().action;
+    return at<ActionT>().action;
   }
 
   //! @brief Get the reward of the action keyed by ActionT.
-  //! @return The reward, or std::nullopt if the item has no such action or the action has no reward.
+  //! @return std::optional<ActionReward>: the reward, or std::nullopt if the item has no such action or the action has no reward.
   template <typename ActionT>
-  [[nodiscard]] std::optional<ActionReward> get_reward() const
+  [[nodiscard]] auto get_reward() const
   {
-    if ( not has_action<ActionT>() ) return std::nullopt;
     return at<ActionT>().action.reward();
   }
 
   //! @brief Get all rewards of the action keyed by ActionT.
-  //! @return The rewards, empty if the item has no such action or the action has no reward.
+  //! @return ActionRewards: the rewards, empty if the item has no such action or the action has no reward.
   template <typename ActionT>
-  [[nodiscard]] ActionRewards get_rewards() const
+  [[nodiscard]] auto get_rewards() const
   {
-    if ( not has_action<ActionT>() ) return {};
     return at<ActionT>().action.rewards();
   }
 
   //! @brief Get the spawn npc effect of the action keyed by ActionT.
-  //! @return The npc spawn effect object, or std::nullopt if the item has no such action or the action has no npc spawn effect.
+  //! @return std::optional<SpawnNpcEffect>: the effect, or std::nullopt if the item has no such action or the action has
+  //! no npc spawn effect.
   template <typename ActionT>
-  [[nodiscard]] std::optional<SpawnNpcEffect> get_spawn_npc_effect() const
+  [[nodiscard]] auto get_spawn_npc_effect() const
   {
-    if ( not has_action<ActionT>() ) return std::nullopt;
     return at<ActionT>().action.side_effects().spawn_npc;
   }
 
   //! @brief Get the wear of the action keyed by ActionT ("wear" in items.json).
-  //! @return The wear, or std::nullopt if the item has no such action or the action has no wear.
+  //! @return std::optional<ActionWear>: the wear, or std::nullopt if the item has no such action or the action has no wear.
   template <typename ActionT>
-  [[nodiscard]] std::optional<ActionWear> get_wear() const
+  [[nodiscard]] auto get_wear() const
   {
-    if ( not has_action<ActionT>() ) return std::nullopt;
     return at<ActionT>().action.wear();
   }
 
-  //! @brief Add an action keyed by its concrete type. Must be a template: taking BaseAction by value would slice
-  //! the argument and key every action under typeid(BaseAction).
+  //! @brief Add an action keyed by its concrete type. Must be a template: keying by the BaseAction argument's type
+  //! would key every action under typeid(BaseAction).
   template <typename ActionT>
-  void emplace( ActionT action )
+  void emplace( const ActionT &action )
   {
-    m_actions.emplace( std::type_index( typeid( ActionT ) ), ActionTimePair{ action, sf::Time::Zero } );
+    m_actions.emplace( std::type_index( typeid( ActionT ) ), action );
   }
 
-  //! @brief Iterators over the item's actions.
-  auto begin() { return m_actions.begin(); }
-  auto end() { return m_actions.end(); }
+  //! @brief All of the item's actions.
+  [[nodiscard]] const ActionMap &actions() const { return m_actions.map(); }
 
   //! @brief Whether the item carries a Cmp::Inventory::WearLevel, i.e. any of its actions has a "wear" block in items.json.
-  bool has_wear() const
-  {
-    return std::ranges::any_of( m_actions, []( const auto &pair ) { return pair.second.action.wear().has_value(); } );
-  }
+  bool has_wear() const;
 
   //! @brief Whether the item wears while it is in the world ("spawn_action.wear" in items.json).
-  bool wears_in_world() const { return get_wear<SpawnAction>().has_value(); }
+  bool wears_in_world() const;
 
   //! @brief Time for the item to fully expire while it is in the world. Zero means it does not expire there.
-  sf::Time world_expiry() const { return sf::seconds( get_wear<SpawnAction>().value_or( ActionWear{} ).expiry_seconds ); }
+  sf::Time world_expiry() const;
 
   //! @brief Whether the item wears while it is in the player inventory ("carry_action.wear" in items.json).
-  bool wears_in_inventory() const { return get_wear<CarryAction>().has_value(); }
+  bool wears_in_inventory() const;
 
   //! @brief Time for the item to fully expire while it is in the player inventory. Zero means it does not expire there.
-  sf::Time inventory_expiry() const { return sf::seconds( get_wear<CarryAction>().value_or( ActionWear{} ).expiry_seconds ); }
+  sf::Time inventory_expiry() const;
 
   //! @brief Whether the item only wears in the inventory while it is actively in use (e.g. flute playing, broom flying).
-  bool wears_only_when_active() const { return get_wear<CarryAction>().value_or( ActionWear{} ).active_only; }
+  bool wears_only_when_active() const;
 
   //! @brief The reward for offering this item at the given kind of altar ("offering_action.reward" in items.json).
   //! @param location The kind of altar the item is offered at.
   //! @return The reward, or std::nullopt if the item can't be offered at that kind of altar.
-  std::optional<ActionReward> get_offering_reward( Altar::Kind location ) const
-  {
-    if ( not has_action<OfferingAction>() ) return std::nullopt;
-    return at<OfferingAction>().action.reward( location );
-  }
+  std::optional<ActionReward> get_offering_reward( Altar::Kind location ) const;
 
   //! @brief The npc spawn effect for offering this item at the altar ("side_effects.spawn_npc" in items.json).
   //! @return The reward, or std::nullopt if the item can't be offered.
-  std::optional<SpawnNpcEffect> get_offering_npc_spawn_effect() const { return get_spawn_npc_effect<OfferingAction>(); }
+  std::optional<SpawnNpcEffect> get_offering_npc_spawn_effect() const;
 
   //! @brief Whether this item can be offered at the altar, i.e. its offering_action has any effect: a non zero stat
   //! delta, a toxidrome, a side effect or a reward.
-  bool is_offerable() const { return has_action<OfferingAction>() and not at<OfferingAction>().action.is_zero(); }
+  bool is_offerable() const;
 
   //! @brief The item gained when this plant is foraged (empty hand or gloves), see "forage_action.reward.item" in
   //! items.json. Empty string is a no op.
-  Sys::ItemKey get_forage_output() const
-  {
-    const auto reward = get_reward<ForageAction>();
-    return reward ? reward->item : Sys::ItemKey();
-  }
+  Sys::ItemKey get_forage_output() const;
 
   //! @brief The item dropped when this plant is chopped with an axe, see "destroy_action.reward.item" in items.json.
   //! Empty string is a no op.
-  Sys::ItemKey get_axe_output() const
-  {
-    const auto reward = get_reward<DestroyAction>();
-    return reward ? reward->item : Sys::ItemKey();
-  }
+  Sys::ItemKey get_axe_output() const;
 
   //! @brief Damage done to the corresponding tool by this item.
   int get_pickaxe_damage() const { return m_pickaxe_damage; }
@@ -232,11 +200,7 @@ public:
 
   //! @brief Whether the item's spawn_action or carry_action damages the player (negative "health" in items.json), i.e.
   //! whether a Cmp::Inventory::StingDamage is added when the item is created.
-  bool stings() const
-  {
-    return ( has_action<SpawnAction>() and at<SpawnAction>().action.health() < 0 ) or
-           ( has_action<CarryAction>() and at<CarryAction>().action.health() < 0 );
-  }
+  bool stings() const;
 
   //! @brief Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
   Sys::ItemKey item_type;
@@ -268,7 +232,7 @@ private:
   std::size_t m_sprite_random_count{ 0 };
 
   //! @brief The actions and their effects that can be applied to the player. Imported from items.json.
-  std::unordered_map<std::type_index, ActionTimePair> m_actions;
+  ActionSet m_actions;
 
   //! @brief Damage done to a pickaxe by this item.
   int m_pickaxe_damage{ 0 };

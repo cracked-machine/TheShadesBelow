@@ -2,7 +2,6 @@
 #define SRC_SYSTEMS_ALTARSYSTEM_HPP__
 
 #include <Systems/BaseSystem.hpp>
-#include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
 #include <optional>

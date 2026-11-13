@@ -11,6 +11,7 @@
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
+#include <Components/Random.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SceneSettings/Footsteps.hpp>
 #include <Components/SceneSettings/Paused.hpp>
