@@ -385,7 +385,10 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
 
   // items without a Cmp::Inventory::StingDamage (e.g. foraged with gloves) don't sting when picked up
   const auto spawn_action = Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg, world_item_entt );
-  play_action_sfx( spawn_action );
+
+  //! @todo we dont want to automatically play the spawn sfx every time we pick up an item. Maybe this should be a toggle in the json?
+  // play_action_sfx( spawn_action );
+
   if ( const auto *world_item_pos_cmp = reg.try_get<Cmp::Position>( world_item_entt ) )
   {
     trigger_side_effects( spawn_action, *world_item_pos_cmp, world_item_entt );
