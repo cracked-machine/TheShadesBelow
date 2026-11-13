@@ -3,7 +3,9 @@
 #include <Components/Player/RepelNpc.hpp>
 #include <Components/Player/ToxicImmunity.hpp>
 #include <Components/Position.hpp>
+#include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BaseAction.hpp>
+#include <Components/Stats/SideEffects.hpp>
 #include <Components/UUID.hpp>
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/CreateItemEvent.hpp>

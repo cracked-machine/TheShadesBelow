@@ -1,6 +1,7 @@
 #include <Components/Inventory/Grimoire.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BurnAction.hpp>
 #include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/CollisionAction.hpp>

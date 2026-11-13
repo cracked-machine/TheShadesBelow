@@ -59,6 +59,7 @@
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/Toxicity/Bradycadia.hpp>
 #include <Components/Toxicity/Tachycardia.hpp>
+#include <Components/Toxicity/Toxidrome.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/GrimoireItemUpdateEvent.hpp>

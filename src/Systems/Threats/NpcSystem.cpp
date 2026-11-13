@@ -77,6 +77,7 @@
 #include <Components/Stats/DestroyAction.hpp>
 #include <Components/Stats/ProjectileAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
+#include <Components/Stats/SideEffects.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>

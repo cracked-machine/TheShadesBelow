@@ -30,8 +30,10 @@
 #include <Components/Player/Wealth.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
+#include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/OfferingAction.hpp>
 #include <Components/Stats/PlayerStats.hpp>
+#include <Components/Stats/SideEffects.hpp>
 #include <Components/Toxicity/Bradycadia.hpp>
 #include <Components/Toxicity/Halucinogen.hpp>
 #include <Components/Toxicity/Hypoxia.hpp>

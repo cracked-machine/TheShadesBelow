@@ -85,11 +85,13 @@
 #include <Components/SelectedPosition.hpp>
 #include <Components/Spring/ActiveHealing.hpp>
 #include <Components/Spring/HealingSpringMultiBlock.hpp>
+#include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/DestroyAction.hpp>
 #include <Components/Stats/PlayerStats.hpp>
 #include <Components/Stats/ProximityAction.hpp>
+#include <Components/Stats/SideEffects.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/Toxicity/Bradycadia.hpp>
 #include <Components/Toxicity/Halucinogen.hpp>

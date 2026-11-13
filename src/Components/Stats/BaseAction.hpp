@@ -5,17 +5,14 @@
 #include <Components/Stats/BaseActionFwd.hpp>
 #include <Components/Stats/StatDeltas.hpp>
 #include <SFML/System/Time.hpp>
-#include <Systems/Stores/StoreKey.hpp>
 
 #include <algorithm>
-#include <entt/core/fwd.hpp>
 #include <memory>
 #include <optional>
 #include <string>
 #include <typeindex>
 #include <unordered_map>
 #include <utility>
-#include <vector>
 
 namespace Game::Cmp::Toxicity
 {
@@ -24,280 +21,6 @@ class Toxidrome;
 
 namespace Game::Cmp
 {
-class PlayerStats;
-
-//! @brief How likely a side effect is to fire each time its action is applied.
-enum class Probability {
-  //! @brief Always fires.
-  ALWAYS,
-  //! @brief Rolled against the player's luck: high luck makes good effects likelier and bad effects rarer.
-  PLAYER_LUCK
-};
-
-//! @brief Optional side effect of an action: spawn an NPC at the action's source position.
-struct SpawnNpcEffect
-{
-  //! @brief Where the NPC spawns relative to the action's source.
-  enum class Location {
-    //! @brief A random free cell beside the source.
-    NEARBY,
-    //! @brief The NPC sprite centred on the source's exact pixel centre (not grid snapped), e.g. on an altar.
-    CENTER
-  };
-
-  //! @brief The NPC to spawn, see res/json/npc.json.
-  std::string npc_type;
-  //! @brief Where the NPC spawns relative to the action's source.
-  Location location{ Location::NEARBY };
-  //! @brief How likely the effect is to fire each time the action is applied.
-  Probability probability{ Probability::ALWAYS };
-  //! @brief Max live NPCs spawned by each world item instance, across all of its actions. 0 = unlimited.
-  int max_instances{ 0 };
-  //! @brief Distance in blocks from the item that the player must be within before the NPC spawn is triggered.
-  int trigger_range{ 1 };
-  //! @brief Distance from the item to spawned NPC.
-  int spawn_radius{ 1 };
-
-  //! @brief Optional gate: the NPC only spawns while a player stat equals a value. See "side_effects.spawn_npc.if".
-  struct Condition
-  {
-    //! @brief The player stat compared.
-    enum class Stat {
-      HEALTH,
-      FEAR,
-      DESPAIR,
-      INFAMY,
-      LUCK,
-      ANIMA,
-      //! @brief One toxidrome's toxicity, 0 if inactive (see toxidrome_id).
-      TOXIDROME,
-      //! @brief The summed toxicity of every active toxidrome.
-      ALL_TOXIDROMES
-    };
-    //! @brief The player stat compared.
-    Stat stat{ Stat::HEALTH };
-    //! @brief The "stat" name as written in JSON, for display.
-    std::string stat_name;
-    //! @brief The toxidrome's entt::type_hash id, only used when stat is TOXIDROME.
-    entt::id_type toxidrome_id{ 0 };
-    //! @brief The value the stat must equal.
-    int value{ 0 };
-  };
-  //! @brief Spawn only while this holds. No condition = always eligible.
-  std::optional<Condition> condition;
-
-  //! @brief Whether the condition (if any) holds for the given player stats.
-  //! @param stats The player's current stats.
-  //! @return true if there is no condition or it holds.
-  [[nodiscard]] bool condition_met( const PlayerStats &stats ) const;
-  //! @brief This effect's chance of firing at the given player luck.
-  //! @param player_luck Player's luck stat, range [0, 100].
-  //! @return Chance in [0, 1].
-  [[nodiscard]] float chance( int player_luck ) const;
-  //! @brief Roll this effect's probability.
-  //! @param player_luck Player's luck stat, range [0, 100].
-  //! @return true if the effect should fire.
-  [[nodiscard]] bool roll( int player_luck ) const;
-};
-
-//! @brief Optional side effect of an action: a lightning strike (on a working lightning rod in view, else the player).
-struct LightningEffect
-{
-  //! @brief How likely the effect is to fire each time the action is applied.
-  Probability probability{ Probability::ALWAYS };
-  //! @brief This effect's chance of firing at the given player luck.
-  //! @param player_luck Player's luck stat, range [0, 100].
-  //! @return Chance in [0, 1].
-  [[nodiscard]] float chance( int player_luck ) const;
-  //! @brief Roll this effect's probability.
-  //! @param player_luck Player's luck stat, range [0, 100].
-  //! @return true if the effect should fire.
-  [[nodiscard]] bool roll( int player_luck ) const;
-};
-
-//! @brief Optional side effect of an action affecting player movement and/or NPC pathfinding.
-struct MovementEffect
-{
-  //! @brief Effect on the player's movement.
-  struct Player
-  {
-    //! @brief The kind of player movement effect.
-    enum class Type {
-      //! @brief Slow the player down.
-      SLOW,
-      //! @brief Make the player's movement erratic.
-      DRUNK
-    };
-    //! @brief The kind of player movement effect.
-    Type type{ Type::SLOW };
-    //! @brief How long (seconds) the effect lasts.
-    int tick{ 0 };
-  };
-
-  //! @brief Effect on NPC pathfinding.
-  struct Npc
-  {
-    //! @brief The kind of NPC pathfinding effect.
-    enum class Type {
-      //! @brief Slow NPCs down.
-      SLOW,
-      //! @brief Make NPC pathfinding erratic.
-      DRUNK,
-      //! @brief NPCs flee from the player instead of chasing them.
-      REPEL
-    };
-    //! @brief The kind of NPC pathfinding effect.
-    Type type{ Type::SLOW };
-    //! @brief How long (seconds) the effect lasts.
-    int tick{ 0 };
-  };
-
-  //! @brief Effect on the player's movement, if any.
-  std::optional<Player> player;
-  //! @brief Effect on NPC pathfinding, if any.
-  std::optional<Npc> npc;
-  //! @brief How likely the effect is to fire each time the action is applied.
-  Probability probability{ Probability::ALWAYS };
-  //! @brief This effect's chance of firing at the given player luck.
-  //! @param player_luck Player's luck stat, range [0, 100].
-  //! @return Chance in [0, 1].
-  [[nodiscard]] float chance( int player_luck ) const;
-  //! @brief Roll this effect's probability.
-  //! @param player_luck Player's luck stat, range [0, 100].
-  //! @return true if the effect should fire.
-  [[nodiscard]] bool roll( int player_luck ) const;
-};
-
-//! @brief Optional side effect of an action: toxidromes can't increase for tick seconds (see Cmp::Player::ToxicImmunity).
-struct ToxicImmunityEffect
-{
-  //! @brief How long (seconds) the immunity lasts.
-  int tick{ 0 };
-  //! @brief How likely the effect is to fire each time the action is applied.
-  Probability probability{ Probability::ALWAYS };
-  //! @brief This effect's chance of firing at the given player luck.
-  //! @param player_luck Player's luck stat, range [0, 100].
-  //! @return Chance in [0, 1].
-  [[nodiscard]] float chance( int player_luck ) const;
-  //! @brief Roll this effect's probability.
-  //! @param player_luck Player's luck stat, range [0, 100].
-  //! @return true if the effect should fire.
-  [[nodiscard]] bool roll( int player_luck ) const;
-};
-
-//! @brief Optional side effect of an action: kill NPCs that come near the action's source (proximity_action only).
-//! @note The Burryman is immune (see Events::DestroyNpcEvent) and NPCs spawned by the source itself are spared.
-struct KillNpcEffect
-{
-  //! @brief The NPC types that can be killed, see res/json/npc.json. Empty = any NPC.
-  std::vector<Sys::NpcKey> npc_types;
-  //! @brief Distance in blocks from the source that an NPC must be within to be killed.
-  int trigger_range{ 1 };
-  //! @brief Sprite played where the NPC dies, or std::nullopt for no animation.
-  std::optional<Sys::SpriteKey> death_anim;
-  //! @brief How likely the effect is to fire, rolled per NPC in range each time the action is applied.
-  Probability probability{ Probability::ALWAYS };
-  //! @brief Wear (out of 100) the source takes per kill. A fully worn source is destroyed.
-  float wear_per_kill{ 0.f };
-  //! @brief Whether this effect can kill the given NPC type.
-  //! @param npc_type The NPC's type key.
-  //! @return true if npc_types is empty or contains npc_type.
-  [[nodiscard]] bool targets( const Sys::NpcKey &npc_type ) const;
-  //! @brief This effect's chance of firing at the given player luck.
-  //! @param player_luck Player's luck stat, range [0, 100].
-  //! @return Chance in [0, 1].
-  [[nodiscard]] float chance( int player_luck ) const;
-  //! @brief Roll this effect's probability.
-  //! @param player_luck Player's luck stat, range [0, 100].
-  //! @return true if the effect should fire.
-  [[nodiscard]] bool roll( int player_luck ) const;
-};
-
-//! @brief The optional side effects of an action, each rolled independently. See the "side_effects" object in
-//! res/json/items.json and res/json/npc.json.
-struct SideEffects
-{
-  //! @brief Spawn (or relocate) an NPC.
-  std::optional<SpawnNpcEffect> spawn_npc;
-  //! @brief Lightning strike.
-  std::optional<LightningEffect> lightning;
-  //! @brief Movement/pathfinding effect.
-  std::optional<MovementEffect> movement;
-  //! @brief Toxic immunity.
-  std::optional<ToxicImmunityEffect> toxic_immunity;
-  //! @brief Kill nearby NPCs.
-  std::optional<KillNpcEffect> kill_npc;
-  //! @brief Whether there are no effects at all.
-  //! @return true if no effect is set.
-  [[nodiscard]] bool empty() const { return not spawn_npc and not lightning and not movement and not toxic_immunity and not kill_npc; }
-};
-
-//! @brief Optional reward granted when an action is applied. See the "reward" object of the offering_action,
-//! forage_action, destroy_action and proximity_action entries in res/json/items.json.
-//! @details An offering_action reward sets exactly one of item, wealth or altar, optionally restricted to one altar
-//! location. A forage_action/destroy_action reward only sets item. A proximity_action reward sets exactly one of item or
-//! loot, dropped beside the source.
-//! The item may end with '*' to pick a random item key with that prefix (e.g. "item.jewelry*"), and may set a target
-//! (inventory or nearby) and, when nearby, a count of items to drop.
-struct ActionReward
-{
-  //! @brief Where a reward item is placed.
-  enum class Target {
-    //! @brief The action's default placement, e.g. inventory for an empty-hand forage, beside the plant for a gloves forage.
-    DEFAULT,
-    //! @brief Added to the player inventory, or dropped nearby if the player's hand isn't free.
-    INVENTORY,
-    //! @brief Dropped on random free cells beside the source.
-    NEARBY
-  };
-
-  //! @brief An altar effect triggered by offering the item.
-  enum class AltarEffect {
-    //! @brief No altar effect.
-    NONE,
-    //! @brief Light an altar talisman.
-    TALISMAN,
-    //! @brief Banish all ghosts (witches jar).
-    BANISH,
-    //! @brief Gain an extra life, respawning the player when they die (witches jar, nightshade).
-    EXTRA_LIFE,
-    //! @brief Unlock the crypt key (exit key).
-    CRYPT_KEY,
-    //! @brief Temporary immunity to toxidrome increases (St John's Wort).
-    TOXIC_IMMUNITY
-  };
-
-  //! @brief The item gained. Empty string if unused.
-  Sys::ItemKey item;
-  //! @brief The wealth gained. Zero if unused.
-  int wealth{ 0 };
-  //! @brief The altar effect. NONE if unused.
-  AltarEffect altar{ AltarEffect::NONE };
-  //! @brief The kind of altar this reward is granted at (offering_action only). std::nullopt means any altar.
-  std::optional<Altar::Kind> location;
-  //! @brief How long (seconds) a timed altar effect lasts, e.g. TOXIC_IMMUNITY (offering_action only). Zero if unused.
-  int tick{ 0 };
-  //! @brief The loot sprite dropped (proximity_action only). Empty string if unused.
-  Sys::SpriteKey loot;
-  //! @brief Distance in blocks from the source that the player must be within before the reward drops (proximity_action only).
-  int trigger_range{ 1 };
-  //! @brief Max drops over each source item instance's lifetime, picked up or not; further drops are skipped. 0 = unlimited
-  //! (proximity_action only).
-  int max_instances{ 0 };
-  //! @brief Where the reward item is placed.
-  Target target{ Target::DEFAULT };
-  //! @brief The number of reward items dropped, "count" in items.json (Target::NEARBY only).
-  int quantity{ 1 };
-  //! @brief Whether the item ends with '*', i.e. is a random pick from the item keys with that prefix.
-  [[nodiscard]] bool is_item_wildcard() const { return item.str().ends_with( '*' ); }
-  //! @brief The number of reward fields that are set.
-  //! @return int Count of item, wealth, altar and loot that are not their unused value.
-  [[nodiscard]] int count() const
-  {
-    return static_cast<int>( not item.empty() ) + static_cast<int>( wealth > 0 ) + static_cast<int>( altar != AltarEffect::NONE ) +
-           static_cast<int>( not loot.empty() );
-  }
-};
 
 // ActionRewards (std::vector<ActionReward>) is declared in BaseActionFwd.hpp
 
@@ -344,7 +67,18 @@ public:
   //! @param tick How often (seconds) the action re-applies, or 0 for a one-shot.
   BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima,
               Stats::Tick tick );
+  //! @brief Construct a new Base Action object with no side effects or rewards.
+  //! @param toxidrome toxidrome affliction applied alongside the stat changes, if any.
+  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima,
+              Stats::Tick tick, Cmp::Toxicity::Toxidrome toxidrome );
+  //! @brief Construct a new Base Action object with no rewards.
+  //! @param toxidrome toxidrome affliction applied alongside the stat changes, if any.
+  //! @param side_effects Optional side effects (NPC spawn, lightning, movement), each with its own probability.
+  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima,
+              Stats::Tick tick, Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects );
   //! @brief Construct a new Base Action object.
+  //! @note Overloads are used instead of default arguments so that this header doesn't need the complete
+  //! Toxidrome, SideEffects and ActionReward types.
   //! @param health Change applied to the health stat.
   //! @param fear Change applied to the fear stat.
   //! @param despair Change applied to the despair stat.
@@ -357,10 +91,11 @@ public:
   //! @param side_effects Optional side effects (NPC spawn, lightning, movement), each with its own probability.
   //! @param rewards Optional rewards granted when the action is applied (e.g. forage/chop/offering output).
   BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima,
-              Stats::Tick tick, Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects = {}, ActionRewards rewards = {} );
+              Stats::Tick tick, Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects, ActionRewards rewards );
   //! @brief Destroy the Base Action object.
   ~BaseAction();
 
+  //! @brief Copies share the immutable toxidrome, side effects and rewards; only the stat deltas, wear and sfx are copied.
   BaseAction( const BaseAction &other );
   BaseAction &operator=( const BaseAction &other );
   BaseAction( BaseAction &&other ) noexcept;
@@ -407,7 +142,7 @@ public:
   [[nodiscard]] const Cmp::Toxicity::Toxidrome &toxidrome() const;
   //! @brief Get the optional side effects of this action.
   //! @return const SideEffects& The NPC spawn/lightning/movement effects.
-  [[nodiscard]] const SideEffects &side_effects() const { return m_side_effects; }
+  [[nodiscard]] const SideEffects &side_effects() const;
   //! @brief Get the optional reward of this action, for actions that have at most one (i.e. not altar specific).
   //! @return std::optional<ActionReward> The first reward, or std::nullopt if the action grants none.
   [[nodiscard]] std::optional<ActionReward> reward() const;
@@ -417,7 +152,7 @@ public:
   [[nodiscard]] std::optional<ActionReward> reward( Altar::Kind location ) const;
   //! @brief Get all rewards of this action.
   //! @return const ActionRewards& The rewards, empty if the action grants none.
-  [[nodiscard]] const ActionRewards &rewards() const { return m_rewards; }
+  [[nodiscard]] const ActionRewards &rewards() const;
   //! @brief Whether this action has no effect, i.e. every stat delta is zero, it applies no toxidrome and has no side effects
   //! or reward.
   //! @return true if applying this action would change nothing.
@@ -452,14 +187,16 @@ private:
   int m_luck{ 0 };
   //! @brief The change applied to the anima stat.
   int m_anima{ 0 };
-  //! @brief The toxidrome affliction applied alongside the stat changes, if any. Never null; held behind
-  //! a pointer only so this header need not include Toxidrome.hpp. Copy/move are hand-written in the
-  //! .cpp (deep-copy for copy, pointer-steal for move) to keep BaseAction copy-constructible.
-  std::unique_ptr<Cmp::Toxicity::Toxidrome> m_toxidrome;
+  // The toxidrome, side effects and rewards are set once at construction and never modified, so copies share them.
+  // They are held behind pointers so this header needs only forward declarations of their types. Never null, except
+  // in a moved-from object.
+
+  //! @brief The toxidrome affliction applied alongside the stat changes, if any.
+  std::shared_ptr<const Cmp::Toxicity::Toxidrome> m_toxidrome;
   //! @brief Optional side effects (NPC spawn, lightning, movement).
-  SideEffects m_side_effects;
+  std::shared_ptr<const SideEffects> m_side_effects;
   //! @brief Optional rewards granted when the action is applied.
-  ActionRewards m_rewards;
+  std::shared_ptr<const ActionRewards> m_rewards;
   //! @brief How often (seconds) the action re-applies, or 0 for a one-shot.
   float m_tick{ 0 };
   //! @brief How the source item wears while the action is in effect, see wear().

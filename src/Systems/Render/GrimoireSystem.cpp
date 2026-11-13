@@ -2,8 +2,10 @@
 #include <Components/Inventory/Grimoire.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/SceneSettings/ShowDebugStats.hpp>
+#include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
+#include <Components/Stats/SideEffects.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <Events/GrimoireDiscoveryEvent.hpp>
 #include <Events/GrimoireNpcUpdateEvent.hpp>

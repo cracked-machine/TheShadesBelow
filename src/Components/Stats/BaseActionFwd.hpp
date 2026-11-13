@@ -14,6 +14,7 @@ class BaseAction;
 struct ActionReward;
 struct ActionWear;
 struct SpawnNpcEffect;
+struct SideEffects;
 struct ActionTimePair;
 struct ActionMap;
 

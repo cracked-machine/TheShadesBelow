@@ -1,5 +1,7 @@
 #include <Components/Random.hpp>
+#include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BaseAction.hpp>
+#include <Components/Stats/SideEffects.hpp>
 #include <Components/Stats/PlayerStats.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <algorithm>
@@ -70,6 +72,18 @@ BaseAction::BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair d
 }
 
 BaseAction::BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima, Stats::Tick tick,
+                        Cmp::Toxicity::Toxidrome toxidrome )
+    : BaseAction( health, fear, despair, infamy, luck, anima, tick, std::move( toxidrome ), SideEffects{} )
+{
+}
+
+BaseAction::BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima, Stats::Tick tick,
+                        Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects )
+    : BaseAction( health, fear, despair, infamy, luck, anima, tick, std::move( toxidrome ), std::move( side_effects ), ActionRewards{} )
+{
+}
+
+BaseAction::BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima, Stats::Tick tick,
                         Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects, ActionRewards rewards )
     : m_health( health.value ),
       m_fear( fear.value ),
@@ -77,64 +91,34 @@ BaseAction::BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair d
       m_infamy( infamy.value ),
       m_luck( luck.value ),
       m_anima( anima.value ),
-      m_toxidrome( std::make_unique<Cmp::Toxicity::Toxidrome>( std::move( toxidrome ) ) ),
-      m_side_effects( std::move( side_effects ) ),
-      m_rewards( std::move( rewards ) ),
+      m_toxidrome( std::make_shared<const Cmp::Toxicity::Toxidrome>( std::move( toxidrome ) ) ),
+      m_side_effects( std::make_shared<const SideEffects>( std::move( side_effects ) ) ),
+      m_rewards( std::make_shared<const ActionRewards>( std::move( rewards ) ) ),
       m_tick( tick.value )
 {
 }
 
 BaseAction::~BaseAction() = default;
 
-BaseAction::BaseAction( const BaseAction &other )
-    : m_health( other.m_health ),
-      m_fear( other.m_fear ),
-      m_despair( other.m_despair ),
-      m_infamy( other.m_infamy ),
-      m_luck( other.m_luck ),
-      m_anima( other.m_anima ),
-      m_toxidrome( std::make_unique<Cmp::Toxicity::Toxidrome>( *other.m_toxidrome ) ),
-      m_side_effects( other.m_side_effects ),
-      m_rewards( other.m_rewards ),
-      m_tick( other.m_tick ),
-      m_wear( other.m_wear ),
-      m_sfx( other.m_sfx )
-{
-}
-
-BaseAction &BaseAction::operator=( const BaseAction &other )
-{
-  if ( this == &other ) return *this;
-  m_health = other.m_health;
-  m_fear = other.m_fear;
-  m_despair = other.m_despair;
-  m_infamy = other.m_infamy;
-  m_luck = other.m_luck;
-  m_anima = other.m_anima;
-  m_toxidrome = std::make_unique<Cmp::Toxicity::Toxidrome>( *other.m_toxidrome );
-  m_side_effects = other.m_side_effects;
-  m_rewards = other.m_rewards;
-  m_tick = other.m_tick;
-  m_wear = other.m_wear;
-  m_sfx = other.m_sfx;
-  return *this;
-}
-
+BaseAction::BaseAction( const BaseAction &other ) = default;
+BaseAction &BaseAction::operator=( const BaseAction &other ) = default;
 BaseAction::BaseAction( BaseAction &&other ) noexcept = default;
 BaseAction &BaseAction::operator=( BaseAction &&other ) noexcept = default;
 
 const Cmp::Toxicity::Toxidrome &BaseAction::toxidrome() const { return *m_toxidrome; }
+const SideEffects &BaseAction::side_effects() const { return *m_side_effects; }
+const ActionRewards &BaseAction::rewards() const { return *m_rewards; }
 
 std::optional<ActionReward> BaseAction::reward() const
 {
-  if ( m_rewards.empty() ) return std::nullopt;
-  return m_rewards.front();
+  if ( m_rewards->empty() ) return std::nullopt;
+  return m_rewards->front();
 }
 
 std::optional<ActionReward> BaseAction::reward( Altar::Kind location ) const
 {
   std::optional<ActionReward> any_location;
-  for ( const auto &reward : m_rewards )
+  for ( const auto &reward : *m_rewards )
   {
     if ( reward.location == location ) return reward;
     if ( not reward.location ) any_location = reward;
@@ -145,7 +129,7 @@ std::optional<ActionReward> BaseAction::reward( Altar::Kind location ) const
 bool BaseAction::is_zero() const
 {
   return m_health == 0 and m_fear == 0 and m_despair == 0 and m_infamy == 0 and m_luck == 0 and m_anima == 0 and m_toxidrome->begin() == m_toxidrome->end() and
-         m_side_effects.empty() and m_rewards.empty();
+         m_side_effects->empty() and m_rewards->empty();
 }
 
 } // namespace Game::Cmp

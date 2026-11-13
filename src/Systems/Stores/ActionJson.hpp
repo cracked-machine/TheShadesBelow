@@ -7,7 +7,9 @@
 //! and everything that includes a store doesn't depend on BaseAction.hpp.
 
 #include <Components/Altar/Kind.hpp>
+#include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BaseAction.hpp>
+#include <Components/Stats/SideEffects.hpp>
 #include <Factory/ToxicityFactory.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Utils/JsonDeserializer.hpp>

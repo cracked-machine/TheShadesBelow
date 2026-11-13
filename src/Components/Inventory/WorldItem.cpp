@@ -1,9 +1,11 @@
 #include <Components/Inventory/WorldItem.hpp>
+#include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/DestroyAction.hpp>
 #include <Components/Stats/ForageAction.hpp>
 #include <Components/Stats/OfferingAction.hpp>
+#include <Components/Stats/SideEffects.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 
 #include <algorithm>

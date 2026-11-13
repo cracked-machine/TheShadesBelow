@@ -1,3 +1,4 @@
+#include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BurnAction.hpp>
 #include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/ConsumeAction.hpp>
@@ -5,6 +6,7 @@
 #include <Components/Stats/ForageAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/OfferingAction.hpp>
+#include <Components/Stats/SideEffects.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <SFML/System/Time.hpp>
 #include <Systems/Stores/ActionJson.hpp>

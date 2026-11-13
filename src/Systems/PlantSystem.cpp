@@ -16,9 +16,11 @@
 #include <Components/Player/DiggingTimer.hpp>
 #include <Components/Position.hpp>
 #include <Components/SelectedPosition.hpp>
+#include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BurnAction.hpp>
 #include <Components/Stats/DestroyAction.hpp>
 #include <Components/Stats/ForageAction.hpp>
+#include <Components/Stats/SideEffects.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Events/AddInventoryEvent.hpp>
