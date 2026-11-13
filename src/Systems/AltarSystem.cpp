@@ -172,6 +172,7 @@ void AltarSystem::check_player_altar_offering( entt::entity altar_entity, Cmp::A
 
   SPDLOG_INFO( "Player made an offering: {}", item.item_type );
   const auto offering_action = Utils::Player::apply_action_from_item_store<Cmp::OfferingAction>( reg(), item.item_type );
+  play_action_sfx( offering_action );
   trigger_side_effects( offering_action, Cmp::Position( altar_cmp.position, altar_cmp.size ), altar_entity );
   Factory::Player::destroy_inventory( reg(), item.item_type );
   // the offering has left the inventory, so an inventory reward item can take its place
@@ -415,7 +416,6 @@ void AltarSystem::play_offering_anim( const Cmp::Altar::MultiBlock &altar_cmp, O
   float altar_offering_anim_height = Sys::SpriteStore::instance().get( sprite_type ).sprite_size().y;
   // get the center (topleft coord), then adjust to center the altar_offering_anim, then adjust for altar_offering_anim height
   Cmp::Position new_pos( altar_cmp.getCenter() - sf::Vector2{ 7.f, 28.f } - sf::Vector2{ 0.f, altar_offering_anim_height }, Constants::kGridSizePxF );
-  m_sound_bank.get_effect( "shrine_lighting" ).play();
   Factory::Altar::create_altar_offering_anim( reg(), new_pos, sprite_type );
 
   reg().emplace_or_replace<Cmp::Altar::ActivationTimer>( Utils::Player::get_entity( reg() ) );

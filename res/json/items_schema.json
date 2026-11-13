@@ -178,6 +178,16 @@
             }
           }
         },
+        "sfx": {
+          "type": "object",
+          "description": "Optional. Sound effects (names from res/json/audio.json) for this action. An empty or missing name plays nothing. consume_action: loop while consuming, final once consumed. destroy_action: loop on each intermediate axe hit, final when felled. burn_action: loop while burning, final when burnt out. forage_action, spawn_action, offering_action: final when applied. proximity_action: final when its side effects or reward trigger, and on each kill_npc kill.",
+          "required": ["final"],
+          "additionalProperties": false,
+          "properties": {
+            "loop": { "type": "string", "description": "Plays while the action is in progress. Optional." },
+            "final": { "type": "string", "description": "Plays when the action completes or is applied. Empty string for none." }
+          }
+        },
         "reward": {
           "description": "Optional reward. Its shape is set by each action (no_altar_reward, item_only_reward, proximity_reward or offering_reward_entry)."
         },

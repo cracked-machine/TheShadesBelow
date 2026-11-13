@@ -224,6 +224,9 @@ void PlantSystem::player_plant_interact()
       const auto forage_reward = plant_item->get_reward<Cmp::ForageAction>();
       const auto axe_reward = plant_item->get_reward<Cmp::DestroyAction>();
       const auto axe_hits = plant_item->get_axe_hits();
+      // forage_action is optional, so its sfx (see items.json) may be absent
+      const auto forage_sfx = plant_item->has_action<Cmp::ForageAction>() ? plant_item->get_action<Cmp::ForageAction>().sfx() : Cmp::ActionSfx{};
+      const auto destroy_sfx = plant_item->has_action<Cmp::DestroyAction>() ? plant_item->get_action<Cmp::DestroyAction>().sfx() : Cmp::ActionSfx{};
       const Cmp::Position plant_bounds( plant_mb_cmp.position, plant_mb_cmp.size );
 
       // each forage wears the plant down
@@ -267,9 +270,10 @@ void PlantSystem::player_plant_interact()
           if ( forage_reward->target != Cmp::ActionReward::Target::NEARBY )
           {
             const auto spawn_action = Utils::Player::apply_action_from_inventory_item<Cmp::SpawnAction>( reg() );
+            play_action_sfx( spawn_action );
             trigger_side_effects( spawn_action, Utils::Player::get_position( reg() ) );
           }
-          m_sound_bank.get_effect( "chopping_final" ).play();
+          play_action_sfx( forage_sfx );
           wear_plant();
         }
         apply_forage_action( true );
@@ -342,7 +346,8 @@ void PlantSystem::player_plant_interact()
             get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, std::ceil( 100.f / static_cast<float>( axe_hits ) ) ) );
             if ( not Utils::is_plant_depleted( reg(), plant_entt ) )
             {
-              m_sound_bank.get_effect( "chopping" ).play();
+              // intermediate hits play the destroy_action "loop" sfx, the felling hit its "final" sfx
+              if ( not destroy_sfx.loop.empty() ) { m_sound_bank.get_effect( destroy_sfx.loop ).play(); }
               continue;
             }
           }
@@ -361,7 +366,7 @@ void PlantSystem::player_plant_interact()
           // its loot is left for the player to collect
           destroy_plant_spawned_npcs( plant_uuid_cmp, Sys::SpriteKey( "sprite.death.anim.bloodsplat" ) );
           get_systems_event_queue().trigger( Events::DestroyPlantEvent( plant_entt ) );
-          m_sound_bank.get_effect( "chopping_final" ).play();
+          play_action_sfx( destroy_action );
         }
       }
     }
@@ -394,6 +399,14 @@ void PlantSystem::update_burning_plants( sf::Time dt )
     auto *burn_timer = reg().try_get<Cmp::Plant::BurningTimer>( plant_entt );
     if ( not burn_timer ) continue;
 
+    // burn_action.sfx: "loop" plays while burning, "final" once burnt out (see items.json). Items without a burn_action
+    // get a default one (see ItemStore), so this is only empty for a plant entity that has no Cmp::WorldItem.
+    Cmp::ActionSfx burn_sfx;
+    if ( const auto *burn_item = reg().try_get<Cmp::WorldItem>( plant_entt ); burn_item and burn_item->has_action<Cmp::BurnAction>() )
+    {
+      burn_sfx = burn_item->get_action<Cmp::BurnAction>().sfx();
+    }
+
     if ( *burn_timer < burn_timer->timeout() )
     {
       // update player stats with burn_action: apply once if interval == 0, otherwise every `interval`
@@ -418,8 +431,7 @@ void PlantSystem::update_burning_plants( sf::Time dt )
       }
 
       // stll burning
-      if ( m_sound_bank.get_effect( "burning" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "burning" ).play(); }
-      m_sound_bank.get_effect( "burning" ).setLooping( false );
+      play_action_loop_sfx( burn_sfx );
 
       // don't create a duplicate particle sprite if this plant already has a flame
       bool already_has_flame = false;
@@ -480,7 +492,8 @@ void PlantSystem::update_burning_plants( sf::Time dt )
     else
     {
       // all done
-      m_sound_bank.get_effect( "burning" ).stop();
+      stop_action_loop_sfx( burn_sfx );
+      play_action_sfx( burn_sfx );
       reg().remove<Cmp::Plant::BurningTimer>( plant_entt );
       for ( auto [ps_owner_entt, ps_owner_cmp, ps_owner_uuid] : reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID>().each() )
       {

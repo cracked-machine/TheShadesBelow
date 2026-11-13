@@ -10,7 +10,8 @@
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
 
@@ -27,7 +28,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "wealth": 2 } }}
+                                "reward": { "wealth": 2 }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.bomb": {
@@ -41,7 +43,8 @@
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.boots": {
@@ -55,7 +58,8 @@
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.longbow": {
@@ -71,7 +75,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.torch": {
@@ -85,7 +90,8 @@
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.cryptkey": {
@@ -99,7 +105,8 @@
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.cursetablet.ghost": {
@@ -114,7 +121,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "wear": { "expiryseconds": 60, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
 
@@ -130,7 +138,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "wear": { "expiryseconds": 60, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
 
@@ -146,7 +155,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "wear": { "expiryseconds": 60, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
  
@@ -162,7 +172,8 @@
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.elderflute": {
@@ -177,7 +188,8 @@
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.elderwine": {
@@ -188,11 +200,13 @@
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "side_effects": { "toxic_immunity": { "tick": 60, "probability": "always" } } }},
+                                "side_effects": { "toxic_immunity": { "tick": 60, "probability": "always" } }, 
+                                "sfx": { "loop": "drinking", "final": "drinking_end" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.exitkey": {
@@ -207,7 +221,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "CryptKey" } }}
+                                "reward": { "altar": "CryptKey" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.gloves": {
@@ -223,7 +238,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.hawthorntea": {
@@ -233,11 +249,13 @@
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "consume_action":     { "health": 0, "fear": -20, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": ["bradycardia", "tachycardia"], "toxicity": -20 }, "tick": 0 }},
+      { "consume_action":     { "health": 0, "fear": -20, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": ["bradycardia", "tachycardia"], "toxicity": -20 }, "tick": 0, 
+                                "sfx": { "loop": "drinking", "final": "drinking_end" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.jewelry_amephyst_gemstone": {
@@ -252,7 +270,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "wealth": 2 } }}
+                                "reward": { "wealth": 2 }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.jewelry_amephyst_ring": {
@@ -267,7 +286,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "wealth": 2 } }}
+                                "reward": { "wealth": 2 }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.jewelry_diamond_gemstone": {
@@ -282,7 +302,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "wealth": 2 } }}
+                                "reward": { "wealth": 2 }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.jewelry_emerald_gemstone": {
@@ -297,7 +318,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "wealth": 2 } }}
+                                "reward": { "wealth": 2 }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.jewelry_emerald_necklace": {
@@ -312,7 +334,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "wealth": 2 } }}
+                                "reward": { "wealth": 2 }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.jewelry_ruby_ring": {
@@ -327,7 +350,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "wealth": 2 } }}
+                                "reward": { "wealth": 2 }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.jewelry_sapphire_gemstone": {
@@ -342,7 +366,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "wealth": 2 } }}
+                                "reward": { "wealth": 2 }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.jewelry_sapphire_necklace": {
@@ -357,7 +382,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "wealth": 2 } }}
+                                "reward": { "wealth": 2 }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.lightningrod": {
@@ -373,7 +399,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.lightningrod.broken": {
@@ -387,7 +414,8 @@
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.pickaxe": {
@@ -403,7 +431,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "wealth": 2 } }}
+                                "reward": { "wealth": 2 }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.plant.burdock": {
@@ -412,18 +441,22 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 5 },
     "actions": [
-      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "loop": "burning", "final": "" } }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.burdockroot" } }},
+                                "reward": { "item": "item.burdockroot" }, 
+                                "sfx": { "loop": "chopping", "final": "chopping_final" } }},
       { "forage_action":      { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.burr" } }},
+                                "reward": { "item": "item.burr" }, 
+                                "sfx": { "final": "chopping_final" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.burdockroot": {
@@ -438,7 +471,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "all", "toxicity": -25 }, "tick": 0,
-                                "side_effects": {"spawn_npc": {"type": "npc.burryman", "probability": "always", "if": { "stat": "all", "value": 0 }}} }}
+                                "side_effects": {"spawn_npc": {"type": "npc.burryman", "probability": "always", "if": { "stat": "all", "value": 0 }}}, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.burr": {
@@ -454,7 +488,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 60, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.plant.elder": {
@@ -464,19 +499,23 @@
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 10, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "side_effects": { "spawn_npc": { "type": "npc.eldermother", "probability": "always", "max_instances": 1 } } }},
+                                "side_effects": { "spawn_npc": { "type": "npc.eldermother", "probability": "always", "max_instances": 1 } }, 
+                                "sfx": { "loop": "burning", "final": "" } }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "reward": { "item": "item.elderstick" },
-                                "side_effects": { "spawn_npc": { "type": "npc.eldermother", "probability": "player_luck", "max_instances": 1 } } }},
+                                "side_effects": { "spawn_npc": { "type": "npc.eldermother", "probability": "player_luck", "max_instances": 1 } }, 
+                                "sfx": { "loop": "chopping", "final": "chopping_final" } }},
       { "forage_action":      { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.elderberries" } }},
+                                "reward": { "item": "item.elderberries" }, 
+                                "sfx": { "final": "chopping_final" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 2, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.elderstick": {
@@ -491,7 +530,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 7, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.elderflute" } }}
+                                "reward": { "item": "item.elderflute" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.elderberries": {
@@ -502,13 +542,15 @@
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
-      { "consume_action":     { "health": 3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "hypoxia", "toxicity": 5 }, "tick": 0 }},
+      { "consume_action":     { "health": 3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "hypoxia", "toxicity": 5 }, "tick": 0, 
+                                "sfx": { "loop": "eating", "final": "" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.elderwine" } }}
+                                "reward": { "item": "item.elderwine" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.plant.foxglove": {
@@ -517,18 +559,22 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 5 },
     "actions": [
-      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": ["halucinogen", "bradycardia"], "toxicity": 5 }, "tick": 1 }},
+      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": ["halucinogen", "bradycardia"], "toxicity": 5 }, "tick": 1, 
+                                "sfx": { "loop": "burning", "final": "" } }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": ["halucinogen", "bradycardia"], "toxicity": 1 }, "tick": 1, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "loop": "chopping", "final": "chopping_final" } }},
       { "forage_action":      { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.foxgloveflower" } }},
+                                "reward": { "item": "item.foxgloveflower" }, 
+                                "sfx": { "final": "chopping_final" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": {"item": "item.digitalis"} }}
+                                "reward": {"item": "item.digitalis"}, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.foxgloveflower": {
@@ -539,13 +585,15 @@
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "halucinogen", "toxicity": 1 }, "tick": 1, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
-      { "consume_action":     { "health": 3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "halucinogen", "toxicity": 5 }, "tick": 0 }},
+      { "consume_action":     { "health": 3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "halucinogen", "toxicity": 5 }, "tick": 0, 
+                                "sfx": { "loop": "eating", "final": "" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "side_effects": { "spawn_npc": { "type": "npc.mimic", "max_instances": 1, "probability": "always" } } }}
+                                "side_effects": { "spawn_npc": { "type": "npc.mimic", "max_instances": 1, "probability": "always" } }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.plant.hawthorn": {
@@ -555,19 +603,23 @@
     "damage_to_weapon": { "pickaxe": 0, "axe": 25, "shovel": 10, "bow": 5 },
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "side_effects": { "lightning": { "probability": "always" } } }},
+                                "side_effects": { "lightning": { "probability": "always" } }, 
+                                "sfx": { "loop": "burning", "final": "" } }},
       { "carry_action":       { "health": -1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.hawthornstick" } }},
+                                "reward": { "item": "item.hawthornstick" }, 
+                                "sfx": { "loop": "chopping", "final": "chopping_final" } }},
       { "forage_action":      { "health": -5, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "reward": { "item": "item.hawthornflower" },
-                                "side_effects": { "lightning": { "probability": "player_luck" } } }},
+                                "side_effects": { "lightning": { "probability": "player_luck" } }, 
+                                "sfx": { "final": "chopping_final" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.hawthornstick": {
@@ -582,7 +634,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 7, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.lightningrod" } }}
+                                "reward": { "item": "item.lightningrod" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.hawthornflower": {
@@ -593,13 +646,15 @@
     "actions": [
       { "carry_action":       { "health": -1, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3, 
                                 "wear": { "expiryseconds": 60, "active_only": false } }},
-      { "consume_action":     { "health": 0, "fear": -1, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "all", "toxicity": -1 }, "tick": 0 }},
+      { "consume_action":     { "health": 0, "fear": -1, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "all", "toxicity": -1 }, "tick": 0, 
+                                "sfx": { "loop": "eating", "final": "" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 60, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.hawthorntea" } }}
+                                "reward": { "item": "item.hawthorntea" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.plant.henbane": {
@@ -608,18 +663,22 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 10, "bow": 5 },
     "actions": [
-      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": ["halucinogen", "tachycardia"], "toxicity": 5 }, "tick": 1 }},
+      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": ["halucinogen", "tachycardia"], "toxicity": 5 }, "tick": 1, 
+                                "sfx": { "loop": "burning", "final": "" } }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.henbanestick" } }},
+                                "reward": { "item": "item.henbanestick" }, 
+                                "sfx": { "loop": "chopping", "final": "chopping_final" } }},
       { "forage_action":      { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.henbaneseed" } }},
+                                "reward": { "item": "item.henbaneseed" }, 
+                                "sfx": { "final": "chopping_final" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.henbanestick": {
@@ -634,7 +693,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 7, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.witchesbroom" } }}
+                                "reward": { "item": "item.witchesbroom" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.henbaneseed": {
@@ -645,12 +705,14 @@
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 180, "active_only": false } }},
-      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "bradycardia", "toxicity": -10 }, "tick": 0 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "bradycardia", "toxicity": -10 }, "tick": 0, 
+                                "sfx": { "loop": "eating", "final": "" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 180, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
 
@@ -660,18 +722,23 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 5 },
     "actions": [
-      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "phototoxia", "toxicity": 5 }, "tick": 3 }},
+      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "phototoxia", "toxicity": 5 }, "tick": 3, 
+                                "sfx": { "loop": "burning", "final": "" } }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "phototoxia", "toxicity": 5 }, "tick": 3, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "loop": "chopping", "final": "chopping_final" } }},
       { "forage_action":      { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.hogweedseed" } }},
+                                "reward": { "item": "item.hogweedseed" }, 
+                                "sfx": { "final": "chopping_final" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "phototoxia", "toxicity": 5 }, "tick": 3,
-                                "side_effects": { "kill_npc": { "probability": "player_luck", "trigger_range": 1, "wear_per_kill": 10, "npc_types": ["npc.skeleton", "npc.adder"], "death_anim": "sprite.death.anim.flames" } } }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+                                "side_effects": { "kill_npc": { "probability": "player_luck", "trigger_range": 1, "wear_per_kill": 10, "npc_types": ["npc.skeleton", "npc.adder"], "death_anim": "sprite.death.anim.flames" } }, 
+                                "sfx": { "final": "shrine_lighting" } }},
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.hogweedseed": {
@@ -682,12 +749,14 @@
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "phototoxia", "toxicity": 1 }, "tick": 3, 
                                 "wear": { "expiryseconds": 180, "active_only": false } }},
-      { "consume_action":     { "health": 0, "fear": 0, "despair": -1, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "halucinogen", "toxicity": -25 }, "tick": 0 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": -1, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "halucinogen", "toxicity": -25 }, "tick": 0, 
+                                "sfx": { "loop": "eating", "final": "" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "phototoxia", "toxicity": 1 }, "tick": 0, 
                                 "wear": { "expiryseconds": 180, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.plant.nettle": {
@@ -696,18 +765,22 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 5 },
     "actions": [
-      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "loop": "burning", "final": "" } }},
       { "carry_action":       { "health": -3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.nettlefiber" } }},
+                                "reward": { "item": "item.nettlefiber" }, 
+                                "sfx": { "loop": "chopping", "final": "chopping_final" } }},
       { "forage_action":      { "health": -5, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.nettleleaf" } }},
+                                "reward": { "item": "item.nettleleaf" }, 
+                                "sfx": { "final": "chopping_final" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "proximity_action":   { "health": -1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.nettlefiber": {
@@ -722,7 +795,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.gloves" } }}
+                                "reward": { "item": "item.gloves" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.nettleleaf": {
@@ -733,12 +807,14 @@
     "actions": [
       { "carry_action":       { "health": -1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3, 
                                 "wear": { "expiryseconds": 60, "active_only": false } }},
-      { "consume_action":     { "health": 5, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "consume_action":     { "health": 5, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "loop": "eating", "final": "" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 60, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.plant.nightshade": {
@@ -747,18 +823,22 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 5 },
     "actions": [
-      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "tachycardia", "toxicity": 10 }, "tick": 1 }},
+      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "tachycardia", "toxicity": 10 }, "tick": 1, 
+                                "sfx": { "loop": "burning", "final": "" } }},
       { "carry_action":       { "health": 0, "fear": 1, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "tachycardia", "toxicity": 1 }, "tick": 1, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "loop": "chopping", "final": "chopping_final" } }},
       { "forage_action":      { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.nightshadeflower" } }},
+                                "reward": { "item": "item.nightshadeflower" }, 
+                                "sfx": { "final": "chopping_final" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "ExtraLife", "location": "Graveyard" } }}
+                                "reward": { "altar": "ExtraLife", "location": "Graveyard" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.nightshadeflower": {
@@ -769,14 +849,16 @@
     "actions": [
       { "carry_action":       { "health": 0, "fear": 1, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "tachycardia", "toxicity": 1 }, "tick": 1, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
-      { "consume_action":     { "health": 1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "tachycardia", "toxicity": 5 }, "tick": 0 }},
+      { "consume_action":     { "health": 1, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "tachycardia", "toxicity": 5 }, "tick": 0, 
+                                "sfx": { "loop": "eating", "final": "" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "reward": { "item": "item.jewelry*", "target": "nearby", "count": 9 },
-                                "side_effects": {"spawn_npc": {"type": "npc.azazel", "location": "center", "max_instances": 1, "probability": "always"} } }}
+                                "side_effects": {"spawn_npc": {"type": "npc.azazel", "location": "center", "max_instances": 1, "probability": "always"} }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.plant.redcampion": {
@@ -786,19 +868,22 @@
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 5 },
     "axe_hits": 3,
     "actions": [
-      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "loop": "burning", "final": "" } }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.antivenom" } }},
+                                "reward": { "item": "item.antivenom" }, 
+                                "sfx": { "loop": "chopping", "final": "chopping_final" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 5,
                                 "reward": { "loot": "sprite.crypt.loot.gold", "trigger_range": 3, "max_instances": 3 },
                                 "side_effects": { "spawn_npc": { "type": "npc.adder", "probability": "always", "max_instances": 3, "trigger_range": 3 } } }},
 
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.antivenom": {
@@ -808,11 +893,13 @@
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "venom", "toxicity": -50 }, "tick": 0 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "venom", "toxicity": -50 }, "tick": 0, 
+                                "sfx": { "loop": "drinking", "final": "drinking_end" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.digitalis": {
@@ -822,11 +909,13 @@
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "tachycardia", "toxicity": -25 }, "tick": 0 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "tachycardia", "toxicity": -25 }, "tick": 0, 
+                                "sfx": { "loop": "drinking", "final": "drinking_end" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.plant.rowan": {
@@ -835,18 +924,22 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 10, "bow": 5 },
     "actions": [
-      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": -25, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": -25, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "loop": "burning", "final": "" } }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": -10, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.rowanstick" } }},
+                                "reward": { "item": "item.rowanstick" }, 
+                                "sfx": { "loop": "chopping", "final": "chopping_final" } }},
       { "forage_action":      { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.rowanberries" } }},
+                                "reward": { "item": "item.rowanberries" }, 
+                                "sfx": { "final": "chopping_final" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 1, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.rowanstick": {
@@ -861,7 +954,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 7, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.dowsingrod" } }}
+                                "reward": { "item": "item.dowsingrod" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.rowanberries": {
@@ -872,13 +966,15 @@
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
-      { "consume_action":     { "health": 3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "vertigo", "toxicity": 5 }, "tick": 0 }},
+      { "consume_action":     { "health": 3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "vertigo", "toxicity": 5 }, "tick": 0, 
+                                "sfx": { "loop": "eating", "final": "" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.rowanwine" } }}
+                                "reward": { "item": "item.rowanwine" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.plant.stjohnswort": {
@@ -887,18 +983,22 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 5, "bow": 5 },
     "actions": [
-      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "loop": "burning", "final": "" } }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.bloodoil" } }},
+                                "reward": { "item": "item.bloodoil" }, 
+                                "sfx": { "loop": "chopping", "final": "chopping_final" } }},
       { "forage_action":      { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.stjohnswortflower" } }},
+                                "reward": { "item": "item.stjohnswortflower" }, 
+                                "sfx": { "final": "chopping_final" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3,
                                 "wear": { "expiryseconds": 60, "active_only": true } }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": -10, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": -10, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.bloodoil": {
@@ -909,11 +1009,13 @@
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "phototoxia", "toxicity": 20 }, "tick": 0,
-                                "side_effects": { "movement": { "probability": "always", "npc": { "type": "repel", "tick": 60 } } } }},
+                                "side_effects": { "movement": { "probability": "always", "npc": { "type": "repel", "tick": 60 } } }, 
+                                "sfx": { "loop": "drinking", "final": "drinking_end" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.stjohnswortflower": {
@@ -924,12 +1026,14 @@
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
-      { "consume_action":     { "health": 0, "fear": 0, "despair": -5, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": -5, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "loop": "eating", "final": "" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.plant.yew": {
@@ -938,18 +1042,22 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 10, "bow": 5 },
     "actions": [
-      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "bradycardia", "toxicity": 10 }, "tick": 2 }},
+      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "bradycardia", "toxicity": 10 }, "tick": 2, 
+                                "sfx": { "loop": "burning", "final": "" } }},
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.yewstick" } }},
+                                "reward": { "item": "item.yewstick" }, 
+                                "sfx": { "loop": "chopping", "final": "chopping_final" } }},
       { "forage_action":      { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.yewberry" } }},
+                                "reward": { "item": "item.yewberry" }, 
+                                "sfx": { "final": "chopping_final" } }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "bradycardia", "toxicity": 1 }, "tick": 3 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.yewstick": {
@@ -964,7 +1072,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 7, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "item": "item.longbow" } }}
+                                "reward": { "item": "item.longbow" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.yewberry": {
@@ -975,12 +1084,14 @@
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
-      { "consume_action":     { "health": 3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "bradycardia", "toxicity": 5 }, "tick": 0 }},
+      { "consume_action":     { "health": 3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 3, "toxidrome": { "type": "bradycardia", "toxicity": 5 }, "tick": 0, 
+                                "sfx": { "loop": "eating", "final": "" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": -5, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": -5, "luck": 0, "anima": 5, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.preservedcat": {
@@ -994,7 +1105,8 @@
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.talisman0": {
@@ -1009,7 +1121,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "Talisman" } }}
+                                "reward": { "altar": "Talisman" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.talisman1": {
@@ -1024,7 +1137,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "Talisman" } }}
+                                "reward": { "altar": "Talisman" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.talisman2": {
@@ -1039,7 +1153,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "Talisman" } }}
+                                "reward": { "altar": "Talisman" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.talisman3": {
@@ -1054,7 +1169,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "Talisman" } }}
+                                "reward": { "altar": "Talisman" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.talisman4": {
@@ -1069,7 +1185,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "Talisman" } }}
+                                "reward": { "altar": "Talisman" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.talisman5": {
@@ -1084,7 +1201,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "Talisman" } }}
+                                "reward": { "altar": "Talisman" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.talisman6": {
@@ -1099,7 +1217,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "Talisman" } }}
+                                "reward": { "altar": "Talisman" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.talisman7": {
@@ -1114,7 +1233,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "Talisman" } }}
+                                "reward": { "altar": "Talisman" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.talisman8": {
@@ -1129,7 +1249,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "Talisman" } }}
+                                "reward": { "altar": "Talisman" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.talisman9": {
@@ -1144,7 +1265,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "Talisman" } }}
+                                "reward": { "altar": "Talisman" }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.rottenfood": {
@@ -1154,11 +1276,13 @@
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "consume_action":     { "health": -10, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "consume_action":     { "health": -10, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "loop": "eating", "final": "" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.rowanwine": {
@@ -1168,11 +1292,13 @@
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 10, "anima": 3, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 10, "anima": 3, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "loop": "drinking", "final": "drinking_end" } }},
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.shovel": {
@@ -1188,7 +1314,8 @@
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "wealth": 2 } }}
+                                "reward": { "wealth": 2 }, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.witchesbroom": {
@@ -1203,7 +1330,8 @@
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   },
   "item.witchesjar": {
@@ -1219,7 +1347,8 @@
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "reward": [ { "altar": "Banish", "location": "Graveyard" },
-                                            { "altar": "ExtraLife", "location": "Crypt" } ] }}
+                                            { "altar": "ExtraLife", "location": "Crypt" } ], 
+                                "sfx": { "final": "shrine_lighting" } }}
     ]
   }
 }

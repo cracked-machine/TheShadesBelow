@@ -8,6 +8,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace Game::Cmp::Toxicity
@@ -361,6 +362,16 @@ struct ActionWear
   bool active_only{ false };
 };
 
+//! @brief Sound effects played for an action. See the optional "sfx" object of an action in res/json/items.json and
+//! res/json/npc.json. An empty name plays nothing.
+struct ActionSfx
+{
+  //! @brief Plays while the action is in progress, e.g. eating/drinking, an intermediate axe hit, a plant burning.
+  std::string loop;
+  //! @brief Plays when the action completes or is applied.
+  std::string final;
+};
+
 //! @brief Base class for a player-stat modifier applied when a particular kind of gameplay action
 //! occurs (e.g. burying, carrying, colliding with, consuming, destroying, or being hit by something).
 //! @details Holds the health/fear/despair/infamy/toxicity deltas, an optional toxidrome affliction, and
@@ -436,6 +447,12 @@ public:
   //! @brief Set how the source item wears while this action is in effect, see wear().
   //! @param wear The wear settings.
   void set_wear( ActionWear wear ) { m_wear = wear; }
+  //! @brief Get the sound effects of this action ("sfx" in items.json/npc.json).
+  //! @return const ActionSfx& The loop and final sound names, empty if unused.
+  [[nodiscard]] const ActionSfx &sfx() const { return m_sfx; }
+  //! @brief Set the sound effects of this action, see sfx().
+  //! @param sfx The sound effect names.
+  void set_sfx( ActionSfx sfx ) { m_sfx = std::move( sfx ); }
   //! @brief Get the toxidrome affliction associated with this action.
   //! @return Stats::toxidrome The toxidrome type and its own tick interval.
   [[nodiscard]] const Cmp::Toxicity::Toxidrome &toxidrome() const;
@@ -458,7 +475,7 @@ public:
   [[nodiscard]] bool is_zero() const;
 
   //! @brief Accumulate another action's stat deltas into this one.
-  //! @note Does not accumulate toxidrome, side effects or reward.
+  //! @note Does not accumulate toxidrome, side effects, reward or sfx.
   //! @param rhs The action whose deltas are added to this one.
   //! @return BaseAction& Reference to this action, after accumulation.
   BaseAction &operator+=( const BaseAction &rhs )
@@ -498,6 +515,8 @@ private:
   float m_tick{ 0 };
   //! @brief How the source item wears while the action is in effect, see wear().
   std::optional<ActionWear> m_wear;
+  //! @brief Sound effects played for the action, see sfx().
+  ActionSfx m_sfx;
 };
 
 } // namespace Game::Cmp

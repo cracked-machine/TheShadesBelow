@@ -108,6 +108,16 @@
           "description": "Zero for instant dmg using knockback with cooldown, Non-zero for damage every tick.",
           "type": "number"
         },
+        "sfx": {
+          "type": "object",
+          "description": "Optional. Sound effects (names from res/json/audio.json) for this action. The final sound plays each time the action is applied. An empty or missing name plays nothing.",
+          "required": ["final"],
+          "additionalProperties": false,
+          "properties": {
+            "loop": { "type": "string", "description": "Plays while the action is in progress. Optional, unused for NPC actions." },
+            "final": { "type": "string", "description": "Plays when the action is applied. Empty string for none." }
+          }
+        },
         "side_effects": {
           "type": "object",
           "description": "Optional side effects of the action, each rolled independently every time the action is applied.",

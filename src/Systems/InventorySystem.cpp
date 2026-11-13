@@ -385,6 +385,7 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
 
   // items without a Cmp::Inventory::StingDamage (e.g. foraged with gloves) don't sting when picked up
   const auto spawn_action = Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg, world_item_entt );
+  play_action_sfx( spawn_action );
   if ( const auto *world_item_pos_cmp = reg.try_get<Cmp::Position>( world_item_entt ) )
   {
     trigger_side_effects( spawn_action, *world_item_pos_cmp, world_item_entt );
@@ -489,19 +490,16 @@ void InventorySystem::consume_inventory( sf::Time dt )
   if ( not consume_timer ) return;
 
   const auto &consumable_type = item_type.consumable_type();
+  // consume_action.sfx: "loop" plays while consuming, "final" once done (see items.json)
+  const auto consume_sfx_action = item_type.get_action<Cmp::ConsumeAction>();
   if ( *consume_timer < consume_timer->timeout() )
   {
     *consume_timer += dt;
 
     // stll consuming
-    if ( consumable_type == Cmp::WorldItem::Consumable::DRINKABLE )
+    play_action_loop_sfx( consume_sfx_action );
+    if ( consumable_type == Cmp::WorldItem::Consumable::EDIBLE )
     {
-      if ( m_sound_bank.get_effect( "drinking" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "drinking" ).play(); }
-    }
-    else if ( consumable_type == Cmp::WorldItem::Consumable::EDIBLE )
-    {
-      if ( m_sound_bank.get_effect( "eating" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "eating" ).play(); }
-
       auto uuid = Cmp::UUID::generate();
       auto player_pos = Utils::Player::get_position( reg() ).getCenter();
       auto adj_player_pos = sf::Vector2f( player_pos.x, player_pos.y + 3 );
@@ -536,12 +534,8 @@ void InventorySystem::consume_inventory( sf::Time dt )
   else
   {
     // all done
-    m_sound_bank.get_effect( "eating" ).stop();
-    if ( consumable_type == Cmp::WorldItem::Consumable::DRINKABLE )
-    {
-      m_sound_bank.get_effect( "drinking" ).stop();
-      if ( m_sound_bank.get_effect( "drinking_end" ).getStatus() != sf::Sound::Status::Playing ) { m_sound_bank.get_effect( "drinking_end" ).play(); }
-    }
+    stop_action_loop_sfx( consume_sfx_action );
+    play_action_sfx( consume_sfx_action );
     reg().remove<Cmp::Player::ConsumeTimer>( Utils::Player::get_entity( reg() ) );
     const auto consume_action = Utils::Player::apply_action_from_inventory_item<Cmp::ConsumeAction>( reg() );
     trigger_side_effects( consume_action, Utils::Player::get_position( reg() ) );

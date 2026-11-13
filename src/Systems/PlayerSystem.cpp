@@ -966,6 +966,7 @@ void PlayerSystem::apply_plant_proximity_modifiers( sf::Time dt )
 
     if ( triggered )
     {
+      play_action_sfx( proximity_action );
       get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( plant_worlditem_cmp.item_type, Cmp::ProximityAction::kKey, proximity_action ) );
       // reset now, otherwise side effects and rewards re-trigger every frame while the player is outside the closer range check below
       proximity_timer = sf::Time::Zero;

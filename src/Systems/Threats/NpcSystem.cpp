@@ -148,6 +148,7 @@ Cmp::BaseAction NpcSystem::apply_npc_action( const Sys::NpcKey &npc_type, const 
   if ( action.health() < 0 ) { Utils::Player::get_mortality( reg() ).last_damage_cause = Cmp::Player::Mortality::State::HAUNTED; }
   Utils::Player::get_stats( reg() ).apply( action );
   get_systems_event_queue().trigger( Events::GrimoireNpcUpdateEvent( npc_type, ActionT::kKey, action ) );
+  play_action_sfx( action );
   return action;
 }
 
@@ -1354,7 +1355,10 @@ void NpcSystem::check_plant_kill_npc( sf::Time dt )
 
     for ( auto npc_entt : npcs )
     {
-      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, kill_npc->death_anim, "shrine_lighting" ) );
+      // each kill plays the plant's proximity_action "final" sfx (see items.json)
+      const auto &kill_sfx = proximity_action.sfx().final;
+      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, kill_npc->death_anim,
+                                                                  kill_sfx.empty() ? std::nullopt : std::optional<std::string>( kill_sfx ) ) );
       if ( kill_npc->wear_per_kill > 0.f ) get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, kill_npc->wear_per_kill ) );
     }
     get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( plant_worlditem_cmp.item_type, Cmp::ProximityAction::kKey, proximity_action ) );

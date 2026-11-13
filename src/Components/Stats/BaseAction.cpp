@@ -97,7 +97,8 @@ BaseAction::BaseAction( const BaseAction &other )
       m_side_effects( other.m_side_effects ),
       m_rewards( other.m_rewards ),
       m_tick( other.m_tick ),
-      m_wear( other.m_wear )
+      m_wear( other.m_wear ),
+      m_sfx( other.m_sfx )
 {
 }
 
@@ -115,6 +116,7 @@ BaseAction &BaseAction::operator=( const BaseAction &other )
   m_rewards = other.m_rewards;
   m_tick = other.m_tick;
   m_wear = other.m_wear;
+  m_sfx = other.m_sfx;
   return *this;
 }
 

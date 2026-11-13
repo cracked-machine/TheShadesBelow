@@ -14,7 +14,7 @@
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
 namespace Game::PathFinding{ class SpatialHashGrid; }
-namespace Game::Cmp { class BaseAction; class Position; struct ActionReward; }
+namespace Game::Cmp { class BaseAction; class Position; struct ActionReward; struct ActionSfx; }
 // clang-format on
 
 namespace Game::Sys
@@ -62,6 +62,28 @@ protected:
   //! @param pos_cmp The action's source position (e.g. the world item, or the player for inventory/store actions).
   //! @param source_entt The world item whose action this is, if any. Its Cmp::UUID keys Cmp::SpawnNpcEffect::max_instances.
   void trigger_side_effects( const Cmp::BaseAction &action, const Cmp::Position &pos_cmp, entt::entity source_entt = entt::null );
+
+  //! @brief Play an action's "final" sound effect (see Cmp::ActionSfx), if it has one.
+  //! @param sfx The action's sound effects.
+  void play_action_sfx( const Cmp::ActionSfx &sfx );
+  //! @brief Play the action's "final" sound effect (see Cmp::ActionSfx), if it has one.
+  //! @param action The applied action.
+  void play_action_sfx( const Cmp::BaseAction &action );
+
+  //! @brief Play an action's "loop" sound effect (see Cmp::ActionSfx), if it has one and it isn't already playing.
+  //! Call every frame while the action is in progress; the sound is replayed each time it finishes.
+  //! @param sfx The in-progress action's sound effects.
+  void play_action_loop_sfx( const Cmp::ActionSfx &sfx );
+  //! @brief Play the action's "loop" sound effect, see play_action_loop_sfx( const Cmp::ActionSfx & ).
+  //! @param action The in-progress action.
+  void play_action_loop_sfx( const Cmp::BaseAction &action );
+
+  //! @brief Stop an action's "loop" sound effect (see Cmp::ActionSfx), if it has one.
+  //! @param sfx The finished action's sound effects.
+  void stop_action_loop_sfx( const Cmp::ActionSfx &sfx );
+  //! @brief Stop the action's "loop" sound effect, see stop_action_loop_sfx( const Cmp::ActionSfx & ).
+  //! @param action The action that has finished.
+  void stop_action_loop_sfx( const Cmp::BaseAction &action );
 
   //! @brief Grant a reward item at its explicit target (see Cmp::ActionReward::Target): Events::AddInventoryEvent if the
   //! player's hand is free, otherwise Events::CreateItemEvent on free cells beside the source. A wildcard item is picked

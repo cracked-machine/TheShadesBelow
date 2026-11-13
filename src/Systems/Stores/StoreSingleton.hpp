@@ -190,6 +190,12 @@ protected:
       const auto &wear = j.at( "wear" );
       action.set_wear( Cmp::ActionWear{ JsonDeserializer::get_float( wear, "expiryseconds" ), wear.at( "active_only" ).get<bool>() } );
     }
+    // sfx is optional, but when present "final" is required ("loop" is optional)
+    if ( j.contains( "sfx" ) )
+    {
+      const auto &sfx = j.at( "sfx" );
+      action.set_sfx( Cmp::ActionSfx{ sfx.value( "loop", std::string{} ), sfx.at( "final" ).get<std::string>() } );
+    }
     return action;
   }
 

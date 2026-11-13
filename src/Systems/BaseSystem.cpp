@@ -1,3 +1,4 @@
+#include <Audio/SoundBank.hpp>
 
 #include <Components/Player/RepelNpc.hpp>
 #include <Components/Player/ToxicImmunity.hpp>
@@ -28,6 +29,27 @@ BaseSystem::BaseSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
 {
   SPDLOG_DEBUG( "BaseSystem constructor called" );
 }
+
+void BaseSystem::play_action_sfx( const Cmp::ActionSfx &sfx )
+{
+  if ( not sfx.final.empty() ) { m_sound_bank.get_effect( sfx.final ).play(); }
+}
+
+void BaseSystem::play_action_loop_sfx( const Cmp::ActionSfx &sfx )
+{
+  if ( sfx.loop.empty() ) return;
+  auto &sound = m_sound_bank.get_effect( sfx.loop );
+  if ( sound.getStatus() != sf::Sound::Status::Playing ) { sound.play(); }
+}
+
+void BaseSystem::stop_action_loop_sfx( const Cmp::ActionSfx &sfx )
+{
+  if ( not sfx.loop.empty() ) { m_sound_bank.get_effect( sfx.loop ).stop(); }
+}
+
+void BaseSystem::play_action_sfx( const Cmp::BaseAction &action ) { play_action_sfx( action.sfx() ); }
+void BaseSystem::play_action_loop_sfx( const Cmp::BaseAction &action ) { play_action_loop_sfx( action.sfx() ); }
+void BaseSystem::stop_action_loop_sfx( const Cmp::BaseAction &action ) { stop_action_loop_sfx( action.sfx() ); }
 
 void BaseSystem::trigger_side_effects( const Cmp::BaseAction &action, const Cmp::Position &pos_cmp, entt::entity source_entt )
 {
