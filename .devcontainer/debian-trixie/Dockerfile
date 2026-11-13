@@ -73,6 +73,8 @@ RUN apt update -y && apt install -y \
     libfreetype-dev
 
 RUN apt update -y && apt install -y glslang-tools
+# used to programmatically valid JSON files against their schemas.
+RUN apt update -y && apt install -y python3-jsonschema
 
 RUN locale-gen en_GB.UTF-8 && update-locale
 

@@ -96,6 +96,32 @@ target_compile_options(ImGui-SFML PRIVATE -Wno-deprecated-declarations)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+# Validate res/json/<name>.json against res/json/<name>_schema.json at configure time,
+# so invalid JSON fails CMake before anything compiles.
+option(VALIDATE_JSON "Validate res/json files against their schemas at configure time" ON)
+if(VALIDATE_JSON)
+    # 3.8+ so the almalinux8 image picks python3.9 (where pip installed jsonschema), not the system 3.6
+    find_package(Python3 3.8 COMPONENTS Interpreter)
+    if(Python3_FOUND)
+        execute_process(COMMAND ${Python3_EXECUTABLE} -c "import jsonschema"
+                        RESULT_VARIABLE _jsonschema_rc OUTPUT_QUIET ERROR_QUIET)
+    endif()
+    if(Python3_FOUND AND _jsonschema_rc EQUAL 0)
+        execute_process(
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/validate_json.py ${CMAKE_SOURCE_DIR}/res/json
+            RESULT_VARIABLE _json_rc)
+        if(NOT _json_rc EQUAL 0)
+            message(FATAL_ERROR "JSON schema validation failed (see errors above)")
+        endif()
+        # Re-run configure (and so validation) whenever a JSON file or the script changes
+        file(GLOB _json_files ${CMAKE_SOURCE_DIR}/res/json/*.json)
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+                     ${_json_files} ${CMAKE_SOURCE_DIR}/scripts/validate_json.py)
+    else()
+        message(WARNING "Python3 >= 3.8 with jsonschema not found - JSON schema validation skipped")
+    endif()
+endif()
+
 add_subdirectory( ${CMAKE_SOURCE_DIR}/src )
 
 

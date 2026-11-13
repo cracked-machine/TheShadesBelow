@@ -41,6 +41,9 @@ RUN curl -fsSL https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSI
 # python yq (provides `yq -y`, same as Debian's yq package) used by scripts/build.sh
 RUN pip3.9 install --no-cache-dir yq
 
+# used to programmatically valid JSON files against their schemas.
+RUN pip3.9 install --no-cache-dir jsonschema
+
 # SFML3 reqs
 RUN dnf install -y \
     libX11-devel \
