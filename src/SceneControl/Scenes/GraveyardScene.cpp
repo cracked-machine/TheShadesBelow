@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <Audio/SoundBank.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Direction.hpp>
@@ -304,7 +305,9 @@ void GraveyardScene::do_update( sf::Time dt )
   const bool paused = pause_overlay.is_paused() or m_sys.find<Sys::Store::Type::GrimoireSystem>().is_grimoire_overlay_open();
   const sf::Time world_dt = paused ? sf::Time::Zero : dt;
 
-  Utils::Player::get_level_depth( m_reg ).display_timer += world_dt;
+  // clamp the step: the first frame after a level loads has a dt covering the whole load (several seconds),
+  // which would otherwise expire the depth display before it is ever seen
+  Utils::Player::get_level_depth( m_reg ).display_timer += std::min( world_dt, sf::milliseconds( 100 ) );
 
   if ( not paused )
   {
