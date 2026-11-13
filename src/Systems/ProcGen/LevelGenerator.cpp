@@ -96,6 +96,7 @@
 
 #include <SFML/System/Vector2.hpp>
 #include <algorithm>
+#include <cmath>
 #include <functional>
 #include <optional>
 #include <ranges>
@@ -741,14 +742,17 @@ std::vector<entt::entity> LevelGenerator::gen_npc_containers( sf::Vector2u map_g
   std::vector<entt::entity> assigned_entts;
 
   // full density (one NPC container per N grid squares) is only reached at the final level depth;
-  // shallower levels get a linear fraction of it, e.g. depth 1 of 9 gets 1/9th.
+  // shallower levels get a logarithmic fraction of it: log(1 + depth) / log(1 + max_depth),
+  // so counts start high and flatten out towards the final depth.
   // For the 99x99 graveyard map (81 at full density) with MaxLevelDepth = 9:
   //   depth: 1   2   3   4   5   6   7   8   9
-  //   npcs:  9  18  27  36  45  54  63  72  81
+  //   npcs: 24  39  49  57  63  68  73  77  81
   const std::size_t max_npc_containers = map_grid_size.x * map_grid_size.y / 120;
   const auto max_level_depth = static_cast<std::size_t>( std::max( 1, Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value() ) );
   const auto level_depth = std::clamp<std::size_t>( Utils::Player::get_level_depth( reg() ).get_count(), 1, max_level_depth );
-  const std::size_t num_npc_containers = std::max<std::size_t>( 1, max_npc_containers * level_depth / max_level_depth );
+  const double depth_ratio = std::log1p( static_cast<double>( level_depth ) ) / std::log1p( static_cast<double>( max_level_depth ) );
+  const std::size_t num_npc_containers = std::max<std::size_t>(
+      1, static_cast<std::size_t>( std::lround( static_cast<double>( max_npc_containers ) * depth_ratio ) ) );
 
   // keep sampling until the target is met - candidates that land on reserved cells are rejected
   const std::size_t max_attempts = num_npc_containers * 20;
