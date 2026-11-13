@@ -20,15 +20,12 @@
         "actions": {
           "type": "array",
           "description": "List of actions available for this item",
-          "minItems": 8,
-          "maxItems": 9,
+          "minItems": 5,
+          "maxItems": 6,
           "allOf": [
-            { "contains": { "required": ["carry_action"] } },
-            { "contains": { "required": ["consume_action"] } },
             { "contains": { "required": ["destroy_action"] } },
             { "contains": { "required": ["spawn_action"] } },
             { "contains": { "required": ["proximity_action"] } },
-            { "contains": { "required": ["offering_action"] } },
             { "contains": { "required": ["projectile_action"] } },
             { "contains": { "required": ["collision_action"] } }
           ],
@@ -38,14 +35,6 @@
             "properties": {
               "burn_action": {
                 "description": "Optional; defaults to all zeroes. Applied repeatedly, at its own tick interval, while the item is burning.",
-                "allOf": [{ "$ref": "#/definitions/action_effect" }]
-              },
-              "carry_action": {
-                "description": "Defined for schema uniformity with items.json; not currently applied to NPCs.",
-                "allOf": [{ "$ref": "#/definitions/action_effect" }]
-              },
-              "consume_action": {
-                "description": "Defined for schema uniformity with items.json; not currently applied to NPCs.",
                 "allOf": [{ "$ref": "#/definitions/action_effect" }]
               },
               "destroy_action": {
@@ -58,10 +47,6 @@
               },
               "proximity_action": {
                 "description": "Applied repeatedly, at its own tick interval, while the player is near the NPC and it is within the current screen view.",
-                "allOf": [{ "$ref": "#/definitions/action_effect" }]
-              },
-              "offering_action": {
-                "description": "Defined for schema uniformity with items.json; not currently applied to NPCs.",
                 "allOf": [{ "$ref": "#/definitions/action_effect" }]
               },
               "projectile_action": {

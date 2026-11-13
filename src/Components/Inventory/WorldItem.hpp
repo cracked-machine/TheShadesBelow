@@ -60,8 +60,8 @@ public:
   //! @param shovel_dmg Damage done to a shovel by this item.
   //! @param bow_dmg Damage done to a bow by this item.
   //! @param consumable Whether the item can be eaten, drunk or neither.
-  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, std::size_t sprite_index, std::size_t sprite_random_count, int pickaxe_dmg, int axe_dmg, int shovel_dmg, int bow_dmg,
-             Consumable consumable = Consumable::NONE )
+  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, std::size_t sprite_index, std::size_t sprite_random_count, int pickaxe_dmg,
+             int axe_dmg, int shovel_dmg, int bow_dmg, Consumable consumable = Consumable::NONE )
       : item_type( std::move( item_type ) ),
         sprite_type( std::move( sprite_type ) ),
         m_sprite_index( sprite_index ),
@@ -74,18 +74,23 @@ public:
   {
   }
 
-  //! @brief Get the action/time pair keyed by ActionT. Throws std::out_of_range if absent.
+  //! @brief Get the action/time pair keyed by ActionT. Every action is optional in items.json: if absent, a zeroed
+  //! (no effect) action is inserted, so the returned timer is owned by this item. Use has_action() beforehand if
+  //! "absent" must be told apart from "present but no effect".
   template <typename ActionT>
   ActionTimePair &at()
   {
-    return m_actions.at( std::type_index( typeid( ActionT ) ) );
+    return m_actions.try_emplace( std::type_index( typeid( ActionT ) ), ActionTimePair{ .action = no_action(), .time = sf::Time::Zero } )
+        .first->second;
   }
 
-  //! @brief Get the action/time pair keyed by ActionT. Throws std::out_of_range if absent.
+  //! @brief Get the action/time pair keyed by ActionT, or a shared zeroed (no effect) pair if absent.
   template <typename ActionT>
   const ActionTimePair &at() const
   {
-    return m_actions.at( std::type_index( typeid( ActionT ) ) );
+    static const ActionTimePair kNone{ .action = no_action(), .time = sf::Time::Zero };
+    const auto it = m_actions.find( std::type_index( typeid( ActionT ) ) );
+    return it != m_actions.end() ? it->second : kNone;
   }
 
   //! @brief Whether the item has an action keyed by ActionT.
@@ -95,11 +100,11 @@ public:
     return m_actions.contains( std::type_index( typeid( ActionT ) ) );
   }
 
-  //! @brief Get a copy of the action keyed by ActionT. Throws std::out_of_range if absent.
+  //! @brief Get a copy of the action keyed by ActionT, or a zeroed (no effect) action if absent.
   template <typename ActionT>
   BaseAction get_action() const
   {
-    return m_actions.at( std::type_index( typeid( ActionT ) ) ).action;
+    return std::as_const( *this ).template at<ActionT>().action;
   }
 
   //! @brief Get the reward of the action keyed by ActionT.

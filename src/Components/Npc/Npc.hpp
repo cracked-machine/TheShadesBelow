@@ -54,15 +54,21 @@ public:
     sf::Time time;
   };
 
+  //! @brief Get the action/time pair keyed by ActionT. Every action is optional in npc.json: if absent, a zeroed
+  //! (no effect) action is inserted, so the returned timer is owned by this NPC. Use has_action() beforehand if
+  //! "absent" must be told apart from "present but no effect".
   template <typename ActionT>
-  auto &at()
+  ActionTimePair &at()
   {
-    return actions.at( std::type_index( typeid( ActionT ) ) );
+    return actions.try_emplace( std::type_index( typeid( ActionT ) ), ActionTimePair{ no_action(), sf::Time::Zero } ).first->second;
   }
+  //! @brief Get the action/time pair keyed by ActionT, or a shared zeroed (no effect) pair if absent.
   template <typename ActionT>
-  const auto &at() const
+  const ActionTimePair &at() const
   {
-    return actions.at( std::type_index( typeid( ActionT ) ) );
+    static const ActionTimePair kNone{ no_action(), sf::Time::Zero };
+    const auto it = actions.find( std::type_index( typeid( ActionT ) ) );
+    return it != actions.end() ? it->second : kNone;
   }
   //! @brief Whether the NPC has an ActionT, see res/json/npc.json.
   template <typename ActionT>

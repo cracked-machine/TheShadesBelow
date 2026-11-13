@@ -111,11 +111,6 @@ void ItemStore::init_store()
         }
       }
     }
-    // burn_action is optional (only plants burn), so default it to no effect
-    if ( not worlditem.has_action<Cmp::BurnAction>() )
-    {
-      worlditem.emplace( Cmp::BurnAction( { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0.f } ) );
-    }
     if ( item_value.contains( "axe_hits" ) )
     {
       const auto axe_hits = Utils::JsonDeserializer::get_int( item_value, "axe_hits" );

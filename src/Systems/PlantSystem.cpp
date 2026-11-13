@@ -225,8 +225,8 @@ void PlantSystem::player_plant_interact()
       const auto axe_reward = plant_item->get_reward<Cmp::DestroyAction>();
       const auto axe_hits = plant_item->get_axe_hits();
       // forage_action is optional, so its sfx (see items.json) may be absent
-      const auto forage_sfx = plant_item->has_action<Cmp::ForageAction>() ? plant_item->get_action<Cmp::ForageAction>().sfx() : Cmp::ActionSfx{};
-      const auto destroy_sfx = plant_item->has_action<Cmp::DestroyAction>() ? plant_item->get_action<Cmp::DestroyAction>().sfx() : Cmp::ActionSfx{};
+      const auto forage_sfx = plant_item->get_action<Cmp::ForageAction>().sfx();
+      const auto destroy_sfx = plant_item->get_action<Cmp::DestroyAction>().sfx();
       const Cmp::Position plant_bounds( plant_mb_cmp.position, plant_mb_cmp.size );
 
       // each forage wears the plant down
@@ -399,13 +399,10 @@ void PlantSystem::update_burning_plants( sf::Time dt )
     auto *burn_timer = reg().try_get<Cmp::Plant::BurningTimer>( plant_entt );
     if ( not burn_timer ) continue;
 
-    // burn_action.sfx: "loop" plays while burning, "final" once burnt out (see items.json). Items without a burn_action
-    // get a default one (see ItemStore), so this is only empty for a plant entity that has no Cmp::WorldItem.
+    // burn_action.sfx: "loop" plays while burning, "final" once burnt out (see items.json). Empty if the item has no
+    // burn_action, or the plant entity has no Cmp::WorldItem.
     Cmp::ActionSfx burn_sfx;
-    if ( const auto *burn_item = reg().try_get<Cmp::WorldItem>( plant_entt ); burn_item and burn_item->has_action<Cmp::BurnAction>() )
-    {
-      burn_sfx = burn_item->get_action<Cmp::BurnAction>().sfx();
-    }
+    if ( const auto *burn_item = reg().try_get<Cmp::WorldItem>( plant_entt ) ) { burn_sfx = burn_item->get_action<Cmp::BurnAction>().sfx(); }
 
     if ( *burn_timer < burn_timer->timeout() )
     {

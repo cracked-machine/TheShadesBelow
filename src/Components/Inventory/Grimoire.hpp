@@ -149,8 +149,8 @@ private:
                              OfferingAction, SpawnAction>();
   }
 
-  //! @brief Add each of the subpage item's actions that has no effect (see BaseAction::is_zero) to the subpage, so it
-  //! shows "none" before it is discovered.
+  //! @brief Add each of the subpage item's actions that has no effect (see BaseAction::is_zero), or is absent from
+  //! items.json, to the subpage, so it shows "none" before it is discovered.
   static void prefill_empty_actions( SubPage &sub_page )
   {
     if ( sub_page.item_key.empty() ) return;
@@ -162,20 +162,19 @@ private:
       const bool all_empty = std::ranges::all_of( matches, [&]( const Sys::ItemKey &key )
       {
         const auto &item = item_store.get( key );
-        return item.has_action<ActionT>() and item.get_action<ActionT>().is_zero();
+        return item.get_action<ActionT>().is_zero();
       } );
       if ( all_empty ) { sub_page.action_map.emplace( std::string( ActionT::kKey ), item_store.get( matches.front() ).get_action<ActionT>() ); }
     } );
   }
 
-  //! @brief Add each of the NPC's actions that has no effect (see BaseAction::is_zero) to its subpage, so it shows
-  //! "none" before it is discovered.
+  //! @brief Add each of the NPC's actions that has no effect (see BaseAction::is_zero), or is absent from npc.json, to
+  //! its subpage, so it shows "none" before it is discovered.
   static void prefill_empty_npc_actions( const Sys::NpcKey &npc_key, SubPage &sub_page )
   {
     const auto &npc = Sys::NpcStore::instance().get( npc_key );
     for_each_action_type( [&]<typename ActionT>()
     {
-      if ( not npc.has_action<ActionT>() ) return;
       const auto &action = npc.at<ActionT>().action;
       if ( action.is_zero() ) { sub_page.action_map.emplace( std::string( ActionT::kKey ), action ); }
     } );

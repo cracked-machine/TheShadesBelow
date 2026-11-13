@@ -3,7 +3,6 @@
 
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
-#include <optional>
 #include <string_view>
 #include <utility>
 
@@ -29,8 +28,8 @@ public:
   //! @param disease Disease affliction applied alongside the stat changes, if any.
   //! @param side_effects Optional side effects (NPC spawn, lightning, movement).
   //! @param rewards Optional rewards granted when the action is applied (see Cmp::ActionReward).
-  CarryAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima, Stats::Tick tick,
-               Cmp::Toxicity::Toxidrome toxidrome = {}, SideEffects side_effects = {}, ActionRewards rewards = {} )
+  CarryAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima,
+               Stats::Tick tick, Cmp::Toxicity::Toxidrome toxidrome = {}, SideEffects side_effects = {}, ActionRewards rewards = {} )
       : BaseAction( health, fear, despair, infamy, luck, anima, tick, std::move( toxidrome ), std::move( side_effects ), std::move( rewards ) )
   {
   }

@@ -4,6 +4,7 @@
 #include <Components/Altar/Kind.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
+#include <algorithm>
 #include <entt/core/fwd.hpp>
 #include <memory>
 #include <optional>
@@ -391,7 +392,8 @@ public:
   //! @param luck Change applied to the luck stat.
   //! @param anima Change applied to the anima stat.
   //! @param tick How often (seconds) the action re-applies, or 0 for a one-shot.
-  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima, Stats::Tick tick );
+  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima,
+              Stats::Tick tick );
   //! @brief Construct a new Base Action object.
   //! @param health Change applied to the health stat.
   //! @param fear Change applied to the fear stat.
@@ -404,8 +406,8 @@ public:
   //! toxidrome carries its own toxicity contribution (see Cmp::Toxicity::Toxidrome).
   //! @param side_effects Optional side effects (NPC spawn, lightning, movement), each with its own probability.
   //! @param rewards Optional rewards granted when the action is applied (e.g. forage/chop/offering output).
-  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima, Stats::Tick tick,
-              Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects = {}, ActionRewards rewards = {} );
+  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima,
+              Stats::Tick tick, Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects = {}, ActionRewards rewards = {} );
   //! @brief Destroy the Base Action object.
   ~BaseAction();
 
@@ -418,10 +420,7 @@ public:
   //! @return int The change applied to the health stat.
   [[nodiscard]] int health() const { return m_health; }
   //! @brief Drop any damage from this action, leaving a health gain and the other stat deltas as they are.
-  void remove_damage()
-  {
-    if ( m_health < 0 ) m_health = 0;
-  }
+  void remove_damage() { m_health = std::max( m_health, 0 ); }
   //! @brief Get the fear delta.
   //! @return int The change applied to the fear stat.
   [[nodiscard]] int fear() const { return m_fear; }
@@ -518,6 +517,10 @@ private:
   //! @brief Sound effects played for the action, see sfx().
   ActionSfx m_sfx;
 };
+
+//! @brief An action with no effect: zero stat deltas, one-shot tick, and no toxidrome, side effects, rewards, wear
+//! or sfx. Returned for any action an item or NPC omits from res/json/items.json or res/json/npc.json.
+[[nodiscard]] inline BaseAction no_action() { return BaseAction( { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0.f } ); }
 
 } // namespace Game::Cmp
 
