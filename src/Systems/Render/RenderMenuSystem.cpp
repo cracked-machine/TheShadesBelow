@@ -26,13 +26,6 @@
 #include <Components/Persistent/BurrSlowFactor.hpp>
 #include <Components/Persistent/BurrThrowCooldown.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
-#include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
-#include <Components/Persistent/HeldItemOffset.hpp>
-#include <Components/Persistent/HeldItemRotation.hpp>
-#include <Components/Persistent/HeldItemRotationSouth.hpp>
-#include <Components/Persistent/HeldItemRotationWest.hpp>
-#include <Components/Persistent/HeldItemScale.hpp>
-#include <Components/Persistent/HeldItemSideOffsetX.hpp>
 #include <Components/Persistent/CorruptionDamage.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
@@ -53,34 +46,46 @@
 #include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveCountMargin.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
+#include <Components/Persistent/GraveOddsBombTrap.hpp>
+#include <Components/Persistent/GraveOddsCurseTablet.hpp>
+#include <Components/Persistent/GraveOddsJewelry.hpp>
+#include <Components/Persistent/GraveOddsNpcTrap.hpp>
+#include <Components/Persistent/GraveOddsTalisman.hpp>
+#include <Components/Persistent/GraveOddsTorch.hpp>
 #include <Components/Persistent/GraveTrailGuideColour.hpp>
-#include <Components/Persistent/GraveTrailNominalHopDistance.hpp>
 #include <Components/Persistent/GraveTrailNominalHopCount.hpp>
+#include <Components/Persistent/GraveTrailNominalHopDistance.hpp>
 #include <Components/Persistent/GraveTrailStartCount.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
+#include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
 #include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
+#include <Components/Persistent/HeldItemOffset.hpp>
+#include <Components/Persistent/HeldItemRotation.hpp>
+#include <Components/Persistent/HeldItemRotationSouth.hpp>
+#include <Components/Persistent/HeldItemRotationWest.hpp>
+#include <Components/Persistent/HeldItemScale.hpp>
+#include <Components/Persistent/HeldItemSideOffsetX.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
-#include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcCrowFlightSpeed.hpp>
-#include <Components/Persistent/NpcCrowPerchSpeed.hpp>
-#include <Components/Persistent/NpcCrowPerchRange.hpp>
 #include <Components/Persistent/NpcCrowMaxPerchWait.hpp>
+#include <Components/Persistent/NpcCrowPerchRange.hpp>
+#include <Components/Persistent/NpcCrowPerchSpeed.hpp>
 #include <Components/Persistent/NpcMimicTint.hpp>
-#include <Components/Persistent/NpcRenderOffset.hpp>
 #include <Components/Persistent/NpcPushBack.hpp>
+#include <Components/Persistent/NpcRenderOffset.hpp>
 #include <Components/Persistent/NpcShockwaveFreq.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveResolution.hpp>
@@ -95,17 +100,18 @@
 #include <Components/Persistent/NpcWatchmanSpawnMax.hpp>
 #include <Components/Persistent/NpcWatchmanSweepAmplitude.hpp>
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
+#include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/PickaxeGraveDigWear.hpp>
 #include <Components/Persistent/PickaxeObstacleDigWear.hpp>
 #include <Components/Persistent/PickaxePotSmashWear.hpp>
 #include <Components/Persistent/PlantWearPerForage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
+#include <Components/Persistent/PlayerCornerAssistTolerance.hpp>
+#include <Components/Persistent/PlayerDiagonalGapCatch.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerFootstepAddDelay.hpp>
 #include <Components/Persistent/PlayerFootstepFadeDelay.hpp>
 #include <Components/Persistent/PlayerFootstepSfxStrideLength.hpp>
-#include <Components/Persistent/PlayerCornerAssistTolerance.hpp>
-#include <Components/Persistent/PlayerDiagonalGapCatch.hpp>
 #include <Components/Persistent/PlayerLerpInterruptThreshold.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
 #include <Components/Persistent/PlayerOnFireHealthDmgPerSec.hpp>
@@ -130,12 +136,6 @@
 #include <Components/Persistent/StatChangeDisplayDuration.hpp>
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/TachycardiaMovementSpeed.hpp>
-#include <Components/Persistent/GraveOddsBombTrap.hpp>
-#include <Components/Persistent/GraveOddsCurseTablet.hpp>
-#include <Components/Persistent/GraveOddsJewelry.hpp>
-#include <Components/Persistent/GraveOddsNpcTrap.hpp>
-#include <Components/Persistent/GraveOddsTalisman.hpp>
-#include <Components/Persistent/GraveOddsTorch.hpp>
 #include <Components/Persistent/TalismanMinChance.hpp>
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
@@ -451,12 +451,9 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     ImGui::TextDisabled( "0 = worst, 100 = best; equal values share a band; applies next level" );
     {
       const std::array<Cmp::Persist::BasePersistent<int> *, 6> odds_settings{
-          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsCurseTablet>( reg() ),
-          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsBombTrap>( reg() ),
-          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsTorch>( reg() ),
-          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsNpcTrap>( reg() ),
-          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsJewelry>( reg() ),
-          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsTalisman>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsCurseTablet>( reg() ), &Sys::PersistSystem::get<Cmp::Persist::GraveOddsBombTrap>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsTorch>( reg() ),       &Sys::PersistSystem::get<Cmp::Persist::GraveOddsNpcTrap>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsJewelry>( reg() ),     &Sys::PersistSystem::get<Cmp::Persist::GraveOddsTalisman>( reg() ),
       };
       // every column is as wide as the widest slider or label, so the sliders sit at equal x intervals
       const ImVec2 slider_size( 48.0f, 160.0f );
@@ -559,7 +556,8 @@ void RenderMenuSystem::render_victory_screen( bool allow_continue, int cadaver_w
 {
   sf::Vector2u display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
 
-  const unsigned int depth = Utils::Player::get_level_depth( m_reg ).get_count();
+  const int max_level_depth = Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value();
+  const unsigned int depth = max_level_depth - Utils::Player::get_level_depth( m_reg ).get_count();
   const bool final_depth = Utils::Player::is_final_level_depth( m_reg );
 
   sf::Text title_text( m_font, final_depth ? std::format( "Final Level {} Complete!", depth ) : std::format( "Level {} Complete!", depth ), 96 );

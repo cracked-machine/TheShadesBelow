@@ -15,6 +15,7 @@
 #include <Components/LastDirection.hpp>
 #include <Components/NoRender.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
+#include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/StatChangeDisplayDuration.hpp>
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
@@ -86,7 +87,6 @@ void RenderOverlaySystem::render_overlay( sf::Time dt )
   PROFILED( render_ui_meters( dt ) );
   PROFILED( render_ui_labels( dt ) );
   PROFILED( render_ui_texts() );
-  PROFILED( render_level_depth() );
   PROFILED( render_ghost_grave_halos() );
 
   const auto display_size = sf::Vector2f( m_window.getSize() );
@@ -138,8 +138,7 @@ void RenderOverlaySystem::render_ui_icons()
   {
     // we handle the other icons seperately
     if ( icon.name == "inventory_icon" or icon.name.contains( "sprite.crypt.loot.cadaver" ) ) { continue; }
-    RenderSystem::safe_render_sprite_screen( icon.type, icon.rect, icon.index,
-                                             { icon.scale, icon.scale } );
+    RenderSystem::safe_render_sprite_screen( icon.type, icon.rect, icon.index, { icon.scale, icon.scale } );
   }
 }
 
@@ -600,11 +599,12 @@ std::string RenderOverlaySystem::update_stat_change_text( const std::string &lab
 
 void RenderOverlaySystem::render_level_depth()
 {
-  const auto &player_level_cmp = Utils::Player::get_level_depth( reg() );
-  if ( player_level_cmp.display_timer >= player_level_cmp.display_cooldown ) { return; }
+  const Cmp::Player::LevelDepth &level_depth_cmp = Utils::Player::get_level_depth( reg() );
+  if ( level_depth_cmp.display_timer >= level_depth_cmp.display_cooldown ) { return; }
 
+  const int max_level_depth = Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value();
   const auto display_res = sf::Vector2f( m_window.getSize() );
-  sf::Text level_txt( m_font, "Nekropolis " + std::to_string( player_level_cmp.get_count() ), scaled_char_size( 100 ) );
+  sf::Text level_txt( m_font, "Nekropolis " + std::to_string( max_level_depth - level_depth_cmp.get_count() ), scaled_char_size( 100 ) );
   level_txt.setPosition( sf::Vector2f( ( display_res.x / 2.f ) - level_txt.getLocalBounds().getCenter().x, 100.f * ui_scale() ) );
   level_txt.setFillColor( sf::Color::White );
   draw_screen( level_txt );

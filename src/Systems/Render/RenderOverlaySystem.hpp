@@ -44,6 +44,10 @@ public:
   //! @param dt
   void render_overlay( sf::Time dt );
 
+  //! @brief Render the current dungeon level depth text while its display cooldown has not yet elapsed.
+  //! Not part of render_overlay(): only GraveyardScene advances the display timer, so other scenes would show it frozen.
+  void render_level_depth();
+
 private:
   //! @brief Draw the screen-space particle sprites, i.e. the torch flame flickering over the UI inventory icon.
   void render_ui_particles();
@@ -89,9 +93,6 @@ private:
   //! recent changes.
   //! @param dt
   void render_ui_labels( sf::Time dt );
-
-  //! @brief Render the current dungeon level depth text while its display cooldown has not yet elapsed.
-  void render_level_depth();
 
   //! @brief Render the shop UI overlay (outlines, item icons and slot labels) if a Cmp::Shop::Inventory is enabled in the registry.
   void render_shop_inventory_overlay();

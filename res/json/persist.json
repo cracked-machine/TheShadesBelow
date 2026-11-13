@@ -451,9 +451,9 @@
   },
   "MaxLevelDepth": {
     "type": "int",
-    "value": 9,
-    "min_value": 1,
-    "max_value": 10,
+    "value": 5,
+    "min_value": 5,
+    "max_value": 5,
     "detail": "Max Level Depth",
     "format": "%d"
   },

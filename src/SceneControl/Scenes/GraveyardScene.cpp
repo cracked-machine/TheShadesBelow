@@ -385,6 +385,7 @@ void GraveyardScene::do_update( sf::Time dt )
 
   PROFILED( m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( world_dt ) );
   PROFILED( m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_overlay( world_dt ) );
+  PROFILED( m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_level_depth() );
   if ( not paused )
   {
     PROFILED( m_sys.find<Sys::Store::Type::TooltipSystem>().update( dt ) );
