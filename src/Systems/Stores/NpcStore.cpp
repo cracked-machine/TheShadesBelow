@@ -63,6 +63,8 @@ void NpcStore::init_store()
         }
       }
     }
+    // burn_action is optional, so default it to no effect
+    if ( not npc.has_action<Cmp::BurnAction>() ) { npc.emplace( Cmp::BurnAction( { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0.f } ) ); }
     m_store.emplace( key_type( item_key ), std::move( npc ) );
     SPDLOG_DEBUG( "Loaded item: {}", item_key );
   }

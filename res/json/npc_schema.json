@@ -20,10 +20,9 @@
         "actions": {
           "type": "array",
           "description": "List of actions available for this item",
-          "minItems": 9,
+          "minItems": 8,
           "maxItems": 9,
           "allOf": [
-            { "contains": { "required": ["burn_action"] } },
             { "contains": { "required": ["carry_action"] } },
             { "contains": { "required": ["consume_action"] } },
             { "contains": { "required": ["destroy_action"] } },
@@ -38,7 +37,7 @@
             "maxProperties": 1,
             "properties": {
               "burn_action": {
-                "description": "Applied repeatedly, at its own tick interval, while the item is burning.",
+                "description": "Optional; defaults to all zeroes. Applied repeatedly, at its own tick interval, while the item is burning.",
                 "allOf": [{ "$ref": "#/definitions/action_effect" }]
               },
               "carry_action": {
