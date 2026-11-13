@@ -12,6 +12,7 @@
 #include <SFML/Graphics/Text.hpp>
 
 #include <fstream>
+#include <string_view>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
@@ -20,6 +21,15 @@ namespace Game::Sys
 
 namespace
 {
+
+//! @brief Whether a tooltip's item condition matches the event's item. A condition ending in '*' matches any item key
+//! with that prefix (e.g. "item.talisman*"), otherwise the keys must be equal. An empty condition matches any item.
+bool item_condition_matches( std::string_view condition, std::string_view item )
+{
+  if ( condition.empty() ) return true;
+  if ( condition.ends_with( '*' ) ) return item.starts_with( condition.substr( 0, condition.size() - 1 ) );
+  return condition == item;
+}
 
 //! @brief Read an sf::Color from a json object with r, g, b and (optional) a fields.
 sf::Color get_colour( const nlohmann::json &json_data, const sf::Color &fallback )
@@ -206,7 +216,7 @@ const TooltipSystem::TooltipDef *TooltipSystem::find_match( const Candidate &can
   for ( const auto &def : m_definitions )
   {
     if ( def.trigger != candidate.trigger ) { continue; }
-    if ( not def.item.empty() and def.item != candidate.item ) { continue; }
+    if ( not item_condition_matches( def.item, candidate.item ) ) { continue; }
     if ( def.frequency == Frequency::DISABLED ) { continue; }
     if ( def.frequency == Frequency::ONCE and m_seen.contains( def.id ) ) { continue; }
     return &def;

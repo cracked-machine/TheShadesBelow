@@ -221,8 +221,8 @@
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "CryptKey" }, 
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": -10, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
+                                "reward": { "altar": "CryptKey", "location": "Graveyard" },
                                 "sfx": { "final": "shrine_lighting" } }}
     ]
   },

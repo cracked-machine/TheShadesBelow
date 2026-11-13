@@ -11,7 +11,6 @@
 #include <Components/Grave/TrailMarker.hpp>
 #include <Components/Grave/TrailStart.hpp>
 #include <Components/Inventory/BlastProof.hpp>
-#include <Components/Inventory/FlashUIInventory.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Npc/Crow.hpp>
 #include <Components/Particle/FlameParticleSprite.hpp>
@@ -36,14 +35,11 @@
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
-#include <Events/AddInventoryEvent.hpp>
 #include <Events/AltarActivatedEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/CreateNpcEvent.hpp>
-#include <Events/DropInventoryEvent.hpp>
 #include <Events/ExhumeGraveEvent.hpp>
 #include <Events/GraveTrailCompleteEvent.hpp>
-#include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/ParticleFactory.hpp>
@@ -265,14 +261,12 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
     crow_cmp.flee = true;
   }
 
-  if ( trail_position.size() >= static_cast<size_t>( max_trail_size ) * 2 )
+  if ( trail_position.size() >= static_cast<size_t>( max_trail_size ) )
   {
-    // crypt key trail is complete: the caller drops the crypt key instead, and the trail's last arrow goes with it
+    // the trail is complete: the caller drops the exit key instead, and the trail's last arrow goes with it
     reg().clear<Cmp::Grave::TrailMarker>();
-    return TrailStep::CRYPT_KEY;
+    return TrailStep::COMPLETE;
   }
-  // exit key trail is complete: the caller drops the exit key, but the trail carries on towards the crypt key
-  const bool exit_key_reached = trail_position.size() == max_trail_size;
 
   // no un-exhumed graves left to point at
   auto interred_view = reg().view<Cmp::Position, Cmp::Grave::MultiBlock>( entt::exclude<Cmp::Grave::Exhumed> );
@@ -281,7 +275,7 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
     SPDLOG_WARN( "No un-exhumed graves left, skipping trail marker for {}", static_cast<uint32_t>( source_entt ) );
     // nowhere left to point: drop the arrow that led here and this grave's own (angle-less) target marker
     reg().clear<Cmp::Grave::TrailMarker>();
-    return exit_key_reached ? TrailStep::EXIT_KEY : TrailStep::NO_GRAVES;
+    return TrailStep::NO_GRAVES;
   }
 
   const auto &source_pos = reg().get<Cmp::Position>( source_entt );
@@ -360,8 +354,8 @@ GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_e
   {
     trailss << " " << static_cast<uint32_t>( entt );
   }
-  SPDLOG_INFO( "Trail {}/{}: {}", trail_position.size(), max_trail_size * 2, trailss.str() );
-  return exit_key_reached ? TrailStep::EXIT_KEY : TrailStep::ADVANCED;
+  SPDLOG_INFO( "Trail {}/{}: {}", trail_position.size(), max_trail_size, trailss.str() );
+  return TrailStep::ADVANCED;
 }
 
 void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_anim_cmp, ExhumedBy by )
@@ -384,29 +378,15 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
     reg().clear<Cmp::Grave::TrailStart>();
     SPDLOG_INFO( "Grave {} started the trail", static_cast<uint32_t>( grave_entity ) );
     // nowhere for the trail to go: hand over the key now so the level can still be exited
-    if ( pick_next_trail_grave( grave_entity ) != TrailStep::ADVANCED ) { grant_grave_key( "item.exitkey", grave_entity, by ); }
+    if ( pick_next_trail_grave( grave_entity ) != TrailStep::ADVANCED ) { finish_trail( grave_entity ); }
     return;
   }
 
-  // a grave on the trail skips its own consequence: it either points onwards or, at the end of the trail, holds the exit key
+  // a grave on the trail skips its own consequence: it either points onwards or, at the end of the trail (or when no
+  // graves are left to point at), holds the exit key
   if ( reg().all_of<Cmp::Grave::TrailMarker>( grave_entity ) )
   {
-    switch ( pick_next_trail_grave( grave_entity ) )
-    {
-      case TrailStep::EXIT_KEY:
-        grant_grave_key( "item.exitkey", grave_entity, by );
-        break;
-      case TrailStep::CRYPT_KEY:
-        grant_grave_key( "item.cryptkey", grave_entity, by );
-        // the trail is over: restart it so the next altar's trail runs its full length, and let AltarSystem release
-        // the activated altar so the player can activate another. Enqueued as the caller may be iterating registry views
-        Utils::Player::trail_position( reg() ) = Cmp::Player::GraveTrail{};
-        get_systems_event_queue().enqueue( Events::GraveTrailCompleteEvent{} );
-        break;
-      case TrailStep::ADVANCED:
-      case TrailStep::NO_GRAVES:
-        break;
-    }
+    if ( pick_next_trail_grave( grave_entity ) != TrailStep::ADVANCED ) { finish_trail( grave_entity ); }
     return;
   }
 
@@ -545,35 +525,25 @@ Utils::Cardinal facing_edge( const sf::FloatRect &altar, sf::Vector2f grave_cent
 
 } // namespace
 
-void GraveSystem::grant_grave_key( const Sys::ItemKey &key, entt::entity grave_entity, ExhumedBy by )
+void GraveSystem::finish_trail( entt::entity grave_entity )
 {
-  if ( by == ExhumedBy::BOMB )
-  {
-    // the player is not at the grave: leave the key beside it (keys survive blasts anyway) instead of in their hands.
-    // Events::ItemPickedUpEvent is sent when they pick it up.
-    const Cmp::Position bounds = grave_bounds( grave_entity );
-    get_systems_event_queue().trigger( Events::CreateItemEvent( bounds, key, "drop_loot", 0.f, true, 0, entt::null, [this]( entt::entity item_entt )
-    { reg().emplace_or_replace<Cmp::Inventory::BlastProof>( item_entt ); } ) );
-    const auto spawn_action = Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), key );
-    play_action_sfx( spawn_action );
-    trigger_side_effects( spawn_action, bounds );
-    SPDLOG_INFO( "Bomb blast exhumed {}", key.str() );
-    return;
-  }
+  const Sys::ItemKey kExitKey{ "item.exitkey" };
 
-  // the key goes straight into the player's hands, so whatever they were holding (e.g. the digging tool) is dropped
-  get_systems_event_queue().trigger( Events::DropInventoryEvent() );
-  get_systems_event_queue().trigger( Events::AddInventoryEvent( key ) );
-  const auto spawn_action = Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), key );
+  // the key is left beside the grave (keys survive blasts anyway) for the player to pick up and carry to the exit or an
+  // altar. Events::ItemPickedUpEvent is sent when they pick it up.
+  const Cmp::Position bounds = grave_bounds( grave_entity );
+  get_systems_event_queue().trigger( Events::CreateItemEvent( bounds, kExitKey, "drop_loot", 0.f, true, 0, entt::null,
+                                                              [this]( entt::entity item_entt )
+  { reg().emplace_or_replace<Cmp::Inventory::BlastProof>( item_entt ); } ) );
+  const auto spawn_action = Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), kExitKey );
   play_action_sfx( spawn_action );
-  trigger_side_effects( spawn_action, Utils::Player::get_position( reg() ) );
+  trigger_side_effects( spawn_action, bounds );
+  SPDLOG_INFO( "Grave trail complete, exit key exhumed" );
 
-  m_sound_bank.get_effect( "equip_inventory" ).play();
-  // signal UI to flash
-  reg().emplace_or_replace<Cmp::FlashUIInventory>( reg().create() );
-  // enqueued rather than triggered, as the caller may still be iterating registry views
-  get_systems_event_queue().enqueue( Events::ItemPickedUpEvent( key ) );
-  SPDLOG_INFO( "Player exhumed {}", key.str() );
+  // restart the trail so the next altar's trail runs its full length, and let AltarSystem release the activated altar
+  // so the player can activate another. Enqueued as the caller may be iterating registry views
+  Utils::Player::trail_position( reg() ) = Cmp::Player::GraveTrail{};
+  get_systems_event_queue().enqueue( Events::GraveTrailCompleteEvent{} );
 }
 
 void GraveSystem::on_altar_activated( const Events::AltarActivatedEvent &event )

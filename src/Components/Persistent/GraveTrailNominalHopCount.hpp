@@ -5,8 +5,8 @@
 namespace Game::Cmp::Persist
 {
 
-//! @brief Nominal number of graves in the exit key trail. The trail length at a level is this plus the level depth
-//! (the crypt key trail is twice that), see GraveSystem.
+//! @brief Nominal number of graves in the grave trail that leads to the exit key. The trail length at a level is this
+//! plus the level depth, see GraveSystem.
 class GraveTrailNominalHopCount : public BasePersistent<int>
 {
 public:

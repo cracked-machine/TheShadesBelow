@@ -8,8 +8,7 @@
 namespace Game::Factory::Altar
 {
 
-//! @brief Tag of the candle flame particles lit on an altar per relic. Their colour shows the key progress: default once
-//! the exitkey drops, blue once the cryptkey drops.
+//! @brief Tag of the candle flame particles lit on an altar, one per talisman offered.
 inline constexpr const char *kCandleFlameParticleTag = "graveyard.altar.particle.flame";
 //! @brief Tag of the sparkle particles shown, along with the altar's active sprite, while the player holds its extra life.
 inline constexpr const char *kExtraLifeParticleTag = "altar.particle.extralife";

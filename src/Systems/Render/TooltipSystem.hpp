@@ -93,7 +93,8 @@ private:
     //! @brief name of the event that triggers this tooltip, e.g. "AddInventoryEvent", "ItemPickedUpEvent",
     //! "GrimoireDiscoveryEvent", "InsufficientAnimaEvent", "TalismanRefusedEvent" or "CryptEntryRefusedEvent"
     std::string trigger;
-    //! @brief optional item key condition, empty matches any item
+    //! @brief optional item key condition, empty matches any item. A trailing '*' matches any item key with that
+    //! prefix, e.g. "item.talisman*"
     std::string item;
     //! @brief the message to display
     std::string text;

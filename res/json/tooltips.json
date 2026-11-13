@@ -33,8 +33,17 @@
       "duration_s": 4.0
     },
     {
+      "id": "exitkey_no_anima",
+      "trigger": "InsufficientAnimaEvent",
+      "condition": { "item": "item.exitkey" },
+      "text": "The exit key can only be offered when you have anima.\nOffer or eat plants to gain anima.",
+      "frequency": "always",
+      "duration_s": 4.0
+    },
+    {
       "id": "talisman_no_anima",
       "trigger": "InsufficientAnimaEvent",
+      "condition": { "item": "item.talisman*" },
       "text": "A talisman can only be activated when you have anima.\nOffer or eat plants to gain anima.",
       "frequency": "always",
       "duration_s": 4.0

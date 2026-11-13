@@ -19,7 +19,6 @@
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/SummonOffering.hpp>
-#include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Persistent/AltarOfferingCooldown.hpp>
 #include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
@@ -43,11 +42,13 @@
 #include <Components/Toxicity/Vertigo.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/AddInventoryEvent.hpp>
 #include <Events/AltarActivatedEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/GraveTrailCompleteEvent.hpp>
 #include <Events/InsufficientAnimaEvent.hpp>
+#include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/TalismanRefusedEvent.hpp>
 #include <Factory/AltarFactory.hpp>
@@ -177,6 +178,8 @@ void AltarSystem::check_player_altar_offering( entt::entity altar_entity, Cmp::A
   play_action_sfx( offering_action );
   trigger_side_effects( offering_action, Cmp::Position( altar_cmp.position, altar_cmp.size ), altar_entity );
   Factory::Player::destroy_inventory( reg(), item.item_type );
+  // the exit key has left the inventory, so the crypt key can take its place
+  if ( reward and reward->altar == Cmp::ActionReward::AltarEffect::CRYPT_KEY ) give_reward_key( "item.cryptkey" );
   // the offering has left the inventory, so an inventory reward item can take its place
   if ( reward and not reward->item.empty() )
   {
@@ -221,8 +224,7 @@ bool AltarSystem::grant_offering_reward( entt::entity altar_entity, Cmp::Altar::
     case AltarEffect::EXTRA_LIFE:
       return offering_for_extra_life( altar_entity, altar_cmp, altar_uuid );
     case AltarEffect::CRYPT_KEY:
-      // return offering_exitkey( altar_entity, altar_cmp, altar_uuid );
-      return false;
+      return offering_cryptkey( altar_cmp );
     case AltarEffect::TOXIC_IMMUNITY:
       offering_for_toxic_immunity( altar_cmp, reward->tick );
       return true;
@@ -334,16 +336,7 @@ bool AltarSystem::offering_talisman( entt::entity altar_entity, Cmp::Altar::Mult
   }
   if ( talisman_count_cmp->activated( talisman_key ) ) return false;
 
-  // the talisman's (negative) offering anima is its cost, paid by check_player_altar_offering() once the altar accepts it
-  const int anima_cost = -Utils::Player::get_action_from_item_store<Cmp::OfferingAction>( talisman_key ).anima();
-  if ( Utils::Player::get_stats( reg() ).anima() < anima_cost )
-  {
-    SPDLOG_INFO( "Not enough anima to activate {} (need {})", item_type, anima_cost );
-    // signal UI to flash the anima meter and explain why
-    reg().emplace_or_replace<Cmp::FlashUIAnima>( reg().create() );
-    get_systems_event_queue().trigger( Events::InsufficientAnimaEvent( talisman_key ) );
-    return false;
-  }
+  if ( not can_afford_offering( talisman_key ) ) return false;
 
   talisman_count_cmp->activate( talisman_key );
   SPDLOG_INFO( "Activated {} ({} of {})", item_type, talisman_count_cmp->count(), talisman_count_cmp->size() );
@@ -355,7 +348,6 @@ bool AltarSystem::offering_talisman( entt::entity altar_entity, Cmp::Altar::Mult
     Factory::Particle::add_flame( m_reg, Factory::Altar::kCandleFlameParticleTag, altar_uuid, flame_ps_pos, 5000, Cmp::Particle::kAltarScalePreset );
   }
   else { SPDLOG_WARN( "{} has no particle_offsets entry for talisman index {}", inactive_sprite_type.str(), *flame_idx ); }
-  SPDLOG_DEBUG( "Altar activated to state {}.", altar_cmp.get_offering_count() );
   play_offering_anim( altar_cmp, OfferingAnimType::DEFAULT );
 
   if ( talisman_count_cmp->count() == talisman_count_cmp->size() )
@@ -368,31 +360,24 @@ bool AltarSystem::offering_talisman( entt::entity altar_entity, Cmp::Altar::Mult
   return true;
 }
 
-bool AltarSystem::offering_exitkey( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
+bool AltarSystem::can_afford_offering( const Sys::ItemKey &item_key )
 {
-  // all the relics must be offered first
-  const uint8_t offering_count = altar_cmp.get_offering_count();
-  if ( offering_count < altar_cmp.get_exitkey_drop_threshold() or offering_count >= altar_cmp.get_cryptkey_drop_threshold() ) return false;
+  // the item's (negative) offering anima is its cost, paid by check_player_altar_offering() once the altar accepts it
+  const int anima_cost = -Utils::Player::get_action_from_item_store<Cmp::OfferingAction>( item_key ).anima();
+  if ( Utils::Player::get_stats( reg() ).anima() >= anima_cost ) return true;
 
-  reg().patch<Cmp::Altar::MultiBlock>( altar_entity, []( Cmp::Altar::MultiBlock &cmp ) { cmp.increment_offering_count(); } );
+  SPDLOG_INFO( "Not enough anima to offer {} (need {})", item_key.str(), anima_cost );
+  // signal UI to flash the anima meter and explain why
+  reg().emplace_or_replace<Cmp::FlashUIAnima>( reg().create() );
+  get_systems_event_queue().trigger( Events::InsufficientAnimaEvent( item_key ) );
+  return false;
+}
 
-  // turn this altar's candle flames blue
-  for ( auto [particle_entt, particle_cmp, particle_uuid_cmp] : reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID>().each() )
-  {
-    if ( particle_uuid_cmp != altar_uuid ) continue;
-    if ( particle_cmp.sprite->get_tag() != Factory::Altar::kCandleFlameParticleTag ) continue;
-    auto *flame_particle = dynamic_cast<Cmp::Particle::FlameParticleSprite *>( particle_cmp.sprite.get() );
-    if ( flame_particle ) { flame_particle->m_final_flame_color = { 0, 0, 255 }; }
-  }
-  SPDLOG_DEBUG( "Altar activated to state {}.", altar_cmp.get_offering_count() );
+bool AltarSystem::offering_cryptkey( const Cmp::Altar::MultiBlock &altar_cmp )
+{
+  if ( not can_afford_offering( "item.exitkey" ) ) return false;
   play_offering_anim( altar_cmp, OfferingAnimType::KEY );
-
-  if ( altar_cmp.get_offering_count() >= altar_cmp.get_cryptkey_drop_threshold() and not altar_cmp.is_cryptkey_lockout() )
-  {
-    drop_reward_item( "item.cryptkey" );
-    altar_cmp.set_cryptkey_lockout();
-    m_sound_bank.get_effect( "crypt_altar_activate" ).play();
-  }
+  m_sound_bank.get_effect( "crypt_altar_activate" ).play();
   return true;
 }
 
@@ -423,11 +408,15 @@ void AltarSystem::play_offering_anim( const Cmp::Altar::MultiBlock &altar_cmp, O
   reg().emplace_or_replace<Cmp::Altar::ActivationTimer>( Utils::Player::get_entity( reg() ) );
 }
 
-void AltarSystem::drop_reward_item( const Sys::ItemKey &item_key )
+void AltarSystem::give_reward_key( const Sys::ItemKey &item_key )
 {
-  get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), item_key, "drop_loot" ) );
+  get_systems_event_queue().trigger( Events::AddInventoryEvent( item_key ) );
+  m_sound_bank.get_effect( "equip_inventory" ).play();
   // signal UI to flash
   reg().emplace_or_replace<Cmp::FlashUIInventory>( reg().create() );
+  // enqueued rather than triggered, as the caller may still be iterating registry views
+  get_systems_event_queue().enqueue( Events::ItemPickedUpEvent( item_key ) );
+  SPDLOG_INFO( "Altar granted {}", item_key.str() );
 }
 
 } // namespace Game::Sys

@@ -65,12 +65,20 @@ private:
   //! Graveyard altar: respawn back at this altar.
   //! @return false if the altar refused the offering, e.g. the player already has an extra life
   bool offering_for_extra_life( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
-  //! @brief Light an altar candle per relic. Drops an exitkey once the exitkey threshold is reached (all candles lit).
+  //! @brief Light the altar candle for the offered talisman. Once all its candles are lit the altar is activated and
+  //! GraveSystem starts the grave trail that leads to the exit key.
   //! @return false if the altar refused the offering
   bool offering_talisman( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
-  //! @brief Turn the altar flames blue. Drops a cryptkey once the cryptkey threshold is reached.
-  //! @return false if the altar refused the offering
-  bool offering_exitkey( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
+  //! @brief Accept the exit key in exchange for the crypt key, at any graveyard altar whether activated or not. The exit
+  //! key's (negative) offering anima is its cost. check_player_altar_offering() puts the crypt key in the player's hand
+  //! once the exit key has been destroyed.
+  //! @return false if the altar refused the offering, i.e. the player can't afford it
+  bool offering_cryptkey( const Cmp::Altar::MultiBlock &altar_cmp );
+  //! @brief Whether the player has enough anima to pay the item's (negative) offering anima. If not, flash the anima
+  //! meter and send Events::InsufficientAnimaEvent to explain why.
+  bool can_afford_offering( const Sys::ItemKey &item_key );
+  //! @brief Put an altar reward key (e.g. the crypt key) straight into the player's (empty) hand and flash the inventory UI
+  void give_reward_key( const Sys::ItemKey &item_key );
 
   //! @brief Show the altar's extra life: swap to its active sprite, add the extra life particles and play the activate
   //! sound. Undone by Factory::Player::remove_player_extra_life() when the extra life is spent.
@@ -78,8 +86,6 @@ private:
   void activate_altar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
   //! @brief Play the offering animation/sound above the altar and start the activation cooldown
   void play_offering_anim( const Cmp::Altar::MultiBlock &altar_cmp, OfferingAnimType offering_anim_type );
-  //! @brief Drop an item at the player position and flash the inventory UI
-  void drop_reward_item( const Sys::ItemKey &item_key );
 };
 
 } // namespace Game::Sys

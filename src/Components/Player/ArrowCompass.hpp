@@ -39,7 +39,8 @@ namespace Game::Cmp::Player
 //! @brief Caches the player's compass arrow state. The compass has several needles, each pointing at its own target:
 //!        - an "exit" needle, active while an exit key exists anywhere in the scene (world item or inventory)
 //!        - a "crypt" needle, active while a crypt key exists anywhere in the scene (world item or inventory)
-//!        - a "held" needle, driven by the item in the player's inventory slot (altar / talisman targets)
+//!        - a "held" needle, driven by the item in the player's inventory slot (altar / talisman targets). Holding the
+//!          exit key also shows this needle, as it can be offered at an altar for the crypt key
 //!        Key needles are therefore shown whether or not the player holds the key, and turn off once the key is used
 //!        (destroyed). Target resolution is throttled via `m_retarget_timer`, which PlayerSystem advances each frame.
 //!        Not transferred between scenes (see RegistryTransfer) so a stale target never carries over.
@@ -89,7 +90,8 @@ struct ArrowCompass
   static constexpr float kTargetRegionScale{ 0.5f };
 
   //! @brief Recompute the held needle's mode if the inventory item type or its offering eligibility has changed since the last call.
-  //!        Keys are ignored here: their needles are driven by the key's existence (see refresh_targets()).
+  //!        The crypt key is ignored here: its needle is driven by the key's existence (see refresh_targets()). The exit
+  //!        key also has its own needle, but is offerable, so it shows the altar needle too.
   //! @param item_type The item type currently in the player's inventory slot (empty if none)
   //! @param is_offerable Whether the inventory item can currently be offered at the altar (tools only once spent)
   //! @return true if the mode was recomputed (forces a retarget on the next refresh_targets())
@@ -99,8 +101,8 @@ struct ArrowCompass
     m_cached_item_type = item_type;
     m_cached_is_offerable = is_offerable;
 
-    // keys have their own needles, so the (offerable) exitkey does not also point at the altar
-    if ( item_type.contains( "cryptkey" ) or item_type.contains( "exitkey" ) )
+    // the crypt key has its own needle; the (offerable) exit key falls through to point at the altar as well as the exit
+    if ( item_type.contains( "cryptkey" ) )
       m_held.mode = Mode::NONE;
     else if ( item_type.contains( "talisman" ) )
       m_held.mode = Mode::TALISMAN;
@@ -271,10 +273,7 @@ private:
       case Mode::ALTAR: {
         needle.target = nearest( reg.view<Cmp::Altar::MultiBlock>(), player_center,
                                  []( entt::entity, const Cmp::Altar::MultiBlock &altar_cmp ) -> std::optional<Cmp::Position>
-        {
-          if ( altar_cmp.is_exitkey_lockout() ) return std::nullopt;
-          return Cmp::Position( altar_cmp.position, altar_cmp.size );
-        } );
+        { return Cmp::Position( altar_cmp.position, altar_cmp.size ); } );
         break;
       }
       case Mode::TALISMAN: {
