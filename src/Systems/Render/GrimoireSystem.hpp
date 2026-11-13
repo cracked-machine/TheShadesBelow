@@ -15,6 +15,7 @@
 #include <array>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -23,6 +24,9 @@ namespace Game::Sys
 
 //! @brief Toggles and drives the player's grimoire (spellbook) overlay. The NPC and plant pages are in separate tabs
 //! (an ImGui tab bar), and each subpage's actions are listed in an ImGui table. Gameplay is paused while the overlay is open.
+//! While it is closed, hovering the mouse over a plant or NPC in the game area shows its grimoire subpage (its name and
+//! actions table) in a compact overlay, see res/ui/grimoire_plant_hover.json, res/ui/grimoire_npc_hover.json and
+//! Cmp::Persist::GrimoireHoverFollowsMouse.
 class GrimoireSystem : public RenderSystem
 {
 public:
@@ -36,9 +40,12 @@ public:
   //! @param dt
   void update( sf::Time dt );
 
-  //! @brief Draw the current grimoire page, if the overlay is open. Pumps the frame's ImGui frame while open.
+  //! @brief Draw the current grimoire page if the overlay is open, otherwise the hover overlay if the mouse is over an NPC
+  //! or a plant (an NPC in front of a plant wins). Pumps the frame's ImGui frame while either is shown.
   //! @param dt Real frame time, for ImGui.
-  void render( sf::Time dt );
+  //! @param allow_hover false to suppress the hover overlay, e.g. while the game is paused and the pause overlay
+  //! pumps the frame's ImGui frame instead. It is always suppressed while the F3 debug panels are shown, for the same reason.
+  void render( sf::Time dt, bool allow_hover );
 
   //! @brief True while the grimoire overlay is toggled open. Scenes that host the grimoire use this as their pause query.
   [[nodiscard]] bool is_grimoire_overlay_open() const;
@@ -88,6 +95,51 @@ private:
   //! @param reward The item, wealth or special altar effect granted by the action.
   //! @return std::string The reward item's display name, the wealth gained, or a description of the special effect.
   static std::string reward_display_name( const Cmp::ActionReward &reward );
+
+  //! @brief Draw the open grimoire: its tab bar and the current tab's page, in an invisible ImGui window over the layout's
+  //! main_outline. Call between ImGui::SFML::Update and ImGui::SFML::Render.
+  //! @param grimoire_cmp
+  void render_grimoire( const Cmp::Grimoire &grimoire_cmp );
+
+  //! @brief Draw the hover overlay: the subpage of `page` laid out by `ui_data`, at its fixed position or beside the mouse
+  //! cursor (Cmp::Persist::GrimoireHoverFollowsMouse). Call between ImGui::SFML::Update and ImGui::SFML::Render.
+  //! @tparam PageT Cmp::Grimoire::NpcPage or Cmp::Grimoire::PlantPage.
+  //! @param ui_data The hover layout, res/ui/grimoire_npc_hover.json or res/ui/grimoire_plant_hover.json.
+  //! @param window_id The ImGui window id.
+  //! @param cache_prefix Prefix of the layout's TextColumn cache keys.
+  //! @param page The hovered NPC's or plant's page.
+  template <typename PageT>
+  void render_hover( Render::UiData &ui_data, const char *window_id, const std::string &cache_prefix, const PageT &page );
+
+  //! @brief Find the grimoire page of the plant under the mouse cursor in the game area.
+  //! @param grimoire_cmp
+  //! @return The page, or nullptr if the mouse is outside the window, not over a plant, or over a plant with no page.
+  const Cmp::Grimoire::PlantPage *find_hovered_plant_page( const Cmp::Grimoire &grimoire_cmp ) const;
+
+  //! @brief Find the grimoire page of the visible NPC under the mouse cursor in the game area.
+  //! @param grimoire_cmp
+  //! @return The page, or nullptr if the mouse is outside the window, not over a visible NPC, or over an NPC with no page.
+  const Cmp::Grimoire::NpcPage *find_hovered_npc_page( const Cmp::Grimoire &grimoire_cmp ) const;
+
+  //! @brief The mouse cursor's world-space bounds, if it is inside the window.
+  //! @return The bounds, or std::nullopt if the cursor is outside the window: sf::Mouse reports positions outside it too,
+  //! which would map to entities off screen.
+  std::optional<sf::FloatRect> mouse_bounds_in_window() const;
+
+  //! @brief The anchor offset that moves a hover layout's main_outline beside the mouse cursor: below-right of it,
+  //! flipped to the left of / above it where it would leave the window, and clamped to the window.
+  //! @param ui_data The hover layout.
+  //! @param window_size
+  //! @return The offset to pass to Render::UiData::sync_to, or {0,0} if the layout has no main_outline.
+  sf::Vector2f hover_anchor( Render::UiData &ui_data, sf::Vector2u window_size );
+
+  //! @brief Begin an invisible ImGui window over the layout's main_outline, or over the whole screen without one. Always
+  //! pair with ImGui::End.
+  //! @param ui_data
+  //! @param id The ImGui window id, e.g. "##grimoire".
+  //! @param extra_flags Flags added to the common grimoire window flags.
+  //! @return The result of ImGui::Begin.
+  static bool begin_layout_window( const Render::UiData &ui_data, const char *id, int extra_flags );
 
   //! @brief Draw the NPCs/Plants tab bar at the layout's "tab_bar" ui_tab, and update m_tab from the open tab.
   //! @param ui_data The layout of the current tab.
@@ -176,6 +228,10 @@ private:
   std::unique_ptr<Render::UiData> m_plant_ui_data;
   //! @brief Layout of the NPC pages, see res/ui/grimoire_npc.json.
   std::unique_ptr<Render::UiData> m_npc_ui_data;
+  //! @brief Layout of the plant hover overlay, see res/ui/grimoire_plant_hover.json.
+  std::unique_ptr<Render::UiData> m_plant_hover_ui_data;
+  //! @brief Layout of the NPC hover overlay, see res/ui/grimoire_npc_hover.json.
+  std::unique_ptr<Render::UiData> m_npc_hover_ui_data;
 
   //! @brief The tab currently shown.
   Cmp::Grimoire::Tab m_tab{ Cmp::Grimoire::Tab::NPCS };
@@ -183,8 +239,8 @@ private:
   std::array<std::size_t, 2> m_page_idx{};
   //! @brief Select m_tab in the ImGui tab bar on the next frame: ImGui otherwise keeps the tab last clicked.
   bool m_select_tab{ true };
-  //! @brief Whether the grimoire pumped an ImGui frame last frame, so the frame it closes on can pump one more to
-  //! consume the events forwarded to ImGui while it was open.
+  //! @brief Whether the grimoire or the hover overlay pumped an ImGui frame last frame, so the frame the grimoire
+  //! closes on can pump one more to consume the events forwarded to ImGui while it was open.
   bool m_imgui_active{ false };
 };
 

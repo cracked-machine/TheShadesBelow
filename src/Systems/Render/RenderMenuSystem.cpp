@@ -26,6 +26,7 @@
 #include <Components/Persistent/BurrSlowFactor.hpp>
 #include <Components/Persistent/BurrThrowCooldown.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
+#include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
 #include <Components/Persistent/HeldItemOffset.hpp>
 #include <Components/Persistent/HeldItemRotation.hpp>
 #include <Components/Persistent/HeldItemRotationSouth.hpp>
@@ -426,6 +427,10 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
 
     Sys::PersistSystem::get<Cmp::Persist::MusicVolume>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::EffectsVolume>( reg() ).render_widget();
+
+    ImGui::SeparatorText( "Interface" );
+
+    Sys::PersistSystem::get<Cmp::Persist::GrimoireHoverFollowsMouse>( reg() ).render_widget();
 
     ImGui::SeparatorText( "Tutorial" );
 

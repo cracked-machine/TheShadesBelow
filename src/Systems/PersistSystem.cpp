@@ -26,6 +26,7 @@
 #include <Components/Persistent/BurrSlowFactor.hpp>
 #include <Components/Persistent/BurrThrowCooldown.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
+#include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
 #include <Components/Persistent/HeldItemOffset.hpp>
 #include <Components/Persistent/HeldItemRotation.hpp>
 #include <Components/Persistent/HeldItemRotationSouth.hpp>
@@ -154,6 +155,7 @@
 #include <Systems/PersistSystemImpl.hpp>
 
 #include <fstream>
+#include <utility>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <stdexcept>
@@ -335,6 +337,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ShovelPotSmashWear>();
   add_component<Cmp::Persist::TooltipsSeen>();
   add_component<Cmp::Persist::ResetTutorial>();
+  add_component<Cmp::Persist::GrimoireHoverFollowsMouse>();
 
   // Add serdes functions to each component
   for ( const auto &[name, config] : definitions->items() )
@@ -348,6 +351,14 @@ void PersistSystem::initialize_component_registry()
   for ( const auto *name : { "TooltipsSeen", "ResetTutorial" } )
   {
     if ( not definitions->contains( name ) ) { m_components.at( name ).initialise( nlohmann::json::object() ); }
+  }
+
+  // Settings added since may likewise be missing, so create them with their default value and menu label.
+  const std::pair<const char *, nlohmann::json> new_settings[] = {
+      { "GrimoireHoverFollowsMouse", { { "type", "bool" }, { "value", false }, { "detail", "Grimoire hover info follows mouse" } } } };
+  for ( const auto &[name, defaults] : new_settings )
+  {
+    if ( not definitions->contains( name ) ) { m_components.at( name ).initialise( defaults ); }
   }
 
   // Add components not stored in JSON (runtime-only seeds)

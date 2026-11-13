@@ -1,5 +1,10 @@
 #include <Audio/SoundBank.hpp>
+#include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Inventory/Grimoire.hpp>
+#include <Components/Inventory/WorldItem.hpp>
+#include <Components/NoRender.hpp>
+#include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
+#include <Components/Position.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/Stats/ActionReward.hpp>
@@ -13,6 +18,9 @@
 #include <Events/PlayerActionEvent.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Window/Mouse.hpp>
+#include <Systems/PersistSystem.hpp>
+#include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/GrimoireSystem.hpp>
 
 #include <Systems/Stores/ItemStore.hpp>
@@ -42,6 +50,8 @@ namespace
 {
 constexpr float kToggleDebounceThreshold = 1.f;
 constexpr float kNavigateDebounceThreshold = 0.5f;
+//! @brief Gap between the mouse cursor and the hover overlay when it follows the mouse, in design-space pixels.
+constexpr float kHoverCursorGapPx = 24.f;
 
 //! @brief Map a grimoire_plants.json object name (e.g. "forage_actions") to the page's subpage for its
 //! prefix and the remainder of the name (e.g. "actions").
@@ -88,6 +98,8 @@ GrimoireSystem::GrimoireSystem( entt::registry &reg, sf::RenderWindow &window, A
 
   m_plant_ui_data = std::make_unique<Render::UiData>( "res/ui/grimoire_plants.json" );
   m_npc_ui_data = std::make_unique<Render::UiData>( "res/ui/grimoire_npc.json" );
+  m_plant_hover_ui_data = std::make_unique<Render::UiData>( "res/ui/grimoire_plant_hover.json" );
+  m_npc_hover_ui_data = std::make_unique<Render::UiData>( "res/ui/grimoire_npc_hover.json" );
 }
 
 void GrimoireSystem::update( sf::Time dt )
@@ -283,11 +295,22 @@ std::string GrimoireSystem::reward_display_name( const Cmp::ActionReward &reward
   return "none";
 }
 
-void GrimoireSystem::render( sf::Time dt )
+void GrimoireSystem::render( sf::Time dt, bool allow_hover )
 {
-  // only draw the grimoire if its enabled
   const auto *grimoire_cmp = find_grimoire();
-  if ( not grimoire_cmp or not grimoire_cmp->is_enabled )
+  const bool grimoire_open = grimoire_cmp and grimoire_cmp->is_enabled;
+
+  // the F3 debug panels pump the one ImGui frame allowed per frame while they are shown, so the hover overlay can't
+  // NPCs move and are drawn over plants, so an NPC in front of a plant wins
+  const Cmp::Grimoire::NpcPage *hover_npc_page = nullptr;
+  const Cmp::Grimoire::PlantPage *hover_plant_page = nullptr;
+  if ( grimoire_cmp and not grimoire_open and allow_hover and not Utils::scene_setting<Cmp::SceneSettings::ShowDebugStats>( reg() ).enabled )
+  {
+    hover_npc_page = find_hovered_npc_page( *grimoire_cmp );
+    if ( not hover_npc_page ) { hover_plant_page = find_hovered_plant_page( *grimoire_cmp ); }
+  }
+
+  if ( not grimoire_open and not hover_npc_page and not hover_plant_page )
   {
     // the events forwarded to ImGui on the frame the grimoire closed are still queued: pump one empty frame to consume
     // them, so they aren't replayed onto the menu widgets the next time a menu opens
@@ -304,16 +327,17 @@ void GrimoireSystem::render( sf::Time dt )
   // ImGui asserts on a non-positive DeltaTime, so never hand it a zero frame time
   ImGui::SFML::Update( m_window, std::max( dt, sf::microseconds( 1 ) ) );
   ImGui::PushFont( Utils::imgui_grimoire_font() );
+  if ( grimoire_open ) { render_grimoire( *grimoire_cmp ); }
+  else if ( hover_npc_page ) { render_hover( *m_npc_hover_ui_data, "##grimoire_npc_hover", "grimoire_npc_hover_", *hover_npc_page ); }
+  else { render_hover( *m_plant_hover_ui_data, "##grimoire_plant_hover", "grimoire_plant_hover_", *hover_plant_page ); }
+  ImGui::PopFont();
+  ImGui::SFML::Render( m_window );
+}
 
-  // the layouts are authored at their Tiled map size; rescale them if the window resolution has changed (no-op otherwise)
-  m_npc_ui_data->sync_to( m_window.getSize() );
-  m_plant_ui_data->sync_to( m_window.getSize() );
-
-  // one invisible window over the layout's main_outline holds the tab bar and the tables, each placed by its layout
-  // object. Widgets are clipped to it, and the tab bar stretches to its right edge. Without a main_outline it covers the screen.
-  const Render::UiData &current_ui_data = m_tab == Cmp::Grimoire::Tab::NPCS ? *m_npc_ui_data : *m_plant_ui_data;
-  const auto main_outline_it = std::ranges::find( current_ui_data.m_outlines, std::string( "main_outline" ), &Render::UiData::Outline::name );
-  if ( main_outline_it != current_ui_data.m_outlines.end() )
+bool GrimoireSystem::begin_layout_window( const Render::UiData &ui_data, const char *id, int extra_flags )
+{
+  const auto main_outline_it = std::ranges::find( ui_data.m_outlines, std::string( "main_outline" ), &Render::UiData::Outline::name );
+  if ( main_outline_it != ui_data.m_outlines.end() )
   {
     ImGui::SetNextWindowPos( ImVec2( main_outline_it->rect.position.x, main_outline_it->rect.position.y ) );
     ImGui::SetNextWindowSize( ImVec2( main_outline_it->rect.size.x, main_outline_it->rect.size.y ) );
@@ -325,26 +349,119 @@ void GrimoireSystem::render( sf::Time dt )
   }
   constexpr ImGuiWindowFlags kWindowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings |
                                             ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove;
-  if ( ImGui::Begin( "##grimoire", nullptr, kWindowFlags ) )
+  return ImGui::Begin( id, nullptr, kWindowFlags | extra_flags );
+}
+
+void GrimoireSystem::render_grimoire( const Cmp::Grimoire &grimoire_cmp )
+{
+  // the layouts are authored at their Tiled map size; rescale them if the window resolution has changed (no-op otherwise)
+  m_npc_ui_data->sync_to( m_window.getSize() );
+  m_plant_ui_data->sync_to( m_window.getSize() );
+
+  // one invisible window over the layout's main_outline holds the tab bar and the tables, each placed by its layout
+  // object. Widgets are clipped to it, and the tab bar stretches to its right edge. Without a main_outline it covers the screen.
+  const Render::UiData &current_ui_data = m_tab == Cmp::Grimoire::Tab::NPCS ? *m_npc_ui_data : *m_plant_ui_data;
+  if ( begin_layout_window( current_ui_data, "##grimoire", ImGuiWindowFlags_None ) )
   {
     // the tab bar first, so a click this frame shows the newly selected tab's page straight away. ImGui only draws at
     // ImGui::SFML::Render, so it still ends up on top of the SFML parts of the page.
     render_tab_bar( current_ui_data );
 
-    const std::size_t count = page_count( *grimoire_cmp, m_tab );
+    const std::size_t count = page_count( grimoire_cmp, m_tab );
     std::size_t &page_idx = m_page_idx[tab_index( m_tab )];
     if ( count > 0 )
     {
       page_idx = std::min( page_idx, count - 1 );
       // the layouts share object names (e.g. "page_label"), so keep their cached texts apart
-      if ( m_tab == Cmp::Grimoire::Tab::NPCS ) { render_page( *m_npc_ui_data, "grimoire_npc_", grimoire_cmp->npc_pages.at( page_idx ), count ); }
-      else { render_page( *m_plant_ui_data, "grimoire_plant_", grimoire_cmp->plant_pages.at( page_idx ), count ); }
+      if ( m_tab == Cmp::Grimoire::Tab::NPCS ) { render_page( *m_npc_ui_data, "grimoire_npc_", grimoire_cmp.npc_pages.at( page_idx ), count ); }
+      else { render_page( *m_plant_ui_data, "grimoire_plant_", grimoire_cmp.plant_pages.at( page_idx ), count ); }
     }
   }
   ImGui::End();
+}
 
-  ImGui::PopFont();
-  ImGui::SFML::Render( m_window );
+template <typename PageT>
+void GrimoireSystem::render_hover( Render::UiData &ui_data, const char *window_id, const std::string &cache_prefix, const PageT &page )
+{
+  // the page is read from the live grimoire every frame, so a discovery made while hovering shows straight away
+  const sf::Vector2u window_size = m_window.getSize();
+  const bool follow_mouse = PersistSystem::get<Cmp::Persist::GrimoireHoverFollowsMouse>( reg() ).get_value();
+  ui_data.sync_to( window_size, follow_mouse ? hover_anchor( ui_data, window_size ) : sf::Vector2f{ 0.f, 0.f } );
+
+  // display only: events aren't forwarded to ImGui during gameplay, and the overlay must never take the mouse from the game
+  if ( begin_layout_window( ui_data, window_id, ImGuiWindowFlags_NoInputs ) )
+  {
+    // the hover layouts have no page_label, so the page count is unused
+    render_page( ui_data, cache_prefix, page, 0 );
+  }
+  ImGui::End();
+}
+
+std::optional<sf::FloatRect> GrimoireSystem::mouse_bounds_in_window() const
+{
+  const sf::Vector2i mouse_pixel_pos = sf::Mouse::getPosition( m_window );
+  const sf::Vector2u window_size = m_window.getSize();
+  if ( mouse_pixel_pos.x < 0 or mouse_pixel_pos.y < 0 or mouse_pixel_pos.x >= static_cast<int>( window_size.x ) or
+       mouse_pixel_pos.y >= static_cast<int>( window_size.y ) )
+  {
+    return std::nullopt;
+  }
+  return Utils::get_mouse_bounds_in_gameview( m_window, RenderSystem::get_world_view() );
+}
+
+const Cmp::Grimoire::PlantPage *GrimoireSystem::find_hovered_plant_page( const Cmp::Grimoire &grimoire_cmp ) const
+{
+  const auto mouse_bounds = mouse_bounds_in_window();
+  if ( not mouse_bounds ) { return nullptr; }
+  for ( auto [plant_entt, plant_mb_cmp, plant_item_cmp] : reg().view<Cmp::PlantMultiBlock, Cmp::WorldItem>().each() )
+  {
+    if ( not mouse_bounds->findIntersection( plant_mb_cmp ) ) { continue; }
+    const auto page_it = std::ranges::find( grimoire_cmp.plant_pages, plant_item_cmp.item_type,
+                                            []( const Cmp::Grimoire::PlantPage &page ) -> const Sys::ItemKey & { return page.plant_subpage.item_key; } );
+    if ( page_it != grimoire_cmp.plant_pages.end() ) { return &*page_it; }
+  }
+  return nullptr;
+}
+
+const Cmp::Grimoire::NpcPage *GrimoireSystem::find_hovered_npc_page( const Cmp::Grimoire &grimoire_cmp ) const
+{
+  const auto mouse_bounds = mouse_bounds_in_window();
+  if ( not mouse_bounds ) { return nullptr; }
+  // hidden NPCs can't be hovered. NPC containers (e.g. bones piles) have no Cmp::Npc::NPC, so they aren't given away.
+  for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position>( entt::exclude<Cmp::NoRender> ).each() )
+  {
+    if ( not mouse_bounds->findIntersection( npc_pos_cmp ) ) { continue; }
+    const auto page_it = std::ranges::find( grimoire_cmp.npc_pages, npc_cmp.npc_type, &Cmp::Grimoire::NpcPage::npc_key );
+    if ( page_it != grimoire_cmp.npc_pages.end() ) { return &*page_it; }
+  }
+  return nullptr;
+}
+
+sf::Vector2f GrimoireSystem::hover_anchor( Render::UiData &ui_data, sf::Vector2u window_size )
+{
+  // rescale for the window at the current anchor first (a no-op unless the resolution changed), so the panel's size and
+  // its position without an anchor can be read back from the layout
+  const sf::Vector2f current_anchor = ui_data.anchor_offset();
+  ui_data.sync_to( window_size, current_anchor );
+  const auto &outlines = ui_data.m_outlines;
+  const auto main_outline_it = std::ranges::find( outlines, std::string( "main_outline" ), &Render::UiData::Outline::name );
+  if ( main_outline_it == outlines.end() ) { return { 0.f, 0.f }; }
+
+  const sf::Vector2f panel_size = main_outline_it->rect.size;
+  const sf::Vector2f unanchored_pos = main_outline_it->rect.position - current_anchor;
+  // keep the border, drawn outside the rect, on screen as well
+  const float border = static_cast<float>( std::max( 0, main_outline_it->line_thickness ) );
+  const float gap = kHoverCursorGapPx * ui_data.scale();
+  const sf::Vector2f mouse( sf::Mouse::getPosition( m_window ) );
+  const sf::Vector2f window( window_size );
+
+  // below-right of the cursor, or flipped to the other side where it would leave the window
+  sf::Vector2f pos = mouse + sf::Vector2f{ gap, gap };
+  if ( pos.x + panel_size.x + border > window.x ) { pos.x = mouse.x - gap - panel_size.x; }
+  if ( pos.y + panel_size.y + border > window.y ) { pos.y = mouse.y - gap - panel_size.y; }
+  pos.x = std::clamp( pos.x, border, std::max( border, window.x - panel_size.x - border ) );
+  pos.y = std::clamp( pos.y, border, std::max( border, window.y - panel_size.y - border ) );
+  return pos - unanchored_pos;
 }
 
 void GrimoireSystem::render_tab_bar( const Render::UiData &ui_data )

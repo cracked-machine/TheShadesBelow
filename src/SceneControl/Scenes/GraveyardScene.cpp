@@ -387,9 +387,10 @@ void GraveyardScene::do_update( sf::Time dt )
     PROFILED( m_sys.find<Sys::Store::Type::TooltipSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::TooltipSystem>().render() );
   }
-  // real dt even while paused, so the grimoire's debounce timers still run and it can be closed/paged
+  // real dt even while paused, so the grimoire's debounce timers still run and it can be closed/paged.
+  // No grimoire hover overlay while paused: the pause overlay pumps the one ImGui frame allowed per frame.
   PROFILED( m_sys.find<Sys::Store::Type::GrimoireSystem>().update( dt ) );
-  PROFILED( m_sys.find<Sys::Store::Type::GrimoireSystem>().render( dt ) );
+  PROFILED( m_sys.find<Sys::Store::Type::GrimoireSystem>().render( dt, /*allow_hover=*/not pause_overlay.is_paused() ) );
   // the debug panels are hidden while paused: both pump the one ImGui frame allowed per frame
   PROFILED( pause_overlay.render( dt ) );
   if ( not pause_overlay.is_paused() ) { PROFILED( m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug( dt ) ); }

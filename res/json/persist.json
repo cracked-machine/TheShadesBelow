@@ -1145,6 +1145,11 @@
     "value": false,
     "detail": "Reset Tutorial (show all tips again)"
   },
+  "GrimoireHoverFollowsMouse": {
+    "type": "bool",
+    "value": false,
+    "detail": "Grimoire hover info follows mouse"
+  },
   "TooltipsSeen": {
     "type": "std::set<std::string>",
     "value": []

@@ -100,18 +100,22 @@ float UiData::ui_scale( sf::Vector2u display_res, sf::Vector2f design )
   return std::min( static_cast<float>( display_res.x ) / design.x, static_cast<float>( display_res.y ) / design.y );
 }
 
-void UiData::sync_to( sf::Vector2u display_res )
+void UiData::sync_to( sf::Vector2u display_res, sf::Vector2f anchor_offset )
 {
-  if ( display_res == m_scaled_for or display_res.x == 0u or display_res.y == 0u ) return;
+  if ( display_res.x == 0u or display_res.y == 0u ) return;
+  if ( display_res == m_scaled_for and anchor_offset == m_anchor_offset ) return;
+  // an anchor that follows the mouse changes every frame, so only log resolution changes
+  const bool resolution_changed = display_res != m_scaled_for;
   m_scaled_for = display_res;
+  m_anchor_offset = anchor_offset;
 
   // uniform scale so sprites and text are not distorted on a different aspect ratio (e.g. 16:10), centred in the spare space
   m_scale = ui_scale( display_res, m_design_size );
   m_offset = ( sf::Vector2f( display_res ) - ( m_design_size * m_scale ) ) / 2.f;
-  SPDLOG_DEBUG( "UiData scaled to {}x{}: scale {}, offset {},{}", display_res.x, display_res.y, m_scale, m_offset.x, m_offset.y );
+  if ( resolution_changed ) SPDLOG_DEBUG( "UiData scaled to {}x{}: scale {}, offset {},{}", display_res.x, display_res.y, m_scale, m_offset.x, m_offset.y );
 
   const float scale = m_scale;
-  const sf::Vector2f offset = m_offset;
+  const sf::Vector2f offset = m_offset + m_anchor_offset;
   const auto scale_rect = [scale, offset]( const sf::FloatRect &rect ) { return sf::FloatRect( ( rect.position * scale ) + offset, rect.size * scale ); };
   // font sizes are whole pixels and must stay visible
   const auto scale_font = [scale]( int font_size ) { return std::max( 1, static_cast<int>( std::lround( static_cast<float>( font_size ) * scale ) ) ); };

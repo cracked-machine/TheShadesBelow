@@ -121,10 +121,12 @@ public:
   //! @param scene_tiledata_path
   void deserialize( const std::filesystem::path &scene_tiledata_path );
 
-  //! @brief Rescale the layout for `display_res`. Cheap no-op when the layout is already scaled for that resolution, so it
-  //! can be called every frame (e.g. at the top of a render pass) to pick up display resolution changes.
+  //! @brief Rescale the layout for `display_res`. Cheap no-op when the layout is already scaled for that resolution and
+  //! anchor, so it can be called every frame (e.g. at the top of a render pass) to pick up display resolution changes.
   //! @param display_res the target (window) resolution in pixels
-  void sync_to( sf::Vector2u display_res );
+  //! @param anchor_offset an extra screen-space translation applied after scaling and centring, e.g. to move a panel
+  //! to the mouse cursor. Defaults to none.
+  void sync_to( sf::Vector2u display_res, sf::Vector2f anchor_offset = { 0.f, 0.f } );
 
   //! @brief The uniform design-to-screen scale currently applied (1.0 until sync_to() is called).
   //! Use it to scale hard-coded pixel values (font sizes, offsets) drawn alongside this layout.
@@ -132,6 +134,9 @@ public:
 
   //! @brief The screen-space offset currently applied after scaling, i.e. the letterbox margin that centres the layout.
   [[nodiscard]] sf::Vector2f offset() const { return m_offset; }
+
+  //! @brief The anchor offset currently applied after scaling and centring, see sync_to().
+  [[nodiscard]] sf::Vector2f anchor_offset() const { return m_anchor_offset; }
 
   //! @brief The layout's design size in pixels, read from the Tiled map (width * tilewidth, height * tileheight).
   [[nodiscard]] sf::Vector2f design_size() const { return m_design_size; }
@@ -175,6 +180,8 @@ private:
   float m_scale{ 1.f };
   //! @brief See offset().
   sf::Vector2f m_offset{ 0.f, 0.f };
+  //! @brief The anchor offset the public element lists are currently translated by, see sync_to().
+  sf::Vector2f m_anchor_offset{ 0.f, 0.f };
 
   //! @brief Design-space copies of the parsed elements, as authored in the Tiled map. sync_to() rebuilds the public lists from these.
   std::vector<Outline> m_design_outlines;
