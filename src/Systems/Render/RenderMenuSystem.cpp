@@ -29,6 +29,7 @@
 #include <Components/Persistent/CorruptionDamage.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
+#include <Components/Persistent/CryptVariantOverride.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
 #include <Components/Persistent/DespairHealthDmgPerSec.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
@@ -393,6 +394,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     ImGui::SeparatorText( "NPC Settings" );
 
     Sys::PersistSystem::get<Cmp::Persist::CryptNpcSpawnCount>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::CryptVariantOverride>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::NpcShockwaveResolution>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::NpcShockwaveSpeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::NpcShockwaveFreq>( reg() ).render_widget();

@@ -354,6 +354,14 @@
     "detail": "Crypt Shuffke Timeout",
     "format": "%.1f"
   },
+  "CryptVariantOverride": {
+    "type": "int",
+    "value": -1,
+    "min_value": -1,
+    "max_value": 1,
+    "detail": "Crypt Variant (-1 = random, 0 = Classic, 1 = Open)",
+    "format": "%d"
+  },
   "DespairHealthDmgPerSec": {
     "type": "int",
     "value": 1,

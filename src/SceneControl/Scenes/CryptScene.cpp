@@ -7,7 +7,7 @@
 #include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Particle/LavaFireballParticleSprite.hpp>
 #include <Components/Particle/NoteParticleSprite.hpp>
-#include <Components/Persistent/CryptShuffleTimeout.hpp>
+#include <Components/Persistent/CryptVariantOverride.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -31,6 +31,8 @@
 #include <SceneControl/Scenes/CryptScene.hpp>
 #include <Systems/AnimSystem.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Systems/Crypt/Variants/CryptVariant.hpp>
+#include <Systems/Crypt/Variants/CryptVariantArbiter.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/InventorySystem.hpp>
@@ -55,6 +57,15 @@
 
 namespace Game::Scene
 {
+
+CryptScene::CryptScene( Audio::SoundBank &sound_bank, Sys::Store &system_store, entt::dispatcher &nav_event_dispatcher )
+    : Scene( nav_event_dispatcher ),
+      m_sound_bank( sound_bank ),
+      m_sys( system_store )
+{
+}
+
+CryptScene::~CryptScene() = default;
 
 void CryptScene::on_init()
 {
@@ -98,15 +109,20 @@ void CryptScene::on_init()
   auto &random_level_sys = m_sys.find<Sys::Store::Type::LevelGenerator>();
   random_level_sys.init( m_reserved_sm );
   random_level_sys.build_scene_from_data( *m_scene_data );
-  m_sys.find<Sys::Store::Type::PassageSystem>().init_scene_data( m_scene_data );
+  auto &crypt_sys = m_sys.find<Sys::Store::Type::CryptSystem>();
+  auto &passage_sys = m_sys.find<Sys::Store::Type::PassageSystem>();
+  passage_sys.init_scene_data( m_scene_data );
+
+  // pick this crypt's design
+  const int variant_override = Sys::PersistSystem::get<Cmp::Persist::CryptVariantOverride>( m_reg ).get_value();
+  m_variant = Sys::Crypt::CryptVariantArbiter::with_default_variants().pick( crypt_sys, passage_sys, variant_override );
+  passage_sys.set_config( m_variant->passage_config() );
+  crypt_sys.set_variant( m_variant.get() );
 
   // intialise the game area
   auto start_room_entity = m_reg.create();
   m_reg.emplace_or_replace<Cmp::Crypt::RoomStart>( start_room_entity, player_start_area.position, player_start_area.size );
-  m_sys.find<Sys::Store::Type::CryptSystem>().create_end_room( map_size_grid );
-  m_sys.find<Sys::Store::Type::CryptSystem>().create_initial_closed_rooms( map_size_grid );
-  m_sys.find<Sys::Store::Type::CryptSystem>().cache_all_room_connections();
-  m_sys.find<Sys::Store::Type::CryptSystem>().gen_crypt_initial_interior();
+  m_variant->generate( map_size_grid );
 
   Factory::Shader::add_red_vignette( m_sys.find<Sys::Store::Type::ShaderSystem>(),
                                      Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
@@ -151,15 +167,14 @@ void CryptScene::on_enter()
 
   // the player is moved through PlayerSystem, which needs this scene's navmeshes to keep them in sync
   reinit_navmesh();
+  m_sys.find<Sys::Store::Type::CryptSystem>().set_variant( m_variant.get() );
 
   if ( m_just_spawned )
   {
     Sys::BaseSystem::get_systems_event_queue().trigger(
         Events::UpdatePlayerPositionEvent( sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( m_reg ) ) ) );
     m_just_spawned = false;
-    m_sys.find<Sys::Store::Type::CryptSystem>().setup();
-    const auto kCryptShuffleTimeout = Sys::PersistSystem::get<Cmp::Persist::CryptShuffleTimeout>( m_reg ).get_value();
-    Factory::Crypt::create_crypt_shuffle_timer( m_reg, kCryptShuffleTimeout );
+    if ( Utils::Player::get_mortality( m_reg ).state != Cmp::Player::Mortality::State::DEAD ) m_variant->on_first_enter();
   }
 
   // prevent the player from wandering off before the scene has loaded
@@ -185,6 +200,7 @@ void CryptScene::on_exit()
   // Cleanup any resources or entities specific to the CryptScene
   SPDLOG_DEBUG( "Exiting {}", get_name() );
   Factory::Crypt::destroy_crypt_shuffle_timer( m_reg );
+  m_sys.find<Sys::Store::Type::CryptSystem>().set_variant( nullptr );
   m_sys.find<Sys::Store::Type::FootstepSystem>().stop_footsteps_sound();
 
   // Hide the sudden position update/camera pan behind a forced loading screen.

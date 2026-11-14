@@ -8,19 +8,24 @@
 #include <Factory/ObstacleFactory.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Systems/Crypt/Variants/CryptLayoutParams.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 #include <set>
+#include <span>
 
 // clang-format off
 namespace Game::Cmp { class Position; }
 namespace Game::Cmp::Crypt { class RoomEnd; class RoomStart; }
+namespace Game::Sys::Crypt { class CryptVariant; }
 // clang-format on
 
 namespace Game::Sys
 {
 
-//! @brief Drives the procedurally-shuffled crypt maze: room open/close state, levers, chests, lava pits,
-//! spike traps, and the entrance/exit/objective sequence.
+//! @brief Crypt toolkit: room open/close primitives, levers, chests, lava pits, spike traps, and the graveyard
+//! entrance/exit/objective mechanics. The layout and progression policy (when rooms open, which content appears)
+//! belongs to the active Sys::Crypt::CryptVariant, which composes the public primitives below.
 class CryptSystem : public Game::Sys::BaseSystem
 {
 public:
@@ -57,8 +62,12 @@ public:
     m_loot_sm = loot_sm;
   }
 
-  //! @brief Initial maze setup. Called from Scene::on_enter()
-  void setup();
+  //! @brief Set the variant that owns the crypt's layout/progression policy. Non-owning; the CryptScene owns it.
+  //! @param variant The active variant, or nullptr when no crypt scene is active.
+  void set_variant( Crypt::CryptVariant *variant ) { m_variant = variant; }
+
+  //! @brief The shared sound bank, for crypt variants to play room/passage effects.
+  Audio::SoundBank &sound_bank() { return m_sound_bank; }
 
   //! @brief Frame update. Called from Scene::do_update()
   void update( sf::Time dt );
@@ -95,8 +104,7 @@ public:
   //! @param action
   void check_objective_activation( Events::PlayerActionEvent::GameActions action );
 
-  //! @brief Check for lever activation
-  //! @param action
+  //! @brief Check for lever activation. Each pull is reported to the active variant.
   void check_lever_activation();
 
   //! @brief Open a chest the player has activated, dropping loot from it.
@@ -107,58 +115,23 @@ public:
   //! @param uuid_map
   void create_room_borders( const Factory::Obstacle::UUIDEntityMap &uuid_map );
 
-  //! @brief Shuffle the rooms and passages
-  void shuffle_rooms_passages();
-
   //! @brief Generate the initial Crypt interior walls (fills in Cmp::CryptRoomsClosed)
   //! @note Except for start/end rooms, all other rooms should start as Cmp::CryptRoomsClosed
   void gen_crypt_initial_interior();
 
-  //! @brief Pre-cache the passage connections between the initial closed rooms to mitigate FPS issues during play.
-  void cache_all_room_connections();
-
   //! @brief Create the initial rooms that are closed by default.
-  //! @param reg
   //! @param map_grid_size
-  void create_initial_closed_rooms( sf::Vector2u map_grid_size );
+  //! @param params Room count/size/spacing tunables
+  void create_initial_closed_rooms( sf::Vector2u map_grid_size, const Crypt::LayoutParams &params );
 
   //! @brief Generate the main objective for the Crypt
   //! @param map_grid_size
   void create_end_room( sf::Vector2u map_grid_size );
 
-  //! @brief Reset the maze unlock state and lever count (call when re-entering the crypt scene).
-  void reset_maze()
-  {
-    m_maze_unlocked = false;
-    m_enabled_levers = 0;
-  }
-
-private:
-  //! @brief Return an opened graveyard crypt door to its locked state: solid, blocks the player, closed sprite.
-  //! Reverses the open steps in unlock_crypt_door().
-  //! @param door_entity entity with Cmp::Crypt::Entrance
-  //! @param door_pos_cmp the door's position
-  void close_crypt_door( entt::entity door_entity, const Cmp::Position &door_pos_cmp );
+  // ---- Room primitives, composed by Sys::Crypt::CryptVariant ----
 
   //! @brief Build a map of Cmp::UUID -> entity for all entities that are not Cmp::Obstacle
   Factory::Obstacle::UUIDEntityMap build_non_obstacle_uuid_map();
-
-  //! @brief Find the Cmp::Crypt::BuildingMultiBlock entity intersecting the given position
-  //! @param pos_cmp
-  //! @return The intersecting entity, or entt::null if none found
-  entt::entity find_intersecting_multiblock( const Cmp::Position &pos_cmp );
-
-  //! @brief Restore the interior/border wall obstacle and its z-fighting-avoidance cap block for one wall position.
-  //! @param main_entt
-  //! @param main_pos_cmp
-  //! @param room_wall_type
-  void decorate_interior_wall( entt::entity main_entt, const Cmp::Position &main_pos_cmp, RoomWallType room_wall_type );
-
-  //! @brief Unlock the objective passage
-  void unlock_objective_passage();
-
-  //! @brief Unlock the exit passage
-  void unlock_exit_passage();
 
   //! @brief Change all Cmp::Crypt::RoomOpen to Cmp::Crypt::RoomClosed
   //! @note Excludes start/end rooms and the open room occupied by the player)
@@ -181,11 +154,6 @@ private:
   //! @param uuid_map
   void empty_open_rooms( const Factory::Obstacle::UUIDEntityMap &uuid_map );
 
-  //! @brief Collect open-room floor positions not occupied by the player, a lava pit, a lever, a chest,
-  //! or a nearby passage block.
-  //! @return The candidate position entities.
-  std::vector<entt::entity> get_available_room_positions();
-
   //! @brief Adds Cmp::Lever components to Cmp::Crypt::RoomOpen areas
   void add_lever_to_open_rooms();
 
@@ -197,26 +165,9 @@ private:
   //! @param player_pos_cmp
   void add_lava_pit_open_rooms( const Cmp::Position &player_pos_cmp );
 
-  //! @brief Spit a fireball out of a random active lava pit cell once the effect cooldown has elapsed.
-  //! @param dt Time elapsed since the last frame.
-  void do_lava_pit_animation( sf::Time dt );
-
   //! @brief Remove lava pits from open rooms
   //! @param player_pos_cmp
   void remove_lava_pit_open_rooms( const Cmp::Position &player_pos_cmp );
-
-  //! @brief Check player collision with lava pits
-  void check_lava_pit_collision();
-
-  //! @brief Activate/deactivate the lava pit if player is close
-  void check_lava_pit_activation_by_proximity();
-
-  //! @brief Check player collision with the spike traps
-  void check_spike_trap_collision();
-
-  //! @brief Activate/deactivate the spike trap if player is close
-  //! @note This uses animation component `m_animation_active` member.
-  void check_spike_trap_activation_by_proximity( sf::Time dt );
 
   //! @brief Removes Cmp::Lever components from Cmp::Crypt::RoomOpen areas
   //! @param player_pos_cmp
@@ -232,8 +183,10 @@ private:
   //! @brief Removes ALL chests.
   void remove_all_chests();
 
-  //! @brief Spawn NPCs in each open room in the game area
-  void spawn_npc_in_open_rooms();
+  //! @brief Spawn NPCs in the centre of distinct, randomly picked open rooms.
+  //! @param npc_types Pool of NPC types; each spawn picks one at random
+  //! @param count Requested number of NPCs, capped by the number of open rooms
+  void spawn_npc_in_open_rooms( std::span<const Sys::NpcKey> npc_types, int count );
 
   //! @brief Get the single Cmp::Crypt::RoomStart component
   //! @return Pair of entt::entity and Cmp::Crypt::RoomStart&
@@ -243,14 +196,51 @@ private:
   //! @return Pair of entt::entity and Cmp::Crypt::RoomEnd&
   std::pair<entt::entity, Cmp::Crypt::RoomEnd &> get_crypt_room_end();
 
+private:
+  //! @brief Return an opened graveyard crypt door to its locked state: solid, blocks the player, closed sprite.
+  //! Reverses the open steps in unlock_crypt_door().
+  //! @param door_entity entity with Cmp::Crypt::Entrance
+  //! @param door_pos_cmp the door's position
+  void close_crypt_door( entt::entity door_entity, const Cmp::Position &door_pos_cmp );
+
+  //! @brief Find the Cmp::Crypt::BuildingMultiBlock entity intersecting the given position
+  //! @param pos_cmp
+  //! @return The intersecting entity, or entt::null if none found
+  entt::entity find_intersecting_multiblock( const Cmp::Position &pos_cmp );
+
+  //! @brief Restore the interior/border wall obstacle and its z-fighting-avoidance cap block for one wall position.
+  //! @param main_entt
+  //! @param main_pos_cmp
+  //! @param room_wall_type
+  void decorate_interior_wall( entt::entity main_entt, const Cmp::Position &main_pos_cmp, RoomWallType room_wall_type );
+
+  //! @brief Collect open-room floor positions not occupied by the player, a lava pit, a lever, a chest,
+  //! or a nearby passage block.
+  //! @return The candidate position entities.
+  std::vector<entt::entity> get_available_room_positions();
+
+  //! @brief Spit a fireball out of a random active lava pit cell once the effect cooldown has elapsed.
+  //! @param dt Time elapsed since the last frame.
+  void do_lava_pit_animation( sf::Time dt );
+
+  //! @brief Check player collision with lava pits
+  void check_lava_pit_collision();
+
+  //! @brief Activate/deactivate the lava pit if player is close
+  void check_lava_pit_activation_by_proximity();
+
+  //! @brief Check player collision with the spike traps
+  void check_spike_trap_collision();
+
+  //! @brief Activate/deactivate the spike trap if player is close
+  //! @note This uses animation component `m_animation_active` member.
+  void check_spike_trap_activation_by_proximity( sf::Time dt );
+
   //! @brief Dispatcher reference for scene management events
   entt::dispatcher &m_scenemanager_event_dispatcher;
 
-  //! @brief Number of enabled levers
-  unsigned int m_enabled_levers{ 0 };
-
-  //! @brief Indicates if the maze was unlocked this cycle
-  bool m_maze_unlocked{ false };
+  //! @brief The active crypt variant (non-owning), or nullptr outside the crypt scene
+  Crypt::CryptVariant *m_variant{ nullptr };
 
   //! @brief Time accumulated since the last lava pit fireball was emitted.
   sf::Time m_lava_effect_cooldown_elapsed{ sf::Time::Zero };

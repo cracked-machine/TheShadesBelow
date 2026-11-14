@@ -29,6 +29,7 @@
 #include <Components/Persistent/CorruptionDamage.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
+#include <Components/Persistent/CryptVariantOverride.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
 #include <Components/Persistent/DespairHealthDmgPerSec.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
@@ -214,6 +215,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::CorruptionDamage>();
   add_component<Cmp::Persist::CryptShuffleTimeout>();
   add_component<Cmp::Persist::CryptNpcSpawnCount>();
+  add_component<Cmp::Persist::CryptVariantOverride>();
   add_component<Cmp::Persist::DiggingCooldownThreshold>();
   add_component<Cmp::Persist::DiggingDamagePerHit>();
   add_component<Cmp::Persist::DisplayResolution>();

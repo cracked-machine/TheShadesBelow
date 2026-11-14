@@ -44,7 +44,6 @@
 #include <Events/CrowDeliveryEvent.hpp>
 #include <Events/CryptEntryRefusedEvent.hpp>
 #include <Events/CryptRoomEvent.hpp>
-#include <Events/PassageEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/CryptFactory.hpp>
 #include <Factory/LootFactory.hpp>
@@ -55,6 +54,7 @@
 #include <SceneControl/Scenes/CryptScene.hpp>
 #include <Shaders/ScreenShudderShader.hpp>
 #include <Sprites/SpriteSheet.hpp>
+#include <Systems/Crypt/Variants/CryptVariant.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
@@ -80,28 +80,11 @@
 namespace Game::Sys
 {
 
-void CryptSystem::setup()
-{
-  if ( Utils::Player::get_mortality( m_reg ).state != Cmp::Player::Mortality::State::DEAD )
-  {
-    shuffle_rooms_passages();
-    reset_maze();
-  }
-}
-
 void CryptSystem::update( sf::Time dt )
 {
-
-  if ( m_maze_unlocked ) { Factory::Crypt::destroy_crypt_shuffle_timer( reg() ); }
-  else { Utils::Crypt::update_crypt_shuffle_timer( reg(), dt ); }
+  if ( m_variant ) m_variant->update( dt );
 
   check_exit_collision();
-
-  if ( not m_maze_unlocked and Utils::Crypt::is_crypt_shuffle_timer_expired( reg() ) )
-  {
-    //
-    shuffle_rooms_passages();
-  }
 
   // check collisions with lava pit/spike traps
   if ( Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled )
@@ -114,94 +97,6 @@ void CryptSystem::update( sf::Time dt )
   check_lava_pit_activation_by_proximity();
   do_lava_pit_animation( dt );
   check_spike_trap_activation_by_proximity( dt );
-}
-
-void CryptSystem::shuffle_rooms_passages()
-{
-  if ( auto shudder = Sys::ShaderSystem::find<Sprites::ScreenShudderShader>( reg(), "ScreenShudder" ) )
-    shudder->get().trigger( /*duration=*/sf::seconds( 0.5f ), /*amplitude=*/3.f, /*frequency=*/16.f );
-  auto uuid_map = build_non_obstacle_uuid_map();
-
-  auto selected_rooms = Utils::Rnd::get_n_rand_components<Cmp::Crypt::RoomClosed>(
-      reg(), 4, {}, Utils::Rnd::ExcludePack<Cmp::Crypt::RoomStart, Cmp::Crypt::RoomEnd>{}, 0 );
-
-  auto player_pos_cmp = Utils::Player::get_position( reg() );
-  // reset rooms/passages
-  remove_lava_pit_open_rooms( player_pos_cmp );
-  remove_lever_open_rooms( player_pos_cmp );
-  remove_chest_open_rooms( player_pos_cmp );
-  close_open_rooms( player_pos_cmp );
-  fill_closed_rooms( uuid_map );
-  get_systems_event_queue().trigger( Events::PassageEvent( Events::PassageEvent::Type::REMOVE_PASSAGES ) );
-
-  // open new rooms/passages
-  open_selected_rooms( selected_rooms );
-  empty_open_rooms( uuid_map );
-  create_room_borders( uuid_map );
-  add_lava_pit_open_rooms( player_pos_cmp );
-
-  // try to open passages for the occupied room: only do start room if player is currently there
-  auto [start_room_entt, start_room_cmp] = get_crypt_room_start();
-  if ( Utils::Player::get_position( reg() ).findIntersection( start_room_cmp ) )
-  {
-    get_systems_event_queue().trigger( Events::PassageEvent( Events::PassageEvent::Type::CONNECT_START_TO_OPENROOMS, start_room_entt ) );
-  }
-  else { get_systems_event_queue().trigger( Events::PassageEvent( Events::PassageEvent::Type::CONNECT_OCCUPIED_TO_OPENROOMS ) ); }
-
-  add_chest_to_open_rooms( player_pos_cmp );
-  get_systems_event_queue().trigger( Events::PassageEvent( Events::PassageEvent::Type::OPEN_PASSAGES ) );
-  add_lever_to_open_rooms();
-
-  m_sound_bank.get_effect( "crypt_room_shuffle" ).play();
-  Utils::Crypt::reset_crypt_shuffle_timer( reg() );
-}
-
-void CryptSystem::unlock_objective_passage()
-{
-  auto uuid_map = build_non_obstacle_uuid_map();
-
-  auto player_pos_cmp = Utils::Player::get_position( reg() );
-
-  // reset rooms/passages
-  remove_lava_pit_open_rooms( player_pos_cmp );
-  remove_lever_open_rooms( player_pos_cmp );
-  remove_chest_open_rooms( player_pos_cmp );
-  close_open_rooms( player_pos_cmp );
-  remove_all_levers();
-  fill_closed_rooms( uuid_map );
-  get_systems_event_queue().trigger( Events::PassageEvent( Events::PassageEvent::Type::REMOVE_PASSAGES ) );
-  empty_open_rooms( uuid_map );
-  create_room_borders( uuid_map );
-
-  // open new rooms/passages
-  SPDLOG_DEBUG( "~~~~~~~~~~~ OPENING FINAL PASSAGE ~~~~~~~~~~~~~~~" );
-  get_systems_event_queue().trigger( Events::PassageEvent( Events::PassageEvent::Type::CONNECT_OCCUPIED_TO_ENDROOM, get_crypt_room_end().first ) );
-  get_systems_event_queue().trigger( Events::PassageEvent( Events::PassageEvent::Type::OPEN_PASSAGES ) );
-  m_sound_bank.get_effect( "crypt_room_shuffle" ).play();
-}
-
-void CryptSystem::unlock_exit_passage()
-{
-  auto uuid_map = build_non_obstacle_uuid_map();
-
-  auto player_pos_cmp = Utils::Player::get_position( reg() );
-
-  // if we unlocked the maze by picking up the cadaver, then cancel the timer
-  m_maze_unlocked = true;
-
-  close_open_rooms( player_pos_cmp );
-  remove_all_chests();
-  remove_all_levers();
-  remove_lava_pit_open_rooms( player_pos_cmp );
-  open_all_rooms();
-  empty_open_rooms( uuid_map );
-  create_room_borders( uuid_map );
-
-  // make sure player can reach exit
-  get_systems_event_queue().trigger( Events::PassageEvent( Events::PassageEvent::Type::CONNECT_START_TO_OPENROOMS, get_crypt_room_start().first ) );
-  get_systems_event_queue().trigger( Events::PassageEvent( Events::PassageEvent::Type::CONNECT_ALL_ROOMS ) );
-
-  spawn_npc_in_open_rooms();
 }
 
 void CryptSystem::on_player_action( Events::PlayerActionEvent &event )
@@ -235,9 +130,11 @@ void CryptSystem::on_room_event( Events::CryptRoomEvent &event )
 {
   if ( Utils::Player::get_mortality( reg() ).state == Cmp::Player::Mortality::State::DEAD ) return;
 
-  if ( event.type == Events::CryptRoomEvent::Type::SHUFFLE_PASSAGES ) { shuffle_rooms_passages(); }
-  else if ( event.type == Events::CryptRoomEvent::Type::FINAL_PASSAGE ) { unlock_objective_passage(); }
-  else if ( event.type == Events::CryptRoomEvent::Type::EXIT_ALL_PASSAGES ) { unlock_exit_passage(); }
+  if ( not m_variant ) return;
+
+  if ( event.type == Events::CryptRoomEvent::Type::SHUFFLE_PASSAGES ) { m_variant->shuffle(); }
+  else if ( event.type == Events::CryptRoomEvent::Type::FINAL_PASSAGE ) { m_variant->unlock_objective(); }
+  else if ( event.type == Events::CryptRoomEvent::Type::EXIT_ALL_PASSAGES ) { m_variant->unlock_exit(); }
 }
 
 void CryptSystem::update_exit_zorder()
@@ -473,7 +370,7 @@ void CryptSystem::check_objective_activation( Events::PlayerActionEvent::GameAct
 
 void CryptSystem::check_lever_activation()
 {
-  if ( m_maze_unlocked ) return;
+  if ( not m_variant ) return;
 
   auto player_view = reg().view<Cmp::Player::Character, const Cmp::Position>();
   auto lever_view = reg().view<Cmp::Crypt::Lever, Cmp::Position>();
@@ -488,7 +385,6 @@ void CryptSystem::check_lever_activation()
       if ( lever_cmp.isEnabled() ) { continue; }
       if ( not player_hitbox.findIntersection( lever_pos_cmp ) ) { continue; }
       lever_cmp.setEnabled( true );
-      m_enabled_levers++;
       lever_activated = true;
 
       // clang-format off
@@ -500,22 +396,13 @@ void CryptSystem::check_lever_activation()
       // clang-format on
 
       m_sound_bank.get_effect( "crypt_lever_open" ).play();
-      SPDLOG_DEBUG( "Lever enabled at {},{} - Count:{}", lever_pos_cmp.position.x, lever_pos_cmp.position.y, m_enabled_levers );
+      SPDLOG_DEBUG( "Lever enabled at {},{}", lever_pos_cmp.position.x, lever_pos_cmp.position.y );
     }
   }
 
-  // the shuffle/unlock creates and destroys levers and positions, so it must not run while the views above are being iterated
-  if ( not lever_activated ) return;
-
-  // check if we have activated enough levers to access the maze objective
-  if ( m_enabled_levers > 2 )
-  {
-    m_maze_unlocked = true;
-
-    unlock_objective_passage();
-    Utils::Crypt::reset_crypt_shuffle_timer( reg() );
-  }
-  else { shuffle_rooms_passages(); }
+  // the variant may shuffle/unlock, which creates and destroys levers and positions, so it must not run while the views
+  // above are being iterated
+  if ( lever_activated ) m_variant->on_lever_activated();
 }
 
 void CryptSystem::check_chest_activation( Events::PlayerActionEvent::GameActions action )
@@ -601,21 +488,21 @@ void CryptSystem::gen_crypt_initial_interior()
   }
 }
 
-void CryptSystem::create_initial_closed_rooms( sf::Vector2u map_grid_size )
+void CryptSystem::create_initial_closed_rooms( sf::Vector2u map_grid_size, const Crypt::LayoutParams &params )
 {
   const auto &grid_square_size = Constants::kGridSizePxF;
-  const int min_room_width = 3;
-  const int min_room_height = 3;
-  const int max_room_width = 8;
-  const int max_room_height = 8;
-  const int max_distance_between_rooms = 2;
-  const int max_attempts = 5000;
+  const int min_room_width = params.min_room_w;
+  const int min_room_height = params.min_room_h;
+  const int max_room_width = params.max_room_w;
+  const int max_room_height = params.max_room_h;
+  const int max_distance_between_rooms = params.min_room_spacing;
+  const int max_attempts = params.max_attempts;
 
   auto reserved_sm = m_reserved_sm.lock();
 
   int room_count = 0;
   int current_attempt = 0;
-  while ( room_count < 20 )
+  while ( room_count < params.room_count )
   {
 
     int room_width = Cmp::RandomInt{ min_room_width, max_room_width }.gen();
@@ -769,12 +656,6 @@ void CryptSystem::create_initial_closed_rooms( sf::Vector2u map_grid_size )
 
   SPDLOG_DEBUG( "Total rooms: {}", room_count );
   // Currently no special logic needed; placeholder for future use
-}
-
-void CryptSystem::cache_all_room_connections()
-{
-  SPDLOG_DEBUG( "CryptSystem::cache_all_room_connections()" );
-  get_systems_event_queue().trigger( Events::PassageEvent( Events::PassageEvent::Type::CACHE_ALL_ROOM_CONNECTIONS ) );
 }
 
 void CryptSystem::create_end_room( sf::Vector2u map_grid_size )
@@ -1282,8 +1163,10 @@ void CryptSystem::remove_all_chests()
   }
 }
 
-void CryptSystem::spawn_npc_in_open_rooms()
+void CryptSystem::spawn_npc_in_open_rooms( std::span<const Sys::NpcKey> npc_types, int count )
 {
+  if ( npc_types.empty() or count <= 0 ) return;
+
   auto open_room_view = reg().view<Cmp::Crypt::RoomOpen>();
   std::vector<Cmp::Crypt::RoomOpen> open_room_list;
 
@@ -1300,9 +1183,9 @@ void CryptSystem::spawn_npc_in_open_rooms()
     return;
   }
 
-  // Spawn user specified number of NPCs or the max number of rooms: whichever is smallest.
-  const int npcs_to_spawn = std::min( Sys::PersistSystem::get<Cmp::Persist::CryptNpcSpawnCount>( reg() ).get_value(),
-                                      static_cast<unsigned short>( open_room_list.size() ) );
+  // Spawn the requested number of NPCs or the max number of rooms: whichever is smallest.
+  const int npcs_to_spawn = std::min( count, static_cast<int>( open_room_list.size() ) );
+  Cmp::RandomInt npc_type_picker( 0, static_cast<int>( npc_types.size() ) - 1 );
 
   for ( int r = 0; r < npcs_to_spawn; r++ )
   {
@@ -1322,9 +1205,10 @@ void CryptSystem::spawn_npc_in_open_rooms()
 
     // Spawn NPC in the selected room
     auto spawn_position = Utils::snap_to_grid( extracted_open_room_cmp.getCenter() );
-    get_systems_event_queue().trigger( Events::CreateNpcEvent( "npc.priest", Cmp::Position( spawn_position, Constants::kGridSizePxF ) ) );
+    const auto &npc_type = npc_types[static_cast<std::size_t>( npc_type_picker.gen() )];
+    get_systems_event_queue().trigger( Events::CreateNpcEvent( npc_type, Cmp::Position( spawn_position, Constants::kGridSizePxF ) ) );
 
-    SPDLOG_DEBUG( "Spawned NPC {} at position ({}, {})", r + 1, spawn_position.x, spawn_position.y );
+    SPDLOG_DEBUG( "Spawned NPC {} ({}) at position ({}, {})", r + 1, npc_type, spawn_position.x, spawn_position.y );
   }
 }
 

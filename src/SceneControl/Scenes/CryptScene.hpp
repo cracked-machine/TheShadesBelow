@@ -9,9 +9,12 @@
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Vector2.hpp>
 
+#include <memory>
+
 // clang-format off
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
+namespace Game::Sys::Crypt { class CryptVariant; }
 // clang-format on
 
 namespace Game::Scene
@@ -26,17 +29,17 @@ public:
   //! @param sound_bank Shared sound bank used to play/stop crypt-related audio
   //! @param system_store Store of game systems the scene drives each update
   //! @param nav_event_dispatcher Used to notify the SceneInputRouter when new input events are available
-  CryptScene( Audio::SoundBank &sound_bank, Sys::Store &system_store, entt::dispatcher &nav_event_dispatcher )
-      : Scene( nav_event_dispatcher ),
-        m_sound_bank( sound_bank ),
-        m_sys( system_store )
-  {
-  }
+  CryptScene( Audio::SoundBank &sound_bank, Sys::Store &system_store, entt::dispatcher &nav_event_dispatcher );
 
-  //! @brief Builds the crypt level (rooms, navmeshes, floor tiles, torch flame particles) and initializes persistent state
+  //! @brief Destroy the CryptScene object. Defined out of line (like the constructor) so Sys::Crypt::CryptVariant can stay forward declared.
+  ~CryptScene() override;
+
+  //! @brief Picks the crypt variant, builds the crypt level (rooms, navmeshes, floor tiles, torch flame particles) and
+  //! initializes persistent state
   void on_init() override;
 
-  //! @brief Restores player position and starts the crypt shuffle timer on first entry, and locks player movement until the scene has loaded
+  //! @brief Restores player position and lets the variant set up the rooms on first entry, and locks player movement until
+  //! the scene has loaded
   void on_enter() override;
 
   //! @brief Destroys the crypt shuffle timer, stops footstep audio, removes the player's extra life, and delays for a forced loading screen
@@ -65,6 +68,9 @@ private:
 
   //! @brief Store of game systems the scene drives each update
   Sys::Store &m_sys;
+
+  //! @brief The crypt design picked by Sys::Crypt::CryptVariantArbiter for this scene
+  std::unique_ptr<Sys::Crypt::CryptVariant> m_variant;
 };
 
 } // namespace Game::Scene

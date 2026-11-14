@@ -13,7 +13,6 @@
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SpawnArea.hpp>
 #include <Components/UUID.hpp>
-#include <Events/PassageEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/CryptFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
@@ -36,9 +35,7 @@ namespace Game::Sys
 
 PassageSystem::PassageSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
     : Game::Sys::BaseSystem( reg, window, sound_bank )
-
 {
-  std::ignore = get_systems_event_queue().sink<Events::PassageEvent>().connect<&PassageSystem::on_passage_event>( this );
 }
 
 void PassageSystem::update( [[maybe_unused]] sf::Time dt )
@@ -52,45 +49,31 @@ void PassageSystem::init_nav_mesh( const PathFinding::SpatialHashGridSharedPtr &
   m_passage_algos.cache_wall_components( reg() );
 }
 
-void PassageSystem::on_passage_event( Events::PassageEvent &event )
+void PassageSystem::set_config( const PassageConfig &config )
+{
+  m_config = config;
+
+  // this system outlives each crypt scene, so drop anything left over from the previous crypt
+  m_passage_algos.reset();
+  m_connect_all_rooms = false;
+  m_region_idx = 0;
+  m_uncached_passage_list.clear();
+  m_passage_block_grid.clear();
+}
+
+sf::Vector2f PassageSystem::map_size_pixel()
 {
   Scene::SceneMapSharedPtr crypt_scene_data = m_crypt_scene_data.lock();
   if ( not crypt_scene_data ) throw std::runtime_error( "Unable to lock Scene::SceneConfigSharedPtr" );
-  auto [map_size_grid, map_size_pixel] = crypt_scene_data->map_size();
+  return crypt_scene_data->map_size().second;
+}
 
-  switch ( event.type )
-  {
-    case Events::PassageEvent::Type::REMOVE_PASSAGES:
-      m_passage_algos.reset();
-      fill_all_passages();
-      remove_all_passage_blocks();
-      m_uncached_passage_list.clear();
-      break;
-    case Events::PassageEvent::Type::OPEN_PASSAGES:
-      open_passages();
-      break;
-    case Events::PassageEvent::Type::CONNECT_START_TO_OPENROOMS:
-      connect_start_and_open_rooms_passages( event.entity );
-      break;
-    case Events::PassageEvent::Type::CONNECT_OCCUPIED_TO_OPENROOMS:
-      connect_occupied_and_open_room_passages();
-      break;
-    case Events::PassageEvent::Type::CONNECT_OCCUPIED_TO_ENDROOM:
-      connect_occupied_and_end_room_passages( reg(), event.entity, map_size_pixel );
-      tidy_passage_blocks();
-      create_uncached_passages();
-      break;
-    case Events::PassageEvent::Type::CACHE_ALL_ROOM_CONNECTIONS:
-      m_region_idx = 0;
-      cache_all_room_connections();
-      break;
-    case Events::PassageEvent::Type::CONNECT_ALL_ROOMS:
-      m_connect_all_rooms = true;
-      break;
-    case Events::PassageEvent::Type::ADD_SPIKE_TRAPS:
-      add_spike_traps();
-      break;
-  }
+void PassageSystem::reset_passages()
+{
+  m_passage_algos.reset();
+  fill_all_passages();
+  remove_all_passage_blocks();
+  m_uncached_passage_list.clear();
 }
 
 void PassageSystem::open_passages()
@@ -114,7 +97,7 @@ void PassageSystem::add_spike_traps()
   }
 }
 
-void PassageSystem::connect_start_and_open_rooms_passages( entt::entity start_room_entt )
+void PassageSystem::connect_start_to_open_rooms( entt::entity start_room_entt )
 {
   if ( start_room_entt == entt::null )
   {
@@ -146,7 +129,7 @@ void PassageSystem::connect_start_and_open_rooms_passages( entt::entity start_ro
   for ( auto &[direction, qaudrant] : quadrants )
   {
     auto distances = find_room_distances<Cmp::Crypt::RoomOpen>( start_room_cmp->m_connectors[direction], qaudrant, { start_room_entt } );
-    auto passage_blocks = find_passages<Cmp::Crypt::RoomOpen>( start_room_cmp->m_connectors[direction], distances, ProcGen::WalkingType::DRUNK,
+    auto passage_blocks = find_passages<Cmp::Crypt::RoomOpen>( start_room_cmp->m_connectors[direction], distances, m_config.walk_type,
                                                                map_size_pixel, ProcGen::OnePassagePerTargetRoom::YES,
                                                                ProcGen::AllowDuplicatePassages::NO );
     m_uncached_passage_list.insert( m_uncached_passage_list.begin(), passage_blocks.begin(), passage_blocks.end() );
@@ -156,7 +139,7 @@ void PassageSystem::connect_start_and_open_rooms_passages( entt::entity start_ro
   tidy_passage_blocks();
 }
 
-void PassageSystem::connect_occupied_and_open_room_passages()
+void PassageSystem::connect_occupied_to_open_rooms()
 {
   Scene::SceneMapSharedPtr crypt_scene_data = m_crypt_scene_data.lock();
   if ( not crypt_scene_data ) throw std::runtime_error( "Unable to lock Scene::SceneConfigSharedPtr" );
@@ -189,7 +172,7 @@ void PassageSystem::connect_occupied_and_open_room_passages()
     for ( auto &[direction, qaudrant] : quadrants )
     {
       auto distances = find_room_distances<Cmp::Crypt::RoomOpen>( occupied_room_cmp.m_connectors[direction], qaudrant, { open_room_entt } );
-      auto passage_blocks = find_passages<Cmp::Crypt::RoomOpen>( occupied_room_cmp.m_connectors[direction], distances, ProcGen::WalkingType::DRUNK,
+      auto passage_blocks = find_passages<Cmp::Crypt::RoomOpen>( occupied_room_cmp.m_connectors[direction], distances, m_config.walk_type,
                                                                  map_size_pixel, ProcGen::OnePassagePerTargetRoom::YES,
                                                                  ProcGen::AllowDuplicatePassages::NO );
       m_uncached_passage_list.insert( m_uncached_passage_list.begin(), passage_blocks.begin(), passage_blocks.end() );
@@ -199,40 +182,41 @@ void PassageSystem::connect_occupied_and_open_room_passages()
   }
 }
 
-void PassageSystem::connect_occupied_and_end_room_passages( entt::registry &reg, entt::entity end_room_entt, sf::Vector2f map_size_pixel )
+void PassageSystem::connect_occupied_to_end_room()
 {
-  std::vector<Cmp::Crypt::PassageBlock> passage_block_list;
-  if ( end_room_entt == entt::null )
+  auto end_room_view = reg().view<Cmp::Crypt::RoomEnd>();
+  if ( end_room_view.front() == entt::null )
   {
-    SPDLOG_WARN( "End room entt is null" );
+    SPDLOG_WARN( "no end room found" );
     return;
   }
-  auto *crypt_end_room_cmp = reg.try_get<Cmp::Crypt::RoomEnd>( end_room_entt );
-  if ( not crypt_end_room_cmp )
-  {
-    SPDLOG_WARN( "end room cmp is null" );
-    return;
-  }
+  const auto end_room_entt = end_room_view.front();
+  auto &crypt_end_room_cmp = reg().get<Cmp::Crypt::RoomEnd>( end_room_entt );
+  const auto map_size_px = map_size_pixel();
 
-  auto open_room_view = reg.view<Cmp::Crypt::RoomOpen>();
+  auto open_room_view = reg().view<Cmp::Crypt::RoomOpen>();
   for ( auto [open_room_entt, open_room_cmp] : open_room_view.each() )
   {
-    if ( not Utils::Player::get_position( reg ).findIntersection( open_room_cmp ) ) continue;
+    if ( not Utils::Player::get_position( reg() ).findIntersection( open_room_cmp ) ) continue;
     auto &occupied_room_cmp = open_room_cmp;
 
     // no need to search for suitable target, we already have it
     const auto &current_passage_door = occupied_room_cmp.m_connectors[Cmp::Crypt::CryptPassageDirection::NORTH];
     m_passage_algos.increment_passage_id();
 
-    std::vector<Cmp::Crypt::PassageBlock> passage_blocks = m_passage_algos.create_drunken_walk( reg, current_passage_door, *crypt_end_room_cmp,
-                                                                                                map_size_pixel, { open_room_entt, end_room_entt } );
+    std::vector<Cmp::Crypt::PassageBlock> passage_blocks = m_passage_algos.create_drunken_walk( reg(), current_passage_door, crypt_end_room_cmp,
+                                                                                                map_size_px, { open_room_entt, end_room_entt } );
 
     m_uncached_passage_list.insert( m_uncached_passage_list.begin(), passage_blocks.begin(), passage_blocks.end() );
   }
+
+  tidy_passage_blocks();
+  create_uncached_passages();
 }
 
 void PassageSystem::cache_all_room_connections()
 {
+  m_region_idx = 0;
 
   Scene::SceneMapSharedPtr crypt_scene_data = m_crypt_scene_data.lock();
   if ( not crypt_scene_data ) throw std::runtime_error( "Unable to lock Scene::SceneConfigSharedPtr" );
@@ -306,7 +290,7 @@ void PassageSystem::cache_all_room_connections()
                                                                  { target_entt }, ProcGen::AllowDuplicatePassages::NO );
         if ( not passage_list.empty() )
         {
-          target_cmp->set_all_doors_used( true );
+          if ( m_config.sparse_connections ) target_cmp->set_all_doors_used( true );
           adjacency[closed_room_entt].insert( target_entt );
           adjacency[target_entt].insert( closed_room_entt ); // passages are traversable both ways
           cache_blocks( passage_list );
@@ -482,7 +466,7 @@ void PassageSystem::create_cached_passages()
   {
     m_connect_all_rooms = false;
     open_passages();
-    add_spike_traps();
+    if ( m_config.spike_traps ) add_spike_traps();
     return;
   }
 

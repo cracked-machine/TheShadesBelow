@@ -14,17 +14,27 @@
 
 // clang-format off
 namespace Game::Cmp::Crypt { class PassageDoor; class PassageBlock; class RoomClosed; class RoomOpen; }
-namespace Game::Events { class PassageEvent; }
 namespace Game::PathFinding { class SpatialHashGrid; }
 // clang-format on
 
 namespace Game::Sys
 {
 
-//! @brief Carves and manages passage blocks that connect crypt rooms together, driven by
-//!        Events::PassageEvent. Handles connecting the start/occupied/end rooms to nearby open
-//!        or closed rooms, caching passage layouts per region, and opening/filling passages as
-//!        the player explores the level.
+//! @brief Tunables for how PassageSystem connects crypt rooms. Supplied by the active Sys::Crypt::CryptVariant.
+struct PassageConfig
+{
+  //! @brief Carving algorithm used when connecting the start/occupied room to open rooms.
+  ProcGen::WalkingType walk_type{ ProcGen::WalkingType::DRUNK };
+  //! @brief If true, each room can be the target of only one passage while pre-caching connections, which keeps dead-end
+  //! rooms. If false, rooms can receive several incoming passages, giving a denser network.
+  bool sparse_connections{ true };
+  //! @brief Add a spike trap to each passage once the full-level connection pass has finished.
+  bool spike_traps{ true };
+};
+
+//! @brief Carves and manages passage blocks that connect crypt rooms together. A toolkit driven directly by the
+//!        active Sys::Crypt::CryptVariant: connecting the start/occupied/end rooms to nearby open or closed rooms,
+//!        caching passage layouts per region, and opening/filling passages as the player explores the level.
 class PassageSystem : public Game::Sys::BaseSystem
 {
 public:
@@ -43,43 +53,51 @@ public:
   //! @param npc_navmesh Spatial grid used for NPC pathfinding
   void init_nav_mesh( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh );
 
-  //! @brief Dispatches a Events::PassageEvent to the corresponding passage operation
-  //!        (remove, open, connect rooms, cache connections, or add spike traps).
-  //! @param event The passage event describing which operation to perform
-  void on_passage_event( Events::PassageEvent &event );
+  //! @brief Set the passage tunables for the current crypt. Also clears any state left over from a previous crypt.
+  //! @param config See PassageConfig
+  void set_config( const PassageConfig &config );
 
   //! @brief Per-frame update; when a full-level connection pass has been requested it spawns
   //!        one cached passage region per call until all regions are placed.
   //! @param dt Time elapsed since the last update
   void update( sf::Time dt );
 
+  //! @brief Wall in every passage, then remove all passage blocks and reset the passage IDs.
+  void reset_passages();
+
   //! @brief Empty out passage block areas, removing obstacles/chests so passages become walkable.
   void open_passages();
 
-  //! @brief Create west, north, east passages for the start room via find_passage_target()
+  //! @brief Create west, north, east passages from the start room to open rooms
   //! @param start_room_entt The entity ID of the start room
-  void connect_start_and_open_rooms_passages( entt::entity start_room_entt );
+  void connect_start_to_open_rooms( entt::entity start_room_entt );
 
-  //! @brief Create west, north, east and south passages for the occupied room via find_passage_target()
-  void connect_occupied_and_open_room_passages();
+  //! @brief Create west, north, east and south passages from the occupied room to open rooms
+  void connect_occupied_to_open_rooms();
 
-  //! @brief Create west, north, east and south passages for all open rooms via find_passage_target()
+  //! @brief Create a north passage from the occupied room to the end room, then instantiate it.
+  void connect_occupied_to_end_room();
+
+  //! @brief Pre-calculate passages between all closed rooms (and the end room), bucketed by region.
+  //! Spawned later, incrementally, by connect_all_rooms().
   void cache_all_room_connections();
 
-  //! @brief Connect the end room to the nearest reachable closed room via its south door, marking
-  //!        that closed room as the BFS root for later room-connectivity checks.
-  void connect_end_room_to_nearest_closed_room();
-
-  //! @brief Create north passage for occupied room to the end room. Calls createDrunkenWalkPassage() directly.
-  //! @param reg Entity-component registry to query/carve passage blocks in
-  //! @param end_room_entt The entity ID of the end room
-  //! @param map_size_pixel Size of the map in pixels, used to keep the walk within bounds
-  void connect_occupied_and_end_room_passages( entt::registry &reg, entt::entity end_room_entt, sf::Vector2f map_size_pixel );
+  //! @brief Start spawning the cached passages (one region per update()); opens them and adds spike traps
+  //! (if PassageConfig::spike_traps) when done.
+  void connect_all_rooms() { m_connect_all_rooms = true; }
 
   //! @brief Add spike traps along each already-carved passage, one per passage ID.
   void add_spike_traps();
 
 private:
+  //! @brief Connect the end room to the nearest reachable closed room via its south door, marking
+  //!        that closed room as the BFS root for later room-connectivity checks.
+  void connect_end_room_to_nearest_closed_room();
+
+  //! @brief Get the crypt map size in pixels from the scene data.
+  //! @return sf::Vector2f
+  sf::Vector2f map_size_pixel();
+
   //! @brief Removes all Cmp::Crypt::PassageBlock entities
   void remove_all_passage_blocks();
 
@@ -141,6 +159,9 @@ private:
 
   //! @brief flag for enabling final dynamic scene update via the update function
   bool m_connect_all_rooms{ false };
+
+  //! @brief Passage tunables for the current crypt, see set_config()
+  PassageConfig m_config;
 
   //! @brief Precalculated passage blocks for every room connection, bucketed by region, spawned
   //!        incrementally by create_cached_passages() during the final dynamic scene update.

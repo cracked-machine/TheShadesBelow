@@ -92,6 +92,10 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/AltarSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/LootSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/CryptSystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Crypt/Variants/CryptVariant.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Crypt/Variants/CryptVariantArbiter.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Crypt/Variants/ClassicCryptVariant.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Crypt/Variants/OpenCryptVariant.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/HealingSpringSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/RuinSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ShopSystem.cpp
