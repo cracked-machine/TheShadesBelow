@@ -115,7 +115,7 @@ private:
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
 
-  //! @brief Prevent player from spamming the drop inventory action.
+  //! @brief Time since the last pickup/drop; swaps are ignored until Cmp::Persist::InventorySwapCooldown has passed.
   sf::Time m_swap_item_cooldown_timer;
 
   //! @brief fixed step for updating the item damage for expiry.

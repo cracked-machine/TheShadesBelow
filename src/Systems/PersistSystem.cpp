@@ -26,13 +26,6 @@
 #include <Components/Persistent/BurrSlowFactor.hpp>
 #include <Components/Persistent/BurrThrowCooldown.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
-#include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
-#include <Components/Persistent/HeldItemOffset.hpp>
-#include <Components/Persistent/HeldItemRotation.hpp>
-#include <Components/Persistent/HeldItemRotationSouth.hpp>
-#include <Components/Persistent/HeldItemRotationWest.hpp>
-#include <Components/Persistent/HeldItemScale.hpp>
-#include <Components/Persistent/HeldItemSideOffsetX.hpp>
 #include <Components/Persistent/CorruptionDamage.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
@@ -51,43 +44,49 @@
 #include <Components/Persistent/FlyingTransitionTime.hpp>
 #include <Components/Persistent/FuseDelay.hpp>
 #include <Components/Persistent/GlovesWearPerForage.hpp>
+#include <Components/Persistent/GraveCountMargin.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
-#include <Components/Persistent/GraveTrailGuideColour.hpp>
-#include <Components/Persistent/GraveTrailNominalHopDistance.hpp>
-#include <Components/Persistent/GraveTrailNominalHopCount.hpp>
-#include <Components/Persistent/GraveTrailStartCount.hpp>
-#include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/GraveOddsBombTrap.hpp>
 #include <Components/Persistent/GraveOddsCurseTablet.hpp>
 #include <Components/Persistent/GraveOddsJewelry.hpp>
 #include <Components/Persistent/GraveOddsNpcTrap.hpp>
 #include <Components/Persistent/GraveOddsTalisman.hpp>
 #include <Components/Persistent/GraveOddsTorch.hpp>
-#include <Components/Persistent/TalismanMinChance.hpp>
-#include <Components/Persistent/GraveCountMargin.hpp>
+#include <Components/Persistent/GraveTrailGuideColour.hpp>
+#include <Components/Persistent/GraveTrailNominalHopCount.hpp>
+#include <Components/Persistent/GraveTrailNominalHopDistance.hpp>
+#include <Components/Persistent/GraveTrailStartCount.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
+#include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
 #include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
+#include <Components/Persistent/HeldItemOffset.hpp>
+#include <Components/Persistent/HeldItemRotation.hpp>
+#include <Components/Persistent/HeldItemRotationSouth.hpp>
+#include <Components/Persistent/HeldItemRotationWest.hpp>
+#include <Components/Persistent/HeldItemScale.hpp>
+#include <Components/Persistent/HeldItemSideOffsetX.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/InventorySwapCooldown.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
+#include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
-#include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcCrowFlightSpeed.hpp>
-#include <Components/Persistent/NpcCrowPerchSpeed.hpp>
-#include <Components/Persistent/NpcCrowPerchRange.hpp>
 #include <Components/Persistent/NpcCrowMaxPerchWait.hpp>
+#include <Components/Persistent/NpcCrowPerchRange.hpp>
+#include <Components/Persistent/NpcCrowPerchSpeed.hpp>
 #include <Components/Persistent/NpcMimicTint.hpp>
-#include <Components/Persistent/NpcRenderOffset.hpp>
 #include <Components/Persistent/NpcPushBack.hpp>
+#include <Components/Persistent/NpcRenderOffset.hpp>
 #include <Components/Persistent/NpcShockwaveFreq.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveResolution.hpp>
@@ -102,17 +101,18 @@
 #include <Components/Persistent/NpcWatchmanSpawnMax.hpp>
 #include <Components/Persistent/NpcWatchmanSweepAmplitude.hpp>
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
+#include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/PickaxeGraveDigWear.hpp>
 #include <Components/Persistent/PickaxeObstacleDigWear.hpp>
 #include <Components/Persistent/PickaxePotSmashWear.hpp>
 #include <Components/Persistent/PlantWearPerForage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
+#include <Components/Persistent/PlayerCornerAssistTolerance.hpp>
+#include <Components/Persistent/PlayerDiagonalGapCatch.hpp>
 #include <Components/Persistent/PlayerDiagonalLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerFootstepAddDelay.hpp>
 #include <Components/Persistent/PlayerFootstepFadeDelay.hpp>
 #include <Components/Persistent/PlayerFootstepSfxStrideLength.hpp>
-#include <Components/Persistent/PlayerCornerAssistTolerance.hpp>
-#include <Components/Persistent/PlayerDiagonalGapCatch.hpp>
 #include <Components/Persistent/PlayerLerpInterruptThreshold.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
 #include <Components/Persistent/PlayerOnFireHealthDmgPerSec.hpp>
@@ -138,12 +138,13 @@
 #include <Components/Persistent/ShovelObstacleDigWear.hpp>
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
+#include <Components/Persistent/StatChangeDisplayDuration.hpp>
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/TachycardiaMovementSpeed.hpp>
+#include <Components/Persistent/TalismanMinChance.hpp>
 #include <Components/Persistent/TooltipsSeen.hpp>
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
-#include <Components/Persistent/StatChangeDisplayDuration.hpp>
 #include <Components/Persistent/ToxicImmunityMeterTint.hpp>
 #include <Components/Persistent/VenomHealthDmgPerSec.hpp>
 #include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
@@ -154,11 +155,12 @@
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 
+#include <array>
 #include <fstream>
-#include <utility>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <stdexcept>
+#include <utility>
 
 namespace Game::Sys
 {
@@ -321,6 +323,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::BurrExpiry>();
   add_component<Cmp::Persist::BurrSlowFactor>();
   add_component<Cmp::Persist::BurrThrowCooldown>();
+  add_component<Cmp::Persist::InventorySwapCooldown>();
   add_component<Cmp::Persist::FlyingOscillationAmplitude>();
   add_component<Cmp::Persist::FlyingLiftOffset>();
   add_component<Cmp::Persist::PlayerRenderOffset>();
@@ -354,8 +357,8 @@ void PersistSystem::initialize_component_registry()
   }
 
   // Settings added since may likewise be missing, so create them with their default value and menu label.
-  const std::pair<const char *, nlohmann::json> new_settings[] = {
-      { "GrimoireHoverFollowsMouse", { { "type", "bool" }, { "value", false }, { "detail", "Grimoire hover info follows mouse" } } } };
+  const std::array<std::pair<const char *, nlohmann::json>, 1> new_settings = {
+      { { "GrimoireHoverFollowsMouse", { { "type", "bool" }, { "value", false }, { "detail", "Grimoire hover info follows mouse" } } } } };
   for ( const auto &[name, defaults] : new_settings )
   {
     if ( not definitions->contains( name ) ) { m_components.at( name ).initialise( defaults ); }

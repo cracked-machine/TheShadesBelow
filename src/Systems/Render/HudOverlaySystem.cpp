@@ -25,7 +25,6 @@
 #include <Components/Player/ToxicImmunity.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
-#include <Components/Shop/Inventory.hpp>
 #include <Components/Toxicity/Bradycadia.hpp>
 #include <Components/Toxicity/Halucinogen.hpp>
 #include <Components/Toxicity/Hypoxia.hpp>
@@ -43,9 +42,8 @@
 #include <Systems/BaseSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
-#include <Systems/Render/RenderOverlaySystem.hpp>
+#include <Systems/Render/HudOverlaySystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
-#include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>
@@ -71,15 +69,12 @@
 namespace Game::Sys
 {
 
-void RenderOverlaySystem::render_overlay( sf::Time dt )
+void HudOverlaySystem::update( sf::Time dt )
 {
-  // the layouts are authored at their Tiled map size; rescale them if the window resolution has changed (no-op otherwise)
+  // the layout is authored at its Tiled map size; rescale it if the window resolution has changed (no-op otherwise)
   if ( m_main_ui_data ) m_main_ui_data->sync_to( m_window.getSize() );
-  if ( m_shop_ui_data ) m_shop_ui_data->sync_to( m_window.getSize() );
 
   PROFILED( render_ui_particles() );
-
-  PROFILED( render_shop_inventory_overlay() );
   PROFILED( render_ui_outlines() );
   PROFILED( render_ui_icons() );
   PROFILED( render_ui_cadaver_icons() );
@@ -90,10 +85,10 @@ void RenderOverlaySystem::render_overlay( sf::Time dt )
   PROFILED( render_ghost_grave_halos() );
 
   const auto display_size = sf::Vector2f( m_window.getSize() );
-  render_crypt_maze_timer( { display_size.x / 2.f, 0.f }, scaled_char_size( 100 ) );
+  render_crypt_maze_timer( { display_size.x / 2.f, 0.f }, scaled_char_size( 100, m_main_ui_data.get() ) );
 }
 
-void RenderOverlaySystem::render_ui_particles()
+void HudOverlaySystem::render_ui_particles()
 {
   if ( not m_main_ui_data ) return;
 
@@ -117,17 +112,17 @@ void RenderOverlaySystem::render_ui_particles()
   }
 }
 
-void RenderOverlaySystem::render_ui_outlines()
+void HudOverlaySystem::render_ui_outlines()
 {
   if ( not m_main_ui_data )
   {
     SPDLOG_CRITICAL( "UiData object is not initialised. Cannot draw Status Outline overlay" );
     return;
   }
-  render_outlines( m_main_ui_data->m_outlines );
+  render_outlines( *m_main_ui_data );
 }
 
-void RenderOverlaySystem::render_ui_icons()
+void HudOverlaySystem::render_ui_icons()
 {
   if ( not m_main_ui_data )
   {
@@ -142,7 +137,7 @@ void RenderOverlaySystem::render_ui_icons()
   }
 }
 
-void RenderOverlaySystem::render_ui_cadaver_icons()
+void HudOverlaySystem::render_ui_cadaver_icons()
 {
   if ( not m_main_ui_data )
   {
@@ -161,7 +156,7 @@ void RenderOverlaySystem::render_ui_cadaver_icons()
   }
 }
 
-void RenderOverlaySystem::render_ui_inventory_icon()
+void HudOverlaySystem::render_ui_inventory_icon()
 {
   if ( not m_main_ui_data )
   {
@@ -183,7 +178,7 @@ void RenderOverlaySystem::render_ui_inventory_icon()
   }
 }
 
-void RenderOverlaySystem::render_ui_meters( sf::Time dt )
+void HudOverlaySystem::render_ui_meters( sf::Time dt )
 {
   if ( not m_main_ui_data )
   {
@@ -201,7 +196,7 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
   const sf::Color toxidrome_glint = Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterShimmer>( reg() );
   // gives each frozen meter its own frost pattern
   int toxidrome_index = 0;
-  const float kMeterOutlineThickness = 5.f * ui_scale();
+  const float kMeterOutlineThickness = 5.f * hud_scale();
 
   sf::RectangleShape innermeter;
   sf::RectangleShape outermeter;
@@ -362,9 +357,9 @@ void RenderOverlaySystem::render_ui_meters( sf::Time dt )
   }
 }
 
-void RenderOverlaySystem::render_meter_shimmer( const sf::FloatRect &rect, float progress, sf::Color colour )
+void HudOverlaySystem::render_meter_shimmer( const sf::FloatRect &rect, float progress, sf::Color colour )
 {
-  const float kShimmerHalfWidth = 10.f * ui_scale();
+  const float kShimmerHalfWidth = 10.f * hud_scale();
   // the band leans like "/": its top edge is offset right of its bottom edge by the slant
   const float half_slant = rect.size.y * 0.25f;
   const float left = rect.position.x;
@@ -392,7 +387,7 @@ void RenderOverlaySystem::render_meter_shimmer( const sf::FloatRect &rect, float
   draw_screen( band );
 }
 
-bool RenderOverlaySystem::load_frost_shader()
+bool HudOverlaySystem::load_frost_shader()
 {
   if ( m_frost_shader_ok ) return *m_frost_shader_ok;
 
@@ -412,7 +407,7 @@ bool RenderOverlaySystem::load_frost_shader()
   return *m_frost_shader_ok;
 }
 
-void RenderOverlaySystem::render_meter_frost( const sf::FloatRect &rect, float seed, sf::Color frost, sf::Color glint )
+void HudOverlaySystem::render_meter_frost( const sf::FloatRect &rect, float seed, sf::Color frost, sf::Color glint )
 {
   // the shader works in render target pixels (gl_FragCoord), so map the default view rect onto the target
   auto &target = active_render_target();
@@ -433,7 +428,7 @@ void RenderOverlaySystem::render_meter_frost( const sf::FloatRect &rect, float s
   draw_screen( overlay, sf::RenderStates( &m_frost_shader ) );
 }
 
-void RenderOverlaySystem::render_ui_texts()
+void HudOverlaySystem::render_ui_texts()
 {
   if ( not m_main_ui_data )
   {
@@ -449,7 +444,7 @@ void RenderOverlaySystem::render_ui_texts()
     text.setPosition( ui_text.rect.position );
     text.setFillColor( sf::Color::White );
     text.setOutlineColor( sf::Color::Black );
-    text.setOutlineThickness( 2.f * ui_scale() );
+    text.setOutlineThickness( 2.f * hud_scale() );
     draw_screen( text );
   }
 }
@@ -461,7 +456,7 @@ void RenderOverlaySystem::render_ui_texts()
 //! @param interval accumulated flash time; reset to zero once the flash expires
 //! @return true if the UI element should currently be drawn in its "flashed" state, false otherwise.
 template <typename FlashComponent>
-bool RenderOverlaySystem::update_flash_toggle( sf::Time dt )
+bool HudOverlaySystem::update_flash_toggle( sf::Time dt )
 {
   auto view = reg().view<FlashComponent>();
   if ( view.empty() ) return false;
@@ -478,7 +473,7 @@ bool RenderOverlaySystem::update_flash_toggle( sf::Time dt )
   return static_cast<int>( flash_cmp.cooldown_timer.asMilliseconds() / m_ui_flash_factor ) % 2 == 1;
 }
 
-void RenderOverlaySystem::render_ui_labels( sf::Time dt )
+void HudOverlaySystem::render_ui_labels( sf::Time dt )
 {
   if ( not m_main_ui_data )
   {
@@ -514,7 +509,7 @@ void RenderOverlaySystem::render_ui_labels( sf::Time dt )
     }
     text.setFillColor( sf::Color::White );
     text.setOutlineColor( sf::Color::Black );
-    text.setOutlineThickness( 2.f * ui_scale() );
+    text.setOutlineThickness( 2.f * hud_scale() );
 
     // flash the text if we just picked up a cadaver
     if ( ui_label.name == "cadaver_label" and update_flash_toggle<Cmp::FlashUICadaver>( dt ) )
@@ -541,7 +536,7 @@ void RenderOverlaySystem::render_ui_labels( sf::Time dt )
   }
 }
 
-std::optional<int> RenderOverlaySystem::get_change_label_stat( const std::string &label_name )
+std::optional<int> HudOverlaySystem::get_change_label_stat( const std::string &label_name )
 {
   const auto &stats = Utils::Player::get_stats( reg() );
   const auto &toxidrome = stats.toxidrome();
@@ -561,7 +556,7 @@ std::optional<int> RenderOverlaySystem::get_change_label_stat( const std::string
   return std::nullopt;
 }
 
-std::string RenderOverlaySystem::update_stat_change_text( const std::string &label_name, sf::Time dt )
+std::string HudOverlaySystem::update_stat_change_text( const std::string &label_name, sf::Time dt )
 {
   const auto current_value = get_change_label_stat( label_name );
   if ( not current_value )
@@ -597,127 +592,21 @@ std::string RenderOverlaySystem::update_stat_change_text( const std::string &lab
   return std::format( "{:+}", change.delta );
 }
 
-void RenderOverlaySystem::render_level_depth()
+void HudOverlaySystem::render_level_depth()
 {
   const Cmp::Player::LevelDepth &level_depth_cmp = Utils::Player::get_level_depth( reg() );
   if ( level_depth_cmp.display_timer >= level_depth_cmp.display_cooldown ) { return; }
 
   const int max_level_depth = Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value();
   const auto display_res = sf::Vector2f( m_window.getSize() );
-  sf::Text level_txt( m_font, "Nekropolis " + std::to_string( max_level_depth - level_depth_cmp.get_count() ), scaled_char_size( 100 ) );
-  level_txt.setPosition( sf::Vector2f( ( display_res.x / 2.f ) - level_txt.getLocalBounds().getCenter().x, 100.f * ui_scale() ) );
+  sf::Text level_txt( m_font, "Nekropolis " + std::to_string( max_level_depth - level_depth_cmp.get_count() ), scaled_char_size( 100, m_main_ui_data.get() ) );
+  level_txt.setPosition( sf::Vector2f( ( display_res.x / 2.f ) - level_txt.getLocalBounds().getCenter().x, 100.f * hud_scale() ) );
   level_txt.setFillColor( sf::Color::White );
   draw_screen( level_txt );
 }
 
-void RenderOverlaySystem::render_shop_inventory_overlay()
-{
 
-  // only draw the shop if its enabled
-  auto inventory_view = reg().view<Cmp::Shop::Inventory>();
-  if ( inventory_view.empty() ) { return; }
-  auto &inventory_cmp = inventory_view.get<Cmp::Shop::Inventory>( inventory_view.front() );
-  if ( not inventory_cmp.is_enabled ) return;
-
-  if ( not m_shop_ui_data )
-  {
-    SPDLOG_CRITICAL( "UiData object is not initialised. Cannot draw value overlay" );
-    return;
-  }
-
-  // Draw all UI outlines
-  render_outlines( m_shop_ui_data->m_outlines );
-
-  // The shop flames are an unassigned pool (see Factory::Particle::sync_flames_for_shop_inventory):
-  // each torch slot just takes the next unused one.
-  auto flame_view = reg().view<Cmp::Particle::SpriteOwner>();
-  auto flame_it = flame_view.begin();
-  auto next_slot_flame = [&]() -> Cmp::Particle::SpriteOwner *
-  {
-    while ( flame_it != flame_view.end() )
-    {
-      auto &owner = flame_view.get<Cmp::Particle::SpriteOwner>( *flame_it );
-      ++flame_it;
-      if ( owner.sprite and owner.sprite->get_tag() == Factory::Particle::kShopSlotFlameTag ) return &owner;
-    }
-    return nullptr;
-  };
-
-  // Draw all UI Icons
-  for ( auto [icon, slot] : std::views::zip( m_shop_ui_data->m_icons, inventory_cmp.m_slots ) )
-  {
-    auto &[item, price] = slot;
-    const auto &world_item = Sys::ItemStore::instance().get( item );
-    const auto &sprite_type = world_item.sprite_type;
-    // Use the default scale/size unless its a plant then its need to be resized/repositioned to fit in the UI box
-    const float shop_scale = m_shop_ui_data->scale();
-    auto sprite_scale = sf::Vector2f{ icon.scale, icon.scale };
-    auto sprite_pos = Cmp::Position( icon.rect.position, Constants::kGridSizePxF );
-    if ( sprite_type.contains( "plant" ) )
-    {
-      // one design-space step shorter, i.e. (sprite_scale - 1) before the UI scale was applied
-      sprite_scale = sf::Vector2f{ icon.scale, icon.scale - shop_scale };
-      sprite_pos = Cmp::Position( { icon.rect.position.x, icon.rect.position.y - ( 8.f * shop_scale ) }, Constants::kGridSizePxF );
-    }
-
-    RenderSystem::safe_render_sprite_screen( sprite_type, sprite_pos, world_item.icon_sprite_index(), sprite_scale );
-
-    if ( item != "item.torch" ) continue;
-    auto *flame_owner = next_slot_flame();
-    if ( not flame_owner ) continue;
-    auto &flame = *flame_owner->sprite;
-    // same wick offset as the player inventory icon in render_ui_particles()
-    const sf::Vector2f emitter_pos{ icon.rect.position.x + ( icon.scale * 8.f ), icon.rect.position.y + ( icon.scale * 6.f ) };
-    if ( flame.get_emitter_position() != emitter_pos )
-    {
-      // slots shift when an item is bought: drop the particles still rising from the old position
-      flame.set_emitter_position( emitter_pos );
-      flame.clear();
-    }
-    flame.set_view_transform( m_window, m_window.getDefaultView() );
-    flame.restart();
-    draw_screen( flame );
-  }
-
-  //! @brief Helper to draw predefined `sf_text` at `pos`
-  auto draw_label_text_at = [&]( sf::Text &sf_text, const sf::Vector2f &pos, const std::string &align = "left" )
-  {
-    if ( align == "center" ) { sf_text.setPosition( { pos.x - sf_text.getLocalBounds().getCenter().x, pos.y } ); }
-    else if ( align == "left" ) { sf_text.setPosition( pos ); }
-    else if ( align == "right" ) { sf_text.setPosition( { pos.x - sf_text.getLocalBounds().size.x, pos.y } ); }
-
-    draw_screen( sf_text );
-  };
-
-  // Draw all text labels (index, description, price)
-  for ( auto [i, slot] : std::views::enumerate( inventory_cmp.m_slots ) )
-  {
-    auto &[item, price] = slot;
-
-    const unsigned int slot_char_size = std::max( 1u, static_cast<unsigned int>( std::lround( 30.f * m_shop_ui_data->scale() ) ) );
-    sf::Text slot_idx_txt( m_font, std::to_string( i + 1 ), slot_char_size );
-    slot_idx_txt.setFillColor( sf::Color::Black );
-
-    Sys::SpriteKey sprite_mtype = Sys::ItemStore::instance().get( item ).sprite_type;
-    sf::Text slot_desc_txt( m_font, Sys::SpriteStore::instance().get( sprite_mtype ).display_name(), slot_char_size );
-    slot_desc_txt.setFillColor( sf::Color::Black );
-
-    sf::Text slot_price_txt( m_font, std::to_string( price ), slot_char_size );
-    slot_price_txt.setFillColor( sf::Color::Black );
-
-    const std::string idx_key = "slot" + std::to_string( i + 1 ) + "_idx";
-    const std::string desc_key = "slot" + std::to_string( i + 1 ) + "_desc";
-    const std::string price_key = "slot" + std::to_string( i + 1 ) + "_price";
-    for ( const auto &ui_label : m_shop_ui_data->m_labels )
-    {
-      if ( ui_label.name.contains( idx_key ) ) { draw_label_text_at( slot_idx_txt, ui_label.rect.position, ui_label.align ); }
-      else if ( ui_label.name.contains( desc_key ) ) { draw_label_text_at( slot_desc_txt, ui_label.rect.position, ui_label.align ); }
-      else if ( ui_label.name.contains( price_key ) ) { draw_label_text_at( slot_price_txt, ui_label.rect.position, ui_label.align ); }
-    }
-  }
-}
-
-void RenderOverlaySystem::render_ghost_grave_halos()
+void HudOverlaySystem::render_ghost_grave_halos()
 {
   // auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
   // auto wearlevel = Utils::Player::get_inventory_wear_level( reg() );
@@ -737,7 +626,7 @@ void RenderOverlaySystem::render_ghost_grave_halos()
   // }
 }
 
-void RenderOverlaySystem::render_crypt_maze_timer( sf::Vector2f pos, unsigned int size )
+void HudOverlaySystem::render_crypt_maze_timer( sf::Vector2f pos, unsigned int size )
 {
   const auto kCryptShuffleTimeout = Sys::PersistSystem::get<Cmp::Persist::CryptShuffleTimeout>( reg() ).get_value();
 
@@ -752,7 +641,7 @@ void RenderOverlaySystem::render_crypt_maze_timer( sf::Vector2f pos, unsigned in
       clock_text.setPosition( { pos.x - ( clock_text.getLocalBounds().size.x / 2 ), pos.y } );
       clock_text.setFillColor( sf::Color::Red );
       clock_text.setOutlineColor( sf::Color::Black );
-      clock_text.setOutlineThickness( 2.f * ui_scale() );
+      clock_text.setOutlineThickness( 2.f * hud_scale() );
       draw_screen( clock_text );
     }
   }

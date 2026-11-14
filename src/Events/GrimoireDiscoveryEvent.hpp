@@ -11,9 +11,9 @@ namespace Game::Events
 
 //! @brief Notification that the grimoire revealed new information about an item or NPC: its page entry or a newly
 //! discovered action.
-//! @note Sent by Sys::GrimoireSystem only when the grimoire actually changed, unlike Events::GrimoireItemUpdateEvent /
+//! @note Sent by Sys::GrimoireOverlaySystem only when the grimoire actually changed, unlike Events::GrimoireItemUpdateEvent /
 //! Events::GrimoireNpcUpdateEvent
-//! which is sent on every application of an action. See Sys::TooltipSystem.
+//! which is sent on every application of an action. See Sys::TooltipOverlaySystem.
 struct GrimoireDiscoveryEvent
 {
   //! @brief Construct a new GrimoireDiscoveryEvent object for an item page

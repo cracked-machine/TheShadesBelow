@@ -24,13 +24,15 @@
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/ProcGen/PassageSystem.hpp>
 #include <Systems/ProcGen/TrailGuideSystem.hpp>
-#include <Systems/Render/GrimoireSystem.hpp>
+#include <Systems/Render/GrimoireOverlaySystem.hpp>
 #include <Systems/Render/PauseOverlaySystem.hpp>
-#include <Systems/Render/RenderDebugSystem.hpp>
+#include <Systems/Render/DebugOverlaySystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderMenuSystem.hpp>
-#include <Systems/Render/RenderOverlaySystem.hpp>
-#include <Systems/Render/TooltipSystem.hpp>
+#include <Systems/Render/HudOverlaySystem.hpp>
+#include <Systems/Render/OverlayArbitrationSystem.hpp>
+#include <Systems/Render/ShopOverlaySystem.hpp>
+#include <Systems/Render/TooltipOverlaySystem.hpp>
 #include <Systems/RuinSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
 #include <Systems/ShopSystem.hpp>
@@ -76,7 +78,7 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
   emplace<Type::FootstepSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::GraveSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::FlyingSystem>( m_initial_reg, window, sound_bank );
-  emplace<Type::GrimoireSystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::GrimoireOverlaySystem>( m_initial_reg, window, sound_bank );
   emplace<Type::HealingSpringSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );
   emplace<Type::InventorySystem>( m_initial_reg, window, sound_bank );
   emplace<Type::ItemSystem>( m_initial_reg, window, sound_bank );
@@ -90,17 +92,19 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
   emplace<Type::PlayerSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );
   emplace<Type::PersistSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::LevelGenerator>( m_initial_reg, window, sound_bank );
-  emplace<Type::RenderDebugSystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::DebugOverlaySystem>( m_initial_reg, window, sound_bank );
   emplace<Type::RenderGameSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::RenderMenuSystem>( m_initial_reg, window, sound_bank );
-  emplace<Type::RenderOverlaySystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::HudOverlaySystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::ShopOverlaySystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::OverlayArbitrationSystem>( m_initial_reg, window, sound_bank, *this );
   emplace<Type::ShaderSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::SceneInputRouter>( m_initial_reg, window, sound_bank, nav_event_dispatcher, scenemanager_event_dispatcher );
   emplace<Type::ShockwaveSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::ShopSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );
   emplace<Type::SinkHoleHazardSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::TeleportSystem>( m_initial_reg, window, sound_bank );
-  emplace<Type::TooltipSystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::TooltipOverlaySystem>( m_initial_reg, window, sound_bank );
   emplace<Type::WatchmanSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::WispSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::WormholeSystem>( m_initial_reg, window, sound_bank );

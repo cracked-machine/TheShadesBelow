@@ -1,9 +1,9 @@
-#ifndef SRC_SYSTEMS_RENDER_RENDERDEBUGSYSTEM_HPP__
-#define SRC_SYSTEMS_RENDER_RENDERDEBUGSYSTEM_HPP__
+#ifndef SRC_SYSTEMS_RENDER_DEBUGOVERLAYSYSTEM_HPP__
+#define SRC_SYSTEMS_RENDER_DEBUGOVERLAYSYSTEM_HPP__
 
 #include <Components/Position.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
-#include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Render/BaseOverlaySystem.hpp>
 #include <Systems/Render/UiData.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Optimizations.hpp>
@@ -25,12 +25,12 @@ namespace Game::Sys
 
 //! @brief Renders the debug visualisations toggled by the Cmp::SceneSettings::ShowNavmesh, ShowPathFinding and ShowDebugStats scene
 //! settings: the navmesh, NPC pathfinding, and the debug overlay (misc stats, Z-order list, NPC list, entity inspector).
-//! Scenes call render_debug() after RenderGameSystem::render_game().
-class RenderDebugSystem : public RenderSystem
+//! OverlayArbitrationSystem calls update() after RenderGameSystem::render_game().
+class DebugOverlaySystem : public BaseOverlaySystem
 {
 public:
-  //! @brief Construct a new Render Debug System object. Loads the debug UI layout data from its JSON file.
-  RenderDebugSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
+  //! @brief Construct a new Debug Overlay System object. Loads the debug UI layout data from its JSON file.
+  DebugOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief init the weak pointer for the pathfinding navmesh
   //! @param spatial_grid_ptr
@@ -41,11 +41,12 @@ public:
     m_reserved_sm = reserved_sm;
   }
 
-  //! @brief Entrypoint for rendering whichever debug visualisations are enabled in the current scene settings.
+  //! @brief Render whichever debug visualisations are enabled in the current scene settings. The debug panels are only
+  //! shown while OverlayArbitrationSystem::debug_panels_visible().
   //! Must be called after RenderGameSystem::render_game() in the same frame, as the debug stats overlay lists
   //! the z-order queue (`s_zorder_queue`) that call refreshes.
-  //! @param dt Real (unpaused) frame time, used to advance the ImGui frame for the debug stats panels.
-  void render_debug( sf::Time dt );
+  //! @param dt
+  void update( sf::Time dt ) override;
 
 private:
   //! @brief Debug-draw the spatial hash grid navmesh: the neighbour bucket size and cell edges at every position in view.
@@ -56,8 +57,7 @@ private:
 
   //! @brief Draw the crypt room outlines, selected positions, particle emitter positions and the half-view bounds, then the
   //! debug overlay panels (misc stats, Z-order list, NPC list, entity inspector) as semi-transparent ImGui windows on top.
-  //! @param dt Real (unpaused) frame time, used to advance the ImGui frame.
-  void render_debug_stats( sf::Time dt );
+  void render_debug_stats();
 
   //! @brief Begin one of the debug overlay's ImGui windows, placed at the matching "res/ui/dbg.json" label position on first use.
   //!        Must always be paired with ImGui::End(), whatever this returns.
@@ -155,9 +155,6 @@ private:
   //! @brief The current debug rectangle toggles.
   HighlightToggles m_highlights;
 
-  //! @brief Whether an ImGui frame was pumped for the debug stats overlay last frame, so turning it off can flush ImGui's event queue.
-  bool m_debug_imgui_active{ false };
-
   //! @brief tracks the npc pathfinding navmesh i.e. where the NPC cannot move to
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;
 
@@ -167,4 +164,4 @@ private:
 
 } // namespace Game::Sys
 
-#endif // SRC_SYSTEMS_RENDER_RENDERDEBUGSYSTEM_HPP__
+#endif // SRC_SYSTEMS_RENDER_DEBUGOVERLAYSYSTEM_HPP__

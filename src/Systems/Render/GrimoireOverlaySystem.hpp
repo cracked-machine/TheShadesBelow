@@ -1,14 +1,13 @@
-#ifndef SRC_SYSTEMS_GRIMOIRESYSTEM_HPP__
-#define SRC_SYSTEMS_GRIMOIRESYSTEM_HPP__
+#ifndef SRC_SYSTEMS_RENDER_GRIMOIREOVERLAYSYSTEM_HPP__
+#define SRC_SYSTEMS_RENDER_GRIMOIREOVERLAYSYSTEM_HPP__
 
 #include <Components/Inventory/Grimoire.hpp>
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/GrimoireItemUpdateEvent.hpp>
 #include <Events/GrimoireNpcUpdateEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
-#include <Events/PlayerActionEvent.hpp>
-#include <Systems/BaseSystem.hpp>
-#include <Systems/Render/RenderSystem.hpp>
+#include <Events/OverlayEvent.hpp>
+#include <Systems/Render/BaseOverlaySystem.hpp>
 #include <Systems/Render/UiData.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
@@ -22,40 +21,42 @@
 namespace Game::Sys
 {
 
-//! @brief Toggles and drives the player's grimoire (spellbook) overlay. The NPC and plant pages are in separate tabs
+//! @brief Draws and drives the player's grimoire (spellbook) overlay. OverlayArbitrationSystem opens and closes it on
+//! Events::OverlayEvent GRIMOIRE_TOGGLE. The NPC and plant pages are in separate tabs
 //! (an ImGui tab bar), and each subpage's actions are listed in an ImGui table. Gameplay is paused while the overlay is open.
 //! While it is closed, hovering the mouse over a plant or NPC in the game area shows its grimoire subpage (its name and
 //! actions table) in a compact overlay, see res/ui/grimoire_plant_hover.json, res/ui/grimoire_npc_hover.json and
 //! Cmp::Persist::GrimoireHoverFollowsMouse.
-class GrimoireSystem : public RenderSystem
+class GrimoireOverlaySystem : public BaseOverlaySystem
 {
 public:
-  //! @brief Construct a new Grimoire System object
+  //! @brief Construct a new Grimoire Overlay System object
   //! @param reg
   //! @param window
   //! @param sound_bank
-  GrimoireSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
+  GrimoireOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
-  //! @brief Advance the toggle and navigation debounce timers.
-  //! @param dt
-  void update( sf::Time dt );
-
-  //! @brief Draw the current grimoire page if the overlay is open, otherwise the hover overlay if the mouse is over an NPC
-  //! or a plant (an NPC in front of a plant wins). Pumps the frame's ImGui frame while either is shown.
-  //! @param dt Real frame time, for ImGui.
-  //! @param allow_hover false to suppress the hover overlay, e.g. while the game is paused and the pause overlay
-  //! pumps the frame's ImGui frame instead. It is always suppressed while the F3 debug panels are shown, for the same reason.
-  void render( sf::Time dt, bool allow_hover );
+  //! @brief Advance the page-turn debounce timer, then draw the current grimoire page if the overlay is open, otherwise the
+  //! hover overlay if hovering is allowed (OverlayArbitrationSystem::hover_allowed()) and the mouse is over an NPC or a
+  //! plant (an NPC in front of a plant wins).
+  //! @param dt Real frame time.
+  void update( sf::Time dt ) override;
 
   //! @brief True while the grimoire overlay is toggled open. Scenes that host the grimoire use this as their pause query.
-  [[nodiscard]] bool is_grimoire_overlay_open() const;
+  [[nodiscard]] bool is_open() const;
+
+  //! @brief Open the grimoire, cancelling any bow draw and pausing the sound effects. No-op if already open or there is
+  //! no grimoire.
+  void open();
+
+  //! @brief Close the grimoire and resume the sound effects. No-op if it is not open.
+  void close();
 
 private:
-  //! @brief Toggle the overlay on GRIMOIRE_TOGGLE and, while open, turn the current tab's pages on GRIMOIRE_PREV/GRIMOIRE_NEXT
-  //! (arrow keys or mouse wheel). Both debounced. Opening cancels any bow draw and pauses sound effects; closing resumes them.
-  //! The overlay can't be opened while the F3 debug panels are shown.
+  //! @brief While the grimoire is open, turn the current tab's pages on GRIMOIRE_PREV/GRIMOIRE_NEXT (arrow keys or mouse
+  //! wheel), debounced.
   //! @param ev
-  void on_player_action( Events::PlayerActionEvent ev );
+  void on_overlay_event( const Events::OverlayEvent &ev );
 
   //! @brief Discover the grimoire page for a picked-up plant: reveal its sprite, name and carry action.
   //! @param ev
@@ -97,12 +98,12 @@ private:
   static std::string reward_display_name( const Cmp::ActionReward &reward );
 
   //! @brief Draw the open grimoire: its tab bar and the current tab's page, in an invisible ImGui window over the layout's
-  //! main_outline. Call between ImGui::SFML::Update and ImGui::SFML::Render.
+  //! main_outline.
   //! @param grimoire_cmp
   void render_grimoire( const Cmp::Grimoire &grimoire_cmp );
 
   //! @brief Draw the hover overlay: the subpage of `page` laid out by `ui_data`, at its fixed position or beside the mouse
-  //! cursor (Cmp::Persist::GrimoireHoverFollowsMouse). Call between ImGui::SFML::Update and ImGui::SFML::Render.
+  //! cursor (Cmp::Persist::GrimoireHoverFollowsMouse).
   //! @tparam PageT Cmp::Grimoire::NpcPage or Cmp::Grimoire::PlantPage.
   //! @param ui_data The hover layout, res/ui/grimoire_npc_hover.json or res/ui/grimoire_plant_hover.json.
   //! @param window_id The ImGui window id.
@@ -153,10 +154,6 @@ private:
   //! @param page_count Number of pages in the tab, for the page label.
   template <typename PageT>
   void render_page( const Render::UiData &ui_data, const std::string &cache_prefix, const PageT &page, std::size_t page_count );
-
-  //! @brief Draw the page's outline boxes.
-  //! @param ui_data The layout of the page currently shown.
-  void render_outlines( const Render::UiData &ui_data );
 
   //! @brief Draw a subpage's sprite icon.
   //! @param icon The layout's icon.
@@ -214,13 +211,45 @@ private:
   //! @param fn Called with the index of the plant page holding the subpage, and the subpage itself.
   void for_each_subpage( const Sys::ItemKey &item_key, const std::function<void( std::size_t, Cmp::Grimoire::SubPage & )> &fn );
 
+  static std::size_t tab_index( Cmp::Grimoire::Tab tab ) { return static_cast<std::size_t>( tab ); }
+
+  //! @brief Map a grimoire_plants.json object name (e.g. "forage_actions") to the page's subpage for its
+  //! prefix and the remainder of the name (e.g. "actions").
+  //! @return The subpage, or nullptr if the name has no subpage prefix.
+  std::pair<const Cmp::Grimoire::SubPage *, std::string_view> resolve_subpage( const Cmp::Grimoire::PlantPage &page, std::string_view name )
+  {
+    // the *_special_ prefixes must come before plant_/forage_/drop_ as the first matching prefix wins
+    const std::array<std::pair<std::string_view, const Cmp::Grimoire::SubPage *>, 6> prefixes = {
+        { { "plant_special_", &page.plant_offering_subpage },
+          { "forage_special_", &page.forage_offering_subpage },
+          { "drop_special_", &page.drop_offering_subpage },
+          { "plant_", &page.plant_subpage },
+          { "forage_", &page.forage_subpage },
+          { "drop_", &page.drop_subpage } } };
+    for ( const auto &[prefix, sub_page] : prefixes )
+    {
+      if ( name.starts_with( prefix ) ) { return { sub_page, name.substr( prefix.size() ) }; }
+    }
+    return { nullptr, name };
+  }
+
+  //! @brief Map a grimoire_npc.json object name (e.g. "npc_actions") to the NPC page's subpage and the remainder
+  //! of the name (e.g. "actions").
+  //! @return The subpage, or nullptr if the name has no "npc_" prefix.
+  static std::pair<const Cmp::Grimoire::SubPage *, std::string_view> resolve_subpage( const Cmp::Grimoire::NpcPage &page, std::string_view name )
+  {
+    static constexpr std::string_view kPrefix = "npc_";
+    if ( name.starts_with( kPrefix ) ) { return { &page.npc_subpage, name.substr( kPrefix.size() ) }; }
+    return { nullptr, name };
+  }
+  //! @brief Tab bar captions, indexed by Cmp::Grimoire::Tab.
+  static constexpr std::array<const char *, 2> kTabLabels = { "NPCs", "Plants" };
+
   //! @brief Number of pages in a tab.
   //! @param grimoire_cmp
   //! @param tab
   static std::size_t page_count( const Cmp::Grimoire &grimoire_cmp, Cmp::Grimoire::Tab tab );
 
-  //! @brief Time since the overlay was last toggled, used to debounce rapid toggling.
-  sf::Time m_toggle_debounce;
   //! @brief Time since the page was last turned, used to debounce rapid page turning.
   sf::Time m_navigate_debounce;
 
@@ -239,11 +268,8 @@ private:
   std::array<std::size_t, 2> m_page_idx{};
   //! @brief Select m_tab in the ImGui tab bar on the next frame: ImGui otherwise keeps the tab last clicked.
   bool m_select_tab{ true };
-  //! @brief Whether the grimoire or the hover overlay pumped an ImGui frame last frame, so the frame the grimoire
-  //! closes on can pump one more to consume the events forwarded to ImGui while it was open.
-  bool m_imgui_active{ false };
 };
 
 } // namespace Game::Sys
 
-#endif // SRC_SYSTEMS_GRIMOIRESYSTEM_HPP__
+#endif // SRC_SYSTEMS_RENDER_GRIMOIREOVERLAYSYSTEM_HPP__

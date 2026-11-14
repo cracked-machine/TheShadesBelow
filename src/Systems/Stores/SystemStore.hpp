@@ -31,7 +31,7 @@ class ExitSystem;
 class FootstepSystem;
 class GraveSystem;
 class FlyingSystem;
-class GrimoireSystem;
+class GrimoireOverlaySystem;
 class HealingSpringSystem;
 class InventorySystem;
 class ItemStore;
@@ -46,10 +46,12 @@ class PassageSystem;
 class PersistSystem;
 class PlantSystem;
 class PlayerSystem;
-class RenderDebugSystem;
+class DebugOverlaySystem;
 class RenderGameSystem;
 class RenderMenuSystem;
-class RenderOverlaySystem;
+class HudOverlaySystem;
+class OverlayArbitrationSystem;
+class ShopOverlaySystem;
 class RuinSystem;
 class SceneInputRouter;
 class SinkHoleHazardSystem;
@@ -58,7 +60,7 @@ class ShaderSystem;
 class ShockwaveSystem;
 class ShopSystem;
 class TeleportSystem;
-class TooltipSystem;
+class TooltipOverlaySystem;
 class WatchmanSystem;
 class WispSystem;
 class WormholeSystem;
@@ -102,8 +104,8 @@ public:
     GraveSystem,
     //! @brief Key for FlyingSystem.
     FlyingSystem,
-    //! @brief Key for GrimoireSystem.
-    GrimoireSystem,
+    //! @brief Key for GrimoireOverlaySystem.
+    GrimoireOverlaySystem,
     //! @brief Key for HealingSpringSystem.
     HealingSpringSystem,
     //! @brief Key for InventorySystem.
@@ -132,14 +134,18 @@ public:
     PlayerSystem,
     //! @brief Key for ProcGen::LevelGenerator.
     LevelGenerator,
-    //! @brief Key for RenderDebugSystem.
-    RenderDebugSystem,
+    //! @brief Key for DebugOverlaySystem.
+    DebugOverlaySystem,
     //! @brief Key for RenderGameSystem.
     RenderGameSystem,
     //! @brief Key for RenderMenuSystem.
     RenderMenuSystem,
-    //! @brief Key for RenderOverlaySystem.
-    RenderOverlaySystem,
+    //! @brief Key for HudOverlaySystem.
+    HudOverlaySystem,
+    //! @brief Key for ShopOverlaySystem.
+    ShopOverlaySystem,
+    //! @brief Key for OverlayArbitrationSystem.
+    OverlayArbitrationSystem,
     //! @brief Key for SceneInputRouter.
     SceneInputRouter,
     //! @brief Key for ShaderSystem.
@@ -154,8 +160,8 @@ public:
     WatchmanSystem,
     //! @brief Key for TeleportSystem.
     TeleportSystem,
-    //! @brief Key for TooltipSystem.
-    TooltipSystem,
+    //! @brief Key for TooltipOverlaySystem.
+    TooltipOverlaySystem,
     //! @brief Key for WispSystem.
     WispSystem,
     //! @brief Key for WormholeSystem.
@@ -232,51 +238,53 @@ private:
 
 // Explicit template specializations for SystemTraits
 // clang-format off
-template<> struct Store::SystemTraits<Store::Type::ActionSystem>           { using type = ActionSystem; };
-template<> struct Store::SystemTraits<Store::Type::AltarSystem>            { using type = AltarSystem; };
-template<> struct Store::SystemTraits<Store::Type::AnimSystem>             { using type = AnimSystem; };
-template<> struct Store::SystemTraits<Store::Type::ArrowSystem>            { using type = ArrowSystem; };
-template<> struct Store::SystemTraits<Store::Type::BombSystem>             { using type = BombSystem; };
-template<> struct Store::SystemTraits<Store::Type::BurrSystem>             { using type = BurrSystem; };
+template<> struct Store::SystemTraits<Store::Type::ActionSystem>             { using type = ActionSystem; };
+template<> struct Store::SystemTraits<Store::Type::AltarSystem>              { using type = AltarSystem; };
+template<> struct Store::SystemTraits<Store::Type::AnimSystem>               { using type = AnimSystem; };
+template<> struct Store::SystemTraits<Store::Type::ArrowSystem>              { using type = ArrowSystem; };
+template<> struct Store::SystemTraits<Store::Type::BombSystem>               { using type = BombSystem; };
+template<> struct Store::SystemTraits<Store::Type::BurrSystem>               { using type = BurrSystem; };
 template<> struct Store::SystemTraits<Store::Type::CellAutomataSystem>     { using type = ProcGen::CellAutomataSystem; };
-template<> struct Store::SystemTraits<Store::Type::CorruptionHazardSystem> { using type = CorruptionHazardSystem; };
+template<> struct Store::SystemTraits<Store::Type::CorruptionHazardSystem>   { using type = CorruptionHazardSystem; };
 template<> struct Store::SystemTraits<Store::Type::CryptSystem>            { using type = Game::Sys::CryptSystem; };
 template<> struct Store::SystemTraits<Store::Type::DiffusionLtdAggrSystem> { using type = ProcGen::DLASystem; };
 template<> struct Store::SystemTraits<Store::Type::DowsingGuideSystem>     { using type = ProcGen::DowsingGuideSystem; };
 template<> struct Store::SystemTraits<Store::Type::TrailGuideSystem>       { using type = ProcGen::TrailGuideSystem; };
-template<> struct Store::SystemTraits<Store::Type::ExitSystem>             { using type = ExitSystem; };
-template<> struct Store::SystemTraits<Store::Type::FootstepSystem>         { using type = FootstepSystem; };
-template<> struct Store::SystemTraits<Store::Type::GraveSystem>            { using type = GraveSystem; };
-template<> struct Store::SystemTraits<Store::Type::FlyingSystem>           { using type = FlyingSystem; };
-template<> struct Store::SystemTraits<Store::Type::GrimoireSystem>         { using type = GrimoireSystem; };
-template<> struct Store::SystemTraits<Store::Type::HealingSpringSystem>    { using type = HealingSpringSystem; };
-template<> struct Store::SystemTraits<Store::Type::InventorySystem>        { using type = InventorySystem; };
-template<> struct Store::SystemTraits<Store::Type::ItemSystem>             { using type = ItemSystem; };
-template<> struct Store::SystemTraits<Store::Type::RuinSystem>             { using type = RuinSystem; };
-template<> struct Store::SystemTraits<Store::Type::LootSystem>             { using type = LootSystem; };
-template<> struct Store::SystemTraits<Store::Type::LightningSystem>        { using type = LightningSystem; };
-template<> struct Store::SystemTraits<Store::Type::NpcSystem>              { using type = NpcSystem; };
-template<> struct Store::SystemTraits<Store::Type::PauseOverlaySystem>     { using type = PauseOverlaySystem; };
-template<> struct Store::SystemTraits<Store::Type::ParticleSystem>         { using type = ParticleSystem; };
+template<> struct Store::SystemTraits<Store::Type::ExitSystem>               { using type = ExitSystem; };
+template<> struct Store::SystemTraits<Store::Type::FootstepSystem>           { using type = FootstepSystem; };
+template<> struct Store::SystemTraits<Store::Type::GraveSystem>              { using type = GraveSystem; };
+template<> struct Store::SystemTraits<Store::Type::FlyingSystem>             { using type = FlyingSystem; };
+template<> struct Store::SystemTraits<Store::Type::GrimoireOverlaySystem>    { using type = GrimoireOverlaySystem; };
+template<> struct Store::SystemTraits<Store::Type::HealingSpringSystem>      { using type = HealingSpringSystem; };
+template<> struct Store::SystemTraits<Store::Type::InventorySystem>          { using type = InventorySystem; };
+template<> struct Store::SystemTraits<Store::Type::ItemSystem>               { using type = ItemSystem; };
+template<> struct Store::SystemTraits<Store::Type::RuinSystem>               { using type = RuinSystem; };
+template<> struct Store::SystemTraits<Store::Type::LootSystem>               { using type = LootSystem; };
+template<> struct Store::SystemTraits<Store::Type::LightningSystem>          { using type = LightningSystem; };
+template<> struct Store::SystemTraits<Store::Type::NpcSystem>                { using type = NpcSystem; };
+template<> struct Store::SystemTraits<Store::Type::PauseOverlaySystem>       { using type = PauseOverlaySystem; };
+template<> struct Store::SystemTraits<Store::Type::ParticleSystem>           { using type = ParticleSystem; };
 template<> struct Store::SystemTraits<Store::Type::PassageSystem>          { using type = Game::Sys::PassageSystem; };
-template<> struct Store::SystemTraits<Store::Type::PersistSystem>          { using type = PersistSystem; };
-template<> struct Store::SystemTraits<Store::Type::PlantSystem>            { using type = PlantSystem; };
-template<> struct Store::SystemTraits<Store::Type::PlayerSystem>           { using type = PlayerSystem; };
+template<> struct Store::SystemTraits<Store::Type::PersistSystem>            { using type = PersistSystem; };
+template<> struct Store::SystemTraits<Store::Type::PlantSystem>              { using type = PlantSystem; };
+template<> struct Store::SystemTraits<Store::Type::PlayerSystem>             { using type = PlayerSystem; };
 template<> struct Store::SystemTraits<Store::Type::LevelGenerator>         { using type = ProcGen::LevelGenerator; };
-template<> struct Store::SystemTraits<Store::Type::RenderDebugSystem>      { using type = RenderDebugSystem; };
-template<> struct Store::SystemTraits<Store::Type::RenderGameSystem>       { using type = RenderGameSystem; };
-template<> struct Store::SystemTraits<Store::Type::RenderOverlaySystem>    { using type = RenderOverlaySystem; };
-template<> struct Store::SystemTraits<Store::Type::RenderMenuSystem>       { using type = RenderMenuSystem; };
-template<> struct Store::SystemTraits<Store::Type::SceneInputRouter>       { using type = SceneInputRouter; };
-template<> struct Store::SystemTraits<Store::Type::ShaderSystem>           { using type = ShaderSystem; };
-template<> struct Store::SystemTraits<Store::Type::ShockwaveSystem>        { using type = ShockwaveSystem; };
-template<> struct Store::SystemTraits<Store::Type::ShopSystem>             { using type = ShopSystem; };
-template<> struct Store::SystemTraits<Store::Type::SinkHoleHazardSystem>   { using type = SinkHoleHazardSystem; };
-template<> struct Store::SystemTraits<Store::Type::WatchmanSystem>         { using type = WatchmanSystem; };
-template<> struct Store::SystemTraits<Store::Type::TeleportSystem>         { using type = TeleportSystem; };
-template<> struct Store::SystemTraits<Store::Type::TooltipSystem>          { using type = TooltipSystem; };
-template<> struct Store::SystemTraits<Store::Type::WispSystem>             { using type = WispSystem; };
-template<> struct Store::SystemTraits<Store::Type::WormholeSystem>         { using type = WormholeSystem; };
+template<> struct Store::SystemTraits<Store::Type::DebugOverlaySystem>       { using type = DebugOverlaySystem; };
+template<> struct Store::SystemTraits<Store::Type::RenderGameSystem>         { using type = RenderGameSystem; };
+template<> struct Store::SystemTraits<Store::Type::HudOverlaySystem>         { using type = HudOverlaySystem; };
+template<> struct Store::SystemTraits<Store::Type::ShopOverlaySystem>        { using type = ShopOverlaySystem; };
+template<> struct Store::SystemTraits<Store::Type::OverlayArbitrationSystem> { using type = OverlayArbitrationSystem; };
+template<> struct Store::SystemTraits<Store::Type::RenderMenuSystem>         { using type = RenderMenuSystem; };
+template<> struct Store::SystemTraits<Store::Type::SceneInputRouter>         { using type = SceneInputRouter; };
+template<> struct Store::SystemTraits<Store::Type::ShaderSystem>             { using type = ShaderSystem; };
+template<> struct Store::SystemTraits<Store::Type::ShockwaveSystem>          { using type = ShockwaveSystem; };
+template<> struct Store::SystemTraits<Store::Type::ShopSystem>               { using type = ShopSystem; };
+template<> struct Store::SystemTraits<Store::Type::SinkHoleHazardSystem>     { using type = SinkHoleHazardSystem; };
+template<> struct Store::SystemTraits<Store::Type::WatchmanSystem>           { using type = WatchmanSystem; };
+template<> struct Store::SystemTraits<Store::Type::TeleportSystem>           { using type = TeleportSystem; };
+template<> struct Store::SystemTraits<Store::Type::TooltipOverlaySystem>     { using type = TooltipOverlaySystem; };
+template<> struct Store::SystemTraits<Store::Type::WispSystem>               { using type = WispSystem; };
+template<> struct Store::SystemTraits<Store::Type::WormholeSystem>           { using type = WormholeSystem; };
 // clang-format on
 
 } // namespace Game::Sys

@@ -9,7 +9,7 @@ namespace Game::Cmp::Persist
 {
 
 //! @brief Persistent set of tooltip ids (see res/json/tooltips.json) the player has already seen.
-//! Used by Sys::TooltipSystem so that "once" tooltips are only shown once, across scenes and restarts.
+//! Used by Sys::TooltipOverlaySystem so that "once" tooltips are only shown once, across scenes and restarts.
 //! @note Stored as a std::set so the serialized array keeps a stable order in persist.json.
 class TooltipsSeen
 {

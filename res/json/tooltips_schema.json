@@ -1,6 +1,6 @@
 {
   "title": "Tooltips Configuration",
-  "description": "Schema for the data-driven help tooltips displayed by TooltipSystem",
+  "description": "Schema for the data-driven help tooltips displayed by TooltipOverlaySystem",
   "type": "object",
   "definitions": {
     "colour": {

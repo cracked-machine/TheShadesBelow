@@ -42,10 +42,9 @@
 #include <Systems/PlayerSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/Render/PauseOverlaySystem.hpp>
-#include <Systems/Render/RenderDebugSystem.hpp>
+#include <Systems/Render/DebugOverlaySystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
-#include <Systems/Render/RenderOverlaySystem.hpp>
-#include <Systems/Render/TooltipSystem.hpp>
+#include <Systems/Render/OverlayArbitrationSystem.hpp>
 #include <Systems/RuinSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
@@ -186,7 +185,7 @@ void RuinSceneUpperFloor::do_update( sf::Time dt )
   using namespace Sys;
   // the pause overlay pauses gameplay: the world is still drawn, but nothing in it advances
   auto &pause_overlay = m_sys.find<Sys::Store::Type::PauseOverlaySystem>();
-  const bool paused = pause_overlay.is_paused();
+  const bool paused = pause_overlay.is_open();
   const sf::Time world_dt = paused ? sf::Time::Zero : dt;
 
   if ( not paused )
@@ -214,15 +213,8 @@ void RuinSceneUpperFloor::do_update( sf::Time dt )
   }
 
   m_sys.find<Store::Type::RenderGameSystem>().render_game( world_dt );
-  m_sys.find<Store::Type::RenderOverlaySystem>().render_overlay( world_dt );
-  if ( not paused )
-  {
-    m_sys.find<Store::Type::TooltipSystem>().update( dt );
-    m_sys.find<Store::Type::TooltipSystem>().render();
-  }
-  // real dt even while paused, for ImGui. The debug panels are hidden while paused: both pump the one ImGui frame allowed per frame
-  pause_overlay.render( dt );
-  if ( not paused ) { m_sys.find<Store::Type::RenderDebugSystem>().render_debug( dt ); }
+  // HUD, shop, tooltip, grimoire, pause and debug overlays, in one shared ImGui frame. Real dt even while paused, for ImGui.
+  m_sys.find<Store::Type::OverlayArbitrationSystem>().update( dt, world_dt );
 }
 
 void RuinSceneUpperFloor::reinit_navmesh()
@@ -230,7 +222,7 @@ void RuinSceneUpperFloor::reinit_navmesh()
   m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, nullptr, nullptr, m_loot_sm );
   m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_generic_npc_navmesh, nullptr, m_loot_sm );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
-  m_sys.find<Sys::Store::Type::RenderDebugSystem>().init( m_generic_npc_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::DebugOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm );
 }
 
 entt::registry &RuinSceneUpperFloor::registry() { return m_reg; }

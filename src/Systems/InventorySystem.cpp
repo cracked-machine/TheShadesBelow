@@ -11,6 +11,7 @@
 #include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
+#include <Components/Persistent/InventorySwapCooldown.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/SummonOffering.hpp>
@@ -40,6 +41,7 @@
 #include <Systems/InventorySystem.hpp>
 #include <Systems/ItemSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
+#include <Systems/PersistSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Cardinal.hpp>
@@ -187,7 +189,8 @@ void InventorySystem::swap_inventory()
   // can't let go of the broom mid-flight (including the descent to the landing cell)
   if ( Utils::Player::is_flying( reg() ) ) return;
 
-  if ( m_swap_item_cooldown_timer < sf::milliseconds( 750.f ) ) return;
+  const sf::Time swap_cooldown = sf::seconds( Sys::PersistSystem::get<Cmp::Persist::InventorySwapCooldown>( reg() ).get_value() );
+  if ( m_swap_item_cooldown_timer < swap_cooldown ) return;
 
   auto player_pos = Cmp::RectBounds::scaled( Utils::Player::get_position( reg() ), 0.5 );
   Sys::SpriteKey existing_player_inventory_type;

@@ -6,7 +6,7 @@ namespace Game::Events
 
 //! @brief Notification that a locked crypt door was not unlocked because the player has already collected every
 //! cadaver part, so the crypt has nothing left to give.
-//! @note Sent by Sys::CryptSystem. See Sys::TooltipSystem.
+//! @note Sent by Sys::CryptSystem. See Sys::TooltipOverlaySystem.
 struct CryptEntryRefusedEvent
 {
 };

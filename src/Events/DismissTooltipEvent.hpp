@@ -5,7 +5,7 @@ namespace Game::Events
 {
 
 //! @brief Requests that the currently displayed tooltip be hidden before its timer expires.
-//! See Sys::TooltipSystem.
+//! See Sys::TooltipOverlaySystem.
 struct DismissTooltipEvent
 {
 };

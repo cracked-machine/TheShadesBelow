@@ -1,70 +1,63 @@
-#ifndef SRC_SYSTEMS_RENDER_RENDEROVERLAYSYSTEM_HPP__
-#define SRC_SYSTEMS_RENDER_RENDEROVERLAYSYSTEM_HPP__
+#ifndef SRC_SYSTEMS_RENDER_HUDOVERLAYSYSTEM_HPP__
+#define SRC_SYSTEMS_RENDER_HUDOVERLAYSYSTEM_HPP__
 
-#include <Components/Position.hpp>
-#include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Render/BaseOverlaySystem.hpp>
 #include <Systems/Render/UiData.hpp>
-#include <Systems/Stores/StoreKey.hpp>
-#include <Utils/Constants.hpp>
-#include <Utils/Optimizations.hpp>
 
-#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Shader.hpp>
-#include <SFML/Graphics/Text.hpp>
-#include <SFML/System/Clock.hpp>
+#include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <entt/entity/entity.hpp>
 
-#include <algorithm>
-#include <cmath>
+#include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
 
-// clang-format off
-namespace Game::Sprites { class SpriteSheet; }
-// clang-format on
-
 namespace Game::Sys
 {
 
-//! @brief Renders everything layered on top of the game world: HUD elements (meters, labels, icons, texts) and the shop and grimoire
-//! overlays. Debug visualisations are handled by RenderDebugSystem.
-class RenderOverlaySystem : public RenderSystem
+//! @brief Draws the HUD layered on top of the game world: meters, labels, icons and texts from res/ui/ui.json, the
+//! screen-space torch particles over the inventory icon, the crypt maze shuffle countdown and the level depth banner.
+class HudOverlaySystem : public BaseOverlaySystem
 {
 public:
-  //! @brief Construct a new Render Overlay System object. Loads the main and shop UI layout data from their JSON files.
-  RenderOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
-      : RenderSystem( reg, window, sound_bank )
+  //! @brief Construct a new HUD Overlay System object. Loads the HUD layout from res/ui/ui.json.
+  //! @param reg
+  //! @param window
+  //! @param sound_bank
+  HudOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+      : BaseOverlaySystem( reg, window, sound_bank ),
+        m_main_ui_data( std::make_unique<Render::UiData>( "res/ui/ui.json" ) )
   {
-    m_main_ui_data = std::make_unique<Render::UiData>( "res/ui/ui.json" );
-    m_shop_ui_data = std::make_unique<Render::UiData>( "res/ui/shop.json" );
-  };
+  }
 
-  //! @brief Entrypoint for rendering the UI overlays: screen-space particles, the shop and grimoire overlays, and the HUD.
-  //! @param dt
-  void render_overlay( sf::Time dt );
+  //! @brief Draw the HUD: screen-space particles, outlines, icons, meters, labels, texts and the crypt maze timer.
+  //! @param dt World frame time (zero while paused), so meter flashes and stat-change labels freeze with the world.
+  void update( sf::Time dt ) override;
 
   //! @brief Render the current dungeon level depth text while its display cooldown has not yet elapsed.
-  //! Not part of render_overlay(): only GraveyardScene advances the display timer, so other scenes would show it frozen.
+  //! Not part of update(): only GraveyardScene advances the display timer, so other scenes would show it frozen.
   void render_level_depth();
 
 private:
   //! @brief Draw the screen-space particle sprites, i.e. the torch flame flickering over the UI inventory icon.
   void render_ui_particles();
 
-  //! @brief Render the main UI's outline rectangles (e.g. panel borders).
+  //! @brief Render the HUD's outline rectangles (e.g. panel borders).
   void render_ui_outlines();
 
-  //! @brief Render the main UI's icons, excluding the inventory icon which is handled by render_ui_inventory_icon.
+  //! @brief Render the HUD's icons, excluding the inventory icon which is handled by render_ui_inventory_icon.
   void render_ui_icons();
 
+  //! @brief Render the cadaver part icons that the player has collected.
   void render_ui_cadaver_icons();
 
   //! @brief Render the sprite in the Inventory UI.
   //! @note ParticleSprites are rendered seperately in render_ui_particles
   void render_ui_inventory_icon();
 
-  //! @brief Render the main UI's meters (health, fear, infamy, despair, toxicity, inventory wear) and flash their outline colour on
+  //! @brief Render the HUD's meters (health, fear, infamy, despair, toxicity, inventory wear) and flash their outline colour on
   //! recent changes.
   //! @param dt
   void render_ui_meters( sf::Time dt );
@@ -86,16 +79,13 @@ private:
   //! @param glint crystal ridge and glint colour
   void render_meter_frost( const sf::FloatRect &rect, float seed, sf::Color frost, sf::Color glint );
 
-  //! @brief Render the main UI's static text elements.
+  //! @brief Render the HUD's static text elements.
   void render_ui_texts();
 
-  //! @brief Render the main UI's dynamic labels (cadaver count, wealth, current inventory item) and flash their colour on
+  //! @brief Render the HUD's dynamic labels (cadaver count, wealth, current inventory item) and flash their colour on
   //! recent changes.
   //! @param dt
   void render_ui_labels( sf::Time dt );
-
-  //! @brief Render the shop UI overlay (outlines, item icons and slot labels) if a Cmp::Shop::Inventory is enabled in the registry.
-  void render_shop_inventory_overlay();
 
   //! @brief Render the halo effect around the graves that are marked as ghost spawners. Only active when player is carrying ElderFlute.
   void render_ghost_grave_halos();
@@ -108,16 +98,8 @@ private:
   template <typename FlashComponent>
   bool update_flash_toggle( sf::Time dt );
 
-  //! @brief The main UI layout's current design-to-screen scale, for hard-coded HUD pixel values (outline widths, font sizes).
-  [[nodiscard]] float ui_scale() const { return m_main_ui_data ? m_main_ui_data->scale() : 1.f; }
-
-  //! @brief Scale a design-space (1920x1080) character size to the current UI scale.
-  //! @param design_size character size in pixels at the layout's design resolution
-  //! @return the scaled character size, at least 1
-  [[nodiscard]] unsigned int scaled_char_size( unsigned int design_size ) const
-  {
-    return std::max( 1u, static_cast<unsigned int>( std::lround( static_cast<float>( design_size ) * ui_scale() ) ) );
-  }
+  //! @brief The HUD layout's current design-to-screen scale, for hard-coded HUD pixel values (outline widths, font sizes).
+  [[nodiscard]] float hud_scale() const { return ui_scale( m_main_ui_data.get() ); }
 
   //! @brief Get the current value of the player stat or toxidrome named by a "<stat>_delta_lbl" UI label.
   //! @param label_name the UI label name, e.g. "health_delta_lbl" or "venom_delta_lbl"
@@ -132,28 +114,8 @@ private:
   //! @return std::string the delta text, or an empty string once the duration has elapsed
   std::string update_stat_change_text( const std::string &label_name, sf::Time dt );
 
-  //! @brief Draw a list of UI outline rectangles (panel borders).
-  //! @param outlines
-  void render_outlines( const std::vector<Render::UiData::Outline> &outlines )
-  {
-    sf::RectangleShape rect;
-    for ( const auto &outline : outlines )
-    {
-      rect.setSize( outline.rect.size );
-      rect.setPosition( outline.rect.position );
-      rect.setFillColor( outline.fill_color );
-      rect.setOutlineColor( outline.line_color );
-      rect.setOutlineThickness( static_cast<float>( outline.line_thickness ) );
-      rect.setRotation( outline.rotation );
-      draw_screen( rect );
-    }
-  }
-
-  //! @brief Layout data object for the main UI
+  //! @brief Layout data object for the HUD
   std::unique_ptr<Render::UiData> m_main_ui_data;
-
-  //! @brief Layout data object for the shop scene overlay
-  std::unique_ptr<Render::UiData> m_shop_ui_data;
 
   //! @brief Screen flash frequency
   int m_ui_flash_factor{ 300 };
@@ -183,4 +145,4 @@ private:
 
 } // namespace Game::Sys
 
-#endif // SRC_SYSTEMS_RENDER_RENDEROVERLAYSYSTEM_HPP__
+#endif // SRC_SYSTEMS_RENDER_HUDOVERLAYSYSTEM_HPP__

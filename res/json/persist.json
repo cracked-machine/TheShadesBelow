@@ -75,7 +75,7 @@
   },
   "AltarOfferingCooldown": {
     "type": "float",
-    "value": 3.0,
+    "value": 1.5,
     "min_value": 0.0,
     "max_value": 10.0,
     "detail": "Altar Offering Cooldown",
@@ -265,6 +265,14 @@
     "max_value": 360.0,
     "detail": "Held item rotation facing north",
     "format": "%.0f"
+  },
+  "InventorySwapCooldown": {
+    "type": "float",
+    "value": 0.75,
+    "min_value": 0.0,
+    "max_value": 3.0,
+    "detail": "Item pickup/drop cooldown (seconds)",
+    "format": "%.2f"
   },
   "PlayerRenderOffset": {
     "type": "float",

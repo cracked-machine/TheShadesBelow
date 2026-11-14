@@ -10,7 +10,7 @@ namespace Game::Events
 
 //! @brief Notification that an altar refused a talisman because an altar is already fully activated (Cmp::Altar::Activated),
 //! so its grave trail must be completed before any other altar can be activated.
-//! @note Sent by Sys::AltarSystem. See Sys::TooltipSystem.
+//! @note Sent by Sys::AltarSystem. See Sys::TooltipOverlaySystem.
 struct TalismanRefusedEvent
 {
   //! @brief Construct a new TalismanRefusedEvent object

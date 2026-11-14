@@ -383,7 +383,7 @@ void RenderGameSystem::capture_sprite_layer( Sprites::IShaderSprite &sprite )
 
 void RenderGameSystem::draw_particle_sprite( Cmp::Particle::SpriteOwner &particle_owner )
 {
-  // screen-space (UI) particles are drawn by RenderOverlaySystem
+  // screen-space (UI) particles are drawn by HudOverlaySystem and ShopOverlaySystem
   if ( not particle_owner.sprite ) return;
   if ( particle_owner.sprite->get_view_type() != Cmp::Particle::ViewType::WORLD ) return;
 
@@ -618,7 +618,7 @@ void RenderGameSystem::render_held_item( const sf::FloatRect &body_rect, sf::Vec
   if ( facing_west ) scale.x = -scale.x;
   scale *= Sys::PersistSystem::get<Cmp::Persist::HeldItemScale>( reg() ).get_value();
 
-  // same sprite as the UI inventory icon (see RenderOverlaySystem::render_ui_inventory_icon)
+  // same sprite as the UI inventory icon (see HudOverlaySystem::render_ui_inventory_icon)
   for ( auto [inventory_entt, inventory_cmp, anim_cmp] : reg().view<Cmp::PlayerInventorySlot, Cmp::AnimData>().each() )
   {
     // the origin is the sprite centre, so the item is scaled and tilted in place

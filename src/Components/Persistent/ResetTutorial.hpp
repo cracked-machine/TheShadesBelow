@@ -6,7 +6,7 @@ namespace Game::Cmp::Persist
 {
 
 //! @brief Settings menu request to show all "once" tooltips again.
-//! @note Sys::TooltipSystem clears Cmp::Persist::TooltipsSeen when this is true, then sets it back to false.
+//! @note Sys::TooltipOverlaySystem clears Cmp::Persist::TooltipsSeen when this is true, then sets it back to false.
 class ResetTutorial : public BasePersistent<bool>
 {
 public:

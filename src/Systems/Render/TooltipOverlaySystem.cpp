@@ -3,7 +3,7 @@
 #include <Components/Persistent/TooltipsSeen.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
-#include <Systems/Render/TooltipSystem.hpp>
+#include <Systems/Render/TooltipOverlaySystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
@@ -41,21 +41,21 @@ sf::Color get_colour( const nlohmann::json &json_data, const sf::Color &fallback
 
 } // namespace
 
-TooltipSystem::TooltipSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
-    : RenderSystem( reg, window, sound_bank )
+TooltipOverlaySystem::TooltipOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseOverlaySystem( reg, window, sound_bank )
 {
   load_definitions( "res/json/tooltips.json" );
-  std::ignore = get_systems_event_queue().sink<Events::AddInventoryEvent>().connect<&TooltipSystem::on_add_inventory_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::ItemPickedUpEvent>().connect<&TooltipSystem::on_item_picked_up_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::GrimoireDiscoveryEvent>().connect<&TooltipSystem::on_grimoire_discovery_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::InsufficientAnimaEvent>().connect<&TooltipSystem::on_insufficient_anima_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::TalismanRefusedEvent>().connect<&TooltipSystem::on_talisman_refused_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::CryptEntryRefusedEvent>().connect<&TooltipSystem::on_crypt_entry_refused_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::DismissTooltipEvent>().connect<&TooltipSystem::on_dismiss_tooltip_event>( this );
-  SPDLOG_DEBUG( "TooltipSystem initialized with {} tooltips", m_definitions.size() );
+  std::ignore = get_systems_event_queue().sink<Events::AddInventoryEvent>().connect<&TooltipOverlaySystem::on_add_inventory_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::ItemPickedUpEvent>().connect<&TooltipOverlaySystem::on_item_picked_up_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::GrimoireDiscoveryEvent>().connect<&TooltipOverlaySystem::on_grimoire_discovery_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::InsufficientAnimaEvent>().connect<&TooltipOverlaySystem::on_insufficient_anima_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::TalismanRefusedEvent>().connect<&TooltipOverlaySystem::on_talisman_refused_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::CryptEntryRefusedEvent>().connect<&TooltipOverlaySystem::on_crypt_entry_refused_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::DismissTooltipEvent>().connect<&TooltipOverlaySystem::on_dismiss_tooltip_event>( this );
+  SPDLOG_DEBUG( "TooltipOverlaySystem initialized with {} tooltips", m_definitions.size() );
 }
 
-void TooltipSystem::load_definitions( const std::string &path )
+void TooltipOverlaySystem::load_definitions( const std::string &path )
 {
   std::ifstream input_file( path );
   if ( not input_file.is_open() )
@@ -119,43 +119,43 @@ void TooltipSystem::load_definitions( const std::string &path )
   }
 }
 
-void TooltipSystem::on_add_inventory_event( const Events::AddInventoryEvent &event )
+void TooltipOverlaySystem::on_add_inventory_event( const Events::AddInventoryEvent &event )
 {
   if ( not m_enabled ) { return; }
   m_candidates.push_back( { "AddInventoryEvent", event.m_item.str() } );
 }
 
-void TooltipSystem::on_item_picked_up_event( const Events::ItemPickedUpEvent &event )
+void TooltipOverlaySystem::on_item_picked_up_event( const Events::ItemPickedUpEvent &event )
 {
   if ( not m_enabled ) { return; }
   m_candidates.push_back( { "ItemPickedUpEvent", event.m_item.str() } );
 }
 
-void TooltipSystem::on_grimoire_discovery_event( const Events::GrimoireDiscoveryEvent &event )
+void TooltipOverlaySystem::on_grimoire_discovery_event( const Events::GrimoireDiscoveryEvent &event )
 {
   if ( not m_enabled ) { return; }
   m_candidates.push_back( { "GrimoireDiscoveryEvent", event.m_key } );
 }
 
-void TooltipSystem::on_insufficient_anima_event( const Events::InsufficientAnimaEvent &event )
+void TooltipOverlaySystem::on_insufficient_anima_event( const Events::InsufficientAnimaEvent &event )
 {
   if ( not m_enabled ) { return; }
   m_candidates.push_back( { "InsufficientAnimaEvent", event.m_item.str() } );
 }
 
-void TooltipSystem::on_talisman_refused_event( const Events::TalismanRefusedEvent &event )
+void TooltipOverlaySystem::on_talisman_refused_event( const Events::TalismanRefusedEvent &event )
 {
   if ( not m_enabled ) { return; }
   m_candidates.push_back( { "TalismanRefusedEvent", event.m_item.str() } );
 }
 
-void TooltipSystem::on_crypt_entry_refused_event( [[maybe_unused]] const Events::CryptEntryRefusedEvent &event )
+void TooltipOverlaySystem::on_crypt_entry_refused_event( [[maybe_unused]] const Events::CryptEntryRefusedEvent &event )
 {
   if ( not m_enabled ) { return; }
   m_candidates.push_back( { "CryptEntryRefusedEvent", "" } );
 }
 
-void TooltipSystem::update( sf::Time dt )
+void TooltipOverlaySystem::update( sf::Time dt )
 {
   check_reset();
 
@@ -187,9 +187,11 @@ void TooltipSystem::update( sf::Time dt )
     m_active->remaining -= dt;
     if ( m_active->remaining <= sf::Time::Zero ) { m_active.reset(); }
   }
+
+  render();
 }
 
-void TooltipSystem::check_reset()
+void TooltipOverlaySystem::check_reset()
 {
   auto &reset = PersistSystem::get<Cmp::Persist::ResetTutorial>( reg() );
   if ( not reset.get_value() ) { return; }
@@ -204,14 +206,14 @@ void TooltipSystem::check_reset()
   PersistSystem::save_component<Cmp::Persist::ResetTutorial>( reg() );
 }
 
-void TooltipSystem::sync_seen()
+void TooltipOverlaySystem::sync_seen()
 {
   auto &scene_seen = PersistSystem::get<Cmp::Persist::TooltipsSeen>( reg() ).get_value();
   m_seen.insert( scene_seen.begin(), scene_seen.end() );
   scene_seen = m_seen;
 }
 
-const TooltipSystem::TooltipDef *TooltipSystem::find_match( const Candidate &candidate ) const
+const TooltipOverlaySystem::TooltipDef *TooltipOverlaySystem::find_match( const Candidate &candidate ) const
 {
   for ( const auto &def : m_definitions )
   {
@@ -224,7 +226,7 @@ const TooltipSystem::TooltipDef *TooltipSystem::find_match( const Candidate &can
   return nullptr;
 }
 
-std::string TooltipSystem::format_text( const TooltipDef &def, const Candidate &candidate )
+std::string TooltipOverlaySystem::format_text( const TooltipDef &def, const Candidate &candidate )
 {
   static constexpr std::string_view kItemPlaceholder = "{item}";
   std::string text = def.text;
@@ -239,7 +241,7 @@ std::string TooltipSystem::format_text( const TooltipDef &def, const Candidate &
   return text;
 }
 
-void TooltipSystem::render()
+void TooltipOverlaySystem::render()
 {
   if ( not m_active ) { return; }
 

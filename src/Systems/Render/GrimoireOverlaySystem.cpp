@@ -3,10 +3,9 @@
 #include <Components/Inventory/Grimoire.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/NoRender.hpp>
+#include <Components/Npc/Npc.hpp>
 #include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
 #include <Components/Position.hpp>
-#include <Components/Npc/Npc.hpp>
-#include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
@@ -15,13 +14,14 @@
 #include <Events/GrimoireDiscoveryEvent.hpp>
 #include <Events/GrimoireNpcUpdateEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
-#include <Events/PlayerActionEvent.hpp>
+#include <Events/OverlayEvent.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
-#include <Systems/Render/GrimoireSystem.hpp>
+#include <Systems/Render/GrimoireOverlaySystem.hpp>
+#include <Systems/Render/OverlayArbitrationSystem.hpp>
 
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/NpcStore.hpp>
@@ -31,70 +31,29 @@
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 #include <algorithm>
+#include <array>
 #include <entt/entity/registry.hpp>
 #include <entt/entity/view.hpp>
 #include <format>
+#include <imgui.h>
 #include <optional>
 #include <ranges>
 #include <spdlog/spdlog.h>
 #include <string_view>
-#include <imgui-SFML.h>
-#include <imgui.h>
 #include <utility>
 #include <vector>
 
 namespace Game::Sys
 {
 
-namespace
+GrimoireOverlaySystem::GrimoireOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseOverlaySystem( reg, window, sound_bank )
 {
-constexpr float kToggleDebounceThreshold = 1.f;
-constexpr float kNavigateDebounceThreshold = 0.5f;
-//! @brief Gap between the mouse cursor and the hover overlay when it follows the mouse, in design-space pixels.
-constexpr float kHoverCursorGapPx = 24.f;
-
-//! @brief Map a grimoire_plants.json object name (e.g. "forage_actions") to the page's subpage for its
-//! prefix and the remainder of the name (e.g. "actions").
-//! @return The subpage, or nullptr if the name has no subpage prefix.
-std::pair<const Cmp::Grimoire::SubPage *, std::string_view> resolve_subpage( const Cmp::Grimoire::PlantPage &page, std::string_view name )
-{
-  // the *_special_ prefixes must come before plant_/forage_/drop_ as the first matching prefix wins
-  const std::pair<std::string_view, const Cmp::Grimoire::SubPage *> prefixes[] = { { "plant_special_", &page.plant_offering_subpage },
-                                                                                   { "forage_special_", &page.forage_offering_subpage },
-                                                                                   { "drop_special_", &page.drop_offering_subpage },
-                                                                                   { "plant_", &page.plant_subpage },
-                                                                                   { "forage_", &page.forage_subpage },
-                                                                                   { "drop_", &page.drop_subpage } };
-  for ( const auto &[prefix, sub_page] : prefixes )
-  {
-    if ( name.starts_with( prefix ) ) { return { sub_page, name.substr( prefix.size() ) }; }
-  }
-  return { nullptr, name };
-}
-
-//! @brief Map a grimoire_npc.json object name (e.g. "npc_actions") to the NPC page's subpage and the remainder
-//! of the name (e.g. "actions").
-//! @return The subpage, or nullptr if the name has no "npc_" prefix.
-std::pair<const Cmp::Grimoire::SubPage *, std::string_view> resolve_subpage( const Cmp::Grimoire::NpcPage &page, std::string_view name )
-{
-  static constexpr std::string_view kPrefix = "npc_";
-  if ( name.starts_with( kPrefix ) ) { return { &page.npc_subpage, name.substr( kPrefix.size() ) }; }
-  return { nullptr, name };
-}
-//! @brief Tab bar captions, indexed by Cmp::Grimoire::Tab.
-constexpr std::array<const char *, 2> kTabLabels = { "NPCs", "Plants" };
-
-std::size_t tab_index( Cmp::Grimoire::Tab tab ) { return static_cast<std::size_t>( tab ); }
-} // namespace
-
-GrimoireSystem::GrimoireSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
-    : RenderSystem( reg, window, sound_bank )
-{
-  std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&GrimoireSystem::on_player_action>( this );
-  std::ignore = get_systems_event_queue().sink<Events::ItemPickedUpEvent>().connect<&GrimoireSystem::on_item_pickup_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::AddInventoryEvent>().connect<&GrimoireSystem::on_add_inventory_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::GrimoireItemUpdateEvent>().connect<&GrimoireSystem::on_grimoire_item_update_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::GrimoireNpcUpdateEvent>().connect<&GrimoireSystem::on_grimoire_npc_update_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::OverlayEvent>().connect<&GrimoireOverlaySystem::on_overlay_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::ItemPickedUpEvent>().connect<&GrimoireOverlaySystem::on_item_pickup_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::AddInventoryEvent>().connect<&GrimoireOverlaySystem::on_add_inventory_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::GrimoireItemUpdateEvent>().connect<&GrimoireOverlaySystem::on_grimoire_item_update_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::GrimoireNpcUpdateEvent>().connect<&GrimoireOverlaySystem::on_grimoire_npc_update_event>( this );
 
   m_plant_ui_data = std::make_unique<Render::UiData>( "res/ui/grimoire_plants.json" );
   m_npc_ui_data = std::make_unique<Render::UiData>( "res/ui/grimoire_npc.json" );
@@ -102,32 +61,44 @@ GrimoireSystem::GrimoireSystem( entt::registry &reg, sf::RenderWindow &window, A
   m_npc_hover_ui_data = std::make_unique<Render::UiData>( "res/ui/grimoire_npc_hover.json" );
 }
 
-void GrimoireSystem::update( sf::Time dt )
-{
-  m_toggle_debounce += dt;
-  m_navigate_debounce += dt;
-}
-
-bool GrimoireSystem::is_grimoire_overlay_open() const
+bool GrimoireOverlaySystem::is_open() const
 {
   auto grimoire_view = reg().view<const Cmp::Grimoire>();
   if ( grimoire_view.empty() ) { return false; }
   return grimoire_view.get<const Cmp::Grimoire>( grimoire_view.front() ).is_enabled;
 }
 
-Cmp::Grimoire *GrimoireSystem::find_grimoire()
+void GrimoireOverlaySystem::open()
+{
+  auto *grimoire_cmp = find_grimoire();
+  if ( not grimoire_cmp or grimoire_cmp->is_enabled ) { return; }
+  grimoire_cmp->is_enabled = true;
+  // ImGui remembers the tab last clicked, so select the one a discovery may have switched to
+  m_select_tab = true;
+  on_modal_open();
+}
+
+void GrimoireOverlaySystem::close()
+{
+  auto *grimoire_cmp = find_grimoire();
+  if ( not grimoire_cmp or not grimoire_cmp->is_enabled ) { return; }
+  grimoire_cmp->is_enabled = false;
+  on_modal_close();
+}
+
+Cmp::Grimoire *GrimoireOverlaySystem::find_grimoire()
 {
   auto grimoire_view = reg().view<Cmp::Grimoire>();
   if ( grimoire_view.empty() ) { return nullptr; }
   return &grimoire_view.get<Cmp::Grimoire>( grimoire_view.front() );
 }
 
-std::size_t GrimoireSystem::page_count( const Cmp::Grimoire &grimoire_cmp, Cmp::Grimoire::Tab tab )
+std::size_t GrimoireOverlaySystem::page_count( const Cmp::Grimoire &grimoire_cmp, Cmp::Grimoire::Tab tab )
 {
   return tab == Cmp::Grimoire::Tab::NPCS ? grimoire_cmp.npc_pages.size() : grimoire_cmp.plant_pages.size();
 }
 
-void GrimoireSystem::for_each_subpage( const Sys::ItemKey &item_key, const std::function<void( std::size_t, Cmp::Grimoire::SubPage & )> &fn )
+void GrimoireOverlaySystem::for_each_subpage( const Sys::ItemKey &item_key, const std::function<void( std::size_t, Cmp::Grimoire::SubPage & )> &fn )
 {
   auto *grimoire_cmp = find_grimoire();
   if ( not grimoire_cmp or item_key.empty() ) { return; }
@@ -143,18 +114,18 @@ void GrimoireSystem::for_each_subpage( const Sys::ItemKey &item_key, const std::
   }
 }
 
-void GrimoireSystem::show_page_when_closed( Cmp::Grimoire::Tab tab, std::size_t page_idx )
+void GrimoireOverlaySystem::show_page_when_closed( Cmp::Grimoire::Tab tab, std::size_t page_idx )
 {
-  if ( is_grimoire_overlay_open() ) { return; }
+  if ( is_open() ) { return; }
   m_tab = tab;
   m_page_idx[tab_index( tab )] = page_idx;
 }
 
-void GrimoireSystem::on_item_pickup_event( const Events::ItemPickedUpEvent &ev ) { discover_item( ev.m_item ); }
+void GrimoireOverlaySystem::on_item_pickup_event( const Events::ItemPickedUpEvent &ev ) { discover_item( ev.m_item ); }
 
-void GrimoireSystem::on_add_inventory_event( const Events::AddInventoryEvent &ev ) { discover_item( ev.m_item ); }
+void GrimoireOverlaySystem::on_add_inventory_event( const Events::AddInventoryEvent &ev ) { discover_item( ev.m_item ); }
 
-void GrimoireSystem::discover_item( const Sys::ItemKey &item_key )
+void GrimoireOverlaySystem::discover_item( const Sys::ItemKey &item_key )
 {
   const auto &item = Sys::ItemStore::instance().get( item_key );
   bool changed = false;
@@ -174,7 +145,7 @@ void GrimoireSystem::discover_item( const Sys::ItemKey &item_key )
   if ( changed ) { get_systems_event_queue().trigger( Events::GrimoireDiscoveryEvent( item_key ) ); }
 }
 
-void GrimoireSystem::on_grimoire_item_update_event( const Events::GrimoireItemUpdateEvent &ev )
+void GrimoireOverlaySystem::on_grimoire_item_update_event( const Events::GrimoireItemUpdateEvent &ev )
 {
   if ( ev.m_action_key == Cmp::ProximityAction::kKey and ev.m_action.is_zero() ) { return; }
   const auto &item = Sys::ItemStore::instance().get( ev.m_item );
@@ -193,7 +164,7 @@ void GrimoireSystem::on_grimoire_item_update_event( const Events::GrimoireItemUp
   if ( changed ) { get_systems_event_queue().trigger( Events::GrimoireDiscoveryEvent( ev.m_item ) ); }
 }
 
-void GrimoireSystem::on_grimoire_npc_update_event( const Events::GrimoireNpcUpdateEvent &ev )
+void GrimoireOverlaySystem::on_grimoire_npc_update_event( const Events::GrimoireNpcUpdateEvent &ev )
 {
   if ( ev.m_action_key == Cmp::ProximityAction::kKey and ev.m_action.is_zero() ) { return; }
   auto *grimoire_cmp = find_grimoire();
@@ -214,46 +185,28 @@ void GrimoireSystem::on_grimoire_npc_update_event( const Events::GrimoireNpcUpda
   if ( changed ) { get_systems_event_queue().trigger( Events::GrimoireDiscoveryEvent( ev.m_npc ) ); }
 }
 
-void GrimoireSystem::on_player_action( Events::PlayerActionEvent ev )
+void GrimoireOverlaySystem::on_overlay_event( const Events::OverlayEvent &ev )
 {
-  auto *grimoire_cmp = find_grimoire();
-  if ( not grimoire_cmp ) { return; }
+  using Action = Events::OverlayEvent::OverlayActions;
+  if ( ev.action != Action::GRIMOIRE_PREV and ev.action != Action::GRIMOIRE_NEXT ) { return; }
 
-  if ( ev.action == Events::PlayerActionEvent::GameActions::GRIMOIRE_TOGGLE and m_toggle_debounce.asSeconds() >= kToggleDebounceThreshold )
-  {
-    // the grimoire and the F3 debug panels each pump the one ImGui frame allowed per frame, so they are never shown
-    // together. F3 is likewise ignored while the grimoire is open (see SceneInputRouter::grimoire_overlay_input_handler).
-    if ( not grimoire_cmp->is_enabled and Utils::scene_setting<Cmp::SceneSettings::ShowDebugStats>( reg() ).enabled ) { return; }
-
-    grimoire_cmp->is_enabled = not grimoire_cmp->is_enabled;
-    m_toggle_debounce = sf::Time::Zero;
-    if ( grimoire_cmp->is_enabled )
-    {
-      // ImGui remembers the tab last clicked, so select the one a discovery may have switched to
-      m_select_tab = true;
-      // the mouse release is swallowed while paused, so abandon any draw now rather than leave it pending.
-      // Cancel before pausing the effects so the draw sfx is stopped, not paused and later resumed.
-      get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::CANCEL_BOW ) );
-      m_sound_bank.pause_effects();
-    }
-    else { m_sound_bank.resume_effects(); }
-    return;
-  }
-
+  const auto *grimoire_cmp = find_grimoire();
+  if ( not grimoire_cmp or not grimoire_cmp->is_enabled ) { return; }
   const std::size_t count = page_count( *grimoire_cmp, m_tab );
-  if ( not grimoire_cmp->is_enabled or count == 0 ) { return; }
+  if ( count == 0 ) { return; }
+
+  constexpr float kNavigateDebounceThreshold = 0.5f;
   if ( m_navigate_debounce.asSeconds() < kNavigateDebounceThreshold ) { return; }
 
   // pages turn, and wrap around, within the current tab only
   std::size_t &page_idx = m_page_idx[tab_index( m_tab )];
-  if ( ev.action == Events::PlayerActionEvent::GameActions::GRIMOIRE_PREV ) { page_idx = ( page_idx - 1 + count ) % count; }
-  else if ( ev.action == Events::PlayerActionEvent::GameActions::GRIMOIRE_NEXT ) { page_idx = ( page_idx + 1 ) % count; }
-  else { return; }
+  if ( ev.action == Action::GRIMOIRE_PREV ) { page_idx = ( page_idx - 1 + count ) % count; }
+  else { page_idx = ( page_idx + 1 ) % count; }
   m_navigate_debounce = sf::Time::Zero;
   m_sound_bank.get_effect( "page_turn" ).play();
 }
 
-std::string GrimoireSystem::npc_display_name( const std::string &npc_type )
+std::string GrimoireOverlaySystem::npc_display_name( const std::string &npc_type )
 {
   const auto npc_types = Sys::NpcStore::instance().get_all();
   if ( std::ranges::find( npc_types, Sys::NpcKey( npc_type ) ) == npc_types.end() ) { return npc_type; }
@@ -261,7 +214,7 @@ std::string GrimoireSystem::npc_display_name( const std::string &npc_type )
   return Sys::SpriteStore::instance().get( npc.sprite_type_list.front() ).display_name();
 }
 
-std::string GrimoireSystem::reward_display_name( const Cmp::ActionReward &reward )
+std::string GrimoireOverlaySystem::reward_display_name( const Cmp::ActionReward &reward )
 {
   if ( not reward.item.empty() )
   {
@@ -295,46 +248,32 @@ std::string GrimoireSystem::reward_display_name( const Cmp::ActionReward &reward
   return "none";
 }
 
-void GrimoireSystem::render( sf::Time dt, bool allow_hover )
+void GrimoireOverlaySystem::update( sf::Time dt )
 {
-  const auto *grimoire_cmp = find_grimoire();
-  const bool grimoire_open = grimoire_cmp and grimoire_cmp->is_enabled;
+  m_navigate_debounce += dt;
 
-  // the F3 debug panels pump the one ImGui frame allowed per frame while they are shown, so the hover overlay can't
+  const auto *grimoire_cmp = find_grimoire();
+  if ( not grimoire_cmp ) { return; }
+  const bool grimoire_open = grimoire_cmp->is_enabled;
+
   // NPCs move and are drawn over plants, so an NPC in front of a plant wins
   const Cmp::Grimoire::NpcPage *hover_npc_page = nullptr;
   const Cmp::Grimoire::PlantPage *hover_plant_page = nullptr;
-  if ( grimoire_cmp and not grimoire_open and allow_hover and not Utils::scene_setting<Cmp::SceneSettings::ShowDebugStats>( reg() ).enabled )
+  if ( not grimoire_open and OverlayArbitrationSystem::hover_allowed( reg() ) )
   {
     hover_npc_page = find_hovered_npc_page( *grimoire_cmp );
     if ( not hover_npc_page ) { hover_plant_page = find_hovered_plant_page( *grimoire_cmp ); }
   }
+  if ( not grimoire_open and not hover_npc_page and not hover_plant_page ) { return; }
 
-  if ( not grimoire_open and not hover_npc_page and not hover_plant_page )
-  {
-    // the events forwarded to ImGui on the frame the grimoire closed are still queued: pump one empty frame to consume
-    // them, so they aren't replayed onto the menu widgets the next time a menu opens
-    if ( m_imgui_active )
-    {
-      ImGui::SFML::Update( m_window, std::max( dt, sf::microseconds( 1 ) ) );
-      ImGui::SFML::Render( m_window );
-    }
-    m_imgui_active = false;
-    return;
-  }
-  m_imgui_active = true;
-
-  // ImGui asserts on a non-positive DeltaTime, so never hand it a zero frame time
-  ImGui::SFML::Update( m_window, std::max( dt, sf::microseconds( 1 ) ) );
   ImGui::PushFont( Utils::imgui_grimoire_font() );
   if ( grimoire_open ) { render_grimoire( *grimoire_cmp ); }
   else if ( hover_npc_page ) { render_hover( *m_npc_hover_ui_data, "##grimoire_npc_hover", "grimoire_npc_hover_", *hover_npc_page ); }
   else { render_hover( *m_plant_hover_ui_data, "##grimoire_plant_hover", "grimoire_plant_hover_", *hover_plant_page ); }
   ImGui::PopFont();
-  ImGui::SFML::Render( m_window );
 }
 
-bool GrimoireSystem::begin_layout_window( const Render::UiData &ui_data, const char *id, int extra_flags )
+bool GrimoireOverlaySystem::begin_layout_window( const Render::UiData &ui_data, const char *id, int extra_flags )
 {
   const auto main_outline_it = std::ranges::find( ui_data.m_outlines, std::string( "main_outline" ), &Render::UiData::Outline::name );
   if ( main_outline_it != ui_data.m_outlines.end() )
@@ -352,7 +291,7 @@ bool GrimoireSystem::begin_layout_window( const Render::UiData &ui_data, const c
   return ImGui::Begin( id, nullptr, kWindowFlags | extra_flags );
 }
 
-void GrimoireSystem::render_grimoire( const Cmp::Grimoire &grimoire_cmp )
+void GrimoireOverlaySystem::render_grimoire( const Cmp::Grimoire &grimoire_cmp )
 {
   // the layouts are authored at their Tiled map size; rescale them if the window resolution has changed (no-op otherwise)
   m_npc_ui_data->sync_to( m_window.getSize() );
@@ -363,8 +302,8 @@ void GrimoireSystem::render_grimoire( const Cmp::Grimoire &grimoire_cmp )
   const Render::UiData &current_ui_data = m_tab == Cmp::Grimoire::Tab::NPCS ? *m_npc_ui_data : *m_plant_ui_data;
   if ( begin_layout_window( current_ui_data, "##grimoire", ImGuiWindowFlags_None ) )
   {
-    // the tab bar first, so a click this frame shows the newly selected tab's page straight away. ImGui only draws at
-    // ImGui::SFML::Render, so it still ends up on top of the SFML parts of the page.
+    // the tab bar first, so a click this frame shows the newly selected tab's page straight away. ImGui only draws when
+    // OverlayArbitrationSystem renders the shared frame, so it still ends up on top of the SFML parts of the page.
     render_tab_bar( current_ui_data );
 
     const std::size_t count = page_count( grimoire_cmp, m_tab );
@@ -381,14 +320,14 @@ void GrimoireSystem::render_grimoire( const Cmp::Grimoire &grimoire_cmp )
 }
 
 template <typename PageT>
-void GrimoireSystem::render_hover( Render::UiData &ui_data, const char *window_id, const std::string &cache_prefix, const PageT &page )
+void GrimoireOverlaySystem::render_hover( Render::UiData &ui_data, const char *window_id, const std::string &cache_prefix, const PageT &page )
 {
   // the page is read from the live grimoire every frame, so a discovery made while hovering shows straight away
   const sf::Vector2u window_size = m_window.getSize();
   const bool follow_mouse = PersistSystem::get<Cmp::Persist::GrimoireHoverFollowsMouse>( reg() ).get_value();
   ui_data.sync_to( window_size, follow_mouse ? hover_anchor( ui_data, window_size ) : sf::Vector2f{ 0.f, 0.f } );
 
-  // display only: events aren't forwarded to ImGui during gameplay, and the overlay must never take the mouse from the game
+  // display only: the overlay must never take the mouse from the game
   if ( begin_layout_window( ui_data, window_id, ImGuiWindowFlags_NoInputs ) )
   {
     // the hover layouts have no page_label, so the page count is unused
@@ -397,7 +336,7 @@ void GrimoireSystem::render_hover( Render::UiData &ui_data, const char *window_i
   ImGui::End();
 }
 
-std::optional<sf::FloatRect> GrimoireSystem::mouse_bounds_in_window() const
+std::optional<sf::FloatRect> GrimoireOverlaySystem::mouse_bounds_in_window() const
 {
   const sf::Vector2i mouse_pixel_pos = sf::Mouse::getPosition( m_window );
   const sf::Vector2u window_size = m_window.getSize();
@@ -409,7 +348,7 @@ std::optional<sf::FloatRect> GrimoireSystem::mouse_bounds_in_window() const
   return Utils::get_mouse_bounds_in_gameview( m_window, RenderSystem::get_world_view() );
 }
 
-const Cmp::Grimoire::PlantPage *GrimoireSystem::find_hovered_plant_page( const Cmp::Grimoire &grimoire_cmp ) const
+const Cmp::Grimoire::PlantPage *GrimoireOverlaySystem::find_hovered_plant_page( const Cmp::Grimoire &grimoire_cmp ) const
 {
   const auto mouse_bounds = mouse_bounds_in_window();
   if ( not mouse_bounds ) { return nullptr; }
@@ -417,13 +356,14 @@ const Cmp::Grimoire::PlantPage *GrimoireSystem::find_hovered_plant_page( const C
   {
     if ( not mouse_bounds->findIntersection( plant_mb_cmp ) ) { continue; }
     const auto page_it = std::ranges::find( grimoire_cmp.plant_pages, plant_item_cmp.item_type,
-                                            []( const Cmp::Grimoire::PlantPage &page ) -> const Sys::ItemKey & { return page.plant_subpage.item_key; } );
+                                            []( const Cmp::Grimoire::PlantPage &page ) -> const Sys::ItemKey &
+    { return page.plant_subpage.item_key; } );
     if ( page_it != grimoire_cmp.plant_pages.end() ) { return &*page_it; }
   }
   return nullptr;
 }
 
-const Cmp::Grimoire::NpcPage *GrimoireSystem::find_hovered_npc_page( const Cmp::Grimoire &grimoire_cmp ) const
+const Cmp::Grimoire::NpcPage *GrimoireOverlaySystem::find_hovered_npc_page( const Cmp::Grimoire &grimoire_cmp ) const
 {
   const auto mouse_bounds = mouse_bounds_in_window();
   if ( not mouse_bounds ) { return nullptr; }
@@ -437,7 +377,7 @@ const Cmp::Grimoire::NpcPage *GrimoireSystem::find_hovered_npc_page( const Cmp::
   return nullptr;
 }
 
-sf::Vector2f GrimoireSystem::hover_anchor( Render::UiData &ui_data, sf::Vector2u window_size )
+sf::Vector2f GrimoireOverlaySystem::hover_anchor( Render::UiData &ui_data, sf::Vector2u window_size )
 {
   // rescale for the window at the current anchor first (a no-op unless the resolution changed), so the panel's size and
   // its position without an anchor can be read back from the layout
@@ -451,6 +391,8 @@ sf::Vector2f GrimoireSystem::hover_anchor( Render::UiData &ui_data, sf::Vector2u
   const sf::Vector2f unanchored_pos = main_outline_it->rect.position - current_anchor;
   // keep the border, drawn outside the rect, on screen as well
   const float border = static_cast<float>( std::max( 0, main_outline_it->line_thickness ) );
+  //! @brief Gap between the mouse cursor and the hover overlay when it follows the mouse, in design-space pixels.
+  constexpr float kHoverCursorGapPx = 24.f;
   const float gap = kHoverCursorGapPx * ui_data.scale();
   const sf::Vector2f mouse( sf::Mouse::getPosition( m_window ) );
   const sf::Vector2f window( window_size );
@@ -464,7 +406,7 @@ sf::Vector2f GrimoireSystem::hover_anchor( Render::UiData &ui_data, sf::Vector2u
   return pos - unanchored_pos;
 }
 
-void GrimoireSystem::render_tab_bar( const Render::UiData &ui_data )
+void GrimoireOverlaySystem::render_tab_bar( const Render::UiData &ui_data )
 {
   // the tab bar stretches across its parent window, so give it a child window the size of the layout's ui_tab
   // object. Without one, it stretches across the ##grimoire window.
@@ -498,7 +440,7 @@ void GrimoireSystem::render_tab_bar( const Render::UiData &ui_data )
 }
 
 template <typename PageT>
-void GrimoireSystem::render_page( const Render::UiData &ui_data, const std::string &cache_prefix, const PageT &page, std::size_t page_count )
+void GrimoireOverlaySystem::render_page( const Render::UiData &ui_data, const std::string &cache_prefix, const PageT &page, std::size_t page_count )
 {
   render_outlines( ui_data );
   for ( const auto &icon : ui_data.m_icons )
@@ -519,28 +461,14 @@ void GrimoireSystem::render_page( const Render::UiData &ui_data, const std::stri
   }
 }
 
-void GrimoireSystem::render_outlines( const Render::UiData &ui_data )
-{
-  for ( const auto &outline : ui_data.m_outlines )
-  {
-    auto rect = sf::RectangleShape( outline.rect.size );
-    rect.setPosition( outline.rect.position );
-    rect.setFillColor( outline.fill_color );
-    rect.setOutlineColor( outline.line_color );
-    rect.setOutlineThickness( static_cast<float>( outline.line_thickness ) );
-    rect.setRotation( outline.rotation );
-    draw_screen( rect );
-  }
-}
-
-void GrimoireSystem::render_icon( const Render::UiData::Icon &icon, const Cmp::Grimoire::SubPage &sub_page )
+void GrimoireOverlaySystem::render_icon( const Render::UiData::Icon &icon, const Cmp::Grimoire::SubPage &sub_page )
 {
   Sys::SpriteKey sprite_key = sub_page.sprite_key;
   RenderSystem::safe_render_sprite_screen( sprite_key, { icon.rect.position, Constants::kGridSizePxF }, sub_page.sprite_index,
                                            { icon.scale, icon.scale } );
 }
 
-void GrimoireSystem::render_page_label( const Render::UiData &ui_data, const std::string &cache_prefix, std::size_t page_count )
+void GrimoireOverlaySystem::render_page_label( const Render::UiData &ui_data, const std::string &cache_prefix, std::size_t page_count )
 {
   // Tiled point y is the text baseline; sf::Text draws its baseline ~font_size below its position, so shift up by font_size
   // so that texts/labels of different font sizes at the same y line up
@@ -556,7 +484,7 @@ void GrimoireSystem::render_page_label( const Render::UiData &ui_data, const std
   }
 }
 
-void GrimoireSystem::render_text( const Render::UiData::Text &text, const std::string &cache_prefix, const Cmp::Grimoire::SubPage *sub_page )
+void GrimoireOverlaySystem::render_text( const Render::UiData::Text &text, const std::string &cache_prefix, const Cmp::Grimoire::SubPage *sub_page )
 {
   TextColumn draw_line{ .self = *this,
                         .cache_key = cache_prefix + text.name,
@@ -567,7 +495,7 @@ void GrimoireSystem::render_text( const Render::UiData::Text &text, const std::s
   else { draw_line( text.value, sf::Color::Black ); }
 }
 
-void GrimoireSystem::render_action_table( const Render::UiData::Table &table, const Cmp::Grimoire::SubPage &sub_page )
+void GrimoireOverlaySystem::render_action_table( const Render::UiData::Table &table, const Cmp::Grimoire::SubPage &sub_page )
 {
   ImGui::SetCursorScreenPos( ImVec2( table.rect.position.x, table.rect.position.y ) );
   ImGui::PushID( table.name.c_str() );
@@ -603,7 +531,7 @@ void GrimoireSystem::render_action_table( const Render::UiData::Table &table, co
   ImGui::PopID();
 }
 
-std::vector<std::string> GrimoireSystem::action_effect_lines( const Cmp::Grimoire::SubPage &sub_page, const std::string &action_key )
+std::vector<std::string> GrimoireOverlaySystem::action_effect_lines( const Cmp::Grimoire::SubPage &sub_page, const std::string &action_key )
 {
   const auto action_it = sub_page.action_map.find( action_key );
   if ( action_it == sub_page.action_map.end() ) { return { "?????" }; }
@@ -617,7 +545,7 @@ std::vector<std::string> GrimoireSystem::action_effect_lines( const Cmp::Grimoir
   return lines;
 }
 
-bool GrimoireSystem::append_reward_lines( std::vector<std::string> &lines, const Cmp::BaseAction &action )
+bool GrimoireOverlaySystem::append_reward_lines( std::vector<std::string> &lines, const Cmp::BaseAction &action )
 {
   // the reward goes first so it sits on the action's caption row, e.g. "Offering | (Elder Flute)"
   const auto reward = action.reward();
@@ -626,7 +554,7 @@ bool GrimoireSystem::append_reward_lines( std::vector<std::string> &lines, const
   return true;
 }
 
-bool GrimoireSystem::append_stat_lines( std::vector<std::string> &lines, const Cmp::BaseAction &action )
+bool GrimoireOverlaySystem::append_stat_lines( std::vector<std::string> &lines, const Cmp::BaseAction &action )
 {
   // one line per non-zero stat
   const std::string tick_suffix = action.interval() > 0.f ? std::format( "pt/{:g}s", action.interval() ) : "";
@@ -669,13 +597,12 @@ bool GrimoireSystem::append_stat_lines( std::vector<std::string> &lines, const C
   return has_effect;
 }
 
-bool GrimoireSystem::append_side_effect_lines( std::vector<std::string> &lines, const Cmp::BaseAction &action )
+bool GrimoireOverlaySystem::append_side_effect_lines( std::vector<std::string> &lines, const Cmp::BaseAction &action )
 {
   // side effects, with their chance of firing
   const Cmp::SideEffects &effects = action.side_effects();
   const int player_luck = Utils::Player::get_stats( reg() ).luck();
-  const auto draw_effect = [&]( std::string_view label, float chance )
-  { lines.push_back( std::format( "{}: {:.0f}%", label, chance * 100.f ) ); };
+  const auto draw_effect = [&]( std::string_view label, float chance ) { lines.push_back( std::format( "{}: {:.0f}%", label, chance * 100.f ) ); };
   if ( effects.spawn_npc )
   {
     std::string label = std::format( "summons {}", npc_display_name( effects.spawn_npc->npc_type ) );

@@ -1,7 +1,7 @@
 #version 330
 
 // Frost overlay drawn over a toxidrome UI meter while the player has toxic immunity
-// (see RenderOverlaySystem::render_ui_meters). Draws a frost haze and crystal ridges that thicken
+// (see HudOverlaySystem::render_ui_meters). Draws a frost haze and crystal ridges that thicken
 // towards the meter edges, plus a few slowly twinkling glints.
 
 // meter bounds in render target pixels: x, y (from the top), width, height

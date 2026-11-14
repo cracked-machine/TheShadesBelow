@@ -7,7 +7,7 @@ namespace Game::Cmp::Persist
 
 //! @brief Whether the grimoire hover overlay (the grimoire subpage of the plant or NPC under the mouse) is drawn beside
 //! the mouse cursor instead of at its fixed position in res/ui/grimoire_plant_hover.json or res/ui/grimoire_npc_hover.json.
-//! @note Read every frame by Sys::GrimoireSystem::render.
+//! @note Read every frame by Sys::GrimoireOverlaySystem::update.
 class GrimoireHoverFollowsMouse : public BasePersistent<bool>
 {
 public:

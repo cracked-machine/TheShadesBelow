@@ -68,7 +68,7 @@ namespace Game::Sys
 
 //! @brief Renders everything that exists in the game world: the z-ordered entity queue (sprites, particles, shaders, floor tiles),
 //! player-adjacent effects (shockwaves, lightning, compass arrow), and the camera. UI and debug rendering are done
-//! separately by RenderOverlaySystem and RenderDebugSystem.
+//! separately by the overlay systems, see OverlayArbitrationSystem.
 class RenderGameSystem : public RenderSystem
 {
 public:
@@ -79,7 +79,7 @@ public:
   ~RenderGameSystem();
 
   //! @brief Entrypoint for rendering the game world. Draws into the frame that SceneManager::update() clears beforehand
-  //! and presents afterwards; RenderOverlaySystem::render_overlay and RenderDebugSystem::render_debug draw on top of it.
+  //! and presents afterwards; OverlayArbitrationSystem::update draws the overlays on top of it.
   //! @param dt
   //! @param render_position_grid Optional spatial index of static (never moved after creation)
   //! Cmp::Position-bearing renderable entities - see ZOrderQueue::refresh(). Scenes that don't
@@ -114,7 +114,7 @@ private:
   //! the rest transparent. See IShaderSprite::is_sprite_layer().
   void capture_sprite_layer( Sprites::IShaderSprite &sprite );
 
-  //! @brief Draws a world-space particle sprite. Screen-space particles are drawn by RenderOverlaySystem.
+  //! @brief Draws a world-space particle sprite. Screen-space particles are drawn by HudOverlaySystem and ShopOverlaySystem.
   void draw_particle_sprite( Cmp::Particle::SpriteOwner &particle_owner );
 
   //! @brief Draws a floor tile set at its world grid offset

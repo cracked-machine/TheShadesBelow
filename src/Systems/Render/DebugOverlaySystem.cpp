@@ -58,7 +58,8 @@
 #include <PathFinding/AStar.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/ParticleSystem.hpp>
-#include <Systems/Render/RenderDebugSystem.hpp>
+#include <Systems/Render/DebugOverlaySystem.hpp>
+#include <Systems/Render/OverlayArbitrationSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Optimizations.hpp>
@@ -71,7 +72,6 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/System/Vector2.hpp>
-#include <imgui-SFML.h>
 #include <imgui.h>
 
 #include <algorithm>
@@ -117,30 +117,21 @@ void text_line( const std::string &str, sf::Color colour = sf::Color::White )
 
 } // namespace
 
-RenderDebugSystem::RenderDebugSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
-    : RenderSystem( reg, window, sound_bank ),
+DebugOverlaySystem::DebugOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
+    : BaseOverlaySystem( reg, window, sound_bank ),
       m_dbg_ui_data( std::make_unique<Render::UiData>( "res/ui/dbg.json" ) )
 {
-  SPDLOG_DEBUG( "RenderDebugSystem initialized" );
+  SPDLOG_DEBUG( "DebugOverlaySystem initialized" );
 }
 
-void RenderDebugSystem::render_debug( sf::Time dt )
+void DebugOverlaySystem::update( [[maybe_unused]] sf::Time dt )
 {
   if ( Utils::scene_setting<Cmp::SceneSettings::ShowNavmesh>( reg() ).enabled ) { PROFILED( render_navmesh() ); }
   if ( Utils::scene_setting<Cmp::SceneSettings::ShowPathFinding>( reg() ).enabled ) { PROFILED( render_pathfinding() ); }
-  const bool show_debug_stats = Utils::scene_setting<Cmp::SceneSettings::ShowDebugStats>( reg() ).enabled;
-  if ( show_debug_stats ) { PROFILED( render_debug_stats( dt ) ); }
-  else if ( m_debug_imgui_active )
-  {
-    // The event that switched the overlay off (F3) was forwarded to ImGui by SceneInputRouter while it was still on; pump one
-    // empty frame to consume it so it isn't replayed onto the menu widgets the next time a menu opens.
-    ImGui::SFML::Update( m_window, std::max( dt, sf::microseconds( 1 ) ) );
-    ImGui::SFML::Render( m_window );
-  }
-  m_debug_imgui_active = show_debug_stats;
+  if ( OverlayArbitrationSystem::debug_panels_visible( reg() ) ) { PROFILED( render_debug_stats() ); }
 }
 
-void RenderDebugSystem::render_navmesh()
+void DebugOverlaySystem::render_navmesh()
 {
   const auto npc_navmesh = m_npc_navmesh.lock();
   if ( not npc_navmesh ) return;
@@ -172,7 +163,7 @@ void RenderDebugSystem::render_navmesh()
   }
 }
 
-void RenderDebugSystem::render_pathfinding()
+void DebugOverlaySystem::render_pathfinding()
 {
   const Cmp::Position player_pos_cmp = Utils::Player::get_position( reg() );
   Cmp::Position player_center_hitbox( player_pos_cmp.getCenter(), { 1.f, 1.f } );
@@ -193,14 +184,13 @@ void RenderDebugSystem::render_pathfinding()
   }
 }
 
-void RenderDebugSystem::render_debug_stats( sf::Time dt )
+void DebugOverlaySystem::render_debug_stats()
 {
   // these debug shapes are only drawn within the current view to prevent FPS drops
   ZoneScopedN( "RenderDebugUI" );
 
-  // The debug panels are ImGui windows drawn on top of everything else; render_debug() is the last draw call in every scene.
-  // ImGui asserts on a non-positive DeltaTime, so never hand it a zero frame time.
-  ImGui::SFML::Update( m_window, std::max( dt, sf::microseconds( 1 ) ) );
+  // The debug panels are ImGui windows, drawn on top of everything else when OverlayArbitrationSystem renders the shared
+  // ImGui frame.
 
   // Transparent child/list/title backgrounds, so only the window's own (SetNextWindowBgAlpha) background shows through.
   constexpr std::array kTransparentCols{ ImGuiCol_ChildBg, ImGuiCol_FrameBg, ImGuiCol_TitleBg, ImGuiCol_TitleBgActive, ImGuiCol_TitleBgCollapsed };
@@ -209,7 +199,7 @@ void RenderDebugSystem::render_debug_stats( sf::Time dt )
     ImGui::PushStyleColor( col, ImVec4( 0.f, 0.f, 0.f, 0.f ) );
   }
 
-  // before the rectangles below, so a checkbox change applies this frame (ImGui only draws at ImGui::SFML::Render)
+  // before the rectangles below, so a checkbox change applies this frame (ImGui only draws when the shared frame is rendered)
   PROFILED( render_ui_highlight_options() );
 
   if ( m_highlights.lava_pit_cells ) render_square_for_floatrect_cmp<Cmp::Crypt::RoomLavaPitCell>( kLavaPitCellColour, 0.5f );
@@ -279,10 +269,9 @@ void RenderDebugSystem::render_debug_stats( sf::Time dt )
   PROFILED( render_ui_entity_inspect() );
 
   ImGui::PopStyleColor( static_cast<int>( kTransparentCols.size() ) );
-  ImGui::SFML::Render( m_window );
 }
 
-bool RenderDebugSystem::begin_debug_window( const char *title, std::string_view label_name, sf::Vector2f initial_size, bool start_collapsed )
+bool DebugOverlaySystem::begin_debug_window( const char *title, std::string_view label_name, sf::Vector2f initial_size, bool start_collapsed )
 {
   const sf::Vector2f window_size( m_window.getSize() );
   sf::Vector2f pos{ 0.f, 0.f };
@@ -306,7 +295,7 @@ bool RenderDebugSystem::begin_debug_window( const char *title, std::string_view 
   return ImGui::Begin( title, nullptr, ImGuiWindowFlags_NoFocusOnAppearing );
 }
 
-void RenderDebugSystem::render_ui_highlight_options()
+void DebugOverlaySystem::render_ui_highlight_options()
 {
   if ( begin_debug_window( "Highlights", "highlight_options", /*initial_size=*/{ 300.f, 300.f }, /*start_collapsed=*/true ) )
   {
@@ -345,7 +334,7 @@ void RenderDebugSystem::render_ui_highlight_options()
   ImGui::End();
 }
 
-void RenderDebugSystem::render_ui_misc_stats()
+void DebugOverlaySystem::render_ui_misc_stats()
 {
   if ( begin_debug_window( "Stats", "entity_stats", /*initial_size=*/{ 460.f, 260.f } ) )
   {
@@ -371,7 +360,7 @@ void RenderDebugSystem::render_ui_misc_stats()
   ImGui::End();
 }
 
-void RenderDebugSystem::render_ui_zorder_list()
+void DebugOverlaySystem::render_ui_zorder_list()
 {
   // clang-format off
   static const std::set<std::string, std::less<>> kExclusions = {
@@ -440,7 +429,7 @@ void RenderDebugSystem::render_ui_zorder_list()
   ImGui::End();
 }
 
-void RenderDebugSystem::render_ui_npc_list()
+void DebugOverlaySystem::render_ui_npc_list()
 {
   if ( begin_debug_window( "NPCs", "npc_list", /*initial_size=*/{ 300.f, 400.f }, /*start_collapsed=*/true ) )
   {
@@ -460,7 +449,7 @@ void RenderDebugSystem::render_ui_npc_list()
   ImGui::End();
 }
 
-void RenderDebugSystem::render_ui_entity_inspect()
+void DebugOverlaySystem::render_ui_entity_inspect()
 {
   if ( not begin_debug_window( "Inspect", "inspect_list", { 460.f, 500.f } ) )
   {
@@ -540,7 +529,7 @@ void RenderDebugSystem::render_ui_entity_inspect()
   ImGui::End();
 }
 
-void RenderDebugSystem::render_lerp_positions()
+void DebugOverlaySystem::render_lerp_positions()
 {
   auto lerp_view = reg().view<Cmp::LerpPosition, Cmp::Direction, Cmp::Npc::NPC, Cmp::Position>();
   for ( auto [entity, lerp_pos_cmp, dir_cmp, npc_cmp, npc_pos_cmp] : lerp_view.each() )
@@ -561,7 +550,7 @@ void RenderDebugSystem::render_lerp_positions()
   }
 }
 
-void RenderDebugSystem::render_square( sf::Vector2f pos, sf::Vector2f size, sf::Color color )
+void DebugOverlaySystem::render_square( sf::Vector2f pos, sf::Vector2f size, sf::Color color )
 {
   sf::RectangleShape rect( size );
   rect.setPosition( pos );
@@ -571,7 +560,7 @@ void RenderDebugSystem::render_square( sf::Vector2f pos, sf::Vector2f size, sf::
   draw_world( rect );
 }
 
-void RenderDebugSystem::render_spatial_grid_neighbours( const Cmp::Position &query_pos, sf::Color color, PathFinding::QueryCompass query_compass )
+void DebugOverlaySystem::render_spatial_grid_neighbours( const Cmp::Position &query_pos, sf::Color color, PathFinding::QueryCompass query_compass )
 {
   if ( PathFinding::SpatialHashGridSharedPtr spatialgrid_ptr = m_npc_navmesh.lock() )
   {
@@ -593,7 +582,7 @@ void RenderDebugSystem::render_spatial_grid_neighbours( const Cmp::Position &que
   }
 }
 
-void RenderDebugSystem::render_pathfinding_vector( const Cmp::Position &start_pos_cmp, const Cmp::Position &end_pos_cmp, sf::Color color,
+void DebugOverlaySystem::render_pathfinding_vector( const Cmp::Position &start_pos_cmp, const Cmp::Position &end_pos_cmp, sf::Color color,
                                                    PathFinding::QueryCompass query_compass, std::span<const sf::Vector2i> footprint_cells )
 {
   if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), start_pos_cmp ) ) return;

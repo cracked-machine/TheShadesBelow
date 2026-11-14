@@ -24,8 +24,8 @@ class RectBounds;
 namespace Game::Sys
 {
 
-//! @brief Base class for the game's render systems (RenderGameSystem, RenderMenuSystem, RenderOverlaySystem,
-//! RenderDebugSystem). Owns the shared world view
+//! @brief Base class for the game's render systems (RenderGameSystem, RenderMenuSystem and the overlays, see
+//! BaseOverlaySystem). Owns the shared world view
 //! and font, and provides common rendering primitives such as safe sprite rendering with fallback squares, text rendering, and
 //! world/screen coordinate conversion.
 class RenderSystem : public BaseSystem

@@ -82,10 +82,10 @@ private:
   //! @brief Process input while the pause overlay is shown. Gameplay is paused, so only P (resume), the volume sliders
   //!        (via ImGui) and the common window events are handled.
   void pause_overlay_input_handler();
-  //! @brief Check whether the current scene is paused (see Cmp::SceneSettings::Paused).
+  //! @brief Check whether the pause overlay is open (see OverlayArbitrationSystem::active_modal()).
   //! @return true if paused, false if not or the scene has no pause setting.
   bool is_paused();
-  //! @brief Trigger a PAUSE_TOGGLE player action.
+  //! @brief Trigger a PAUSE_TOGGLE overlay event.
   void toggle_pause();
 
   //! @brief Process input while the grimoire overlay is open. Gameplay is paused, so only the grimoire's own
@@ -101,12 +101,13 @@ private:
   //! @param event The polled window event
   void process_grimoire_wheel( const sf::Event &event );
 
-  //! @brief Forward the event to ImGui only while the debug stats overlay (an ImGui frame pumped by RenderDebugSystem) is shown.
+  //! @brief Forward the event to ImGui. Safe in gameplay scenes: OverlayArbitrationSystem pumps an ImGui frame every frame.
   //! @param event The polled window event
-  void forward_to_debug_imgui( const sf::Event &event );
-  //! @brief Check whether the mouse is over (or dragging) a debug overlay window, so gameplay should ignore mouse input.
-  //! @return true if the debug stats overlay is shown and ImGui wants the mouse
-  bool debug_ui_wants_mouse();
+  void forward_to_imgui( const sf::Event &event );
+  //! @brief Check whether the mouse is over (or dragging) an overlay window that takes input (e.g. the F3 debug panels),
+  //! so gameplay should ignore mouse input.
+  //! @return true if ImGui wants the mouse
+  static bool imgui_wants_mouse();
   //! @brief Check whether the event is a mouse button press/release or wheel scroll.
   //! @param event The polled window event
   //! @return true for mouse button and wheel events

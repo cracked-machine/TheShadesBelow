@@ -251,13 +251,13 @@ void add_flame_for_player_inventory_slot( entt::registry &reg );
 void add_flame_for_world_items( entt::registry &reg, const std::string &ps_tag );
 
 //! @brief Tag of the screen-space flames created by sync_flames_for_shop_inventory().
-//! @note Deliberately does not contain "torch": RenderOverlaySystem::render_ui_particles() pins
+//! @note Deliberately does not contain "torch": HudOverlaySystem::render_ui_particles() pins
 //! any screen-space "torch" sprite to the player inventory icon.
 inline const std::string kShopSlotFlameTag{ "ui.shopslot.particle.flame" };
 
 //! @brief Make the number of screen-space shop flames match the number of torches currently stocked in
 //! the shop inventory, creating or destroying flames as needed. Call whenever the shop stock changes.
-//! The flames are not bound to a slot or position: RenderOverlaySystem::render_shop_inventory_overlay()
+//! The flames are not bound to a slot or position: ShopOverlaySystem::update()
 //! hands one to each torch slot and positions it over the icon each frame.
 //! @param reg
 void sync_flames_for_shop_inventory( entt::registry &reg );

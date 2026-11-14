@@ -9,7 +9,7 @@ namespace Game::Events
 {
 
 //! @brief Notification that an altar refused an item because the player does not have enough anima to pay for it.
-//! @note Sent by Sys::AltarSystem when a talisman is offered without enough anima. See Sys::TooltipSystem.
+//! @note Sent by Sys::AltarSystem when a talisman is offered without enough anima. See Sys::TooltipOverlaySystem.
 struct InsufficientAnimaEvent
 {
   //! @brief Construct a new InsufficientAnimaEvent object

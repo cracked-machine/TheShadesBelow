@@ -25,14 +25,6 @@ struct PlayerActionEvent
     SELECT_POSITION,
     //! @brief Deselect the currently selected moveable obstacle.
     DESELECT_POSITION,
-    //! @brief Toggle the grimoire overlay open/closed.
-    GRIMOIRE_TOGGLE,
-    //! @brief Toggle the pause overlay on/off. Ignored while the grimoire is open.
-    PAUSE_TOGGLE,
-    //! @brief Go to the previous grimoire page. No-op if the grimoire is closed.
-    GRIMOIRE_PREV,
-    //! @brief Go to the next grimoire page. No-op if the grimoire is closed.
-    GRIMOIRE_NEXT,
     //! @brief Begin drawing/nocking the bow.
     DRAW_BOW,
     //! @brief Release the drawn bow, firing an arrow.

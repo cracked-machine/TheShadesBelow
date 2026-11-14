@@ -2,7 +2,6 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Direction.hpp>
 #include <Components/Exit.hpp>
-#include <Components/Inventory/Grimoire.hpp>
 #include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/Cadaver.hpp>
@@ -14,9 +13,7 @@
 #include <Components/Random.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SceneSettings/Footsteps.hpp>
-#include <Components/SceneSettings/Paused.hpp>
 #include <Components/SceneSettings/Shaders.hpp>
-#include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/SceneSettings/ShowNavmesh.hpp>
 #include <Components/SceneSettings/ShowPathFinding.hpp>
 #include <Components/Stats/BaseAction.hpp>
@@ -29,6 +26,7 @@
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/LightningEvent.hpp>
 #include <Events/LoadSettingsEvent.hpp>
+#include <Events/OverlayEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/SaveSettingsEvent.hpp>
@@ -50,6 +48,7 @@
 #include <SceneControl/SceneInputRouter.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
+#include <Systems/Render/OverlayArbitrationSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -130,9 +129,9 @@ void SceneInputRouter::graveyard_scene_state_handler()
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
   {
-    forward_to_debug_imgui( *event );
+    forward_to_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
-    if ( is_mouse_event( *event ) and debug_ui_wants_mouse() ) continue;
+    if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -180,7 +179,7 @@ void SceneInputRouter::graveyard_scene_state_handler()
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::SWAP_INVENTORY ) );
   }
-  if ( not debug_ui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not imgui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     // get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::DRAW_BOW ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::FORAGE ) );
@@ -201,9 +200,9 @@ void SceneInputRouter::crypt_scene_state_handler()
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
   {
-    forward_to_debug_imgui( *event );
+    forward_to_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
-    if ( is_mouse_event( *event ) and debug_ui_wants_mouse() ) continue;
+    if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -240,7 +239,7 @@ void SceneInputRouter::crypt_scene_state_handler()
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::SWAP_INVENTORY ) );
   }
-  if ( not debug_ui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not imgui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     // get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::DIG ) );
   }
@@ -257,9 +256,9 @@ void SceneInputRouter::healing_spring_scene_state_handler()
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
   {
-    forward_to_debug_imgui( *event );
+    forward_to_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
-    if ( is_mouse_event( *event ) and debug_ui_wants_mouse() ) continue;
+    if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -279,7 +278,7 @@ void SceneInputRouter::healing_spring_scene_state_handler()
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
     // get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::DROP_CARRYITEM ) );
   }
-  if ( not debug_ui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not imgui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ATTACK ) );
   }
@@ -296,9 +295,9 @@ void SceneInputRouter::shop_scene_state_handler()
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
   {
-    forward_to_debug_imgui( *event );
+    forward_to_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
-    if ( is_mouse_event( *event ) and debug_ui_wants_mouse() ) continue;
+    if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -323,7 +322,7 @@ void SceneInputRouter::shop_scene_state_handler()
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::SWAP_INVENTORY ) );
   }
-  if ( not debug_ui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not imgui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ATTACK ) );
   }
@@ -340,9 +339,9 @@ void SceneInputRouter::ruin_scene_state_handler()
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
   {
-    forward_to_debug_imgui( *event );
+    forward_to_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
-    if ( is_mouse_event( *event ) and debug_ui_wants_mouse() ) continue;
+    if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -370,7 +369,7 @@ void SceneInputRouter::ruin_scene_state_handler()
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::SELECT_POSITION ) );
   }
-  if ( not debug_ui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not imgui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ATTACK ) );
   }
@@ -415,11 +414,11 @@ void SceneInputRouter::level_complete_scene_state_handler()
 void SceneInputRouter::pause_overlay_input_handler()
 {
   // gameplay is paused, so only the pause overlay's own controls get through. The grimoire and the F3 debug keys are
-  // blocked: PauseOverlaySystem pumps the one ImGui frame allowed per frame while paused.
+  // blocked: no other modal overlay or the debug panels may open while paused (see OverlayArbitrationSystem).
   while ( const std::optional event = m_window.pollEvent() )
   {
-    // PauseOverlaySystem pumps an ImGui frame while paused (the volume sliders), so the events can go to ImGui
-    ImGui::SFML::ProcessEvent( m_window, *event );
+    // for the volume sliders
+    forward_to_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( const auto *keyPressed = event->getIf<sf::Event::KeyPressed>() )
     {
@@ -430,26 +429,23 @@ void SceneInputRouter::pause_overlay_input_handler()
 
 bool SceneInputRouter::is_paused()
 {
-  auto paused_view = reg().view<const Cmp::SceneSettings::Paused>();
-  if ( paused_view.empty() ) { return false; }
-  return paused_view.get<const Cmp::SceneSettings::Paused>( paused_view.front() ).enabled;
+  return Sys::OverlayArbitrationSystem::active_modal( reg() ) == Sys::OverlayArbitrationSystem::Modal::PAUSE;
 }
 
 void SceneInputRouter::toggle_pause()
 {
-  get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::PAUSE_TOGGLE ) );
+  get_systems_event_queue().trigger( Events::OverlayEvent( Events::OverlayEvent::OverlayActions::PAUSE_TOGGLE ) );
 }
 
 void SceneInputRouter::grimoire_overlay_input_handler()
 {
-  // gameplay is paused while the grimoire is open, so only the grimoire's own controls get through.
-  // P (pause) is blocked too: the pause overlay and the grimoire both pump the one ImGui frame allowed per frame.
-  // The F3 debug keys are not handled here either: the grimoire and the debug panels both pump the one ImGui frame
-  // allowed per frame, so they are never shown together (see GrimoireSystem::on_player_action).
+  // gameplay is paused while the grimoire is open, so only the grimoire's own controls get through. P (pause) and the
+  // F3 debug keys are blocked too: no other modal overlay or the debug panels may open while the grimoire is open
+  // (see OverlayArbitrationSystem).
   while ( const std::optional event = m_window.pollEvent() )
   {
-    // GrimoireSystem pumps an ImGui frame while the grimoire is open (its tab bar), so the events can go to ImGui
-    ImGui::SFML::ProcessEvent( m_window, *event );
+    // for the tab bar
+    forward_to_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
     process_grimoire_wheel( *event );
   }
@@ -458,24 +454,22 @@ void SceneInputRouter::grimoire_overlay_input_handler()
 
 bool SceneInputRouter::is_grimoire_open()
 {
-  auto grimoire_view = reg().view<const Cmp::Grimoire>();
-  if ( grimoire_view.empty() ) { return false; }
-  return grimoire_view.get<const Cmp::Grimoire>( grimoire_view.front() ).is_enabled;
+  return Sys::OverlayArbitrationSystem::active_modal( reg() ) == Sys::OverlayArbitrationSystem::Modal::GRIMOIRE;
 }
 
 void SceneInputRouter::process_grimoire_keys()
 {
   if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::G ) )
   {
-    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::GRIMOIRE_TOGGLE ) );
+    get_systems_event_queue().trigger( Events::OverlayEvent( Events::OverlayEvent::OverlayActions::GRIMOIRE_TOGGLE ) );
   }
   if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::Left ) )
   {
-    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::GRIMOIRE_PREV ) );
+    get_systems_event_queue().trigger( Events::OverlayEvent( Events::OverlayEvent::OverlayActions::GRIMOIRE_PREV ) );
   }
   if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::Right ) )
   {
-    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::GRIMOIRE_NEXT ) );
+    get_systems_event_queue().trigger( Events::OverlayEvent( Events::OverlayEvent::OverlayActions::GRIMOIRE_NEXT ) );
   }
 }
 
@@ -485,9 +479,9 @@ void SceneInputRouter::process_grimoire_wheel( const sf::Event &event )
   // scroll up/away for the previous grimoire page, down/towards for the next, like scrolling a document
   if ( wheelScrolled and wheelScrolled->wheel == sf::Mouse::Wheel::Vertical and wheelScrolled->delta != 0.f )
   {
-    const auto action = wheelScrolled->delta > 0.f ? Events::PlayerActionEvent::GameActions::GRIMOIRE_NEXT
-                                                   : Events::PlayerActionEvent::GameActions::GRIMOIRE_PREV;
-    get_systems_event_queue().trigger( Events::PlayerActionEvent( action ) );
+    const auto action = wheelScrolled->delta > 0.f ? Events::OverlayEvent::OverlayActions::GRIMOIRE_NEXT
+                                                   : Events::OverlayEvent::OverlayActions::GRIMOIRE_PREV;
+    get_systems_event_queue().trigger( Events::OverlayEvent( action ) );
   }
 }
 
@@ -506,17 +500,18 @@ void SceneInputRouter::process_move_keys()
   }
 }
 
-void SceneInputRouter::forward_to_debug_imgui( const sf::Event &event )
+void SceneInputRouter::forward_to_imgui( const sf::Event &event )
 {
-  // Paired with RenderDebugSystem, which pumps an ImGui frame only while ShowDebugStats is on. Forwarding at any other time
-  // would let events pile up in ImGui's queue (see comment in settings_scene_state_handler).
-  if ( Utils::scene_setting<Cmp::SceneSettings::ShowDebugStats>( reg() ).enabled ) { ImGui::SFML::ProcessEvent( m_window, event ); }
+  // OverlayArbitrationSystem pumps an ImGui frame every gameplay frame, so forwarded events never pile up in ImGui's
+  // queue (see comment in settings_scene_state_handler).
+  ImGui::SFML::ProcessEvent( m_window, event );
 }
 
-bool SceneInputRouter::debug_ui_wants_mouse()
+bool SceneInputRouter::imgui_wants_mouse()
 {
-  // WantCaptureMouse is left over from the last ImGui frame, so it is only meaningful while the debug windows are being pumped.
-  return Utils::scene_setting<Cmp::SceneSettings::ShowDebugStats>( reg() ).enabled and ImGui::GetIO().WantCaptureMouse;
+  // WantCaptureMouse is left over from the last ImGui frame, i.e. whether the mouse is over (or dragging) an overlay
+  // window that takes input, such as the F3 debug panels. The grimoire hover overlay never takes input.
+  return ImGui::GetIO().WantCaptureMouse;
 }
 
 bool SceneInputRouter::is_mouse_event( const sf::Event &event )
@@ -553,7 +548,10 @@ void SceneInputRouter::try_handle_debug_key( [[maybe_unused]] sf::Keyboard::Scan
   using namespace sf::Keyboard;
   if ( scancode == Scancode::F1 ) { toggle_setting<Cmp::SceneSettings::CollisionDetection>( "Collisions are" ); }
   else if ( scancode == Scancode::F2 ) { toggle_setting<Cmp::SceneSettings::ShowPathFinding>( "Show pathfinding is" ); }
-  else if ( scancode == Scancode::F3 ) { toggle_setting<Cmp::SceneSettings::ShowDebugStats>( "Show debug stats is" ); }
+  else if ( scancode == Scancode::F3 )
+  {
+    get_systems_event_queue().trigger( Events::OverlayEvent( Events::OverlayEvent::OverlayActions::DEBUG_TOGGLE ) );
+  }
   else if ( scancode == Scancode::F4 ) { toggle_setting<Cmp::SceneSettings::ShowNavmesh>( "Show navmesh is" ); }
   else if ( scancode == Scancode::F9 ) { toggle_setting<Cmp::SceneSettings::Shaders>( "Shaders are" ); }
   else if ( scancode == Scancode::F10 ) { toggle_setting<Cmp::SceneSettings::Footsteps>( "Footsteps are" ); }

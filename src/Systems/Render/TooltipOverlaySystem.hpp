@@ -1,5 +1,5 @@
-#ifndef SRC_SYSTEMS_RENDER_TOOLTIPSYSTEM_HPP__
-#define SRC_SYSTEMS_RENDER_TOOLTIPSYSTEM_HPP__
+#ifndef SRC_SYSTEMS_RENDER_TOOLTIPOVERLAYSYSTEM_HPP__
+#define SRC_SYSTEMS_RENDER_TOOLTIPOVERLAYSYSTEM_HPP__
 
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/CryptEntryRefusedEvent.hpp>
@@ -8,7 +8,7 @@
 #include <Events/InsufficientAnimaEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/TalismanRefusedEvent.hpp>
-#include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Render/BaseOverlaySystem.hpp>
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Time.hpp>
@@ -29,22 +29,19 @@ namespace Game::Sys
 //! A repeating ("always") tooltip never replaces an active one-time ("once") tooltip, so a notification raised in the
 //! same frame as a tutorial (e.g. picking up an item) cannot hide it. A tooltip's text may contain "{item}", which is
 //! replaced by the display name of the item carried by the triggering event.
-class TooltipSystem : public RenderSystem
+class TooltipOverlaySystem : public BaseOverlaySystem
 {
 public:
   //! @brief Construct a new Tooltip System object and load res/json/tooltips.json
   //! @param reg
   //! @param window
   //! @param sound_bank
-  TooltipSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
+  TooltipOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
-  //! @brief Process the reset request, evaluate pending candidates and count down the active tooltip.
-  //! @note Call from each gameplay scene's do_update(), so the countdown stops while the game is paused.
+  //! @brief Process the reset request, evaluate pending candidates, count down the active tooltip and draw it.
+  //! @note OverlayArbitrationSystem skips this while the game is paused, so the countdown stops too.
   //! @param dt the frame delta time
-  void update( sf::Time dt );
-
-  //! @brief Draw the active tooltip panel (if any) in screen space. Call after RenderOverlaySystem::render_overlay().
-  void render();
+  void update( sf::Time dt ) override;
 
   //! @brief Record a candidate for tooltips triggered by "AddInventoryEvent".
   //! @param event
@@ -75,6 +72,9 @@ public:
   void on_dismiss_tooltip_event( [[maybe_unused]] const Events::DismissTooltipEvent &event ) { m_active.reset(); }
 
 private:
+  //! @brief Draw the active tooltip panel (if any) in screen space.
+  void render();
+
   //! @brief How often a tooltip may be shown
   enum class Frequency {
     //! @brief Shown the first time only, tracked in Cmp::Persist::TooltipsSeen
@@ -184,4 +184,4 @@ private:
 
 } // namespace Game::Sys
 
-#endif // SRC_SYSTEMS_RENDER_TOOLTIPSYSTEM_HPP__
+#endif // SRC_SYSTEMS_RENDER_TOOLTIPOVERLAYSYSTEM_HPP__

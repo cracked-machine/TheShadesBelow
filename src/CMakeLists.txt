@@ -59,15 +59,18 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/ProcGen/DowsingGuideSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ProcGen/TrailGuideSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderSystem.cpp
-    ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderDebugSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderGameSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderMenuSystem.cpp
-    ${CMAKE_SOURCE_DIR}/src/Systems/Render/RenderOverlaySystem.cpp
-    ${CMAKE_SOURCE_DIR}/src/Systems/Render/TooltipSystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/BaseOverlaySystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/DebugOverlaySystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/GrimoireOverlaySystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/HudOverlaySystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/OverlayArbitrationSystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/PauseOverlaySystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/ShopOverlaySystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/TooltipOverlaySystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/UiData.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/ZOrderQueue.cpp
-    ${CMAKE_SOURCE_DIR}/src/Systems/Render/GrimoireSystem.cpp
-    ${CMAKE_SOURCE_DIR}/src/Systems/Render/PauseOverlaySystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/AnimSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/BaseSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/ActionSystem.cpp

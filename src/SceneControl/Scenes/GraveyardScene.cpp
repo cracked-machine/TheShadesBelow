@@ -79,13 +79,11 @@
 #include <Systems/ProcGen/DowsingGuideSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/ProcGen/TrailGuideSystem.hpp>
-#include <Systems/Render/GrimoireSystem.hpp>
 #include <Systems/Render/PauseOverlaySystem.hpp>
-#include <Systems/Render/RenderDebugSystem.hpp>
+#include <Systems/Render/DebugOverlaySystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
-#include <Systems/Render/RenderOverlaySystem.hpp>
+#include <Systems/Render/OverlayArbitrationSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
-#include <Systems/Render/TooltipSystem.hpp>
 #include <Systems/RuinSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
@@ -301,8 +299,7 @@ void GraveyardScene::do_update( sf::Time dt )
   ZoneScoped;
 
   // the grimoire and the pause overlay pause gameplay: the world is still drawn, but nothing in it advances
-  auto &pause_overlay = m_sys.find<Sys::Store::Type::PauseOverlaySystem>();
-  const bool paused = pause_overlay.is_paused() or m_sys.find<Sys::Store::Type::GrimoireSystem>().is_grimoire_overlay_open();
+  const bool paused = Sys::OverlayArbitrationSystem::active_modal( m_reg ) != Sys::OverlayArbitrationSystem::Modal::NONE;
   const sf::Time world_dt = paused ? sf::Time::Zero : dt;
 
   // clamp the step: the first frame after a level loads has a dt covering the whole load (several seconds),
@@ -384,20 +381,8 @@ void GraveyardScene::do_update( sf::Time dt )
   }
 
   PROFILED( m_sys.find<Sys::Store::Type::RenderGameSystem>().render_game( world_dt ) );
-  PROFILED( m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_overlay( world_dt ) );
-  PROFILED( m_sys.find<Sys::Store::Type::RenderOverlaySystem>().render_level_depth() );
-  if ( not paused )
-  {
-    PROFILED( m_sys.find<Sys::Store::Type::TooltipSystem>().update( dt ) );
-    PROFILED( m_sys.find<Sys::Store::Type::TooltipSystem>().render() );
-  }
-  // real dt even while paused, so the grimoire's debounce timers still run and it can be closed/paged.
-  // No grimoire hover overlay while paused: the pause overlay pumps the one ImGui frame allowed per frame.
-  PROFILED( m_sys.find<Sys::Store::Type::GrimoireSystem>().update( dt ) );
-  PROFILED( m_sys.find<Sys::Store::Type::GrimoireSystem>().render( dt, /*allow_hover=*/not pause_overlay.is_paused() ) );
-  // the debug panels are hidden while paused: both pump the one ImGui frame allowed per frame
-  PROFILED( pause_overlay.render( dt ) );
-  if ( not pause_overlay.is_paused() ) { PROFILED( m_sys.find<Sys::Store::Type::RenderDebugSystem>().render_debug( dt ) ); }
+  // HUD, shop, tooltip, grimoire, pause and debug overlays, in one shared ImGui frame. Real dt even while paused, for ImGui.
+  PROFILED( m_sys.find<Sys::Store::Type::OverlayArbitrationSystem>().update( dt, world_dt ) );
 }
 
 void GraveyardScene::reinit_system_spatial_maps()
@@ -412,7 +397,7 @@ void GraveyardScene::reinit_system_spatial_maps()
   m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
   m_sys.find<Sys::Store::Type::WormholeSystem>().init( m_generic_npc_navmesh, m_reserved_sm );
-  m_sys.find<Sys::Store::Type::RenderDebugSystem>().init( m_generic_npc_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::DebugOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::WatchmanSystem>().init( m_reserved_sm );
   m_sys.find<Sys::Store::Type::SinkHoleHazardSystem>().init( m_reserved_sm );
   m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().init( m_reserved_sm );
