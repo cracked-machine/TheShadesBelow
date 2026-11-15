@@ -499,7 +499,7 @@ void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, 
     {
       reg().emplace_or_replace<Cmp::Inventory::BlastProof>( item_entt );
       light_torch_loot( item_entt );
-    } ) );
+    }, /*sting=*/true, /*auto_pickup=*/true ) );
     const auto spawn_action = Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), selected_item_type );
     play_action_sfx( spawn_action );
     trigger_side_effects( spawn_action, bounds );
@@ -507,7 +507,8 @@ void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, 
   }
 
   get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ), selected_item_type, "drop_loot", 0.f, false, 0,
-                                                              entt::null, [this]( entt::entity item_entt ) { light_torch_loot( item_entt ); } ) );
+                                                              entt::null, [this]( entt::entity item_entt ) { light_torch_loot( item_entt ); },
+                                                              /*sting=*/true, /*auto_pickup=*/true ) );
   const auto spawn_action = Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), selected_item_type );
   play_action_sfx( spawn_action );
   trigger_side_effects( spawn_action, Utils::Player::get_position( reg() ) );
@@ -539,7 +540,7 @@ void GraveSystem::finish_trail( entt::entity grave_entity )
   const Cmp::Position bounds = grave_bounds( grave_entity );
   get_systems_event_queue().trigger( Events::CreateItemEvent( bounds, kExitKey, "drop_loot", 0.f, true, 0, entt::null,
                                                               [this]( entt::entity item_entt )
-  { reg().emplace_or_replace<Cmp::Inventory::BlastProof>( item_entt ); } ) );
+  { reg().emplace_or_replace<Cmp::Inventory::BlastProof>( item_entt ); }, /*sting=*/true, /*auto_pickup=*/true ) );
   const auto spawn_action = Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), kExitKey );
   play_action_sfx( spawn_action );
   trigger_side_effects( spawn_action, bounds );

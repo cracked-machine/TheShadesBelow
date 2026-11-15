@@ -240,12 +240,13 @@ void PlantSystem::forage_plant()
     Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
                                            plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
 
-    // the forage is dropped next to the plant: the inventory may be occupied
+    // the forage is dropped next to the plant: the inventory may be occupied. It is a reward for the player, so it may be
+    // picked up straight into an empty slot (Cmp::Persist::AutoPickupDrops)
     if ( forage_reward->target == Cmp::ActionReward::Target::DEFAULT )
     {
       get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( find_forage_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
                                                                   Sys::ItemStore::instance().pick_item( forage_reward->item ), "drop_loot", 0.f,
-                                                                  false, 0, entt::null, {}, not wearing_gloves ) );
+                                                                  false, 0, entt::null, {}, not wearing_gloves, /*auto_pickup=*/true ) );
     }
     else { grant_item_reward( *forage_reward, plant_bounds, plant_entt ); }
     play_action_sfx( forage_sfx );

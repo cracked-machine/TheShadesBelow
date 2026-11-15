@@ -11,6 +11,7 @@
 #include <Components/Stats/PlayerStats.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <Systems/Stores/StoreKey.hpp>
+#include <optional>
 #include <source_location>
 
 namespace Game::Cmp
@@ -167,6 +168,12 @@ uint8_t get_selected_slot_idx( entt::registry &reg );
 //! @param idx The slot index.
 //! @return entt::entity The slot entity, or entt::null if there is no slot with that index.
 entt::entity get_inventory_slot_entt( entt::registry &reg, uint8_t idx );
+
+//! @brief Get the index of the first empty inventory slot, in slot order. A slot whose entity doesn't exist yet counts
+//! as empty (see Factory::Player::ensure_inventory_slots()).
+//! @param reg The registry.
+//! @return std::optional<uint8_t> The slot index, or std::nullopt if every slot holds an item.
+std::optional<uint8_t> get_first_empty_slot_idx( entt::registry &reg );
 
 //! @brief Get the selected inventory slot entity, whether it is empty or not.
 //! @param reg reference to the entt registry

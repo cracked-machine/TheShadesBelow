@@ -104,7 +104,20 @@ void InventorySystem::on_drop_inventory_event( [[maybe_unused]] Events::DropInve
   drop_inventory_item( player_pos, inventory_entt );
 }
 
-void InventorySystem::on_pickup_world_item_event( Events::PickupWorldItemEvent ev ) { pickup_world_item( reg(), ev.world_item_entt ); }
+void InventorySystem::on_pickup_world_item_event( Events::PickupWorldItemEvent ev )
+{
+  if ( not ev.to_empty_slot )
+  {
+    pickup_world_item( reg(), ev.world_item_entt );
+    return;
+  }
+
+  // queued from the drop, so the item may have gone (e.g. picked up or destroyed) and the slots may have filled since
+  if ( not reg().valid( ev.world_item_entt ) or not reg().all_of<Cmp::WorldItem>( ev.world_item_entt ) ) return;
+  const auto slot_idx = Utils::Player::get_first_empty_slot_idx( reg() );
+  if ( not slot_idx ) return; // every slot is full, so it stays on the ground
+  pickup_world_item( reg(), ev.world_item_entt, slot_idx );
+}
 
 void InventorySystem::on_select_inventory_slot_event( const Events::SelectInventorySlotEvent &ev )
 {

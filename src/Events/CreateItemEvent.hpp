@@ -25,9 +25,11 @@ struct CreateItemEvent
   //! @param source_entt The dropping world item, or entt::null if there is none (then unlimited).
   //! @param on_created Optional callback receiving the newly created world item entity. Not called when skipped or if creation fails.
   //! @param sting false: never add a Cmp::Inventory::StingDamage, e.g. the item was foraged with gloves.
+  //! @param auto_pickup true: a reward for the player, picked up into an empty inventory slot when
+  //! Cmp::Persist::AutoPickupDrops is on.
   explicit CreateItemEvent( Cmp::Position pos, Sys::ItemKey item, std::string sfx = "", float zorder = 0.f, bool spawn_nearby = false,
                             int max_instances = 0, entt::entity source_entt = entt::null, std::function<void( entt::entity )> on_created = {},
-                            bool sting = true )
+                            bool sting = true, bool auto_pickup = false )
       : m_pos( pos ),
         m_item( std::move( item ) ),
         m_sfx( std::move( sfx ) ),
@@ -36,7 +38,8 @@ struct CreateItemEvent
         m_max_instances( max_instances ),
         m_source_entt( source_entt ),
         m_on_created( std::move( on_created ) ),
-        m_sting( sting )
+        m_sting( sting ),
+        m_auto_pickup( auto_pickup )
   {
   }
 
@@ -58,6 +61,9 @@ struct CreateItemEvent
   std::function<void( entt::entity )> m_on_created;
   //! @brief false: never add a Cmp::Inventory::StingDamage, see Cmp::WorldItem::stings().
   bool m_sting{ true };
+  //! @brief true: a reward for the player (e.g. grave loot), picked up into the first empty inventory slot when
+  //! Cmp::Persist::AutoPickupDrops is on; left on the ground if every slot is full. See Sys::ItemSystem.
+  bool m_auto_pickup{ false };
 };
 
 } // namespace Game::Events

@@ -9,6 +9,7 @@
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
 #include <Components/Persistent/ArtefactMinChance.hpp>
+#include <Components/Persistent/AutoPickupDrops.hpp>
 #include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/AxeObstacleDigWear.hpp>
 #include <Components/Persistent/AxePotSmashWear.hpp>
@@ -292,6 +293,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::InventorySwapCooldown>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::InventorySlotCount>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::InventorySlotRollover>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::AutoPickupDrops>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::StowedTorchLit>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerMovementSpeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::TachycardiaMovementSpeed>( reg() ).render_widget();

@@ -300,6 +300,11 @@
     "value": false,
     "detail": "Inventory slot selection wraps around"
   },
+  "AutoPickupDrops": {
+    "type": "bool",
+    "value": false,
+    "detail": "Auto pick up reward drops into an empty inventory slot"
+  },
   "PlayerRenderOffset": {
     "type": "float",
     "value": -4.0,

@@ -9,17 +9,21 @@
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
+#include <Components/Persistent/AutoPickupDrops.hpp>
 #include <Components/Position.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/DestroyitemEvent.hpp>
+#include <Events/PickupWorldItemEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/ItemFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SFML/Audio/Sound.hpp>
 #include <Systems/ItemSystem.hpp>
+#include <Systems/PersistSystem.hpp>
+#include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Constants.hpp>
@@ -85,6 +89,15 @@ void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev )
   // 4. post-creation tagging
   if ( is_curse_tablet ) { Factory::Item::add_curse_tablet( reg(), item_entt, ev.m_item, sprite_idx ); }
   if ( ev.m_on_created ) { ev.m_on_created( item_entt ); }
+
+  // 5. a reward for the player goes straight into an empty slot, if the setting allows. Done last so on_created's
+  // bindings (e.g. a torch's flame, a summoning offering) are on the item to be carried over. Enqueued, as the caller
+  // may still be iterating registry views; InventorySystem picks the slot then, or leaves the item on the ground
+  if ( ev.m_auto_pickup and Sys::PersistSystem::get<Cmp::Persist::AutoPickupDrops>( reg() ).get_value() and
+       not reg().all_of<Cmp::PlantMultiBlock>( item_entt ) )
+  {
+    get_systems_event_queue().enqueue( Events::PickupWorldItemEvent{ item_entt, /*to_empty_slot=*/true } );
+  }
 }
 
 void ItemSystem::on_destroy_item_event( Game::Events::DestroyItemEvent ev )

@@ -273,7 +273,7 @@ void AltarSystem::offering_for_item( const Cmp::Altar::MultiBlock &altar_cmp, co
   {
     get_systems_event_queue().trigger( Events::CreateItemEvent( Utils::Player::get_position( reg() ),
                                                                 Sys::ItemStore::instance().pick_item( reward.item ), "drop_loot", 0.f, false, 0,
-                                                                entt::null, on_created ) );
+                                                                entt::null, on_created, /*sting=*/true, /*auto_pickup=*/true ) );
     return;
   }
   grant_item_reward( reward, Cmp::Position( altar_cmp.position, altar_cmp.size ), entt::null, on_created );

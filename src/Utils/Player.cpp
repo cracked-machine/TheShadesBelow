@@ -294,6 +294,17 @@ entt::entity get_inventory_slot_entt( entt::registry &reg, uint8_t idx )
   return entt::null;
 }
 
+std::optional<uint8_t> get_first_empty_slot_idx( entt::registry &reg )
+{
+  const auto count = get_inventory_slot_count( reg );
+  for ( uint8_t idx = 0; idx < count; ++idx )
+  {
+    const auto slot_entt = get_inventory_slot_entt( reg, idx );
+    if ( slot_entt == entt::null or reg.get<Cmp::PlayerInventorySlot>( slot_entt ).empty() ) return idx;
+  }
+  return std::nullopt;
+}
+
 entt::entity get_selected_slot_entt( entt::registry &reg ) { return get_inventory_slot_entt( reg, get_selected_slot_idx( reg ) ); }
 
 std::tuple<entt::entity, Sys::ItemKey, Sys::SpriteKey> get_inventory( entt::registry &reg )

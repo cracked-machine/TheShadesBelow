@@ -9,6 +9,9 @@ struct PickupWorldItemEvent
 {
   //! @brief The world item entity to pick up.
   entt::entity world_item_entt;
+  //! @brief true: pick it up into the first empty slot, or leave it on the ground if every slot is full (see
+  //! Cmp::Persist::AutoPickupDrops). false: into the selected slot, dropping anything already in it.
+  bool to_empty_slot{ false };
 };
 
 } // namespace Game::Events
