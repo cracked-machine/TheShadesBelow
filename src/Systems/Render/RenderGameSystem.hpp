@@ -56,7 +56,6 @@ struct AnimData;
 class WorldItem;
 } // namespace Game::Cmp
 
-namespace Game::Cmp::Altar { class TalismanCount; }
 namespace Game::Cmp::Hazard { struct SinkholeCorners; }
 
 namespace Game::Cmp::Npc { struct Burryman; struct Crow; }
@@ -170,12 +169,6 @@ private:
   //! @param scale The player's Cmp::AbsoluteScale (without any mirroring); multiplied by Cmp::Persist::HeldItemScale.
   //! @param alpha The player's alpha, so the item fades with the player.
   void render_held_item( const sf::FloatRect &body_rect, sf::Vector2f facing, sf::Vector2f scale, uint8_t alpha );
-
-  //! @brief Draw every talisman of an altar (offered or not) at its slot in the altar's `talisman_offsets`.
-  //! @param talisman_cmp The altar's talismans; each one's index picks its offset.
-  //! @param anim_cmp The altar's current sprite, used to find its inactive variant, which holds the offsets.
-  //! @param body_rect The altar's on-screen bounds.
-  void render_altar_talismans( const Cmp::Altar::TalismanCount &talisman_cmp, const Cmp::AnimData &anim_cmp, const sf::FloatRect &body_rect );
 
   //! @brief Draw a small wear-level bar above an item, filled proportionally to `wearlevel`.
   //! @param wearlevel

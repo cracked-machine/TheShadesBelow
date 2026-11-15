@@ -4,7 +4,7 @@
 namespace Game::Cmp
 {
 
-//! @brief Signals to the Render system to flash the UI for player anima, e.g. when a talisman is refused for lack of anima
+//! @brief Signals to the Render system to flash the UI for player anima, e.g. when an altar activation is refused for lack of anima
 //! @note This is destroyed by the Render system.
 class FlashUIAnima
 {

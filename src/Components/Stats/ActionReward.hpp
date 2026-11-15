@@ -4,6 +4,7 @@
 //! @file
 //! @brief The optional reward of an action (see BaseAction::rewards()).
 
+#include <Components/Altar/ArtefactGroup.hpp>
 #include <Components/Altar/Kind.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
@@ -35,11 +36,11 @@ struct ActionReward
   enum class AltarEffect {
     //! @brief No altar effect.
     NONE,
-    //! @brief Light an altar talisman.
-    TALISMAN,
+    //! @brief Light the graveyard altar corner of the artefact's group (see artefact_group).
+    ARTEFACT,
     //! @brief Banish all ghosts (witches jar).
     BANISH,
-    //! @brief Gain an extra life, respawning the player when they die (witches jar, nightshade).
+    //! @brief Gain an extra life, respawning the player when they die (witches jar at the crypt altar).
     EXTRA_LIFE,
     //! @brief Exchange the offered exit key for the crypt key (any graveyard altar, costs the offering's anima).
     CRYPT_KEY,
@@ -53,6 +54,8 @@ struct ActionReward
   int wealth{ 0 };
   //! @brief The altar effect. NONE if unused.
   AltarEffect altar{ AltarEffect::NONE };
+  //! @brief The artefact group, "group" in items.json. Set if and only if altar is ARTEFACT.
+  std::optional<Altar::ArtefactGroup> artefact_group;
   //! @brief The kind of altar this reward is granted at (offering_action only). std::nullopt means any altar.
   std::optional<Altar::Kind> location;
   //! @brief How long (seconds) a timed altar effect lasts, e.g. TOXIC_IMMUNITY (offering_action only). Zero if unused.

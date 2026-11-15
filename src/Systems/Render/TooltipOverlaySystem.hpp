@@ -2,17 +2,22 @@
 #define SRC_SYSTEMS_RENDER_TOOLTIPOVERLAYSYSTEM_HPP__
 
 #include <Events/AddInventoryEvent.hpp>
+#include <Events/AltarActivationAnimaEvent.hpp>
+#include <Events/AltarApproachedEvent.hpp>
+#include <Events/ArtefactRefusedEvent.hpp>
 #include <Events/CryptEntryRefusedEvent.hpp>
 #include <Events/DismissTooltipEvent.hpp>
 #include <Events/GrimoireDiscoveryEvent.hpp>
 #include <Events/InsufficientAnimaEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
-#include <Events/TalismanRefusedEvent.hpp>
 #include <Systems/Render/BaseOverlaySystem.hpp>
 
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
+
+#include <nlohmann/json_fwd.hpp>
 
 #include <optional>
 #include <set>
@@ -22,7 +27,8 @@
 namespace Game::Sys
 {
 
-//! @brief Displays data-driven help messages (res/json/tooltips.json) in a screen-space panel in front of the game.
+//! @brief Displays data-driven help messages (res/json/tooltips.json) in a panel in front of the game. Each tooltip's
+//! "position" places the panel at a fixed point on screen, or above the world object that triggered it (e.g. an altar).
 //! @details Listens to game events without consuming them. Event handlers only record a candidate; candidates are
 //! evaluated in update(), which runs in the next scene update, so every other handler for the event has already
 //! run and game state is up to date, regardless of the dispatcher's handler order.
@@ -59,9 +65,17 @@ public:
   //! @param event
   void on_insufficient_anima_event( const Events::InsufficientAnimaEvent &event );
 
-  //! @brief Record a candidate for tooltips triggered by "TalismanRefusedEvent".
+  //! @brief Record a candidate for tooltips triggered by "ArtefactRefusedEvent".
   //! @param event
-  void on_talisman_refused_event( const Events::TalismanRefusedEvent &event );
+  void on_artefact_refused_event( const Events::ArtefactRefusedEvent &event );
+
+  //! @brief Record a candidate for tooltips triggered by "AltarActivationAnimaEvent".
+  //! @param event
+  void on_altar_activation_anima_event( [[maybe_unused]] const Events::AltarActivationAnimaEvent &event );
+
+  //! @brief Record a candidate for tooltips triggered by "AltarApproachedEvent".
+  //! @param event
+  void on_altar_approached_event( [[maybe_unused]] const Events::AltarApproachedEvent &event );
 
   //! @brief Record a candidate for tooltips triggered by "CryptEntryRefusedEvent".
   //! @param event
@@ -85,16 +99,27 @@ private:
     DISABLED
   };
 
+  //! @brief Where a tooltip's panel is drawn, "position" in res/json/tooltips.json
+  struct TooltipPosition
+  {
+    //! @brief true for "above_source": centred above the world bounds carried by the triggering event, following the
+    //! camera. Falls back to `screen` if the event carries no bounds.
+    bool above_source{ false };
+    //! @brief panel centre as a fraction of the display resolution
+    sf::Vector2f screen{ 0.5f, 0.85f };
+  };
+
   //! @brief A tooltip definition from res/json/tooltips.json
   struct TooltipDef
   {
     //! @brief unique id, stored in Cmp::Persist::TooltipsSeen
     std::string id;
     //! @brief name of the event that triggers this tooltip, e.g. "AddInventoryEvent", "ItemPickedUpEvent",
-    //! "GrimoireDiscoveryEvent", "InsufficientAnimaEvent", "TalismanRefusedEvent" or "CryptEntryRefusedEvent"
+    //! "GrimoireDiscoveryEvent", "InsufficientAnimaEvent", "ArtefactRefusedEvent", "AltarActivationAnimaEvent",
+    //! "AltarApproachedEvent" or "CryptEntryRefusedEvent"
     std::string trigger;
     //! @brief optional item key condition, empty matches any item. A trailing '*' matches any item key with that
-    //! prefix, e.g. "item.talisman*"
+    //! prefix, e.g. "item.artefact*"
     std::string item;
     //! @brief the message to display
     std::string text;
@@ -102,6 +127,8 @@ private:
     Frequency frequency{ Frequency::ONCE };
     //! @brief how long the tooltip is displayed for
     sf::Time duration{ sf::seconds( 5.f ) };
+    //! @brief where the panel is drawn
+    TooltipPosition position;
   };
 
   //! @brief An event occurrence recorded by an event handler, waiting to be evaluated by update()
@@ -111,6 +138,8 @@ private:
     std::string trigger;
     //! @brief item key carried by the event, if any
     std::string item;
+    //! @brief world bounds of the object that raised the event, if any (see TooltipPosition::above_source)
+    std::optional<sf::FloatRect> source_bounds{};
   };
 
   //! @brief The tooltip currently being displayed
@@ -122,13 +151,15 @@ private:
     sf::Time remaining;
     //! @brief the frequency of the definition being displayed, see update()
     Frequency frequency;
+    //! @brief where the panel is drawn
+    TooltipPosition position;
+    //! @brief world bounds of the object that raised the event, if any
+    std::optional<sf::FloatRect> source_bounds;
   };
 
   //! @brief Panel style from res/json/tooltips.json
   struct PanelStyle
   {
-    //! @brief panel centre as a fraction of the display resolution
-    sf::Vector2f position{ 0.5f, 0.85f };
     //! @brief font size in pixels
     unsigned int font_size{ 24 };
     //! @brief space between the text and the panel border in pixels
@@ -156,6 +187,16 @@ private:
   //! @param candidate
   //! @return const TooltipDef* the matching definition, or nullptr
   const TooltipDef *find_match( const Candidate &candidate ) const;
+
+  //! @brief Read a tooltip's "position": an {"x", "y"} screen fraction or "above_source".
+  //! @param entry the tooltip's json object
+  //! @return std::optional<TooltipPosition> the position (the default if omitted), or std::nullopt if malformed
+  static std::optional<TooltipPosition> parse_position( const nlohmann::json &entry );
+
+  //! @brief The panel centre in window pixels for the active tooltip.
+  //! @param panel_size the panel size in pixels
+  //! @param display_size the display resolution
+  sf::Vector2f panel_centre( sf::Vector2f panel_size, sf::Vector2f display_size ) const;
 
   //! @brief Get the definition's text with "{item}" replaced by the display name of the candidate's item.
   //! @param def

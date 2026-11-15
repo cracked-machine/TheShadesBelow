@@ -1,5 +1,6 @@
 
 
+#include <Components/Persistent/AltarActivationAnimaCost.hpp>
 #include <Components/Persistent/AltarOfferingCooldown.hpp>
 #include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
 #include <Components/Persistent/ArmedBlinkFreq.hpp>
@@ -7,6 +8,7 @@
 #include <Components/Persistent/ArmedBlockColourFill.hpp>
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
+#include <Components/Persistent/ArtefactMinChance.hpp>
 #include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/AxeObstacleDigWear.hpp>
 #include <Components/Persistent/AxePotSmashWear.hpp>
@@ -29,8 +31,8 @@
 #include <Components/Persistent/CorruptionDamage.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
-#include <Components/Persistent/CryptVariantOverride.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
+#include <Components/Persistent/CryptVariantOverride.hpp>
 #include <Components/Persistent/DespairHealthDmgPerSec.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
@@ -47,9 +49,9 @@
 #include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveCountMargin.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
+#include <Components/Persistent/GraveOddsArtefact.hpp>
 #include <Components/Persistent/GraveOddsBombTrap.hpp>
 #include <Components/Persistent/GraveOddsCurseTablet.hpp>
-#include <Components/Persistent/GraveOddsJewelry.hpp>
 #include <Components/Persistent/GraveOddsNpcTrap.hpp>
 #include <Components/Persistent/GraveOddsTalisman.hpp>
 #include <Components/Persistent/GraveOddsTorch.hpp>
@@ -62,7 +64,6 @@
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
 #include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
-#include <Components/Persistent/StowedTorchLit.hpp>
 #include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
@@ -79,6 +80,7 @@
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
+#include <Components/Persistent/LuckDropRate.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
@@ -142,17 +144,16 @@
 #include <Components/Persistent/ShovelObstacleDigWear.hpp>
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
-#include <Components/Persistent/StatChangeDisplayDuration.hpp>
-#include <Components/Persistent/LuckDropRate.hpp>
 #include <Components/Persistent/StartingAnima.hpp>
 #include <Components/Persistent/StartingDespair.hpp>
 #include <Components/Persistent/StartingFear.hpp>
 #include <Components/Persistent/StartingHealth.hpp>
 #include <Components/Persistent/StartingInfamy.hpp>
 #include <Components/Persistent/StartingLuck.hpp>
+#include <Components/Persistent/StatChangeDisplayDuration.hpp>
+#include <Components/Persistent/StowedTorchLit.hpp>
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/TachycardiaMovementSpeed.hpp>
-#include <Components/Persistent/TalismanMinChance.hpp>
 #include <Components/Persistent/TooltipsSeen.hpp>
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
@@ -239,12 +240,12 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::GraveTrailNominalHopCount>();
   add_component<Cmp::Persist::GraveTrailStartCount>();
   add_component<Cmp::Persist::MaxLevelDepth>();
-  add_component<Cmp::Persist::TalismanMinChance>();
+  add_component<Cmp::Persist::ArtefactMinChance>();
   add_component<Cmp::Persist::GraveOddsCurseTablet>();
   add_component<Cmp::Persist::GraveOddsBombTrap>();
   add_component<Cmp::Persist::GraveOddsTorch>();
   add_component<Cmp::Persist::GraveOddsNpcTrap>();
-  add_component<Cmp::Persist::GraveOddsJewelry>();
+  add_component<Cmp::Persist::GraveOddsArtefact>();
   add_component<Cmp::Persist::GraveOddsTalisman>();
   add_component<Cmp::Persist::GraveCountMargin>();
   add_component<Cmp::Persist::GraveTrailGuideColour>();
@@ -260,6 +261,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::AzazelFireballSpeed>();
   add_component<Cmp::Persist::AzazelFireballArc>();
   add_component<Cmp::Persist::AzazelFireballColour>();
+  add_component<Cmp::Persist::AltarActivationAnimaCost>();
   add_component<Cmp::Persist::AltarOfferingCooldown>();
   add_component<Cmp::Persist::AltarSummonOfferingCooldown>();
   add_component<Cmp::Persist::LightningDamage>();

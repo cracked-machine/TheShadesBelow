@@ -1,6 +1,7 @@
 #ifndef SRC_COMPONENTS_INVENTORY_WORLDITEM_HPP__
 #define SRC_COMPONENTS_INVENTORY_WORLDITEM_HPP__
 
+#include <Components/Altar/ArtefactGroup.hpp>
 #include <Components/Altar/Kind.hpp>
 #include <Components/Random.hpp>
 #include <Components/Stats/ActionSet.hpp>
@@ -160,6 +161,10 @@ public:
   //! @param location The kind of altar the item is offered at.
   //! @return The reward, or std::nullopt if the item can't be offered at that kind of altar.
   std::optional<ActionReward> get_offering_reward( Altar::Kind location ) const;
+
+  //! @brief The artefact group of this item ("offering_action.reward.group" in items.json, graveyard altar only).
+  //! @return The group, or std::nullopt if the item is not an artefact.
+  std::optional<Altar::ArtefactGroup> get_artefact_group() const;
 
   //! @brief The npc spawn effect for offering this item at the altar ("side_effects.spawn_npc" in items.json).
   //! @return The reward, or std::nullopt if the item can't be offered.

@@ -6,7 +6,6 @@
 #include <Components/AbsoluteScale.hpp>
 #include <Components/AbsoluteTint.hpp>
 #include <Components/Altar/MultiBlock.hpp>
-#include <Components/Altar/TalismanCount.hpp>
 #include <Components/Altar/TrailGuide.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Armed.hpp>
@@ -333,7 +332,6 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
   if ( const auto *burryman_cmp = reg().try_get<Cmp::Npc::Burryman>( entity ) ) render_carried_items( *burryman_cmp, body_rect );
   if ( const auto *crow_cmp = reg().try_get<Cmp::Npc::Crow>( entity ) ) render_carried_items( *crow_cmp, body_rect );
   // if ( is_player and not held_item_behind ) render_held_item( body_rect, facing, held_item_scale, alpha );
-  if ( const auto *talisman_cmp = reg().try_get<Cmp::Altar::TalismanCount>( entity ) ) render_altar_talismans( *talisman_cmp, anim_cmp, body_rect );
 }
 
 void RenderGameSystem::draw_shader_sprite( Cmp::Shader::SpriteOwner &shader_owner )
@@ -629,25 +627,6 @@ void RenderGameSystem::render_held_item( const sf::FloatRect &body_rect, sf::Vec
     // the origin is the sprite centre, so the item is scaled and tilted in place
     safe_render_sprite_world( anim_cmp->m_sprite_type, sf::FloatRect( body_rect.position + offset, Constants::kGridSizePxF ), 0, scale, alpha,
                               Constants::kGridSizePxF / 2.f, rotation );
-  }
-}
-
-void RenderGameSystem::render_altar_talismans( const Cmp::Altar::TalismanCount &talisman_cmp, const Cmp::AnimData &anim_cmp,
-                                               const sf::FloatRect &body_rect )
-{
-  // the altar may be lit by an extra life, but its talisman offsets are defined on the inactive sprite
-  const auto
-      &talisman_offsets = Sys::SpriteStore::instance().get( Factory::Altar::get_altar_sprite( anim_cmp.m_sprite_type, false ) ).talisman_offsets();
-
-  // talismans are always shown, offered or not; iteration order matches TalismanCount::index()
-  std::size_t idx = 0;
-  for ( const auto &[talisman_key, activated] : talisman_cmp )
-  {
-    if ( idx >= talisman_offsets.size() ) break;
-    safe_render_sprite_world( Factory::Altar::get_altar_talisman_sprite( talisman_key ),
-                              sf::FloatRect( body_rect.position + talisman_offsets[idx], Constants::kGridSizePxF ),
-                              Sys::ItemStore::instance().get( talisman_key ).icon_sprite_index() );
-    ++idx;
   }
 }
 

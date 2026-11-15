@@ -73,9 +73,17 @@
     "detail": "Axe wear: killing skeleton",
     "format": "%.1f"
   },
+  "AltarActivationAnimaCost": {
+    "type": "int",
+    "value": 40,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Altar Activation Anima Cost",
+    "format": "%d"
+  },
   "AltarOfferingCooldown": {
     "type": "float",
-    "value": 1.5,
+    "value": 0.5,
     "min_value": 0.0,
     "max_value": 10.0,
     "detail": "Altar Offering Cooldown",
@@ -491,12 +499,12 @@
     "detail": "Max Level Depth",
     "format": "%d"
   },
-  "TalismanMinChance": {
+  "ArtefactMinChance": {
     "type": "int",
     "value": 10,
     "min_value": 1,
     "max_value": 50,
-    "detail": "Talisman Min Chance",
+    "detail": "Artefact Min Chance",
     "format": "%d%%"
   },
   "GraveOddsCurseTablet": {
@@ -531,17 +539,17 @@
     "detail": "NPC",
     "format": "%d"
   },
-  "GraveOddsJewelry": {
+  "GraveOddsArtefact": {
     "type": "int",
     "value": 50,
     "min_value": 0,
     "max_value": 100,
-    "detail": "Jewel",
+    "detail": "Artefact",
     "format": "%d"
   },
   "GraveOddsTalisman": {
     "type": "int",
-    "value": 50,
+    "value": 10,
     "min_value": 0,
     "max_value": 100,
     "detail": "Talisman",

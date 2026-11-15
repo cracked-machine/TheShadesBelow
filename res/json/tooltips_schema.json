@@ -24,16 +24,6 @@
       "type": "object",
       "description": "Style of the screen-space tooltip panel",
       "properties": {
-        "position": {
-          "type": "object",
-          "description": "Panel centre as a fraction of the display resolution",
-          "properties": {
-            "x": {"type": "number", "minimum": 0, "maximum": 1},
-            "y": {"type": "number", "minimum": 0, "maximum": 1}
-          },
-          "required": ["x", "y"],
-          "additionalProperties": false
-        },
         "font_size": {"type": "integer", "minimum": 1},
         "padding": {"type": "number", "minimum": 0},
         "fill_colour": {"$ref": "#/definitions/colour"},
@@ -48,7 +38,7 @@
         "type": "object",
         "properties": {
           "id": {"type": "string", "description": "Unique id, stored in persist.json TooltipsSeen"},
-          "trigger": {"type": "string", "enum": ["AddInventoryEvent", "ItemPickedUpEvent", "GrimoireDiscoveryEvent", "InsufficientAnimaEvent", "TalismanRefusedEvent", "CryptEntryRefusedEvent"], "description": "Event that triggers the tooltip"},
+          "trigger": {"type": "string", "enum": ["AddInventoryEvent", "ItemPickedUpEvent", "GrimoireDiscoveryEvent", "InsufficientAnimaEvent", "ArtefactRefusedEvent", "AltarActivationAnimaEvent", "AltarApproachedEvent", "CryptEntryRefusedEvent"], "description": "Event that triggers the tooltip"},
           "condition": {
             "type": "object",
             "properties": {
@@ -57,6 +47,25 @@
             "additionalProperties": false
           },
           "text": {"type": "string", "description": "Message to display. \"{item}\" is replaced by the display name of the item carried by the triggering event"},
+          "position": {
+            "description": "Where the panel is drawn. Defaults to {\"x\": 0.5, \"y\": 0.85}",
+            "oneOf": [
+              {
+                "type": "object",
+                "description": "Panel centre as a fraction of the display resolution",
+                "properties": {
+                  "x": {"type": "number", "minimum": 0, "maximum": 1},
+                  "y": {"type": "number", "minimum": 0, "maximum": 1}
+                },
+                "required": ["x", "y"],
+                "additionalProperties": false
+              },
+              {
+                "const": "above_source",
+                "description": "Centred above the world object that raised the event (e.g. the altar), following the camera. Falls back to the default if the event carries no object"
+              }
+            ]
+          },
           "frequency": {"type": "string", "enum": ["once", "always", "disabled"]},
           "duration_s": {"type": "number", "exclusiveMinimum": 0, "description": "Seconds the tooltip is displayed for"}
         },

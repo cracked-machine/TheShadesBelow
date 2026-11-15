@@ -1,6 +1,6 @@
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Altar/Segment.hpp>
-#include <Components/Altar/TalismanCount.hpp>
+#include <Components/Altar/ArtefactCount.hpp>
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/BuildingSegment.hpp>
 #include <Components/Crypt/InteriorMultiBlock.hpp>
@@ -25,20 +25,20 @@
 #include <Components/Npc/Footprint.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/ObstacleCap.hpp>
+#include <Components/Persistent/ArtefactMinChance.hpp>
 #include <Components/Persistent/GraveCountMargin.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
-#include <Components/Persistent/GraveTrailNominalHopCount.hpp>
-#include <Components/Persistent/MaxLevelDepth.hpp>
-#include <Components/Persistent/MinNumHealingSprings.hpp>
-#include <Components/Persistent/NumAltars.hpp>
-#include <Components/Persistent/MinNumRuins.hpp>
+#include <Components/Persistent/GraveOddsArtefact.hpp>
 #include <Components/Persistent/GraveOddsBombTrap.hpp>
 #include <Components/Persistent/GraveOddsCurseTablet.hpp>
-#include <Components/Persistent/GraveOddsJewelry.hpp>
 #include <Components/Persistent/GraveOddsNpcTrap.hpp>
 #include <Components/Persistent/GraveOddsTalisman.hpp>
 #include <Components/Persistent/GraveOddsTorch.hpp>
-#include <Components/Persistent/TalismanMinChance.hpp>
+#include <Components/Persistent/GraveTrailNominalHopCount.hpp>
+#include <Components/Persistent/MaxLevelDepth.hpp>
+#include <Components/Persistent/MinNumHealingSprings.hpp>
+#include <Components/Persistent/MinNumRuins.hpp>
+#include <Components/Persistent/NumAltars.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/LevelDepth.hpp>
@@ -491,7 +491,8 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
 {
   // const size_t grave_num_multiplier = Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() ).get_value();
   // only one altar can be activated at a time, so more altars mean less backtracking, not more graves (see below)
-  const auto max_num_altars = static_cast<size_t>( std::max( 1, static_cast<int>( Sys::PersistSystem::get<Cmp::Persist::NumAltars>( reg() ).get_value() ) ) );
+  const auto max_num_altars = static_cast<size_t>(
+      std::max( 1, static_cast<int>( Sys::PersistSystem::get<Cmp::Persist::NumAltars>( reg() ).get_value() ) ) );
   const size_t max_num_crypts = 1;
   const auto &min_num_healing_springs = Sys::PersistSystem::get<Cmp::Persist::MinNumHealingSprings>( reg() );
   const auto &min_num_ruins = Sys::PersistSystem::get<Cmp::Persist::MinNumRuins>( reg() );
@@ -511,11 +512,10 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
   const auto &altar1_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.altar.inactive" );
   auto altar_mb_entts = spawn_multiblocks<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( max_num_altars, altar1_spritesheet,
                                                                                         /*log=*/true, kMinBuildingSpacingCells );
-  // each altar draws its own talismans, so the sets may overlap between altars
   for ( auto entt : altar_mb_entts )
   {
-    reg().emplace_or_replace<Cmp::Altar::TalismanCount>(
-        entt, Sys::ItemStore::instance().pick_distinct_items( "item.talisman*", Cmp::Altar::TalismanCount::kAltarTalismanCount ) );
+    // every altar takes one artefact of each group
+    reg().emplace_or_replace<Cmp::Altar::ArtefactCount>( entt );
   }
 
   // CRYPTS - one crypt serves every grave trail's crypt key, whichever altar started it
@@ -545,9 +545,9 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
     // sized per cadaver part, not per altar: each part takes one altar activation and one trail, whichever altar is used.
     // Sized for the longest trail of the run, at the deepest level
     const auto max_level_depth = static_cast<size_t>( std::max( 1, Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value() ) );
-    const size_t altar_activation_count = Cmp::Altar::TalismanCount::kAltarTalismanCount;
-    // trail graves skip their consequence, so each altar activation's talismans are dug from graves off the trail.
-    // Sized for the worst case: the talisman chance never drops below Cmp::Persist::TalismanMinChance
+    const size_t altar_activation_count = Cmp::Altar::ArtefactCount::size();
+    // trail graves skip their consequence, so each altar activation's artefacts are dug from graves off the trail.
+    // Sized for the worst case: the artefact chance never drops below Cmp::Persist::ArtefactMinChance
     // the odds line is fixed per level, so settings changes take effect from the next level
     using Slot = Cmp::Grave::Consequence::Slot;
     using ConsequenceType = Cmp::Grave::Consequence::Type;
@@ -556,27 +556,27 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
         Slot{ .type = ConsequenceType::BOMB_TRAP, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsBombTrap>( reg() ).get_value() },
         Slot{ .type = ConsequenceType::TORCH, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsTorch>( reg() ).get_value() },
         Slot{ .type = ConsequenceType::NPC_TRAP, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsNpcTrap>( reg() ).get_value() },
-        Slot{ .type = ConsequenceType::JEWELRY, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsJewelry>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::ARTEFACT, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsArtefact>( reg() ).get_value() },
         Slot{ .type = ConsequenceType::TALISMAN, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsTalisman>( reg() ).get_value() },
     } );
-    // Consequence caps the floor at the talisman band width, so size for the capped value
-    int max_talisman_floor_pct = Cmp::Grave::Consequence::max_talisman_floor_pct( consequence_line );
-    if ( max_talisman_floor_pct < 1 )
+    // Consequence caps the floor at the artefact band width, so size for the capped value
+    int max_artefact_floor_pct = Cmp::Grave::Consequence::max_artefact_floor_pct( consequence_line );
+    if ( max_artefact_floor_pct < 1 )
     {
-      SPDLOG_WARN( "Grave odds leave no band for talismans (width {}): the talisman min chance cannot be guaranteed", max_talisman_floor_pct );
-      max_talisman_floor_pct = 1;
+      SPDLOG_WARN( "Grave odds leave no band for artefacts (width {}): the artefact min chance cannot be guaranteed", max_artefact_floor_pct );
+      max_artefact_floor_pct = 1;
     }
-    const int min_talisman_chance_pct = std::clamp( Sys::PersistSystem::get<Cmp::Persist::TalismanMinChance>( reg() ).get_value(), 1,
-                                                    max_talisman_floor_pct );
-    const auto min_talisman_chance = static_cast<size_t>( min_talisman_chance_pct );
-    const size_t talisman_graves = ( altar_activation_count * 100 + min_talisman_chance - 1 ) / min_talisman_chance;
+    const int min_artefact_chance_pct = std::clamp( Sys::PersistSystem::get<Cmp::Persist::ArtefactMinChance>( reg() ).get_value(), 1,
+                                                    max_artefact_floor_pct );
+    const auto min_artefact_chance = static_cast<size_t>( min_artefact_chance_pct );
+    const size_t artefact_graves = ( altar_activation_count * 100 + min_artefact_chance - 1 ) / min_artefact_chance;
     const size_t trail_graves = ( trail_size + max_level_depth ) * exit_and_crypt_key_multiplier + trail_start_count;
-    const size_t base_num_graves = ( trail_graves + talisman_graves ) * max_cadaver_count;
-    // the talisman graves above are only the average needed, and bombs blast graves open, so add a margin on top
+    const size_t base_num_graves = ( trail_graves + artefact_graves ) * max_cadaver_count;
+    // the artefact graves above are only the average needed, and bombs blast graves open, so add a margin on top
     const auto margin_pct = static_cast<size_t>( std::max( 0, Sys::PersistSystem::get<Cmp::Persist::GraveCountMargin>( reg() ).get_value() ) );
     const size_t required_num_graves = ( base_num_graves * ( 100 + margin_pct ) + 99 ) / 100;
-    SPDLOG_INFO( "Graves required: {} = ({} trail + {} talisman per cadaver part) x {} parts + {}% margin", required_num_graves, trail_graves,
-                 talisman_graves, max_cadaver_count, margin_pct );
+    SPDLOG_INFO( "Graves required: {} = ({} trail + {} artefact per cadaver part) x {} parts + {}% margin", required_num_graves, trail_graves,
+                 artefact_graves, max_cadaver_count, margin_pct );
 
     std::map<Cmp::Grave::Consequence::Type, int> grave_consequences_distribution;
     std::size_t placed_num_graves = 0;
@@ -593,8 +593,8 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
           reg(), pos->position, spritesheet, index, 0, m_reserved_sm.get() );
       m_reserved_sm->insert( mb_entt, pos.value() );
       // fix the roll at creation; the consequence is resolved against the player's current luck when needed
-      auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 100 ).gen(), min_talisman_chance_pct,
-                                                                              consequence_line );
+      auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 100 ).gen(), min_artefact_chance_pct,
+                                                                             consequence_line );
       // simulate the rolls now to get an idea of the distribution with game start player luck
       grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck() )]++;
       placed_num_graves++;

@@ -9,11 +9,11 @@ namespace Game::Events
 {
 
 //! @brief Notification that an altar refused an item because the player does not have enough anima to pay for it.
-//! @note Sent by Sys::AltarSystem when a talisman is offered without enough anima. See Sys::TooltipOverlaySystem.
+//! @note Sent by Sys::AltarSystem when an item with an anima cost (e.g. the exit key) is offered without enough anima. See Sys::TooltipOverlaySystem.
 struct InsufficientAnimaEvent
 {
   //! @brief Construct a new InsufficientAnimaEvent object
-  //! @param item Item identifier of the refused item, e.g. "item.talisman1". See res/json/items.json.
+  //! @param item Item identifier of the refused item, e.g. "item.exitkey". See res/json/items.json.
   explicit InsufficientAnimaEvent( Sys::ItemKey item )
       : m_item( std::move( item ) )
   {

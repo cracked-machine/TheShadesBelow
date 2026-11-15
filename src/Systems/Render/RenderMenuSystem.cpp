@@ -1,5 +1,6 @@
 
 
+#include <Components/Persistent/AltarActivationAnimaCost.hpp>
 #include <Components/Persistent/AltarOfferingCooldown.hpp>
 #include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
 #include <Components/Persistent/ArmedBlinkFreq.hpp>
@@ -7,6 +8,7 @@
 #include <Components/Persistent/ArmedBlockColourFill.hpp>
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
+#include <Components/Persistent/ArtefactMinChance.hpp>
 #include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/AxeObstacleDigWear.hpp>
 #include <Components/Persistent/AxePotSmashWear.hpp>
@@ -29,8 +31,8 @@
 #include <Components/Persistent/CorruptionDamage.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
-#include <Components/Persistent/CryptVariantOverride.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
+#include <Components/Persistent/CryptVariantOverride.hpp>
 #include <Components/Persistent/DespairHealthDmgPerSec.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
@@ -47,9 +49,9 @@
 #include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveCountMargin.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
+#include <Components/Persistent/GraveOddsArtefact.hpp>
 #include <Components/Persistent/GraveOddsBombTrap.hpp>
 #include <Components/Persistent/GraveOddsCurseTablet.hpp>
-#include <Components/Persistent/GraveOddsJewelry.hpp>
 #include <Components/Persistent/GraveOddsNpcTrap.hpp>
 #include <Components/Persistent/GraveOddsTalisman.hpp>
 #include <Components/Persistent/GraveOddsTorch.hpp>
@@ -71,14 +73,14 @@
 #include <Components/Persistent/HeldItemRotationWest.hpp>
 #include <Components/Persistent/HeldItemScale.hpp>
 #include <Components/Persistent/HeldItemSideOffsetX.hpp>
+#include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/InventorySlotCount.hpp>
 #include <Components/Persistent/InventorySlotRollover.hpp>
 #include <Components/Persistent/InventorySwapCooldown.hpp>
-#include <Components/Persistent/StowedTorchLit.hpp>
-#include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
+#include <Components/Persistent/LuckDropRate.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/MinNumHealingSprings.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
@@ -138,17 +140,16 @@
 #include <Components/Persistent/ShovelObstacleDigWear.hpp>
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
-#include <Components/Persistent/StatChangeDisplayDuration.hpp>
-#include <Components/Persistent/LuckDropRate.hpp>
 #include <Components/Persistent/StartingAnima.hpp>
 #include <Components/Persistent/StartingDespair.hpp>
 #include <Components/Persistent/StartingFear.hpp>
 #include <Components/Persistent/StartingHealth.hpp>
 #include <Components/Persistent/StartingInfamy.hpp>
 #include <Components/Persistent/StartingLuck.hpp>
+#include <Components/Persistent/StatChangeDisplayDuration.hpp>
+#include <Components/Persistent/StowedTorchLit.hpp>
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/TachycardiaMovementSpeed.hpp>
-#include <Components/Persistent/TalismanMinChance.hpp>
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
 #include <Components/Persistent/ToxicImmunityMeterTint.hpp>
@@ -314,9 +315,9 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     ImGui::TextDisabled( "applied at the start of every level" );
     {
       const std::array<Cmp::Persist::BasePersistent<int> *, 6> starting_stats{
-          &Sys::PersistSystem::get<Cmp::Persist::StartingHealth>( reg() ), &Sys::PersistSystem::get<Cmp::Persist::StartingFear>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::StartingHealth>( reg() ),  &Sys::PersistSystem::get<Cmp::Persist::StartingFear>( reg() ),
           &Sys::PersistSystem::get<Cmp::Persist::StartingDespair>( reg() ), &Sys::PersistSystem::get<Cmp::Persist::StartingInfamy>( reg() ),
-          &Sys::PersistSystem::get<Cmp::Persist::StartingLuck>( reg() ),   &Sys::PersistSystem::get<Cmp::Persist::StartingAnima>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::StartingLuck>( reg() ),    &Sys::PersistSystem::get<Cmp::Persist::StartingAnima>( reg() ),
       };
       render_vslider_row( starting_stats );
     }
@@ -384,6 +385,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::AzazelFireballSpeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AzazelFireballArc>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AzazelFireballColour>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::AltarActivationAnimaCost>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AltarOfferingCooldown>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AltarSummonOfferingCooldown>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::EmberDamage>( reg() ).render_widget();
@@ -473,7 +475,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalHopCount>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailStartCount>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::TalismanMinChance>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::ArtefactMinChance>( reg() ).render_widget();
 
     // Grave consequence odds line, one vertical slider per consequence, worst (0) to best (100)
     ImGui::TextUnformatted( "Grave Consequence Odds" );
@@ -482,7 +484,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
       const std::array<Cmp::Persist::BasePersistent<int> *, 6> odds_settings{
           &Sys::PersistSystem::get<Cmp::Persist::GraveOddsCurseTablet>( reg() ), &Sys::PersistSystem::get<Cmp::Persist::GraveOddsBombTrap>( reg() ),
           &Sys::PersistSystem::get<Cmp::Persist::GraveOddsTorch>( reg() ),       &Sys::PersistSystem::get<Cmp::Persist::GraveOddsNpcTrap>( reg() ),
-          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsJewelry>( reg() ),     &Sys::PersistSystem::get<Cmp::Persist::GraveOddsTalisman>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsArtefact>( reg() ),    &Sys::PersistSystem::get<Cmp::Persist::GraveOddsTalisman>( reg() ),
       };
       render_vslider_row( odds_settings );
     }

@@ -2041,11 +2041,11 @@
         }
       }
     },
-    "sprite.altar.talisman": {
+    "sprite.item.artefact.treasure": {
       "spritesheet": {
-        "displayname": "Talisman",
-        "texture_path": "res/textures/landmarks.png",
-        "sprite_indices": [540, 541, 542, 543, 544, 545, 546, 547, 548, 549],
+        "displayname": "Artefact: Treasure",
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [120, 121, 122, 123],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
@@ -2053,7 +2053,46 @@
           "y": 1
         }
       }
-    },    
+    },
+    "sprite.item.artefact.likeness": {
+      "spritesheet": {
+        "displayname": "Artefact: Likeness",
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [130, 131, 132, 133],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.artefact.name": {
+      "spritesheet": {
+        "displayname": "Artefact: Name",
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [140, 141, 142, 143],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.item.artefact.words": {
+      "spritesheet": {
+        "displayname": "Artefact: Words",
+        "texture_path": "res/textures/inventoryitems.png",
+        "sprite_indices": [150, 151, 152, 153],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },   
     "sprite.item.rottenfood": {
       "spritesheet": {
         "displayname": "Rotten Substance",

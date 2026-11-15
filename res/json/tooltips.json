@@ -1,7 +1,6 @@
 {
   "enabled": true,
   "panel": {
-    "position": { "x": 0.5, "y": 0.85 },
     "font_size": 24,
     "padding": 12,
     "fill_colour": { "r": 0, "g": 0, "b": 0, "a": 180 },
@@ -14,6 +13,7 @@
       "trigger": "AddInventoryEvent",
       "condition": { "item": "item.pickaxe" },
       "text": "You carry a pickaxe. Use it to dig through obstacles.\nPress <Enter> to dismiss.",
+      "position": { "x": 0.5, "y": 0.85 },
       "frequency": "once",
       "duration_s": 6.0
     },
@@ -22,6 +22,7 @@
       "trigger": "ItemPickedUpEvent",
       "condition": { "item": "item.witchesbroom" },
       "text": "A witch's broom! Use it to fly.\nDon't drop it mid-flight.",
+      "position": { "x": 0.5, "y": 0.85 },
       "frequency": "once",
       "duration_s": 6.0
     },
@@ -29,6 +30,7 @@
       "id": "grimoire_updated",
       "trigger": "GrimoireDiscoveryEvent",
       "text": "Grimoire updated: {item}\nPress <G> to open the grimoire.",
+      "position": { "x": 0.5, "y": 0.85 },
       "frequency": "always",
       "duration_s": 4.0
     },
@@ -37,21 +39,31 @@
       "trigger": "InsufficientAnimaEvent",
       "condition": { "item": "item.exitkey" },
       "text": "The exit key can only be offered when you have anima.\nOffer or eat plants to gain anima.",
+      "position": { "x": 0.5, "y": 0.85 },
       "frequency": "always",
       "duration_s": 4.0
     },
     {
-      "id": "talisman_no_anima",
-      "trigger": "InsufficientAnimaEvent",
-      "condition": { "item": "item.talisman*" },
-      "text": "A talisman can only be activated when you have anima.\nOffer or eat plants to gain anima.",
+      "id": "altar_approach",
+      "trigger": "AltarApproachedEvent",
+      "text": "Bring me the dead: their treasure, their face, their name, their words.",
+      "position": "above_source",
       "frequency": "always",
-      "duration_s": 4.0
+      "duration_s": 5.0
     },
     {
-      "id": "talisman_trail_in_progress",
-      "trigger": "TalismanRefusedEvent",
+      "id": "altar_no_anima",
+      "trigger": "AltarActivationAnimaEvent",
+      "text": "The roots drink from the dead. Bring me what they have taken.",
+      "position": "above_source",
+      "frequency": "always",
+      "duration_s": 5.0
+    },
+    {
+      "id": "artefact_trail_in_progress",
+      "trigger": "ArtefactRefusedEvent",
       "text": "An altar has already been activated.\nComplete its grave trail before activating another altar.",
+      "position": "above_source",
       "frequency": "always",
       "duration_s": 4.0
     },
@@ -59,6 +71,7 @@
       "id": "crypt_all_cadavers",
       "trigger": "CryptEntryRefusedEvent",
       "text": "You have already collected every cadaver part.\nThis crypt holds nothing more for you.",
+      "position": { "x": 0.5, "y": 0.85 },
       "frequency": "always",
       "duration_s": 4.0
     }

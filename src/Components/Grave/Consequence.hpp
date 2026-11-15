@@ -17,11 +17,12 @@ public:
     NPC_TRAP = 1,
     //! @brief Spawns a bomb trap from the grave.
     BOMB_TRAP,
-    //! @brief Drops jewelry loot.
-    JEWELRY,
+    //! @brief Drops an artefact that the nearest graveyard altar still needs. Its band is the guaranteed floor, see
+    //! Cmp::Persist::ArtefactMinChance.
+    ARTEFACT,
     //! @brief Drops a curse tablet
     CURSE_TABLET,
-    //! @brief Drops a talisman that an altar takes.
+    //! @brief Drops a talisman.
     TALISMAN,
     //! @brief Drops a torch item.
     TORCH
@@ -53,25 +54,22 @@ public:
     return slots;
   }
 
-  //! @brief Lowest and highest skewed values that always resolve to the talisman group, whatever the luck tie-break
-  [[nodiscard]] static int talisman_low_edge( const Line &line ) { return band_edges( line, Type::TALISMAN )[0]; }
-  [[nodiscard]] static int talisman_high_edge( const Line &line ) { return band_edges( line, Type::TALISMAN )[1]; }
+  //! @brief Lowest and highest skewed values that always resolve to the artefact group, whatever the luck tie-break
+  [[nodiscard]] static int artefact_low_edge( const Line &line ) { return band_edges( line, Type::ARTEFACT )[0]; }
+  [[nodiscard]] static int artefact_high_edge( const Line &line ) { return band_edges( line, Type::ARTEFACT )[1]; }
 
-  //! @brief The largest talisman floor the line can guarantee: the width of the talisman group's band. Can be 0 or
-  //! less when the neighbouring slots squeeze the talisman band to nothing.
-  [[nodiscard]] static int max_talisman_floor_pct( const Line &line )
-  {
-    return talisman_high_edge( line ) - talisman_low_edge( line ) + 1;
-  }
+  //! @brief The largest artefact floor the line can guarantee: the width of the artefact group's band. Can be 0 or
+  //! less when the neighbouring slots squeeze the artefact band to nothing.
+  [[nodiscard]] static int max_artefact_floor_pct( const Line &line ) { return artefact_high_edge( line ) - artefact_low_edge( line ) + 1; }
 
   //! @param roll Fixed roll in the range [0, 100], decided once at level gen
-  //! @param min_talisman_chance_pct Lowest chance (percent) of a talisman however bad the player's luck, from
-  //! Cmp::Persist::TalismanMinChance at level gen. Capped at max_talisman_floor_pct().
+  //! @param min_artefact_chance_pct Lowest chance (percent) of an artefact however bad the player's luck, from
+  //! Cmp::Persist::ArtefactMinChance at level gen. Capped at max_artefact_floor_pct().
   //! @param line The odds line at level gen, see make_line(). Kept so later setting changes only affect new levels.
-  Consequence( int roll, int min_talisman_chance_pct, const Line &line )
+  Consequence( int roll, int min_artefact_chance_pct, const Line &line )
       : m_line( line ),
         m_roll( roll ),
-        m_min_talisman_chance_pct( std::clamp( min_talisman_chance_pct, 0, std::max( 0, max_talisman_floor_pct( line ) ) ) )
+        m_min_artefact_chance_pct( std::clamp( min_artefact_chance_pct, 0, std::max( 0, max_artefact_floor_pct( line ) ) ) )
   {
   }
 
@@ -81,9 +79,9 @@ public:
   [[nodiscard]] Type roll( int player_luck ) const
   {
     // luck skews the roll towards the good (high) or bad (low) end of the line. The downward skew is limited so the
-    // top m_min_talisman_chance_pct rolls still land in the talisman band.
-    const int talisman_floor_offset = talisman_low_edge( m_line ) + m_min_talisman_chance_pct - 1 - 100;
-    const int offset = std::max( player_luck - 50, talisman_floor_offset );
+    // top m_min_artefact_chance_pct rolls still land in the artefact band.
+    const int artefact_floor_offset = artefact_low_edge( m_line ) + m_min_artefact_chance_pct - 1 - 100;
+    const int offset = std::max( player_luck - 50, artefact_floor_offset );
     const int skewed = std::clamp( m_roll + offset, 0, 100 );
     const bool lucky = player_luck >= 50;
     // compare doubled values so the halfway point stays an integer
@@ -112,16 +110,16 @@ private:
   }
 
   //! @brief Choose one type from the group [first, last]. A single slot is returned as is. Rolls protected by the
-  //! talisman floor always get the talisman, so the floor still holds; other rolls pick by the grave's fixed roll.
+  //! artefact floor always get the artefact, so the floor still holds; other rolls pick by the grave's fixed roll.
   [[nodiscard]] Type pick( std::size_t first, std::size_t last ) const
   {
     if ( first == last ) return m_line[first].type;
-    const bool floor_protected = m_min_talisman_chance_pct > 0 and m_roll > 100 - m_min_talisman_chance_pct;
+    const bool floor_protected = m_min_artefact_chance_pct > 0 and m_roll > 100 - m_min_artefact_chance_pct;
     if ( floor_protected )
     {
       for ( std::size_t i = first; i <= last; ++i )
       {
-        if ( m_line[i].type == Type::TALISMAN ) return Type::TALISMAN;
+        if ( m_line[i].type == Type::ARTEFACT ) return Type::ARTEFACT;
       }
     }
     const auto group_size = static_cast<int>( last - first + 1 );
@@ -148,7 +146,7 @@ private:
 
   Line m_line;
   int m_roll;
-  int m_min_talisman_chance_pct;
+  int m_min_artefact_chance_pct;
 };
 
 //! @brief Lets fmt/spdlog print the consequence type as its underlying value

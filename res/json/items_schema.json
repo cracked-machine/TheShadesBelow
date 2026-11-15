@@ -303,8 +303,13 @@
         },
         "altar": {
           "type": "string",
-          "enum": ["None", "Talisman", "Banish", "ExtraLife", "CryptKey", "ToxicImmunity"],
-          "description": "The altar effect (offering_action only). Talisman: light an altar talisman. Banish: banish all ghosts. ExtraLife: respawn when the player dies, at the crypt start (crypt altar) or back at the altar (graveyard altar). CryptKey: unlock the crypt key (exit key). ToxicImmunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
+          "enum": ["None", "Artefact", "Banish", "ExtraLife", "CryptKey", "ToxicImmunity"],
+          "description": "The altar effect (offering_action only). Artefact: light the graveyard altar corner of the artefact's group (requires group). Banish: banish all ghosts. ExtraLife: respawn at the crypt start when the player dies (crypt altar only). CryptKey: unlock the crypt key (exit key). ToxicImmunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
+        },
+        "group": {
+          "type": "string",
+          "enum": ["Treasure", "Likeness", "Name", "Words"],
+          "description": "The artefact group (offering_action only, required by and only allowed with altar Artefact). A graveyard altar takes one artefact of each group, so any item in a group fills that group's corner light."
         },
         "location": {
           "type": "string",
@@ -348,9 +353,12 @@
     },
     "offering_reward_entry": {
       "allOf": [{ "$ref": "#/definitions/reward" }],
-      "propertyNames": { "enum": ["item", "wealth", "altar", "location", "tick", "target", "count"] },
+      "propertyNames": { "enum": ["item", "wealth", "altar", "group", "location", "tick", "target", "count"] },
       "oneOf": [{ "required": ["item"] }, { "required": ["wealth"] }, { "required": ["altar"] }],
-      "dependencies": { "tick": ["altar"] }
+      "dependencies": { "tick": ["altar"], "group": ["altar"] },
+      "if": { "properties": { "altar": { "const": "Artefact" } }, "required": ["altar"] },
+      "then": { "required": ["group"] },
+      "else": { "not": { "required": ["group"] } }
     },
     "no_altar_reward": {
       "description": "A single reward object. Altar effects are only applied by offering_action, so any other action may not set reward.altar.",

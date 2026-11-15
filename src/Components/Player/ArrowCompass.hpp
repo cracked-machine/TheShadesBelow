@@ -3,13 +3,14 @@
 
 #include <Components/Altar/Activated.hpp>
 #include <Components/Altar/MultiBlock.hpp>
-#include <Components/Altar/TalismanCount.hpp>
+#include <Components/Altar/ArtefactCount.hpp>
 #include <Components/Crypt/Entrance.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
+#include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
@@ -39,7 +40,7 @@ namespace Game::Cmp::Player
 //! @brief Caches the player's compass arrow state. The compass has several needles, each pointing at its own target:
 //!        - an "exit" needle, active while an exit key exists anywhere in the scene (world item or inventory)
 //!        - a "crypt" needle, active while a crypt key exists anywhere in the scene (world item or inventory)
-//!        - a "held" needle, driven by the item in the player's inventory slot (altar / talisman targets). Holding the
+//!        - a "held" needle, driven by the item in the player's inventory slot (altar / artefact targets). Holding the
 //!          exit key also shows this needle, as it can be offered at an altar for the crypt key
 //!        Key needles are therefore shown whether or not the player holds the key, and turn off once the key is used
 //!        (destroyed). Target resolution is throttled via `m_retarget_timer`, which PlayerSystem advances each frame.
@@ -47,8 +48,8 @@ namespace Game::Cmp::Player
 struct ArrowCompass
 {
   //! @brief What a needle is pointing at.
-  //!        TALISMAN points only at an altar that still needs the held talisman (most talismans lit first, then nearest).
-  enum class Mode { NONE, EXIT, CRYPT, ALTAR, TALISMAN };
+  //!        ARTEFACT points only at an altar that still needs the held artefact's group (most groups lit first, then nearest).
+  enum class Mode { NONE, EXIT, CRYPT, ALTAR, ARTEFACT };
 
   //! @brief One compass arrow: its target type, label, colour and resolved target.
   struct Needle
@@ -76,7 +77,7 @@ struct ArrowCompass
     sf::Vector2f direction;
   };
 
-  //! @brief Colour of the altar/talisman needle's label (matches sprite.graveyard.arrowcompass.altar)
+  //! @brief Colour of the altar/artefact needle's label (matches sprite.graveyard.arrowcompass.altar)
   static constexpr sf::Color kAltarColor{ 200, 30, 30 };
   //! @brief Colour of the exit key needle's label (matches sprite.graveyard.arrowcompass.exit)
   static constexpr sf::Color kExitColor{ 0, 200, 0 };
@@ -101,11 +102,13 @@ struct ArrowCompass
     m_cached_item_type = item_type;
     m_cached_is_offerable = is_offerable;
 
+    m_cached_artefact_group = item_type.empty() ? std::nullopt : Sys::ItemStore::instance().get( item_type ).get_artefact_group();
+
     // the crypt key has its own needle; the (offerable) exit key falls through to point at the altar as well as the exit
     if ( item_type.contains( "cryptkey" ) )
       m_held.mode = Mode::NONE;
-    else if ( item_type.contains( "talisman" ) )
-      m_held.mode = Mode::TALISMAN;
+    else if ( m_cached_artefact_group )
+      m_held.mode = Mode::ARTEFACT;
     else if ( is_offerable or item_type.contains( "relic" ) )
       m_held.mode = Mode::ALTAR;
     else
@@ -276,18 +279,19 @@ private:
         { return Cmp::Position( altar_cmp.position, altar_cmp.size ); } );
         break;
       }
-      case Mode::TALISMAN: {
-        // mirrors AltarSystem::offering_talisman(): once any altar is activated, no altar accepts talismans
+      case Mode::ARTEFACT: {
+        // mirrors AltarSystem::offering_artefact(): once any altar is activated, no altar accepts artefacts
         needle.target.reset();
         if ( not reg.view<Cmp::Altar::Activated>().empty() ) break;
 
         std::size_t best_count = 0;
         float best_distance = std::numeric_limits<float>::max();
-        for ( auto [altar_entt, altar_cmp, talisman_cmp] : reg.view<Cmp::Altar::MultiBlock, Cmp::Altar::TalismanCount>().each() )
+        if ( not m_cached_artefact_group ) break;
+        for ( auto [altar_entt, altar_cmp, artefact_cmp] : reg.view<Cmp::Altar::MultiBlock, Cmp::Altar::ArtefactCount>().each() )
         {
-          if ( not talisman_cmp.index( m_cached_item_type ) or talisman_cmp.activated( m_cached_item_type ) ) continue;
+          if ( artefact_cmp.activated( *m_cached_artefact_group ) ) continue;
           // prefer the altar closest to completion, then the nearest
-          const std::size_t count = talisman_cmp.count();
+          const std::size_t count = artefact_cmp.count();
           const float distance = Utils::Maths::getEuclideanDistance( altar_cmp.position, player_center );
           if ( needle.target and ( count < best_count or ( count == best_count and distance >= best_distance ) ) ) continue;
           best_count = count;
@@ -328,11 +332,13 @@ private:
 
   Needle m_exit{ .mode = Mode::EXIT, .label = "exit", .sprite = "sprite.graveyard.arrowcompass.exit", .color = kExitColor };
   Needle m_crypt{ .mode = Mode::CRYPT, .label = "crypt", .sprite = "sprite.graveyard.arrowcompass.crypt", .color = kCryptColor };
-  //! @brief Altar and talisman targets share the altar arrow
+  //! @brief Altar and artefact targets share the altar arrow
   Needle m_held{ .label = "altar", .sprite = "sprite.graveyard.arrowcompass.altar", .color = kAltarColor };
 
   Sys::ItemKey m_cached_item_type;
   bool m_cached_is_offerable{ false };
+  //! @brief The cached inventory item's artefact group, if it is an artefact
+  std::optional<Cmp::Altar::ArtefactGroup> m_cached_artefact_group;
   bool m_retarget_pending{ true };
 
   //! @brief Frequency of the sine wave for the arrow's pulsing scale

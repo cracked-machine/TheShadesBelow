@@ -5,8 +5,8 @@ namespace Game::Events
 {
 
 //! @brief Notification that the grave trail has reached its end and the exit key has been exhumed.
-//! @note Sent by Sys::GraveSystem. Sys::AltarSystem responds by resetting the activated altar (candles out, talismans
-//! cleared, Cmp::Altar::Activated removed), so any altar, including that one, can be activated with talismans again.
+//! @note Sent by Sys::GraveSystem. Sys::AltarSystem responds by resetting the activated altar (lights out, artefacts
+//! cleared, Cmp::Altar::Activated removed), so any altar, including that one, takes artefacts again.
 struct GraveTrailCompleteEvent
 {
 };

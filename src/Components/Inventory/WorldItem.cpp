@@ -34,6 +34,13 @@ std::optional<ActionReward> WorldItem::get_offering_reward( Altar::Kind location
   return at<OfferingAction>().action.reward( location );
 }
 
+std::optional<Altar::ArtefactGroup> WorldItem::get_artefact_group() const
+{
+  const auto reward = get_offering_reward( Altar::Kind::GRAVEYARD );
+  if ( not reward or reward->altar != ActionReward::AltarEffect::ARTEFACT ) return std::nullopt;
+  return reward->artefact_group;
+}
+
 std::optional<SpawnNpcEffect> WorldItem::get_offering_npc_spawn_effect() const { return get_spawn_npc_effect<OfferingAction>(); }
 
 bool WorldItem::is_offerable() const { return has_action<OfferingAction>() and not at<OfferingAction>().action.is_zero(); }

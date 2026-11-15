@@ -2,7 +2,7 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/AbsoluteAlpha.hpp>
 #include <Components/Altar/MultiBlock.hpp>
-#include <Components/Altar/TalismanCount.hpp>
+#include <Components/Altar/ArtefactCount.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/Exhumed.hpp>
@@ -48,6 +48,7 @@
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
+#include <Systems/Stores/ItemStore.hpp>
 #include <Utils/Cardinal.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
@@ -405,11 +406,8 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
       get_systems_event_queue().trigger(
           Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::TRIGGER_BOMB, by == ExhumedBy::BOMB ? grave_entity : entt::null ) );
       break;
-    case Cmp::Grave::Consequence::Type::JEWELRY:
-      spawn_grave_loot( { "item.jewelry_sapphire_necklace", "item.jewelry_amephyst_ring", "item.jewelry_ruby_ring", "item.jewelry_emerald_necklace",
-                          "item.jewelry_emerald_gemstone", "item.jewelry_sapphire_gemstone", "item.jewelry_diamond_gemstone",
-                          "item.jewelry_amephyst_gemstone" },
-                        grave_entity, by );
+    case Cmp::Grave::Consequence::Type::ARTEFACT:
+      spawn_artefact_loot( grave_entity, by );
       break;
     case Cmp::Grave::Consequence::Type::CURSE_TABLET:
       spawn_grave_loot(
@@ -423,47 +421,54 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
     case Cmp::Grave::Consequence::Type::TORCH:
       spawn_grave_loot( { "item.torch" }, grave_entity, by );
       break;
-    case Cmp::Grave::Consequence::Type::TALISMAN: {
-      // only talismans the altar nearest the player still needs drop, so the player is never left digging up
-      // talismans for an altar on the other side of the map, or ones that altar has already been given. Altars that
-      // have all their talismans are skipped.
-      const sf::Vector2f player_center = Utils::Player::get_position( reg() ).getCenter();
-      const Cmp::Altar::TalismanCount *nearest_altar = nullptr;
-      float nearest_distance = std::numeric_limits<float>::max();
-      for ( auto [altar_entt, altar_mb, talisman_cmp] : reg().view<Cmp::Altar::MultiBlock, Cmp::Altar::TalismanCount>().each() )
-      {
-        if ( talisman_cmp.count() >= talisman_cmp.size() ) continue;
-        const float distance = Utils::Maths::getEuclideanDistance( player_center, altar_mb.getCenter() );
-        if ( distance < nearest_distance )
-        {
-          nearest_distance = distance;
-          nearest_altar = &talisman_cmp;
-        }
-      }
-
-      std::vector<Sys::ItemKey> loot_pool;
-      if ( nearest_altar )
-      {
-        for ( const auto &[talisman_key, activated] : *nearest_altar )
-        {
-          if ( not activated ) loot_pool.push_back( talisman_key );
-        }
-      }
-      if ( loot_pool.empty() )
-      {
-        SPDLOG_WARN( "Grave rolled a talisman but no altar still needs one" );
-        break;
-      }
-      std::stringstream poolss;
-      for ( const auto &talisman_key : loot_pool )
-      {
-        poolss << " " << talisman_key.str();
-      }
-      SPDLOG_DEBUG( "Grave talisman pool (altar {:.0f} px from player):{}", nearest_distance, poolss.str() );
-      spawn_grave_loot( loot_pool, grave_entity, by );
+    case Cmp::Grave::Consequence::Type::TALISMAN:
+      spawn_grave_loot( Sys::ItemStore::instance().get_item_matches( "item.talisman*" ), grave_entity, by );
       break;
+  }
+}
+
+void GraveSystem::spawn_artefact_loot( entt::entity grave_entity, ExhumedBy by )
+{
+  // only artefacts of the groups the altar nearest the player still needs drop, so the player is never left digging up
+  // artefacts for an altar on the other side of the map, or ones that altar has already been given. Altars that have
+  // all their artefacts are skipped.
+  const sf::Vector2f player_center = Utils::Player::get_position( reg() ).getCenter();
+  const Cmp::Altar::ArtefactCount *nearest_altar = nullptr;
+  float nearest_distance = std::numeric_limits<float>::max();
+  for ( auto [altar_entt, altar_mb, artefact_cmp] : reg().view<Cmp::Altar::MultiBlock, Cmp::Altar::ArtefactCount>().each() )
+  {
+    if ( artefact_cmp.all_lit() ) continue;
+    const float distance = Utils::Maths::getEuclideanDistance( player_center, altar_mb.getCenter() );
+    if ( distance < nearest_distance )
+    {
+      nearest_distance = distance;
+      nearest_altar = &artefact_cmp;
     }
   }
+
+  // any item of a missing group will do, so new artefacts join the pool through items.json alone
+  std::vector<Sys::ItemKey> loot_pool;
+  if ( nearest_altar )
+  {
+    const auto missing_groups = nearest_altar->missing_groups();
+    for ( const auto &item_key : Sys::ItemStore::instance().get_all() )
+    {
+      const auto group = Sys::ItemStore::instance().get( item_key ).get_artefact_group();
+      if ( group and std::ranges::find( missing_groups, *group ) != missing_groups.end() ) loot_pool.push_back( item_key );
+    }
+  }
+  if ( loot_pool.empty() )
+  {
+    SPDLOG_WARN( "Grave rolled an artefact but no altar still needs one" );
+    return;
+  }
+  std::stringstream poolss;
+  for ( const auto &artefact_key : loot_pool )
+  {
+    poolss << " " << artefact_key.str();
+  }
+  SPDLOG_DEBUG( "Grave artefact pool (altar {:.0f} px from player):{}", nearest_distance, poolss.str() );
+  spawn_grave_loot( loot_pool, grave_entity, by );
 }
 
 void GraveSystem::light_torch_loot( entt::entity item_entt )

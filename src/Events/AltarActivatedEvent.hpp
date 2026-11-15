@@ -6,7 +6,8 @@
 namespace Game::Events
 {
 
-//! @brief Triggered by AltarSystem once every talisman has been offered at an altar and it becomes Cmp::Altar::Activated.
+//! @brief Triggered by AltarSystem once the player pays anima to activate an altar with every artefact
+//! offered, and it becomes Cmp::Altar::Activated.
 //! GraveSystem responds by choosing the key grave trail start graves.
 struct AltarActivatedEvent
 {

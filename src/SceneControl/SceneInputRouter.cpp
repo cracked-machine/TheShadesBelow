@@ -497,7 +497,7 @@ void SceneInputRouter::process_inventory_slot_input( const sf::Event &event, boo
   {
     // scroll up/away for the previous slot, down/towards for the next
     if ( wheelScrolled->wheel != sf::Mouse::Wheel::Vertical or wheelScrolled->delta == 0.f ) return;
-    get_systems_event_queue().trigger( Events::SelectInventorySlotEvent( wheelScrolled->delta > 0.f ? Mode::NEXT : Mode::PREV ) );
+    get_systems_event_queue().trigger( Events::SelectInventorySlotEvent( wheelScrolled->delta > 0.f ? Mode::PREV : Mode::NEXT ) );
     return;
   }
   if ( not number_keys ) return;

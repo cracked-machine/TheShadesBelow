@@ -10,6 +10,7 @@
 
 #include <imgui.h>
 
+#include <algorithm>
 #include <fstream>
 #include <string_view>
 #include <nlohmann/json.hpp>
@@ -22,7 +23,7 @@ namespace
 {
 
 //! @brief Whether a tooltip's item condition matches the event's item. A condition ending in '*' matches any item key
-//! with that prefix (e.g. "item.talisman*"), otherwise the keys must be equal. An empty condition matches any item.
+//! with that prefix (e.g. "item.artefact*"), otherwise the keys must be equal. An empty condition matches any item.
 bool item_condition_matches( std::string_view condition, std::string_view item )
 {
   if ( condition.empty() ) return true;
@@ -48,7 +49,10 @@ TooltipOverlaySystem::TooltipOverlaySystem( entt::registry &reg, sf::RenderWindo
   std::ignore = get_systems_event_queue().sink<Events::ItemPickedUpEvent>().connect<&TooltipOverlaySystem::on_item_picked_up_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::GrimoireDiscoveryEvent>().connect<&TooltipOverlaySystem::on_grimoire_discovery_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::InsufficientAnimaEvent>().connect<&TooltipOverlaySystem::on_insufficient_anima_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::TalismanRefusedEvent>().connect<&TooltipOverlaySystem::on_talisman_refused_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::ArtefactRefusedEvent>().connect<&TooltipOverlaySystem::on_artefact_refused_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::AltarActivationAnimaEvent>().connect<&TooltipOverlaySystem::on_altar_activation_anima_event>(
+      this );
+  std::ignore = get_systems_event_queue().sink<Events::AltarApproachedEvent>().connect<&TooltipOverlaySystem::on_altar_approached_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::CryptEntryRefusedEvent>().connect<&TooltipOverlaySystem::on_crypt_entry_refused_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::DismissTooltipEvent>().connect<&TooltipOverlaySystem::on_dismiss_tooltip_event>( this );
   SPDLOG_DEBUG( "TooltipOverlaySystem initialized with {} tooltips", m_definitions.size() );
@@ -77,10 +81,6 @@ void TooltipOverlaySystem::load_definitions( const std::string &path )
   if ( json_data.contains( "panel" ) and json_data["panel"].is_object() )
   {
     const auto &panel = json_data["panel"];
-    if ( panel.contains( "position" ) and panel["position"].is_object() )
-    {
-      m_style.position = { panel["position"].value( "x", m_style.position.x ), panel["position"].value( "y", m_style.position.y ) };
-    }
     m_style.font_size = panel.value( "font_size", m_style.font_size );
     m_style.padding = panel.value( "padding", m_style.padding );
     if ( panel.contains( "fill_colour" ) ) { m_style.fill_colour = get_colour( panel["fill_colour"], m_style.fill_colour ); }
@@ -103,6 +103,13 @@ void TooltipOverlaySystem::load_definitions( const std::string &path )
     def.text = entry.value( "text", "" );
     def.duration = sf::seconds( entry.value( "duration_s", def.duration.asSeconds() ) );
     if ( entry.contains( "condition" ) and entry["condition"].is_object() ) { def.item = entry["condition"].value( "item", "" ); }
+    const auto position = parse_position( entry );
+    if ( not position )
+    {
+      SPDLOG_WARN( "Skipping tooltip '{}': 'position' must be {{\"x\", \"y\"}} or \"above_source\"", def.id );
+      continue;
+    }
+    def.position = *position;
 
     const std::string frequency = entry.value( "frequency", "once" );
     if ( frequency == "once" ) { def.frequency = Frequency::ONCE; }
@@ -116,6 +123,24 @@ void TooltipOverlaySystem::load_definitions( const std::string &path )
 
     m_definitions.push_back( std::move( def ) );
   }
+}
+
+std::optional<TooltipOverlaySystem::TooltipPosition> TooltipOverlaySystem::parse_position( const nlohmann::json &entry )
+{
+  TooltipPosition position;
+  if ( not entry.contains( "position" ) ) { return position; }
+  const auto &json_position = entry["position"];
+  if ( json_position.is_string() and json_position.get<std::string>() == "above_source" )
+  {
+    position.above_source = true;
+    return position;
+  }
+  if ( json_position.is_object() )
+  {
+    position.screen = { json_position.value( "x", position.screen.x ), json_position.value( "y", position.screen.y ) };
+    return position;
+  }
+  return std::nullopt;
 }
 
 void TooltipOverlaySystem::on_add_inventory_event( const Events::AddInventoryEvent &event )
@@ -142,10 +167,22 @@ void TooltipOverlaySystem::on_insufficient_anima_event( const Events::Insufficie
   m_candidates.push_back( { "InsufficientAnimaEvent", event.m_item.str() } );
 }
 
-void TooltipOverlaySystem::on_talisman_refused_event( const Events::TalismanRefusedEvent &event )
+void TooltipOverlaySystem::on_artefact_refused_event( const Events::ArtefactRefusedEvent &event )
 {
   if ( not m_enabled ) { return; }
-  m_candidates.push_back( { "TalismanRefusedEvent", event.m_item.str() } );
+  m_candidates.push_back( { "ArtefactRefusedEvent", event.m_item.str(), event.m_altar_bounds } );
+}
+
+void TooltipOverlaySystem::on_altar_activation_anima_event( const Events::AltarActivationAnimaEvent &event )
+{
+  if ( not m_enabled ) { return; }
+  m_candidates.push_back( { "AltarActivationAnimaEvent", "", event.altar_bounds } );
+}
+
+void TooltipOverlaySystem::on_altar_approached_event( const Events::AltarApproachedEvent &event )
+{
+  if ( not m_enabled ) { return; }
+  m_candidates.push_back( { "AltarApproachedEvent", "", event.altar_bounds } );
 }
 
 void TooltipOverlaySystem::on_crypt_entry_refused_event( [[maybe_unused]] const Events::CryptEntryRefusedEvent &event )
@@ -169,7 +206,7 @@ void TooltipOverlaySystem::update( sf::Time dt )
 
       // a repeating notification must not hide a one-time tutorial; otherwise the newest tooltip replaces the active one
       if ( def->frequency == Frequency::ALWAYS and m_active and m_active->frequency == Frequency::ONCE ) { continue; }
-      m_active = ActiveTooltip{ format_text( *def, candidate ), def->duration, def->frequency };
+      m_active = ActiveTooltip{ format_text( *def, candidate ), def->duration, def->frequency, def->position, candidate.source_bounds };
       if ( def->frequency == Frequency::ONCE )
       {
         m_seen.insert( def->id );
@@ -240,17 +277,38 @@ std::string TooltipOverlaySystem::format_text( const TooltipDef &def, const Cand
   return text;
 }
 
+sf::Vector2f TooltipOverlaySystem::panel_centre( sf::Vector2f panel_size, sf::Vector2f display_size ) const
+{
+  const TooltipPosition &position = m_active->position;
+  if ( not position.above_source or not m_active->source_bounds )
+  {
+    return { display_size.x * position.screen.x, display_size.y * position.screen.y };
+  }
+
+  // centred above the source's top edge, recomputed every frame so the panel follows the camera
+  constexpr float kSourceGapPx = 8.f;
+  const sf::FloatRect &bounds = *m_active->source_bounds;
+  const sf::Vector2f top_centre = world_to_screen( { bounds.position.x + ( bounds.size.x * 0.5f ), bounds.position.y } );
+  sf::Vector2f centre{ top_centre.x, top_centre.y - kSourceGapPx - ( panel_size.y * 0.5f ) };
+  // keep the whole panel on screen, e.g. when the source is near the view edge
+  const sf::Vector2f half = panel_size * 0.5f;
+  centre.x = std::clamp( centre.x, half.x, std::max( half.x, display_size.x - half.x ) );
+  centre.y = std::clamp( centre.y, half.y, std::max( half.y, display_size.y - half.y ) );
+  return centre;
+}
+
 void TooltipOverlaySystem::render()
 {
   if ( not m_active ) { return; }
 
-  const sf::Vector2u display_size = PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
-  const sf::Vector2f centre{ static_cast<float>( display_size.x ) * m_style.position.x, static_cast<float>( display_size.y ) * m_style.position.y };
+  const sf::Vector2u display_resolution = PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
+  const sf::Vector2f display_size( display_resolution );
 
   // all ImGui, panel included: ImGui renders after every SFML draw, so the tooltip stays over the HUD's ImGui widgets
   const auto font_size = static_cast<float>( m_style.font_size );
   const sf::Vector2f text_size = measure_text( m_active->text, font_size );
   const sf::Vector2f panel_size = text_size + sf::Vector2f{ m_style.padding * 2.f, m_style.padding * 2.f };
+  const sf::Vector2f centre = panel_centre( panel_size, display_size );
   const sf::Vector2f panel_min = centre - ( panel_size * 0.5f );
   const sf::Vector2f panel_max = centre + ( panel_size * 0.5f );
   constexpr float kPanelOutlineThickness = 2.f;
