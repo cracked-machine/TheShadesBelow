@@ -15,10 +15,10 @@ BaseOverlaySystem::BaseOverlaySystem( entt::registry &reg, sf::RenderWindow &win
 {
 }
 
-void BaseOverlaySystem::render_outlines( const Render::UiData &ui_data )
+void BaseOverlaySystem::render_outlines( const Render::UiLayout &ui_layout )
 {
   sf::RectangleShape rect;
-  for ( const auto &outline : ui_data.m_outlines )
+  for ( const auto &outline : ui_layout.m_outlines )
   {
     rect.setSize( outline.rect.size );
     rect.setPosition( outline.rect.position );
@@ -30,9 +30,9 @@ void BaseOverlaySystem::render_outlines( const Render::UiData &ui_data )
   }
 }
 
-unsigned int BaseOverlaySystem::scaled_char_size( unsigned int design_size, const Render::UiData *ui_data )
+unsigned int BaseOverlaySystem::scaled_char_size( unsigned int design_size, const Render::UiLayout *ui_layout )
 {
-  return std::max( 1u, static_cast<unsigned int>( std::lround( static_cast<float>( design_size ) * ui_scale( ui_data ) ) ) );
+  return std::max( 1u, static_cast<unsigned int>( std::lround( static_cast<float>( design_size ) * ui_scale( ui_layout ) ) ) );
 }
 
 void BaseOverlaySystem::on_modal_open()

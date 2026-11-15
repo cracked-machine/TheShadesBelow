@@ -119,7 +119,7 @@ void text_line( const std::string &str, sf::Color colour = sf::Color::White )
 
 DebugOverlaySystem::DebugOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
     : BaseOverlaySystem( reg, window, sound_bank ),
-      m_dbg_ui_data( std::make_unique<Render::UiData>( "res/ui/dbg.json" ) )
+      m_dbg_ui_layout( std::make_unique<Render::UiLayout>( "res/ui/dbg.json" ) )
 {
   SPDLOG_DEBUG( "DebugOverlaySystem initialized" );
 }
@@ -275,13 +275,13 @@ bool DebugOverlaySystem::begin_debug_window( const char *title, std::string_view
 {
   const sf::Vector2f window_size( m_window.getSize() );
   sf::Vector2f pos{ 0.f, 0.f };
-  if ( m_dbg_ui_data )
+  if ( m_dbg_ui_layout )
   {
-    auto it = std::ranges::find_if( m_dbg_ui_data->m_labels, [&]( const auto &label ) { return label.name == label_name; } );
-    if ( it != m_dbg_ui_data->m_labels.end() )
+    auto it = std::ranges::find_if( m_dbg_ui_layout->m_labels, [&]( const auto &label ) { return label.name == label_name; } );
+    if ( it != m_dbg_ui_layout->m_labels.end() )
     {
       // debug windows are free-floating, so stretch the design-space position per axis (keeps edge-anchored panels on the edges)
-      const sf::Vector2f design = m_dbg_ui_data->design_size();
+      const sf::Vector2f design = m_dbg_ui_layout->design_size();
       pos = { it->rect.position.x * window_size.x / design.x, it->rect.position.y * window_size.y / design.y };
     }
   }

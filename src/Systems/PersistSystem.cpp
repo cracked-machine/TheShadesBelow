@@ -62,6 +62,7 @@
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
 #include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
+#include <Components/Persistent/StowedTorchLit.hpp>
 #include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
 #include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
@@ -72,6 +73,8 @@
 #include <Components/Persistent/HeldItemScale.hpp>
 #include <Components/Persistent/HeldItemSideOffsetX.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
+#include <Components/Persistent/InventorySlotCount.hpp>
+#include <Components/Persistent/InventorySlotRollover.hpp>
 #include <Components/Persistent/InventorySwapCooldown.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
@@ -326,6 +329,9 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::BurrSlowFactor>();
   add_component<Cmp::Persist::BurrThrowCooldown>();
   add_component<Cmp::Persist::InventorySwapCooldown>();
+  add_component<Cmp::Persist::InventorySlotCount>();
+  add_component<Cmp::Persist::StowedTorchLit>();
+  add_component<Cmp::Persist::InventorySlotRollover>();
   add_component<Cmp::Persist::FlyingOscillationAmplitude>();
   add_component<Cmp::Persist::FlyingLiftOffset>();
   add_component<Cmp::Persist::PlayerRenderOffset>();
@@ -359,8 +365,12 @@ void PersistSystem::initialize_component_registry()
   }
 
   // Settings added since may likewise be missing, so create them with their default value and menu label.
-  const std::array<std::pair<const char *, nlohmann::json>, 1> new_settings = {
-      { { "GrimoireHoverFollowsMouse", { { "type", "bool" }, { "value", false }, { "detail", "Grimoire hover info follows mouse" } } } } };
+  const std::array<std::pair<const char *, nlohmann::json>, 4> new_settings = {
+      { { "GrimoireHoverFollowsMouse", { { "type", "bool" }, { "value", false }, { "detail", "Grimoire hover info follows mouse" } } },
+        { "InventorySlotCount",
+          { { "type", "int" }, { "value", 1 }, { "min_value", 1 }, { "max_value", 5 }, { "detail", "Inventory slot count" }, { "format", "%d" } } },
+        { "StowedTorchLit", { { "type", "bool" }, { "value", false }, { "detail", "Torch stays lit when its slot is not selected" } } },
+        { "InventorySlotRollover", { { "type", "bool" }, { "value", true }, { "detail", "Inventory slot selection wraps around" } } } } };
   for ( const auto &[name, defaults] : new_settings )
   {
     if ( not definitions->contains( name ) ) { m_components.at( name ).initialise( defaults ); }

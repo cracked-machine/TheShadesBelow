@@ -2,7 +2,7 @@
 #define SRC_SYSTEMS_RENDER_SHOPOVERLAYSYSTEM_HPP__
 
 #include <Systems/Render/BaseOverlaySystem.hpp>
-#include <Systems/Render/UiData.hpp>
+#include <Systems/Render/UiLayout.hpp>
 
 #include <SFML/System/Time.hpp>
 
@@ -28,7 +28,7 @@ public:
 
 private:
   //! @brief Layout data object for the shop overlay
-  std::unique_ptr<Render::UiData> m_shop_ui_data;
+  std::unique_ptr<Render::UiLayout> m_shop_ui_layout;
 };
 
 } // namespace Game::Sys

@@ -17,11 +17,14 @@
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/Grimoire.hpp>
+#include <Components/Grave/CurseTablet.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
+#include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
+#include <Components/Npc/SummonOffering.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/Cadaver.hpp>
@@ -39,6 +42,7 @@
 #include <Components/Player/Mortality.hpp>
 #include <Components/Player/MovementDelta.hpp>
 #include <Components/Player/RuinLocation.hpp>
+#include <Components/Player/SelectedInventorySlot.hpp>
 #include <Components/Player/TorchRadius.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
@@ -262,6 +266,38 @@ void RegistryTransfer::xfer_player_entt( entt::registry &source_registry, entt::
   pretty_print( "No Storage Found", no_storage_cmps );
 }
 
+void RegistryTransfer::xfer_inventory_slots( entt::registry &source_registry, entt::registry &target_registry )
+{
+  // the target's slots are replaced wholesale, so a slot emptied in the source scene is empty in the target too
+  auto target_slot_view = target_registry.view<Cmp::PlayerInventorySlot>();
+  std::vector<entt::entity> stale_slots( target_slot_view.begin(), target_slot_view.end() );
+  target_registry.destroy( stale_slots.begin(), stale_slots.end() );
+
+  init_missing_cmp_storages( target_registry );
+
+  // every slot, empty ones included. Cmp::PlayerInventorySlot::m_slot_idx is copied with the slot, so items keep
+  // their positions across scenes.
+  std::vector<std::string> transferred_cmps;
+  std::vector<std::string> no_storage_cmps;
+  for ( auto source_entity : source_registry.view<Cmp::PlayerInventorySlot>() )
+  {
+    const auto target_entity = target_registry.create();
+    for ( auto &&curr : source_registry.storage() )
+    {
+      auto &source_storage = curr.second;
+      if ( not source_storage.contains( source_entity ) ) continue;
+      if ( auto *target_storage = target_registry.storage( curr.first ) )
+      {
+        target_storage->push( target_entity, source_storage.value( source_entity ) );
+        transferred_cmps.emplace_back( source_storage.type().name() );
+      }
+      else { no_storage_cmps.emplace_back( source_storage.type().name() ); }
+    }
+  }
+  pretty_print( "Transferred inventory slot", transferred_cmps );
+  pretty_print( "No Storage Found", no_storage_cmps );
+}
+
 void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
 {
   // Force storage creation by accessing storage for each known component type
@@ -286,6 +322,10 @@ void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
   registry.storage<Cmp::AnimData>();
   registry.storage<Cmp::Inventory::DowsingTarget>();
   registry.storage<Cmp::PlayerInventorySlot>();
+  registry.storage<Cmp::Player::SelectedInventorySlot>();
+  registry.storage<Cmp::Inventory::StingDamage>();
+  registry.storage<Cmp::Npc::SummonOffering>();
+  registry.storage<Cmp::Grave::CurseTablet>();
   registry.storage<Cmp::TorchRadius>();
   registry.storage<Cmp::WorldItem>();
   registry.storage<Cmp::Inventory::WearLevel>();

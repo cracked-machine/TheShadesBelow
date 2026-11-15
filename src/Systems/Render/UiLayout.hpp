@@ -1,5 +1,5 @@
-#ifndef SRC_SYSTEMS_RENDER_UIDATA_HPP__
-#define SRC_SYSTEMS_RENDER_UIDATA_HPP__
+#ifndef SRC_SYSTEMS_RENDER_UILAYOUT_HPP__
+#define SRC_SYSTEMS_RENDER_UILAYOUT_HPP__
 
 #include <SFML/System/Angle.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -7,6 +7,7 @@
 #include <Utils/JsonDeserializer.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -20,7 +21,7 @@ namespace Game::Render
 //! The JSON is never modified; instead sync_to() maps the design-space elements onto the current display resolution with
 //! a uniform scale (so sprites and text keep their aspect ratio) and centres the result. The public element lists always
 //! hold the screen-space (scaled) values; until sync_to() is first called they equal the design-space values.
-class UiData : public Utils::JsonDeserializer
+class UiLayout : public Utils::JsonDeserializer
 {
 public:
   //! @brief A rectangular outline element in the UI layout (e.g. a panel border).
@@ -113,9 +114,9 @@ public:
     std::string name;
   };
 
-  //! @brief Construct a new UiData object and deserialize the given UI map file.
+  //! @brief Construct a new UiLayout object and deserialize the given UI map file.
   //! @param map_file
-  UiData( const std::filesystem::path &map_file );
+  UiLayout( const std::filesystem::path &map_file );
 
   //! @brief Parse the Tiled JSON UI map file at `scene_tiledata_path` and populate the outline, label, text, meter and icon lists.
   //! @param scene_tiledata_path
@@ -127,6 +128,12 @@ public:
   //! @param anchor_offset an extra screen-space translation applied after scaling and centring, e.g. to move a panel
   //! to the mouse cursor. Defaults to none.
   void sync_to( sf::Vector2u display_res, sf::Vector2f anchor_offset = { 0.f, 0.f } );
+
+  //! @brief Scale the layout by `scale` and translate it to `origin`, without fitting or centring it on the screen. For
+  //! sub-layouts that follow another layout's scale, e.g. one HUD inventory slot. Cheap no-op when unchanged.
+  //! @param scale the uniform design-to-screen scale, e.g. the parent layout's scale()
+  //! @param origin screen-space position of the layout's design-space origin
+  void sync_to_scale( float scale, sf::Vector2f origin = { 0.f, 0.f } );
 
   //! @brief The uniform design-to-screen scale currently applied (1.0 until sync_to() is called).
   //! Use it to scale hard-coded pixel values (font sizes, offsets) drawn alongside this layout.
@@ -183,6 +190,16 @@ private:
   //! @brief The anchor offset the public element lists are currently translated by, see sync_to().
   sf::Vector2f m_anchor_offset{ 0.f, 0.f };
 
+  //! @brief The scale and origin last applied by sync_to_scale(); unset after a sync_to(), see sync_to_scale().
+  std::optional<float> m_synced_scale;
+  //! @brief See m_synced_scale.
+  sf::Vector2f m_synced_origin{ 0.f, 0.f };
+
+  //! @brief Rebuild the public element lists from the design-space copies, scaled by `scale` then translated by `offset`.
+  //! @param scale uniform design-to-screen scale
+  //! @param offset screen-space translation applied after scaling
+  void apply_transform( float scale, sf::Vector2f offset );
+
   //! @brief Design-space copies of the parsed elements, as authored in the Tiled map. sync_to() rebuilds the public lists from these.
   std::vector<Outline> m_design_outlines;
   std::vector<Label> m_design_labels;
@@ -200,4 +217,4 @@ private:
 
 } // namespace Game::Render
 
-#endif // SRC_SYSTEMS_RENDER_UIDATA_HPP__
+#endif // SRC_SYSTEMS_RENDER_UILAYOUT_HPP__

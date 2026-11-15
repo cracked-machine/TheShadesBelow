@@ -407,7 +407,7 @@ void add_flame_for_player_inventory_slot( entt::registry &reg )
   // Add a flame ParticleSprite for a torch in the player inventory
   for ( auto [inventory_entt, inventory_cmp, inventory_uuid_cmp] : reg.view<Cmp::PlayerInventorySlot, Cmp::UUID>().each() )
   {
-    if ( inventory_cmp.m_item.item_type != "item.torch" ) continue;
+    if ( inventory_cmp.empty() or inventory_cmp.m_item->item_type != "item.torch" ) continue;
 
     Factory::Particle::add_flame( reg, "ui.torch.particle.flame", inventory_uuid_cmp, Utils::Player::get_position( reg ).getCenter(), 50000,
                                   Cmp::Particle::kUiScalePreset );
@@ -419,7 +419,7 @@ void add_flame_for_player_inventory_slot( entt::registry &reg )
 
       // Move the ParticleSprite to the UI view. Any particle sprites should be fully cleared
       // otherwise we get particle effects in strange places during the transition frame.
-      // The emitter position is set by HudOverlaySystem using the UiData object.
+      // The emitter position is set by HudOverlaySystem using the UiLayout object.
       ps_owner.sprite->clear();
       ps_owner.sprite->set_view_type( Cmp::Particle::ViewType::SCREEN );
     }
@@ -466,7 +466,7 @@ void sync_flames_for_shop_inventory( entt::registry &reg )
   {
     if ( ps_owner.sprite->get_tag() != kShopSlotFlameTag ) continue;
     if ( ps_owner.sprite->get_view_type() == Cmp::Particle::ViewType::SCREEN ) continue;
-    // The emitter position is set by ShopOverlaySystem using the UiData object.
+    // The emitter position is set by ShopOverlaySystem using the UiLayout object.
     ps_owner.sprite->clear();
     ps_owner.sprite->set_view_type( Cmp::Particle::ViewType::SCREEN );
   }

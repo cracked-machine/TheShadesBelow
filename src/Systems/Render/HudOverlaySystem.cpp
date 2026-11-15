@@ -34,6 +34,7 @@
 #include <Components/Toxicity/Venom.hpp>
 #include <Components/Toxicity/Vertigo.hpp>
 #include <Components/Wall.hpp>
+#include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <SFML/System/Time.hpp>
@@ -48,12 +49,14 @@
 #include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Crypt.hpp>
+#include <Utils/ImGuiTheme.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Profiling.hpp>
 #include <Utils/Utils.hpp>
 
 #include <SFML/Graphics/Color.hpp>
+#include <imgui.h>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
@@ -64,6 +67,7 @@
 #include <filesystem>
 #include <format>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace Game::Sys
@@ -72,41 +76,52 @@ namespace Game::Sys
 void HudOverlaySystem::update( sf::Time dt )
 {
   // the layout is authored at its Tiled map size; rescale it if the window resolution has changed (no-op otherwise)
-  if ( m_main_ui_data ) m_main_ui_data->sync_to( m_window.getSize() );
+  if ( m_main_ui_layout ) m_main_ui_layout->sync_to( m_window.getSize() );
+  // one inventory slot's layout follows the HUD's scale; each slot adds its own origin when drawn (no-op if unchanged)
+  if ( m_slot_ui_layout ) m_slot_ui_layout->sync_to_scale( hud_scale() );
 
-  PROFILED( render_ui_particles() );
+  PROFILED( fit_inventory_outline() );
   PROFILED( render_ui_outlines() );
   PROFILED( render_ui_icons() );
   PROFILED( render_ui_cadaver_icons() );
-  PROFILED( render_ui_inventory_icon() );
+  PROFILED( render_ui_inventory_table( dt ) );
+  // after the inventory table, so the torch flames flicker over their slot icons
+  PROFILED( render_ui_particles() );
   PROFILED( render_ui_meters( dt ) );
   PROFILED( render_ui_labels( dt ) );
   PROFILED( render_ui_texts() );
   PROFILED( render_ghost_grave_halos() );
 
   const auto display_size = sf::Vector2f( m_window.getSize() );
-  render_crypt_maze_timer( { display_size.x / 2.f, 0.f }, scaled_char_size( 100, m_main_ui_data.get() ) );
+  render_crypt_maze_timer( { display_size.x / 2.f, 0.f }, scaled_char_size( 100, m_main_ui_layout.get() ) );
 }
 
 void HudOverlaySystem::render_ui_particles()
 {
-  if ( not m_main_ui_data ) return;
+  if ( not m_main_ui_layout ) return;
 
-  // only torches are moved into screen-space, they flicker over the inventory icon
-  auto view = reg().view<Cmp::Particle::SpriteOwner>( entt::exclude<Cmp::NoRender> );
-  for ( auto [entity, particle_owner] : view.each() )
+  // only carried torches are moved into screen-space; each lit one flickers over its own inventory slot icon
+  auto view = reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID>( entt::exclude<Cmp::NoRender> );
+  for ( auto [entity, particle_owner, particle_uuid_cmp] : view.each() )
   {
     if ( not particle_owner.sprite ) continue;
     auto &sprite = *particle_owner.sprite;
     if ( sprite.get_view_type() != Cmp::Particle::ViewType::SCREEN ) continue;
     if ( not sprite.get_tag().contains( "torch" ) ) continue;
 
-    sprite.set_view_transform( m_window, m_window.getDefaultView() );
-    for ( auto &icon : m_main_ui_data->m_icons )
+    // the slot holding this torch, if it is lit (selected, or stowed with Cmp::Persist::StowedTorchLit) and was drawn
+    std::optional<SlotIcon> slot_icon;
+    for ( auto [slot_entt, slot_cmp, slot_uuid_cmp] : reg().view<Cmp::PlayerInventorySlot, Cmp::UUID>().each() )
     {
-      if ( icon.name != "inventory_icon" ) continue;
-      sprite.set_emitter_position( { icon.rect.position.x + ( icon.scale * 8.f ), icon.rect.position.y + ( icon.scale * 6.f ) } );
+      if ( slot_uuid_cmp != particle_uuid_cmp ) continue;
+      if ( slot_cmp.m_slot_idx >= m_slot_icons.size() ) continue;
+      if ( Utils::Player::is_torch_slot_lit( reg(), slot_entt ) ) { slot_icon = m_slot_icons.at( slot_cmp.m_slot_idx ); }
+      break;
     }
+    if ( not slot_icon ) continue;
+
+    sprite.set_view_transform( m_window, m_window.getDefaultView() );
+    sprite.set_emitter_position( { slot_icon->position.x + ( slot_icon->scale * 8.f ), slot_icon->position.y + ( slot_icon->scale * 6.f ) } );
     sprite.restart();
     draw_screen( sprite );
   }
@@ -114,37 +129,37 @@ void HudOverlaySystem::render_ui_particles()
 
 void HudOverlaySystem::render_ui_outlines()
 {
-  if ( not m_main_ui_data )
+  if ( not m_main_ui_layout )
   {
-    SPDLOG_CRITICAL( "UiData object is not initialised. Cannot draw Status Outline overlay" );
+    SPDLOG_CRITICAL( "UiLayout object is not initialised. Cannot draw Status Outline overlay" );
     return;
   }
-  render_outlines( *m_main_ui_data );
+  render_outlines( *m_main_ui_layout );
 }
 
 void HudOverlaySystem::render_ui_icons()
 {
-  if ( not m_main_ui_data )
+  if ( not m_main_ui_layout )
   {
-    SPDLOG_CRITICAL( "UiData object is not initialised. Cannot draw icon overlay" );
+    SPDLOG_CRITICAL( "UiLayout object is not initialised. Cannot draw icon overlay" );
     return;
   }
-  for ( const auto &icon : m_main_ui_data->m_icons )
+  for ( const auto &icon : m_main_ui_layout->m_icons )
   {
-    // we handle the other icons seperately
-    if ( icon.name == "inventory_icon" or icon.name.contains( "sprite.crypt.loot.cadaver" ) ) { continue; }
+    // we handle the cadaver icons seperately
+    if ( icon.name.contains( "sprite.crypt.loot.cadaver" ) ) { continue; }
     RenderSystem::safe_render_sprite_screen( icon.type, icon.rect, icon.index, { icon.scale, icon.scale } );
   }
 }
 
 void HudOverlaySystem::render_ui_cadaver_icons()
 {
-  if ( not m_main_ui_data )
+  if ( not m_main_ui_layout )
   {
-    SPDLOG_CRITICAL( "UiData object is not initialised. Cannot draw icon overlay" );
+    SPDLOG_CRITICAL( "UiLayout object is not initialised. Cannot draw icon overlay" );
     return;
   }
-  for ( const auto &icon : m_main_ui_data->m_icons )
+  for ( const auto &icon : m_main_ui_layout->m_icons )
   {
     if ( icon.name.contains( "sprite.crypt.loot.cadaver" ) )
     {
@@ -156,33 +171,180 @@ void HudOverlaySystem::render_ui_cadaver_icons()
   }
 }
 
-void HudOverlaySystem::render_ui_inventory_icon()
+const Render::UiLayout::Table *HudOverlaySystem::find_inventory_table() const
 {
-  if ( not m_main_ui_data )
+  if ( not m_main_ui_layout ) return nullptr;
+  const auto it = std::ranges::find( m_main_ui_layout->m_tables, std::string( kInventoryTableName ), &Render::UiLayout::Table::name );
+  return it == m_main_ui_layout->m_tables.end() ? nullptr : &*it;
+}
+
+namespace
+{
+//! @brief Find a layout element by name in one of a UiLayout's element lists.
+template <typename ElementT>
+const ElementT *find_element( const std::vector<ElementT> &elements, std::string_view name )
+{
+  const auto it = std::ranges::find_if( elements, [name]( const ElementT &element ) { return element.name == name; } );
+  return it == elements.end() ? nullptr : &*it;
+}
+} // namespace
+
+sf::Vector2f HudOverlaySystem::inventory_slot_size() const
+{
+  if ( not m_slot_ui_layout ) return { 0.f, 0.f };
+  return m_slot_ui_layout->design_size() * hud_scale();
+}
+
+void HudOverlaySystem::fit_inventory_outline()
+{
+  const auto *table = find_inventory_table();
+  if ( not table ) return;
+  const auto it = std::ranges::find( m_main_ui_layout->m_outlines, std::string( kInventoryOutlineName ), &Render::UiLayout::Outline::name );
+  if ( it == m_main_ui_layout->m_outlines.end() ) return;
+
+  // the authored outline pads the table; keep that padding around all the slots. Recomputed from the table every
+  // frame, so the size never accumulates between UiLayout::sync_to() rebuilds.
+  const sf::Vector2f pad = table->rect.position - it->rect.position;
+  const sf::Vector2f slot_size = inventory_slot_size();
+  const float slot_count = static_cast<float>( Utils::Player::get_inventory_slot_count( reg() ) );
+  it->rect.size = { ( slot_count * slot_size.x ) + ( 2.f * pad.x ), slot_size.y + ( 2.f * pad.y ) };
+}
+
+void HudOverlaySystem::render_ui_inventory_table( sf::Time dt )
+{
+  m_slot_icons.fill( std::nullopt );
+  const auto *table = find_inventory_table();
+  if ( not table or not m_slot_ui_layout )
   {
-    SPDLOG_CRITICAL( "UiData object is not initialised. Cannot draw icon overlay" );
+    SPDLOG_CRITICAL( "No '{}' ui_table in the HUD layout, or no {}. Cannot draw the inventory", kInventoryTableName, kInventorySlotLayout );
     return;
   }
-  for ( const auto &icon : m_main_ui_data->m_icons )
+
+  const uint8_t slot_count = Utils::Player::get_inventory_slot_count( reg() );
+  const uint8_t selected_idx = Utils::Player::get_selected_slot_idx( reg() );
+  const sf::Vector2f slot_size = inventory_slot_size();
+  // flash the selected slot's highlight on a recent change (e.g. a repaired tool or an altar reward)
+  const bool flash = update_flash_toggle<Cmp::FlashUIInventory>( dt );
+
+  // the ui_table only gives the position; each column is one slot of res/ui/inventory_slot.json
+  ImGui::SetNextWindowPos( ImVec2( table->rect.position.x, table->rect.position.y ) );
+  ImGui::SetNextWindowSize( ImVec2( slot_size.x * static_cast<float>( slot_count ), slot_size.y ) );
+  // display only: the HUD must never take the mouse from the game, or come in front of other overlays
+  constexpr ImGuiWindowFlags kWindowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings |
+                                            ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
+                                            ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoScrollbar;
+  ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0.f, 0.f ) );
+  ImGui::PushStyleVar( ImGuiStyleVar_CellPadding, ImVec2( 0.f, 0.f ) );
+  ImGui::PushFont( Utils::imgui_grimoire_font() );
+  if ( ImGui::Begin( "##hud_inventory", nullptr, kWindowFlags ) )
   {
-
-    if ( icon.name != "inventory_icon" ) continue;
-
-    auto inventory_view = reg().view<Cmp::PlayerInventorySlot, Cmp::AnimData>();
-    for ( auto [inventory_entt, inventory_cmp, anim_cmp] : inventory_view.each() )
+    ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.f, 1.f, 1.f, 1.f ) );
+    ImGui::PushStyleColor( ImGuiCol_TableBorderLight, ImVec4( 0.f, 0.f, 0.f, 0.5f ) );
+    ImGui::PushStyleColor( ImGuiCol_PlotHistogram, ImVec4( 1.f, 0.f, 0.f, 1.f ) );
+    ImGui::PushStyleColor( ImGuiCol_FrameBg, ImVec4( 0.f, 0.f, 0.f, 0.5f ) );
+    if ( ImGui::BeginTable( "##inventory", slot_count, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit ) )
     {
-      // the slot keeps its item's frame (items.json sprite.index, or the frame rolled by sprite.random) as the anim offset
-      RenderSystem::safe_render_sprite_screen( anim_cmp.m_sprite_type, { icon.rect.position, Constants::kGridSizePxF },
-                                               anim_cmp.getFrameIndexOffset(), { icon.scale, icon.scale } );
+      for ( uint8_t idx = 0; idx < slot_count; ++idx )
+      {
+        ImGui::TableSetupColumn( nullptr, ImGuiTableColumnFlags_WidthFixed, slot_size.x );
+      }
+      ImGui::TableNextRow();
+      // column `idx` is always slot `idx`, so emptying a slot never shifts the others
+      for ( uint8_t idx = 0; idx < slot_count; ++idx )
+      {
+        ImGui::TableSetColumnIndex( idx );
+        const ImVec2 cell_min = ImGui::GetCursorScreenPos();
+        render_inventory_slot( idx, idx == selected_idx, flash, { cell_min.x, cell_min.y } );
+      }
+      ImGui::EndTable();
     }
+    ImGui::PopStyleColor( 4 );
   }
+  ImGui::End();
+  ImGui::PopFont();
+  ImGui::PopStyleVar( 2 );
+}
+
+void HudOverlaySystem::place_imgui_text( const Render::UiLayout::Label &label, sf::Vector2f slot_origin, const std::string &text )
+{
+  // the font is rasterised at kImGuiGrimoireFontPx, so scale it to the label's (HUD scaled) font size
+  ImGui::SetWindowFontScale( static_cast<float>( label.font_size ) / Utils::kImGuiGrimoireFontPx );
+  // like the HUD's other labels: the point is the text's top, and its left edge, centre or right edge per `align`
+  sf::Vector2f pos = slot_origin + label.rect.position;
+  const float text_w = ImGui::CalcTextSize( text.c_str() ).x;
+  if ( label.align == "center" ) { pos.x -= text_w / 2.f; }
+  else if ( label.align == "right" ) { pos.x -= text_w; }
+  ImGui::SetCursorScreenPos( ImVec2( pos.x, pos.y ) );
+  ImGui::TextUnformatted( text.c_str() );
+}
+
+void HudOverlaySystem::render_inventory_slot( uint8_t idx, bool selected, bool flash, sf::Vector2f slot_origin )
+{
+  const auto &layout = *m_slot_ui_layout;
+  const auto offset_rect = [slot_origin]( const sf::FloatRect &rect ) { return sf::FloatRect( slot_origin + rect.position, rect.size ); };
+
+  // the highlight is drawn by SFML behind the icon, as ImGui draws over the SFML sprites and would tint them
+  if ( const auto *highlight_cmp = find_element( layout.m_outlines, kSlotHighlightName ); selected and highlight_cmp )
+  {
+    const auto rect = offset_rect( highlight_cmp->rect );
+    const auto thickness = static_cast<float>( highlight_cmp->line_thickness );
+    // drawn inside the authored rect, so a full-size highlight doesn't spill into the next slot
+    sf::RectangleShape highlight( { rect.size.x - ( 2.f * thickness ), rect.size.y - ( 2.f * thickness ) } );
+    highlight.setPosition( rect.position + sf::Vector2f( thickness, thickness ) );
+    highlight.setFillColor( highlight_cmp->fill_color );
+    highlight.setOutlineThickness( thickness );
+    highlight.setOutlineColor( flash ? sf::Color::White : highlight_cmp->line_color );
+    draw_screen( highlight );
+  }
+
+  const auto slot_entt = Utils::Player::get_inventory_slot_entt( reg(), idx );
+  const auto *slot_cmp = slot_entt == entt::null ? nullptr : &reg().get<Cmp::PlayerInventorySlot>( slot_entt );
+  const bool has_item = slot_cmp != nullptr and not slot_cmp->empty();
+
+  // icon, shrunk (x and y, keeping its aspect) to fit the slot_icon rect and centred in it, e.g. a 1x2 plant fits its height
+  const auto *icon_cmp = find_element( layout.m_icons, kSlotIconName );
+  const auto *anim_cmp = has_item ? reg().try_get<Cmp::AnimData>( slot_entt ) : nullptr;
+  if ( icon_cmp and anim_cmp )
+  {
+    const auto box = offset_rect( icon_cmp->rect );
+    const sf::Vector2f sprite_size = Sys::SpriteStore::instance().get( anim_cmp->m_sprite_type ).sprite_size();
+    const float icon_scale = std::min( box.size.x / sprite_size.x, box.size.y / sprite_size.y );
+    const sf::Vector2f icon_pos = box.position + ( ( box.size - ( sprite_size * icon_scale ) ) / 2.f );
+    // the slot keeps its item's frame (items.json sprite.index, or the frame rolled by sprite.random) as the anim offset
+    RenderSystem::safe_render_sprite_screen( anim_cmp->m_sprite_type, { icon_pos, sprite_size }, anim_cmp->getFrameIndexOffset(),
+                                             { icon_scale, icon_scale } );
+    m_slot_icons.at( idx ) = SlotIcon{ .position = icon_pos, .scale = icon_scale };
+  }
+
+  if ( const auto *number_cmp = find_element( layout.m_labels, kSlotNumberName ) )
+  {
+    place_imgui_text( *number_cmp, slot_origin, std::to_string( idx + 1 ) );
+  }
+
+  if ( const auto *name_cmp = find_element( layout.m_labels, kSlotNameName ); name_cmp and has_item )
+  {
+    place_imgui_text( *name_cmp, slot_origin, Sys::SpriteStore::instance().get( slot_cmp->m_item->sprite_type ).display_name() );
+  }
+
+  const auto *wear_cmp = has_item ? reg().try_get<Cmp::Inventory::WearLevel>( slot_entt ) : nullptr;
+  if ( const auto *meter_cmp = find_element( layout.m_meters, kSlotWearName ); meter_cmp and wear_cmp )
+  {
+    const auto rect = offset_rect( meter_cmp->rect );
+    ImGui::SetCursorScreenPos( ImVec2( rect.position.x, rect.position.y ) );
+    ImGui::ProgressBar( std::clamp( wear_cmp->m_level / 100.f, 0.f, 1.f ), ImVec2( rect.size.x, rect.size.y ), "" );
+  }
+
+  // size the cell to the whole slot, whatever was drawn: ImGui only grows a cell (and the row) from submitted items
+  const sf::Vector2f slot_size = inventory_slot_size();
+  ImGui::SetCursorScreenPos( ImVec2( slot_origin.x, slot_origin.y ) );
+  ImGui::Dummy( ImVec2( slot_size.x, slot_size.y ) );
 }
 
 void HudOverlaySystem::render_ui_meters( sf::Time dt )
 {
-  if ( not m_main_ui_data )
+  if ( not m_main_ui_layout )
   {
-    SPDLOG_CRITICAL( "UiData object is not initialised. Cannot draw icon overlay" );
+    SPDLOG_CRITICAL( "UiLayout object is not initialised. Cannot draw icon overlay" );
     return;
   }
   // toxidrome meters get a frozen fill and a frosted overlay while the player is immune, blinking as the immunity runs out
@@ -200,7 +362,7 @@ void HudOverlaySystem::render_ui_meters( sf::Time dt )
 
   sf::RectangleShape innermeter;
   sf::RectangleShape outermeter;
-  for ( const auto &meter : m_main_ui_data->m_meters )
+  for ( const auto &meter : m_main_ui_layout->m_meters )
   {
     float meter_value = 0;
     sf::Color meter_inner_color;
@@ -314,12 +476,6 @@ void HudOverlaySystem::render_ui_meters( sf::Time dt )
       is_toxidrome_meter = true;
       should_render = true;
     }
-    else if ( meter.name == "inventory_meter" )
-    {
-      meter_value = Utils::Player::get_inventory_wear_level( reg() );
-      if ( meter_value >= 0 ) { should_render = true; }
-      meter_inner_color = sf::Color::Red;
-    }
 
     if ( not should_render ) { continue; }
 
@@ -430,14 +586,14 @@ void HudOverlaySystem::render_meter_frost( const sf::FloatRect &rect, float seed
 
 void HudOverlaySystem::render_ui_texts()
 {
-  if ( not m_main_ui_data )
+  if ( not m_main_ui_layout )
   {
-    SPDLOG_CRITICAL( "UiData object is not initialised. Cannot draw value overlay" );
+    SPDLOG_CRITICAL( "UiLayout object is not initialised. Cannot draw value overlay" );
     return;
   }
 
   sf::Text text( m_font, "", 1 );
-  for ( const auto &ui_text : m_main_ui_data->m_texts )
+  for ( const auto &ui_text : m_main_ui_layout->m_texts )
   {
     text.setString( ui_text.value );
     text.setCharacterSize( ui_text.font_size );
@@ -475,22 +631,16 @@ bool HudOverlaySystem::update_flash_toggle( sf::Time dt )
 
 void HudOverlaySystem::render_ui_labels( sf::Time dt )
 {
-  if ( not m_main_ui_data )
+  if ( not m_main_ui_layout )
   {
-    SPDLOG_CRITICAL( "UiData object is not initialised. Cannot draw value overlay" );
+    SPDLOG_CRITICAL( "UiLayout object is not initialised. Cannot draw value overlay" );
     return;
   }
   sf::Text text( m_font, "", 1 );
-  for ( const auto &ui_label : m_main_ui_data->m_labels )
+  for ( const auto &ui_label : m_main_ui_layout->m_labels )
   {
     std::string text_str;
     if ( ui_label.name == "wealth_label" ) { text_str = " =   " + std::to_string( Utils::Player::get_wealth( reg() ).wealth ); }
-    else if ( ui_label.name == "inventory_label" )
-    {
-      auto [_, _, inventory_sprite_type] = Utils::Player::get_inventory( reg() );
-      if ( inventory_sprite_type == "" ) { text_str = ""; }
-      else { text_str = Sys::SpriteStore::instance().get( inventory_sprite_type ).display_name(); }
-    }
     else if ( ui_label.name.ends_with( "_delta_lbl" ) )
     {
       text_str = update_stat_change_text( ui_label.name, dt );
@@ -526,12 +676,6 @@ void HudOverlaySystem::render_ui_labels( sf::Time dt )
     }
 
     // flash the text if we just picked up a Key
-    if ( ui_label.name == "inventory_label" and update_flash_toggle<Cmp::FlashUIInventory>( dt ) )
-    {
-      text.setFillColor( sf::Color::Black );
-      text.setOutlineColor( sf::Color::White );
-    }
-
     draw_screen( text );
   }
 }
@@ -599,7 +743,7 @@ void HudOverlaySystem::render_level_depth()
 
   const int max_level_depth = Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value();
   const auto display_res = sf::Vector2f( m_window.getSize() );
-  sf::Text level_txt( m_font, "Nekropolis " + std::to_string( max_level_depth - level_depth_cmp.get_count() ), scaled_char_size( 100, m_main_ui_data.get() ) );
+  sf::Text level_txt( m_font, "Nekropolis " + std::to_string( max_level_depth - level_depth_cmp.get_count() ), scaled_char_size( 100, m_main_ui_layout.get() ) );
   level_txt.setPosition( sf::Vector2f( ( display_res.x / 2.f ) - level_txt.getLocalBounds().getCenter().x, 100.f * hud_scale() ) );
   level_txt.setFillColor( sf::Color::White );
   draw_screen( level_txt );

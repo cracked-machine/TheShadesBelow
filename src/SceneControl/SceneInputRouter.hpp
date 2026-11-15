@@ -101,6 +101,12 @@ private:
   //! @param event The polled window event
   void process_grimoire_wheel( const sf::Event &event );
 
+  //! @brief Change the selected inventory slot: a vertical mouse wheel scroll selects the previous/next slot, and (if
+  //!        `number_keys`) the number row keys 1-5 select a slot directly. Numpad keys are never used.
+  //! @param event The polled window event
+  //! @param number_keys false in scenes that use the number keys for something else (e.g. buying in the shop)
+  void process_inventory_slot_input( const sf::Event &event, bool number_keys );
+
   //! @brief Forward the event to ImGui. Safe in gameplay scenes: OverlayArbitrationSystem pumps an ImGui frame every frame.
   //! @param event The polled window event
   void forward_to_imgui( const sf::Event &event );

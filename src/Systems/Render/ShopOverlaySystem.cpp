@@ -18,7 +18,7 @@ namespace Game::Sys
 
 ShopOverlaySystem::ShopOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
     : BaseOverlaySystem( reg, window, sound_bank ),
-      m_shop_ui_data( std::make_unique<Render::UiData>( "res/ui/shop.json" ) )
+      m_shop_ui_layout( std::make_unique<Render::UiLayout>( "res/ui/shop.json" ) )
 {
 }
 
@@ -30,16 +30,16 @@ void ShopOverlaySystem::update( [[maybe_unused]] sf::Time dt )
   auto &inventory_cmp = inventory_view.get<Cmp::Shop::Inventory>( inventory_view.front() );
   if ( not inventory_cmp.is_enabled ) return;
 
-  if ( not m_shop_ui_data )
+  if ( not m_shop_ui_layout )
   {
-    SPDLOG_CRITICAL( "UiData object is not initialised. Cannot draw value overlay" );
+    SPDLOG_CRITICAL( "UiLayout object is not initialised. Cannot draw value overlay" );
     return;
   }
   // the layout is authored at its Tiled map size; rescale it if the window resolution has changed (no-op otherwise)
-  m_shop_ui_data->sync_to( m_window.getSize() );
+  m_shop_ui_layout->sync_to( m_window.getSize() );
 
   // Draw all UI outlines
-  render_outlines( *m_shop_ui_data );
+  render_outlines( *m_shop_ui_layout );
 
   // The shop flames are an unassigned pool (see Factory::Particle::sync_flames_for_shop_inventory):
   // each torch slot just takes the next unused one.
@@ -57,13 +57,13 @@ void ShopOverlaySystem::update( [[maybe_unused]] sf::Time dt )
   };
 
   // Draw all UI Icons
-  for ( auto [icon, slot] : std::views::zip( m_shop_ui_data->m_icons, inventory_cmp.m_slots ) )
+  for ( auto [icon, slot] : std::views::zip( m_shop_ui_layout->m_icons, inventory_cmp.m_slots ) )
   {
     auto &[item, price] = slot;
     const auto &world_item = Sys::ItemStore::instance().get( item );
     const auto &sprite_type = world_item.sprite_type;
     // Use the default scale/size unless its a plant then its need to be resized/repositioned to fit in the UI box
-    const float shop_scale = m_shop_ui_data->scale();
+    const float shop_scale = m_shop_ui_layout->scale();
     auto sprite_scale = sf::Vector2f{ icon.scale, icon.scale };
     auto sprite_pos = Cmp::Position( icon.rect.position, Constants::kGridSizePxF );
     if ( sprite_type.contains( "plant" ) )
@@ -107,7 +107,7 @@ void ShopOverlaySystem::update( [[maybe_unused]] sf::Time dt )
   {
     auto &[item, price] = slot;
 
-    const unsigned int slot_char_size = scaled_char_size( 30, m_shop_ui_data.get() );
+    const unsigned int slot_char_size = scaled_char_size( 30, m_shop_ui_layout.get() );
     sf::Text slot_idx_txt( m_font, std::to_string( i + 1 ), slot_char_size );
     slot_idx_txt.setFillColor( sf::Color::Black );
 
@@ -121,7 +121,7 @@ void ShopOverlaySystem::update( [[maybe_unused]] sf::Time dt )
     const std::string idx_key = "slot" + std::to_string( i + 1 ) + "_idx";
     const std::string desc_key = "slot" + std::to_string( i + 1 ) + "_desc";
     const std::string price_key = "slot" + std::to_string( i + 1 ) + "_price";
-    for ( const auto &ui_label : m_shop_ui_data->m_labels )
+    for ( const auto &ui_label : m_shop_ui_layout->m_labels )
     {
       if ( ui_label.name.contains( idx_key ) ) { draw_label_text_at( slot_idx_txt, ui_label.rect.position, ui_label.align ); }
       else if ( ui_label.name.contains( desc_key ) ) { draw_label_text_at( slot_desc_txt, ui_label.rect.position, ui_label.align ); }

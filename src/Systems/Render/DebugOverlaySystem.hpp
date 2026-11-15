@@ -4,7 +4,7 @@
 #include <Components/Position.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/Render/BaseOverlaySystem.hpp>
-#include <Systems/Render/UiData.hpp>
+#include <Systems/Render/UiLayout.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Optimizations.hpp>
 #include <span>
@@ -134,7 +134,7 @@ private:
   }
 
   //! @brief Layout data object for the debug UI
-  std::unique_ptr<Render::UiData> m_dbg_ui_data;
+  std::unique_ptr<Render::UiLayout> m_dbg_ui_layout;
 
   //! @brief Which debug rectangles render_debug_stats() draws, toggled from the "Highlights" window. All off by default.
   struct HighlightToggles

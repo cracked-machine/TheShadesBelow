@@ -10,7 +10,12 @@
 #include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/Grimoire.hpp>
+#include <Components/Grave/CurseTablet.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
+#include <Components/Inventory/StingDamage.hpp>
+#include <Components/Inventory/WearLevel.hpp>
+#include <Components/Npc/SummonOffering.hpp>
+#include <Components/UUID.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Particle/SpriteBase.hpp>
@@ -28,6 +33,7 @@
 #include <Components/Player/LastGraveyardPosition.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Player/Mortality.hpp>
+#include <Components/Player/SelectedInventorySlot.hpp>
 #include <Components/Player/MovementDelta.hpp>
 #include <Components/Player/TorchRadius.hpp>
 #include <Components/Player/Wealth.hpp>
@@ -111,6 +117,8 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   reg.emplace_or_replace<Cmp::Player::Doglegs>( entity );
   reg.emplace_or_replace<Cmp::Grimoire>( entity );
   reg.emplace_or_replace<Cmp::Player::GraveTrail>( entity );
+  reg.emplace_or_replace<Cmp::Player::SelectedInventorySlot>( entity );
+  ensure_inventory_slots( reg );
 }
 
 entt::entity add_spawn_area( entt::registry &reg, entt::entity entity, float zorder )
@@ -152,12 +160,75 @@ void create_player_death_anim( entt::registry &reg, Cmp::Position player_pos_cmp
   reg.emplace_or_replace<Cmp::ZOrderValue>( player_blood_splat_entity, player_pos_cmp.position.y * 3 ); // always infront
 }
 
+entt::entity create_empty_inventory_slot( entt::registry &reg, uint8_t idx )
+{
+  auto slot_entt = reg.create();
+  reg.emplace<Cmp::PlayerInventorySlot>( slot_entt, idx, std::nullopt );
+  return slot_entt;
+}
+
+void clear_inventory_slot( entt::registry &reg, entt::entity slot_entt )
+{
+  auto *slot_cmp = reg.try_get<Cmp::PlayerInventorySlot>( slot_entt );
+  if ( not slot_cmp ) return;
+  slot_cmp->m_item.reset();
+  // every per-item component a slot can carry. Add any new per-item component here, so an emptied slot never keeps
+  // stale item state. The entity itself is kept so the slot never moves.
+  reg.remove<Cmp::Inventory::WearLevel, Cmp::Inventory::StingDamage, Cmp::UUID, Cmp::AnimData, Cmp::Inventory::DowsingTarget,
+             Cmp::Npc::SummonOffering, Cmp::Grave::CurseTablet, Cmp::ZOrderValue>( slot_entt );
+}
+
+void ensure_inventory_slots( entt::registry &reg )
+{
+  const auto count = Utils::Player::get_inventory_slot_count( reg );
+  auto slot_view = reg.view<Cmp::PlayerInventorySlot>();
+
+  std::array<bool, Cmp::kMaxInventorySlots> present{};
+  std::vector<entt::entity> surplus;
+  for ( auto [slot_entt, slot_cmp] : slot_view.each() )
+  {
+    if ( slot_cmp.m_slot_idx >= count or present.at( slot_cmp.m_slot_idx ) ) { surplus.push_back( slot_entt ); }
+    else { present.at( slot_cmp.m_slot_idx ) = true; }
+  }
+
+  // the slot count can only be changed from the settings menu, between runs, so surplus slots should be empty
+  for ( auto slot_entt : surplus )
+  {
+    const auto &slot_cmp = reg.get<Cmp::PlayerInventorySlot>( slot_entt );
+    if ( not slot_cmp.empty() )
+    {
+      SPDLOG_WARN( "Removing inventory slot {} holding {}: slot count is now {}", slot_cmp.m_slot_idx, slot_cmp.m_item->item_type.str(), count );
+    }
+    reg.destroy( slot_entt );
+  }
+
+  for ( uint8_t idx = 0; idx < count; ++idx )
+  {
+    if ( not present.at( idx ) ) { create_empty_inventory_slot( reg, idx ); }
+  }
+}
+
 void destroy_inventory( entt::registry &reg, const Sys::ItemKey &type )
 {
-  auto inventory_view = reg.view<Cmp::PlayerInventorySlot>();
-  for ( auto [inventory_entt, inventory_cmp] : inventory_view.each() )
+  // prefer the selected slot, so using the held item never empties a different slot holding the same item
+  const auto selected_entt = Utils::Player::get_selected_slot_entt( reg );
+  if ( selected_entt != entt::null )
   {
-    if ( inventory_cmp.m_item.item_type == type ) reg.destroy( inventory_entt );
+    const auto &selected_cmp = reg.get<Cmp::PlayerInventorySlot>( selected_entt );
+    if ( not selected_cmp.empty() and selected_cmp.m_item->item_type == type )
+    {
+      clear_inventory_slot( reg, selected_entt );
+      return;
+    }
+  }
+  for ( uint8_t idx = 0; idx < Utils::Player::get_inventory_slot_count( reg ); ++idx )
+  {
+    const auto slot_entt = Utils::Player::get_inventory_slot_entt( reg, idx );
+    if ( slot_entt == entt::null ) continue;
+    const auto &slot_cmp = reg.get<Cmp::PlayerInventorySlot>( slot_entt );
+    if ( slot_cmp.empty() or slot_cmp.m_item->item_type != type ) continue;
+    clear_inventory_slot( reg, slot_entt );
+    return;
   }
 }
 

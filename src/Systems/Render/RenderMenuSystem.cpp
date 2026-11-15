@@ -71,7 +71,10 @@
 #include <Components/Persistent/HeldItemRotationWest.hpp>
 #include <Components/Persistent/HeldItemScale.hpp>
 #include <Components/Persistent/HeldItemSideOffsetX.hpp>
+#include <Components/Persistent/InventorySlotCount.hpp>
+#include <Components/Persistent/InventorySlotRollover.hpp>
 #include <Components/Persistent/InventorySwapCooldown.hpp>
+#include <Components/Persistent/StowedTorchLit.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
@@ -279,6 +282,9 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::HeldItemRotationSouth>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::HeldItemScale>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::InventorySwapCooldown>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::InventorySlotCount>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::InventorySlotRollover>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::StowedTorchLit>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerMovementSpeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::TachycardiaMovementSpeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::BradycardiaMovementSpeed>( reg() ).render_widget();

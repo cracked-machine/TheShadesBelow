@@ -219,12 +219,18 @@ void LootSystem::check_loot_collision( sf::Time dt )
     }
     else if ( effect.type == "sprite.graveyard.loot.repair" )
     {
-      // update the wear level of the first matching tool in the player inventory, if any
-      auto inventory_view = reg().view<Cmp::PlayerInventorySlot>();
-      for ( auto [weapons_entity, inventory_slot] : inventory_view.each() )
+      // update the wear level of the first matching tool in the player inventory, if any: the selected slot first, then
+      // the others in slot order
+      const uint8_t slot_count = Utils::Player::get_inventory_slot_count( reg() );
+      const uint8_t selected_idx = Utils::Player::get_selected_slot_idx( reg() );
+      for ( uint8_t offset = 0; offset < slot_count; ++offset )
       {
-        if ( inventory_slot.m_item.sprite_type.contains( "axe" ) or inventory_slot.m_item.sprite_type.contains( "pickaxe" ) or
-             inventory_slot.m_item.sprite_type.contains( "shovel" ) or inventory_slot.m_item.sprite_type.contains( "bow" ) )
+        const auto weapons_entity = Utils::Player::get_inventory_slot_entt( reg(), static_cast<uint8_t>( ( selected_idx + offset ) % slot_count ) );
+        if ( weapons_entity == entt::null ) continue;
+        const auto &inventory_slot = reg().get<Cmp::PlayerInventorySlot>( weapons_entity );
+        if ( inventory_slot.empty() ) continue;
+        const auto &sprite_type = inventory_slot.m_item->sprite_type;
+        if ( sprite_type.contains( "axe" ) or sprite_type.contains( "pickaxe" ) or sprite_type.contains( "shovel" ) or sprite_type.contains( "bow" ) )
         {
           auto *wear_level_cmp = reg().try_get<Cmp::Inventory::WearLevel>( weapons_entity );
           if ( wear_level_cmp )

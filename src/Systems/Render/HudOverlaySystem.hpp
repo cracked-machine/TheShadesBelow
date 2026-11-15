@@ -2,13 +2,17 @@
 #define SRC_SYSTEMS_RENDER_HUDOVERLAYSYSTEM_HPP__
 
 #include <Systems/Render/BaseOverlaySystem.hpp>
-#include <Systems/Render/UiData.hpp>
+#include <Systems/Render/UiLayout.hpp>
 
 #include <SFML/Graphics/Shader.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <entt/entity/entity.hpp>
 
+#include <Components/Inventory/PlayerInventorySlot.hpp>
+
+#include <array>
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
@@ -18,7 +22,8 @@ namespace Game::Sys
 {
 
 //! @brief Draws the HUD layered on top of the game world: meters, labels, icons and texts from res/ui/ui.json, the
-//! screen-space torch particles over the inventory icon, the crypt maze shuffle countdown and the level depth banner.
+//! inventory slot table (an ImGui table at the "inventory_items" ui_table), the screen-space torch particles over their
+//! inventory slot icons, the crypt maze shuffle countdown and the level depth banner.
 class HudOverlaySystem : public BaseOverlaySystem
 {
 public:
@@ -28,7 +33,8 @@ public:
   //! @param sound_bank
   HudOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
       : BaseOverlaySystem( reg, window, sound_bank ),
-        m_main_ui_data( std::make_unique<Render::UiData>( "res/ui/ui.json" ) )
+        m_main_ui_layout( std::make_unique<Render::UiLayout>( "res/ui/ui.json" ) ),
+        m_slot_ui_layout( std::make_unique<Render::UiLayout>( kInventorySlotLayout ) )
   {
   }
 
@@ -41,23 +47,52 @@ public:
   void render_level_depth();
 
 private:
-  //! @brief Draw the screen-space particle sprites, i.e. the torch flame flickering over the UI inventory icon.
+  //! @brief Draw the screen-space particle sprites, i.e. the flame of each lit torch (Utils::Player::is_torch_slot_lit)
+  //! flickering over its inventory slot icon. Uses the slot icons recorded by render_ui_inventory_table().
   void render_ui_particles();
 
   //! @brief Render the HUD's outline rectangles (e.g. panel borders).
   void render_ui_outlines();
 
-  //! @brief Render the HUD's icons, excluding the inventory icon which is handled by render_ui_inventory_icon.
+  //! @brief Render the HUD's icons, excluding the cadaver icons which are handled by render_ui_cadaver_icons.
   void render_ui_icons();
 
   //! @brief Render the cadaver part icons that the player has collected.
   void render_ui_cadaver_icons();
 
-  //! @brief Render the sprite in the Inventory UI.
-  //! @note ParticleSprites are rendered seperately in render_ui_particles
-  void render_ui_inventory_icon();
+  //! @brief Find the "inventory_items" ui_table in the HUD layout.
+  //! @return The table, or nullptr if the layout has none.
+  [[nodiscard]] const Render::UiLayout::Table *find_inventory_table() const;
 
-  //! @brief Render the HUD's meters (health, fear, infamy, despair, toxicity, inventory wear) and flash their outline colour on
+  //! @brief The on-screen size of one inventory slot: the res/ui/inventory_slot.json map size at the HUD's scale.
+  [[nodiscard]] sf::Vector2f inventory_slot_size() const;
+
+  //! @brief Resize the "inventory_outline" so it keeps its authored padding (its offset to the "inventory_items" table)
+  //! around every inventory slot.
+  void fit_inventory_outline();
+
+  //! @brief Render every inventory slot as one row of an ImGui table at the "inventory_items" ui_table's position: one
+  //! column per slot (column i = slot i), each laid out by res/ui/inventory_slot.json. The selected slot is highlighted.
+  //! @note ParticleSprites are rendered seperately in render_ui_particles
+  //! @param dt for the Cmp::FlashUIInventory highlight flash
+  void render_ui_inventory_table( sf::Time dt );
+
+  //! @brief Render one inventory slot's table cell from the res/ui/inventory_slot.json layout: the selection highlight
+  //! (slot_highlight), item icon fitted to slot_icon, slot_number and slot_name text, and the wear level as an
+  //! ImGui::ProgressBar at slot_wear. Must be called inside the inventory table, with the cell's column set.
+  //! @param idx the slot index
+  //! @param selected whether this is the selected slot
+  //! @param flash whether the selected slot's highlight is in the "on" phase of a Cmp::FlashUIInventory flash
+  //! @param slot_origin screen position of the slot's top left corner
+  void render_inventory_slot( uint8_t idx, bool selected, bool flash, sf::Vector2f slot_origin );
+
+  //! @brief Draw ImGui text at a slot layout ui_label: its font_size, and its point aligned per its align property.
+  //! @param label the slot layout label
+  //! @param slot_origin screen position of the slot's top left corner
+  //! @param text the text to draw
+  void place_imgui_text( const Render::UiLayout::Label &label, sf::Vector2f slot_origin, const std::string &text );
+
+  //! @brief Render the HUD's meters (health, fear, infamy, despair, toxicity) and flash their outline colour on
   //! recent changes.
   //! @param dt
   void render_ui_meters( sf::Time dt );
@@ -82,7 +117,7 @@ private:
   //! @brief Render the HUD's static text elements.
   void render_ui_texts();
 
-  //! @brief Render the HUD's dynamic labels (cadaver count, wealth, current inventory item) and flash their colour on
+  //! @brief Render the HUD's dynamic labels (cadaver count, wealth) and flash their colour on
   //! recent changes.
   //! @param dt
   void render_ui_labels( sf::Time dt );
@@ -99,7 +134,7 @@ private:
   bool update_flash_toggle( sf::Time dt );
 
   //! @brief The HUD layout's current design-to-screen scale, for hard-coded HUD pixel values (outline widths, font sizes).
-  [[nodiscard]] float hud_scale() const { return ui_scale( m_main_ui_data.get() ); }
+  [[nodiscard]] float hud_scale() const { return ui_scale( m_main_ui_layout.get() ); }
 
   //! @brief Get the current value of the player stat or toxidrome named by a "<stat>_delta_lbl" UI label.
   //! @param label_name the UI label name, e.g. "health_delta_lbl" or "venom_delta_lbl"
@@ -115,7 +150,39 @@ private:
   std::string update_stat_change_text( const std::string &label_name, sf::Time dt );
 
   //! @brief Layout data object for the HUD
-  std::unique_ptr<Render::UiData> m_main_ui_data;
+  std::unique_ptr<Render::UiLayout> m_main_ui_layout;
+
+  //! @brief Layout data object for one inventory slot (res/ui/inventory_slot.json), at the HUD's scale with a {0,0}
+  //! origin; slots add their own origin when drawn
+  std::unique_ptr<Render::UiLayout> m_slot_ui_layout;
+
+  //! @brief Name of the ui_table the inventory slots are drawn at
+  static constexpr const char *kInventoryTableName = "inventory_items";
+  //! @brief Name of the ui_outline that is resized to fit the inventory slots
+  static constexpr const char *kInventoryOutlineName = "inventory_outline";
+  //! @brief Tiled layout of one inventory slot; its map size is the slot size
+  static constexpr const char *kInventorySlotLayout = "res/ui/inventory_slot.json";
+  //! @brief res/ui/inventory_slot.json ui_outline drawn behind the selected slot
+  static constexpr const char *kSlotHighlightName = "slot_highlight";
+  //! @brief res/ui/inventory_slot.json ui_icon rect the item sprite is fitted into
+  static constexpr const char *kSlotIconName = "slot_icon";
+  //! @brief res/ui/inventory_slot.json ui_label for the item name
+  static constexpr const char *kSlotNameName = "slot_name";
+  //! @brief res/ui/inventory_slot.json ui_label for the slot number
+  static constexpr const char *kSlotNumberName = "slot_number";
+  //! @brief res/ui/inventory_slot.json ui_meter for the wear level ImGui::ProgressBar
+  static constexpr const char *kSlotWearName = "slot_wear";
+
+  //! @brief Where an inventory slot's item icon was drawn this frame
+  struct SlotIcon
+  {
+    //! @brief Screen position of the sprite's top left corner
+    sf::Vector2f position;
+    //! @brief Uniform scale the sprite was drawn at
+    float scale{ 1.f };
+  };
+  //! @brief Each slot's icon from the last render_ui_inventory_table(), indexed by slot; unset for empty slots
+  std::array<std::optional<SlotIcon>, Cmp::kMaxInventorySlots> m_slot_icons{};
 
   //! @brief Screen flash frequency
   int m_ui_flash_factor{ 300 };

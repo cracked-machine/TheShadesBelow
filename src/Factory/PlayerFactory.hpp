@@ -30,7 +30,26 @@ entt::entity add_spawn_area( entt::registry &registry, entt::entity entity, floa
 //! @param sprite
 void create_player_death_anim( entt::registry &registry, Cmp::Position player_pos_cmp, const Sprites::SpriteSheet &sprite );
 
-//! @brief Destroy all player inventory slots matching a type. See "item.xxxx" in res/json/items.json
+//! @brief Create an empty player inventory slot entity with the given index.
+//! @param reg the ECS registry
+//! @param idx the fixed slot index
+//! @return entt::entity the new slot entity
+entt::entity create_empty_inventory_slot( entt::registry &reg, uint8_t idx );
+
+//! @brief Empty an inventory slot in place: reset its item and remove every per-item component. The slot entity and its
+//! index are kept, so emptying a slot never shifts the other slots.
+//! @note Read any item components you need (e.g. to copy them to a world item) before calling this.
+//! @param reg the ECS registry
+//! @param slot_entt the slot entity to empty
+void clear_inventory_slot( entt::registry &reg, entt::entity slot_entt );
+
+//! @brief Make sure there is exactly one inventory slot entity for each index `0..count-1`, creating missing slots empty
+//! and removing slots beyond the current Cmp::Persist::InventorySlotCount.
+//! @param reg the ECS registry
+void ensure_inventory_slots( entt::registry &reg );
+
+//! @brief Empty one player inventory slot holding the given item type, preferring the selected slot.
+//! See "item.xxxx" in res/json/items.json
 //! @param reg the ECS registry
 //! @param type the type to destroy
 void destroy_inventory( entt::registry &reg, const Sys::ItemKey &type );

@@ -46,6 +46,12 @@ public:
   //! @param target_registry Target registry
   void xfer_player_entt( entt::registry &source_registry, entt::registry &target_registry );
 
+  //! @brief Replace every player inventory slot in the target registry with a copy of each slot (empty or not) in the
+  //!        source registry, including the slots' per-item components.
+  //! @param source_registry Copy from
+  //! @param target_registry Copy to
+  void xfer_inventory_slots( entt::registry &source_registry, entt::registry &target_registry );
+
   //! @brief Sync two registries for a specific component only.
   //! @details Use this to transfer components between scenes.
   //!          Note the component must be registered via `init_missing_cmp_storages()` in order for this to work
@@ -58,9 +64,9 @@ public:
     auto source_inventory_view = source_registry.view<COMPONENT>();
     if ( source_inventory_view.empty() )
     {
-      SPDLOG_WARN( "Player inventory is empty in source regsitry. Removing inventory in target registry" );
-      // Note, this kills all slots in target registry of the next scene, but since we only have one slot this doesnt matter
-      // If we add more slots, you would compare slot ids here.
+      SPDLOG_WARN( "No {} in source registry. Removing it from the target registry", entt::type_id<COMPONENT>().name() );
+      // Note, this kills every entity with COMPONENT in the target registry. Player inventory slots use
+      // xfer_inventory_slots() instead.
       auto target_inventory_view = target_registry.view<COMPONENT>();
       for ( auto inventory_entity : target_inventory_view )
       {

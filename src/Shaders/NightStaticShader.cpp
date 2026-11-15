@@ -93,7 +93,8 @@ void NightStaticShader::update( entt::registry &reg, sf::Time dt )
   }
 
   // flame particle sprites are paused when torch is in inventory so we need to add the radius explicitly
-  if ( inventory_type.contains( "torch" ) )
+  // a torch in hand, or a stowed one when Cmp::Persist::StowedTorchLit is on; only one light however many are lit
+  if ( Utils::Player::has_lit_torch( reg ) )
   {
     torch_positions.push_back( Utils::Player::get_position( reg ).getCenter() );
     torch_colors.push_back( WARM_YELLOW );

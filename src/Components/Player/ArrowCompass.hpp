@@ -242,7 +242,7 @@ private:
     }
     for ( auto [slot_entt, slot_cmp] : reg.view<Cmp::PlayerInventorySlot>().each() )
     {
-      if ( slot_cmp.m_item.item_type == key ) return true;
+      if ( not slot_cmp.empty() and slot_cmp.m_item->item_type == key ) return true;
     }
     return false;
   }

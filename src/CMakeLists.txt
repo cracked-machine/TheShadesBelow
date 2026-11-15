@@ -69,7 +69,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/PauseOverlaySystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/ShopOverlaySystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/TooltipOverlaySystem.cpp
-    ${CMAKE_SOURCE_DIR}/src/Systems/Render/UiData.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/UiLayout.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/ZOrderQueue.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/AnimSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/BaseSystem.cpp

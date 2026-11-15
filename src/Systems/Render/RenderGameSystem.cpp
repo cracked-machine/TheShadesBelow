@@ -85,7 +85,7 @@
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderPassTypes.hpp>
 #include <Systems/Render/RenderSystem.hpp>
-#include <Systems/Render/UiData.hpp>
+#include <Systems/Render/UiLayout.hpp>
 #include <Systems/ShaderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
@@ -113,7 +113,7 @@ RenderGameSystem::RenderGameSystem( entt::registry &reg, sf::RenderWindow &windo
     : RenderSystem( reg, window, sound_bank )
 {
   // the compass arrow avoids the UI panels down the left of the screen, see update_compass_left_inset()
-  m_hud_ui_data = std::make_unique<Render::UiData>( "res/ui/ui.json" );
+  m_hud_ui_layout = std::make_unique<Render::UiLayout>( "res/ui/ui.json" );
   update_compass_left_inset();
 
   SPDLOG_DEBUG( "RenderGameSystem initialized" );
@@ -123,10 +123,10 @@ RenderGameSystem::~RenderGameSystem() = default;
 
 void RenderGameSystem::update_compass_left_inset()
 {
-  if ( not m_hud_ui_data ) return;
-  m_hud_ui_data->sync_to( m_window.getSize() );
+  if ( not m_hud_ui_layout ) return;
+  m_hud_ui_layout->sync_to( m_window.getSize() );
   // the right edge of the widest ui_outline, in screen pixels at the current UI scale
-  const auto &outlines = m_hud_ui_data->m_outlines;
+  const auto &outlines = m_hud_ui_layout->m_outlines;
   const auto widest = std::ranges::max_element( outlines, {}, []( const auto &outline ) { return outline.rect.size.x; } );
   if ( widest != outlines.end() ) m_compass_left_inset_px = widest->rect.position.x + widest->rect.size.x;
 }
@@ -196,8 +196,11 @@ void RenderGameSystem::render_zorder_queue()
     }
 
     else if ( auto *floor_tiles = reg().try_get<Sprites::Containers::VertexFloor>( entity ) ) { draw_vertex_floor( *floor_tiles ); }
-    // the inventory slot holding the dowsing rod: draws the chevrons above the floor and below sprites
-    else if ( reg().all_of<Cmp::Inventory::DowsingTarget>( entity ) ) { draw_world( Utils::Player::get_doglegs( reg() ).m_markers ); }
+    // the inventory slot holding the dowsing rod: draws the chevrons above the floor and below sprites, only while it is in hand
+    else if ( reg().all_of<Cmp::Inventory::DowsingTarget>( entity ) )
+    {
+      if ( entity == Utils::Player::get_inventory_entt( reg() ) ) { draw_world( Utils::Player::get_doglegs( reg() ).m_markers ); }
+    }
     // the chevrons from the activated altar to the trail start graves
     else if ( auto *trail_guide = reg().try_get<Cmp::Altar::TrailGuide>( entity ) ) { draw_world( trail_guide->paths.m_markers ); }
   }
@@ -425,21 +428,21 @@ void RenderGameSystem::render_arrow_compass()
   {
     auto &compass = reg().get_or_emplace<Cmp::Player::ArrowCompass>( player_entt );
 
-    // single slot inventory; read the item type by reference to avoid a per-frame string copy
-    auto inv_view = reg().view<Cmp::PlayerInventorySlot>();
-    const auto *inv_slot = inv_view.empty() ? nullptr : &inv_view.get<Cmp::PlayerInventorySlot>( inv_view.front() );
-    bool is_offerable = ( inv_slot != nullptr ) and inv_slot->m_item.is_offerable();
+    // the item in hand (selected slot); read the item type by reference to avoid a per-frame string copy
+    const auto inv_entt = Utils::Player::get_inventory_entt( reg() );
+    const auto *inv_slot = inv_entt == entt::null ? nullptr : &reg().get<Cmp::PlayerInventorySlot>( inv_entt );
+    bool is_offerable = ( inv_slot != nullptr ) and inv_slot->m_item->is_offerable();
     if ( is_offerable )
     {
       // tools can only be offered once spent (see AltarSystem::check_player_altar_offering)
-      const auto &type = inv_slot->m_item.item_type;
+      const auto &type = inv_slot->m_item->item_type;
       if ( type == "item.axe" or type == "item.pickaxe" or type == "item.shovel" )
       {
-        const auto *wear_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inv_view.front() );
+        const auto *wear_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inv_entt );
         is_offerable = ( wear_cmp != nullptr ) and wear_cmp->m_level <= 0;
       }
     }
-    compass.update_mode( inv_slot ? inv_slot->m_item.item_type : kNoItem, is_offerable );
+    compass.update_mode( inv_slot ? inv_slot->m_item->item_type : kNoItem, is_offerable );
 
     const sf::Vector2f player_center = pc_pos_cmp.getCenter();
     compass.refresh_targets( reg(), player_center );
@@ -618,11 +621,13 @@ void RenderGameSystem::render_held_item( const sf::FloatRect &body_rect, sf::Vec
   if ( facing_west ) scale.x = -scale.x;
   scale *= Sys::PersistSystem::get<Cmp::Persist::HeldItemScale>( reg() ).get_value();
 
-  // same sprite as the UI inventory icon (see HudOverlaySystem::render_ui_inventory_icon)
-  for ( auto [inventory_entt, inventory_cmp, anim_cmp] : reg().view<Cmp::PlayerInventorySlot, Cmp::AnimData>().each() )
+  // only the item in hand (selected slot); same sprite as its HUD slot (see HudOverlaySystem::render_ui_inventory_table)
+  const auto inventory_entt = Utils::Player::get_inventory_entt( reg() );
+  if ( inventory_entt == entt::null ) return;
+  if ( const auto *anim_cmp = reg().try_get<Cmp::AnimData>( inventory_entt ) )
   {
     // the origin is the sprite centre, so the item is scaled and tilted in place
-    safe_render_sprite_world( anim_cmp.m_sprite_type, sf::FloatRect( body_rect.position + offset, Constants::kGridSizePxF ), 0, scale, alpha,
+    safe_render_sprite_world( anim_cmp->m_sprite_type, sf::FloatRect( body_rect.position + offset, Constants::kGridSizePxF ), 0, scale, alpha,
                               Constants::kGridSizePxF / 2.f, rotation );
   }
 }

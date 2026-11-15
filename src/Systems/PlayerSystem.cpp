@@ -912,13 +912,15 @@ void PlayerSystem::apply_healing_spring_modifiers()
 
 void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
 {
-  // We need the inventory component not the types
-  for ( auto [slot_entt, slot_cmp] : reg().view<Cmp::PlayerInventorySlot>().each() )
+  // carry effects only apply to the item in hand (the selected slot). We need the inventory component not the types
+  const auto slot_entt = Utils::Player::get_inventory_entt( reg() );
+  if ( slot_entt == entt::null ) return;
+  auto &slot_cmp = reg().get<Cmp::PlayerInventorySlot>( slot_entt );
   {
-    auto &[carry_action_def, carry_timer] = slot_cmp.m_item.at<Cmp::CarryAction>();
-    if ( carry_action_def.interval() == 0.f ) continue;
+    auto &[carry_action_def, carry_timer] = slot_cmp.m_item->at<Cmp::CarryAction>();
+    if ( carry_action_def.interval() == 0.f ) return;
     carry_timer += dt;
-    if ( carry_timer.asSeconds() < carry_action_def.interval() ) continue;
+    if ( carry_timer.asSeconds() < carry_action_def.interval() ) return;
     // items without a Cmp::Inventory::StingDamage (e.g. foraged with gloves) are harmless to carry
     auto carry_action = carry_action_def;
     if ( not reg().all_of<Cmp::Inventory::StingDamage>( slot_entt ) ) carry_action.remove_damage();
@@ -928,7 +930,7 @@ void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
       Utils::Player::get_mortality( reg() ).last_damage_cause = Cmp::Player::Mortality::State::SKEWERED;
     }
     Utils::Player::get_stats( reg() ).apply( carry_action );
-    get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( slot_cmp.m_item.item_type, Cmp::CarryAction::kKey, carry_action ) );
+    get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( slot_cmp.m_item->item_type, Cmp::CarryAction::kKey, carry_action ) );
     carry_timer = sf::Time::Zero;
   }
 }

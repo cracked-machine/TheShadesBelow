@@ -11,6 +11,7 @@
 #include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
+#include <Components/Persistent/InventorySlotRollover.hpp>
 #include <Components/Persistent/InventorySwapCooldown.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
@@ -18,6 +19,7 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/NoPath.hpp>
+#include <Components/Player/SelectedInventorySlot.hpp>
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/Stats/ConsumeAction.hpp>
@@ -30,6 +32,7 @@
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
+#include <Events/SelectInventorySlotEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/ItemFactory.hpp>
 #include <Factory/MultiblockFactory.hpp>
@@ -66,12 +69,14 @@ InventorySystem::InventorySystem( entt::registry &reg, sf::RenderWindow &window,
   std::ignore = get_systems_event_queue().sink<Events::DropInventoryEvent>().connect<&InventorySystem::on_drop_inventory_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::PickupWorldItemEvent>().connect<&InventorySystem::on_pickup_world_item_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::UpdateDmgEvent>().connect<&InventorySystem::on_update_dmg_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::SelectInventorySlotEvent>().connect<&InventorySystem::on_select_inventory_slot_event>( this );
   SPDLOG_DEBUG( "InventorySystem initialized" );
 }
 
 void InventorySystem::update( sf::Time dt )
 {
   m_swap_item_cooldown_timer += dt;
+  Factory::Player::ensure_inventory_slots( reg() );
   Factory::Particle::delete_expired_particle_sprites( reg(), "player.forage.particle.eating" );
 
   auto player_entt = Utils::Player::get_entity( reg() );
@@ -101,6 +106,74 @@ void InventorySystem::on_drop_inventory_event( [[maybe_unused]] Events::DropInve
 
 void InventorySystem::on_pickup_world_item_event( Events::PickupWorldItemEvent ev ) { pickup_world_item( reg(), ev.world_item_entt ); }
 
+void InventorySystem::on_select_inventory_slot_event( const Events::SelectInventorySlotEvent &ev )
+{
+  // can't change hands mid-bite, or let go of the broom mid-flight (including the descent to the landing cell)
+  if ( Utils::Player::is_player_eating( reg() ) ) return;
+  if ( Utils::Player::is_flying( reg() ) ) return;
+
+  auto player_entt = Utils::Player::get_entity( reg() );
+  auto *selected_cmp = reg().try_get<Cmp::Player::SelectedInventorySlot>( player_entt );
+  if ( not selected_cmp ) return;
+
+  const uint8_t count = Utils::Player::get_inventory_slot_count( reg() );
+  const uint8_t current = Utils::Player::get_selected_slot_idx( reg() );
+  const bool rollover = Sys::PersistSystem::get<Cmp::Persist::InventorySlotRollover>( reg() ).get_value();
+  uint8_t next = current;
+  switch ( ev.m_mode )
+  {
+    case Events::SelectInventorySlotEvent::Mode::INDEX:
+      if ( ev.m_idx >= count ) return;
+      next = ev.m_idx;
+      break;
+    case Events::SelectInventorySlotEvent::Mode::NEXT:
+      if ( rollover ) { next = static_cast<uint8_t>( ( current + 1 ) % count ); }
+      else if ( current + 1 < count ) { next = static_cast<uint8_t>( current + 1 ); }
+      break;
+    case Events::SelectInventorySlotEvent::Mode::PREV:
+      if ( rollover ) { next = static_cast<uint8_t>( ( current + count - 1 ) % count ); }
+      else if ( current > 0 ) { next = static_cast<uint8_t>( current - 1 ); }
+      break;
+  }
+  if ( next == current )
+  {
+    // keep the stored index in range even if it was clamped by a lower slot count
+    selected_cmp->m_idx = current;
+    return;
+  }
+
+  // a drawn bow (or charged burr) belongs to the item being put away
+  get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::CANCEL_BOW ) );
+  selected_cmp->m_idx = next;
+  SPDLOG_DEBUG( "Selected inventory slot {}", next );
+}
+
+entt::entity InventorySystem::prepare_empty_slot( std::optional<uint8_t> idx )
+{
+  const uint8_t slot_idx = idx.value_or( Utils::Player::get_selected_slot_idx( reg() ) );
+  auto slot_entt = Utils::Player::get_inventory_slot_entt( reg(), slot_idx );
+  if ( slot_entt == entt::null )
+  {
+    Factory::Player::ensure_inventory_slots( reg() );
+    slot_entt = Utils::Player::get_inventory_slot_entt( reg(), slot_idx );
+    if ( slot_entt == entt::null )
+    {
+      SPDLOG_WARN( "No inventory slot {}", slot_idx );
+      return entt::null;
+    }
+  }
+
+  if ( not reg().get<Cmp::PlayerInventorySlot>( slot_entt ).empty() )
+  {
+    // callers are expected to free the slot first; drop the occupant rather than lose it
+    SPDLOG_WARN( "Inventory slot {} is occupied, dropping its item", slot_idx );
+    drop_inventory_item( Utils::Player::get_position( reg() ).position, slot_entt );
+    // e.g. a plant can't be replanted in the spawn area
+    if ( not reg().get<Cmp::PlayerInventorySlot>( slot_entt ).empty() ) { Factory::Player::clear_inventory_slot( reg(), slot_entt ); }
+  }
+  return slot_entt;
+}
+
 void InventorySystem::on_update_dmg_event( const Events::UpdateDmgEvent &ev ) { update_dmg( ev.m_item_entt, ev.m_amount, ev.m_type ); }
 
 void InventorySystem::update_dmg( entt::entity entt, float amount, Events::UpdateDmgEvent::Type type )
@@ -119,19 +192,22 @@ void InventorySystem::update_dmg( entt::entity entt, float amount, Events::Updat
         break;
     }
 
-    if ( wearlevel_cmp.m_level <= 0 )
+    const auto &slot_cmp = reg().get<Cmp::PlayerInventorySlot>( entt );
+    if ( wearlevel_cmp.m_level <= 0 and not slot_cmp.empty() )
     {
-      auto inventory_type = reg().get<Cmp::PlayerInventorySlot>( entt ).m_item.item_type;
+      const Sys::ItemKey inventory_type = slot_cmp.m_item->item_type;
+      const uint8_t slot_idx = slot_cmp.m_slot_idx;
       auto item = Sys::ItemStore::instance().get( inventory_type );
       if ( item.consumable_type() == Cmp::WorldItem::Consumable::EDIBLE )
       {
-        reg().destroy( entt );
-        add_inventory_item( "item.rottenfood" );
+        // rotten food takes the place of the food, in the same slot
+        Factory::Player::clear_inventory_slot( reg(), entt );
+        add_inventory_item( "item.rottenfood", slot_idx );
       }
       else if ( inventory_type == "item.gloves" )
       {
         // worn out gloves fall apart
-        reg().destroy( entt );
+        Factory::Player::clear_inventory_slot( reg(), entt );
         m_sound_bank.get_effect( "drop_inventory" ).play();
       }
       else
@@ -143,12 +219,13 @@ void InventorySystem::update_dmg( entt::entity entt, float amount, Events::Updat
   }
 }
 
-void InventorySystem::add_inventory_item( const Sys::ItemKey &item )
+void InventorySystem::add_inventory_item( const Sys::ItemKey &item, std::optional<uint8_t> idx )
 {
   const auto &item_cmp = Sys::ItemStore::instance().get( item );
 
-  auto inventory_entt = reg().create();
-  reg().emplace_or_replace<Cmp::PlayerInventorySlot>( inventory_entt, item_cmp );
+  auto inventory_entt = prepare_empty_slot( idx );
+  if ( inventory_entt == entt::null ) return;
+  reg().get<Cmp::PlayerInventorySlot>( inventory_entt ).m_item = item_cmp;
   if ( item_cmp.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entt, 100.f ); }
   if ( item_cmp.stings() ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( inventory_entt ); }
 
@@ -195,40 +272,43 @@ void InventorySystem::swap_inventory()
   auto player_pos = Cmp::RectBounds::scaled( Utils::Player::get_position( reg() ), 0.5 );
   Sys::SpriteKey existing_player_inventory_type;
 
-  // drop inventory if we have one
-  auto inventory_view = reg().view<Cmp::PlayerInventorySlot>();
-  for ( auto [inventory_entt, inventory_cmp] : inventory_view.each() )
+  // drop the selected slot's item if it has one
+  if ( auto [inventory_entt, _, inventory_sprite_type] = Utils::Player::get_inventory( reg() ); inventory_entt != entt::null )
   {
-    existing_player_inventory_type = inventory_cmp.m_item.sprite_type;
+    existing_player_inventory_type = inventory_sprite_type;
     drop_inventory_item( Utils::Player::get_position( reg() ).position, inventory_entt );
   }
 
-  // pickup inventory if there is something at this position
-  auto world_item_view = reg().view<Cmp::WorldItem, Cmp::Position>( entt::exclude<Cmp::PlantMultiBlock> );
-  for ( auto [world_item_entt, world_item_cmp, world_item_pos_cmp] : world_item_view.each() )
+  // pickup inventory into the selected slot if it is now empty and there is something at this position
+  // (a plant can't be replanted in the spawn area, so the slot may still be full)
+  const auto selected_entt = Utils::Player::get_selected_slot_entt( reg() );
+  if ( selected_entt != entt::null and reg().get<Cmp::PlayerInventorySlot>( selected_entt ).empty() )
   {
-    if ( not player_pos.findIntersection( world_item_pos_cmp ) ) continue;        // is there something to pick up?
-    if ( world_item_cmp.sprite_type == existing_player_inventory_type ) continue; // dont pick up the one we just dropped
-    if ( inventory_view.size() > 0 ) { break; }                                   // don't pickup another if we already have one
+    auto world_item_view = reg().view<Cmp::WorldItem, Cmp::Position>( entt::exclude<Cmp::PlantMultiBlock> );
+    for ( auto [world_item_entt, world_item_cmp, world_item_pos_cmp] : world_item_view.each() )
+    {
+      if ( not player_pos.findIntersection( world_item_pos_cmp ) ) continue;        // is there something to pick up?
+      if ( world_item_cmp.sprite_type == existing_player_inventory_type ) continue; // dont pick up the one we just dropped
 
-    pickup_world_item( reg(), world_item_entt );
+      pickup_world_item( reg(), world_item_entt );
+      break; // the slot is full now
+    }
   }
   m_swap_item_cooldown_timer = sf::Time::Zero;
-  SPDLOG_DEBUG( "inventory_view: {} ", inventory_view.size() );
 }
 
 void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity inventory_slot_entt )
 {
   auto *inventory_slot_cmp = reg().try_get<Cmp::PlayerInventorySlot>( inventory_slot_entt );
 
-  if ( not inventory_slot_cmp )
+  if ( not inventory_slot_cmp or inventory_slot_cmp->empty() )
   {
     SPDLOG_INFO( "Player has no inventory" );
     return;
   }
 
   // if player inventory is a plant item then replant it in the ground - snap to nearest grid to prevent collision issues
-  if ( inventory_slot_cmp->m_item.sprite_type.contains( "plant" ) )
+  if ( inventory_slot_cmp->m_item->sprite_type.contains( "plant" ) )
   {
     // multiblocks are top-left anchored, so offset the y-axis so that plant base is at players feet
     auto plant_pos = Utils::snap_to_grid( { pos.x, pos.y - Constants::kGridSizePxF.y } );
@@ -236,17 +316,17 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
     // don't allow plants to be dropped at all in the player spawn area
     if ( Utils::Player::is_in_spawn( reg(), Utils::Player::get_position( reg() ) ) ) return;
 
-    const auto &spritesheet = Sys::SpriteStore::instance().get( inventory_slot_cmp->m_item.sprite_type );
+    const auto &spritesheet = Sys::SpriteStore::instance().get( inventory_slot_cmp->m_item->sprite_type );
     // keep the frame the item already has (e.g. rolled by sprite.random when it first spawned)
     const auto *slot_anim_cmp = reg().try_get<Cmp::AnimData>( inventory_slot_entt );
-    const std::size_t sprite_idx = slot_anim_cmp ? slot_anim_cmp->getFrameIndexOffset() : inventory_slot_cmp->m_item.sprite_index();
+    const std::size_t sprite_idx = slot_anim_cmp ? slot_anim_cmp->getFrameIndexOffset() : inventory_slot_cmp->m_item->sprite_index();
     auto [mb_entt, segment_entt_list] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>(
         reg(), plant_pos, spritesheet, /*ss_index=*/sprite_idx, /*zorder=*/0, m_reserved_sm.lock().get() );
 
     // Preserve the item this plant was grown from, so digging it back up (see the DIG handler in
     // on_player_action_event) can hand it back via the normal pickup_world_item path instead of
     // having to re-derive an item id from the multiblock's sprite.
-    reg().emplace_or_replace<Cmp::WorldItem>( mb_entt, inventory_slot_cmp->m_item );
+    reg().emplace_or_replace<Cmp::WorldItem>( mb_entt, *inventory_slot_cmp->m_item );
     // keep the remaining forage count when the plant is replanted
     auto *plant_wearlevel_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inventory_slot_entt );
     if ( plant_wearlevel_cmp ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( mb_entt, plant_wearlevel_cmp->m_level ); }
@@ -280,8 +360,8 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
       }
     }
 
-    // clear player inevntory
-    reg().destroy( inventory_slot_entt );
+    // clear player inventory slot
+    Factory::Player::clear_inventory_slot( reg(), inventory_slot_entt );
     m_sound_bank.get_effect( "chopping_final" ).play();
     return;
   }
@@ -293,10 +373,10 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
   // Copy the animdata over to avoid losing ref data
   auto *existing_anim_data = reg().try_get<Cmp::AnimData>( inventory_slot_entt );
   if ( existing_anim_data ) { reg().emplace_or_replace<Cmp::AnimData>( world_item_entt, *existing_anim_data ); }
-  else { SPDLOG_WARN( "Dropped item {} has no AnimData", inventory_slot_cmp->m_item.item_type.str() ); }
+  else { SPDLOG_WARN( "Dropped item {} has no AnimData", inventory_slot_cmp->m_item->item_type.str() ); }
 
   reg().emplace_or_replace<Cmp::ZOrderValue>( world_item_entt, pos.y - 1.f );
-  reg().emplace_or_replace<Cmp::WorldItem>( world_item_entt, inventory_slot_cmp->m_item );
+  reg().emplace_or_replace<Cmp::WorldItem>( world_item_entt, *inventory_slot_cmp->m_item );
   reg().emplace_or_replace<Cmp::Npc::NoPathFinding>( world_item_entt );
 
   // try to copy any relevant components over to the new world carryitem entt
@@ -340,8 +420,8 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
     reg().emplace_or_replace<Cmp::UUID>( world_item_entt, uuid_cmp->data );
   }
 
-  // now destroy the inventory slot
-  reg().destroy( inventory_slot_entt );
+  // now empty the inventory slot
+  Factory::Player::clear_inventory_slot( reg(), inventory_slot_entt );
   if ( world_item_entt != entt::null ) { m_sound_bank.get_effect( "drop_inventory" ).play(); }
 }
 
@@ -366,24 +446,33 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
     get_systems_event_queue().trigger( Events::UpdateDmgEvent( worlditem_entt, dmg ) );
   }
 
-  // there is only one inventory slot so stop after the first one
+  // every slot rots, selected or not. Collect first - update_dmg may empty and refill a slot.
+  const uint8_t selected_idx = Utils::Player::get_selected_slot_idx( reg() );
+  std::vector<std::pair<entt::entity, float>> inventory_dmg;
   for ( auto [inventory_entt, inventory_cmp, wearlevel_cmp] : reg().view<Cmp::PlayerInventorySlot, Cmp::Inventory::WearLevel>().each() )
   {
-    if ( wearlevel_cmp.m_level <= 0 ) continue;
-    // "active_only" items (e.g. elderflute, witchesbroom) only wear while they are in use
-    if ( inventory_cmp.m_item.wears_only_when_active() and not Utils::Player::is_inventory_item_active( reg() ) ) break;
+    if ( inventory_cmp.empty() or wearlevel_cmp.m_level <= 0 ) continue;
+    // "active_only" items (e.g. elderflute, witchesbroom) only wear while they are selected and in use
+    if ( inventory_cmp.m_item->wears_only_when_active() and
+         ( inventory_cmp.m_slot_idx != selected_idx or not Utils::Player::is_inventory_item_active( reg() ) ) )
+    {
+      continue;
+    }
     // the slot entity has no Cmp::WorldItem of its own - the item lives inside the slot component.
     // Tools have no expiry; they only wear through use.
-    if ( inventory_cmp.m_item.inventory_expiry() != sf::Time::Zero )
+    if ( inventory_cmp.m_item->inventory_expiry() != sf::Time::Zero )
     {
-      float dmg = 100.f / ( inventory_cmp.m_item.inventory_expiry().asSeconds() / expiry_update_timeout.asSeconds() );
-      update_dmg( inventory_entt, dmg, Events::UpdateDmgEvent::SUBTRACT );
+      float dmg = 100.f / ( inventory_cmp.m_item->inventory_expiry().asSeconds() / expiry_update_timeout.asSeconds() );
+      inventory_dmg.emplace_back( inventory_entt, dmg );
     }
-    break; // only one inventory slot
+  }
+  for ( auto [inventory_entt, dmg] : inventory_dmg )
+  {
+    update_dmg( inventory_entt, dmg, Events::UpdateDmgEvent::SUBTRACT );
   }
 }
 
-void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world_item_entt )
+void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world_item_entt, std::optional<uint8_t> idx )
 {
 
   // items without a Cmp::Inventory::StingDamage (e.g. foraged with gloves) don't sting when picked up
@@ -405,9 +494,13 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
   // copy the item key now, the world item entt is destroyed below
   const Sys::ItemKey picked_up_item = world_item_cmp->item_type;
 
-  // create the basic inventory slot entt
-  auto inventory_entity = reg.create();
-  reg.emplace_or_replace<Cmp::PlayerInventorySlot>( inventory_entity, *world_item_cmp );
+  // fill the (empty) inventory slot in place, so it keeps its position
+  auto inventory_entity = prepare_empty_slot( idx );
+  if ( inventory_entity == entt::null ) return;
+  // prepare_empty_slot may have dropped an item into the world, so look the world item up again
+  world_item_cmp = reg.try_get<Cmp::WorldItem>( world_item_entt );
+  if ( not world_item_cmp ) return;
+  reg.get<Cmp::PlayerInventorySlot>( inventory_entity ).m_item = *world_item_cmp;
 
   // Copy the animdata over to avoid losing ref data
   auto *existing_anim_data = reg.try_get<Cmp::AnimData>( world_item_entt );
@@ -545,8 +638,11 @@ void InventorySystem::consume_inventory( sf::Time dt )
     reg().remove<Cmp::Player::ConsumeTimer>( Utils::Player::get_entity( reg() ) );
     const auto consume_action = Utils::Player::apply_action_from_inventory_item<Cmp::ConsumeAction>( reg() );
     trigger_side_effects( consume_action, Utils::Player::get_position( reg() ) );
-    auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-    Factory::Player::destroy_inventory( reg(), inventory_type );
+    // empty the selected slot itself, not another slot holding the same item
+    if ( auto inventory_entt = Utils::Player::get_inventory_entt( reg() ); inventory_entt != entt::null )
+    {
+      Factory::Player::clear_inventory_slot( reg(), inventory_entt );
+    }
   }
 }
 

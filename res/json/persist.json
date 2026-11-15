@@ -274,6 +274,24 @@
     "detail": "Item pickup/drop cooldown (seconds)",
     "format": "%.2f"
   },
+  "InventorySlotCount": {
+    "type": "int",
+    "value": 2,
+    "min_value": 1,
+    "max_value": 5,
+    "detail": "Inventory slot count",
+    "format": "%d"
+  },
+  "StowedTorchLit": {
+    "type": "bool",
+    "value": false,
+    "detail": "Torch stays lit when its slot is not selected"
+  },
+  "InventorySlotRollover": {
+    "type": "bool",
+    "value": false,
+    "detail": "Inventory slot selection wraps around"
+  },
   "PlayerRenderOffset": {
     "type": "float",
     "value": -4.0,

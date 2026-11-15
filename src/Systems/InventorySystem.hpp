@@ -5,6 +5,7 @@
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
+#include <Events/SelectInventorySlotEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <SFML/System/Time.hpp>
@@ -12,13 +13,16 @@
 
 #include <SFML/System/Clock.hpp>
 #include <entt/entity/fwd.hpp>
+#include <cstdint>
+#include <optional>
 
 namespace Game::Sys
 {
 
-//! @brief Creates player inventory items and moves items between the player's inventory slot and the world.
-//! Event-driven, responding to Events::AddInventoryEvent, Events::DropInventoryEvent, Events::PickupWorldItemEvent,
-//! and the DROP_INVENTORY action of Events::PlayerActionEvent.
+//! @brief Creates player inventory items, moves items between the player's inventory slots and the world, and changes
+//! the selected slot. Event-driven, responding to Events::AddInventoryEvent, Events::DropInventoryEvent,
+//! Events::PickupWorldItemEvent, Events::SelectInventorySlotEvent and the SWAP_INVENTORY/CONSUME actions of
+//! Events::PlayerActionEvent. Slots always exist and never move; items fill and empty them in place.
 class InventorySystem : public BaseSystem
 {
 public:
@@ -61,6 +65,15 @@ private:
   //! @param ev
   void on_pickup_world_item_event( Events::PickupWorldItemEvent ev );
 
+  //! @brief Change the selected inventory slot. Ignored while eating or flying.
+  //! @param ev
+  void on_select_inventory_slot_event( const Events::SelectInventorySlotEvent &ev );
+
+  //! @brief Get the slot entity at `idx` (default: the selected slot), emptying it first if it unexpectedly holds an item.
+  //! @param idx The slot index, or std::nullopt for the selected slot.
+  //! @return entt::entity The empty slot entity, or entt::null if there is no slot with that index.
+  entt::entity prepare_empty_slot( std::optional<uint8_t> idx );
+
   //! @brief handler for Events::UpdateDmgEvent. Calls update_dmg().
   //! @param ev
   void on_update_dmg_event( const Events::UpdateDmgEvent &ev );
@@ -71,15 +84,16 @@ private:
   //! @param type
   void update_dmg( entt::entity entt, float amount, Events::UpdateDmgEvent::Type type );
 
-  //! @brief Create a new player inventory slot entity for `item`, attaching any item-specific components
+  //! @brief Put `item` into an inventory slot, attaching any item-specific components
   //! (wear level if the item has one, UUID for torches).
   //! @param item Item identifier, e.g. "item.pickaxe". See res/json/items.json.
-  void add_inventory_item( const Sys::ItemKey &item );
+  //! @param idx The slot index, or std::nullopt for the selected slot.
+  void add_inventory_item( const Sys::ItemKey &item, std::optional<uint8_t> idx = std::nullopt );
 
-  //! @brief Drop the inventory (if player has one) and pickup the nearest workd item into inventory
+  //! @brief Drop the selected slot's item (if any) and pickup the nearest world item into the selected slot
   void swap_inventory();
 
-  //! @brief Remove the CarryItem from player inventory and place it into the world
+  //! @brief Move an inventory slot's item into the world and empty the slot
   //! @param pos the postion to place the item
   //! @param inventory_slot_entt the player inventory slot entt
   void drop_inventory_item( sf::Vector2f pos, entt::entity inventory_slot_entt );
@@ -89,14 +103,15 @@ private:
   //! @param dt
   void update_item_expiry_damage( sf::Time dt );
 
-  //! @brief Add the world item to the player's inventory and destroy the world entity.
+  //! @brief Add the world item to an inventory slot and destroy the world entity.
   //! @param reg
   //! @param world_item_entt
-  void pickup_world_item( entt::registry &reg, entt::entity world_item_entt );
+  //! @param idx The slot index, or std::nullopt for the selected slot.
+  void pickup_world_item( entt::registry &reg, entt::entity world_item_entt, std::optional<uint8_t> idx = std::nullopt );
 
   void try_consume_item();
 
-  //! @brief Eat the inventory item if it is edible or drinkable.
+  //! @brief Eat the selected inventory item if it is edible or drinkable.
   //! @param dt Update the EatingTimeAccumulator with the delta time.
   void consume_inventory( sf::Time dt );
 

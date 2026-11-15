@@ -17,6 +17,8 @@
 #include <Components/Npc/Wisp.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
+#include <Components/Persistent/InventorySlotCount.hpp>
+#include <Components/Persistent/StowedTorchLit.hpp>
 #include <Components/Persistent/BradycardiaMovementSpeed.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
@@ -38,6 +40,7 @@
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Player/Mortality.hpp>
 #include <Components/Player/RuinLocation.hpp>
+#include <Components/Player/SelectedInventorySlot.hpp>
 #include <Components/Player/SpeedPenalty.hpp>
 #include <Components/Player/TookDamage.hpp>
 #include <Components/Player/TorchRadius.hpp>
@@ -260,45 +263,73 @@ void remove_lerp_cmp( entt::registry &reg )
   }
 }
 
+uint8_t get_inventory_slot_count( entt::registry &reg )
+{
+  const int count = Sys::PersistSystem::get<Cmp::Persist::InventorySlotCount>( reg ).get_value();
+  return static_cast<uint8_t>( std::clamp( count, 1, static_cast<int>( Cmp::kMaxInventorySlots ) ) );
+}
+
+uint8_t get_selected_slot_idx( entt::registry &reg )
+{
+  const auto count = get_inventory_slot_count( reg );
+  for ( auto [player_entt, selected_cmp] : reg.view<Cmp::Player::SelectedInventorySlot>().each() )
+  {
+    return std::min<uint8_t>( selected_cmp.m_idx, count - 1 );
+  }
+  return 0;
+}
+
+entt::entity get_inventory_slot_entt( entt::registry &reg, uint8_t idx )
+{
+  for ( auto [slot_entt, slot_cmp] : reg.view<Cmp::PlayerInventorySlot>().each() )
+  {
+    if ( slot_cmp.m_slot_idx == idx ) return slot_entt;
+  }
+  return entt::null;
+}
+
+entt::entity get_selected_slot_entt( entt::registry &reg ) { return get_inventory_slot_entt( reg, get_selected_slot_idx( reg ) ); }
+
 std::tuple<entt::entity, Sys::ItemKey, Sys::SpriteKey> get_inventory( entt::registry &reg )
 {
-  auto inv_view = reg.view<Cmp::PlayerInventorySlot>();
-  Sys::SpriteKey found_sprite_type;
-  Sys::ItemKey found_inv_type;
-  entt::entity found_entt = entt::null;
-  // this assumes there is only one slot in the inventory, so warn if there is a bug somewhere
-  if ( inv_view.size() > 1 ) throw std::runtime_error( "Found multiple slots in single slot inventory" );
-  for ( auto [inv_entt, inv_cmp] : inv_view.each() )
-  {
-    found_inv_type = inv_cmp.m_item.item_type;
-    found_sprite_type = inv_cmp.m_item.sprite_type;
-    found_entt = inv_entt;
-  }
-  return { found_entt, found_inv_type, found_sprite_type };
+  const auto slot_entt = get_selected_slot_entt( reg );
+  if ( slot_entt == entt::null ) return { entt::null, {}, {} };
+  const auto &slot_cmp = reg.get<Cmp::PlayerInventorySlot>( slot_entt );
+  if ( slot_cmp.empty() ) return { entt::null, {}, {} };
+  return { slot_entt, slot_cmp.m_item->item_type, slot_cmp.m_item->sprite_type };
 }
 
 entt::entity get_inventory_entt( entt::registry &reg )
 {
-  auto inv_view = reg.view<Cmp::PlayerInventorySlot>();
-  entt::entity found_entt = entt::null;
-  // this assumes there is only one slot in the inventory, so warn if there is a bug somewhere
-  if ( inv_view.size() > 1 ) throw std::runtime_error( "Found multiple slots in single slot inventory" );
-  for ( auto [inv_entt, inv_cmp] : inv_view.each() )
-  {
-    found_entt = inv_entt;
-  }
-  return found_entt;
+  const auto slot_entt = get_selected_slot_entt( reg );
+  if ( slot_entt == entt::null or reg.get<Cmp::PlayerInventorySlot>( slot_entt ).empty() ) return entt::null;
+  return slot_entt;
 }
 
 float get_inventory_wear_level( entt::registry &reg )
 {
-  auto inventory_wear_view = reg.view<Cmp::PlayerInventorySlot, Cmp::Inventory::WearLevel>();
-  for ( auto [inventory_entity, inventory_slot, wear_level] : inventory_wear_view.each() )
-  {
-    return wear_level.m_level;
-  }
+  const auto slot_entt = get_inventory_entt( reg );
+  if ( slot_entt == entt::null ) return -1;
+  if ( const auto *wear_level = reg.try_get<Cmp::Inventory::WearLevel>( slot_entt ) ) return wear_level->m_level;
   SPDLOG_DEBUG( "Player Inventory slot has no appropriate WearLevel component" );
   return -1;
+}
+
+bool is_torch_slot_lit( entt::registry &reg, entt::entity slot_entt )
+{
+  const auto *slot_cmp = reg.try_get<Cmp::PlayerInventorySlot>( slot_entt );
+  if ( not slot_cmp or slot_cmp->empty() or slot_cmp->m_item->item_type != "item.torch" ) return false;
+  if ( slot_cmp->m_slot_idx == get_selected_slot_idx( reg ) ) return true;
+  return Sys::PersistSystem::get<Cmp::Persist::StowedTorchLit>( reg ).get_value();
+}
+
+bool has_lit_torch( entt::registry &reg )
+{
+  for ( auto slot_entt : reg.view<Cmp::PlayerInventorySlot>() )
+  {
+    if ( is_torch_slot_lit( reg, slot_entt ) ) return true;
+  }
+  return false;
 }
 
 bool is_elderflute_active( entt::registry &reg )
@@ -484,23 +515,22 @@ template <typename ActionT>
 Cmp::BaseAction apply_action_from_inventory_item( entt::registry &reg )
 {
   Cmp::BaseAction applied_action( {}, {}, {}, {}, {}, {}, {} );
-  auto inventory_view = reg.view<Cmp::PlayerInventorySlot>();
-  if ( inventory_view->empty() )
+  const auto inventory_entt = get_inventory_entt( reg );
+  if ( inventory_entt == entt::null )
   {
     SPDLOG_WARN( "Player has no inventory. Unable to apply action modifiers" );
     return applied_action;
   }
-  for ( auto [inventory_entt, inventory_cmp] : inventory_view.each() )
-  {
-    auto &player_stats = Utils::Player::get_stats( reg );
-    auto action = inventory_cmp.m_item.at<ActionT>().action;
-    remove_damage_if_no_sting<ActionT>( reg, inventory_entt, action );
-    if ( action.health() < 0 ) reg.emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg ) );
-    record_item_damage_cause<ActionT>( reg, action );
-    player_stats.apply( action );
-    Sys::BaseSystem::get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( inventory_cmp.m_item.item_type, ActionT::kKey, action ) );
-    applied_action = action;
-  }
+  const auto &inventory_cmp = reg.get<Cmp::PlayerInventorySlot>( inventory_entt );
+  auto &player_stats = Utils::Player::get_stats( reg );
+  auto action = inventory_cmp.m_item->at<ActionT>().action;
+  remove_damage_if_no_sting<ActionT>( reg, inventory_entt, action );
+  if ( action.health() < 0 ) reg.emplace_or_replace<Cmp::Player::TookDamage>( Utils::Player::get_entity( reg ) );
+  record_item_damage_cause<ActionT>( reg, action );
+  player_stats.apply( action );
+  Sys::BaseSystem::get_systems_event_queue().trigger(
+      Events::GrimoireItemUpdateEvent( inventory_cmp.m_item->item_type, ActionT::kKey, action ) );
+  applied_action = action;
   return applied_action;
 }
 

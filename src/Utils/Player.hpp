@@ -22,7 +22,7 @@ class PlayerHealth;
 class ZOrderValue;
 class Direction;
 class LastDirection;
-class PlayerInventorySlot;
+struct PlayerInventorySlot;
 class TorchRadius;
 } // namespace Game::Cmp
 
@@ -152,18 +152,54 @@ float get_speed_penalty( entt::registry &reg );
 //! @param reg reference to the entt registry
 void remove_lerp_cmp( entt::registry &reg );
 
-//! @brief Get the entity and sprite type currently held in the player's (single-slot) inventory.
+//! @brief Get the number of player inventory slots (Cmp::Persist::InventorySlotCount, clamped to [1, Cmp::kMaxInventorySlots]).
 //! @param reg reference to the entt registry
-//! @return std::tuple<entt::entity, Sys::ItemKey, Sys::SpriteKey> The inventory slot entity, its item type and its sprite type;
-//! entt::null and empty strings for the types if the inventory is empty.
+//! @return uint8_t The slot count.
+uint8_t get_inventory_slot_count( entt::registry &reg );
+
+//! @brief Get the index of the selected ("in hand") inventory slot, clamped to the current slot count.
+//! @param reg reference to the entt registry
+//! @return uint8_t The selected slot index, 0 if the player has no Cmp::Player::SelectedInventorySlot.
+uint8_t get_selected_slot_idx( entt::registry &reg );
+
+//! @brief Get the inventory slot entity at the given index, whether it is empty or not.
+//! @param reg reference to the entt registry
+//! @param idx The slot index.
+//! @return entt::entity The slot entity, or entt::null if there is no slot with that index.
+entt::entity get_inventory_slot_entt( entt::registry &reg, uint8_t idx );
+
+//! @brief Get the selected inventory slot entity, whether it is empty or not.
+//! @param reg reference to the entt registry
+//! @return entt::entity The slot entity, or entt::null if there is no slot with the selected index.
+entt::entity get_selected_slot_entt( entt::registry &reg );
+
+//! @brief Get the entity and types of the item held in the player's selected ("in hand") inventory slot.
+//! @param reg reference to the entt registry
+//! @return std::tuple<entt::entity, Sys::ItemKey, Sys::SpriteKey> The selected slot entity, its item type and its sprite type;
+//! entt::null and empty strings for the types if the selected slot is empty.
 std::tuple<entt::entity, Sys::ItemKey, Sys::SpriteKey> get_inventory( entt::registry &reg );
 
+//! @brief Get the selected inventory slot entity, if it holds an item.
+//! @param reg reference to the entt registry
+//! @return entt::entity The selected slot entity, or entt::null if the selected slot is empty.
 entt::entity get_inventory_entt( entt::registry &reg );
 
-//! @brief Get the wear level of the item in the player's inventory slot.
+//! @brief Get the wear level of the item in the player's selected inventory slot.
 //! @param reg reference to the entt registry
-//! @return float The wear level, or -1 if the inventory slot has no Cmp::Inventory::WearLevel.
+//! @return float The wear level, or -1 if the selected slot is empty or has no Cmp::Inventory::WearLevel.
 float get_inventory_wear_level( entt::registry &reg );
+
+//! @brief Check whether the given inventory slot holds a torch that is lit: either it is the selected slot, or
+//! Cmp::Persist::StowedTorchLit is enabled.
+//! @param reg reference to the entt registry
+//! @param slot_entt The inventory slot entity.
+//! @return bool true if the slot holds a lit torch.
+bool is_torch_slot_lit( entt::registry &reg, entt::entity slot_entt );
+
+//! @brief Check whether any inventory slot holds a lit torch, see is_torch_slot_lit().
+//! @param reg reference to the entt registry
+//! @return bool true if the player is carrying a lit torch.
+bool has_lit_torch( entt::registry &reg );
 
 //! @brief Check whether the given position is inside a spawn area.
 //! @param reg reference to the entt registry
@@ -257,7 +293,7 @@ template <typename ActionT>
 Cmp::BaseAction apply_action_from_world_item( entt::registry &reg, entt::entity world_item_entt,
                                               const std::source_location &loc = std::source_location::current() );
 
-//! @brief Lookup up and apply the ActionT stat-modifier from the item in player's current inventory
+//! @brief Lookup up and apply the ActionT stat-modifier from the item in player's selected inventory slot
 //! @tparam ActionT  The Cmp::BaseAction subclass to apply (e.g. Cmp::DestroyAction). Only the subclasses
 //! in src/Components/Stats are explicitly instantiated in Player.cpp - using any other type is a link error.
 //! @param reg reference to the entt registry

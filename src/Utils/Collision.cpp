@@ -34,8 +34,8 @@ LightSources collect_light_sources( entt::registry &reg )
 
   // the inventory torch's flame particle is paused (UI-space only) while carried, so it never
   // shows up in the Cmp::WorldItem loop below — check it explicitly, same as NightStaticShader does
-  auto [inventory_entt, inventory_type, inventory_sprite_type] = Utils::Player::get_inventory( reg );
-  if ( inventory_type.contains( "torch" ) ) { lights.circles.push_back( Utils::Player::get_position( reg ).getCenter() ); }
+  // a torch in hand, or a stowed one when Cmp::Persist::StowedTorchLit is on
+  if ( Utils::Player::has_lit_torch( reg ) ) { lights.circles.push_back( Utils::Player::get_position( reg ).getCenter() ); }
 
   for ( auto [torch_entt, torch_cmp, torch_pos] : reg.view<Cmp::WorldItem, Cmp::Position>().each() )
   {

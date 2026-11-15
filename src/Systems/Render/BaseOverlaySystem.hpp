@@ -2,7 +2,7 @@
 #define SRC_SYSTEMS_RENDER_BASEOVERLAYSYSTEM_HPP__
 
 #include <Systems/Render/RenderSystem.hpp>
-#include <Systems/Render/UiData.hpp>
+#include <Systems/Render/UiLayout.hpp>
 
 #include <SFML/System/Time.hpp>
 
@@ -34,19 +34,19 @@ protected:
   BaseOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief Draw a layout's outline rectangles (panel borders) in screen view coordinates.
-  //! @param ui_data
-  void render_outlines( const Render::UiData &ui_data );
+  //! @param ui_layout
+  void render_outlines( const Render::UiLayout &ui_layout );
 
   //! @brief The layout's current design-to-screen scale, for hard-coded pixel values (outline widths, font sizes).
-  //! @param ui_data The layout, or nullptr.
-  //! @return The scale, or 1 if `ui_data` is nullptr.
-  [[nodiscard]] static float ui_scale( const Render::UiData *ui_data ) { return ui_data ? ui_data->scale() : 1.f; }
+  //! @param ui_layout The layout, or nullptr.
+  //! @return The scale, or 1 if `ui_layout` is nullptr.
+  [[nodiscard]] static float ui_scale( const Render::UiLayout *ui_layout ) { return ui_layout ? ui_layout->scale() : 1.f; }
 
   //! @brief Scale a design-space character size to the layout's current UI scale.
   //! @param design_size character size in pixels at the layout's design resolution
-  //! @param ui_data The layout, or nullptr for no scaling.
+  //! @param ui_layout The layout, or nullptr for no scaling.
   //! @return the scaled character size, at least 1
-  [[nodiscard]] static unsigned int scaled_char_size( unsigned int design_size, const Render::UiData *ui_data );
+  [[nodiscard]] static unsigned int scaled_char_size( unsigned int design_size, const Render::UiLayout *ui_layout );
 
   //! @brief Side effects of opening a modal overlay (pause, grimoire): cancel any bow draw, then pause the sound effects.
   void on_modal_open();

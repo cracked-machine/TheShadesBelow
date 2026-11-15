@@ -8,7 +8,7 @@
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/OverlayEvent.hpp>
 #include <Systems/Render/BaseOverlaySystem.hpp>
-#include <Systems/Render/UiData.hpp>
+#include <Systems/Render/UiLayout.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
 #include <array>
@@ -102,15 +102,15 @@ private:
   //! @param grimoire_cmp
   void render_grimoire( const Cmp::Grimoire &grimoire_cmp );
 
-  //! @brief Draw the hover overlay: the subpage of `page` laid out by `ui_data`, at its fixed position or beside the mouse
+  //! @brief Draw the hover overlay: the subpage of `page` laid out by `ui_layout`, at its fixed position or beside the mouse
   //! cursor (Cmp::Persist::GrimoireHoverFollowsMouse).
   //! @tparam PageT Cmp::Grimoire::NpcPage or Cmp::Grimoire::PlantPage.
-  //! @param ui_data The hover layout, res/ui/grimoire_npc_hover.json or res/ui/grimoire_plant_hover.json.
+  //! @param ui_layout The hover layout, res/ui/grimoire_npc_hover.json or res/ui/grimoire_plant_hover.json.
   //! @param window_id The ImGui window id.
   //! @param cache_prefix Prefix of the layout's TextColumn cache keys.
   //! @param page The hovered NPC's or plant's page.
   template <typename PageT>
-  void render_hover( Render::UiData &ui_data, const char *window_id, const std::string &cache_prefix, const PageT &page );
+  void render_hover( Render::UiLayout &ui_layout, const char *window_id, const std::string &cache_prefix, const PageT &page );
 
   //! @brief Find the grimoire page of the plant under the mouse cursor in the game area.
   //! @param grimoire_cmp
@@ -129,53 +129,53 @@ private:
 
   //! @brief The anchor offset that moves a hover layout's main_outline beside the mouse cursor: below-right of it,
   //! flipped to the left of / above it where it would leave the window, and clamped to the window.
-  //! @param ui_data The hover layout.
+  //! @param ui_layout The hover layout.
   //! @param window_size
-  //! @return The offset to pass to Render::UiData::sync_to, or {0,0} if the layout has no main_outline.
-  sf::Vector2f hover_anchor( Render::UiData &ui_data, sf::Vector2u window_size );
+  //! @return The offset to pass to Render::UiLayout::sync_to, or {0,0} if the layout has no main_outline.
+  sf::Vector2f hover_anchor( Render::UiLayout &ui_layout, sf::Vector2u window_size );
 
   //! @brief Begin an invisible ImGui window over the layout's main_outline, or over the whole screen without one. Always
   //! pair with ImGui::End.
-  //! @param ui_data
+  //! @param ui_layout
   //! @param id The ImGui window id, e.g. "##grimoire".
   //! @param extra_flags Flags added to the common grimoire window flags.
   //! @return The result of ImGui::Begin.
-  static bool begin_layout_window( const Render::UiData &ui_data, const char *id, int extra_flags );
+  static bool begin_layout_window( const Render::UiLayout &ui_layout, const char *id, int extra_flags );
 
   //! @brief Draw the NPCs/Plants tab bar at the layout's "tab_bar" ui_tab, and update m_tab from the open tab.
-  //! @param ui_data The layout of the current tab.
-  void render_tab_bar( const Render::UiData &ui_data );
+  //! @param ui_layout The layout of the current tab.
+  void render_tab_bar( const Render::UiLayout &ui_layout );
 
   //! @brief Draw one page: SFML outlines, icons, names and page label, then the ImGui action tables.
   //! @tparam PageT Cmp::Grimoire::NpcPage or Cmp::Grimoire::PlantPage.
-  //! @param ui_data The page's layout.
+  //! @param ui_layout The page's layout.
   //! @param cache_prefix Prefix of the layout's TextColumn cache keys.
   //! @param page The page.
   //! @param page_count Number of pages in the tab, for the page label.
   template <typename PageT>
-  void render_page( const Render::UiData &ui_data, const std::string &cache_prefix, const PageT &page, std::size_t page_count );
+  void render_page( const Render::UiLayout &ui_layout, const std::string &cache_prefix, const PageT &page, std::size_t page_count );
 
   //! @brief Draw a subpage's sprite icon.
   //! @param icon The layout's icon.
   //! @param sub_page The subpage the icon belongs to.
-  void render_icon( const Render::UiData::Icon &icon, const Cmp::Grimoire::SubPage &sub_page );
+  void render_icon( const Render::UiLayout::Icon &icon, const Cmp::Grimoire::SubPage &sub_page );
 
   //! @brief Draw the "N of M" page label.
-  //! @param ui_data The layout of the page currently shown.
+  //! @param ui_layout The layout of the page currently shown.
   //! @param cache_prefix Prefix of the layout's TextColumn cache keys.
   //! @param page_count Number of pages in the tab.
-  void render_page_label( const Render::UiData &ui_data, const std::string &cache_prefix, std::size_t page_count );
+  void render_page_label( const Render::UiLayout &ui_layout, const std::string &cache_prefix, std::size_t page_count );
 
   //! @brief Draw a static text, or a subpage's item or NPC name.
   //! @param text The layout's text.
   //! @param cache_prefix Prefix of the layout's TextColumn cache keys.
   //! @param sub_page The subpage whose name it is, or nullptr for a static text.
-  void render_text( const Render::UiData::Text &text, const std::string &cache_prefix, const Cmp::Grimoire::SubPage *sub_page );
+  void render_text( const Render::UiLayout::Text &text, const std::string &cache_prefix, const Cmp::Grimoire::SubPage *sub_page );
 
   //! @brief Draw a subpage's ImGui action table: one row per entry of `table.rows`, its caption and its effects.
   //! @param table The layout's table.
   //! @param sub_page The subpage the table belongs to.
-  void render_action_table( const Render::UiData::Table &table, const Cmp::Grimoire::SubPage &sub_page );
+  void render_action_table( const Render::UiLayout::Table &table, const Cmp::Grimoire::SubPage &sub_page );
 
   //! @brief The effect lines of one action on a subpage: its reward, stat changes and side effects, "none" if it was
   //! discovered but does nothing, or "?????" if it is still undiscovered.
@@ -254,13 +254,13 @@ private:
   sf::Time m_navigate_debounce;
 
   //! @brief Layout of the plant pages, see res/ui/grimoire_plants.json.
-  std::unique_ptr<Render::UiData> m_plant_ui_data;
+  std::unique_ptr<Render::UiLayout> m_plant_ui_layout;
   //! @brief Layout of the NPC pages, see res/ui/grimoire_npc.json.
-  std::unique_ptr<Render::UiData> m_npc_ui_data;
+  std::unique_ptr<Render::UiLayout> m_npc_ui_layout;
   //! @brief Layout of the plant hover overlay, see res/ui/grimoire_plant_hover.json.
-  std::unique_ptr<Render::UiData> m_plant_hover_ui_data;
+  std::unique_ptr<Render::UiLayout> m_plant_hover_ui_layout;
   //! @brief Layout of the NPC hover overlay, see res/ui/grimoire_npc_hover.json.
-  std::unique_ptr<Render::UiData> m_npc_hover_ui_data;
+  std::unique_ptr<Render::UiLayout> m_npc_hover_ui_layout;
 
   //! @brief The tab currently shown.
   Cmp::Grimoire::Tab m_tab{ Cmp::Grimoire::Tab::NPCS };

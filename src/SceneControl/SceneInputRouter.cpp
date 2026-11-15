@@ -2,6 +2,7 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Direction.hpp>
 #include <Components/Exit.hpp>
+#include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/Cadaver.hpp>
@@ -30,6 +31,7 @@
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/SaveSettingsEvent.hpp>
+#include <Events/SelectInventorySlotEvent.hpp>
 #include <Events/UnlockDoorEvent.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <Factory/ToxicityFactory.hpp>
@@ -53,6 +55,8 @@
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 
+#include <algorithm>
+#include <array>
 #include <imgui-SFML.h>
 #include <imgui.h>
 
@@ -132,6 +136,7 @@ void SceneInputRouter::graveyard_scene_state_handler()
     forward_to_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
+    process_inventory_slot_input( *event, /*number_keys=*/true );
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -158,7 +163,6 @@ void SceneInputRouter::graveyard_scene_state_handler()
         get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::DRAW_BOW ) );
       }
     }
-    else { process_grimoire_wheel( *event ); }
   }
 
   process_move_keys();
@@ -203,6 +207,7 @@ void SceneInputRouter::crypt_scene_state_handler()
     forward_to_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
+    process_inventory_slot_input( *event, /*number_keys=*/true );
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -259,6 +264,7 @@ void SceneInputRouter::healing_spring_scene_state_handler()
     forward_to_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
+    process_inventory_slot_input( *event, /*number_keys=*/true );
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -298,6 +304,7 @@ void SceneInputRouter::shop_scene_state_handler()
     forward_to_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
+    process_inventory_slot_input( *event, /*number_keys=*/false );
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -342,6 +349,7 @@ void SceneInputRouter::ruin_scene_state_handler()
     forward_to_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
+    process_inventory_slot_input( *event, /*number_keys=*/true );
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -427,10 +435,7 @@ void SceneInputRouter::pause_overlay_input_handler()
   }
 }
 
-bool SceneInputRouter::is_paused()
-{
-  return Sys::OverlayArbitrationSystem::active_modal( reg() ) == Sys::OverlayArbitrationSystem::Modal::PAUSE;
-}
+bool SceneInputRouter::is_paused() { return Sys::OverlayArbitrationSystem::active_modal( reg() ) == Sys::OverlayArbitrationSystem::Modal::PAUSE; }
 
 void SceneInputRouter::toggle_pause()
 {
@@ -482,6 +487,30 @@ void SceneInputRouter::process_grimoire_wheel( const sf::Event &event )
     const auto action = wheelScrolled->delta > 0.f ? Events::OverlayEvent::OverlayActions::GRIMOIRE_NEXT
                                                    : Events::OverlayEvent::OverlayActions::GRIMOIRE_PREV;
     get_systems_event_queue().trigger( Events::OverlayEvent( action ) );
+  }
+}
+
+void SceneInputRouter::process_inventory_slot_input( const sf::Event &event, bool number_keys )
+{
+  using Mode = Events::SelectInventorySlotEvent::Mode;
+  if ( const auto *wheelScrolled = event.getIf<sf::Event::MouseWheelScrolled>() )
+  {
+    // scroll up/away for the previous slot, down/towards for the next
+    if ( wheelScrolled->wheel != sf::Mouse::Wheel::Vertical or wheelScrolled->delta == 0.f ) return;
+    get_systems_event_queue().trigger( Events::SelectInventorySlotEvent( wheelScrolled->delta > 0.f ? Mode::NEXT : Mode::PREV ) );
+    return;
+  }
+  if ( not number_keys ) return;
+  if ( const auto *keyPressed = event.getIf<sf::Event::KeyPressed>() )
+  {
+    // the number row only: scancodes never match the numpad keys, which are debug keys
+    using sf::Keyboard::Scancode;
+    static constexpr std::array<Scancode, Cmp::kMaxInventorySlots> kSlotKeys{ Scancode::Num1, Scancode::Num2, Scancode::Num3, Scancode::Num4,
+                                                                              Scancode::Num5 };
+    const auto it = std::ranges::find( kSlotKeys, keyPressed->scancode );
+    if ( it == kSlotKeys.end() ) return;
+    const auto idx = static_cast<uint8_t>( std::distance( kSlotKeys.begin(), it ) );
+    get_systems_event_queue().trigger( Events::SelectInventorySlotEvent( Mode::INDEX, idx ) );
   }
 }
 
