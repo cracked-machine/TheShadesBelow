@@ -13,6 +13,7 @@
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Grave/Segment.hpp>
+#include <Components/Hazard/CollisionResist.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LerpPosition.hpp>
@@ -1440,6 +1441,8 @@ void NpcSystem::find_pushback_position( const Cmp::Direction &npc_direction, con
     if ( Utils::Collision::any_intersects<Cmp::Crypt::BuildingSegment>( reg(), rect ) ) return "BuildingSegment";
     if ( Utils::Collision::any_intersects<Cmp::Ruin::BuildingSegment>( reg(), rect ) ) return "BuildingSegment";
     if ( Utils::Collision::any_intersects<Cmp::Crypt::ObjectiveSegment>( reg(), rect ) ) return "ObjectiveSegment";
+    // never knock the player into a lethal hazard cell (lava pit, sinkhole...) - that bypasses its pushback resist
+    if ( Utils::Collision::any_intersects<Cmp::Hazard::CollisionResist>( reg(), rect ) ) return "Hazard";
     return {};
   };
 

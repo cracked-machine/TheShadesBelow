@@ -35,7 +35,7 @@ public:
   //! serialization, debugging, or runtime type identification in persistent
   //! component systems.
   //! @return std::string The name of the implementing class
-  virtual std::string class_name() const = 0;
+  [[nodiscard]] virtual std::string class_name() const = 0;
 
   //! @brief Deserializes object state from JSON data.
   //! @details This pure virtual method must be implemented by derived classes to restore
@@ -58,7 +58,7 @@ public:
   virtual void render_widget() = 0;
 
   //! @brief Returns the display name/description for this component.
-  virtual const std::string get_detail() const = 0;
+  [[nodiscard]] virtual const std::string get_detail() const = 0;
 };
 
 } // namespace Game::Cmp::Persist

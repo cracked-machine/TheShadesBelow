@@ -20,10 +20,10 @@ public:
   }
   //! @brief Returns the class name used for identification and JSON serialization.
   //! @return std::string The class name.
-  virtual std::string class_name() const override { return "PlayerMovementSpeed"; }
+  [[nodiscard]] std::string class_name() const override { return "PlayerMovementSpeed"; }
   //! @brief Returns the display detail string for this setting.
   //! @return std::string The detail string.
-  const std::string get_detail() const override { return detail; }
+  [[nodiscard]] const std::string get_detail() const override { return detail; }
 };
 
 } // namespace Game::Cmp::Persist

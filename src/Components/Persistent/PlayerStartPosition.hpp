@@ -18,7 +18,7 @@ public:
 
   //! @brief Returns the class name used for identification and JSON serialization.
   //! @return std::string The class name.
-  std::string class_name() const { return "PlayerStartPosition"; }
+  [[nodiscard]] std::string class_name() const { return "PlayerStartPosition"; }
 
   //! @brief Returns a human-readable "x: ... y: ..." representation of the position.
   //! @return std::string& Reference to a static formatted string.
@@ -34,7 +34,7 @@ public:
 
   //! @brief Returns the display detail string for this setting (currently unused/empty).
   //! @return std::string The detail string.
-  const std::string get_detail() const { return ""; }
+  [[nodiscard]] const std::string get_detail() const { return ""; }
 };
 
 } // namespace Game::Cmp::Persist

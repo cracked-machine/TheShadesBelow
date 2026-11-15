@@ -1,4 +1,5 @@
 #include <Audio/SoundBank.hpp>
+#include <Components/Hazard/CollisionResist.hpp>
 #include <Components/Npc/Shockwave.hpp>
 #include <Components/Npc/ShockwaveTimer.hpp>
 #include <Components/Obstacle.hpp>
@@ -18,6 +19,7 @@
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Threats/WormholeSystem.hpp>
+#include <Utils/Collision.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
@@ -108,6 +110,12 @@ bool ShockwaveSystem::intersects_with_visible_segments( const Cmp::Npc::Shockwav
         for ( auto [obstacle_entt, obstacle_cmp, obstacle_pos_cmp] : reg().view<Cmp::Obstacle, Cmp::Position>().each() )
         {
           if ( sf::FloatRect( new_position, Constants::kGridSizePxF ).findIntersection( obstacle_pos_cmp ) ) is_valid = false;
+        }
+        // nor into a lethal hazard cell (lava pit, sinkhole...) - that bypasses its pushback resist
+        if ( not Utils::Player::is_flying( reg() ) and
+             Utils::Collision::any_intersects<Cmp::Hazard::CollisionResist>( reg(), Cmp::RectBounds::scaled( new_position, Constants::kGridSizePxF, 1.f ) ) )
+        {
+          is_valid = false;
         }
         if ( is_valid ) { get_systems_event_queue().trigger( Events::UpdatePlayerPositionEvent( new_position ) ); }
         else { SPDLOG_DEBUG( "New Position was invalid so cancelled" ); }

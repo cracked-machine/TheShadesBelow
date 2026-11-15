@@ -25,7 +25,7 @@ public:
 
   //! @brief Get the class name used for persistence/registry lookup.
   //! @return std::string the class name "DisplayResolution"
-  std::string class_name() const { return "DisplayResolution"; }
+  [[nodiscard]] std::string class_name() const { return "DisplayResolution"; }
 
   //! @brief Get a human-readable "x: <x> y: <y>" representation of the resolution.
   //! @return std::string& the formatted resolution string
@@ -75,7 +75,7 @@ public:
 
   //! @brief Get the human-readable detail/description text (currently unset).
   //! @return std::string empty detail string
-  const std::string get_detail() const { return ""; }
+  [[nodiscard]] const std::string get_detail() const { return ""; }
 };
 
 } // namespace Game::Cmp::Persist

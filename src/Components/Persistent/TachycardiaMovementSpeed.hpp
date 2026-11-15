@@ -20,9 +20,9 @@ public:
   {
   }
   //! @brief Returns the unique registry identifier for this persistent setting.
-  virtual std::string class_name() const override { return "TachycardiaMovementSpeed"; }
+  [[nodiscard]] std::string class_name() const override { return "TachycardiaMovementSpeed"; }
   //! @brief Returns the display detail string for this setting.
-  const std::string get_detail() const override { return detail; }
+  [[nodiscard]] const std::string get_detail() const override { return detail; }
 };
 
 } // namespace Game::Cmp::Persist

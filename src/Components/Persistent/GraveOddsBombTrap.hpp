@@ -20,7 +20,7 @@ public:
   }
   //! @brief Get the class name used for persistence/registry lookup.
   //! @return std::string the class name "GraveOddsBombTrap"
-  [[nodiscard]] virtual std::string class_name() const override { return "GraveOddsBombTrap"; }
+  [[nodiscard]] std::string class_name() const override { return "GraveOddsBombTrap"; }
   //! @brief Get the human-readable detail/description text (currently unset).
   //! @return std::string empty detail string
   [[nodiscard]] const std::string get_detail() const override { return ""; }

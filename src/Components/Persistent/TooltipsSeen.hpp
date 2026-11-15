@@ -19,7 +19,7 @@ public:
 
   //! @brief Get the class name used for persistence/registry lookup.
   //! @return std::string the class name "TooltipsSeen"
-  std::string class_name() const { return "TooltipsSeen"; }
+  [[nodiscard]] std::string class_name() const { return "TooltipsSeen"; }
 
   //! @brief Check whether a tooltip has already been seen.
   //! @param id the tooltip id

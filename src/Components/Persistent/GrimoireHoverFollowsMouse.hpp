@@ -18,9 +18,9 @@ public:
   {
   }
   //! @brief Returns the unique registry identifier for this persistent setting.
-  virtual std::string class_name() const override { return "GrimoireHoverFollowsMouse"; }
+  [[nodiscard]] std::string class_name() const override { return "GrimoireHoverFollowsMouse"; }
   //! @brief Returns the display description for this setting (unset; see persist.json).
-  const std::string get_detail() const override { return ""; }
+  [[nodiscard]] const std::string get_detail() const override { return ""; }
 };
 
 } // namespace Game::Cmp::Persist

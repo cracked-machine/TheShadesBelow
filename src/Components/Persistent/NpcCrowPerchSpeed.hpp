@@ -19,10 +19,10 @@ struct NpcCrowPerchSpeed : public BasePersistent<float>
   }
   //! @brief Get the class name used for persistence/registry lookup.
   //! @return std::string the class name "NpcCrowPerchSpeed"
-  virtual std::string class_name() const override { return "NpcCrowPerchSpeed"; }
+  [[nodiscard]] std::string class_name() const override { return "NpcCrowPerchSpeed"; }
   //! @brief Get the human-readable detail/description text (currently unset).
   //! @return std::string empty detail string
-  const std::string get_detail() const override { return ""; }
+  [[nodiscard]] const std::string get_detail() const override { return ""; }
 };
 
 } // namespace Game::Cmp::Persist

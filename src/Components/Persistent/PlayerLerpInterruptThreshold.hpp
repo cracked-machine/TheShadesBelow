@@ -23,10 +23,10 @@ struct PlayerLerpInterruptThreshold : BasePersistent<float>
   }
   //! @brief Returns the class name used for identification and JSON serialization.
   //! @return std::string The class name.
-  virtual std::string class_name() const override { return "PlayerLerpInterruptThreshold"; }
+  [[nodiscard]] std::string class_name() const override { return "PlayerLerpInterruptThreshold"; }
   //! @brief Returns the display detail string for this setting (currently unused/empty).
   //! @return std::string The detail string.
-  const std::string get_detail() const override { return ""; }
+  [[nodiscard]] const std::string get_detail() const override { return ""; }
 };
 
 } // namespace Game::Cmp::Persist
