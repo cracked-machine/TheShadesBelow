@@ -1136,7 +1136,7 @@
   },
   "StartingLuck": {
     "type": "int",
-    "value": 100,
+    "value": 50,
     "min_value": 0,
     "max_value": 100,
     "detail": "Luck",

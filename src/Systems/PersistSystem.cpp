@@ -375,32 +375,6 @@ void PersistSystem::initialize_component_registry()
     else { SPDLOG_WARN( "Unknown component type in definitions: {}", name ); }
   }
 
-  // Player progress components may be missing from a persist.json installed by an older version,
-  // so create them with their defaults. The key is written to the file on the next save.
-  for ( const auto *name : { "TooltipsSeen", "ResetTutorial" } )
-  {
-    if ( not definitions->contains( name ) ) { m_components.at( name ).initialise( nlohmann::json::object() ); }
-  }
-
-  // Settings added since may likewise be missing, so create them with their default value and menu label.
-  const std::array<std::pair<const char *, nlohmann::json>, 8> new_settings = {
-      { { "GrimoireHoverFollowsMouse", { { "type", "bool" }, { "value", false }, { "detail", "Grimoire hover info follows mouse" } } },
-        { "InventorySlotCount",
-          { { "type", "int" }, { "value", 1 }, { "min_value", 1 }, { "max_value", 5 }, { "detail", "Inventory slot count" }, { "format", "%d" } } },
-        { "StowedTorchLit", { { "type", "bool" }, { "value", false }, { "detail", "Torch stays lit when its slot is not selected" } } },
-        { "InventorySlotRollover", { { "type", "bool" }, { "value", true }, { "detail", "Inventory slot selection wraps around" } } },
-        { "AutoPickupDrops", { { "type", "bool" }, { "value", false }, { "detail", "Auto pick up reward drops into an empty inventory slot" } } },
-        { "AltarActivationAnimaCost",
-          { { "type", "int" }, { "value", 40 }, { "min_value", 0 }, { "max_value", 100 }, { "detail", "Altar Activation Anima Cost" }, { "format", "%d" } } },
-        { "ArtefactMinChance",
-          { { "type", "int" }, { "value", 10 }, { "min_value", 1 }, { "max_value", 50 }, { "detail", "Artefact Min Chance" }, { "format", "%d%%" } } },
-        { "GraveOddsArtefact",
-          { { "type", "int" }, { "value", 50 }, { "min_value", 0 }, { "max_value", 100 }, { "detail", "Artefact" }, { "format", "%d" } } } } };
-  for ( const auto &[name, defaults] : new_settings )
-  {
-    if ( not definitions->contains( name ) ) { m_components.at( name ).initialise( defaults ); }
-  }
-
   // Add components not stored in JSON (runtime-only seeds)
   Sys::PersistSystem::add<Cmp::Persist::WormholeSeed>( reg(), 0 );
   Sys::PersistSystem::add<Cmp::Persist::SinkholeSeed>( reg(), 0 );
