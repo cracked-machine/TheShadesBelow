@@ -3,6 +3,8 @@ Checks: >
   performance-*,
   modernize-*,
   readability-*,
+  -readability-implicit-bool-conversion,
+  -readability-convert-member-functions-to-static,
   bugprone-*,
   -readability-identifier-length,
   -readability-uppercase-literal-suffix,

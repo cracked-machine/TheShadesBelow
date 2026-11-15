@@ -145,13 +145,9 @@ void GraveyardScene::on_init()
   {
     Utils::Player::get_level_depth( m_reg ).increment_count( 1 );
     Utils::Player::trail_position( m_reg ) = Cmp::Player::GraveTrail{};
-    // unless anima is retained between levels, every level starts with no anima;
-    // LevelCompleteScene normally converts it all to wealth already
-    if ( not Sys::PersistSystem::get<Cmp::Persist::RetainAnimaBetweenLevels>( m_reg ).get_value() )
-    {
-      auto &stats = Utils::Player::get_stats( m_reg );
-      stats.apply( { {}, {}, {}, {}, {}, Cmp::Stats::Anima{ -stats.anima() }, {} } );
-    }
+    // every level starts with the Cmp::Persist::Starting* stats; anima is kept if it is retained between levels
+    // (otherwise LevelCompleteScene has normally converted it all to wealth already)
+    Utils::Player::reset_stats_to_starting( m_reg, Sys::PersistSystem::get<Cmp::Persist::RetainAnimaBetweenLevels>( m_reg ).get_value() );
     // every level starts with no cadaver parts collected
     Utils::Player::get_cadaver( m_reg ).reset();
   }

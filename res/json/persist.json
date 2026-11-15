@@ -1089,6 +1089,62 @@
     "detail": "Stat change text display duration",
     "format": "%.1f seconds"
   },
+  "StartingHealth": {
+    "type": "int",
+    "value": 100,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Health",
+    "format": "%d"
+  },
+  "StartingFear": {
+    "type": "int",
+    "value": 0,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Fear",
+    "format": "%d"
+  },
+  "StartingDespair": {
+    "type": "int",
+    "value": 0,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Despair",
+    "format": "%d"
+  },
+  "StartingInfamy": {
+    "type": "int",
+    "value": 0,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Infamy",
+    "format": "%d"
+  },
+  "StartingLuck": {
+    "type": "int",
+    "value": 100,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Luck",
+    "format": "%d"
+  },
+  "StartingAnima": {
+    "type": "int",
+    "value": 0,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Anima",
+    "format": "%d"
+  },
+  "LuckDropRate": {
+    "type": "float",
+    "value": 30.0,
+    "min_value": 0.0,
+    "max_value": 60.0,
+    "detail": "Luck drop rate (seconds per point, 0 = off)",
+    "format": "%.1f s"
+  },
   "TachycardiaHealthDmgPerSec": {
     "type": "int",
     "value": 5,

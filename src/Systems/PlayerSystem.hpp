@@ -103,6 +103,10 @@ private:
   //! @param dt
   void update_heartbeat( sf::Time dt );
 
+  //! @brief Drop the player's luck by 1 point for every Cmp::Persist::LuckDropRate seconds of gameplay (0 = disabled).
+  //! @param dt
+  void update_luck_drop( sf::Time dt );
+
   //! @brief Is player position illuminated by a light source.
   //! @return true
   //! @return false
@@ -206,6 +210,9 @@ private:
 
   //! @brief Synchronizes the action stat modifiers.
   sf::Time m_timed_action_sync_clock;
+
+  //! @brief Gameplay time accumulated towards the next 1 point luck drop. See Cmp::Persist::LuckDropRate.
+  sf::Time m_luck_drop_timer;
 
   //! @brief Weak pointer to the pathfinding navmesh.
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;

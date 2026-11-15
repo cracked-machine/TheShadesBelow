@@ -6,18 +6,17 @@
 #include <Components/AnimData.hpp>
 #include <Components/DeathPosition.hpp>
 #include <Components/Direction.hpp>
+#include <Components/Grave/CurseTablet.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/Grimoire.hpp>
-#include <Components/Grave/CurseTablet.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
-#include <Components/Npc/SummonOffering.hpp>
-#include <Components/UUID.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
+#include <Components/Npc/SummonOffering.hpp>
 #include <Components/Particle/SpriteBase.hpp>
 #include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
@@ -33,8 +32,8 @@
 #include <Components/Player/LastGraveyardPosition.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Player/Mortality.hpp>
-#include <Components/Player/SelectedInventorySlot.hpp>
 #include <Components/Player/MovementDelta.hpp>
+#include <Components/Player/SelectedInventorySlot.hpp>
 #include <Components/Player/TorchRadius.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
@@ -44,6 +43,7 @@
 #include <Components/Stats/PlayerStats.hpp>
 #include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
+#include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/AltarFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
@@ -80,8 +80,7 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   reg.emplace_or_replace<Cmp::Position>( entity, player_pos );
   reg.emplace_or_replace<Cmp::Player::Character>( entity );
   if ( reserved_sm ) reserved_sm->insert( entity, player_pos );
-  reg.emplace_or_replace<Cmp::PlayerStats>( entity, Cmp::Stats::Health{ 100 }, Cmp::Stats::Fear{ 0 }, Cmp::Stats::Despair{ 0 },
-                                            Cmp::Stats::Infamy{ 0 }, Cmp::Stats::Luck{ 50 }, Cmp::Stats::Anima{ 0 } );
+  reg.emplace_or_replace<Cmp::PlayerStats>( entity, Utils::Player::make_starting_stats( reg ) );
 
   reg.emplace_or_replace<Cmp::Direction>( entity, sf::Vector2f{ 0, 0 } );
   reg.emplace_or_replace<Cmp::LastDirection>( entity, sf::Vector2f{ 0, 0 } );

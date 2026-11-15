@@ -23,6 +23,12 @@
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
 #include <Components/Persistent/TachycardiaMovementSpeed.hpp>
+#include <Components/Persistent/StartingAnima.hpp>
+#include <Components/Persistent/StartingDespair.hpp>
+#include <Components/Persistent/StartingFear.hpp>
+#include <Components/Persistent/StartingHealth.hpp>
+#include <Components/Persistent/StartingInfamy.hpp>
+#include <Components/Persistent/StartingLuck.hpp>
 #include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
@@ -433,6 +439,27 @@ Cmp::PlayerStats &get_stats( entt::registry &reg )
     if ( reg.all_of<Cmp::Player::Character>( entity ) ) { return cmp; }
   }
   throw std::runtime_error( "Player entt has no component: Cmp::PlayerStats" );
+}
+
+Cmp::PlayerStats make_starting_stats( entt::registry &reg )
+{
+  return Cmp::PlayerStats( Cmp::Stats::Health{ Sys::PersistSystem::get<Cmp::Persist::StartingHealth>( reg ).get_value() },
+                           Cmp::Stats::Fear{ Sys::PersistSystem::get<Cmp::Persist::StartingFear>( reg ).get_value() },
+                           Cmp::Stats::Despair{ Sys::PersistSystem::get<Cmp::Persist::StartingDespair>( reg ).get_value() },
+                           Cmp::Stats::Infamy{ Sys::PersistSystem::get<Cmp::Persist::StartingInfamy>( reg ).get_value() },
+                           Cmp::Stats::Luck{ Sys::PersistSystem::get<Cmp::Persist::StartingLuck>( reg ).get_value() },
+                           Cmp::Stats::Anima{ Sys::PersistSystem::get<Cmp::Persist::StartingAnima>( reg ).get_value() } );
+}
+
+void reset_stats_to_starting( entt::registry &reg, bool keep_anima )
+{
+  auto &stats = get_stats( reg );
+  const auto target = make_starting_stats( reg );
+  // PlayerStats only takes deltas, so move each stat by the difference to its starting value
+  stats.apply( Cmp::BaseAction( Cmp::Stats::Health{ target.health() - stats.health() }, Cmp::Stats::Fear{ target.fear() - stats.fear() },
+                                Cmp::Stats::Despair{ target.despair() - stats.despair() },
+                                Cmp::Stats::Infamy{ target.infamy() - stats.infamy() }, Cmp::Stats::Luck{ target.luck() - stats.luck() },
+                                Cmp::Stats::Anima{ keep_anima ? 0 : target.anima() - stats.anima() }, {} ) );
 }
 
 Cmp::Player::Footstep &get_footstep_type( entt::registry &reg )

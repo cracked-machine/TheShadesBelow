@@ -143,6 +143,13 @@
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Persistent/StatChangeDisplayDuration.hpp>
+#include <Components/Persistent/LuckDropRate.hpp>
+#include <Components/Persistent/StartingAnima.hpp>
+#include <Components/Persistent/StartingDespair.hpp>
+#include <Components/Persistent/StartingFear.hpp>
+#include <Components/Persistent/StartingHealth.hpp>
+#include <Components/Persistent/StartingInfamy.hpp>
+#include <Components/Persistent/StartingLuck.hpp>
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/TachycardiaMovementSpeed.hpp>
 #include <Components/Persistent/TalismanMinChance.hpp>
@@ -319,6 +326,13 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ToxicImmunityMeterShimmer>();
   add_component<Cmp::Persist::ToxicImmunityMeterTint>();
   add_component<Cmp::Persist::StatChangeDisplayDuration>();
+  add_component<Cmp::Persist::StartingHealth>();
+  add_component<Cmp::Persist::StartingFear>();
+  add_component<Cmp::Persist::StartingDespair>();
+  add_component<Cmp::Persist::StartingInfamy>();
+  add_component<Cmp::Persist::StartingLuck>();
+  add_component<Cmp::Persist::StartingAnima>();
+  add_component<Cmp::Persist::LuckDropRate>();
   add_component<Cmp::Persist::BradycardiaHealthDmgPerSec>();
   add_component<Cmp::Persist::VenomHealthDmgPerSec>();
   add_component<Cmp::Persist::VertigoHealthDmgPerSec>();

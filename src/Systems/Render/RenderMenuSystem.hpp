@@ -1,11 +1,14 @@
 #ifndef SRC_SYSTEMS_RENDER_RENDERMENUSYSTEM_HPP__
 #define SRC_SYSTEMS_RENDER_RENDERMENUSYSTEM_HPP__
 
+#include <Components/Persistent/BasePersistent.hpp>
 #include <Shaders/TitleScreenShader.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Utils/Constants.hpp>
 
 #include <SFML/System/Time.hpp>
+
+#include <span>
 
 namespace Game::Sprites
 {
@@ -72,6 +75,12 @@ public:
   //! @param anima_wealth Wealth added so far from converting anima.
   //! @param retain_anima Whether unspent anima carries over to the next level instead of being sold for wealth.
   void render_victory_screen( bool allow_continue, int cadaver_wealth, int anima_wealth, bool retain_anima );
+
+private:
+  //! @brief Render a row of int settings as vertical sliders, each labelled underneath with its detail string.
+  //! Every column is as wide as the widest slider or label, so the sliders sit at equal x intervals.
+  //! @param settings The settings to show, left to right.
+  void render_vslider_row( std::span<Cmp::Persist::BasePersistent<int> *const> settings );
 };
 
 } // namespace Game::Sys

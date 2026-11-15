@@ -46,6 +46,7 @@
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
+#include <Components/Persistent/LuckDropRate.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerCornerAssistTolerance.hpp>
 #include <Components/Persistent/PlayerDiagonalGapCatch.hpp>
@@ -228,6 +229,7 @@ void PlayerSystem::update( sf::Time dt )
     check_burning_particle_collision( Cmp::Particle::LightningRodParticleSprite::kTagSuffix,
                                       Sys::PersistSystem::get<Cmp::Persist::LightningRodDebrisDamage>( reg() ).get_value(),
                                       Cmp::Player::Mortality::State::SHOCKED );
+    update_luck_drop( dt );
     check_player_can_push( dt );
     check_player_can_pull( dt );
     // FlyingSystem owns the player position while descending to the landing cell, and a taking-off player
@@ -883,6 +885,25 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
     m_timed_action_sync_clock = sf::Time::Zero;
 
     kill_player_if_stats_are_max();
+  }
+}
+
+void PlayerSystem::update_luck_drop( sf::Time dt )
+{
+  const float seconds_per_point = Sys::PersistSystem::get<Cmp::Persist::LuckDropRate>( reg() ).get_value();
+  if ( seconds_per_point <= 0.f )
+  {
+    m_luck_drop_timer = sf::Time::Zero;
+    return;
+  }
+
+  m_luck_drop_timer += dt;
+  const sf::Time interval = sf::seconds( seconds_per_point );
+  auto &player_stats = Utils::Player::get_stats( reg() );
+  while ( m_luck_drop_timer >= interval )
+  {
+    player_stats.apply( Cmp::BaseAction( {}, {}, {}, {}, Cmp::Stats::Luck{ -1 }, {}, {} ) );
+    m_luck_drop_timer -= interval;
   }
 }
 

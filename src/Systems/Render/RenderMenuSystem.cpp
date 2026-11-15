@@ -139,6 +139,13 @@
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Persistent/StatChangeDisplayDuration.hpp>
+#include <Components/Persistent/LuckDropRate.hpp>
+#include <Components/Persistent/StartingAnima.hpp>
+#include <Components/Persistent/StartingDespair.hpp>
+#include <Components/Persistent/StartingFear.hpp>
+#include <Components/Persistent/StartingHealth.hpp>
+#include <Components/Persistent/StartingInfamy.hpp>
+#include <Components/Persistent/StartingLuck.hpp>
 #include <Components/Persistent/TachycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/TachycardiaMovementSpeed.hpp>
 #include <Components/Persistent/TalismanMinChance.hpp>
@@ -301,6 +308,18 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::PlayerLerpInterruptThreshold>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PostPullMovementDelay>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RetainAnimaBetweenLevels>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::LuckDropRate>( reg() ).render_widget();
+
+    ImGui::TextUnformatted( "Starting Stats" );
+    ImGui::TextDisabled( "applied at the start of every level" );
+    {
+      const std::array<Cmp::Persist::BasePersistent<int> *, 6> starting_stats{
+          &Sys::PersistSystem::get<Cmp::Persist::StartingHealth>( reg() ), &Sys::PersistSystem::get<Cmp::Persist::StartingFear>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::StartingDespair>( reg() ), &Sys::PersistSystem::get<Cmp::Persist::StartingInfamy>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::StartingLuck>( reg() ),   &Sys::PersistSystem::get<Cmp::Persist::StartingAnima>( reg() ),
+      };
+      render_vslider_row( starting_stats );
+    }
 
     ImGui::SeparatorText( "Item Effect Settings" );
 
@@ -465,31 +484,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
           &Sys::PersistSystem::get<Cmp::Persist::GraveOddsTorch>( reg() ),       &Sys::PersistSystem::get<Cmp::Persist::GraveOddsNpcTrap>( reg() ),
           &Sys::PersistSystem::get<Cmp::Persist::GraveOddsJewelry>( reg() ),     &Sys::PersistSystem::get<Cmp::Persist::GraveOddsTalisman>( reg() ),
       };
-      // every column is as wide as the widest slider or label, so the sliders sit at equal x intervals
-      const ImVec2 slider_size( 48.0f, 160.0f );
-      float column_width = slider_size.x;
-      for ( auto *setting : odds_settings )
-        column_width = std::max( column_width, ImGui::CalcTextSize( setting->get_detail_ptr()->c_str() ).x );
-      column_width += ImGui::GetStyle().ItemSpacing.x;
-
-      const float row_start_x = ImGui::GetCursorPosX();
-      for ( std::size_t i = 0; i < odds_settings.size(); ++i )
-      {
-        auto &setting = *odds_settings[i];
-        const float column_x = row_start_x + column_width * static_cast<float>( i );
-        if ( i > 0 ) ImGui::SameLine( column_x );
-        ImGui::PushID( &setting );
-        ImGui::BeginGroup();
-        // centre the slider and its label within the column
-        ImGui::SetCursorPosX( column_x + ( column_width - slider_size.x ) * 0.5f );
-        ImGui::VSliderScalar( "##odds", slider_size, ImGuiDataType_S32, setting.get_value_ptr(), setting.get_min_value_ptr(),
-                              setting.get_max_value_ptr(), setting.get_format().empty() ? "%d" : setting.get_format().c_str() );
-        const char *label = setting.get_detail_ptr()->c_str();
-        ImGui::SetCursorPosX( column_x + ( column_width - ImGui::CalcTextSize( label ).x ) * 0.5f );
-        ImGui::TextUnformatted( label );
-        ImGui::EndGroup();
-        ImGui::PopID();
-      }
+      render_vslider_row( odds_settings );
     }
     Sys::PersistSystem::get<Cmp::Persist::GraveCountMargin>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailGuideColour>( reg() ).render_widget();
@@ -541,6 +536,35 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
         SPDLOG_DEBUG( "Selected resolution: {}x{}", display_resolution.x, display_resolution.y );
       }
     }
+  }
+}
+
+void RenderMenuSystem::render_vslider_row( std::span<Cmp::Persist::BasePersistent<int> *const> settings )
+{
+  // every column is as wide as the widest slider or label, so the sliders sit at equal x intervals
+  const ImVec2 slider_size( 48.0f, 160.0f );
+  float column_width = slider_size.x;
+  for ( auto *setting : settings )
+    column_width = std::max( column_width, ImGui::CalcTextSize( setting->get_detail_ptr()->c_str() ).x );
+  column_width += ImGui::GetStyle().ItemSpacing.x;
+
+  const float row_start_x = ImGui::GetCursorPosX();
+  for ( std::size_t i = 0; i < settings.size(); ++i )
+  {
+    auto &setting = *settings[i];
+    const float column_x = row_start_x + column_width * static_cast<float>( i );
+    if ( i > 0 ) ImGui::SameLine( column_x );
+    ImGui::PushID( &setting );
+    ImGui::BeginGroup();
+    // centre the slider and its label within the column
+    ImGui::SetCursorPosX( column_x + ( column_width - slider_size.x ) * 0.5f );
+    ImGui::VSliderScalar( "##vslider", slider_size, ImGuiDataType_S32, setting.get_value_ptr(), setting.get_min_value_ptr(),
+                          setting.get_max_value_ptr(), setting.get_format().empty() ? "%d" : setting.get_format().c_str() );
+    const char *label = setting.get_detail_ptr()->c_str();
+    ImGui::SetCursorPosX( column_x + ( column_width - ImGui::CalcTextSize( label ).x ) * 0.5f );
+    ImGui::TextUnformatted( label );
+    ImGui::EndGroup();
+    ImGui::PopID();
   }
 }
 

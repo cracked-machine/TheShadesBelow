@@ -268,6 +268,17 @@ Cmp::TorchRadius &get_torch_radius( entt::registry &reg );
 //! @throws std::runtime_error if no entity has both Cmp::Player::Character and Cmp::PlayerStats.
 Cmp::PlayerStats &get_stats( entt::registry &reg );
 
+//! @brief Build the player's starting stats from the Cmp::Persist::Starting* settings (no toxidrome affliction).
+//! @param reg reference to the entt registry
+//! @return Cmp::PlayerStats New stats object holding the starting values.
+Cmp::PlayerStats make_starting_stats( entt::registry &reg );
+
+//! @brief Reset the player's health, fear, despair, infamy, luck and anima to the Cmp::Persist::Starting* settings.
+//! The toxidrome is left untouched.
+//! @param reg reference to the entt registry
+//! @param keep_anima true to leave the player's anima as it is (see Cmp::Persist::RetainAnimaBetweenLevels)
+void reset_stats_to_starting( entt::registry &reg, bool keep_anima );
+
 Cmp::Player::Footstep &get_footstep_type( entt::registry &reg );
 
 //! @brief Get the player's global bomb-flash timer, used to time the screen flash effect for bomb detonations.
