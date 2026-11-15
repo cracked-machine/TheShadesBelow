@@ -71,7 +71,7 @@ private:
   entt::entity gen_plant( const Sys::ItemKey &plant_type, const Cmp::Position &pos_cmp );
 
   //! @brief Forage the mouse-selected plant the player is facing, dropping its forage_action reward nearby.
-  //! Any inventory item except a torch, axe or shovel can forage; gloves stop the stat changes and the drop's sting.
+  //! Any inventory item except a torch, axe or shovel can forage; gloves stop the forage's health damage (not its benefits) and the drop's sting.
   void forage_plant();
 
   //! @brief Uses Cmp::SelectedPosition to mark the targetted Cmp::PlantMultiBlock then applies digging damage until the obstacle is destroyed.

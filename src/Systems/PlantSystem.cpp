@@ -197,7 +197,7 @@ void PlantSystem::forage_plant()
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_type == "item.torch" or inventory_type == "item.axe" or inventory_type == "item.shovel" ) return;
 
-  // gloves stop the forage stinging: its stat changes are skipped and the drop gets no Cmp::Inventory::StingDamage
+  // gloves stop the forage stinging: its health damage is skipped (benefits still apply) and the drop gets no Cmp::Inventory::StingDamage
   const bool wearing_gloves = inventory_type == "item.gloves";
 
   auto mouse_position_bounds = Utils::get_mouse_bounds_in_gameview( m_window, RenderSystem::get_world_view() );
@@ -260,11 +260,20 @@ void PlantSystem::forage_plant()
       get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), gloves_wear ) );
     }
 
-    // With gloves only the forage_action side effects apply, not its stat changes. They don't protect against hawthorn lightning though.
-    if ( reg().get<Cmp::WorldItem>( plant_entt ).has_action<Cmp::ForageAction>() )
+    // Gloves block the forage_action's sting (its health damage) but not its benefits or side effects.
+    // They don't protect against hawthorn lightning though.
+    const auto &plant_worlditem = reg().get<Cmp::WorldItem>( plant_entt );
+    if ( plant_worlditem.has_action<Cmp::ForageAction>() )
     {
-      const auto forage_action = wearing_gloves ? reg().get<Cmp::WorldItem>( plant_entt ).get_action<Cmp::ForageAction>()
-                                                : Utils::Player::apply_action_from_world_item<Cmp::ForageAction>( reg(), plant_entt );
+      Cmp::BaseAction forage_action( {}, {}, {}, {}, {}, {}, {} );
+      if ( wearing_gloves )
+      {
+        forage_action = plant_worlditem.get_action<Cmp::ForageAction>();
+        forage_action.remove_damage();
+        Utils::Player::get_stats( reg() ).apply( forage_action );
+        get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( plant_worlditem.item_type, Cmp::ForageAction::kKey, forage_action ) );
+      }
+      else { forage_action = Utils::Player::apply_action_from_world_item<Cmp::ForageAction>( reg(), plant_entt ); }
       trigger_side_effects( forage_action, plant_pos_cmp, plant_entt );
     }
 
