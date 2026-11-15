@@ -1,6 +1,7 @@
 #include <Utils/ImGuiTheme.hpp>
 
 #include <imgui-SFML.h>
+#include <array>
 #include <imgui.h>
 #include <spdlog/spdlog.h>
 
@@ -11,6 +12,8 @@ namespace
 {
 //! @brief The font added by load_imgui_fonts(). Owned by the current ImGui context's font atlas.
 ImFont *s_grimoire_font = nullptr;
+//! @brief The game font at each of kImGuiTextFontPx, see imgui_text_font(). Entries are nullptr if loading failed.
+std::array<ImFont *, kImGuiTextFontPx.size()> s_text_fonts{};
 } // namespace
 
 void apply_imgui_theme()
@@ -101,9 +104,40 @@ void load_imgui_fonts()
   }
   // cancel the global scale applied to every font, so this one draws at exactly the size it was rasterised at
   s_grimoire_font->Scale = 1.f / io.FontGlobalScale;
+
+  // the overlay text font at a few sizes: ImGui 1.91 rasterises a font at one size, so large text drawn from a small
+  // font would be blurry. The grimoire font doubles as the smallest size.
+  for ( std::size_t idx = 0; idx < kImGuiTextFontPx.size(); ++idx )
+  {
+    if ( kImGuiTextFontPx.at( idx ) == kImGuiGrimoireFontPx )
+    {
+      s_text_fonts.at( idx ) = s_grimoire_font;
+      continue;
+    }
+    s_text_fonts.at( idx ) = io.Fonts->AddFontFromFileTTF( "res/fonts/tuffy.ttf", kImGuiTextFontPx.at( idx ) );
+    if ( not s_text_fonts.at( idx ) )
+    {
+      SPDLOG_ERROR( "Failed to load res/fonts/tuffy.ttf at {}px for ImGui overlay text", kImGuiTextFontPx.at( idx ) );
+      continue;
+    }
+    s_text_fonts.at( idx )->Scale = 1.f / io.FontGlobalScale;
+  }
   if ( not ImGui::SFML::UpdateFontTexture() ) { SPDLOG_ERROR( "Failed to update the ImGui font texture" ); }
 }
 
 ImFont *imgui_grimoire_font() { return s_grimoire_font; }
+
+ImFont *imgui_text_font( float px )
+{
+  // the smallest loaded size at least as big as `px`, so the text is only ever scaled down
+  ImFont *best = nullptr;
+  for ( std::size_t idx = 0; idx < kImGuiTextFontPx.size(); ++idx )
+  {
+    if ( not s_text_fonts.at( idx ) ) continue;
+    best = s_text_fonts.at( idx );
+    if ( kImGuiTextFontPx.at( idx ) >= px ) break;
+  }
+  return best ? best : ImGui::GetFont();
+}
 
 } // namespace Game::Utils

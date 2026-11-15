@@ -7,7 +7,6 @@
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Constants.hpp>
 
-#include <SFML/Graphics/Text.hpp>
 #include <SFML/System/Vector2.hpp>
 
 #include <ranges>
@@ -92,42 +91,31 @@ void ShopOverlaySystem::update( [[maybe_unused]] sf::Time dt )
     draw_screen( flame );
   }
 
-  //! @brief Helper to draw predefined `sf_text` at `pos`
-  auto draw_label_text_at = [&]( sf::Text &sf_text, const sf::Vector2f &pos, const std::string &align = "left" )
-  {
-    if ( align == "center" ) { sf_text.setPosition( { pos.x - sf_text.getLocalBounds().getCenter().x, pos.y } ); }
-    else if ( align == "left" ) { sf_text.setPosition( pos ); }
-    else if ( align == "right" ) { sf_text.setPosition( { pos.x - sf_text.getLocalBounds().size.x, pos.y } ); }
-
-    draw_screen( sf_text );
-  };
-
   // Draw all text labels (index, description, price)
+  begin_overlay_window( "##shop_text" );
+  const auto slot_char_size = static_cast<float>( scaled_char_size( 30, m_shop_ui_layout.get() ) );
   for ( auto [i, slot] : std::views::enumerate( inventory_cmp.m_slots ) )
   {
     auto &[item, price] = slot;
 
-    const unsigned int slot_char_size = scaled_char_size( 30, m_shop_ui_layout.get() );
-    sf::Text slot_idx_txt( m_font, std::to_string( i + 1 ), slot_char_size );
-    slot_idx_txt.setFillColor( sf::Color::Black );
-
+    const std::string slot_idx_txt = std::to_string( i + 1 );
     Sys::SpriteKey sprite_mtype = Sys::ItemStore::instance().get( item ).sprite_type;
-    sf::Text slot_desc_txt( m_font, Sys::SpriteStore::instance().get( sprite_mtype ).display_name(), slot_char_size );
-    slot_desc_txt.setFillColor( sf::Color::Black );
-
-    sf::Text slot_price_txt( m_font, std::to_string( price ), slot_char_size );
-    slot_price_txt.setFillColor( sf::Color::Black );
+    const std::string slot_desc_txt = Sys::SpriteStore::instance().get( sprite_mtype ).display_name();
+    const std::string slot_price_txt = std::to_string( price );
 
     const std::string idx_key = "slot" + std::to_string( i + 1 ) + "_idx";
     const std::string desc_key = "slot" + std::to_string( i + 1 ) + "_desc";
     const std::string price_key = "slot" + std::to_string( i + 1 ) + "_price";
     for ( const auto &ui_label : m_shop_ui_layout->m_labels )
     {
-      if ( ui_label.name.contains( idx_key ) ) { draw_label_text_at( slot_idx_txt, ui_label.rect.position, ui_label.align ); }
-      else if ( ui_label.name.contains( desc_key ) ) { draw_label_text_at( slot_desc_txt, ui_label.rect.position, ui_label.align ); }
-      else if ( ui_label.name.contains( price_key ) ) { draw_label_text_at( slot_price_txt, ui_label.rect.position, ui_label.align ); }
+      const std::string *text = nullptr;
+      if ( ui_label.name.contains( idx_key ) ) { text = &slot_idx_txt; }
+      else if ( ui_label.name.contains( desc_key ) ) { text = &slot_desc_txt; }
+      else if ( ui_label.name.contains( price_key ) ) { text = &slot_price_txt; }
+      if ( text ) { draw_text( *text, slot_char_size, ui_label.rect.position, sf::Color::Black, to_text_align( ui_label.align ) ); }
     }
   }
+  end_overlay_window();
 }
 
 } // namespace Game::Sys

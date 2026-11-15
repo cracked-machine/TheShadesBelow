@@ -8,8 +8,7 @@
 #include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 
-#include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/Text.hpp>
+#include <imgui.h>
 
 #include <fstream>
 #include <string_view>
@@ -248,21 +247,24 @@ void TooltipOverlaySystem::render()
   const sf::Vector2u display_size = PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
   const sf::Vector2f centre{ static_cast<float>( display_size.x ) * m_style.position.x, static_cast<float>( display_size.y ) * m_style.position.y };
 
-  sf::Text text( m_font, m_active->text, m_style.font_size );
-  text.setFillColor( m_style.text_colour );
-  const sf::FloatRect text_bounds = text.getLocalBounds();
-  text.setOrigin( text_bounds.position + ( text_bounds.size * 0.5f ) );
-  text.setPosition( centre );
+  // all ImGui, panel included: ImGui renders after every SFML draw, so the tooltip stays over the HUD's ImGui widgets
+  const auto font_size = static_cast<float>( m_style.font_size );
+  const sf::Vector2f text_size = measure_text( m_active->text, font_size );
+  const sf::Vector2f panel_size = text_size + sf::Vector2f{ m_style.padding * 2.f, m_style.padding * 2.f };
+  const sf::Vector2f panel_min = centre - ( panel_size * 0.5f );
+  const sf::Vector2f panel_max = centre + ( panel_size * 0.5f );
+  constexpr float kPanelOutlineThickness = 2.f;
 
-  sf::RectangleShape panel( text_bounds.size + sf::Vector2f{ m_style.padding * 2.f, m_style.padding * 2.f } );
-  panel.setOrigin( panel.getSize() * 0.5f );
-  panel.setPosition( centre );
-  panel.setFillColor( m_style.fill_colour );
-  panel.setOutlineColor( m_style.line_colour );
-  panel.setOutlineThickness( 2.f );
-
-  draw_screen( panel );
-  draw_screen( text );
+  begin_overlay_window( "##tooltip" );
+  auto &draw_list = *ImGui::GetWindowDrawList();
+  const auto to_imu32 = []( sf::Color colour ) { return IM_COL32( colour.r, colour.g, colour.b, colour.a ); };
+  draw_list.AddRectFilled( ImVec2( panel_min.x, panel_min.y ), ImVec2( panel_max.x, panel_max.y ), to_imu32( m_style.fill_colour ) );
+  // the SFML outline was drawn outside the panel, so grow the stroke outwards by half its thickness
+  const float half = kPanelOutlineThickness * 0.5f;
+  draw_list.AddRect( ImVec2( panel_min.x - half, panel_min.y - half ), ImVec2( panel_max.x + half, panel_max.y + half ),
+                     to_imu32( m_style.line_colour ), 0.f, 0, kPanelOutlineThickness );
+  draw_text( m_active->text, font_size, { centre.x, centre.y - ( text_size.y * 0.5f ) }, m_style.text_colour, TextAlign::CENTER );
+  end_overlay_window();
 }
 
 } // namespace Game::Sys

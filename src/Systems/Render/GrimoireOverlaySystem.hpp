@@ -107,10 +107,9 @@ private:
   //! @tparam PageT Cmp::Grimoire::NpcPage or Cmp::Grimoire::PlantPage.
   //! @param ui_layout The hover layout, res/ui/grimoire_npc_hover.json or res/ui/grimoire_plant_hover.json.
   //! @param window_id The ImGui window id.
-  //! @param cache_prefix Prefix of the layout's TextColumn cache keys.
   //! @param page The hovered NPC's or plant's page.
   template <typename PageT>
-  void render_hover( Render::UiLayout &ui_layout, const char *window_id, const std::string &cache_prefix, const PageT &page );
+  void render_hover( Render::UiLayout &ui_layout, const char *window_id, const PageT &page );
 
   //! @brief Find the grimoire page of the plant under the mouse cursor in the game area.
   //! @param grimoire_cmp
@@ -146,14 +145,14 @@ private:
   //! @param ui_layout The layout of the current tab.
   void render_tab_bar( const Render::UiLayout &ui_layout );
 
-  //! @brief Draw one page: SFML outlines, icons, names and page label, then the ImGui action tables.
+  //! @brief Draw one page: SFML outlines and icons, ImGui names and page label, then the ImGui action tables. Must be
+  //! called inside the page's ImGui window (begin_layout_window).
   //! @tparam PageT Cmp::Grimoire::NpcPage or Cmp::Grimoire::PlantPage.
   //! @param ui_layout The page's layout.
-  //! @param cache_prefix Prefix of the layout's TextColumn cache keys.
   //! @param page The page.
   //! @param page_count Number of pages in the tab, for the page label.
   template <typename PageT>
-  void render_page( const Render::UiLayout &ui_layout, const std::string &cache_prefix, const PageT &page, std::size_t page_count );
+  void render_page( const Render::UiLayout &ui_layout, const PageT &page, std::size_t page_count );
 
   //! @brief Draw a subpage's sprite icon.
   //! @param icon The layout's icon.
@@ -162,15 +161,13 @@ private:
 
   //! @brief Draw the "N of M" page label.
   //! @param ui_layout The layout of the page currently shown.
-  //! @param cache_prefix Prefix of the layout's TextColumn cache keys.
   //! @param page_count Number of pages in the tab.
-  void render_page_label( const Render::UiLayout &ui_layout, const std::string &cache_prefix, std::size_t page_count );
+  void render_page_label( const Render::UiLayout &ui_layout, std::size_t page_count );
 
   //! @brief Draw a static text, or a subpage's item or NPC name.
   //! @param text The layout's text.
-  //! @param cache_prefix Prefix of the layout's TextColumn cache keys.
   //! @param sub_page The subpage whose name it is, or nullptr for a static text.
-  void render_text( const Render::UiLayout::Text &text, const std::string &cache_prefix, const Cmp::Grimoire::SubPage *sub_page );
+  void render_text( const Render::UiLayout::Text &text, const Cmp::Grimoire::SubPage *sub_page );
 
   //! @brief Draw a subpage's ImGui action table: one row per entry of `table.rows`, its caption and its effects.
   //! @param table The layout's table.

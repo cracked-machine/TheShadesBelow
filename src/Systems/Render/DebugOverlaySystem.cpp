@@ -70,7 +70,6 @@
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/Text.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <imgui.h>
 
@@ -136,18 +135,20 @@ void DebugOverlaySystem::render_navmesh()
   const auto npc_navmesh = m_npc_navmesh.lock();
   if ( not npc_navmesh ) return;
 
-  sf::Text text( m_font, "", 10 );
+  // the counts are ImGui text, so they are placed in screen pixels: map each world position through the world view, and
+  // scale the world-space font size by the view's zoom
+  const sf::View &world_view = Sys::RenderSystem::get_world_view();
+  // ImGui draws in window pixels
+  const float px_per_world_unit = static_cast<float>( m_window.getSize().y ) / world_view.getSize().y;
+  constexpr float kWorldFontSize = 10.f;
+  begin_overlay_window( "##debug_navmesh" );
   for ( auto [pos_entt, pos_cmp] : reg().view<Cmp::Position>().each() )
   {
-    if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), pos_cmp ) ) continue;
+    if ( not Utils::is_visible_in_view( world_view, pos_cmp ) ) continue;
     auto entt_bucket = npc_navmesh->at( pos_cmp );
-    text.setString( std::to_string( entt_bucket.size() ) );
-    text.setFillColor( sf::Color::Blue );
-    text.setOutlineColor( sf::Color::Black );
-    text.setOutlineThickness( 1.f );
-    text.setPosition( { pos_cmp.position.x + 4.f, pos_cmp.position.y + 4.f } );
-
-    draw_world( text );
+    const sf::Vector2f screen_pos( m_window.mapCoordsToPixel( { pos_cmp.position.x + 4.f, pos_cmp.position.y + 4.f }, world_view ) );
+    draw_text( std::to_string( entt_bucket.size() ), kWorldFontSize * px_per_world_unit, screen_pos, sf::Color::Blue, TextAlign::LEFT,
+               sf::Color::Black, px_per_world_unit );
 
     sf::RectangleShape bottom_edge( { 8.f, 1.f } );
     bottom_edge.setFillColor( sf::Color::Blue );
@@ -161,6 +162,7 @@ void DebugOverlaySystem::render_navmesh()
     right_edge.setPosition( { pos_cmp.position.x + pos_cmp.size.x, pos_cmp.position.y + ( pos_cmp.size.y / 2 ) } );
     draw_world( right_edge );
   }
+  end_overlay_window();
 }
 
 void DebugOverlaySystem::render_pathfinding()

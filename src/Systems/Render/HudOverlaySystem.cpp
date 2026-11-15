@@ -56,10 +56,9 @@
 #include <Utils/Utils.hpp>
 
 #include <SFML/Graphics/Color.hpp>
+#include <imgui-SFML.h>
 #include <imgui.h>
 #include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/Text.hpp>
-#include <SFML/Graphics/VertexArray.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <algorithm>
 #include <array>
@@ -68,6 +67,7 @@
 #include <format>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <utility>
 
 namespace Game::Sys
@@ -87,13 +87,16 @@ void HudOverlaySystem::update( sf::Time dt )
   PROFILED( render_ui_inventory_table( dt ) );
   // after the inventory table, so the torch flames flicker over their slot icons
   PROFILED( render_ui_particles() );
+  // the meters (with their frost) and the texts share one ImGui window, texts submitted last so they draw over the
+  // meters. ImGui renders after every SFML draw, so nothing SFML can be drawn over these.
+  begin_overlay_window( "##hud_meters" );
   PROFILED( render_ui_meters( dt ) );
   PROFILED( render_ui_labels( dt ) );
   PROFILED( render_ui_texts() );
-  PROFILED( render_ghost_grave_halos() );
-
   const auto display_size = sf::Vector2f( m_window.getSize() );
   render_crypt_maze_timer( { display_size.x / 2.f, 0.f }, scaled_char_size( 100, m_main_ui_layout.get() ) );
+  end_overlay_window();
+  PROFILED( render_ghost_grave_halos() );
 }
 
 void HudOverlaySystem::render_ui_particles()
@@ -180,6 +183,19 @@ const Render::UiLayout::Table *HudOverlaySystem::find_inventory_table() const
 
 namespace
 {
+//! @brief Window flags for the HUD's ImGui windows: display only, so the HUD never takes the mouse from the game or
+//! comes in front of other overlays.
+constexpr ImGuiWindowFlags kHudWindowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings |
+                                             ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
+                                             ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoScrollbar;
+
+//! @brief Convert an SFML colour to an ImGui colour.
+ImVec4 to_imvec4( sf::Color colour )
+{
+  return { static_cast<float>( colour.r ) / 255.f, static_cast<float>( colour.g ) / 255.f, static_cast<float>( colour.b ) / 255.f,
+           static_cast<float>( colour.a ) / 255.f };
+}
+
 //! @brief Find a layout element by name in one of a UiLayout's element lists.
 template <typename ElementT>
 const ElementT *find_element( const std::vector<ElementT> &elements, std::string_view name )
@@ -229,14 +245,10 @@ void HudOverlaySystem::render_ui_inventory_table( sf::Time dt )
   // the ui_table only gives the position; each column is one slot of res/ui/inventory_slot.json
   ImGui::SetNextWindowPos( ImVec2( table->rect.position.x, table->rect.position.y ) );
   ImGui::SetNextWindowSize( ImVec2( slot_size.x * static_cast<float>( slot_count ), slot_size.y ) );
-  // display only: the HUD must never take the mouse from the game, or come in front of other overlays
-  constexpr ImGuiWindowFlags kWindowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings |
-                                            ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
-                                            ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoScrollbar;
   ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0.f, 0.f ) );
   ImGui::PushStyleVar( ImGuiStyleVar_CellPadding, ImVec2( 0.f, 0.f ) );
   ImGui::PushFont( Utils::imgui_grimoire_font() );
-  if ( ImGui::Begin( "##hud_inventory", nullptr, kWindowFlags ) )
+  if ( ImGui::Begin( "##hud_inventory", nullptr, kHudWindowFlags ) )
   {
     ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.f, 1.f, 1.f, 1.f ) );
     ImGui::PushStyleColor( ImGuiCol_TableBorderLight, ImVec4( 0.f, 0.f, 0.f, 0.5f ) );
@@ -360,8 +372,6 @@ void HudOverlaySystem::render_ui_meters( sf::Time dt )
   int toxidrome_index = 0;
   const float kMeterOutlineThickness = 5.f * hud_scale();
 
-  sf::RectangleShape innermeter;
-  sf::RectangleShape outermeter;
   for ( const auto &meter : m_main_ui_layout->m_meters )
   {
     float meter_value = 0;
@@ -479,68 +489,39 @@ void HudOverlaySystem::render_ui_meters( sf::Time dt )
 
     if ( not should_render ) { continue; }
 
-    innermeter.setSize( { ( ( meter.rect.size.x / 100 ) * meter_value ), meter.rect.size.y } );
-    innermeter.setPosition( meter.rect.position );
-    innermeter.setFillColor( meter_inner_color );
-    draw_screen( innermeter );
+    // the frame is the meter rect plus the outline: ProgressBar insets its fill by the border size, so the fill covers the
+    // authored rect and the border sits round it, like the old SFML outline
+    const sf::Vector2f outline( kMeterOutlineThickness, kMeterOutlineThickness );
+    const sf::FloatRect frame_rect( meter.rect.position - outline, meter.rect.size + ( outline * 2.f ) );
+    ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, kMeterOutlineThickness );
+    ImGui::PushStyleColor( ImGuiCol_Border, to_imvec4( meter_outer_color ) );
+    ImGui::PushStyleColor( ImGuiCol_BorderShadow, ImVec4( 0.f, 0.f, 0.f, 0.f ) );
+    ImGui::PushStyleColor( ImGuiCol_PlotHistogram, to_imvec4( meter_inner_color ) );
+    // the meters have no background
+    ImGui::PushStyleColor( ImGuiCol_FrameBg, ImVec4( 0.f, 0.f, 0.f, 0.f ) );
+    ImGui::SetCursorScreenPos( ImVec2( frame_rect.position.x, frame_rect.position.y ) );
+    ImGui::ProgressBar( std::clamp( meter_value / 100.f, 0.f, 1.f ), ImVec2( frame_rect.size.x, frame_rect.size.y ), "" );
+    ImGui::PopStyleColor( 4 );
+    ImGui::PopStyleVar();
 
-    outermeter.setSize( meter.rect.size );
-    outermeter.setPosition( meter.rect.position );
-    outermeter.setFillColor( sf::Color::Transparent );
-    outermeter.setOutlineColor( meter_outer_color );
-    outermeter.setOutlineThickness( kMeterOutlineThickness );
-    draw_screen( outermeter );
-
-    // frost the whole toxidrome meter, outline included, so even an empty meter shows the immunity
+    // frost the whole toxidrome meter, outline included, so even an empty meter shows the immunity. Submitted right after
+    // the meter's ProgressBar, so it draws over it.
     if ( immunity_visible and is_toxidrome_meter )
     {
-      const sf::Vector2f outline( kMeterOutlineThickness, kMeterOutlineThickness );
-      const sf::FloatRect overlay_rect( meter.rect.position - outline, meter.rect.size + outline * 2.f );
       if ( load_frost_shader() )
       {
-        render_meter_frost( overlay_rect, static_cast<float>( toxidrome_index ) * 17.31f, toxidrome_overlay, toxidrome_glint );
+        render_meter_frost( meter.name, frame_rect, static_cast<float>( toxidrome_index ) * 17.31f, toxidrome_overlay, toxidrome_glint );
       }
       else
       {
         // no shader support: fall back to a flat frost wash
-        sf::RectangleShape overlay( overlay_rect.size );
-        overlay.setPosition( overlay_rect.position );
-        overlay.setFillColor( toxidrome_overlay );
-        draw_screen( overlay );
+        ImGui::GetWindowDrawList()->AddRectFilled( ImVec2( frame_rect.position.x, frame_rect.position.y ),
+                                                   ImVec2( frame_rect.position.x + frame_rect.size.x, frame_rect.position.y + frame_rect.size.y ),
+                                                   ImGui::GetColorU32( to_imvec4( toxidrome_overlay ) ) );
       }
       ++toxidrome_index;
     }
   }
-}
-
-void HudOverlaySystem::render_meter_shimmer( const sf::FloatRect &rect, float progress, sf::Color colour )
-{
-  const float kShimmerHalfWidth = 10.f * hud_scale();
-  // the band leans like "/": its top edge is offset right of its bottom edge by the slant
-  const float half_slant = rect.size.y * 0.25f;
-  const float left = rect.position.x;
-  const float right = rect.position.x + rect.size.x;
-  const float top = rect.position.y;
-  const float bottom = rect.position.y + rect.size.y;
-
-  // the band centre travels from fully off the left edge to fully off the right edge
-  const float travel = kShimmerHalfWidth + half_slant;
-  const float centre = ( left - travel ) + ( ( right - left ) + ( travel * 2.f ) ) * progress;
-
-  sf::Color edge_colour = colour;
-  edge_colour.a = 0;
-
-  // trailing, centre and leading slanted edges; clamping x keeps the band inside the meter
-  sf::VertexArray band( sf::PrimitiveType::TriangleStrip, 6 );
-  const std::array<std::pair<float, sf::Color>, 3> edges = {
-      { { centre - kShimmerHalfWidth, edge_colour }, { centre, colour }, { centre + kShimmerHalfWidth, edge_colour } } };
-  for ( std::size_t idx = 0; idx < edges.size(); ++idx )
-  {
-    const auto &[edge_x, edge_colour_at] = edges[idx];
-    band[idx * 2] = sf::Vertex{ { std::clamp( edge_x + half_slant, left, right ), top }, edge_colour_at };
-    band[( idx * 2 ) + 1] = sf::Vertex{ { std::clamp( edge_x - half_slant, left, right ), bottom }, edge_colour_at };
-  }
-  draw_screen( band );
 }
 
 bool HudOverlaySystem::load_frost_shader()
@@ -563,25 +544,37 @@ bool HudOverlaySystem::load_frost_shader()
   return *m_frost_shader_ok;
 }
 
-void HudOverlaySystem::render_meter_frost( const sf::FloatRect &rect, float seed, sf::Color frost, sf::Color glint )
+void HudOverlaySystem::render_meter_frost( const std::string &meter_name, const sf::FloatRect &rect, float seed, sf::Color frost,
+                                           sf::Color glint )
 {
-  // the shader works in render target pixels (gl_FragCoord), so map the default view rect onto the target
-  auto &target = active_render_target();
-  const sf::View &screen_view = m_window.getDefaultView();
-  const sf::Vector2f top_left = sf::Vector2f( target.mapCoordsToPixel( rect.position, screen_view ) );
-  const sf::Vector2f bottom_right = sf::Vector2f( target.mapCoordsToPixel( rect.position + rect.size, screen_view ) );
+  // ImGui draws after every SFML draw, so the frost is rendered into the meter's own texture and shown with ImGui::Image
+  // over the meter's ProgressBar. One texture per meter: ImGui only reads them when the frame is rendered.
+  const sf::Vector2u size( static_cast<unsigned int>( std::max( 1.f, std::round( rect.size.x ) ) ),
+                           static_cast<unsigned int>( std::max( 1.f, std::round( rect.size.y ) ) ) );
+  auto &texture = m_frost_textures[meter_name];
+  if ( texture.getSize() != size and not texture.resize( size ) )
+  {
+    SPDLOG_WARN( "Unable to create the {} frost texture", meter_name );
+    return;
+  }
 
-  m_frost_shader.setUniform( "rect", sf::Glsl::Vec4( top_left.x, top_left.y, bottom_right.x - top_left.x, bottom_right.y - top_left.y ) );
-  m_frost_shader.setUniform( "target_height", static_cast<float>( target.getSize().y ) );
+  // the shader works in render target pixels (gl_FragCoord), which are now the texture's own
+  const sf::Vector2f texture_size( size );
+  m_frost_shader.setUniform( "rect", sf::Glsl::Vec4( 0.f, 0.f, texture_size.x, texture_size.y ) );
+  m_frost_shader.setUniform( "target_height", texture_size.y );
   m_frost_shader.setUniform( "time", m_frost_timer.asSeconds() );
   m_frost_shader.setUniform( "seed", seed );
   m_frost_shader.setUniform( "frost", sf::Glsl::Vec4( frost ) );
   m_frost_shader.setUniform( "glint", sf::Glsl::Vec4( glint ) );
 
-  sf::RectangleShape overlay( rect.size );
-  overlay.setPosition( rect.position );
+  texture.clear( sf::Color::Transparent );
+  sf::RectangleShape overlay( texture_size );
   overlay.setFillColor( sf::Color::White );
-  draw_screen( overlay, sf::RenderStates( &m_frost_shader ) );
+  texture.draw( overlay, sf::RenderStates( &m_frost_shader ) );
+  texture.display();
+
+  ImGui::SetCursorScreenPos( ImVec2( rect.position.x, rect.position.y ) );
+  ImGui::Image( texture, rect.size );
 }
 
 void HudOverlaySystem::render_ui_texts()
@@ -592,16 +585,12 @@ void HudOverlaySystem::render_ui_texts()
     return;
   }
 
-  sf::Text text( m_font, "", 1 );
+  // ImGui text, in the HUD window after the meters, so the toxidrome names stay readable on top of their bars
+  const float outline = 2.f * hud_scale();
   for ( const auto &ui_text : m_main_ui_layout->m_texts )
   {
-    text.setString( ui_text.value );
-    text.setCharacterSize( ui_text.font_size );
-    text.setPosition( ui_text.rect.position );
-    text.setFillColor( sf::Color::White );
-    text.setOutlineColor( sf::Color::Black );
-    text.setOutlineThickness( 2.f * hud_scale() );
-    draw_screen( text );
+    draw_text( ui_text.value, static_cast<float>( ui_text.font_size ), ui_text.rect.position, sf::Color::White, TextAlign::LEFT, sf::Color::Black,
+               outline );
   }
 }
 
@@ -636,7 +625,6 @@ void HudOverlaySystem::render_ui_labels( sf::Time dt )
     SPDLOG_CRITICAL( "UiLayout object is not initialised. Cannot draw value overlay" );
     return;
   }
-  sf::Text text( m_font, "", 1 );
   for ( const auto &ui_label : m_main_ui_layout->m_labels )
   {
     std::string text_str;
@@ -646,37 +634,15 @@ void HudOverlaySystem::render_ui_labels( sf::Time dt )
       text_str = update_stat_change_text( ui_label.name, dt );
       if ( text_str.empty() ) { continue; }
     }
-    text.setCharacterSize( ui_label.font_size );
-    text.setString( text_str );
-    if ( ui_label.align == "center" )
-    {
-      text.setPosition( { ui_label.rect.position.x - text.getLocalBounds().getCenter().x, ui_label.rect.position.y } );
-    }
-    else if ( ui_label.align == "left" ) { text.setPosition( ui_label.rect.position ); }
-    else if ( ui_label.align == "right" )
-    {
-      text.setPosition( { ui_label.rect.position.x - text.getLocalBounds().size.x, ui_label.rect.position.y } );
-    }
-    text.setFillColor( sf::Color::White );
-    text.setOutlineColor( sf::Color::Black );
-    text.setOutlineThickness( 2.f * hud_scale() );
 
+    sf::Color outline = sf::Color::Black;
     // flash the text if we just picked up a cadaver
-    if ( ui_label.name == "cadaver_label" and update_flash_toggle<Cmp::FlashUICadaver>( dt ) )
-    {
-      text.setFillColor( sf::Color::White );
-      text.setOutlineColor( sf::Color::White );
-    }
-
+    if ( ui_label.name == "cadaver_label" and update_flash_toggle<Cmp::FlashUICadaver>( dt ) ) { outline = sf::Color::White; }
     // flash the text if we just deposited something in a well
-    if ( ui_label.name == "wealth_label" and update_flash_toggle<Cmp::FlashUIWealth>( dt ) )
-    {
-      text.setFillColor( sf::Color::White );
-      text.setOutlineColor( sf::Color::White );
-    }
+    if ( ui_label.name == "wealth_label" and update_flash_toggle<Cmp::FlashUIWealth>( dt ) ) { outline = sf::Color::White; }
 
-    // flash the text if we just picked up a Key
-    draw_screen( text );
+    draw_text( text_str, static_cast<float>( ui_label.font_size ), ui_label.rect.position, sf::Color::White, to_text_align( ui_label.align ),
+               outline, 2.f * hud_scale() );
   }
 }
 
@@ -743,10 +709,12 @@ void HudOverlaySystem::render_level_depth()
 
   const int max_level_depth = Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value();
   const auto display_res = sf::Vector2f( m_window.getSize() );
-  sf::Text level_txt( m_font, "Nekropolis " + std::to_string( max_level_depth - level_depth_cmp.get_count() ), scaled_char_size( 100, m_main_ui_layout.get() ) );
-  level_txt.setPosition( sf::Vector2f( ( display_res.x / 2.f ) - level_txt.getLocalBounds().getCenter().x, 100.f * hud_scale() ) );
-  level_txt.setFillColor( sf::Color::White );
-  draw_screen( level_txt );
+  // its own window: this is drawn after update(), outside the HUD's other windows
+  begin_overlay_window( "##hud_level_depth" );
+  draw_text( "Nekropolis " + std::to_string( max_level_depth - level_depth_cmp.get_count() ),
+             static_cast<float>( scaled_char_size( 100, m_main_ui_layout.get() ) ), { display_res.x / 2.f, 100.f * hud_scale() }, sf::Color::White,
+             TextAlign::CENTER );
+  end_overlay_window();
 }
 
 
@@ -778,15 +746,9 @@ void HudOverlaySystem::render_crypt_maze_timer( sf::Vector2f pos, unsigned int s
   {
     if ( not Utils::Crypt::is_crypt_shuffle_timer_expired( reg() ) )
     {
-      sf::Text clock_text( m_font, "", size );
       std::stringstream ss;
       ss << std::fixed << std::setprecision( 1 ) << kCryptShuffleTimeout - timer_cmp.m_elapsed.asSeconds();
-      clock_text.setString( ss.str() );
-      clock_text.setPosition( { pos.x - ( clock_text.getLocalBounds().size.x / 2 ), pos.y } );
-      clock_text.setFillColor( sf::Color::Red );
-      clock_text.setOutlineColor( sf::Color::Black );
-      clock_text.setOutlineThickness( 2.f * hud_scale() );
-      draw_screen( clock_text );
+      draw_text( ss.str(), static_cast<float>( size ), pos, sf::Color::Red, TextAlign::CENTER, sf::Color::Black, 2.f * hud_scale() );
     }
   }
 }

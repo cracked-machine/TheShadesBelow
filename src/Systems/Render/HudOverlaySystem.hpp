@@ -4,6 +4,7 @@
 #include <Systems/Render/BaseOverlaySystem.hpp>
 #include <Systems/Render/UiLayout.hpp>
 
+#include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Shader.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -21,7 +22,7 @@
 namespace Game::Sys
 {
 
-//! @brief Draws the HUD layered on top of the game world: meters, labels, icons and texts from res/ui/ui.json, the
+//! @brief Draws the HUD layered on top of the game world: meters (ImGui::ProgressBar), labels, icons and texts from res/ui/ui.json, the
 //! inventory slot table (an ImGui table at the "inventory_items" ui_table), the screen-space torch particles over their
 //! inventory slot icons, the crypt maze shuffle countdown and the level depth banner.
 class HudOverlaySystem : public BaseOverlaySystem
@@ -92,32 +93,29 @@ private:
   //! @param text the text to draw
   void place_imgui_text( const Render::UiLayout::Label &label, sf::Vector2f slot_origin, const std::string &text );
 
-  //! @brief Render the HUD's meters (health, fear, infamy, despair, toxicity) and flash their outline colour on
-  //! recent changes.
+  //! @brief Render the HUD's meters (health, fear, infamy, despair, luck, anima, toxicity) as ImGui::ProgressBars and
+  //! flash their outline colour on recent changes. Must be called inside the "##hud_meters" window (begin_overlay_window).
   //! @param dt
   void render_ui_meters( sf::Time dt );
-
-  //! @brief Draw a diagonal shimmer band swept across a meter (Cmp::Player::ToxicImmunity "frozen" meters).
-  //! @param rect the meter's bounds (outline included); the band is clipped to it
-  //! @param progress sweep position in [0, 1]; the band is off-meter at both ends
-  //! @param colour the band's peak colour (its alpha fades to 0 at the band's edges)
-  void render_meter_shimmer( const sf::FloatRect &rect, float progress, sf::Color colour );
 
   //! @brief Lazily load res/shaders/Frost.frag (Cmp::Player::ToxicImmunity "frozen" meters) on first use.
   //! @return true if the shader is available and loaded. A failure is logged once and cached.
   bool load_frost_shader();
 
-  //! @brief Draw the frost shader over a toxidrome meter.
+  //! @brief Draw the frost shader over a toxidrome meter: render it into the meter's own texture in m_frost_textures,
+  //! then show that with ImGui::Image, so it draws over the meter's ProgressBar.
+  //! @param meter_name the meter's layout name, which keys its frost texture
   //! @param rect the meter's bounds (outline included), in default view coordinates
   //! @param seed per-meter offset so each meter gets its own frost pattern
   //! @param frost base wash colour
   //! @param glint crystal ridge and glint colour
-  void render_meter_frost( const sf::FloatRect &rect, float seed, sf::Color frost, sf::Color glint );
+  void render_meter_frost( const std::string &meter_name, const sf::FloatRect &rect, float seed, sf::Color frost, sf::Color glint );
 
-  //! @brief Render the HUD's static text elements.
+  //! @brief Render the HUD's static text elements as outlined ImGui text, after the meters in the "##hud_meters"
+  //! window so texts over a meter (the toxidrome names) draw on top of it.
   void render_ui_texts();
 
-  //! @brief Render the HUD's dynamic labels (cadaver count, wealth) and flash their colour on
+  //! @brief Render the HUD's dynamic labels (cadaver count, wealth, stat changes) as ImGui text and flash their colour on
   //! recent changes.
   //! @param dt
   void render_ui_labels( sf::Time dt );
@@ -208,6 +206,8 @@ private:
   std::optional<bool> m_frost_shader_ok;
   //! @brief Drives the frost shader's glint twinkle
   sf::Time m_frost_timer;
+  //! @brief Per toxidrome meter frost texture, keyed by meter name, see render_meter_frost()
+  std::unordered_map<std::string, sf::RenderTexture> m_frost_textures;
 };
 
 } // namespace Game::Sys

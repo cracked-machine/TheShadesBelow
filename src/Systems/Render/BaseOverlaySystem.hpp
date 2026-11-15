@@ -4,7 +4,11 @@
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Render/UiLayout.hpp>
 
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Time.hpp>
+#include <SFML/System/Vector2.hpp>
+
+#include <string_view>
 
 namespace Game::Sys
 {
@@ -47,6 +51,49 @@ protected:
   //! @param ui_layout The layout, or nullptr for no scaling.
   //! @return the scaled character size, at least 1
   [[nodiscard]] static unsigned int scaled_char_size( unsigned int design_size, const Render::UiLayout *ui_layout );
+
+  //! @brief Horizontal alignment of overlay text about its position.
+  enum class TextAlign {
+    //! @brief The position is the text's left edge
+    LEFT,
+    //! @brief The position is the text's centre
+    CENTER,
+    //! @brief The position is the text's right edge
+    RIGHT
+  };
+
+  //! @brief Parse a layout ui_label "align" property ("left", "center" or "right"; anything else is left).
+  //! @param align the property value
+  //! @return TextAlign the alignment
+  [[nodiscard]] static TextAlign to_text_align( std::string_view align );
+
+  //! @brief Begin a full-screen, invisible, display-only ImGui window for overlay widgets and text: no inputs, never
+  //! focused or brought to the front, zero padding, square frames, the grimoire font. Pair with end_overlay_window().
+  //! Text drawn with draw_text() goes into this window's draw list, so it layers with the overlay's other ImGui windows.
+  //! @param id the ImGui window id
+  static void begin_overlay_window( const char *id );
+
+  //! @brief End the window begun by begin_overlay_window().
+  static void end_overlay_window();
+
+  //! @brief Measure overlay text drawn by draw_text() at `size`.
+  //! @param text the text
+  //! @param size the font size, in pixels
+  //! @return sf::Vector2f the text's width and height, in pixels
+  [[nodiscard]] static sf::Vector2f measure_text( std::string_view text, float size );
+
+  //! @brief Draw overlay text (res/fonts/tuffy.ttf, see Utils::imgui_text_font) into the current ImGui window's draw
+  //! list. ImGui renders after every SFML draw, so the text is never hidden by SFML drawing. Must be called inside an
+  //! ImGui window, e.g. begin_overlay_window().
+  //! @param text the text
+  //! @param size the font size, in pixels
+  //! @param pos screen position of the text's top, and its left edge, centre or right edge per `align`
+  //! @param fill the text colour
+  //! @param align horizontal alignment about `pos`
+  //! @param outline the outline colour, drawn round the text when `outline_thickness` is positive
+  //! @param outline_thickness the outline width, in pixels
+  static void draw_text( std::string_view text, float size, sf::Vector2f pos, sf::Color fill, TextAlign align = TextAlign::LEFT,
+                         sf::Color outline = sf::Color::Transparent, float outline_thickness = 0.f );
 
   //! @brief Side effects of opening a modal overlay (pause, grimoire): cancel any bow draw, then pause the sound effects.
   void on_modal_open();

@@ -7,7 +7,6 @@
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/PauseOverlaySystem.hpp>
 
-#include <SFML/Graphics/Text.hpp>
 
 #include <imgui.h>
 
@@ -75,19 +74,14 @@ void PauseOverlaySystem::update( [[maybe_unused]] sf::Time dt )
 
   const sf::Vector2f display_size( m_window.getSize() );
 
-  // screen-space text, outlined so it stays readable over the frozen world
-  auto draw_centered_text = [&]( const char *str, unsigned int size, float y )
-  {
-    sf::Text text( m_font, str, size );
-    text.setFillColor( sf::Color::White );
-    text.setOutlineColor( sf::Color::Black );
-    text.setOutlineThickness( kTextOutlineThickness );
-    const sf::FloatRect bounds = text.getLocalBounds();
-    text.setPosition( { ( display_size.x - bounds.size.x ) * 0.5f - bounds.position.x, y } );
-    draw_screen( text );
-  };
-  draw_centered_text( "Paused", kTitleFontSize, kTitleY );
-  draw_centered_text( "Press P to continue", kHintFontSize, kHintY );
+  // screen-space text, outlined so it stays readable over the frozen world. ImGui, so it is drawn over the HUD's ImGui
+  // meters and inventory too.
+  begin_overlay_window( "##pause_text" );
+  draw_text( "Paused", static_cast<float>( kTitleFontSize ), { display_size.x * 0.5f, kTitleY }, sf::Color::White, TextAlign::CENTER,
+             sf::Color::Black, kTextOutlineThickness );
+  draw_text( "Press P to continue", static_cast<float>( kHintFontSize ), { display_size.x * 0.5f, kHintY }, sf::Color::White, TextAlign::CENTER,
+             sf::Color::Black, kTextOutlineThickness );
+  end_overlay_window();
 
   ImGui::SetNextWindowPos( ImVec2( ( display_size.x - kSlidersWidth ) * 0.5f, kSlidersY ) );
   ImGui::SetNextWindowSize( ImVec2( kSlidersWidth, 0.f ) );

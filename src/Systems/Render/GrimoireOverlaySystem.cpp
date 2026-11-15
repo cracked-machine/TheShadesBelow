@@ -268,8 +268,8 @@ void GrimoireOverlaySystem::update( sf::Time dt )
 
   ImGui::PushFont( Utils::imgui_grimoire_font() );
   if ( grimoire_open ) { render_grimoire( *grimoire_cmp ); }
-  else if ( hover_npc_page ) { render_hover( *m_npc_hover_ui_layout, "##grimoire_npc_hover", "grimoire_npc_hover_", *hover_npc_page ); }
-  else { render_hover( *m_plant_hover_ui_layout, "##grimoire_plant_hover", "grimoire_plant_hover_", *hover_plant_page ); }
+  else if ( hover_npc_page ) { render_hover( *m_npc_hover_ui_layout, "##grimoire_npc_hover", *hover_npc_page ); }
+  else { render_hover( *m_plant_hover_ui_layout, "##grimoire_plant_hover", *hover_plant_page ); }
   ImGui::PopFont();
 }
 
@@ -311,16 +311,15 @@ void GrimoireOverlaySystem::render_grimoire( const Cmp::Grimoire &grimoire_cmp )
     if ( count > 0 )
     {
       page_idx = std::min( page_idx, count - 1 );
-      // the layouts share object names (e.g. "page_label"), so keep their cached texts apart
-      if ( m_tab == Cmp::Grimoire::Tab::NPCS ) { render_page( *m_npc_ui_layout, "grimoire_npc_", grimoire_cmp.npc_pages.at( page_idx ), count ); }
-      else { render_page( *m_plant_ui_layout, "grimoire_plant_", grimoire_cmp.plant_pages.at( page_idx ), count ); }
+      if ( m_tab == Cmp::Grimoire::Tab::NPCS ) { render_page( *m_npc_ui_layout, grimoire_cmp.npc_pages.at( page_idx ), count ); }
+      else { render_page( *m_plant_ui_layout, grimoire_cmp.plant_pages.at( page_idx ), count ); }
     }
   }
   ImGui::End();
 }
 
 template <typename PageT>
-void GrimoireOverlaySystem::render_hover( Render::UiLayout &ui_layout, const char *window_id, const std::string &cache_prefix, const PageT &page )
+void GrimoireOverlaySystem::render_hover( Render::UiLayout &ui_layout, const char *window_id, const PageT &page )
 {
   // the page is read from the live grimoire every frame, so a discovery made while hovering shows straight away
   const sf::Vector2u window_size = m_window.getSize();
@@ -331,7 +330,7 @@ void GrimoireOverlaySystem::render_hover( Render::UiLayout &ui_layout, const cha
   if ( begin_layout_window( ui_layout, window_id, ImGuiWindowFlags_NoInputs ) )
   {
     // the hover layouts have no page_label, so the page count is unused
-    render_page( ui_layout, cache_prefix, page, 0 );
+    render_page( ui_layout, page, 0 );
   }
   ImGui::End();
 }
@@ -440,7 +439,7 @@ void GrimoireOverlaySystem::render_tab_bar( const Render::UiLayout &ui_layout )
 }
 
 template <typename PageT>
-void GrimoireOverlaySystem::render_page( const Render::UiLayout &ui_layout, const std::string &cache_prefix, const PageT &page, std::size_t page_count )
+void GrimoireOverlaySystem::render_page( const Render::UiLayout &ui_layout, const PageT &page, std::size_t page_count )
 {
   render_outlines( ui_layout );
   for ( const auto &icon : ui_layout.m_icons )
@@ -448,11 +447,11 @@ void GrimoireOverlaySystem::render_page( const Render::UiLayout &ui_layout, cons
     const auto [sub_page, suffix] = resolve_subpage( page, icon.name );
     if ( sub_page and suffix == "icon" ) { render_icon( icon, *sub_page ); }
   }
-  render_page_label( ui_layout, cache_prefix, page_count );
+  render_page_label( ui_layout, page_count );
   for ( const auto &text : ui_layout.m_texts )
   {
     const auto [sub_page, suffix] = resolve_subpage( page, text.name );
-    render_text( text, cache_prefix, suffix == "name" ? sub_page : nullptr );
+    render_text( text, suffix == "name" ? sub_page : nullptr );
   }
   for ( const auto &table : ui_layout.m_tables )
   {
@@ -468,31 +467,25 @@ void GrimoireOverlaySystem::render_icon( const Render::UiLayout::Icon &icon, con
                                            { icon.scale, icon.scale } );
 }
 
-void GrimoireOverlaySystem::render_page_label( const Render::UiLayout &ui_layout, const std::string &cache_prefix, std::size_t page_count )
+void GrimoireOverlaySystem::render_page_label( const Render::UiLayout &ui_layout, std::size_t page_count )
 {
-  // Tiled point y is the text baseline; sf::Text draws its baseline ~font_size below its position, so shift up by font_size
-  // so that texts/labels of different font sizes at the same y line up
+  // Tiled point y is the text baseline; the text's top is about a font size above it, so shift up by font_size so that
+  // texts/labels of different font sizes at the same y line up
   for ( const auto &label : ui_layout.m_labels )
   {
     if ( label.name != "page_label" ) { continue; }
-    TextColumn draw_line{ .self = *this,
-                          .cache_key = cache_prefix + label.name,
-                          .origin = label.rect.position - sf::Vector2f{ 0.f, static_cast<float>( label.font_size ) },
-                          .font_size = static_cast<unsigned int>( label.font_size ),
-                          .line_height = static_cast<float>( label.font_size ) * 1.2f };
-    draw_line( std::format( "{} of {}", m_page_idx[tab_index( m_tab )] + 1, page_count ), sf::Color::Black );
+    const auto font_size = static_cast<float>( label.font_size );
+    draw_text( std::format( "{} of {}", m_page_idx[tab_index( m_tab )] + 1, page_count ), font_size,
+               label.rect.position - sf::Vector2f{ 0.f, font_size }, sf::Color::Black );
   }
 }
 
-void GrimoireOverlaySystem::render_text( const Render::UiLayout::Text &text, const std::string &cache_prefix, const Cmp::Grimoire::SubPage *sub_page )
+void GrimoireOverlaySystem::render_text( const Render::UiLayout::Text &text, const Cmp::Grimoire::SubPage *sub_page )
 {
-  TextColumn draw_line{ .self = *this,
-                        .cache_key = cache_prefix + text.name,
-                        .origin = text.rect.position - sf::Vector2f{ 0.f, static_cast<float>( text.font_size ) },
-                        .font_size = static_cast<unsigned int>( text.font_size ),
-                        .line_height = static_cast<float>( text.font_size ) * 1.2f };
-  if ( sub_page ) { draw_line( Sys::SpriteStore::instance().get( sub_page->sprite_key ).display_name(), sf::Color::Black ); }
-  else { draw_line( text.value, sf::Color::Black ); }
+  const auto font_size = static_cast<float>( text.font_size );
+  const sf::Vector2f pos = text.rect.position - sf::Vector2f{ 0.f, font_size };
+  if ( sub_page ) { draw_text( Sys::SpriteStore::instance().get( sub_page->sprite_key ).display_name(), font_size, pos, sf::Color::Black ); }
+  else { draw_text( text.value, font_size, pos, sf::Color::Black ); }
 }
 
 void GrimoireOverlaySystem::render_action_table( const Render::UiLayout::Table &table, const Cmp::Grimoire::SubPage &sub_page )
