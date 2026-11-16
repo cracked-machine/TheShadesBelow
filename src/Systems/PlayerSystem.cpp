@@ -87,8 +87,6 @@
 #include <Components/Ruin/RuneMarking.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SelectedPosition.hpp>
-#include <Components/Spring/ActiveHealing.hpp>
-#include <Components/Spring/HealingSpringMultiBlock.hpp>
 #include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/CarryAction.hpp>
@@ -271,7 +269,6 @@ void PlayerSystem::update( sf::Time dt )
   apply_timed_action_side_effects( dt );
   update_repel_npc( dt );
   update_toxic_immunity( dt );
-  create_healing_particles();
   update_note_particles();
 
   update_heartbeat( dt );
@@ -941,7 +938,6 @@ void PlayerSystem::apply_timed_action_side_effects( sf::Time dt )
       apply_health_dmg( Sys::PersistSystem::get<Cmp::Persist::PlayerOnFireHealthDmgPerSec>( reg() ).get_value(),
                         Cmp::Player::Mortality::State::IGNITED );
     }
-    apply_healing_spring_modifiers();
 
     m_timed_action_sync_clock = sf::Time::Zero;
 
@@ -969,28 +965,6 @@ void PlayerSystem::update_luck_drop( sf::Time dt )
 }
 
 bool PlayerSystem::is_player_in_light() { return Utils::Collision::is_position_illuminated( reg(), Utils::Player::get_position( reg() ) ); }
-
-void PlayerSystem::apply_healing_spring_modifiers()
-{
-  // healing spring
-  Cmp::BaseAction fountain_effects( Cmp::Stats::Health{ +5 }, Cmp::Stats::Fear{ -5 }, Cmp::Stats::Despair{ -5 }, Cmp::Stats::Infamy{ -5 }, {}, {},
-                                    {} );
-  for ( auto [fountain_entt, fountain_mb_cmp, fountain_uuid_cmp] : reg().view<Cmp::HealingSpringMultiBlock, Cmp::UUID>().each() )
-  {
-
-    if ( not Utils::is_visible_in_view( Sys::RenderSystem::get_world_view(), fountain_mb_cmp ) ) continue;
-    if ( Utils::Player::is_player_near( reg(), fountain_mb_cmp ) ) { reg().emplace_or_replace<Cmp::HealingSpring::ActiveHealing>( fountain_entt ); }
-    else { reg().remove<Cmp::HealingSpring::ActiveHealing>( fountain_entt ); }
-
-    float player_distance = Utils::Maths::getEuclideanDistance( fountain_mb_cmp.position, Utils::Player::get_position( reg() ).position );
-    if ( player_distance > 500 ) continue;
-    Utils::Player::get_stats( reg() ).apply( fountain_effects );
-
-    // Curing toxidromes isn't expressible as a BaseAction delta (it decays/removes existing active
-    // toxidromes rather than adding a new one), so it's applied directly here rather than via net_modifier.
-    Utils::Player::get_stats( reg() ).decay_all_toxidrome( 5 );
-  }
-}
 
 void PlayerSystem::apply_inventory_modifiers( sf::Time dt )
 {
@@ -1284,39 +1258,6 @@ void PlayerSystem::try_particle_knockback( sf::Vector2f emitter_pos )
   }
 
   SPDLOG_INFO( "Particle knockback blocked in all directions" );
-}
-
-void PlayerSystem::create_healing_particles()
-{
-  for ( auto [fountain_entt, fountain_mb_cmp, fountain_uuid_cmp] : reg().view<Cmp::HealingSpringMultiBlock, Cmp::UUID>().each() )
-  {
-    if ( not reg().any_of<Cmp::HealingSpring::ActiveHealing>( fountain_entt ) ) continue;
-
-    // Add player healing particle sprite if player is near fountain and doesn't already have PS already, otherwise delete any existing PS.
-    std::vector<entt::entity> player_healing_ps_owner_list;
-    for ( auto [ps_entt, ps_cmp, ps_uuid_cmp] : reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID>().each() )
-    {
-      if ( ps_uuid_cmp != fountain_uuid_cmp ) continue;
-      if ( ps_cmp.sprite->get_tag() == "player.healing.particle.active" ) player_healing_ps_owner_list.push_back( ps_entt );
-    }
-    if ( Utils::Player::is_player_near( reg(), fountain_mb_cmp ) )
-    {
-      if ( player_healing_ps_owner_list.empty() )
-      {
-        auto player_pos = Utils::Player::get_position( reg() );
-        Factory::Particle::add_player_healing_ps( reg(), "player.healing.particle.active", 0.3F, 10.f, fountain_uuid_cmp, player_pos.getCenter(),
-                                                  player_pos.y() - 1 );
-      }
-      Factory::Particle::update_position( reg(), fountain_uuid_cmp, Utils::Player::get_position( reg() ).getCenter() );
-    }
-    else
-    {
-      for ( auto ps_entt : player_healing_ps_owner_list )
-      {
-        reg().destroy( ps_entt );
-      }
-    }
-  }
 }
 
 void PlayerSystem::update_note_particles()

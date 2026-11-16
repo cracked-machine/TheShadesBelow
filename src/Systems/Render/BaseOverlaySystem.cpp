@@ -11,6 +11,7 @@
 #include <array>
 #include <cfloat>
 #include <cmath>
+#include <string>
 #include <tuple>
 
 namespace Game::Sys
@@ -107,6 +108,60 @@ void BaseOverlaySystem::render_outlines( const Render::UiLayout &ui_layout )
 unsigned int BaseOverlaySystem::scaled_char_size( unsigned int design_size, const Render::UiLayout *ui_layout )
 {
   return std::max( 1u, static_cast<unsigned int>( std::lround( static_cast<float>( design_size ) * ui_scale( ui_layout ) ) ) );
+}
+
+void BaseOverlaySystem::render_selection_menu( std::string_view title, std::string_view subtitle, bool subtitle_ok,
+                                               std::span<const std::string_view> rows, std::size_t selected, std::string_view hint )
+{
+  constexpr float kMenuTopFraction = 0.2f;
+  // one size up from the grimoire font
+  constexpr float kMenuFontPx = Utils::kImGuiTextFontPx.at( 1 );
+  constexpr float kLabelColumnWidth = 220.f;
+  constexpr float kMarkerColumnWidth = 40.f;
+  const ImVec4 kTitleColour( 1.f, 0.85f, 0.4f, 1.f );
+  const ImVec4 kWarningColour( 1.f, 0.3f, 0.3f, 1.f );
+  const ImVec4 kHintColour( 0.75f, 0.75f, 0.75f, 1.f );
+
+  const ImVec2 display_size = ImGui::GetIO().DisplaySize;
+  ImGui::SetNextWindowPos( ImVec2( display_size.x * 0.5f, display_size.y * kMenuTopFraction ), ImGuiCond_Always, ImVec2( 0.5f, 0.f ) );
+  ImGui::SetNextWindowBgAlpha( 0.75f );
+  // display-only: the caller drives the selection, so it never takes the mouse from the game
+  constexpr ImGuiWindowFlags kWindowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoSavedSettings |
+                                            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoFocusOnAppearing |
+                                            ImGuiWindowFlags_NoNav;
+  ImGui::PushFont( Utils::imgui_text_font( kMenuFontPx ) );
+  if ( ImGui::Begin( "##selection_menu", nullptr, kWindowFlags ) )
+  {
+    ImGui::TextColored( kTitleColour, "%s", std::string( title ).c_str() );
+    ImGui::TextColored( subtitle_ok ? kHintColour : kWarningColour, "%s", std::string( subtitle ).c_str() );
+    ImGui::Separator();
+
+    if ( ImGui::BeginTable( "##selection_menu_table", 2, ImGuiTableFlags_SizingFixedFit ) )
+    {
+      ImGui::TableSetupColumn( "label", ImGuiTableColumnFlags_WidthFixed, kLabelColumnWidth );
+      ImGui::TableSetupColumn( "marker", ImGuiTableColumnFlags_WidthFixed, kMarkerColumnWidth );
+      for ( std::size_t row = 0; row < rows.size(); ++row )
+      {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex( 0 );
+        ImGui::TextUnformatted( rows[row].data(), rows[row].data() + rows[row].size() );
+        ImGui::TableSetColumnIndex( 1 );
+        if ( row == selected ) { ImGui::TextUnformatted( "<" ); }
+      }
+      ImGui::EndTable();
+    }
+
+    ImGui::Separator();
+    ImGui::TextColored( kHintColour, "%s", std::string( hint ).c_str() );
+  }
+  ImGui::End();
+  ImGui::PopFont();
+}
+
+std::size_t BaseOverlaySystem::step_selection( std::size_t selected, std::size_t row_count, bool next )
+{
+  if ( next ) return selected + 1 < row_count ? selected + 1 : selected;
+  return selected > 0 ? selected - 1 : selected;
 }
 
 void BaseOverlaySystem::on_modal_open()

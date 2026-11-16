@@ -40,7 +40,7 @@ public:
   //! @param sys The system store, to look up the overlay systems.
   OverlayArbitrationSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank, Store &sys );
 
-  //! @brief Run the current scene's overlays in draw order inside one shared ImGui frame: HUD, shop, level depth,
+  //! @brief Run the current scene's overlays in draw order inside one shared ImGui frame: HUD, shop, heal menus, level depth,
   //! tooltip, grimoire, pause and debug. Call from each gameplay scene's do_update() after RenderGameSystem::render_game().
   //! @param dt Real frame time, for ImGui and the overlays that run while paused.
   //! @param world_dt World frame time (zero while paused), for the HUD.
@@ -89,6 +89,12 @@ private:
 
   //! @brief True if the current scene has the shop overlay.
   [[nodiscard]] bool has_shop();
+
+  //! @brief True if the current scene has the healing spring heal menu.
+  [[nodiscard]] bool has_spring();
+
+  //! @brief True if the current scene has the barber surgeon heal menu.
+  [[nodiscard]] bool has_barber();
 
   //! @brief True if the current scene has the grimoire overlay (open book and hover).
   [[nodiscard]] bool has_grimoire();

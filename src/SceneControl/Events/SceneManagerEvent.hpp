@@ -31,6 +31,10 @@ struct SceneManagerEvent
     ENTER_SACREDSPRING,
     //! @brief Exit the healing spring scene, returning to the graveyard scene.
     EXIT_SACREDSPRING,
+    //! @brief Enter the barber surgeon scene.
+    ENTER_BARBERSURGEON,
+    //! @brief Exit the barber surgeon scene, returning to the graveyard scene.
+    EXIT_BARBERSURGEON,
     //! @brief Enter the lower floor of the ruin scene.
     ENTER_RUIN_LOWER,
     //! @brief Enter the upper floor of the ruin scene.

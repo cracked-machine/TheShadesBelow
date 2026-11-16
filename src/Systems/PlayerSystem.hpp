@@ -113,9 +113,6 @@ private:
   //! @return false
   bool is_player_in_light();
 
-  //! @brief Apply the stat modifiers for the healing spring
-  void apply_healing_spring_modifiers();
-
   //! @brief Update the carry action timers and apply the stat modifiers for inventory item
   //! @param dt
   void apply_inventory_modifiers( sf::Time dt );
@@ -149,9 +146,6 @@ private:
 
   //! @brief Send mortality event if player fear/despair is 100%
   void kill_player_if_stats_are_max();
-
-  //! @brief Add/remove the player healing particle sprite depending on proximity to an active healing spring fountain.
-  void create_healing_particles();
 
   //! @brief Add, remove and update NoteParticleSprite as the player interacts with the "item.elderflute".
   void update_note_particles();

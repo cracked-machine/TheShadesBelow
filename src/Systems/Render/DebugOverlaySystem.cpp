@@ -50,6 +50,7 @@
 #include <Components/SceneSettings/ShowNavmesh.hpp>
 #include <Components/SceneSettings/ShowPathFinding.hpp>
 #include <Components/SelectedPosition.hpp>
+#include <Components/Spring/BarberSurgeonEntrance.hpp>
 #include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
 #include <Components/Spring/HealingSpringBuildingSegment.hpp>
 #include <Components/Spring/HealingSpringEntrance.hpp>
@@ -515,6 +516,7 @@ void DebugOverlaySystem::render_ui_entity_inspect()
     if ( reg().all_of<Cmp::Crypt::Entrance>( entity ) ) text_line( " Entrance", sf::Color::Cyan );
     if ( reg().all_of<Cmp::Ruin::Entrance>( entity ) ) text_line( " Entrance", sf::Color::Cyan );
     if ( reg().all_of<Cmp::HealingSpringEntrance>( entity ) ) text_line( " HealingSpringEntrance", sf::Color::Cyan );
+    if ( reg().all_of<Cmp::BarberSurgeonEntrance>( entity ) ) text_line( " BarberSurgeonEntrance", sf::Color::Cyan );
     if ( reg().all_of<Cmp::WorldItem>( entity ) ) text_line( " WorldItem", sf::Color::Green );
     if ( reg().all_of<Cmp::Player::Illuminated>( entity ) ) text_line( " Illuminated", sf::Color::Yellow );
     if ( reg().all_of<Cmp::Grave::TrailMarker>( entity ) ) text_line( " TrailMarker", sf::Color::Green );

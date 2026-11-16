@@ -2,12 +2,14 @@
 #include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/SceneSettings/Paused.hpp>
 #include <Components/SceneSettings/ShowDebugStats.hpp>
+#include <Systems/Render/BarberOverlaySystem.hpp>
 #include <Systems/Render/DebugOverlaySystem.hpp>
 #include <Systems/Render/GrimoireOverlaySystem.hpp>
 #include <Systems/Render/HudOverlaySystem.hpp>
 #include <Systems/Render/OverlayArbitrationSystem.hpp>
 #include <Systems/Render/PauseOverlaySystem.hpp>
 #include <Systems/Render/ShopOverlaySystem.hpp>
+#include <Systems/Render/SpringOverlaySystem.hpp>
 #include <Systems/Render/TooltipOverlaySystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 #include <Utils/Profiling.hpp>
@@ -59,6 +61,9 @@ void OverlayArbitrationSystem::update( sf::Time dt, sf::Time world_dt )
 
   PROFILED( m_sys.find<Store::Type::HudOverlaySystem>().update( world_dt ) );
   if ( has_shop() ) { PROFILED( m_sys.find<Store::Type::ShopOverlaySystem>().update( dt ) ); }
+  // the heal menus hide themselves while a modal overlay is open
+  if ( has_spring() ) { PROFILED( m_sys.find<Store::Type::SpringOverlaySystem>().update( dt ) ); }
+  if ( has_barber() ) { PROFILED( m_sys.find<Store::Type::BarberOverlaySystem>().update( dt ) ); }
   if ( has_level_depth() ) { PROFILED( m_sys.find<Store::Type::HudOverlaySystem>().render_level_depth() ); }
   // the tooltip countdown stops while gameplay is paused, by either modal overlay
   if ( active_modal( reg() ) == Modal::NONE ) { PROFILED( m_sys.find<Store::Type::TooltipOverlaySystem>().update( dt ) ); }
@@ -111,6 +116,11 @@ void OverlayArbitrationSystem::on_overlay_event( const Events::OverlayEvent &ev 
     case Action::GRIMOIRE_NEXT:
       // page turning is handled by GrimoireOverlaySystem
       break;
+    case Action::HEAL_PREV:
+    case Action::HEAL_NEXT:
+    case Action::HEAL_PURCHASE:
+      // the heal menu is handled by SpringOverlaySystem and BarberOverlaySystem
+      break;
   }
 }
 
@@ -154,6 +164,10 @@ void OverlayArbitrationSystem::end_frame() { ImGui::SFML::Render( m_window ); }
 bool OverlayArbitrationSystem::is_paused() { return setting_enabled<Cmp::SceneSettings::Paused>( reg() ); }
 
 bool OverlayArbitrationSystem::has_shop() { return Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::SHOP ); }
+
+bool OverlayArbitrationSystem::has_spring() { return Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::HEALING_SPRING ); }
+
+bool OverlayArbitrationSystem::has_barber() { return Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::BARBER_SURGEON ); }
 
 bool OverlayArbitrationSystem::has_grimoire() { return Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::GRAVEYARD ); }
 

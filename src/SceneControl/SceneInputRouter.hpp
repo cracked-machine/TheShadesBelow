@@ -101,6 +101,11 @@ private:
   //! @param event The polled window event
   void process_grimoire_wheel( const sf::Event &event );
 
+  //! @brief Route a vertical mouse wheel event to the heal menu (Events::OverlayEvent HEAL_PREV/HEAL_NEXT).
+  //! @param event the window event
+  //! @return true if the event was a vertical wheel event and was consumed
+  bool process_heal_menu_wheel( const sf::Event &event );
+
   //! @brief Change the selected inventory slot: a vertical mouse wheel scroll selects the previous/next slot, and (if
   //!        `number_keys`) the number row keys 1-5 select a slot directly. Numpad keys are never used.
   //! @param event The polled window event

@@ -8,6 +8,8 @@
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
 
+#include <cstddef>
+#include <span>
 #include <string_view>
 
 namespace Game::Sys
@@ -94,6 +96,25 @@ protected:
   //! @param outline_thickness the outline width, in pixels
   static void draw_text( std::string_view text, float size, sf::Vector2f pos, sf::Color fill, TextAlign align = TextAlign::LEFT,
                          sf::Color outline = sf::Color::Transparent, float outline_thickness = 0.f );
+
+  //! @brief Draw a display-only selection menu: a centred ImGui window with a title, a sub-title line, a two-column
+  //! table of `rows` with a "<" marking the selected row, and a hint line. It takes no mouse input; the selection is
+  //! driven by the caller. Call inside the shared ImGui frame.
+  //! @param title the menu title
+  //! @param subtitle the line under the title, e.g. the cost
+  //! @param subtitle_ok false to show the sub-title in red, e.g. when the player can't afford it
+  //! @param rows the row labels
+  //! @param selected index of the selected row
+  //! @param hint the hint line at the bottom, e.g. the controls
+  static void render_selection_menu( std::string_view title, std::string_view subtitle, bool subtitle_ok, std::span<const std::string_view> rows,
+                                     std::size_t selected, std::string_view hint );
+
+  //! @brief Move a menu selection up/down one row, clamped to [0, row_count).
+  //! @param selected the current selection
+  //! @param row_count the number of rows
+  //! @param next true for the next (lower) row, false for the previous (upper) row
+  //! @return std::size_t the new selection
+  [[nodiscard]] static std::size_t step_selection( std::size_t selected, std::size_t row_count, bool next );
 
   //! @brief Side effects of opening a modal overlay (pause, grimoire): cancel any bow draw, then pause the sound effects.
   void on_modal_open();

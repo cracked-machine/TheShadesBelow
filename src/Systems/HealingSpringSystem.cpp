@@ -7,6 +7,7 @@
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
+#include <Components/Spring/BarberSurgeonEntrance.hpp>
 #include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
 #include <Components/Spring/HealingSpringBuildingSegment.hpp>
 #include <Components/Spring/HealingSpringEntrance.hpp>
@@ -66,7 +67,9 @@ void HealingSpringSystem::check_entrance_collision()
     auto decreased_entrance_bounds = Cmp::RectBounds::scaled( door_pos_cmp.position, door_pos_cmp.size, 0.1f, Cmp::RectBounds::ScaleAxis::XY );
 
     if ( not player_pos.findIntersection( decreased_entrance_bounds.getBounds() ) ) continue;
-    m_scenemanager_event_dispatcher.enqueue<Events::SceneManagerEvent>( Events::SceneManagerEvent::Type::ENTER_SACREDSPRING );
+    const auto enter_type = reg().all_of<Cmp::BarberSurgeonEntrance>( door_entity ) ? Events::SceneManagerEvent::Type::ENTER_BARBERSURGEON
+                                                                                     : Events::SceneManagerEvent::Type::ENTER_SACREDSPRING;
+    m_scenemanager_event_dispatcher.enqueue<Events::SceneManagerEvent>( enter_type );
 
     Factory::Player::remove_player_last_graveyard_pos( reg() );
     Cmp::Position last_known_pos(
@@ -81,7 +84,7 @@ void HealingSpringSystem::check_entrance_collision()
   }
 }
 
-void HealingSpringSystem::check_exit_collision()
+void HealingSpringSystem::check_exit_collision( Events::SceneManagerEvent::Type exit_type )
 {
   auto player_pos = Utils::Player::get_position( reg() );
   auto door_view = reg().view<Cmp::Exit, Cmp::Position>();
@@ -96,8 +99,26 @@ void HealingSpringSystem::check_exit_collision()
                                                               Cmp::RectBounds::ScaleAxis::XY ); // shrink entrance bounds slightly for better UX
 
     if ( not player_pos.findIntersection( decreased_entrance_bounds.getBounds() ) ) continue;
-    m_scenemanager_event_dispatcher.enqueue<Events::SceneManagerEvent>( Events::SceneManagerEvent::Type::EXIT_SACREDSPRING );
+    m_scenemanager_event_dispatcher.enqueue<Events::SceneManagerEvent>( exit_type );
   }
+}
+
+void HealingSpringSystem::request_delayed_exit( Events::SceneManagerEvent::Type exit_type )
+{
+  if ( m_pending_exit.has_value() ) return;
+  constexpr sf::Time kExitDelay = sf::seconds( 1.5f );
+  m_pending_exit = exit_type;
+  m_exit_delay_remaining = kExitDelay;
+}
+
+void HealingSpringSystem::update_delayed_exit( sf::Time dt )
+{
+  if ( not m_pending_exit.has_value() ) return;
+  m_exit_delay_remaining -= dt;
+  if ( m_exit_delay_remaining > sf::Time::Zero ) return;
+  m_scenemanager_event_dispatcher.enqueue<Events::SceneManagerEvent>( *m_pending_exit );
+  m_pending_exit.reset();
+  m_exit_delay_remaining = sf::Time::Zero;
 }
 
 void HealingSpringSystem::check_inventory_deposit()

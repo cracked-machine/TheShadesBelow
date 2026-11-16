@@ -84,7 +84,8 @@
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/LuckDropRate.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
-#include <Components/Persistent/MinNumHealingSprings.hpp>
+#include <Components/Persistent/HealingBuildingOverride.hpp>
+#include <Components/Persistent/PaidHealAmount.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
@@ -268,7 +269,8 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::AltarOfferingCooldown>();
   add_component<Cmp::Persist::AltarSummonOfferingCooldown>();
   add_component<Cmp::Persist::LightningDamage>();
-  add_component<Cmp::Persist::MinNumHealingSprings>();
+  add_component<Cmp::Persist::HealingBuildingOverride>();
+  add_component<Cmp::Persist::PaidHealAmount>();
   add_component<Cmp::Persist::NumAltars>();
   add_component<Cmp::Persist::MinNumRuins>();
   add_component<Cmp::Persist::MusicVolume>();

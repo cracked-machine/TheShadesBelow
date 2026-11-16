@@ -12,6 +12,8 @@ enum class SceneId {
   SHOP,
   //! @brief The healing spring scene
   HEALING_SPRING,
+  //! @brief The barber surgeon scene
+  BARBER_SURGEON,
   //! @brief The upper floor of the ruin scene
   RUIN_UPPER_FLOOR,
   //! @brief The lower floor of the ruin scene

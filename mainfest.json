@@ -8,6 +8,7 @@
     "res/ui/shop.json"
   ],
   "scenes": [
+    "res/scenes/barber.json",
     "res/scenes/crypt.json",
     "res/scenes/graveyard.json",
     "res/scenes/ruinlower.json",

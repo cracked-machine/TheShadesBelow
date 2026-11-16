@@ -22,7 +22,13 @@ struct OverlayEvent
     //! @brief Go to the next grimoire page. No-op if the grimoire is closed.
     GRIMOIRE_NEXT,
     //! @brief Toggle the F3 debug panels (Cmp::SceneSettings::ShowDebugStats). Ignored while a modal overlay is open.
-    DEBUG_TOGGLE
+    DEBUG_TOGGLE,
+    //! @brief Move the heal menu selection up a row. Handled by Sys::SpringOverlaySystem / Sys::BarberOverlaySystem.
+    HEAL_PREV,
+    //! @brief Move the heal menu selection down a row. Handled by Sys::SpringOverlaySystem / Sys::BarberOverlaySystem.
+    HEAL_NEXT,
+    //! @brief Pay for and apply the selected heal. Handled by Sys::SpringOverlaySystem / Sys::BarberOverlaySystem.
+    HEAL_PURCHASE
   };
 
   //! @brief Construct a new OverlayEvent object

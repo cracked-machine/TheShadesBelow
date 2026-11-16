@@ -124,6 +124,9 @@ void HealingSpringScene::on_enter()
   auto &player_dir = Utils::Player::get_direction( m_reg );
   player_dir = Cmp::Direction{ { 0.f, 0.f } };
 
+  // never carry a paid-heal exit countdown over from a previous visit
+  m_sys.find<Sys::Store::Type::HealingSpringSystem>().cancel_delayed_exit();
+
   // no blink/cooldown in the healing spring is required
   m_sys.find<Sys::Store::Type::PlayerSystem>().force_expire_damage_cooldown();
 
@@ -139,6 +142,7 @@ void HealingSpringScene::on_exit()
   // never leave the scene paused, e.g. with its sound effects still paused
   m_sys.find<Sys::Store::Type::PauseOverlaySystem>().force_resume();
   SPDLOG_DEBUG( "Exiting {}", get_name() );
+  m_sys.find<Sys::Store::Type::HealingSpringSystem>().cancel_delayed_exit();
   m_sound_bank.get_music( "healing_spring" ).stop();
   m_sys.find<Sys::Store::Type::FootstepSystem>().stop_footsteps_sound();
   m_reg.clear();
@@ -160,7 +164,8 @@ void HealingSpringScene::do_update( sf::Time dt )
     m_sys.find<Sys::Store::Type::NpcSystem>().update( dt );
     m_sys.find<Sys::Store::Type::FootstepSystem>().update( dt );
     m_sys.find<Sys::Store::Type::LootSystem>().check_loot_collision( dt );
-    m_sys.find<Sys::Store::Type::HealingSpringSystem>().check_exit_collision();
+    m_sys.find<Sys::Store::Type::HealingSpringSystem>().check_exit_collision( Events::SceneManagerEvent::Type::EXIT_SACREDSPRING );
+    m_sys.find<Sys::Store::Type::HealingSpringSystem>().update_delayed_exit( dt );
     m_sys.find<Sys::Store::Type::InventorySystem>().update( dt );
 
     m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt );

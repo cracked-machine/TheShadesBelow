@@ -36,7 +36,7 @@
 #include <Components/Persistent/GraveOddsTorch.hpp>
 #include <Components/Persistent/GraveTrailNominalHopCount.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
-#include <Components/Persistent/MinNumHealingSprings.hpp>
+#include <Components/Persistent/HealingBuildingOverride.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/NumAltars.hpp>
 #include <Components/Player/Cadaver.hpp>
@@ -44,6 +44,7 @@
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
+#include <Components/UUID.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/Ruin/BuildingMultiBlock.hpp>
 #include <Components/Ruin/BuildingSegment.hpp>
@@ -59,8 +60,10 @@
 #include <Components/Ruin/StairsUpperMultiBlock.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/SpawnArea.hpp>
+#include <Components/Spring/BarberSurgeonEntrance.hpp>
 #include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
 #include <Components/Spring/HealingSpringBuildingSegment.hpp>
+#include <Components/Spring/HealingSpringEntrance.hpp>
 #include <Components/Spring/HealingSpringMultiBlock.hpp>
 #include <Components/Spring/HealingSpringSegment.hpp>
 #include <Components/Wall.hpp>
@@ -494,7 +497,8 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
   const auto max_num_altars = static_cast<size_t>(
       std::max( 1, static_cast<int>( Sys::PersistSystem::get<Cmp::Persist::NumAltars>( reg() ).get_value() ) ) );
   const size_t max_num_crypts = 1;
-  const auto &min_num_healing_springs = Sys::PersistSystem::get<Cmp::Persist::MinNumHealingSprings>( reg() );
+  // one healing building per level: either a healing spring or a barber surgeon
+  const size_t max_num_healing_buildings = 1;
   const auto &min_num_ruins = Sys::PersistSystem::get<Cmp::Persist::MinNumRuins>( reg() );
 
   // minimum clearance (in grid cells, both axes) between altars, crypts, healing springs and ruins
@@ -523,9 +527,27 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
   spawn_multiblocks<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( max_num_crypts, crypt_spritesheet,
                                                                                   /*log=*/true, kMinBuildingSpacingCells );
 
+  // HEALING BUILDING - the healing spring and the barber surgeon share the exterior building, only the entrance differs
   const auto &healingspring_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.building.healingspring" );
-  spawn_multiblocks<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>(
-      static_cast<std::size_t>( min_num_healing_springs.get_value() ), healingspring_spritesheet, /*log=*/true, kMinBuildingSpacingCells );
+  auto healing_mb_entts = spawn_multiblocks<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>(
+      max_num_healing_buildings, healingspring_spritesheet, /*log=*/true, kMinBuildingSpacingCells );
+  for ( auto mb_entt : healing_mb_entts )
+  {
+    // 0 = healing spring, 1 = barber surgeon; anything else is a 50/50 roll
+    int building_kind = Sys::PersistSystem::get<Cmp::Persist::HealingBuildingOverride>( reg() ).get_value();
+    if ( building_kind != 0 and building_kind != 1 ) { building_kind = Cmp::RandomInt( 0, 1 ).gen(); }
+    const bool is_barber = building_kind == 1;
+    SPDLOG_INFO( "Healing building is a {}", is_barber ? "Barber Surgeon" : "Healing Spring" );
+    if ( not is_barber ) continue;
+
+    const auto *mb_uuid = reg().try_get<Cmp::UUID>( mb_entt );
+    if ( mb_uuid == nullptr ) continue;
+    for ( auto [door_entt, door_cmp, door_uuid] : reg().view<Cmp::HealingSpringEntrance, Cmp::UUID>().each() )
+    {
+      if ( door_uuid != *mb_uuid ) continue;
+      reg().emplace_or_replace<Cmp::BarberSurgeonEntrance>( door_entt );
+    }
+  }
 
   const auto &ruin_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.ruin" );
   spawn_multiblocks<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>( static_cast<std::size_t>( min_num_ruins.get_value() ),

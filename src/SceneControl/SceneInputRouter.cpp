@@ -39,6 +39,7 @@
 #include <SceneControl/Events/ProcessCryptSceneInputEvent.hpp>
 #include <SceneControl/Events/ProcessGameoverSceneInputEvent.hpp>
 #include <SceneControl/Events/ProcessGraveyardSceneInputEvent.hpp>
+#include <SceneControl/Events/ProcessBarberSurgeonSceneInputEvent.hpp>
 #include <SceneControl/Events/ProcessHealingSpringSceneInputEvent.hpp>
 #include <SceneControl/Events/ProcessLevelCompleteSceneInputEvent.hpp>
 #include <SceneControl/Events/ProcessRuinSceneLowerInputEvent.hpp>
@@ -51,6 +52,7 @@
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/OverlayArbitrationSystem.hpp>
+#include <Systems/ShopSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -77,6 +79,7 @@ SceneInputRouter::SceneInputRouter( entt::registry &reg, sf::RenderWindow &m_win
   m_nav_event_dispatcher.sink<Events::ProcessLevelCompleteSceneInputEvent>().connect<&SceneInputRouter::level_complete_scene_state_handler>( this );
   m_nav_event_dispatcher.sink<Events::ProcessCryptSceneInputEvent>().connect<&SceneInputRouter::crypt_scene_state_handler>( this );
   m_nav_event_dispatcher.sink<Events::ProcessHealingSpringSceneInputEvent>().connect<&SceneInputRouter::healing_spring_scene_state_handler>( this );
+  m_nav_event_dispatcher.sink<Events::ProcessBarberSurgeonSceneInputEvent>().connect<&SceneInputRouter::healing_spring_scene_state_handler>( this );
   m_nav_event_dispatcher.sink<Events::ProcessRuinSceneLowerInputEvent>().connect<&SceneInputRouter::ruin_scene_state_handler>( this );
   m_nav_event_dispatcher.sink<Events::ProcessRuinSceneUpperInputEvent>().connect<&SceneInputRouter::ruin_scene_state_handler>( this );
   m_nav_event_dispatcher.sink<Events::ProcessShopSceneInputEvent>().connect<&SceneInputRouter::shop_scene_state_handler>( this );
@@ -259,11 +262,14 @@ void SceneInputRouter::healing_spring_scene_state_handler()
   }
 
   using namespace sf::Keyboard;
+  // while the player stands at the spring/barber, the wheel picks the heal menu row and E buys it
+  const bool heal_menu_open = ShopSystem::is_heal_menu_open( reg() );
   while ( const std::optional event = m_window.pollEvent() )
   {
     forward_to_imgui( *event );
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
+    if ( heal_menu_open and process_heal_menu_wheel( *event ) ) continue;
     process_inventory_slot_input( *event, /*number_keys=*/true );
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
@@ -274,6 +280,11 @@ void SceneInputRouter::healing_spring_scene_state_handler()
     else if ( const auto *keyPressed = event->getIf<sf::Event::KeyPressed>() )
     {
       if ( keyPressed->scancode == sf::Keyboard::Scancode::P ) { toggle_pause(); }
+      // KeyPressed, not isKeyPressed: holding E buys only once
+      else if ( heal_menu_open and keyPressed->scancode == sf::Keyboard::Scancode::E )
+      {
+        get_systems_event_queue().trigger( Events::OverlayEvent( Events::OverlayEvent::OverlayActions::HEAL_PURCHASE ) );
+      }
     }
   }
 
@@ -488,6 +499,18 @@ void SceneInputRouter::process_grimoire_wheel( const sf::Event &event )
                                                    : Events::OverlayEvent::OverlayActions::GRIMOIRE_PREV;
     get_systems_event_queue().trigger( Events::OverlayEvent( action ) );
   }
+}
+
+bool SceneInputRouter::process_heal_menu_wheel( const sf::Event &event )
+{
+  const auto *wheelScrolled = event.getIf<sf::Event::MouseWheelScrolled>();
+  if ( not wheelScrolled or wheelScrolled->wheel != sf::Mouse::Wheel::Vertical ) return false;
+  // swallow the wheel either way, so it never changes the inventory slot while the heal menu is open
+  if ( wheelScrolled->delta == 0.f ) return true;
+  // scroll up/away for the previous row, down/towards for the next, like the inventory slots
+  const auto action = wheelScrolled->delta > 0.f ? Events::OverlayEvent::OverlayActions::HEAL_PREV : Events::OverlayEvent::OverlayActions::HEAL_NEXT;
+  get_systems_event_queue().trigger( Events::OverlayEvent( action ) );
+  return true;
 }
 
 void SceneInputRouter::process_inventory_slot_input( const sf::Event &event, bool number_keys )

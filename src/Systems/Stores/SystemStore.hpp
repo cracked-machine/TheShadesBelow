@@ -52,6 +52,8 @@ class RenderMenuSystem;
 class HudOverlaySystem;
 class OverlayArbitrationSystem;
 class ShopOverlaySystem;
+class SpringOverlaySystem;
+class BarberOverlaySystem;
 class RuinSystem;
 class SceneInputRouter;
 class SinkHoleHazardSystem;
@@ -144,6 +146,10 @@ public:
     HudOverlaySystem,
     //! @brief Key for ShopOverlaySystem.
     ShopOverlaySystem,
+    //! @brief Key for SpringOverlaySystem.
+    SpringOverlaySystem,
+    //! @brief Key for BarberOverlaySystem.
+    BarberOverlaySystem,
     //! @brief Key for OverlayArbitrationSystem.
     OverlayArbitrationSystem,
     //! @brief Key for SceneInputRouter.
@@ -273,6 +279,8 @@ template<> struct Store::SystemTraits<Store::Type::DebugOverlaySystem>       { u
 template<> struct Store::SystemTraits<Store::Type::RenderGameSystem>         { using type = RenderGameSystem; };
 template<> struct Store::SystemTraits<Store::Type::HudOverlaySystem>         { using type = HudOverlaySystem; };
 template<> struct Store::SystemTraits<Store::Type::ShopOverlaySystem>        { using type = ShopOverlaySystem; };
+template<> struct Store::SystemTraits<Store::Type::SpringOverlaySystem>      { using type = SpringOverlaySystem; };
+template<> struct Store::SystemTraits<Store::Type::BarberOverlaySystem>      { using type = BarberOverlaySystem; };
 template<> struct Store::SystemTraits<Store::Type::OverlayArbitrationSystem> { using type = OverlayArbitrationSystem; };
 template<> struct Store::SystemTraits<Store::Type::RenderMenuSystem>         { using type = RenderMenuSystem; };
 template<> struct Store::SystemTraits<Store::Type::SceneInputRouter>         { using type = SceneInputRouter; };

@@ -68,6 +68,8 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/OverlayArbitrationSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/PauseOverlaySystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/ShopOverlaySystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/SpringOverlaySystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/BarberOverlaySystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/TooltipOverlaySystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/UiLayout.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/ZOrderQueue.cpp
@@ -118,6 +120,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/SceneControl/Scenes/LevelCompleteScene.cpp
     ${CMAKE_SOURCE_DIR}/src/SceneControl/Scenes/CryptScene.cpp
     ${CMAKE_SOURCE_DIR}/src/SceneControl/Scenes/HealingSpringScene.cpp
+    ${CMAKE_SOURCE_DIR}/src/SceneControl/Scenes/BarberSurgeonScene.cpp
     ${CMAKE_SOURCE_DIR}/src/SceneControl/Scenes/RuinSceneLowerFloor.cpp
     ${CMAKE_SOURCE_DIR}/src/SceneControl/Scenes/RuinSceneUpperFloor.cpp
     ${CMAKE_SOURCE_DIR}/src/SceneControl/Scenes/ShopScene.cpp
