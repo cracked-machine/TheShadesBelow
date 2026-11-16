@@ -2,13 +2,17 @@
 #define SRC_SYSTEMS_THREATS_HAZARDFIELDSYSTEMIMPL_HPP__
 
 #include <Components/AnimData.hpp>
+#include <Components/Armable.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Hazard/CorruptionCell.hpp>
 #include <Components/Hazard/SinkholeCorners.hpp>
+#include <Components/LootContainer.hpp>
+#include <Components/Npc/Container.hpp>
 #include <Components/Npc/ElderMother.hpp>
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/ObstacleCap.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/HazardBalance.hpp>
 #include <Components/RectBounds.hpp>
@@ -148,6 +152,8 @@ void HazardFieldSystem<HazardType>::promote_to_hazard_cell( entt::entity entity,
   // remove_obstacle() above un-reserves this position; re-reserve it now the entity is a hazard cell,
   // otherwise BombSystem's blast-arming sweep will still find it via its leftover Cmp::Armable
   if ( reserved_sm ) { reserved_sm->insert( entity, pos ); }
+  // open floor is in the NPC navmesh; drop the whole bucket like Cmp::Npc::NoPathFinding does at navmesh build time
+  if ( auto npc_navmesh = m_npc_navmesh.lock() ) { npc_navmesh->remove_all( pos ); }
   // clang-format off
   reg().template emplace_or_replace<HazardType>( entity );
   reg().template emplace_or_replace<Cmp::AnimData>( entity, Cmp::AnimData::Config{
@@ -239,7 +245,22 @@ sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field( sf::Time dt )
 
   auto reserved_sm = m_reserved_sm.lock();
   auto hazard_view = reg().template view<HazardType, Cmp::Position>();
-  auto obstacle_view = reg().template view<Cmp::Obstacle, Cmp::Position, Cmp::AnimData>();
+  // every world position (Cmp::Armable) is a candidate. Obstacle caps sit over a neighbouring world position and are
+  // removed implicitly along with their obstacle by Factory::Obstacle::remove_obstacle(); loot/NPC containers and walls
+  // are never swallowed. Multiblocks, the exit, the spawn area and world items are excluded via reserved_sm below.
+  auto candidate_view = reg().template view<Cmp::Armable, Cmp::Position>(
+      entt::exclude<Cmp::ObstacleCap, Cmp::Wall, Cmp::LootContainer, Cmp::Npc::Container, HazardType, typename Traits::ExcludeHazard> );
+
+  // obstacles: only the main block (caps are handled above); open floor: only if this hazard type spreads onto it
+  auto is_candidate = [&]( entt::entity entity )
+  {
+    if ( reg().template all_of<Cmp::Obstacle>( entity ) )
+    {
+      const auto *anim_cmp = reg().template try_get<Cmp::AnimData>( entity );
+      return anim_cmp and anim_cmp->m_sprite_type.contains( ".main" );
+    }
+    return Traits::spreads_to_open_floor;
+  };
 
   Cmp::RandomInt hazard_spread_picker( 0, Traits::odds ); // 1 in 8 chance for picking an adjacent obstacle
 
@@ -253,24 +274,23 @@ sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field( sf::Time dt )
     int adjacent_hazard_fields = 0;
 
     // add new hazard cell
-    for ( auto [obstacle_entity, obstacle_cmp, obst_pos_cmp, obst_anim_cmp] : obstacle_view.each() )
+    for ( auto candidate_entity : candidate_view )
     {
-      // only search for main obstacles, cap obstacles are removed implicitly by Factory::Obstacle::remove_obstacle()
-      if ( not obst_anim_cmp.m_sprite_type.contains( ".main" ) ) continue;
-      if ( not hazard_hitbox.findIntersection( obst_pos_cmp ) ) continue;
-      if ( reserved_sm && not reserved_sm->at( obst_pos_cmp ).empty() ) continue;
-      SPDLOG_DEBUG( "Hazard intersected with object {}", static_cast<uint32_t>( obstacle_entity ) );
-
-      if ( reg().template all_of<HazardType>( obstacle_entity ) ) continue;
-      SPDLOG_DEBUG( "Hazard not found at entity {}", static_cast<uint32_t>( obstacle_entity ) );
+      const auto &candidate_pos_cmp = candidate_view.template get<Cmp::Position>( candidate_entity );
+      if ( not hazard_hitbox.findIntersection( candidate_pos_cmp ) ) continue;
+      if ( reserved_sm && not reserved_sm->at( candidate_pos_cmp ).empty() ) continue;
+      if ( not is_candidate( candidate_entity ) ) continue;
+      SPDLOG_DEBUG( "Hazard candidate cell {}", static_cast<uint32_t>( candidate_entity ) );
 
       auto hazard_pick = hazard_spread_picker.gen();
       SPDLOG_DEBUG( "hazard_pick:{}", hazard_pick );
       if ( hazard_pick == 0 )
       {
-        promote_to_hazard_cell( obstacle_entity, obst_pos_cmp, reserved_sm );
-        SPDLOG_DEBUG( "New hazard field created at entity {}", static_cast<uint32_t>( obstacle_entity ) );
-        return obst_pos_cmp.position; // only add one hazard cell per update period
+        // copy: promote_to_hazard_cell() can swap-and-pop the Cmp::Position storage (see its doc)
+        const Cmp::Position new_cell_pos = candidate_pos_cmp;
+        promote_to_hazard_cell( candidate_entity, new_cell_pos, reserved_sm );
+        SPDLOG_DEBUG( "New hazard field created at entity {}", static_cast<uint32_t>( candidate_entity ) );
+        return new_cell_pos.position; // only add one hazard cell per update period
       }
     }
 
@@ -314,17 +334,16 @@ void HazardFieldSystem<HazardType>::check_player_hazard_field_collision()
     // flying over hazards - no falling/decay/damage
     if ( Utils::Player::is_flying( reg() ) ) continue;
 
-    // balancing half over a lethal hazard's edge: PlayerSystem::update_hazard_balance() decides whether they fall in
-    if constexpr ( Traits::kills_instantly )
-    {
-      if ( reg().template all_of<Cmp::Player::HazardBalance>( pc_entt ) ) continue;
-    }
+    // balancing over a lethal hazard's edge: PlayerSystem::update_hazard_balance() decides whether they fall into that
+    // cell, but a new cell opening under them still kills them below
+    [[maybe_unused]] const auto *balance_cmp = reg().template try_get<Cmp::Player::HazardBalance>( pc_entt );
 
     for ( auto [hazard_entt, hazard_cmp, hazard_pos_cmp] : hazard_view.each() )
     {
 
       if constexpr ( Traits::sprite_type == "sprite.graveyard.hazard.sinkhole" )
       {
+        if ( balance_cmp and balance_cmp->hazard == hazard_entt ) continue;
         // centre probe, matching PlayerSystem's balance window (Cmp::Player::HazardBalance) which holds the player half over the edge
         if ( Utils::Collision::lethal_hazard_probe( reg(), player_pos_cmp ).findIntersection( hazard_pos_cmp ) )
         {

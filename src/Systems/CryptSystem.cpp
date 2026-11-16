@@ -885,13 +885,14 @@ void CryptSystem::remove_lava_pit_open_rooms( const Cmp::Position &player_pos_cm
 void CryptSystem::check_lava_pit_collision()
 {
   if ( Utils::Player::get_mortality( reg() ).state == Cmp::Player::Mortality::State::DEAD ) return;
-  // balancing half over the lava's edge: PlayerSystem::update_hazard_balance() decides whether they fall in
-  if ( reg().all_of<Cmp::Player::HazardBalance>( Utils::Player::get_entity( reg() ) ) ) return;
+  // balancing over the lava's edge: PlayerSystem::update_hazard_balance() decides whether they fall into that cell
+  const auto *balance_cmp = reg().try_get<Cmp::Player::HazardBalance>( Utils::Player::get_entity( reg() ) );
 
   // centre probe, matching PlayerSystem's balance window (Cmp::Player::HazardBalance) which holds the player half over the edge
   const auto player_hitbox = Utils::Collision::lethal_hazard_probe( reg(), Utils::Player::get_position( reg() ) );
   for ( auto [lava_cell_entt, lava_cell_cmp] : reg().view<Cmp::Crypt::RoomLavaPitCell>().each() )
   {
+    if ( balance_cmp and balance_cmp->hazard == lava_cell_entt ) continue;
     if ( not player_hitbox.findIntersection( lava_cell_cmp ) ) continue;
     Utils::Crypt::reset_crypt_shuffle_timer( reg() );
 

@@ -392,8 +392,8 @@ void GraveyardScene::reinit_system_spatial_maps()
   m_sys.find<Sys::Store::Type::WormholeSystem>().init( m_generic_npc_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::DebugOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::WatchmanSystem>().init( m_reserved_sm );
-  m_sys.find<Sys::Store::Type::SinkHoleHazardSystem>().init( m_reserved_sm );
-  m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().init( m_reserved_sm );
+  m_sys.find<Sys::Store::Type::SinkHoleHazardSystem>().init( m_reserved_sm, m_generic_npc_navmesh );
+  m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().init( m_reserved_sm, m_generic_npc_navmesh );
 }
 
 entt::registry &GraveyardScene::registry() { return m_reg; }

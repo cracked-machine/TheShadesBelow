@@ -30,8 +30,11 @@ struct HazardTraits<Cmp::SinkholeCell>
   static constexpr Cmp::Player::Mortality::State mortality_state = Cmp::Player::Mortality::State::FALLING;
   //! @brief AnimData sprite type identifier used when spawning a sinkhole cell.
   static constexpr std::string_view sprite_type = "sprite.graveyard.hazard.sinkhole";
-  //! @brief Denominator of the 1-in-N chance used each spread tick to convert an adjacent obstacle into a new sinkhole cell.
+  //! @brief Denominator of the 1-in-N chance used each spread tick to convert an adjacent cell into a new sinkhole cell.
   static constexpr int odds = 2;
+  //! @brief Whether the field spreads into open floor as well as obstacles. Reserved positions (multiblocks, walls,
+  //! exit, spawn area, world items) and loot/NPC containers are always off limits.
+  static constexpr bool spreads_to_open_floor = true;
 };
 
 //! @brief Traits for Corruption hazard field types: gradually drains health on contact and excludes sinkhole cells.
@@ -50,6 +53,8 @@ struct HazardTraits<Cmp::CorruptionCell>
   static constexpr std::string_view sprite_type = "sprite.graveyard.hazard.corruption";
   //! @brief Denominator of the 1-in-N chance used each spread tick to convert an adjacent obstacle into a new corruption cell.
   static constexpr int odds = 7;
+  //! @brief Whether the field spreads into open floor as well as obstacles. Corruption only consumes obstacles.
+  static constexpr bool spreads_to_open_floor = false;
 };
 
 } // namespace Game::Sys

@@ -38,6 +38,7 @@ concept ValidHazard = requires {
   { HazardTraits<T>::kills_instantly } -> std::convertible_to<bool>;
   { HazardTraits<T>::mortality_state } -> std::convertible_to<Cmp::Player::Mortality::State>;
   { HazardTraits<T>::sprite_type } -> std::convertible_to<std::string_view>;
+  { HazardTraits<T>::spreads_to_open_floor } -> std::convertible_to<bool>;
 };
 
 //! @brief A templated system that manages the creation and spread of hazard
@@ -57,9 +58,14 @@ public:
   //! @param window Reference to the SFML render window
   HazardFieldSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
-  //! @brief init the weak pointer for the reserved-positions grid.
-  //! @param reserved_sm
-  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm ) { m_reserved_sm = reserved_sm; }
+  //! @brief init the weak pointers for the reserved-positions grid and the NPC navmesh.
+  //! @param reserved_sm Positions the field must never spread into.
+  //! @param npc_navmesh NPC pathfinding navmesh; cells are removed from it as the field spreads over open floor.
+  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &npc_navmesh )
+  {
+    m_reserved_sm = reserved_sm;
+    m_npc_navmesh = npc_navmesh;
+  }
 
   //! @brief Spread the hazard field, then check for player and NPC collisions with it.
   //! @return The position of any newly added hazard cell, or an empty vector if none was added.
@@ -74,8 +80,9 @@ private:
   //! 1. Accumulate dt and check if the update interval has elapsed.
   //! 2. Get a view of all entities with the hazard field component and position.
   //! 3. For each hazard field entity:
-  //!   a. Check adjacent positions for obstacles without hazard components.
-  //!   b. Use a random chance (1 in 8) to convert an adjacent obstacle into a new hazard cell.
+  //!   a. Check adjacent positions for candidate cells (obstacles, plus open floor if
+  //!   HazardTraits::spreads_to_open_floor) that are not reserved and not already hazard cells.
+  //!   b. Use a random 1-in-HazardTraits::odds chance to convert an adjacent candidate into a new hazard cell.
   //!   c. Count adjacent hazard fields; if surrounded by 2 or more, mark as inactive to stop
   //!   further spreading.
   //! @param dt Frame delta, accumulated into m_spread_update_timer
@@ -88,9 +95,9 @@ private:
   //! If a collision is detected, trigger NPC death event.
   void check_npc_hazard_field_collision();
 
-  //! @brief Convert an obstacle entity into an active hazard cell: transfers its spatial-hash reservation,
-  //! and attaches the hazard/anim/z-order/pathfinding components.
-  //! @param entity The obstacle entity to promote.
+  //! @brief Convert an obstacle or open floor entity into an active hazard cell: transfers its spatial-hash reservation,
+  //! removes the cell from the NPC navmesh and attaches the hazard/anim/z-order/pathfinding components.
+  //! @param entity The obstacle/floor entity to promote.
   //! @param pos The entity's current position. Taken by value: remove_obstacle() destroys cap entities, which can
   //! swap-and-pop the Cmp::Position storage a caller's reference points into.
   //! @param reserved_sm The locked reserved-positions grid, or nullptr if it has expired.
@@ -130,6 +137,9 @@ private:
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
+
+  //! @brief NPC pathfinding navmesh, so NPCs stop routing over cells the field spreads into.
+  PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;
 
   //! @brief Spatial index of this system's hazard cells (one bucket per grid cell), used to track the
   //! structure of the field as it spreads.
