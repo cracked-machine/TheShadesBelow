@@ -14,7 +14,6 @@
 #include <Components/FootStepTimer.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
-#include <Components/Hazard/CollisionResist.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
@@ -64,6 +63,10 @@
 #include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
+#include <Components/Hazard/SinkholeCell.hpp>
+#include <Components/Persistent/HazardBalanceOverlap.hpp>
+#include <Components/Persistent/HazardBalanceTimeout.hpp>
+#include <Components/Player/HazardBalance.hpp>
 #include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/Illuminated.hpp>
 #include <Components/Player/LevelDepth.hpp>
@@ -125,6 +128,7 @@
 #include <Utils/Cardinal.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
+#include <Utils/Crypt.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
@@ -136,9 +140,11 @@
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <string_view>
 #include <typeindex>
 
 namespace Game::Sys
@@ -147,8 +153,7 @@ namespace Game::Sys
 PlayerSystem::PlayerSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank,
                             entt::dispatcher &scenemanager_event_dispatcher )
     : BaseSystem( reg, window, sound_bank ),
-      m_scenemanager_event_dispatcher( scenemanager_event_dispatcher ),
-      m_hazard_pushback_target( entt::null )
+      m_scenemanager_event_dispatcher( scenemanager_event_dispatcher )
 {
   SPDLOG_DEBUG( "PlayerSystem initialized" );
   std::ignore = get_systems_event_queue().sink<Events::PlayerMortalityEvent>().connect<&PlayerSystem::on_player_mortality_event>( this );
@@ -202,9 +207,6 @@ void PlayerSystem::update( sf::Time dt )
     if ( not player_cmp.damage_cooldown_paused ) { player_cmp.m_damage_cooldown_timer += dt; }
   }
 
-  // advanced here rather than in resolve_hazard_pushback(), which runs once per axis each frame
-  if ( m_hazard_pushback_target != entt::null ) { m_hazard_pushback_timer += dt; }
-
   blink_player();
 
   // resting render offset, refreshed every frame so tuning applies immediately in every scene.
@@ -236,13 +238,33 @@ void PlayerSystem::update( sf::Time dt )
     // can't move until they have risen above the obstacle (1x1 cell) height
     const bool grounded_by_flight = Utils::Player::is_landing( reg() ) or
                                     ( Utils::Player::is_flying( reg() ) and not Utils::Player::is_flying_elevated( reg() ) );
-    if ( not grounded_by_flight ) { update_player_position( dt ); }
+    const bool balancing = update_hazard_balance( dt );
+    if ( balancing )
+    {
+      if ( auto *movement_delta = reg().try_get<Cmp::Player::MovementDelta>( Utils::Player::get_entity( reg() ) ) )
+      {
+        movement_delta->m_distance = 0.f; // no footsteps while frozen
+      }
+    }
+    else if ( not grounded_by_flight ) { update_player_position( dt ); }
     update_player_animation();
 
     // once the flying player's sprite clears the obstacle height it is drawn in front of obstacles, except
     // walls and sprites with an explicit spritesheets.json zorder (see FlyingSystem::elevated_zorder)
-    const float player_y = Utils::Player::get_position( reg() ).position.y;
-    Utils::Player::get_zorder( reg() ).set( Utils::Player::is_flying_elevated( reg() ) ? FlyingSystem::elevated_zorder( reg() ) : player_y );
+    float player_zorder = Utils::Player::get_position( reg() ).position.y;
+    if ( Utils::Player::is_flying_elevated( reg() ) ) { player_zorder = FlyingSystem::elevated_zorder( reg() ); }
+    else if ( const auto *balance_cmp = reg().try_get<Cmp::Player::HazardBalance>( Utils::Player::get_entity( reg() ) ) )
+    {
+      // leaning out over a hazard cell below (south) would otherwise be drawn behind its sprite
+      if ( reg().valid( balance_cmp->hazard ) )
+      {
+        const auto *hazard_z = reg().try_get<Cmp::ZOrderValue>( balance_cmp->hazard );
+        const auto *hazard_pos = reg().try_get<Cmp::Position>( balance_cmp->hazard );
+        const float hazard_zorder = hazard_z ? hazard_z->get() : ( hazard_pos ? hazard_pos->position.y : player_zorder );
+        player_zorder = std::max( player_zorder, hazard_zorder + 1.f );
+      }
+    }
+    Utils::Player::get_zorder( reg() ).set( player_zorder );
   }
 
   check_player_mortality();
@@ -534,8 +556,12 @@ void PlayerSystem::update_player_position( sf::Time dt )
     return true;
   };
 
+  // set once a blocked move starts the hazard balance window: the player is frozen from then on
+  auto balancing = [&]() { return reg().all_of<Cmp::Player::HazardBalance>( Utils::Player::get_entity( reg() ) ); };
+
   auto try_horizontal = [&]()
   {
+    if ( balancing() ) return;
     // No horizontal input: nothing to resolve. Must not touch resolved_dir_vector here, otherwise a
     // perpendicular nudge applied by the vertical axis' corner assist would be overwritten.
     if ( direction.x == 0.0f ) return;
@@ -544,6 +570,12 @@ void PlayerSystem::update_player_position( sf::Time dt )
     {
       can_move = true;
       resolved_dir_vector.x = direction.x;
+    }
+    else if ( const auto hazard_entt = Utils::Collision::find_lethal_hazard( reg(), Utils::Collision::lethal_hazard_probe( reg(), next_horizontal_move ) );
+              hazard_entt != entt::null )
+    {
+      // blocked by a lethal hazard: balance half over its edge
+      begin_hazard_balance( hazard_entt, Utils::Cardinal::dominant( { direction.x, 0.f } ) );
     }
     else if ( not try_corner_assist( true ) and resolved_dir_vector.x == 0.0f )
     {
@@ -555,6 +587,7 @@ void PlayerSystem::update_player_position( sf::Time dt )
 
   auto try_vertical = [&]()
   {
+    if ( balancing() ) return;
     // No vertical input: see try_horizontal.
     if ( direction.y == 0.0f ) return;
 
@@ -562,6 +595,12 @@ void PlayerSystem::update_player_position( sf::Time dt )
     {
       can_move = true;
       resolved_dir_vector.y = direction.y;
+    }
+    else if ( const auto hazard_entt = Utils::Collision::find_lethal_hazard( reg(), Utils::Collision::lethal_hazard_probe( reg(), next_vertical_move ) );
+              hazard_entt != entt::null )
+    {
+      // blocked by a lethal hazard: balance half over its edge
+      begin_hazard_balance( hazard_entt, Utils::Cardinal::dominant( { 0.f, direction.y } ) );
     }
     else if ( not try_corner_assist( false ) and resolved_dir_vector.y == 0.0f )
     {
@@ -583,6 +622,8 @@ void PlayerSystem::update_player_position( sf::Time dt )
     try_vertical();
     try_horizontal();
   }
+
+  if ( balancing() ) return;
 
   // Diagonal gap catch: with two perpendicular directions held, one axis slides freely along a wall while the
   // other is blocked. Without this, catching a 1-cell opening in that wall depends on a frame happening to land
@@ -670,6 +711,19 @@ void PlayerSystem::update_player_animation()
   auto &last_dir = Utils::Player::get_last_direction( reg() );
   const bool flying = Utils::Player::is_flying( reg() );
 
+  // balancing on a lethal hazard's edge: wobble towards it at the sheet's own framerate
+  if ( const auto *balance_cmp = reg().try_get<Cmp::Player::HazardBalance>( Utils::Player::get_entity( reg() ) ) )
+  {
+    // indexed by Utils::Cardinal::Value: East, South, West, North
+    static constexpr std::array<std::string_view, Utils::Cardinal::Count> kWobbleSprites{
+        "sprite.player.wobble.east", "sprite.player.wobble.south", "sprite.player.wobble.west", "sprite.player.wobble.north" };
+    anim_cmp.m_sprite_type = Sys::SpriteKey( std::string( kWobbleSprites[balance_cmp->hazard_cell_dir.value()] ) );
+    anim_cmp.m_enabled = true;
+    anim_cmp.clear_framerate_override();
+    last_dir = balance_cmp->hazard_cell_dir.vector();
+    return;
+  }
+
   // update the animation state based on movement direction
   if ( direction_cmp == sf::Vector2f( 0.0f, 0.0f ) ) { anim_cmp.m_enabled = false; }
   else
@@ -701,17 +755,23 @@ void PlayerSystem::update_player_animation()
     if ( last_dir.x > 0.f ) { anim_cmp.m_flip_x = false; }
     else if ( last_dir.x < 0.f ) { anim_cmp.m_flip_x = true; }
   }
-  // just landed: restore the walking sprite for the current facing, even if the player is standing still.
-  // The flying sheet has more frames than the walk sheets, so restart the walk cycle to stay in range.
-  else if ( anim_cmp.m_sprite_type == "sprite.player.flying" )
+  // just landed, or just stopped balancing: restore the walking sprite for the current facing, even if the
+  // player is standing still
+  else if ( anim_cmp.m_sprite_type == "sprite.player.flying" or anim_cmp.m_sprite_type.contains( "sprite.player.wobble" ) )
   {
-    anim_cmp.m_flip_x = false;
-    anim_cmp.m_current_frame = 0;
-    if ( last_dir.x > 0.f ) { anim_cmp.m_sprite_type = "sprite.player.walk.east"; }
-    else if ( last_dir.x < 0.f ) { anim_cmp.m_sprite_type = "sprite.player.walk.west"; }
-    else if ( last_dir.y < 0.f ) { anim_cmp.m_sprite_type = "sprite.player.walk.north"; }
-    else { anim_cmp.m_sprite_type = "sprite.player.walk.south"; }
+    restore_walk_sprite( anim_cmp, last_dir );
   }
+}
+
+void PlayerSystem::restore_walk_sprite( Cmp::AnimData &anim_cmp, sf::Vector2f last_dir )
+{
+  // the flying/wobble sheets don't share the walk sheets' frame count, so restart the walk cycle to stay in range
+  anim_cmp.m_flip_x = false;
+  anim_cmp.m_current_frame = 0;
+  if ( last_dir.x > 0.f ) { anim_cmp.m_sprite_type = "sprite.player.walk.east"; }
+  else if ( last_dir.x < 0.f ) { anim_cmp.m_sprite_type = "sprite.player.walk.west"; }
+  else if ( last_dir.y < 0.f ) { anim_cmp.m_sprite_type = "sprite.player.walk.north"; }
+  else { anim_cmp.m_sprite_type = "sprite.player.walk.south"; }
 }
 
 void PlayerSystem::check_player_mortality()
@@ -747,6 +807,7 @@ void PlayerSystem::check_player_mortality()
         mortality_cmp.last_damage_cause = Cmp::Player::Mortality::State::ALIVE;
         reg().remove<Cmp::NoRender>( entity );
         reg().remove<Cmp::Player::PostDeathTimer>( entity );
+        reg().remove<Cmp::Player::HazardBalance>( entity );
       }
       else
       {
@@ -1209,7 +1270,7 @@ void PlayerSystem::try_particle_knockback( sf::Vector2f emitter_pos )
       if ( rect.findIntersection( nopath_pos_cmp ) ) return true;
     }
     // never knock the player into a lethal hazard cell, e.g. the lava pit itself
-    return Utils::Collision::any_intersects<Cmp::Hazard::CollisionResist>( reg(), rect );
+    return Utils::Collision::any_lethal_hazard( reg(), rect );
   };
 
   for ( const auto &direction : candidate_directions )
@@ -1350,45 +1411,94 @@ bool PlayerSystem::is_valid_move( const sf::FloatRect &target_position )
     }
   }
 
-  // flying over hazards (lava etc) - no pushback
+  // flying over hazards (lava etc) - not blocked
   if ( flying ) return true;
 
   // update_player_position() calls is_valid_move() for both axes every frame, even the axis with
-  // zero direction (its target is just the player's current tile). Skip the hazard pushback state
-  // machine for that no-op axis, otherwise it resets the timer being accumulated by the other axis's
-  // real approach on every single frame, so the player can never push through.
+  // zero direction (its target is just the player's current tile), which must never be blocked.
   if ( target_position.position == Utils::Player::get_position( reg() ).position ) return true;
 
-  return resolve_hazard_pushback( search_bounds );
+  // lethal hazard cells block like a wall; update_player_position() starts the balance window when its
+  // real forward move is blocked by one (corner-assist/gap-catch probes must not)
+  // (the player may step Cmp::Persist::HazardBalanceOverlap onto it, see Utils::Collision::lethal_hazard_probe)
+  return not Utils::Collision::any_lethal_hazard( reg(), Utils::Collision::lethal_hazard_probe( reg(), target_position ) );
 }
 
-bool PlayerSystem::resolve_hazard_pushback( const Cmp::RectBounds &search_bounds )
+void PlayerSystem::begin_hazard_balance( entt::entity hazard_entt, Utils::Cardinal hazard_cell_dir )
 {
-  entt::entity hazard_entt = entt::null;
-  for ( auto [candidate_entt, resist_cmp, pos_cmp] : reg().view<Cmp::Hazard::CollisionResist, Cmp::Position>().each() )
-  {
-    if ( search_bounds.findIntersection( pos_cmp ) )
-    {
-      hazard_entt = candidate_entt;
-      break;
-    }
-  }
+  const auto player_entt = Utils::Player::get_entity( reg() );
+  if ( reg().all_of<Cmp::Player::HazardBalance>( player_entt ) ) return;
 
-  if ( hazard_entt == entt::null )
-  {
-    m_hazard_pushback_target = entt::null;
-    return true;
-  }
+  // the blocked move hasn't stepped more than Cmp::Persist::HazardBalanceOverlap (<= half a cell) onto the hazard yet,
+  // so the nearest grid line on the hazard axis is the edge cell's: lean exactly that far out from it over the hazard.
+  // The perpendicular axis is left as is.
+  const sf::Vector2f player_pos = Utils::Player::get_position( reg() ).position;
+  const sf::Vector2f snapped_pos = Utils::snap_to_grid( player_pos );
+  const bool horizontal = hazard_cell_dir.vector().x != 0.f;
+  const sf::Vector2f edge_pos = horizontal ? sf::Vector2f( snapped_pos.x, player_pos.y ) : sf::Vector2f( player_pos.x, snapped_pos.y );
+  const float overlap = std::clamp( Sys::PersistSystem::get<Cmp::Persist::HazardBalanceOverlap>( reg() ).get_value(), 0.f, 0.5f );
+  const sf::Vector2f balance_pos = edge_pos + hazard_cell_dir.vector().componentWiseMul( Constants::kGridSizePxF * overlap );
 
-  if ( hazard_entt != m_hazard_pushback_target )
+  // recovering steps 1px back along the movement input, so both axes only when moving diagonally
+  // (Cmp::Direction components are -1/0/1)
+  const sf::Vector2f safe_pos = balance_pos - sf::Vector2f( Utils::Player::get_direction( reg() ) );
+
+  reg().emplace<Cmp::Player::HazardBalance>( player_entt, hazard_entt, hazard_cell_dir, balance_pos, safe_pos );
+  on_update_player_position_event( Events::UpdatePlayerPositionEvent( balance_pos ) );
+  SPDLOG_INFO( "Player balancing on hazard edge at {},{}", balance_pos.x, balance_pos.y );
+}
+
+bool PlayerSystem::update_hazard_balance( sf::Time dt )
+{
+  const auto player_entt = Utils::Player::get_entity( reg() );
+  auto *balance_cmp = reg().try_get<Cmp::Player::HazardBalance>( player_entt );
+  if ( not balance_cmp ) return false;
+
+  // the hazard went away (e.g. lava pit removed by a crypt shuffle) - nothing to fall into
+  const entt::entity hazard_entt = balance_cmp->hazard;
+  const bool is_sinkhole = reg().valid( hazard_entt ) and reg().all_of<Cmp::SinkholeCell>( hazard_entt );
+  const bool is_lava = reg().valid( hazard_entt ) and reg().all_of<Cmp::Crypt::RoomLavaPitCell>( hazard_entt );
+  if ( not is_sinkhole and not is_lava )
   {
-    m_hazard_pushback_target = hazard_entt;
-    m_hazard_pushback_timer = sf::Time::Zero;
+    reg().remove<Cmp::Player::HazardBalance>( player_entt );
     return false;
   }
 
-  const auto &resist_cmp = reg().get<Cmp::Hazard::CollisionResist>( hazard_entt );
-  return m_hazard_pushback_timer.asSeconds() >= resist_cmp.resist_seconds;
+  // something else moved the player off the edge (fireball/NPC/shockwave knockback) - they're no longer balancing
+  if ( Utils::Player::get_position( reg() ).position != balance_cmp->balance_pos )
+  {
+    reg().remove<Cmp::Player::HazardBalance>( player_entt );
+    SPDLOG_INFO( "Player knocked off hazard edge, balance cancelled" );
+    return false;
+  }
+
+  balance_cmp->elapsed += dt;
+
+  // recovered: pressing away from the hazard steps the player 1px back to safety
+  const sf::Vector2f input_dir = Utils::Player::get_direction( reg() );
+  if ( input_dir.dot( balance_cmp->hazard_cell_dir.vector() ) < 0.f )
+  {
+    const sf::Vector2f safe_pos = balance_cmp->safe_pos;
+    reg().remove<Cmp::Player::HazardBalance>( player_entt );
+    on_update_player_position_event( Events::UpdatePlayerPositionEvent( safe_pos ) );
+    SPDLOG_INFO( "Player recovered from hazard edge" );
+    return false;
+  }
+
+  const float timeout = Sys::PersistSystem::get<Cmp::Persist::HazardBalanceTimeout>( reg() ).get_value();
+  if ( balance_cmp->elapsed.asSeconds() < timeout ) return true;
+
+  // timed out: fall into the hazard
+  reg().remove<Cmp::Player::HazardBalance>( player_entt );
+  const Cmp::Position hazard_pos = reg().get<Cmp::Position>( hazard_entt );
+  on_update_player_position_event( Events::UpdatePlayerPositionEvent( hazard_pos.position ) );
+  if ( is_sinkhole ) { on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::FALLING, hazard_pos ) ); }
+  else
+  {
+    Utils::Crypt::reset_crypt_shuffle_timer( reg() );
+    on_player_mortality_event( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::IGNITED, hazard_pos ) );
+  }
+  return true;
 }
 
 void PlayerSystem::promote_pending_no_path()

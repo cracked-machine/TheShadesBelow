@@ -3,15 +3,14 @@
 
 #include <Components/AnimData.hpp>
 #include <Components/Exit.hpp>
-#include <Components/Hazard/CollisionResist.hpp>
 #include <Components/Hazard/CorruptionCell.hpp>
 #include <Components/Hazard/SinkholeCorners.hpp>
 #include <Components/Npc/ElderMother.hpp>
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
-#include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/HazardBalance.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/Stats/BaseAction.hpp>
@@ -25,6 +24,7 @@
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Threats/HazardFieldSystem.hpp>
 #include <Systems/Threats/HazardTraits.hpp>
+#include <Utils/Collision.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 
@@ -160,12 +160,6 @@ void HazardFieldSystem<HazardType>::promote_to_hazard_cell( entt::entity entity,
 
   m_field_sm.insert( entity, pos );
   if constexpr ( std::is_same_v<HazardType, Cmp::SinkholeCell> ) { retile_sinkhole_cell_and_neighbours( entity, pos ); }
-  // corruption is a gradual damage field, not an instant kill, so it never gets an initial pushback
-  if constexpr ( not std::is_same_v<HazardType, Cmp::CorruptionCell> )
-  {
-    auto resist_seconds = Sys::PersistSystem::get<Cmp::Persist::HazardPushbackResist>( reg() ).get_value();
-    reg().template emplace_or_replace<Cmp::Hazard::CollisionResist>( entity, resist_seconds );
-  }
 }
 
 //! @copydoc HazardFieldSystem::rebuild_field_sm()
@@ -320,13 +314,19 @@ void HazardFieldSystem<HazardType>::check_player_hazard_field_collision()
     // flying over hazards - no falling/decay/damage
     if ( Utils::Player::is_flying( reg() ) ) continue;
 
+    // balancing half over a lethal hazard's edge: PlayerSystem::update_hazard_balance() decides whether they fall in
+    if constexpr ( Traits::kills_instantly )
+    {
+      if ( reg().template all_of<Cmp::Player::HazardBalance>( pc_entt ) ) continue;
+    }
+
     for ( auto [hazard_entt, hazard_cmp, hazard_pos_cmp] : hazard_view.each() )
     {
 
       if constexpr ( Traits::sprite_type == "sprite.graveyard.hazard.sinkhole" )
       {
-        // full size hitbox - Cmp::Hazard::CollisionResist now guards against accidental entry
-        if ( hazard_pos_cmp.findIntersection( player_pos_cmp ) )
+        // centre probe, matching PlayerSystem's balance window (Cmp::Player::HazardBalance) which holds the player half over the edge
+        if ( Utils::Collision::lethal_hazard_probe( reg(), player_pos_cmp ).findIntersection( hazard_pos_cmp ) )
         {
           // trigger death animation
           get_systems_event_queue().trigger( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::FALLING, player_position ) );

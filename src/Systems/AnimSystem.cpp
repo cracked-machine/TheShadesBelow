@@ -28,9 +28,9 @@ void AnimSystem::update( sf::Time dt )
   {
     if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), pos_cmp ) ) continue;
     // don't accumulate dt if the player is not moving - fixes initial rapid framerate bug.
-    // The flying sprite is exempt: the broom keeps animating while hovering.
+    // The flying and hazard-balance wobble sprites are exempt: they keep animating with no movement input.
     if ( anim_cmp.m_sprite_type.contains( "sprite.player" ) and anim_cmp.m_sprite_type != "sprite.player.flying" and
-         ( Utils::Player::get_direction( reg() ) == sf::Vector2f( 0, 0 ) ) )
+         not anim_cmp.m_sprite_type.contains( "sprite.player.wobble" ) and ( Utils::Player::get_direction( reg() ) == sf::Vector2f( 0, 0 ) ) )
       continue;
     if ( anim_cmp.m_enabled )
     {

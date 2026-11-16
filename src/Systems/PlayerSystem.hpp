@@ -5,6 +5,7 @@
 #include <Components/Player/Mortality.hpp>
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/BaseSystem.hpp>
+#include <Utils/Cardinal.hpp>
 
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
@@ -178,13 +179,23 @@ private:
   //! @return true if the movement is valid and allowed, false otherwise
   bool is_valid_move( const sf::FloatRect &target_position );
 
-  //! @brief Resolves the initial pushback/subsequent yield against `Cmp::Hazard::CollisionResist`
-  //! entities (lethal hazard cells). The first contact with a given hazard cell blocks movement like
-  //! a wall; once the player has kept pushing into that same cell for its configured resist duration,
-  //! this yields and allows the move through so it counts as normal (fatal) hazard collision.
-  //! @param search_bounds The (already scaled) target move bounds to test against hazard cells
-  //! @return true if movement should be allowed, false if still being resisted
-  bool resolve_hazard_pushback( const Cmp::RectBounds &search_bounds );
+  //! @brief Start the hazard balance window (Cmp::Player::HazardBalance) after a move into a lethal hazard
+  //! cell was blocked. No-op if the player is already balancing.
+  //! @param hazard_entt The lethal hazard cell that blocked the move.
+  //! @param hazard_cell_dir Direction from the player towards the hazard cell.
+  void begin_hazard_balance( entt::entity hazard_entt, Utils::Cardinal hazard_cell_dir );
+
+  //! @brief Advance the hazard balance window, if active. Pressing the direction opposite the hazard returns
+  //! the player 1px back from the hazard (Cmp::Player::HazardBalance::safe_pos); once Cmp::Persist::HazardBalanceTimeout expires the player falls in.
+  //! @param dt Frame delta.
+  //! @return true if the player is still balancing this frame (movement must stay frozen).
+  bool update_hazard_balance( sf::Time dt );
+
+  //! @brief Set the walk sprite matching `last_dir` and restart its cycle. Used when switching back from a
+  //! sprite sheet with a different frame count (flying, wobble).
+  //! @param anim_cmp The player's animation component.
+  //! @param last_dir The player's last facing direction.
+  void restore_walk_sprite( Cmp::AnimData &anim_cmp, sf::Vector2f last_dir );
 
   //! @brief Various ways in which the player can die. Starts the death animation loop.
   //! @param ev
@@ -227,12 +238,6 @@ private:
   //! hold the player. Empty until the first update after init(). If the player's Cmp::Position differs from
   //! this, something modified the component directly instead of triggering Events::UpdatePlayerPositionEvent.
   std::optional<sf::Vector2f> m_last_written_pos;
-
-  //! @brief Hazard cell currently being pushed against by `resolve_hazard_pushback`, or entt::null.
-  entt::entity m_hazard_pushback_target;
-
-  //! @brief How long the player has continuously pushed into m_hazard_pushback_target.
-  sf::Time m_hazard_pushback_timer;
 
   //! @brief Axis of the last successfully committed player movement, used only to decide which axis
   //! `update_player_position` resolves first each frame (see the axis-favoring fix in that function).

@@ -609,12 +609,20 @@
     "detail": "GraveyardProcGenSurvivalThreshold",
     "format": "%d"
   },
-  "HazardPushbackResist": {
+  "HazardBalanceOverlap": {
     "type": "float",
-    "value": 0.3,
+    "value": 0.5,
     "min_value": 0.0,
-    "max_value": 2.0,
-    "detail": "How long the player must keep pushing into a lethal hazard cell before falling in",
+    "max_value": 0.75,
+    "detail": "How far the player can step onto a lethal hazard cell before balancing on its edge",
+    "format": "%.2f cells"
+  },
+  "HazardBalanceTimeout": {
+    "type": "float",
+    "value": 1.5,
+    "min_value": 0.0,
+    "max_value": 3.0,
+    "detail": "How long the player balances on a lethal hazard's edge before falling in",
     "format": "%.2f seconds"
   },
   "HealthBonus": {

@@ -66,7 +66,8 @@
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
 #include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
 #include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
-#include <Components/Persistent/HazardPushbackResist.hpp>
+#include <Components/Persistent/HazardBalanceOverlap.hpp>
+#include <Components/Persistent/HazardBalanceTimeout.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/HeldItemOffset.hpp>
 #include <Components/Persistent/HeldItemRotation.hpp>
@@ -379,7 +380,8 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     ImGui::SeparatorText( "Hazard Settings" );
 
     Sys::PersistSystem::get<Cmp::Persist::CorruptionDamage>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::HazardPushbackResist>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::HazardBalanceOverlap>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::HazardBalanceTimeout>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::LightningDamage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::LavaFireballDamage>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AzazelFireballDamage>( reg() ).render_widget();

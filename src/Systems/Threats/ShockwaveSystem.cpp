@@ -1,5 +1,4 @@
 #include <Audio/SoundBank.hpp>
-#include <Components/Hazard/CollisionResist.hpp>
 #include <Components/Npc/Shockwave.hpp>
 #include <Components/Npc/ShockwaveTimer.hpp>
 #include <Components/Obstacle.hpp>
@@ -111,9 +110,9 @@ bool ShockwaveSystem::intersects_with_visible_segments( const Cmp::Npc::Shockwav
         {
           if ( sf::FloatRect( new_position, Constants::kGridSizePxF ).findIntersection( obstacle_pos_cmp ) ) is_valid = false;
         }
-        // nor into a lethal hazard cell (lava pit, sinkhole...) - that bypasses its pushback resist
+        // nor into a lethal hazard cell (lava pit, sinkhole...) - that would bypass the balance window
         if ( not Utils::Player::is_flying( reg() ) and
-             Utils::Collision::any_intersects<Cmp::Hazard::CollisionResist>( reg(), Cmp::RectBounds::scaled( new_position, Constants::kGridSizePxF, 1.f ) ) )
+             Utils::Collision::any_lethal_hazard( reg(), Cmp::RectBounds::scaled( new_position, Constants::kGridSizePxF, 1.f ) ) )
         {
           is_valid = false;
         }

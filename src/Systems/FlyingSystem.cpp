@@ -8,7 +8,6 @@
 #include <Components/Grave/ExitMultiBlock.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
-#include <Components/Hazard/CollisionResist.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
@@ -448,8 +447,8 @@ bool FlyingSystem::is_free_landing_area( const sf::FloatRect &area, bool allow_h
   if ( not any_overlaps<Cmp::Armable>( reg(), cell_bounds ) ) return false;
   if ( any_overlaps<Cmp::Player::NoPath>( reg(), cell_bounds ) ) return false;
   if ( any_overlaps<Cmp::Player::PendingNoPath>( reg(), cell_bounds ) ) return false;
-  // sinkholes: the hazard system makes a landed player fall in
-  if ( not allow_hazards and any_overlaps<Cmp::Hazard::CollisionResist>( reg(), cell_bounds ) ) return false;
+  // sinkholes/lava: the hazard systems make a landed player fall in
+  if ( not allow_hazards and Utils::Collision::any_lethal_hazard( reg(), cell_bounds ) ) return false;
   for ( auto npc_entt : reg().view<Cmp::Npc::NPC>() )
   {
     const auto npc_bounds = Utils::Npc::collision_bounds( reg(), npc_entt );

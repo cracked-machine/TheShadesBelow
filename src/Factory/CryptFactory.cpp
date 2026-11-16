@@ -14,10 +14,8 @@
 #include <Components/Exit.hpp>
 #include <Components/FootStepAlpha.hpp>
 #include <Components/FootStepTimer.hpp>
-#include <Components/Hazard/CollisionResist.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Particle/BlockParticle.hpp>
-#include <Components/Persistent/HazardPushbackResist.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Position.hpp>
@@ -26,7 +24,6 @@
 #include <Factory/CryptFactory.hpp>
 #include <Factory/MultiblockFactory.hpp>
 #include <Sprites/SpriteSheet.hpp>
-#include <Systems/PersistSystemImpl.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Random.hpp>
@@ -113,8 +110,6 @@ void create_crypt_lava_pit( entt::registry &reg, const Cmp::Crypt::RoomOpen &roo
 
   const auto player_pos = Utils::Player::get_position( reg );
 
-  auto pushback_resist_seconds = Sys::PersistSystem::get<Cmp::Persist::HazardPushbackResist>( reg ).get_value();
-
   // add the inidividual lava cells
   for ( auto [pos_entt, pos_cmp] : reg.view<Cmp::Position>().each() )
   {
@@ -126,7 +121,6 @@ void create_crypt_lava_pit( entt::registry &reg, const Cmp::Crypt::RoomOpen &roo
     reg.emplace_or_replace<Cmp::Position>( lava_cell_entt, pos_cmp.position, pos_cmp.size );
     reg.emplace_or_replace<Cmp::Npc::NoPathFinding>( lava_cell_entt );
     reg.emplace_or_replace<Cmp::Crypt::RoomLavaPitCell>( lava_cell_entt, pos_cmp.position, pos_cmp.size );
-    reg.emplace_or_replace<Cmp::Hazard::CollisionResist>( lava_cell_entt, pushback_resist_seconds );
     // clang-format off
     reg.emplace_or_replace<Cmp::AnimData>( lava_cell_entt, Cmp::AnimData::Config{ 
           .sprite_type = "sprite.crypt.lava", 

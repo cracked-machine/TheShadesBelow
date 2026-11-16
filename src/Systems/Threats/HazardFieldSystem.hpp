@@ -89,8 +89,7 @@ private:
   void check_npc_hazard_field_collision();
 
   //! @brief Convert an obstacle entity into an active hazard cell: transfers its spatial-hash reservation,
-  //! attaches the hazard/anim/z-order/pathfinding components, and (unless this hazard type only applies
-  //! gradual damage) an initial pushback-collision resist.
+  //! and attaches the hazard/anim/z-order/pathfinding components.
   //! @param entity The obstacle entity to promote.
   //! @param pos The entity's current position. Taken by value: remove_obstacle() destroys cap entities, which can
   //! swap-and-pop the Cmp::Position storage a caller's reference points into.

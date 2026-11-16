@@ -66,7 +66,8 @@
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
 #include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
 #include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
-#include <Components/Persistent/HazardPushbackResist.hpp>
+#include <Components/Persistent/HazardBalanceOverlap.hpp>
+#include <Components/Persistent/HazardBalanceTimeout.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/HeldItemOffset.hpp>
 #include <Components/Persistent/HeldItemRotation.hpp>
@@ -254,7 +255,8 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::GraveyardProcGenMaxIterations>();
   add_component<Cmp::Persist::GraveyardProcGenBirthThreshold>();
   add_component<Cmp::Persist::GraveyardProcGenSurvivalThreshold>();
-  add_component<Cmp::Persist::HazardPushbackResist>();
+  add_component<Cmp::Persist::HazardBalanceOverlap>();
+  add_component<Cmp::Persist::HazardBalanceTimeout>();
   add_component<Cmp::Persist::HealthBonus>();
   add_component<Cmp::Persist::LavaFireballDamage>();
   add_component<Cmp::Persist::AzazelFireballDamage>();

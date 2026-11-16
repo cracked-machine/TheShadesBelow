@@ -27,6 +27,7 @@
 #include <Components/Particle/LavaFireballParticleSprite.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
+#include <Components/Player/HazardBalance.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -63,6 +64,7 @@
 #include <Systems/Stores/NpcStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
+#include <Utils/Collision.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Crypt.hpp>
 #include <Utils/Maths.hpp>
@@ -883,9 +885,11 @@ void CryptSystem::remove_lava_pit_open_rooms( const Cmp::Position &player_pos_cm
 void CryptSystem::check_lava_pit_collision()
 {
   if ( Utils::Player::get_mortality( reg() ).state == Cmp::Player::Mortality::State::DEAD ) return;
+  // balancing half over the lava's edge: PlayerSystem::update_hazard_balance() decides whether they fall in
+  if ( reg().all_of<Cmp::Player::HazardBalance>( Utils::Player::get_entity( reg() ) ) ) return;
 
-  // full size hitbox - Cmp::Hazard::CollisionResist now guards against accidental entry
-  auto player_hitbox = Cmp::RectBounds::scaled( Utils::Player::get_position( reg() ).position, Utils::Player::get_position( reg() ).size, 1.f );
+  // centre probe, matching PlayerSystem's balance window (Cmp::Player::HazardBalance) which holds the player half over the edge
+  const auto player_hitbox = Utils::Collision::lethal_hazard_probe( reg(), Utils::Player::get_position( reg() ) );
   for ( auto [lava_cell_entt, lava_cell_cmp] : reg().view<Cmp::Crypt::RoomLavaPitCell>().each() )
   {
     if ( not player_hitbox.findIntersection( lava_cell_cmp ) ) continue;

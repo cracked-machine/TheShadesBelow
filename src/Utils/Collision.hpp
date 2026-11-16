@@ -67,6 +67,29 @@ bool pos_intersects( entt::registry &reg, Cmp::RectBounds pos,
   return false;
 }
 
+//! @brief Hitbox used to test the player against lethal hazard cells: `rect` inset on every side by
+//! Cmp::Persist::HazardBalanceOverlap (but never smaller than 1px), i.e. the player only counts as over a hazard once
+//! they have stepped further onto it than that. At 0 it is `rect` itself; at the 0.5 maximum it is a 1px square at
+//! the centre of `rect`. Shared by the movement blocking/balance window (Sys::PlayerSystem) and the hazard death checks
+//! so they always agree.
+//! @param reg reference to the entt reg
+//! @param rect The player's (current or target) bounds.
+//! @return Cmp::RectBounds The inset probe.
+Cmp::RectBounds lethal_hazard_probe( entt::registry &reg, const sf::FloatRect &rect );
+
+//! @brief Find a lethal hazard cell (Cmp::SinkholeCell or Cmp::Crypt::RoomLavaPitCell) intersecting `rect`.
+//! Corruption (Cmp::CorruptionCell) is a gradual damage field, so it is not a lethal hazard.
+//! @param reg reference to the entt reg
+//! @param rect The bounds to test for intersection.
+//! @return entt::entity The first intersecting lethal hazard cell, or entt::null if none.
+entt::entity find_lethal_hazard( entt::registry &reg, const Cmp::RectBounds &rect );
+
+//! @brief Check whether `rect` intersects any lethal hazard cell. See find_lethal_hazard().
+//! @param reg reference to the entt reg
+//! @param rect The bounds to test for intersection.
+//! @return bool true if `rect` intersects a sinkhole or lava pit cell.
+inline bool any_lethal_hazard( entt::registry &reg, const Cmp::RectBounds &rect ) { return find_lethal_hazard( reg, rect ) != entt::null; }
+
 //! @brief Snapshot of every active light source, gathered once so that repeated illumination
 //! queries (e.g. per A* neighbour) don't re-walk the registry.
 struct LightSources

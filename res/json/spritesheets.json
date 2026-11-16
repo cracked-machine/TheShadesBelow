@@ -2554,6 +2554,58 @@
         }
       }
     },
+    "sprite.player.wobble.east": {
+      "spritesheet": {
+        "displayname": "sprite.player.wobble.east",
+        "texture_path": "res/textures/player2.png",
+        "sprite_indices": [18,19,20],
+        "indices_per_sequence": 3,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.player.wobble.north": {
+      "spritesheet": {
+        "displayname": "sprite.player.wobble.north",
+        "texture_path": "res/textures/player2.png",
+        "sprite_indices": [15,16,17],
+        "indices_per_sequence": 3,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.player.wobble.south": {
+      "spritesheet": {
+        "displayname": "sprite.player.wobble.south",
+        "texture_path": "res/textures/player2.png",
+        "sprite_indices": [12,13,14],
+        "indices_per_sequence": 3,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.player.wobble.west": {
+      "spritesheet": {
+        "displayname": "sprite.player.wobble.west",
+        "texture_path": "res/textures/player2.png",
+        "sprite_indices": [21,22,23],
+        "indices_per_sequence": 3,
+        "framerate": 10,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
     "sprite.player.flying": {
       "spritesheet": {
         "displayname": "sprite.player.flying",

@@ -1,14 +1,17 @@
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Crypt/RoomLavaPitCell.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
+#include <Components/Hazard/SinkholeCell.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Npc/Burryman.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/Wisp.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
+#include <Components/Persistent/HazardBalanceOverlap.hpp>
 #include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/TorchRadius.hpp>
 #include <Components/UUID.hpp>
+#include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Utils/Collision.hpp>
 #include <Utils/Maths.hpp>
@@ -19,6 +22,27 @@
 
 namespace Game::Utils::Collision
 {
+
+Cmp::RectBounds lethal_hazard_probe( entt::registry &reg, const sf::FloatRect &rect )
+{
+  const float overlap = std::clamp( Sys::PersistSystem::get<Cmp::Persist::HazardBalanceOverlap>( reg ).get_value(), 0.f, 0.5f );
+  // keep at least 1px so the probe never shrinks to nothing (SFML never intersects an empty rect)
+  const sf::Vector2f probe_size( std::max( rect.size.x * ( 1.f - 2.f * overlap ), 1.f ), std::max( rect.size.y * ( 1.f - 2.f * overlap ), 1.f ) );
+  return Cmp::RectBounds::scaled( sf::FloatRect( rect.getCenter() - probe_size * 0.5f, probe_size ), 1.f );
+}
+
+entt::entity find_lethal_hazard( entt::registry &reg, const Cmp::RectBounds &rect )
+{
+  for ( auto [sinkhole_entt, sinkhole_cmp, sinkhole_pos] : reg.view<Cmp::SinkholeCell, Cmp::Position>().each() )
+  {
+    if ( rect.findIntersection( sinkhole_pos ) ) return sinkhole_entt;
+  }
+  for ( auto [lava_entt, lava_cmp] : reg.view<Cmp::Crypt::RoomLavaPitCell>().each() )
+  {
+    if ( rect.findIntersection( lava_cmp ) ) return lava_entt;
+  }
+  return entt::null;
+}
 
 LightSources collect_light_sources( entt::registry &reg )
 {
