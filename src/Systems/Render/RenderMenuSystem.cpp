@@ -106,7 +106,6 @@
 #include <Components/Persistent/NpcWatchmanSpawnMax.hpp>
 #include <Components/Persistent/NpcWatchmanSweepAmplitude.hpp>
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
-#include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/PaidHealAmount.hpp>
 #include <Components/Persistent/PlantsPerType.hpp>
 #include <Components/Persistent/PlantWearPerForage.hpp>
@@ -487,7 +486,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::GraveCountMargin>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailGuideColour>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ExitKeyRequirement>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::NumAltars>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlantsPerType>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::HealingBuildingOverride>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PaidHealAmount>( reg() ).render_widget();

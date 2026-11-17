@@ -106,7 +106,6 @@
 #include <Components/Persistent/NpcWatchmanSpawnMax.hpp>
 #include <Components/Persistent/NpcWatchmanSweepAmplitude.hpp>
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
-#include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/PaidHealAmount.hpp>
 #include <Components/Persistent/PlantsPerType.hpp>
 #include <Components/Persistent/PlantWearPerForage.hpp>
@@ -266,7 +265,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::LightningDamage>();
   add_component<Cmp::Persist::HealingBuildingOverride>();
   add_component<Cmp::Persist::PaidHealAmount>();
-  add_component<Cmp::Persist::NumAltars>();
   add_component<Cmp::Persist::PlantsPerType>();
   add_component<Cmp::Persist::MinNumRuins>();
   add_component<Cmp::Persist::MusicVolume>();

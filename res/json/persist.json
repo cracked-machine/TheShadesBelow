@@ -641,14 +641,6 @@
     "detail": "Lightning Rod Debris Damage",
     "format": "%d"
   },
-  "NumAltars": {
-    "type": "int",
-    "value": 2,
-    "min_value": 1,
-    "max_value": 4,
-    "detail": "Number of Altars",
-    "format": "%d"
-  },
   "PlantsPerType": {
     "type": "int",
     "value": 100,

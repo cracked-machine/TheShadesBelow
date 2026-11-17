@@ -507,7 +507,7 @@
     "sprite.graveyard.altar.inactive": {
       "spritesheet": {
         "displayname": "sprite.graveyard.altar.inactive",
-        "RelativeZOrder": [1],
+        "RelativeZOrder": [64],
         "texture_path": "res/textures/landmarks.png",
         "sprite_indices": [500],
         "walking_collision_mask": [

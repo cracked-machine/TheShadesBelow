@@ -39,7 +39,6 @@
 #include <Components/Persistent/HealingBuildingOverride.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
-#include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/PlantsPerType.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
@@ -102,6 +101,7 @@
 #include <SFML/System/Vector2.hpp>
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <functional>
 #include <optional>
 #include <ranges>
@@ -109,6 +109,7 @@
 #include <spdlog/spdlog.h>
 #include <tuple>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace Game::Sys::ProcGen
 {
@@ -204,6 +205,41 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
   }
 
   // Solid Layer
+  // The add_solid_* factories only tag entities that already exist under the rect, and an empty cell (e.g. a
+  // levelgen "wall" tile with no wall-layer tile) is walkable. So give every empty cell under a solid its own
+  // entity first - the factories then make it block like any other solid cell.
+  const auto cell_key = []( sf::Vector2f p )
+  {
+    return ( static_cast<std::int64_t>( std::floor( p.x / Constants::kGridSizePxF.x ) ) << 32 ) bitor
+           static_cast<std::uint32_t>( static_cast<std::int32_t>( std::floor( p.y / Constants::kGridSizePxF.y ) ) );
+  };
+  std::unordered_set<std::int64_t> occupied_cells;
+  for ( auto [entt, pos_cmp] : reg().view<Cmp::Position>().each() )
+  {
+    occupied_cells.insert( cell_key( pos_cmp.getCenter() ) );
+  }
+  for ( const auto &solid : scene_data.solid_objectlayer() )
+  {
+    const auto first_col = static_cast<int>( std::floor( solid.position.x / Constants::kGridSizePxF.x ) );
+    const auto first_row = static_cast<int>( std::floor( solid.position.y / Constants::kGridSizePxF.y ) );
+    const auto last_col = static_cast<int>( std::ceil( ( solid.position.x + solid.size.x ) / Constants::kGridSizePxF.x ) );
+    const auto last_row = static_cast<int>( std::ceil( ( solid.position.y + solid.size.y ) / Constants::kGridSizePxF.y ) );
+    for ( int row = first_row; row < last_row; ++row )
+    {
+      for ( int col = first_col; col < last_col; ++col )
+      {
+        const sf::Vector2f cell_pos( static_cast<float>( col ) * Constants::kGridSizePxF.x, static_cast<float>( row ) * Constants::kGridSizePxF.y );
+        const sf::Vector2f cell_center = cell_pos + ( Constants::kGridSizePxF / 2.f );
+        // same center-containment rule as the add_solid_* factories
+        if ( not solid.contains( cell_center ) ) continue;
+        // void cells are outside the playable area already, so don't fill them with entities
+        const Cmp::Position cell_pos_cmp( cell_pos, Constants::kGridSizePxF );
+        if ( not m_void_sm->at( cell_pos_cmp ).empty() ) continue;
+        if ( not occupied_cells.insert( cell_key( cell_center ) ).second ) continue;
+        reg().emplace<Cmp::Position>( reg().create(), cell_pos_cmp );
+      }
+    }
+  }
   for ( const auto &solid : scene_data.solid_objectlayer() )
   {
     Factory::Wall::add_solid_player( reg(), solid, *m_reserved_sm );
@@ -222,6 +258,8 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
     if ( Utils::is_current_scene( r, Cmp::SceneSettings::SceneId::CRYPT ) ) { kind = Cmp::Altar::Kind::CRYPT; }
     else if ( Utils::is_current_scene( r, Cmp::SceneSettings::SceneId::SHOP ) ) { kind = Cmp::Altar::Kind::SHOP; }
     r.patch<Cmp::Altar::MultiBlock>( altar_entt, [kind]( Cmp::Altar::MultiBlock &cmp ) { cmp.set_kind( kind ); } );
+    // the graveyard altar fills its blood quota before it activates
+    if ( kind == Cmp::Altar::Kind::GRAVEYARD ) { r.emplace_or_replace<Cmp::Altar::BloodCount>( altar_entt ); }
     return altar_entt;
   };
   const std::unordered_map<std::string, MultiblockFactoryFn> kMultiblockFactories{
@@ -495,15 +533,12 @@ void LevelGenerator::add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scen
 void LevelGenerator::gen_graveyard_exterior_multiblocks()
 {
   // const size_t grave_num_multiplier = Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() ).get_value();
-  // only one altar can be activated at a time, so more altars mean less backtracking, not more graves (see below)
-  const auto max_num_altars = static_cast<size_t>(
-      std::max( 1, static_cast<int>( Sys::PersistSystem::get<Cmp::Persist::NumAltars>( reg() ).get_value() ) ) );
   const size_t max_num_crypts = 1;
   // one healing building per level: either a healing spring or a barber surgeon
   const size_t max_num_healing_buildings = 1;
   const auto &min_num_ruins = Sys::PersistSystem::get<Cmp::Persist::MinNumRuins>( reg() );
 
-  // minimum clearance (in grid cells, both axes) between altars, crypts, healing springs and ruins
+  // minimum clearance (in grid cells, both axes) between the altar, crypts, healing springs and ruins
   constexpr int kMinBuildingSpacingCells = 10;
 
   // spawn-location lookup for the graves; a failure is reported once, by the grave count check
@@ -514,15 +549,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
     return random_origin_position;
   };
 
-  // ALTARS
-  const auto &altar1_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.altar.inactive" );
-  auto altar_mb_entts = spawn_multiblocks<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>( max_num_altars, altar1_spritesheet,
-                                                                                        /*log=*/true, kMinBuildingSpacingCells );
-  for ( auto entt : altar_mb_entts )
-  {
-    // every altar fills its blood quota before it activates
-    reg().emplace_or_replace<Cmp::Altar::BloodCount>( entt );
-  }
+  // the altar is not spawned here: graveyard.json places it, see build_scene_from_data()
 
   // CRYPTS - one crypt serves every grave trail's crypt key, whichever altar started it
   const auto &crypt_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.crypt.closed" );
