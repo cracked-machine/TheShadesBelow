@@ -514,7 +514,7 @@
   },
   "GraveOddsCurseTablet": {
     "type": "int",
-    "value": 10,
+    "value": 50,
     "min_value": 0,
     "max_value": 100,
     "detail": "Curse",
@@ -522,7 +522,7 @@
   },
   "GraveOddsBombTrap": {
     "type": "int",
-    "value": 30,
+    "value": 50,
     "min_value": 0,
     "max_value": 100,
     "detail": "Bomb",
@@ -530,7 +530,7 @@
   },
   "GraveOddsTorch": {
     "type": "int",
-    "value": 35,
+    "value": 50,
     "min_value": 0,
     "max_value": 100,
     "detail": "Torch",
@@ -538,7 +538,7 @@
   },
   "GraveOddsNpcTrap": {
     "type": "int",
-    "value": 40,
+    "value": 50,
     "min_value": 0,
     "max_value": 100,
     "detail": "NPC",
@@ -546,7 +546,7 @@
   },
   "GraveOddsArtefact": {
     "type": "int",
-    "value": 50,
+    "value": 10,
     "min_value": 0,
     "max_value": 100,
     "detail": "Artefact",
@@ -554,7 +554,7 @@
   },
   "GraveOddsTalisman": {
     "type": "int",
-    "value": 10,
+    "value": 1,
     "min_value": 0,
     "max_value": 100,
     "detail": "Talisman",

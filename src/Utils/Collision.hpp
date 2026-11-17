@@ -6,6 +6,7 @@
 #include <entt/entity/registry.hpp>
 
 #include <span>
+#include <type_traits>
 #include <vector>
 
 namespace Game::Utils::Collision
@@ -21,10 +22,22 @@ template <typename Component>
 bool any_intersects( entt::registry &reg, Cmp::RectBounds pos,
                      std::function<bool( const Component & )> filter = []( const Component & ) { return true; } )
 {
-  for ( auto [candidate_entt, candidate_cmp, candidate_pos] : reg.view<Component, Cmp::Position>().each() )
+  if constexpr ( std::is_empty_v<Component> )
   {
-    if ( not filter( candidate_cmp ) ) continue;
-    if ( pos.findIntersection( candidate_pos ) ) { return true; }
+    // empty tag components (e.g. Cmp::Player::NoPath) aren't yielded by each(), so pass a default instance to the filter
+    for ( auto [candidate_entt, candidate_pos] : reg.view<Component, Cmp::Position>().each() )
+    {
+      if ( not filter( Component{} ) ) continue;
+      if ( pos.findIntersection( candidate_pos ) ) { return true; }
+    }
+  }
+  else
+  {
+    for ( auto [candidate_entt, candidate_cmp, candidate_pos] : reg.view<Component, Cmp::Position>().each() )
+    {
+      if ( not filter( candidate_cmp ) ) continue;
+      if ( pos.findIntersection( candidate_pos ) ) { return true; }
+    }
   }
   return false;
 };

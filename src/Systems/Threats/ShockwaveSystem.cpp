@@ -5,6 +5,7 @@
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/NoPath.hpp>
 #include <Components/Player/TookDamage.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/UUID.hpp>
@@ -109,6 +110,12 @@ bool ShockwaveSystem::intersects_with_visible_segments( const Cmp::Npc::Shockwav
         for ( auto [obstacle_entt, obstacle_cmp, obstacle_pos_cmp] : reg().view<Cmp::Obstacle, Cmp::Position>().each() )
         {
           if ( sf::FloatRect( new_position, Constants::kGridSizePxF ).findIntersection( obstacle_pos_cmp ) ) is_valid = false;
+        }
+        // nor into anything else that blocks player movement (pots/loot containers, walls...) or they get stuck inside
+        if ( not Utils::Player::is_flying( reg() ) and
+             Utils::Collision::any_intersects<Cmp::Player::NoPath>( reg(), Cmp::RectBounds::scaled( new_position, Constants::kGridSizePxF, 1.f ) ) )
+        {
+          is_valid = false;
         }
         // nor into a lethal hazard cell (lava pit, sinkhole...) - that would bypass the balance window
         if ( not Utils::Player::is_flying( reg() ) and

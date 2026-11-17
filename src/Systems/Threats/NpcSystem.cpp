@@ -1440,6 +1440,9 @@ void NpcSystem::find_pushback_position( const Cmp::Direction &npc_direction, con
     if ( Utils::Collision::any_intersects<Cmp::Crypt::BuildingSegment>( reg(), rect ) ) return "BuildingSegment";
     if ( Utils::Collision::any_intersects<Cmp::Ruin::BuildingSegment>( reg(), rect ) ) return "BuildingSegment";
     if ( Utils::Collision::any_intersects<Cmp::Crypt::ObjectiveSegment>( reg(), rect ) ) return "ObjectiveSegment";
+    // catch-all for anything else that blocks player movement (e.g. pots/loot containers), otherwise the player
+    // can be knocked into it and left stuck inside
+    if ( Utils::Collision::any_intersects<Cmp::Player::NoPath>( reg(), rect ) ) return "NoPath";
     // never knock the player into a lethal hazard cell (lava pit, sinkhole...) - that would bypass the balance window
     if ( Utils::Collision::any_lethal_hazard( reg(), rect ) ) return "Hazard";
     return {};
