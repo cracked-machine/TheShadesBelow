@@ -2,8 +2,8 @@
 #define SRC_COMPONENTS_PLAYER_ARROWCOMPASS_HPP__
 
 #include <Components/Altar/Activated.hpp>
+#include <Components/Altar/BloodCount.hpp>
 #include <Components/Altar/MultiBlock.hpp>
-#include <Components/Altar/ArtefactCount.hpp>
 #include <Components/Crypt/Entrance.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
@@ -40,7 +40,7 @@ namespace Game::Cmp::Player
 //! @brief Caches the player's compass arrow state. The compass has several needles, each pointing at its own target:
 //!        - an "exit" needle, active while an exit key exists anywhere in the scene (world item or inventory)
 //!        - a "crypt" needle, active while a crypt key exists anywhere in the scene (world item or inventory)
-//!        - a "held" needle, driven by the item in the player's inventory slot (altar / artefact targets). Holding the
+//!        - a "held" needle, driven by the item in the player's inventory slot (altar / blood targets). Holding the
 //!          exit key also shows this needle, as it can be offered at an altar for the crypt key
 //!        Key needles are therefore shown whether or not the player holds the key, and turn off once the key is used
 //!        (destroyed). Target resolution is throttled via `m_retarget_timer`, which PlayerSystem advances each frame.
@@ -48,8 +48,8 @@ namespace Game::Cmp::Player
 struct ArrowCompass
 {
   //! @brief What a needle is pointing at.
-  //!        ARTEFACT points only at an altar that still needs the held artefact's group (most groups lit first, then nearest).
-  enum class Mode { NONE, EXIT, CRYPT, ALTAR, ARTEFACT };
+  //!        BLOOD points only at a graveyard altar still taking blood (fullest first, then nearest).
+  enum class Mode { NONE, EXIT, CRYPT, ALTAR, BLOOD };
 
   //! @brief One compass arrow: its target type, label, colour and resolved target.
   struct Needle
@@ -77,7 +77,7 @@ struct ArrowCompass
     sf::Vector2f direction;
   };
 
-  //! @brief Colour of the altar/artefact needle's label (matches sprite.graveyard.arrowcompass.altar)
+  //! @brief Colour of the altar/blood needle's label (matches sprite.graveyard.arrowcompass.altar)
   static constexpr sf::Color kAltarColor{ 200, 30, 30 };
   //! @brief Colour of the exit key needle's label (matches sprite.graveyard.arrowcompass.exit)
   static constexpr sf::Color kExitColor{ 0, 200, 0 };
@@ -102,13 +102,13 @@ struct ArrowCompass
     m_cached_item_type = item_type;
     m_cached_is_offerable = is_offerable;
 
-    m_cached_artefact_group = item_type.empty() ? std::nullopt : Sys::ItemStore::instance().get( item_type ).get_artefact_group();
+    m_cached_is_blood = not item_type.empty() and Sys::ItemStore::instance().get( item_type ).get_blood_reward() > 0;
 
     // the crypt key has its own needle; the (offerable) exit key falls through to point at the altar as well as the exit
     if ( item_type.contains( "cryptkey" ) )
       m_held.mode = Mode::NONE;
-    else if ( m_cached_artefact_group )
-      m_held.mode = Mode::ARTEFACT;
+    else if ( m_cached_is_blood )
+      m_held.mode = Mode::BLOOD;
     else if ( is_offerable or item_type.contains( "relic" ) )
       m_held.mode = Mode::ALTAR;
     else
@@ -135,8 +135,10 @@ struct ArrowCompass
 
     for ( Needle *needle : needles() )
     {
-      if ( needle->active ) resolve( *needle, reg, player_center );
-      else needle->target.reset();
+      if ( needle->active )
+        resolve( *needle, reg, player_center );
+      else
+        needle->target.reset();
     }
   }
 
@@ -159,7 +161,7 @@ struct ArrowCompass
   //! @return The edge point and the unit direction from the player to the target, or std::nullopt if the target is inside
   //!         the view-centered kTargetRegionScale region (i.e. the player can already see it)
   [[nodiscard]] static std::optional<std::pair<sf::Vector2f, sf::Vector2f>> edge_point( const sf::FloatRect &target, sf::Vector2f player_center,
-                                                                                         const sf::View &world_view, float left_inset = 0.f )
+                                                                                        const sf::View &world_view, float left_inset = 0.f )
   {
     // Only a reduced region centered in the view counts as "visible", so the indicator stays while the target is near
     // the screen edges or hidden behind the UI panels on the left.
@@ -279,19 +281,19 @@ private:
         { return Cmp::Position( altar_cmp.position, altar_cmp.size ); } );
         break;
       }
-      case Mode::ARTEFACT: {
-        // mirrors AltarSystem::offering_artefact(): once any altar is activated, no altar accepts artefacts
+      case Mode::BLOOD: {
+        // mirrors AltarSystem::offering_blood(): once any altar is activated, no altar accepts blood. An altar activates
+        // the moment its quota fills, so every other graveyard altar is still taking blood.
         needle.target.reset();
         if ( not reg.view<Cmp::Altar::Activated>().empty() ) break;
 
-        std::size_t best_count = 0;
+        int best_count = 0;
         float best_distance = std::numeric_limits<float>::max();
-        if ( not m_cached_artefact_group ) break;
-        for ( auto [altar_entt, altar_cmp, artefact_cmp] : reg.view<Cmp::Altar::MultiBlock, Cmp::Altar::ArtefactCount>().each() )
+        for ( auto [altar_entt, altar_cmp, blood_cmp] : reg.view<Cmp::Altar::MultiBlock, Cmp::Altar::BloodCount>().each() )
         {
-          if ( artefact_cmp.activated( *m_cached_artefact_group ) ) continue;
+          if ( altar_cmp.get_kind() != Cmp::Altar::Kind::GRAVEYARD ) continue;
           // prefer the altar closest to completion, then the nearest
-          const std::size_t count = artefact_cmp.count();
+          const int count = blood_cmp.value();
           const float distance = Utils::Maths::getEuclideanDistance( altar_cmp.position, player_center );
           if ( needle.target and ( count < best_count or ( count == best_count and distance >= best_distance ) ) ) continue;
           best_count = count;
@@ -332,13 +334,13 @@ private:
 
   Needle m_exit{ .mode = Mode::EXIT, .label = "exit", .sprite = "sprite.graveyard.arrowcompass.exit", .color = kExitColor };
   Needle m_crypt{ .mode = Mode::CRYPT, .label = "crypt", .sprite = "sprite.graveyard.arrowcompass.crypt", .color = kCryptColor };
-  //! @brief Altar and artefact targets share the altar arrow
+  //! @brief Altar and blood targets share the altar arrow
   Needle m_held{ .label = "altar", .sprite = "sprite.graveyard.arrowcompass.altar", .color = kAltarColor };
 
   Sys::ItemKey m_cached_item_type;
   bool m_cached_is_offerable{ false };
-  //! @brief The cached inventory item's artefact group, if it is an artefact
-  std::optional<Cmp::Altar::ArtefactGroup> m_cached_artefact_group;
+  //! @brief Whether the cached inventory item is a blood offering
+  bool m_cached_is_blood{ false };
   bool m_retarget_pending{ true };
 
   //! @brief Frequency of the sine wave for the arrow's pulsing scale

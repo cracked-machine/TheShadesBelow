@@ -1,3 +1,6 @@
+#include <Components/Altar/Activated.hpp>
+#include <Components/Altar/BloodCount.hpp>
+#include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Crypt/ShuffleTimer.hpp>
 #include <Components/Grave/Consequence.hpp>
@@ -14,6 +17,7 @@
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/NoRender.hpp>
+#include <Components/Persistent/AltarBloodQuota.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/StatChangeDisplayDuration.hpp>
@@ -33,8 +37,8 @@
 #include <Components/Toxicity/Toxidrome.hpp>
 #include <Components/Toxicity/Venom.hpp>
 #include <Components/Toxicity/Vertigo.hpp>
-#include <Components/Wall.hpp>
 #include <Components/UUID.hpp>
+#include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <SFML/System/Time.hpp>
@@ -56,8 +60,6 @@
 #include <Utils/Utils.hpp>
 
 #include <SFML/Graphics/Color.hpp>
-#include <imgui-SFML.h>
-#include <imgui.h>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <algorithm>
@@ -65,6 +67,8 @@
 #include <cmath>
 #include <filesystem>
 #include <format>
+#include <imgui-SFML.h>
+#include <imgui.h>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -90,6 +94,8 @@ void HudOverlaySystem::update( sf::Time dt )
   // the meters (with their frost) and the texts share one ImGui window, texts submitted last so they draw over the
   // meters. ImGui renders after every SFML draw, so nothing SFML can be drawn over these.
   begin_overlay_window( "##hud_meters" );
+  // first, so the HUD draws over the altar meters
+  PROFILED( render_altar_blood_meters() );
   PROFILED( render_ui_meters( dt ) );
   PROFILED( render_ui_labels( dt ) );
   PROFILED( render_ui_texts() );
@@ -544,8 +550,7 @@ bool HudOverlaySystem::load_frost_shader()
   return *m_frost_shader_ok;
 }
 
-void HudOverlaySystem::render_meter_frost( const std::string &meter_name, const sf::FloatRect &rect, float seed, sf::Color frost,
-                                           sf::Color glint )
+void HudOverlaySystem::render_meter_frost( const std::string &meter_name, const sf::FloatRect &rect, float seed, sf::Color frost, sf::Color glint )
 {
   // ImGui draws after every SFML draw, so the frost is rendered into the meter's own texture and shown with ImGui::Image
   // over the meter's ProgressBar. One texture per meter: ImGui only reads them when the frame is rendered.
@@ -641,8 +646,8 @@ void HudOverlaySystem::render_ui_labels( sf::Time dt )
     // flash the text if we just deposited something in a well
     if ( ui_label.name == "wealth_label" and update_flash_toggle<Cmp::FlashUIWealth>( dt ) ) { outline = sf::Color::White; }
 
-    draw_text( text_str, static_cast<float>( ui_label.font_size ), ui_label.rect.position, sf::Color::White, to_text_align( ui_label.align ),
-               outline, 2.f * hud_scale() );
+    draw_text( text_str, static_cast<float>( ui_label.font_size ), ui_label.rect.position, sf::Color::White, to_text_align( ui_label.align ), outline,
+               2.f * hud_scale() );
   }
 }
 
@@ -717,6 +722,42 @@ void HudOverlaySystem::render_level_depth()
   end_overlay_window();
 }
 
+void HudOverlaySystem::render_altar_blood_meters()
+{
+  // the meter's size in world pixels, centred on the altar
+  constexpr sf::Vector2f kMeterWorldSize{ 6.f, 28.f };
+  constexpr float kMeterWorldOutline = 1.f;
+  const sf::Color kMeterFill( 200, 16, 16, 255 );
+  const sf::Color kMeterBackground( 0, 0, 0, 160 );
+  const sf::Color kMeterOutline( 64, 64, 64, 255 );
+
+  const int quota = Sys::PersistSystem::get<Cmp::Persist::AltarBloodQuota>( reg() ).get_value();
+  const sf::View &world_view = Sys::RenderSystem::get_world_view();
+  // ImGui draws in window pixels
+  const float px_per_world_unit = static_cast<float>( m_window.getSize().y ) / world_view.getSize().y;
+  ImDrawList *draw_list = ImGui::GetWindowDrawList();
+  for ( auto [altar_entt, altar_cmp, blood_cmp] : reg().view<Cmp::Altar::MultiBlock, Cmp::Altar::BloodCount>().each() )
+  {
+    if ( altar_cmp.get_kind() != Cmp::Altar::Kind::GRAVEYARD ) continue;
+    if ( reg().all_of<Cmp::Altar::Activated>( altar_entt ) ) continue;
+    if ( not Utils::is_visible_in_view( world_view, altar_cmp ) ) continue;
+
+    const sf::Vector2f world_top_left = altar_cmp.getCenter() - ( kMeterWorldSize / 2.f );
+    const sf::Vector2f top_left( m_window.mapCoordsToPixel( world_top_left, world_view ) );
+    const sf::Vector2f bottom_right( m_window.mapCoordsToPixel( world_top_left + kMeterWorldSize, world_view ) );
+    const float fill_top = bottom_right.y - ( ( bottom_right.y - top_left.y ) * blood_cmp.fraction( quota ) );
+
+    draw_list->AddRectFilled( ImVec2( top_left.x, top_left.y ), ImVec2( bottom_right.x, bottom_right.y ),
+                              ImGui::GetColorU32( to_imvec4( kMeterBackground ) ) );
+    if ( fill_top < bottom_right.y )
+    {
+      draw_list->AddRectFilled( ImVec2( top_left.x, fill_top ), ImVec2( bottom_right.x, bottom_right.y ),
+                                ImGui::GetColorU32( to_imvec4( kMeterFill ) ) );
+    }
+    draw_list->AddRect( ImVec2( top_left.x, top_left.y ), ImVec2( bottom_right.x, bottom_right.y ), ImGui::GetColorU32( to_imvec4( kMeterOutline ) ),
+                        0.f, 0, kMeterWorldOutline * px_per_world_unit );
+  }
+}
 
 void HudOverlaySystem::render_ghost_grave_halos()
 {

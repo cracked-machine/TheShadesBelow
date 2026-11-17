@@ -1,6 +1,6 @@
+#include <Components/Altar/BloodCount.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Altar/Segment.hpp>
-#include <Components/Altar/ArtefactCount.hpp>
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/BuildingSegment.hpp>
 #include <Components/Crypt/InteriorMultiBlock.hpp>
@@ -25,18 +25,19 @@
 #include <Components/Npc/Footprint.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/ObstacleCap.hpp>
-#include <Components/Persistent/ArtefactMinChance.hpp>
+#include <Components/Persistent/AltarBloodQuota.hpp>
+#include <Components/Persistent/BloodMinChance.hpp>
 #include <Components/Persistent/GraveCountMargin.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
-#include <Components/Persistent/GraveOddsArtefact.hpp>
+#include <Components/Persistent/GraveOddsBlood.hpp>
 #include <Components/Persistent/GraveOddsBombTrap.hpp>
 #include <Components/Persistent/GraveOddsCurseTablet.hpp>
 #include <Components/Persistent/GraveOddsNpcTrap.hpp>
 #include <Components/Persistent/GraveOddsTalisman.hpp>
 #include <Components/Persistent/GraveOddsTorch.hpp>
 #include <Components/Persistent/GraveTrailNominalHopCount.hpp>
-#include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/HealingBuildingOverride.hpp>
+#include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/NumAltars.hpp>
 #include <Components/Player/Cadaver.hpp>
@@ -44,7 +45,6 @@
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
-#include <Components/UUID.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/Ruin/BuildingMultiBlock.hpp>
 #include <Components/Ruin/BuildingSegment.hpp>
@@ -66,6 +66,7 @@
 #include <Components/Spring/HealingSpringEntrance.hpp>
 #include <Components/Spring/HealingSpringMultiBlock.hpp>
 #include <Components/Spring/HealingSpringSegment.hpp>
+#include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateItemEvent.hpp>
@@ -518,8 +519,8 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
                                                                                         /*log=*/true, kMinBuildingSpacingCells );
   for ( auto entt : altar_mb_entts )
   {
-    // every altar takes one artefact of each group
-    reg().emplace_or_replace<Cmp::Altar::ArtefactCount>( entt );
+    // every altar fills its blood quota before it activates
+    reg().emplace_or_replace<Cmp::Altar::BloodCount>( entt );
   }
 
   // CRYPTS - one crypt serves every grave trail's crypt key, whichever altar started it
@@ -567,9 +568,27 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
     // sized per cadaver part, not per altar: each part takes one altar activation and one trail, whichever altar is used.
     // Sized for the longest trail of the run, at the deepest level
     const auto max_level_depth = static_cast<size_t>( std::max( 1, Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value() ) );
-    const size_t altar_activation_count = Cmp::Altar::ArtefactCount::size();
-    // trail graves skip their consequence, so each altar activation's artefacts are dug from graves off the trail.
-    // Sized for the worst case: the artefact chance never drops below Cmp::Persist::ArtefactMinChance
+    // the blood drops one altar activation needs on average: a blood grave picks evenly from every blood item (see
+    // GraveSystem::spawn_blood_loot()), so each drop adds the items' mean blood
+    size_t blood_reward_total = 0;
+    size_t blood_item_count = 0;
+    for ( const auto &item_key : Sys::ItemStore::instance().get_all() )
+    {
+      const int blood = Sys::ItemStore::instance().get( item_key ).get_blood_reward();
+      if ( blood <= 0 ) continue;
+      blood_reward_total += static_cast<size_t>( blood );
+      blood_item_count++;
+    }
+    if ( blood_item_count == 0 )
+    {
+      SPDLOG_WARN( "No item in items.json has an offering_action blood reward: altars cannot be activated" );
+      blood_reward_total = 1;
+      blood_item_count = 1;
+    }
+    const auto blood_quota = static_cast<size_t>( std::max( 1, Sys::PersistSystem::get<Cmp::Persist::AltarBloodQuota>( reg() ).get_value() ) );
+    // quota / mean reward, rounded up: quota * count / total
+    const size_t blood_drops_per_activation = ( blood_quota * blood_item_count + blood_reward_total - 1 ) / blood_reward_total;
+    // trail graves skip their consequence, so each altar activation's blood is dug from graves off the trail
     // the odds line is fixed per level, so settings changes take effect from the next level
     using Slot = Cmp::Grave::Consequence::Slot;
     using ConsequenceType = Cmp::Grave::Consequence::Type;
@@ -578,27 +597,29 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
         Slot{ .type = ConsequenceType::BOMB_TRAP, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsBombTrap>( reg() ).get_value() },
         Slot{ .type = ConsequenceType::TORCH, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsTorch>( reg() ).get_value() },
         Slot{ .type = ConsequenceType::NPC_TRAP, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsNpcTrap>( reg() ).get_value() },
-        Slot{ .type = ConsequenceType::ARTEFACT, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsArtefact>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::BLOOD, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsBlood>( reg() ).get_value() },
         Slot{ .type = ConsequenceType::TALISMAN, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsTalisman>( reg() ).get_value() },
     } );
-    // Consequence caps the floor at the artefact band width, so size for the capped value
-    int max_artefact_floor_pct = Cmp::Grave::Consequence::max_artefact_floor_pct( consequence_line );
-    if ( max_artefact_floor_pct < 1 )
+    // Consequence caps the floor at the blood band width, so size for the capped value
+    int max_blood_floor_pct = Cmp::Grave::Consequence::max_blood_floor_pct( consequence_line );
+    if ( max_blood_floor_pct < 1 )
     {
-      SPDLOG_WARN( "Grave odds leave no band for artefacts (width {}): the artefact min chance cannot be guaranteed", max_artefact_floor_pct );
-      max_artefact_floor_pct = 1;
+      SPDLOG_WARN( "Grave odds leave no band for blood (width {}): the blood min chance cannot be guaranteed", max_blood_floor_pct );
+      max_blood_floor_pct = 1;
     }
-    const int min_artefact_chance_pct = std::clamp( Sys::PersistSystem::get<Cmp::Persist::ArtefactMinChance>( reg() ).get_value(), 1,
-                                                    max_artefact_floor_pct );
-    const auto min_artefact_chance = static_cast<size_t>( min_artefact_chance_pct );
-    const size_t artefact_graves = ( altar_activation_count * 100 + min_artefact_chance - 1 ) / min_artefact_chance;
+    const int min_blood_chance_pct = std::clamp( Sys::PersistSystem::get<Cmp::Persist::BloodMinChance>( reg() ).get_value(), 1, max_blood_floor_pct );
+    // sized for the blood chance at neutral luck, the width of the blood band; Cmp::Persist::BloodMinChance only floors
+    // the chance for very unlucky players, which GraveCountMargin covers
+    const auto blood_chance = static_cast<size_t>( max_blood_floor_pct );
+    const size_t blood_graves = ( blood_drops_per_activation * 100 + blood_chance - 1 ) / blood_chance;
     const size_t trail_graves = ( trail_size + max_level_depth ) * exit_and_crypt_key_multiplier + trail_start_count;
-    const size_t base_num_graves = ( trail_graves + artefact_graves ) * max_cadaver_count;
-    // the artefact graves above are only the average needed, and bombs blast graves open, so add a margin on top
+    const size_t base_num_graves = ( trail_graves + blood_graves ) * max_cadaver_count;
+    // the blood graves above are only the average needed (luck and the small/large mix vary it), and bombs blast graves
+    // open, so add a margin on top
     const auto margin_pct = static_cast<size_t>( std::max( 0, Sys::PersistSystem::get<Cmp::Persist::GraveCountMargin>( reg() ).get_value() ) );
     const size_t required_num_graves = ( base_num_graves * ( 100 + margin_pct ) + 99 ) / 100;
-    SPDLOG_INFO( "Graves required: {} = ({} trail + {} artefact per cadaver part) x {} parts + {}% margin", required_num_graves, trail_graves,
-                 artefact_graves, max_cadaver_count, margin_pct );
+    SPDLOG_INFO( "Graves required: {} = ({} trail + {} blood ({} drops at {}%) per cadaver part) x {} parts + {}% margin", required_num_graves,
+                 trail_graves, blood_graves, blood_drops_per_activation, blood_chance, max_cadaver_count, margin_pct );
 
     std::map<Cmp::Grave::Consequence::Type, int> grave_consequences_distribution;
     std::size_t placed_num_graves = 0;
@@ -615,7 +636,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
           reg(), pos->position, spritesheet, index, 0, m_reserved_sm.get() );
       m_reserved_sm->insert( mb_entt, pos.value() );
       // fix the roll at creation; the consequence is resolved against the player's current luck when needed
-      auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 100 ).gen(), min_artefact_chance_pct,
+      auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 100 ).gen(), min_blood_chance_pct,
                                                                              consequence_line );
       // simulate the rolls now to get an idea of the distribution with game start player luck
       grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck() )]++;

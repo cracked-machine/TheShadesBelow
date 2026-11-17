@@ -1109,8 +1109,8 @@
                                 "sfx": { "final": "shrine_lighting" } }}
     ]
   },
-  "item.artefact.treasure": {
-    "sprite": { "name": "sprite.item.artefact.treasure", "random": true },
+  "item.grave.blood.small": {
+    "sprite": { "name": "sprite.grave.blood.small", "index": 0 },
     "consumable": "none",
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
@@ -1120,13 +1120,13 @@
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "Artefact", "group": "Treasure" }, 
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
+                                "reward": { "altar": "Blood", "blood": 5, "location": "Graveyard" },
                                 "sfx": { "final": "shrine_lighting" } }}
     ]
   },
-  "item.artefact.likeness": {
-    "sprite": { "name": "sprite.item.artefact.likeness", "random": true },
+  "item.grave.blood.large": {
+    "sprite": { "name": "sprite.grave.blood.large", "index": 0 },
     "consumable": "none",
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
@@ -1136,40 +1136,8 @@
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "Artefact", "group": "Likeness" }, 
-                                "sfx": { "final": "shrine_lighting" } }}
-    ]
-  },
-  "item.artefact.name": {
-    "sprite": { "name": "sprite.item.artefact.name", "random": true },
-    "consumable": "none",
-    "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
-    "actions": [
-      { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
-      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "Artefact", "group": "Name" }, 
-                                "sfx": { "final": "shrine_lighting" } }}
-    ]
-  },
-  "item.artefact.words": {
-    "sprite": { "name": "sprite.item.artefact.words", "random": true },
-    "consumable": "none",
-    "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
-    "actions": [
-      { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
-      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "Artefact", "group": "Words" }, 
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
+                                "reward": { "altar": "Blood", "blood": 10, "location": "Graveyard" },
                                 "sfx": { "final": "shrine_lighting" } }}
     ]
   },

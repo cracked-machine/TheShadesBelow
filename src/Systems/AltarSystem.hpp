@@ -1,7 +1,6 @@
 #ifndef SRC_SYSTEMS_ALTARSYSTEM_HPP__
 #define SRC_SYSTEMS_ALTARSYSTEM_HPP__
 
-#include <Components/Altar/ArtefactGroup.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
@@ -30,17 +29,17 @@ public:
   void update( sf::Time dt );
 
 private:
-  //! @brief Capture Events::PlayerActionEvent::GameActions::ACTIVATE. Calls check_player_altar_offering(), then
-  //! try_activate_altar() if nothing was offered.
+  //! @brief Capture Events::PlayerActionEvent::GameActions::ACTIVATE. Calls check_player_altar_offering() for the
+  //! altar the player is near.
   void on_player_action( Events::PlayerActionEvent ev );
 
-  //! @brief Capture Events::GraveTrailCompleteEvent. Resets the activated altar: puts out its corner lights and centre
-  //! column, reverts its inactive sprite, clears its Cmp::Altar::ArtefactCount and removes Cmp::Altar::Activated, so it
-  //! (or any other altar) takes four artefacts again.
+  //! @brief Capture Events::GraveTrailCompleteEvent. Resets the activated altar: puts out its centre column, reverts its
+  //! inactive sprite, empties its Cmp::Altar::BloodCount and removes Cmp::Altar::Activated, so it (or any other altar)
+  //! takes its blood quota again.
   void on_grave_trail_complete( const Events::GraveTrailCompleteEvent &event );
 
   //! @brief Send Events::AltarApproachedEvent on the frame the player comes near a graveyard altar still waiting for
-  //! artefacts. Once per approach: the player must leave every such altar before it is sent again.
+  //! blood. Once per approach: the player must leave every such altar before it is sent again.
   void check_player_approached_altar();
 
   //! @brief Rewards player for offering various items at the altar
@@ -49,18 +48,15 @@ private:
   //! @return true if the held item was offered (consumed), false if there was nothing to offer or the altar refused it
   bool check_player_altar_offering( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp );
 
-  //! @brief Activate a graveyard altar that has every artefact group offered, if the player can pay
-  //! Cmp::Persist::AltarActivationAnimaCost: lights its centre column, marks it Cmp::Altar::Activated and sends
-  //! Events::AltarActivatedEvent so GraveSystem starts the grave trail. Without enough anima, flashes the anima meter
-  //! and sends Events::AltarActivationAnimaEvent instead.
-  //! @note Does nothing if the altar is missing artefacts, an altar is already activated, or the offering cooldown is running.
-  void try_activate_altar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp );
+  //! @brief Activate a graveyard altar whose blood quota is filled: lights its centre column, marks it
+  //! Cmp::Altar::Activated and sends Events::AltarActivatedEvent so GraveSystem starts the grave trail.
+  void activate_graveyard_altar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
 
   //! @brief Grant the item's "offering_action.reward" for this altar's location (see items.json). An item with no reward
   //! (e.g. one that only spawns an NPC) just plays the default offering animation.
   //! @return false if this altar won't accept the offering in its current state, so the item must not be consumed
   bool grant_offering_reward( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid,
-                               const std::optional<Cmp::ActionReward> &reward );
+                              const std::optional<Cmp::ActionReward> &reward );
 
   //! @brief The animation played above the altar following an offering
   enum class OfferingAnimType { DEFAULT, KEY };
@@ -69,7 +65,7 @@ private:
   //! reward's target. Call once the offering has left the inventory.
   //! @param on_created Optional callback receiving each item dropped in the world, e.g. to bind it to a summoned NPC.
   void offering_for_item( const Cmp::Altar::MultiBlock &altar_cmp, const Cmp::ActionReward &reward,
-                           const std::function<void( entt::entity )> &on_created = {} );
+                          const std::function<void( entt::entity )> &on_created = {} );
   //! @brief Swap the item for its "offering_action.reward.wealth" (see items.json), e.g. jewelry or worn out tools
   void offering_for_wealth( const Cmp::Altar::MultiBlock &altar_cmp, int wealth );
   //! @brief Grant the player Cmp::Player::ToxicImmunity for "offering_action.reward.tick" seconds (see items.json), e.g. St John's Wort
@@ -79,10 +75,10 @@ private:
   //! @brief Grant the player a Cmp::Player::ExtraLife at the crypt altar: lights the altar, respawn at the crypt start.
   //! @return false if the altar refused the offering, e.g. the player already has an extra life, or it is not the crypt altar
   bool offering_for_extra_life( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
-  //! @brief Light the altar corner for the offered artefact's group. Once every corner is lit the player can activate
-  //! the altar, see try_activate_altar().
-  //! @return false if the altar refused the offering, e.g. that group is already lit or another altar is activated
-  bool offering_artefact( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid, Cmp::Altar::ArtefactGroup group );
+  //! @brief Add the offered blood to the altar's Cmp::Altar::BloodCount. The offering that fills
+  //! Cmp::Persist::AltarBloodQuota activates the altar, see activate_graveyard_altar().
+  //! @return false if the altar refused the offering, e.g. it is not a graveyard altar or an altar is already activated
+  bool offering_blood( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid, int blood );
   //! @brief Accept the exit key in exchange for the crypt key, at any graveyard altar whether activated or not. The exit
   //! key's (negative) offering anima is its cost. check_player_altar_offering() puts the crypt key in the player's hand
   //! once the exit key has been destroyed.
@@ -103,7 +99,7 @@ private:
   //! @brief Play the offering animation/sound above the altar and start the activation cooldown
   void play_offering_anim( const Cmp::Altar::MultiBlock &altar_cmp, OfferingAnimType offering_anim_type );
 
-  //! @brief Whether the player was near a graveyard altar waiting for artefacts last frame, see check_player_approached_altar()
+  //! @brief Whether the player was near a graveyard altar waiting for blood last frame, see check_player_approached_altar()
   bool m_player_near_altar{ false };
 };
 

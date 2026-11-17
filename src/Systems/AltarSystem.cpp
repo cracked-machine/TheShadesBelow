@@ -2,7 +2,7 @@
 #include <Components/AbsoluteAlpha.hpp>
 #include <Components/Altar/Activated.hpp>
 #include <Components/Altar/AltarActivationTimer.hpp>
-#include <Components/Altar/ArtefactCount.hpp>
+#include <Components/Altar/BloodCount.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Altar/Offering.hpp>
 #include <Components/Altar/Segment.hpp>
@@ -20,7 +20,7 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/SummonOffering.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
-#include <Components/Persistent/AltarActivationAnimaCost.hpp>
+#include <Components/Persistent/AltarBloodQuota.hpp>
 #include <Components/Persistent/AltarOfferingCooldown.hpp>
 #include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
 #include <Components/Player/Character.hpp>
@@ -45,9 +45,8 @@
 #include <Components/ZOrderValue.hpp>
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/AltarActivatedEvent.hpp>
-#include <Events/AltarActivationAnimaEvent.hpp>
 #include <Events/AltarApproachedEvent.hpp>
-#include <Events/ArtefactRefusedEvent.hpp>
+#include <Events/BloodRefusedEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/GraveTrailCompleteEvent.hpp>
@@ -85,18 +84,17 @@ AltarSystem::AltarSystem( entt::registry &reg, sf::RenderWindow &window, Audio::
 
 void AltarSystem::on_grave_trail_complete( [[maybe_unused]] const Events::GraveTrailCompleteEvent &event )
 {
-  // reset the activated altar to unlit, so it takes its four artefacts again for another trail
-  for ( auto [altar_entt, artefact_cmp, altar_uuid] : reg().view<Cmp::Altar::Activated, Cmp::Altar::ArtefactCount, Cmp::UUID>().each() )
+  // reset the activated altar to unlit, so it takes its blood quota again for another trail
+  for ( auto [altar_entt, blood_cmp, altar_uuid] : reg().view<Cmp::Altar::Activated, Cmp::Altar::BloodCount, Cmp::UUID>().each() )
   {
-    artefact_cmp.reset();
-    // put out its corner lights and centre column; an extra life's particles on the same altar are left alone.
+    blood_cmp.reset();
+    // put out its centre column; an extra life's particles on the same altar are left alone.
     // Collected first, so the particle view is not modified while it is iterated
     std::vector<entt::entity> particle_entts;
     for ( auto [particle_entt, particle_cmp, particle_uuid] : reg().view<Cmp::Particle::SpriteOwner, Cmp::UUID>().each() )
     {
       if ( particle_uuid != altar_uuid ) continue;
-      const auto tag = particle_cmp.sprite->get_tag();
-      if ( tag != Factory::Altar::kCandleFlameParticleTag and tag != Factory::Altar::kActivatedParticleTag ) continue;
+      if ( particle_cmp.sprite->get_tag() != Factory::Altar::kActivatedParticleTag ) continue;
       particle_entts.push_back( particle_entt );
     }
     reg().destroy( particle_entts.begin(), particle_entts.end() );
@@ -118,9 +116,7 @@ void AltarSystem::on_player_action( Events::PlayerActionEvent ev )
     if ( not Utils::Player::is_player_near( reg(), altar_cmp ) ) continue;
 
     SPDLOG_DEBUG( "Player collided with Altar at ({}, {})", altar_cmp.position.x, altar_cmp.position.y );
-    // whatever the player holds, an altar with every artefact offered can be activated, unless the press was spent
-    // on an offering
-    if ( not check_player_altar_offering( altar_entity, altar_cmp ) ) try_activate_altar( altar_entity, altar_cmp );
+    check_player_altar_offering( altar_entity, altar_cmp );
   }
 }
 
@@ -141,11 +137,13 @@ void AltarSystem::update( sf::Time dt )
 
 void AltarSystem::check_player_approached_altar()
 {
-  // only a graveyard altar still waiting for artefacts asks for them
+  // only a graveyard altar still waiting for blood asks for it
   std::optional<sf::FloatRect> near_altar;
-  for ( auto [altar_entt, altar_cmp, artefact_cmp] : reg().view<Cmp::Altar::MultiBlock, Cmp::Altar::ArtefactCount>().each() )
+  const int quota = Sys::PersistSystem::get<Cmp::Persist::AltarBloodQuota>( reg() ).get_value();
+  for ( auto [altar_entt, altar_cmp, blood_cmp] : reg().view<Cmp::Altar::MultiBlock, Cmp::Altar::BloodCount>().each() )
   {
-    if ( altar_cmp.get_kind() != Cmp::Altar::Kind::GRAVEYARD or artefact_cmp.all_lit() ) continue;
+    if ( altar_cmp.get_kind() != Cmp::Altar::Kind::GRAVEYARD or reg().all_of<Cmp::Altar::Activated>( altar_entt ) or blood_cmp.is_full( quota ) )
+      continue;
     if ( Utils::Player::is_player_near( reg(), altar_cmp ) )
     {
       near_altar = sf::FloatRect( altar_cmp.position, altar_cmp.size );
@@ -246,9 +244,8 @@ bool AltarSystem::grant_offering_reward( entt::entity altar_entity, Cmp::Altar::
   using AltarEffect = Cmp::ActionReward::AltarEffect;
   switch ( reward->altar )
   {
-    case AltarEffect::ARTEFACT:
-      if ( not reward->artefact_group ) return false;
-      return offering_artefact( altar_entity, altar_cmp, altar_uuid, *reward->artefact_group );
+    case AltarEffect::BLOOD:
+      return offering_blood( altar_entity, altar_cmp, altar_uuid, reward->blood );
     case AltarEffect::BANISH:
       offering_for_banish( altar_cmp );
       return true;
@@ -331,87 +328,38 @@ bool AltarSystem::offering_for_extra_life( entt::entity altar_entity, const Cmp:
   return true;
 }
 
-bool AltarSystem::offering_artefact( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid,
-                                     Cmp::Altar::ArtefactGroup group )
+bool AltarSystem::offering_blood( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid, int blood )
 {
-  auto *artefact_cmp = reg().try_get<Cmp::Altar::ArtefactCount>( altar_entity );
-  if ( not artefact_cmp ) return false;
-
-  auto *anim_cmp = reg().try_get<Cmp::AnimData>( altar_entity );
-  if ( not anim_cmp ) return false;
-  // the corner light offsets are defined on the inactive sprite
-  const Sys::SpriteKey inactive_sprite_type = Factory::Altar::get_altar_sprite( anim_cmp->m_sprite_type, false );
-  if ( inactive_sprite_type == anim_cmp->m_sprite_type and not inactive_sprite_type.str().ends_with( ".inactive" ) )
-  {
-    SPDLOG_WARN( "Altar sprite {} has no active/inactive variant", inactive_sprite_type.str() );
-    return false;
-  }
+  if ( altar_cmp.get_kind() != Cmp::Altar::Kind::GRAVEYARD ) return false;
+  auto *blood_cmp = reg().try_get<Cmp::Altar::BloodCount>( altar_entity );
+  if ( not blood_cmp ) return false;
 
   auto [_, item_type, _] = Utils::Player::get_inventory( reg() );
   if ( item_type.empty() ) return false;
-  const Sys::ItemKey artefact_key( item_type );
 
-  // once an altar is activated its grave trail must be completed first, so no altar takes artefacts until then
+  // once an altar is activated its grave trail must be completed first, so no altar takes blood until then
   if ( not reg().view<Cmp::Altar::Activated>().empty() )
   {
     SPDLOG_INFO( "An altar is already activated, refusing {} until its grave trail is complete", item_type );
-    get_systems_event_queue().trigger( Events::ArtefactRefusedEvent( artefact_key, sf::FloatRect( altar_cmp.position, altar_cmp.size ) ) );
+    get_systems_event_queue().trigger( Events::BloodRefusedEvent( Sys::ItemKey( item_type ), sf::FloatRect( altar_cmp.position, altar_cmp.size ) ) );
     return false;
   }
-  // only one artefact of each group
-  if ( artefact_cmp->activated( group ) ) return false;
 
-  artefact_cmp->activate( group );
-  SPDLOG_INFO( "Offered {} for {} ({} of {})", item_type, Cmp::Altar::to_string( group ), artefact_cmp->count(), artefact_cmp->size() );
-
-  // the group picks its corner light, whatever order the artefacts are offered in
-  const std::size_t flame_idx = Cmp::Altar::ArtefactCount::index( group );
-  const auto &flame_offsets = Sys::SpriteStore::instance().get( inactive_sprite_type ).particle_offsets();
-  if ( flame_idx < flame_offsets.size() )
-  {
-    sf::Vector2f flame_ps_pos = altar_cmp.position + flame_offsets[flame_idx];
-    Factory::Particle::add_flame( m_reg, Factory::Altar::kCandleFlameParticleTag, altar_uuid, flame_ps_pos, 5000, Cmp::Particle::kAltarScalePreset );
-  }
-  else { SPDLOG_WARN( "{} has no particle_offsets entry for artefact index {}", inactive_sprite_type.str(), flame_idx ); }
+  const int quota = Sys::PersistSystem::get<Cmp::Persist::AltarBloodQuota>( reg() ).get_value();
+  blood_cmp->add( blood, quota );
+  SPDLOG_INFO( "Offered {} for {} blood ({} of {})", item_type, blood, blood_cmp->value(), quota );
   play_offering_anim( altar_cmp, OfferingAnimType::DEFAULT );
+
+  if ( blood_cmp->is_full( quota ) ) activate_graveyard_altar( altar_entity, altar_cmp, altar_uuid );
   return true;
 }
 
-void AltarSystem::try_activate_altar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp )
+void AltarSystem::activate_graveyard_altar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
 {
-  if ( altar_cmp.get_kind() != Cmp::Altar::Kind::GRAVEYARD ) return;
-  const auto *artefact_cmp = reg().try_get<Cmp::Altar::ArtefactCount>( altar_entity );
-  if ( not artefact_cmp or not artefact_cmp->all_lit() ) return;
-  // only one grave trail at a time
-  if ( not reg().view<Cmp::Altar::Activated>().empty() ) return;
-  // the same cooldown as an offering, so the press that offers the last artefact doesn't also activate the altar
-  if ( const auto *altar_timer = reg().try_get<Cmp::Altar::ActivationTimer>( Utils::Player::get_entity( reg() ) );
-       altar_timer and *altar_timer < sf::seconds( Sys::PersistSystem::get<Cmp::Persist::AltarOfferingCooldown>( reg() ).get_value() ) )
-  {
-    return;
-  }
-  auto *altar_uuid_cmp = reg().try_get<Cmp::UUID>( altar_entity );
-  if ( not altar_uuid_cmp ) throw std::runtime_error( "Altar does not have UUID" );
-
-  auto &stats = Utils::Player::get_stats( reg() );
-  const int anima_cost = Sys::PersistSystem::get<Cmp::Persist::AltarActivationAnimaCost>( reg() ).get_value();
-  if ( stats.anima() < anima_cost )
-  {
-    SPDLOG_INFO( "Not enough anima to activate the altar (need {}, have {})", anima_cost, stats.anima() );
-    // signal UI to flash the anima meter and explain why
-    reg().emplace_or_replace<Cmp::FlashUIAnima>( reg().create() );
-    get_systems_event_queue().trigger( Events::AltarActivationAnimaEvent{ sf::FloatRect( altar_cmp.position, altar_cmp.size ) } );
-    // so a held ACTIVATE doesn't repeat the refusal every frame
-    reg().emplace_or_replace<Cmp::Altar::ActivationTimer>( Utils::Player::get_entity( reg() ) );
-    return;
-  }
-  stats.apply( { {}, {}, {}, {}, {}, Cmp::Stats::Anima{ -anima_cost }, {} } );
-
   // light the centre column
-  activate_altar( altar_entity, altar_cmp, *altar_uuid_cmp, Factory::Altar::kActivatedParticleTag );
+  activate_altar( altar_entity, altar_cmp, altar_uuid, Factory::Altar::kActivatedParticleTag );
   reg().emplace_or_replace<Cmp::Altar::Activated>( altar_entity );
-  play_offering_anim( altar_cmp, OfferingAnimType::DEFAULT );
-  SPDLOG_INFO( "Altar {} activated for {} anima", static_cast<uint32_t>( altar_entity ), anima_cost );
+  SPDLOG_INFO( "Altar {} activated", static_cast<uint32_t>( altar_entity ) );
   // GraveSystem picks the trail start graves that TrailGuideSystem then guides the player to
   get_systems_event_queue().trigger( Events::AltarActivatedEvent{ Cmp::Position( altar_cmp.position, altar_cmp.size ) } );
 }

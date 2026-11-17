@@ -52,8 +52,10 @@ GrimoireOverlaySystem::GrimoireOverlaySystem( entt::registry &reg, sf::RenderWin
   std::ignore = get_systems_event_queue().sink<Events::OverlayEvent>().connect<&GrimoireOverlaySystem::on_overlay_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::ItemPickedUpEvent>().connect<&GrimoireOverlaySystem::on_item_pickup_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::AddInventoryEvent>().connect<&GrimoireOverlaySystem::on_add_inventory_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::GrimoireItemUpdateEvent>().connect<&GrimoireOverlaySystem::on_grimoire_item_update_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::GrimoireNpcUpdateEvent>().connect<&GrimoireOverlaySystem::on_grimoire_npc_update_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::GrimoireItemUpdateEvent>().connect<&GrimoireOverlaySystem::on_grimoire_item_update_event>(
+      this );
+  std::ignore = get_systems_event_queue().sink<Events::GrimoireNpcUpdateEvent>().connect<&GrimoireOverlaySystem::on_grimoire_npc_update_event>(
+      this );
 
   m_plant_ui_layout = std::make_unique<Render::UiLayout>( "res/ui/grimoire_plants.json" );
   m_npc_ui_layout = std::make_unique<Render::UiLayout>( "res/ui/grimoire_npc.json" );
@@ -232,8 +234,8 @@ std::string GrimoireOverlaySystem::reward_display_name( const Cmp::ActionReward 
   if ( reward.wealth > 0 ) { return std::format( "+{} wealth", reward.wealth ); }
   switch ( reward.altar )
   {
-    case Cmp::ActionReward::AltarEffect::ARTEFACT:
-      return "lights altar corner";
+    case Cmp::ActionReward::AltarEffect::BLOOD:
+      return std::format( "+{} altar blood", reward.blood );
     case Cmp::ActionReward::AltarEffect::BANISH:
       return "banishes ghosts";
     case Cmp::ActionReward::AltarEffect::EXTRA_LIFE:

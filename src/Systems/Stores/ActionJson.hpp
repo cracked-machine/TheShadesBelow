@@ -27,24 +27,12 @@ inline Cmp::ActionReward::AltarEffect make_reward_altar( const std::string &alta
 {
   using AltarEffect = Cmp::ActionReward::AltarEffect;
   if ( altar == "None" ) return AltarEffect::NONE;
-  if ( altar == "Artefact" ) return AltarEffect::ARTEFACT;
+  if ( altar == "Blood" ) return AltarEffect::BLOOD;
   if ( altar == "Banish" ) return AltarEffect::BANISH;
   if ( altar == "ExtraLife" ) return AltarEffect::EXTRA_LIFE;
   if ( altar == "CryptKey" ) return AltarEffect::CRYPT_KEY;
   if ( altar == "ToxicImmunity" ) return AltarEffect::TOXIC_IMMUNITY;
   throw std::runtime_error( "Unknown reward altar: '" + altar + "'" );
-}
-
-//! @brief Convert the "reward.group" string of a JSON action entry.
-//! @throws std::runtime_error on an unknown value.
-inline Cmp::Altar::ArtefactGroup make_reward_artefact_group( const std::string &group )
-{
-  using ArtefactGroup = Cmp::Altar::ArtefactGroup;
-  if ( group == "Treasure" ) return ArtefactGroup::TREASURE;
-  if ( group == "Likeness" ) return ArtefactGroup::LIKENESS;
-  if ( group == "Name" ) return ArtefactGroup::NAME;
-  if ( group == "Words" ) return ArtefactGroup::WORDS;
-  throw std::runtime_error( "Unknown reward group: '" + group + "'" );
 }
 
 //! @brief Convert the "reward.target" string of a JSON action entry.
@@ -153,7 +141,7 @@ inline Cmp::ActionRewards make_reward( const nlohmann::json &j )
     if ( rw.contains( "item" ) ) { reward.item = Sys::ItemKey( JsonDeserializer::get_string( rw, "item" ) ); }
     if ( rw.contains( "wealth" ) ) { reward.wealth = JsonDeserializer::get_int( rw, "wealth" ); }
     if ( rw.contains( "altar" ) ) { reward.altar = make_reward_altar( JsonDeserializer::get_string( rw, "altar" ) ); }
-    if ( rw.contains( "group" ) ) { reward.artefact_group = make_reward_artefact_group( JsonDeserializer::get_string( rw, "group" ) ); }
+    if ( rw.contains( "blood" ) ) { reward.blood = JsonDeserializer::get_int( rw, "blood" ); }
     if ( rw.contains( "location" ) ) { reward.location = make_reward_location( JsonDeserializer::get_string( rw, "location" ) ); }
     if ( rw.contains( "loot" ) ) { reward.loot = Sys::SpriteKey( JsonDeserializer::get_string( rw, "loot" ) ); }
     if ( rw.contains( "trigger_range" ) ) { reward.trigger_range = JsonDeserializer::get_int( rw, "trigger_range" ); }
@@ -162,9 +150,9 @@ inline Cmp::ActionRewards make_reward( const nlohmann::json &j )
     if ( rw.contains( "target" ) ) { reward.target = make_reward_target( JsonDeserializer::get_string( rw, "target" ) ); }
     if ( rw.contains( "count" ) ) { reward.quantity = JsonDeserializer::get_int( rw, "count" ); }
     if ( reward.count() == 0 ) throw std::runtime_error( "reward must set at least one of item, wealth, altar or loot" );
-    if ( ( reward.altar == Cmp::ActionReward::AltarEffect::ARTEFACT ) != reward.artefact_group.has_value() )
+    if ( ( reward.altar == Cmp::ActionReward::AltarEffect::BLOOD ) != ( reward.blood > 0 ) or reward.blood < 0 )
     {
-      throw std::runtime_error( "reward group is required by, and only allowed with, altar 'Artefact'" );
+      throw std::runtime_error( "reward blood (at least 1) is required by, and only allowed with, altar 'Blood'" );
     }
     if ( ( rw.contains( "target" ) or rw.contains( "count" ) ) and reward.item.empty() )
     {

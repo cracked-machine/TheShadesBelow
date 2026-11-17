@@ -120,6 +120,11 @@ private:
   //! @param dt
   void render_ui_labels( sf::Time dt );
 
+  //! @brief Render a red vertical meter over the centre of each on-screen graveyard altar still filling its blood quota
+  //! (Cmp::Altar::BloodCount of Cmp::Persist::AltarBloodQuota). Hidden while the altar is activated. Must be called
+  //! inside an overlay window.
+  void render_altar_blood_meters();
+
   //! @brief Render the halo effect around the graves that are marked as ghost spawners. Only active when player is carrying ElderFlute.
   void render_ghost_grave_halos();
 

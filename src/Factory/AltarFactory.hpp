@@ -8,8 +8,6 @@
 namespace Game::Factory::Altar
 {
 
-//! @brief Tag of the corner flame particles lit on a graveyard altar, one per artefact group offered.
-inline constexpr const char *kCandleFlameParticleTag = "graveyard.altar.particle.flame";
 //! @brief Tag of the centre column particles shown, along with the altar's active sprite, while a graveyard altar is
 //! activated (Cmp::Altar::Activated) and its grave trail is in progress.
 inline constexpr const char *kActivatedParticleTag = "graveyard.altar.particle.activated";

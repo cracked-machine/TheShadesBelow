@@ -46,22 +46,14 @@
     {
       "id": "altar_approach",
       "trigger": "AltarApproachedEvent",
-      "text": "Bring me the dead: their treasure, their face, their name, their words.",
+      "text": "Bring me the blood of the dead.",
       "position": "above_source",
       "frequency": "always",
       "duration_s": 5.0
     },
     {
-      "id": "altar_no_anima",
-      "trigger": "AltarActivationAnimaEvent",
-      "text": "The roots drink from the dead. Bring me what they have taken.",
-      "position": "above_source",
-      "frequency": "always",
-      "duration_s": 5.0
-    },
-    {
-      "id": "artefact_trail_in_progress",
-      "trigger": "ArtefactRefusedEvent",
+      "id": "blood_trail_in_progress",
+      "trigger": "BloodRefusedEvent",
       "text": "An altar has already been activated.\nComplete its grave trail before activating another altar.",
       "position": "above_source",
       "frequency": "always",

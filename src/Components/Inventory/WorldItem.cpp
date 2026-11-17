@@ -34,11 +34,11 @@ std::optional<ActionReward> WorldItem::get_offering_reward( Altar::Kind location
   return at<OfferingAction>().action.reward( location );
 }
 
-std::optional<Altar::ArtefactGroup> WorldItem::get_artefact_group() const
+int WorldItem::get_blood_reward() const
 {
   const auto reward = get_offering_reward( Altar::Kind::GRAVEYARD );
-  if ( not reward or reward->altar != ActionReward::AltarEffect::ARTEFACT ) return std::nullopt;
-  return reward->artefact_group;
+  if ( not reward or reward->altar != ActionReward::AltarEffect::BLOOD ) return 0;
+  return reward->blood;
 }
 
 std::optional<SpawnNpcEffect> WorldItem::get_offering_npc_spawn_effect() const { return get_spawn_npc_effect<OfferingAction>(); }

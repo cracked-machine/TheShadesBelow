@@ -12,9 +12,9 @@
 
 #include <algorithm>
 #include <fstream>
-#include <string_view>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+#include <string_view>
 
 namespace Game::Sys
 {
@@ -23,7 +23,7 @@ namespace
 {
 
 //! @brief Whether a tooltip's item condition matches the event's item. A condition ending in '*' matches any item key
-//! with that prefix (e.g. "item.artefact*"), otherwise the keys must be equal. An empty condition matches any item.
+//! with that prefix (e.g. "item.grave.blood*"), otherwise the keys must be equal. An empty condition matches any item.
 bool item_condition_matches( std::string_view condition, std::string_view item )
 {
   if ( condition.empty() ) return true;
@@ -49,9 +49,7 @@ TooltipOverlaySystem::TooltipOverlaySystem( entt::registry &reg, sf::RenderWindo
   std::ignore = get_systems_event_queue().sink<Events::ItemPickedUpEvent>().connect<&TooltipOverlaySystem::on_item_picked_up_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::GrimoireDiscoveryEvent>().connect<&TooltipOverlaySystem::on_grimoire_discovery_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::InsufficientAnimaEvent>().connect<&TooltipOverlaySystem::on_insufficient_anima_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::ArtefactRefusedEvent>().connect<&TooltipOverlaySystem::on_artefact_refused_event>( this );
-  std::ignore = get_systems_event_queue().sink<Events::AltarActivationAnimaEvent>().connect<&TooltipOverlaySystem::on_altar_activation_anima_event>(
-      this );
+  std::ignore = get_systems_event_queue().sink<Events::BloodRefusedEvent>().connect<&TooltipOverlaySystem::on_blood_refused_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::AltarApproachedEvent>().connect<&TooltipOverlaySystem::on_altar_approached_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::CryptEntryRefusedEvent>().connect<&TooltipOverlaySystem::on_crypt_entry_refused_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::DismissTooltipEvent>().connect<&TooltipOverlaySystem::on_dismiss_tooltip_event>( this );
@@ -167,16 +165,10 @@ void TooltipOverlaySystem::on_insufficient_anima_event( const Events::Insufficie
   m_candidates.push_back( { "InsufficientAnimaEvent", event.m_item.str() } );
 }
 
-void TooltipOverlaySystem::on_artefact_refused_event( const Events::ArtefactRefusedEvent &event )
+void TooltipOverlaySystem::on_blood_refused_event( const Events::BloodRefusedEvent &event )
 {
   if ( not m_enabled ) { return; }
-  m_candidates.push_back( { "ArtefactRefusedEvent", event.m_item.str(), event.m_altar_bounds } );
-}
-
-void TooltipOverlaySystem::on_altar_activation_anima_event( const Events::AltarActivationAnimaEvent &event )
-{
-  if ( not m_enabled ) { return; }
-  m_candidates.push_back( { "AltarActivationAnimaEvent", "", event.altar_bounds } );
+  m_candidates.push_back( { "BloodRefusedEvent", event.m_item.str(), event.m_altar_bounds } );
 }
 
 void TooltipOverlaySystem::on_altar_approached_event( const Events::AltarApproachedEvent &event )

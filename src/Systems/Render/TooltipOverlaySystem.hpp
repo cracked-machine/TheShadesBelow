@@ -2,9 +2,8 @@
 #define SRC_SYSTEMS_RENDER_TOOLTIPOVERLAYSYSTEM_HPP__
 
 #include <Events/AddInventoryEvent.hpp>
-#include <Events/AltarActivationAnimaEvent.hpp>
 #include <Events/AltarApproachedEvent.hpp>
-#include <Events/ArtefactRefusedEvent.hpp>
+#include <Events/BloodRefusedEvent.hpp>
 #include <Events/CryptEntryRefusedEvent.hpp>
 #include <Events/DismissTooltipEvent.hpp>
 #include <Events/GrimoireDiscoveryEvent.hpp>
@@ -65,13 +64,9 @@ public:
   //! @param event
   void on_insufficient_anima_event( const Events::InsufficientAnimaEvent &event );
 
-  //! @brief Record a candidate for tooltips triggered by "ArtefactRefusedEvent".
+  //! @brief Record a candidate for tooltips triggered by "BloodRefusedEvent".
   //! @param event
-  void on_artefact_refused_event( const Events::ArtefactRefusedEvent &event );
-
-  //! @brief Record a candidate for tooltips triggered by "AltarActivationAnimaEvent".
-  //! @param event
-  void on_altar_activation_anima_event( [[maybe_unused]] const Events::AltarActivationAnimaEvent &event );
+  void on_blood_refused_event( const Events::BloodRefusedEvent &event );
 
   //! @brief Record a candidate for tooltips triggered by "AltarApproachedEvent".
   //! @param event
@@ -115,11 +110,11 @@ private:
     //! @brief unique id, stored in Cmp::Persist::TooltipsSeen
     std::string id;
     //! @brief name of the event that triggers this tooltip, e.g. "AddInventoryEvent", "ItemPickedUpEvent",
-    //! "GrimoireDiscoveryEvent", "InsufficientAnimaEvent", "ArtefactRefusedEvent", "AltarActivationAnimaEvent",
+    //! "GrimoireDiscoveryEvent", "InsufficientAnimaEvent", "BloodRefusedEvent",
     //! "AltarApproachedEvent" or "CryptEntryRefusedEvent"
     std::string trigger;
     //! @brief optional item key condition, empty matches any item. A trailing '*' matches any item key with that
-    //! prefix, e.g. "item.artefact*"
+    //! prefix, e.g. "item.grave.blood*"
     std::string item;
     //! @brief the message to display
     std::string text;

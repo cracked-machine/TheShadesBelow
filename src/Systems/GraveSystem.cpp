@@ -1,8 +1,9 @@
 
 #include <Audio/SoundBank.hpp>
 #include <Components/AbsoluteAlpha.hpp>
+#include <Components/Altar/Activated.hpp>
+#include <Components/Altar/BloodCount.hpp>
 #include <Components/Altar/MultiBlock.hpp>
-#include <Components/Altar/ArtefactCount.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/Exhumed.hpp>
@@ -15,6 +16,7 @@
 #include <Components/Npc/Crow.hpp>
 #include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Particle/GraveHaloParticleSprite.hpp>
+#include <Components/Persistent/AltarBloodQuota.hpp>
 #include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
@@ -406,8 +408,8 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
       get_systems_event_queue().trigger(
           Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::TRIGGER_BOMB, by == ExhumedBy::BOMB ? grave_entity : entt::null ) );
       break;
-    case Cmp::Grave::Consequence::Type::ARTEFACT:
-      spawn_artefact_loot( grave_entity, by );
+    case Cmp::Grave::Consequence::Type::BLOOD:
+      spawn_blood_loot( grave_entity, by );
       break;
     case Cmp::Grave::Consequence::Type::CURSE_TABLET:
       spawn_grave_loot(
@@ -427,47 +429,35 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
   }
 }
 
-void GraveSystem::spawn_artefact_loot( entt::entity grave_entity, ExhumedBy by )
+void GraveSystem::spawn_blood_loot( entt::entity grave_entity, ExhumedBy by )
 {
-  // only artefacts of the groups the altar nearest the player still needs drop, so the player is never left digging up
-  // artefacts for an altar on the other side of the map, or ones that altar has already been given. Altars that have
-  // all their artefacts are skipped.
-  const sf::Vector2f player_center = Utils::Player::get_position( reg() ).getCenter();
-  const Cmp::Altar::ArtefactCount *nearest_altar = nullptr;
-  float nearest_distance = std::numeric_limits<float>::max();
-  for ( auto [altar_entt, altar_mb, artefact_cmp] : reg().view<Cmp::Altar::MultiBlock, Cmp::Altar::ArtefactCount>().each() )
+  // blood is only of use while some graveyard altar can still take it
+  const int quota = Sys::PersistSystem::get<Cmp::Persist::AltarBloodQuota>( reg() ).get_value();
+  bool altar_needs_blood = false;
+  for ( auto [altar_entt, altar_mb, blood_cmp] : reg().view<Cmp::Altar::MultiBlock, Cmp::Altar::BloodCount>().each() )
   {
-    if ( artefact_cmp.all_lit() ) continue;
-    const float distance = Utils::Maths::getEuclideanDistance( player_center, altar_mb.getCenter() );
-    if ( distance < nearest_distance )
-    {
-      nearest_distance = distance;
-      nearest_altar = &artefact_cmp;
-    }
+    if ( altar_mb.get_kind() != Cmp::Altar::Kind::GRAVEYARD or reg().all_of<Cmp::Altar::Activated>( altar_entt ) or blood_cmp.is_full( quota ) )
+      continue;
+    altar_needs_blood = true;
+    break;
+  }
+  if ( not altar_needs_blood )
+  {
+    SPDLOG_WARN( "Grave rolled blood but no altar can take it" );
+    return;
   }
 
-  // any item of a missing group will do, so new artefacts join the pool through items.json alone
+  // any item whose offering adds blood will do, so new blood items join the pool through items.json alone
   std::vector<Sys::ItemKey> loot_pool;
-  if ( nearest_altar )
+  for ( const auto &item_key : Sys::ItemStore::instance().get_all() )
   {
-    const auto missing_groups = nearest_altar->missing_groups();
-    for ( const auto &item_key : Sys::ItemStore::instance().get_all() )
-    {
-      const auto group = Sys::ItemStore::instance().get( item_key ).get_artefact_group();
-      if ( group and std::ranges::find( missing_groups, *group ) != missing_groups.end() ) loot_pool.push_back( item_key );
-    }
+    if ( Sys::ItemStore::instance().get( item_key ).get_blood_reward() > 0 ) loot_pool.push_back( item_key );
   }
   if ( loot_pool.empty() )
   {
-    SPDLOG_WARN( "Grave rolled an artefact but no altar still needs one" );
+    SPDLOG_WARN( "Grave rolled blood but no item in items.json has an offering_action blood reward" );
     return;
   }
-  std::stringstream poolss;
-  for ( const auto &artefact_key : loot_pool )
-  {
-    poolss << " " << artefact_key.str();
-  }
-  SPDLOG_DEBUG( "Grave artefact pool (altar {:.0f} px from player):{}", nearest_distance, poolss.str() );
   spawn_grave_loot( loot_pool, grave_entity, by );
 }
 

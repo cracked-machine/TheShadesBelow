@@ -303,13 +303,13 @@
         },
         "altar": {
           "type": "string",
-          "enum": ["None", "Artefact", "Banish", "ExtraLife", "CryptKey", "ToxicImmunity"],
-          "description": "The altar effect (offering_action only). Artefact: light the graveyard altar corner of the artefact's group (requires group). Banish: banish all ghosts. ExtraLife: respawn at the crypt start when the player dies (crypt altar only). CryptKey: unlock the crypt key (exit key). ToxicImmunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
+          "enum": ["None", "Blood", "Banish", "ExtraLife", "CryptKey", "ToxicImmunity"],
+          "description": "The altar effect (offering_action only). Blood: add reward.blood to the graveyard altar's blood quota; the altar activates once the quota is filled (requires blood). Banish: banish all ghosts. ExtraLife: respawn at the crypt start when the player dies (crypt altar only). CryptKey: unlock the crypt key (exit key). ToxicImmunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
         },
-        "group": {
-          "type": "string",
-          "enum": ["Treasure", "Likeness", "Name", "Words"],
-          "description": "The artefact group (offering_action only, required by and only allowed with altar Artefact). A graveyard altar takes one artefact of each group, so any item in a group fills that group's corner light."
+        "blood": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The blood added to a graveyard altar's quota (offering_action only, required by and only allowed with altar Blood). The altar activates and starts its grave trail once its blood reaches AltarBloodQuota (persist.json)."
         },
         "location": {
           "type": "string",
@@ -353,12 +353,12 @@
     },
     "offering_reward_entry": {
       "allOf": [{ "$ref": "#/definitions/reward" }],
-      "propertyNames": { "enum": ["item", "wealth", "altar", "group", "location", "tick", "target", "count"] },
+      "propertyNames": { "enum": ["item", "wealth", "altar", "blood", "location", "tick", "target", "count"] },
       "oneOf": [{ "required": ["item"] }, { "required": ["wealth"] }, { "required": ["altar"] }],
-      "dependencies": { "tick": ["altar"], "group": ["altar"] },
-      "if": { "properties": { "altar": { "const": "Artefact" } }, "required": ["altar"] },
-      "then": { "required": ["group"] },
-      "else": { "not": { "required": ["group"] } }
+      "dependencies": { "tick": ["altar"], "blood": ["altar"] },
+      "if": { "properties": { "altar": { "const": "Blood" } }, "required": ["altar"] },
+      "then": { "required": ["blood"] },
+      "else": { "not": { "required": ["blood"] } }
     },
     "no_altar_reward": {
       "description": "A single reward object. Altar effects are only applied by offering_action, so any other action may not set reward.altar.",

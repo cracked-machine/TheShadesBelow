@@ -1,6 +1,6 @@
 
 
-#include <Components/Persistent/AltarActivationAnimaCost.hpp>
+#include <Components/Persistent/AltarBloodQuota.hpp>
 #include <Components/Persistent/AltarOfferingCooldown.hpp>
 #include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
 #include <Components/Persistent/ArmedBlinkFreq.hpp>
@@ -8,7 +8,6 @@
 #include <Components/Persistent/ArmedBlockColourFill.hpp>
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
-#include <Components/Persistent/ArtefactMinChance.hpp>
 #include <Components/Persistent/AutoPickupDrops.hpp>
 #include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/AxeObstacleDigWear.hpp>
@@ -19,6 +18,7 @@
 #include <Components/Persistent/AzazelFireballCooldown.hpp>
 #include <Components/Persistent/AzazelFireballDamage.hpp>
 #include <Components/Persistent/AzazelFireballSpeed.hpp>
+#include <Components/Persistent/BloodMinChance.hpp>
 #include <Components/Persistent/BombBonus.hpp>
 #include <Components/Persistent/BombDamage.hpp>
 #include <Components/Persistent/BombsExhumeGraves.hpp>
@@ -50,7 +50,7 @@
 #include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveCountMargin.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
-#include <Components/Persistent/GraveOddsArtefact.hpp>
+#include <Components/Persistent/GraveOddsBlood.hpp>
 #include <Components/Persistent/GraveOddsBombTrap.hpp>
 #include <Components/Persistent/GraveOddsCurseTablet.hpp>
 #include <Components/Persistent/GraveOddsNpcTrap.hpp>
@@ -68,6 +68,7 @@
 #include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
 #include <Components/Persistent/HazardBalanceOverlap.hpp>
 #include <Components/Persistent/HazardBalanceTimeout.hpp>
+#include <Components/Persistent/HealingBuildingOverride.hpp>
 #include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/HeldItemOffset.hpp>
 #include <Components/Persistent/HeldItemRotation.hpp>
@@ -84,8 +85,6 @@
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/LuckDropRate.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
-#include <Components/Persistent/HealingBuildingOverride.hpp>
-#include <Components/Persistent/PaidHealAmount.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
@@ -111,6 +110,7 @@
 #include <Components/Persistent/NpcWatchmanSweepAmplitude.hpp>
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
 #include <Components/Persistent/NumAltars.hpp>
+#include <Components/Persistent/PaidHealAmount.hpp>
 #include <Components/Persistent/PickaxeGraveDigWear.hpp>
 #include <Components/Persistent/PickaxeObstacleDigWear.hpp>
 #include <Components/Persistent/PickaxePotSmashWear.hpp>
@@ -243,12 +243,12 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::GraveTrailNominalHopCount>();
   add_component<Cmp::Persist::GraveTrailStartCount>();
   add_component<Cmp::Persist::MaxLevelDepth>();
-  add_component<Cmp::Persist::ArtefactMinChance>();
+  add_component<Cmp::Persist::BloodMinChance>();
   add_component<Cmp::Persist::GraveOddsCurseTablet>();
   add_component<Cmp::Persist::GraveOddsBombTrap>();
   add_component<Cmp::Persist::GraveOddsTorch>();
   add_component<Cmp::Persist::GraveOddsNpcTrap>();
-  add_component<Cmp::Persist::GraveOddsArtefact>();
+  add_component<Cmp::Persist::GraveOddsBlood>();
   add_component<Cmp::Persist::GraveOddsTalisman>();
   add_component<Cmp::Persist::GraveCountMargin>();
   add_component<Cmp::Persist::GraveTrailGuideColour>();
@@ -265,7 +265,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::AzazelFireballSpeed>();
   add_component<Cmp::Persist::AzazelFireballArc>();
   add_component<Cmp::Persist::AzazelFireballColour>();
-  add_component<Cmp::Persist::AltarActivationAnimaCost>();
+  add_component<Cmp::Persist::AltarBloodQuota>();
   add_component<Cmp::Persist::AltarOfferingCooldown>();
   add_component<Cmp::Persist::AltarSummonOfferingCooldown>();
   add_component<Cmp::Persist::LightningDamage>();

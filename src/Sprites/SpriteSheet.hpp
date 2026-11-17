@@ -135,8 +135,7 @@ public:
   [[nodiscard]] const std::vector<sf::Vector2f> &particle_offsets() const { return m_particle_offsets; }
 
   //! @brief Get the talisman draw points, from `talisman_offsets` in spritesheets.json.
-  //! @details Currently unused: the graveyard altar no longer draws talismans. Its corner lights are particle_offsets(),
-  //! indexed by Cmp::Altar::ArtefactGroup.
+  //! @details Currently unused: the graveyard altar no longer draws talismans.
   //! @return Pixel offsets from the sprite's top-left corner. Empty if not specified.
   [[nodiscard]] const std::vector<sf::Vector2f> &talisman_offsets() const { return m_talisman_offsets; }
 

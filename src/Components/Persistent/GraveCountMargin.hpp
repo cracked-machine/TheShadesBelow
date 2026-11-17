@@ -5,7 +5,7 @@
 namespace Game::Cmp::Persist
 {
 
-//! @brief Extra graves (percent) generated on top of the level's required grave count, to cover unlucky artefact
+//! @brief Extra graves (percent) generated on top of the level's required grave count, to cover unlucky blood
 //! rolls and graves lost to bomb blasts. See LevelGenerator.
 class GraveCountMargin : public BasePersistent<int>
 {
