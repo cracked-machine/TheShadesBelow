@@ -2,6 +2,7 @@
 #define SRC_COMPONENTS_PERSISTENT_BASEPERSISTENTVECTOR2F_HPP__
 
 #include <SFML/System/Vector2.hpp>
+#include <Utils/ImGuiStepSlider.hpp>
 #include <imgui.h>
 #include <nlohmann/json.hpp>
 
@@ -31,18 +32,20 @@ public:
   //! @return std::string the detail string
   [[nodiscard]] std::string get_detail() const { return m_detail; }
 
-  //! @brief Render an ImGui two-component slider bound to x and y.
+  //! @brief Render an x slider and a y slider, each with -/+ step buttons, on one row followed by the label.
   void render_widget()
   {
     ImGui::PushID( this );
     const char *label = m_detail.empty() ? m_name.c_str() : m_detail.c_str();
     const char *fmt = m_format.empty() ? "%.3f" : m_format.c_str();
-    float xy[2] = { x, y };
-    if ( ImGui::SliderFloat2( label, xy, m_min_value, m_max_value, fmt ) )
-    {
-      x = xy[0];
-      y = xy[1];
-    }
+    const float step = Utils::imgui_format_step( fmt );
+    const float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+    const float component_width = ( ImGui::CalcItemWidth() - spacing ) * 0.5f;
+    Utils::imgui_step_slider_body( "x", &x, &m_min_value, &m_max_value, fmt, step, component_width );
+    ImGui::SameLine( 0.f, spacing );
+    Utils::imgui_step_slider_body( "y", &y, &m_min_value, &m_max_value, fmt, step, component_width );
+    ImGui::SameLine( 0.f, spacing );
+    ImGui::TextUnformatted( label );
     ImGui::PopID();
   }
 

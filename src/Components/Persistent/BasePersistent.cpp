@@ -1,4 +1,5 @@
 #include <Components/Persistent/BasePersistent.hpp>
+#include <Utils/ImGuiStepSlider.hpp>
 #include <imgui.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
@@ -89,22 +90,17 @@ void BasePersistent<T>::render_widget()
   else if constexpr ( std::is_same_v<T, float> )
   {
     const char *fmt = format.empty() ? "%.3f" : format.c_str();
-    ImGui::SliderScalar( label, ImGuiDataType_Float, get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt );
+    Utils::imgui_step_slider( label, get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt, Utils::imgui_format_step( fmt ) );
   }
-  else if constexpr ( std::is_same_v<T, uint8_t> )
+  else if constexpr ( std::is_same_v<T, uint8_t> or std::is_same_v<T, uint16_t> or std::is_same_v<T, int32_t> or std::is_same_v<T, int> )
   {
     const char *fmt = format.empty() ? "%d" : format.c_str();
-    ImGui::SliderScalar( label, ImGuiDataType_U8, get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt );
-  }
-  else if constexpr ( std::is_same_v<T, uint16_t> )
-  {
-    const char *fmt = format.empty() ? "%d" : format.c_str();
-    ImGui::SliderScalar( label, ImGuiDataType_U16, get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt );
+    Utils::imgui_step_slider( label, get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt, T{ 1 } );
   }
   else if constexpr ( std::is_same_v<T, uint32_t> )
   {
     const char *fmt = format.empty() ? "%u" : format.c_str();
-    ImGui::SliderScalar( label, ImGuiDataType_U32, get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt );
+    Utils::imgui_step_slider( label, get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt, T{ 1 } );
   }
   else if constexpr ( std::is_same_v<T, uint64_t> )
   {
@@ -112,12 +108,7 @@ void BasePersistent<T>::render_widget()
     // ImGui requires max_value <= IM_U64_MAX / 2 for sliders
     constexpr uint64_t imgui_max_limit = std::numeric_limits<uint64_t>::max() / 2;
     uint64_t clamped_max = std::min( max_value, imgui_max_limit );
-    ImGui::SliderScalar( label, ImGuiDataType_U64, get_value_ptr(), get_min_value_ptr(), &clamped_max, fmt );
-  }
-  else if constexpr ( std::is_same_v<T, int32_t> || std::is_same_v<T, int> )
-  {
-    const char *fmt = format.empty() ? "%d" : format.c_str();
-    ImGui::SliderScalar( label, ImGuiDataType_S32, get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt );
+    Utils::imgui_step_slider( label, get_value_ptr(), get_min_value_ptr(), &clamped_max, fmt, T{ 1 } );
   }
   else if constexpr ( std::is_same_v<T, int64_t> )
   {
@@ -125,7 +116,7 @@ void BasePersistent<T>::render_widget()
     // ImGui requires max_value <= IM_S64_MAX / 2 for sliders
     constexpr int64_t imgui_max_limit = std::numeric_limits<int64_t>::max() / 2;
     int64_t clamped_max = std::min( max_value, imgui_max_limit );
-    ImGui::SliderScalar( label, ImGuiDataType_S64, get_value_ptr(), get_min_value_ptr(), &clamped_max, fmt );
+    Utils::imgui_step_slider( label, get_value_ptr(), get_min_value_ptr(), &clamped_max, fmt, T{ 1 } );
   }
   else
   {

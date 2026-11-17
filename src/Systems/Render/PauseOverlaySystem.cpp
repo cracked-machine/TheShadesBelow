@@ -6,6 +6,7 @@
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/PauseOverlaySystem.hpp>
+#include <Utils/ImGuiStepSlider.hpp>
 
 
 #include <imgui.h>
@@ -89,11 +90,14 @@ void PauseOverlaySystem::update( [[maybe_unused]] sf::Time dt )
                                             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize;
   if ( ImGui::Begin( "##pause_overlay", nullptr, kWindowFlags ) )
   {
+    constexpr float kVolumeMin = 0.f;
+    constexpr float kVolumeMax = 100.f;
+    constexpr float kVolumeStep = 1.f;
     auto &music_volume = Sys::PersistSystem::get<Cmp::Persist::MusicVolume>( reg() );
-    ImGui::SliderFloat( "Music Volume", &music_volume.get_value(), 0.f, 100.f, "%.1f" );
+    Utils::imgui_step_slider( "Music Volume", &music_volume.get_value(), &kVolumeMin, &kVolumeMax, "%.1f", kVolumeStep );
 
     auto &effects_volume = Sys::PersistSystem::get<Cmp::Persist::EffectsVolume>( reg() );
-    ImGui::SliderFloat( "Effects Volume", &effects_volume.get_value(), 0.f, 100.f, "%.1f" );
+    Utils::imgui_step_slider( "Effects Volume", &effects_volume.get_value(), &kVolumeMin, &kVolumeMax, "%.1f", kVolumeStep );
 
     m_sound_bank.update_music_volume( music_volume.get_value() );
     m_sound_bank.update_effects_volume( effects_volume.get_value() );

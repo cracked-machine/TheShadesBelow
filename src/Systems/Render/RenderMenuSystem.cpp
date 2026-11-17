@@ -171,6 +171,7 @@
 #include <Systems/Render/RenderMenuSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
 #include <Systems/Threats/BombSystem.hpp>
+#include <Utils/ImGuiStepSlider.hpp>
 #include <Utils/ImGuiTheme.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
@@ -443,10 +444,11 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::NpcWatchmanIdleDirectionChangeInterval>( reg() ).render_widget();
 
     auto &npc_push_back = Sys::PersistSystem::get<Cmp::Persist::NpcPushBack>( reg() );
-    if ( ImGui::SliderScalar( "NPC Push Back Distance", ImGuiDataType_Float, npc_push_back.get_value_ptr(), npc_push_back.get_min_value_ptr(),
-                              npc_push_back.get_max_value_ptr(), "%.1f pixels" ) )
+    const float push_back_step = Constants::kGridSizePxF.x;
+    if ( Utils::imgui_step_slider( "NPC Push Back Distance", npc_push_back.get_value_ptr(), npc_push_back.get_min_value_ptr(),
+                                   npc_push_back.get_max_value_ptr(), "%.1f pixels", push_back_step ) )
     {
-      float step = Constants::kGridSizePxF.x;
+      const float step = push_back_step;
       npc_push_back.get_value() = roundf( npc_push_back.get_value() / step ) * step;
     }
 
@@ -566,8 +568,8 @@ void RenderMenuSystem::render_vslider_row( std::span<Cmp::Persist::BasePersisten
     ImGui::BeginGroup();
     // centre the slider and its label within the column
     ImGui::SetCursorPosX( column_x + ( column_width - slider_size.x ) * 0.5f );
-    ImGui::VSliderScalar( "##vslider", slider_size, ImGuiDataType_S32, setting.get_value_ptr(), setting.get_min_value_ptr(),
-                          setting.get_max_value_ptr(), setting.get_format().empty() ? "%d" : setting.get_format().c_str() );
+    Utils::imgui_step_vslider( "##vslider", slider_size, setting.get_value_ptr(), setting.get_min_value_ptr(), setting.get_max_value_ptr(),
+                               setting.get_format().empty() ? "%d" : setting.get_format().c_str(), 1 );
     const char *label = setting.get_detail_ptr()->c_str();
     ImGui::SetCursorPosX( column_x + ( column_width - ImGui::CalcTextSize( label ).x ) * 0.5f );
     ImGui::TextUnformatted( label );
