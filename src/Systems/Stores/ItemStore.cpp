@@ -114,20 +114,20 @@ void ItemStore::init_store()
         }
       }
     }
-    if ( item_value.contains( "axe_hits" ) )
+    if ( item_value.contains( "destroy_hits" ) )
     {
-      const auto axe_hits = Utils::JsonDeserializer::get_int( item_value, "axe_hits" );
+      const auto destroy_hits = Utils::JsonDeserializer::get_int( item_value, "destroy_hits" );
       if ( not item_key.starts_with( "item.plant." ) )
       {
-        throw std::runtime_error( "Item '" + item_key + "' axe_hits is only allowed on plant items in " + m_json_file_path.string() );
+        throw std::runtime_error( "Item '" + item_key + "' destroy_hits is only allowed on plant items in " + m_json_file_path.string() );
       }
-      // each hit wears the plant down, so it must have a world wear level to be chopped down over several hits
-      if ( axe_hits < 1 or ( axe_hits > 1 and not worlditem.wears_in_world() ) )
+      // each hit wears the plant down, so it must have a world wear level to be destroyed over several hits
+      if ( destroy_hits < 1 or ( destroy_hits > 1 and not worlditem.wears_in_world() ) )
       {
-        throw std::runtime_error( "Item '" + item_key + "' axe_hits must be 1, or above 1 with a spawn_action wear, in " +
+        throw std::runtime_error( "Item '" + item_key + "' destroy_hits must be 1, or above 1 with a spawn_action wear, in " +
                                   m_json_file_path.string() );
       }
-      worlditem.set_axe_hits( axe_hits );
+      worlditem.set_destroy_hits( destroy_hits );
     }
     // an offering reward is exactly one of item, wealth or altar, and each altar location has at most one reward
     const auto offering_rewards = worlditem.get_rewards<Cmp::OfferingAction>();
@@ -160,6 +160,13 @@ void ItemStore::init_store()
       if ( not reward or ( reward->wealth == 0 and reward->altar == Cmp::ActionReward::AltarEffect::NONE and reward->loot.empty() ) ) continue;
       throw std::runtime_error( "Item '" + item_key + "' " + property + " must only set item in " + m_json_file_path.string() );
     }
+    // an item array (random pick) is only allowed on a destroy_action reward
+    for ( const auto &[action_type, action_pair] : worlditem.actions() )
+    {
+      if ( action_type == std::type_index( typeid( Cmp::DestroyAction ) ) ) continue;
+      if ( std::ranges::none_of( action_pair.action.rewards(), []( const Cmp::ActionReward &r ) { return not r.item_pool.empty(); } ) ) continue;
+      throw std::runtime_error( "Item '" + item_key + "' only destroy_action.reward.item may be an array in " + m_json_file_path.string() );
+    }
     // a proximity reward is dropped beside the item: exactly one of item or loot
     if ( const auto reward = worlditem.get_reward<Cmp::ProximityAction>();
          reward and ( reward->count() != 1 or ( reward->item.empty() and reward->loot.empty() ) ) )
@@ -186,6 +193,12 @@ void ItemStore::init_store()
     {
       if ( output.empty() or not get_item_matches( output ).empty() ) continue;
       throw std::runtime_error( "Item '" + item_key.str() + "' has unknown " + property + " '" + output.str() + "' in " + m_json_file_path.string() );
+    }
+    for ( const auto &pool_item : item.get_reward<Cmp::DestroyAction>().value_or( Cmp::ActionReward{} ).item_pool )
+    {
+      if ( not get_item_matches( pool_item ).empty() ) continue;
+      throw std::runtime_error( "Item '" + item_key.str() + "' has unknown destroy_action.reward.item '" + pool_item.str() + "' in " +
+                                m_json_file_path.string() );
     }
     const auto proximity_loot = item.get_reward<Cmp::ProximityAction>().value_or( Cmp::ActionReward{} ).loot;
     if ( proximity_loot.empty() ) continue;
@@ -214,6 +227,13 @@ ItemStore::key_type ItemStore::pick_item( const key_type &key ) const
 {
   if ( not key.str().ends_with( '*' ) ) return key;
   return get_random( get_item_matches( key ) ).item_type;
+}
+
+ItemStore::key_type ItemStore::pick_reward_item( const Cmp::ActionReward &reward ) const
+{
+  if ( reward.item_pool.empty() ) return pick_item( reward.item );
+  const auto pick = static_cast<std::size_t>( Cmp::RandomInt( 0, static_cast<int>( reward.item_pool.size() ) - 1 ).gen() );
+  return pick_item( reward.item_pool[pick] );
 }
 
 std::vector<ItemStore::key_type> ItemStore::pick_distinct_items( const key_type &key, std::size_t n ) const

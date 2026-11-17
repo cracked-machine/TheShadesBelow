@@ -86,7 +86,7 @@ private:
 
   //! @brief Put `item` into an inventory slot, attaching any item-specific components
   //! (wear level if the item has one, UUID for torches).
-  //! @param item Item identifier, e.g. "item.pickaxe". See res/json/items.json.
+  //! @param item Item identifier, e.g. "item.shovel". See res/json/items.json.
   //! @param idx The slot index, or std::nullopt for the selected slot.
   void add_inventory_item( const Sys::ItemKey &item, std::optional<uint8_t> idx = std::nullopt );
 

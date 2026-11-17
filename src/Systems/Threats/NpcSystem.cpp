@@ -419,11 +419,11 @@ void NpcSystem::on_destroy_npc_event( const Events::DestroyNpcEvent &event )
   auto *pos_cmp = reg().try_get<Cmp::Position>( npc_entity );
   if ( not pos_cmp ) return;
 
-  // only the axe or an arrow kills the Burryman, and he drops everything he stole
+  // only the shovel (melee) or an arrow kills the Burryman, and he drops everything he stole
   if ( reg().all_of<Cmp::Npc::Burryman>( npc_entity ) )
   {
     using Cause = Events::DestroyNpcEvent::Cause;
-    if ( event.m_cause != Cause::AXE and event.m_cause != Cause::ARROW ) return;
+    if ( event.m_cause != Cause::MELEE and event.m_cause != Cause::ARROW ) return;
     drop_burryman_items( npc_entity, *pos_cmp );
   }
 

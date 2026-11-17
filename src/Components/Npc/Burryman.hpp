@@ -16,7 +16,7 @@ namespace Game::Cmp::Npc
 {
 
 //! @brief Marker component tagging an entity as the Burryman NPC (a hostile NPC type).
-//! @details The Burryman steals every world item he can reach, then flees the player. Only an axe or an arrow
+//! @details The Burryman steals every world item he can reach, then flees the player. Only the shovel (melee) or an arrow
 //! kills him, dropping everything he carries back into the world.
 struct Burryman
 {

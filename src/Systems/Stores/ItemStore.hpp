@@ -5,6 +5,11 @@
 #include <Systems/Stores/StoreKey.hpp>
 #include <Systems/Stores/StoreSingleton.hpp>
 
+namespace Game::Cmp
+{
+struct ActionReward;
+} // namespace Game::Cmp
+
 namespace Game::Sys
 {
 
@@ -42,6 +47,12 @@ public:
   //! @return The item key.
   //! @throws std::runtime_error if no item matches.
   [[nodiscard]] key_type pick_item( const key_type &key ) const;
+
+  //! @brief Resolve a reward's item to a concrete item key: a random entry of its item_pool if set, else its item.
+  //! Either may end with '*' to pick a random matching item (see pick_item).
+  //! @param reward The reward, e.g. a plant's destroy_action reward.
+  //! @return The item key.
+  [[nodiscard]] key_type pick_reward_item( const Cmp::ActionReward &reward ) const;
 
   //! @brief Pick n distinct random item keys matching key, in random order.
   //! @param key An item key, or an item key prefix ending with '*', e.g. "item.talisman*".

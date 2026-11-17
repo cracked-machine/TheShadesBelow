@@ -179,7 +179,7 @@ bool AltarSystem::check_player_altar_offering( entt::entity altar_entity, Cmp::A
 
   auto is_carrying_tool = [&]()
   {
-    return item.item_type.contains( "item.axe" ) or item.item_type.contains( "item.pickaxe" ) or item.item_type.contains( "item.shovel" ) or
+    return item.item_type.contains( "item.shovel" ) or
            item.item_type.contains( "item.dowsingrod" );
   };
 

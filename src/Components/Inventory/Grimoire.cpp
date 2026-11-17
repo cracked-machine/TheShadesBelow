@@ -63,14 +63,14 @@ Grimoire::Grimoire()
     auto &page = plant_pages.emplace_back( PlantPage{
         .plant_subpage = { .item_key = item_key, .sprite_key = "sprite.plant.unknown", .action_map = {}, .discovered_actions = {} },
         .forage_subpage = { .item_key = item.get_forage_output(), .sprite_key = "sprite.item.unknown", .action_map = {}, .discovered_actions = {} },
-        .drop_subpage = { .item_key = item.get_axe_output(), .sprite_key = "sprite.item.unknown", .action_map = {}, .discovered_actions = {} },
+        .drop_subpage = { .item_key = item.get_drop_output(), .sprite_key = "sprite.item.unknown", .action_map = {}, .discovered_actions = {} },
         .plant_offering_subpage =
             { .item_key = offering_subpage_key( item_key ), .sprite_key = "sprite.item.unknown", .action_map = {}, .discovered_actions = {} },
         .forage_offering_subpage = { .item_key = offering_subpage_key( item.get_forage_output() ),
                                      .sprite_key = "sprite.item.unknown",
                                      .action_map = {},
                                      .discovered_actions = {} },
-        .drop_offering_subpage = { .item_key = offering_subpage_key( item.get_axe_output() ),
+        .drop_offering_subpage = { .item_key = offering_subpage_key( item.get_drop_output() ),
                                    .sprite_key = "sprite.item.unknown",
                                    .action_map = {},
                                    .discovered_actions = {} } } );

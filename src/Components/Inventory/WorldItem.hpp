@@ -36,7 +36,7 @@ public:
   WorldItem() = default;
 
   //! @brief Construct a new World Item object.
-  //! @param item_type Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
+  //! @param item_type Item identifier, e.g. "item.shovel". See res/json/sprite_metadata.json.
   //! @param sprite_type The sprite used to render this item.
   //! @param sprite_index The frame of sprite_type to draw (items.json sprite.index).
   //! @param sprite_random_count If non-zero, each new sprite of this item is a random frame in [0, sprite_random_count) instead
@@ -173,13 +173,13 @@ public:
   //! delta, a toxidrome, a side effect or a reward.
   bool is_offerable() const;
 
-  //! @brief The item gained when this plant is foraged (empty hand or gloves), see "forage_action.reward.item" in
-  //! items.json. Empty string is a no op.
+  //! @brief The plant's forage item, see "forage_action.reward.item" in items.json. Plants are no longer foraged:
+  //! it identifies the forage item among the destroy_action drop pool (e.g. for the grimoire). Empty string if none.
   Sys::ItemKey get_forage_output() const;
 
-  //! @brief The item dropped when this plant is chopped with an axe, see "destroy_action.reward.item" in items.json.
-  //! Empty string is a no op.
-  Sys::ItemKey get_axe_output() const;
+  //! @brief The plant's own drop item, see "destroy_action.reward.item" in items.json. For a random drop pool this is
+  //! the first entry that is neither the forage output nor the plant itself. Empty string if none.
+  Sys::ItemKey get_drop_output() const;
 
   //! @brief Damage done to the corresponding tool by this item.
   int get_pickaxe_damage() const { return m_pickaxe_damage; }
@@ -187,9 +187,9 @@ public:
   int get_shovel_damage() const { return m_shovel_damage; }
   int get_bow_damage() const { return m_bow_damage; }
 
-  //! @brief Number of axe hits needed to chop this plant down, see "axe_hits" in items.json. Defaults to 1.
-  int get_axe_hits() const { return m_axe_hits; }
-  void set_axe_hits( int axe_hits ) { m_axe_hits = axe_hits; }
+  //! @brief Number of shovel hits needed to destroy this plant, see "destroy_hits" in items.json. Defaults to 1.
+  int get_destroy_hits() const { return m_destroy_hits; }
+  void set_destroy_hits( int destroy_hits ) { m_destroy_hits = destroy_hits; }
 
   //! @brief Whether the item can be eaten, drunk or neither.
   Consumable consumable_type() const { return m_consumable; }
@@ -206,7 +206,7 @@ public:
   //! whether a Cmp::Inventory::StingDamage is added when the item is created.
   bool stings() const;
 
-  //! @brief Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
+  //! @brief Item identifier, e.g. "item.shovel". See res/json/sprite_metadata.json.
   Sys::ItemKey item_type;
 
   //! @brief The associated sprite. Imported from items.json.
@@ -250,8 +250,8 @@ private:
   //! @brief Damage done to a bow by this item.
   int m_bow_damage{ 0 };
 
-  //! @brief Number of axe hits needed to chop this plant down. Imported from items.json.
-  int m_axe_hits{ 1 };
+  //! @brief Number of shovel hits needed to destroy this plant. Imported from items.json.
+  int m_destroy_hits{ 1 };
 
   //! @brief Whether the item can be eaten, drunk or neither. Imported from items.json.
   Consumable m_consumable{ Consumable::NONE };

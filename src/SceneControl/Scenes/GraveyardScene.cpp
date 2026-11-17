@@ -139,7 +139,7 @@ void GraveyardScene::on_init()
   if ( m_reg.view<Cmp::Player::Character>().size() == 0 )
   {
     Factory::Player::create_player( m_reg, m_reserved_sm );
-    // Sys::BaseSystem::get_systems_event_queue().trigger( Events::AddInventoryEvent( "item.pickaxe" ) );
+    // Sys::BaseSystem::get_systems_event_queue().trigger( Events::AddInventoryEvent( "item.shovel" ) );
   }
   else
   {

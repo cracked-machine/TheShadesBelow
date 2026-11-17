@@ -10,8 +10,6 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/SpawnedBy.hpp>
 #include <Components/Particle/EmberParticleSprite.hpp>
-#include <Components/Persistent/GlovesWearPerForage.hpp>
-#include <Components/Persistent/PlantWearPerForage.hpp>
 #include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/DiggingTimer.hpp>
 #include <Components/Position.hpp>
@@ -19,9 +17,7 @@
 #include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BurnAction.hpp>
 #include <Components/Stats/DestroyAction.hpp>
-#include <Components/Stats/ForageAction.hpp>
 #include <Components/Stats/SideEffects.hpp>
-#include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
@@ -29,9 +25,7 @@
 #include <Events/DestroyLootEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/DestroyPlantEvent.hpp>
-#include <Events/DropInventoryEvent.hpp>
 #include <Events/GrimoireItemUpdateEvent.hpp>
-#include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/MultiblockFactory.hpp>
@@ -85,7 +79,6 @@ void PlantSystem::update( sf::Time dt )
 void PlantSystem::on_player_action( const Events::PlayerActionEvent &event )
 {
   if ( event.action == Events::PlayerActionEvent::GameActions::DIG ) { player_plant_interact(); }
-  else if ( event.action == Events::PlayerActionEvent::GameActions::FORAGE ) { forage_plant(); }
   else if ( event.action == Events::PlayerActionEvent::GameActions::BURN ) { try_burn_plant(); }
 }
 
@@ -190,100 +183,6 @@ entt::entity PlantSystem::gen_plant( const Sys::ItemKey &plant_type, const Cmp::
   return entt::null;
 }
 
-void PlantSystem::forage_plant()
-{
-  if ( Utils::Player::is_digging_on_cooldown( reg() ) ) { return; }
-
-  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-  if ( inventory_type == "item.torch" or inventory_type == "item.axe" or inventory_type == "item.shovel" ) return;
-
-  // gloves stop the forage stinging: its health damage is skipped (benefits still apply) and the drop gets no Cmp::Inventory::StingDamage
-  const bool wearing_gloves = inventory_type == "item.gloves";
-
-  auto mouse_position_bounds = Utils::get_mouse_bounds_in_gameview( m_window, RenderSystem::get_world_view() );
-
-  auto position_view = reg().view<Cmp::PlantMultiBlock, Cmp::UUID>( entt::exclude<Cmp::SelectedPosition> );
-  for ( auto [plant_entt, plant_mb_cmp, plant_uuid_cmp] : position_view.each() )
-  {
-    // only forage the mouse-selected plant, so other left-click actions (e.g. pickaxe digging) aren't pre-empted
-    if ( not mouse_position_bounds.findIntersection( plant_mb_cmp ) ) continue;
-
-    // check player is near a plant
-    if ( not Utils::Player::is_player_near( reg(), plant_mb_cmp ) ) continue;
-
-    // check player is facing the plant
-    if ( not Utils::Player::get_projected_position( reg() ).findIntersection( plant_mb_cmp ) ) continue;
-
-    // Prevent foraging a plant on fire
-    if ( reg().any_of<Cmp::Plant::BurningTimer>( plant_entt ) ) continue;
-
-    // abandon if the plant has no worlditem (this shouldnt happen but something is critically wrong)
-    auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
-    if ( not plant_item )
-    {
-      SPDLOG_WARN( "Plant {} has no Cmp::WorldItem", static_cast<uint32_t>( plant_entt ) );
-      continue;
-    }
-
-    // copy the reward and sfx: creating items or removing the plant below can invalidate plant_item
-    // plants without a forage_action.reward.item (see items.json) can't be foraged
-    const auto forage_reward = plant_item->get_reward<Cmp::ForageAction>();
-    if ( not forage_reward ) continue;
-    const auto forage_sfx = plant_item->get_action<Cmp::ForageAction>().sfx();
-    const Cmp::Position plant_bounds( plant_mb_cmp.position, plant_mb_cmp.size );
-    const Cmp::Position plant_pos_cmp( plant_mb_cmp.position, Constants::kGridSizePxF );
-
-    // start the cooldown clock
-    reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
-
-    auto plantleaves_particle_uuid = Cmp::UUID::generate();
-    Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
-                                           plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
-
-    // the forage is dropped next to the plant: the inventory may be occupied. It is a reward for the player, so it may be
-    // picked up straight into an empty slot (Cmp::Persist::AutoPickupDrops)
-    if ( forage_reward->target == Cmp::ActionReward::Target::DEFAULT )
-    {
-      get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( find_forage_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
-                                                                  Sys::ItemStore::instance().pick_item( forage_reward->item ), "drop_loot", 0.f,
-                                                                  false, 0, entt::null, {}, not wearing_gloves, /*auto_pickup=*/true ) );
-    }
-    else { grant_item_reward( *forage_reward, plant_bounds, plant_entt ); }
-    play_action_sfx( forage_sfx );
-
-    // each forage wears the plant down
-    auto wear = Sys::PersistSystem::get<Cmp::Persist::PlantWearPerForage>( reg() ).get_value();
-    get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, wear ) );
-
-    if ( wearing_gloves )
-    {
-      auto gloves_wear = Sys::PersistSystem::get<Cmp::Persist::GlovesWearPerForage>( reg() ).get_value();
-      get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), gloves_wear ) );
-    }
-
-    // Gloves block the forage_action's sting (its health damage) but not its benefits or side effects.
-    // They don't protect against hawthorn lightning though.
-    const auto &plant_worlditem = reg().get<Cmp::WorldItem>( plant_entt );
-    if ( plant_worlditem.has_action<Cmp::ForageAction>() )
-    {
-      Cmp::BaseAction forage_action( {}, {}, {}, {}, {}, {}, {} );
-      if ( wearing_gloves )
-      {
-        forage_action = plant_worlditem.get_action<Cmp::ForageAction>();
-        forage_action.remove_damage();
-        Utils::Player::get_stats( reg() ).apply( forage_action );
-        get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( plant_worlditem.item_type, Cmp::ForageAction::kKey, forage_action ) );
-      }
-      else { forage_action = Utils::Player::apply_action_from_world_item<Cmp::ForageAction>( reg(), plant_entt ); }
-      trigger_side_effects( forage_action, plant_pos_cmp, plant_entt );
-    }
-
-    // a fully foraged plant withers away - no drops
-    if ( Utils::is_plant_depleted( reg(), plant_entt ) ) { get_systems_event_queue().trigger( Events::DestroyPlantEvent( plant_entt ) ); }
-    return;
-  }
-}
-
 void PlantSystem::player_plant_interact()
 {
 
@@ -315,76 +214,63 @@ void PlantSystem::player_plant_interact()
       if ( not plant_item ) continue;
 
       auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+      if ( inventory_type != "item.shovel" ) continue;
 
-      // copy the type and rewards: creating items or removing the plant below can invalidate plant_item
-      const auto axe_reward = plant_item->get_reward<Cmp::DestroyAction>();
-      const auto axe_hits = plant_item->get_axe_hits();
+      // copy the rewards: creating items or removing the plant below can invalidate plant_item
+      const auto destroy_reward = plant_item->get_reward<Cmp::DestroyAction>();
+      const auto destroy_hits = plant_item->get_destroy_hits();
       const auto destroy_sfx = plant_item->get_action<Cmp::DestroyAction>().sfx();
+      const auto shovel_damage = static_cast<float>( plant_item->get_shovel_damage() );
       const Cmp::Position plant_bounds( plant_mb_cmp.position, plant_mb_cmp.size );
       const Cmp::Position plant_pos_cmp( plant_mb_cmp.position, Constants::kGridSizePxF );
 
       if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) { return; }
 
-      // Prevent digging/chopping a plant on fire
-      auto *burning_accum = reg().try_get<Cmp::Plant::BurningTimer>( plant_entt );
-      if ( burning_accum ) continue;
+      // Prevent destroying a plant on fire
+      if ( reg().any_of<Cmp::Plant::BurningTimer>( plant_entt ) ) continue;
 
-      if ( inventory_type == "item.shovel" )
+      auto plantleaves_particle_uuid = Cmp::UUID::generate();
+      Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
+                                             plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
+      auto planttwigs_particle_uuid = Cmp::UUID::generate();
+      Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, planttwigs_particle_uuid,
+                                            plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
+
+      // each hit wears the shovel
+      get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), shovel_damage ) );
+
+      // tougher plants (destroy_hits in items.json) lose 1/destroy_hits of their wear level per hit, rounded up so
+      // exactly destroy_hits hits destroy the plant
+      if ( destroy_hits > 1 )
       {
-        // damage the shovel before it is dropped
-        get_systems_event_queue().trigger(
-            Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), static_cast<float>( plant_item->get_shovel_damage() ) ) );
-
-        // dig up the plant
-        get_systems_event_queue().trigger( Events::DropInventoryEvent() );
-        // spawn_action side effects are triggered by InventorySystem when it handles the pickup
-        Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg(), plant_entt );
-        get_systems_event_queue().trigger( Events::PickupWorldItemEvent( plant_entt ) );
-        m_sound_bank.get_effect( "digging_earth" ).play();
+        get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, std::ceil( 100.f / static_cast<float>( destroy_hits ) ) ) );
+        if ( not Utils::is_plant_depleted( reg(), plant_entt ) )
+        {
+          // intermediate hits play the destroy_action "loop" sfx, the final hit its "final" sfx
+          if ( not destroy_sfx.loop.empty() ) { m_sound_bank.get_effect( destroy_sfx.loop ).play(); }
+          continue;
+        }
       }
-      else if ( inventory_type == "item.axe" )
+
+      // drop one random item of the destroy_action reward (drop, forage or the plant itself, see items.json) beside the
+      // plant. It is a reward for the player, so it may be picked up straight into an empty slot (Cmp::Persist::AutoPickupDrops).
+      // Plants without a destroy_action.reward.item drop nothing.
+      if ( destroy_reward and destroy_reward->target == Cmp::ActionReward::Target::DEFAULT )
       {
-        // destroy the plant
-        auto plantleaves_particle_uuid = Cmp::UUID::generate();
-        Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
-                                               plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
-        auto planttwigs_particle_uuid = Cmp::UUID::generate();
-        Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, planttwigs_particle_uuid,
-                                              plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
-
-        // damage the axe before it is dropped
-        get_systems_event_queue().trigger(
-            Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), static_cast<float>( plant_item->get_axe_damage() ) ) );
-
-        // tougher plants (axe_hits in items.json) lose 1/axe_hits of their wear level per hit, rounded up so exactly
-        // axe_hits hits fell an unforaged plant
-        if ( axe_hits > 1 )
-        {
-          get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, std::ceil( 100.f / static_cast<float>( axe_hits ) ) ) );
-          if ( not Utils::is_plant_depleted( reg(), plant_entt ) )
-          {
-            // intermediate hits play the destroy_action "loop" sfx, the felling hit its "final" sfx
-            if ( not destroy_sfx.loop.empty() ) { m_sound_bank.get_effect( destroy_sfx.loop ).play(); }
-            continue;
-          }
-        }
-
-        // plants without a destroy_action.reward.item (see items.json) drop nothing
-        if ( axe_reward and axe_reward->target == Cmp::ActionReward::Target::DEFAULT )
-        {
-          get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( plant_mb_cmp.position, Constants::kGridSizePxF ),
-                                                                      Sys::ItemStore::instance().pick_item( axe_reward->item ), "drop_loot" ) );
-        }
-        // the axe occupies the inventory, so an inventory reward is dropped nearby
-        else if ( axe_reward ) { grant_item_reward( *axe_reward, plant_bounds, plant_entt ); }
-        const auto destroy_action = Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
-
-        trigger_side_effects( destroy_action, plant_pos_cmp, plant_entt );
-        // its loot is left for the player to collect
-        destroy_plant_spawned_npcs( plant_uuid_cmp, Sys::SpriteKey( "sprite.death.anim.bloodsplat" ) );
-        get_systems_event_queue().trigger( Events::DestroyPlantEvent( plant_entt ) );
-        play_action_sfx( destroy_action );
+        get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( find_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
+                                                                    Sys::ItemStore::instance().pick_reward_item( *destroy_reward ), "drop_loot",
+                                                                    0.f, false, 0, entt::null, {}, /*sting=*/true, /*auto_pickup=*/true ) );
       }
+      // the shovel occupies the inventory, so an inventory reward is dropped nearby
+      else if ( destroy_reward ) { grant_item_reward( *destroy_reward, plant_bounds, plant_entt ); }
+      const auto destroy_action = Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
+
+      trigger_side_effects( destroy_action, plant_pos_cmp, plant_entt );
+      // its loot is left for the player to collect
+      destroy_plant_spawned_npcs( plant_uuid_cmp, Sys::SpriteKey( "sprite.death.anim.bloodsplat" ) );
+      get_systems_event_queue().trigger( Events::DestroyPlantEvent( plant_entt ) );
+      play_action_sfx( destroy_action );
+      return;
     }
   }
 }
@@ -566,7 +452,7 @@ void PlantSystem::destroy_plant_spawned_loot( const Cmp::UUID &plant_uuid )
   }
 }
 
-sf::Vector2f PlantSystem::find_forage_drop_pos( const Cmp::PlantMultiBlock &plant_mb_cmp )
+sf::Vector2f PlantSystem::find_drop_pos( const Cmp::PlantMultiBlock &plant_mb_cmp )
 {
   const auto grid = Constants::kGridSizePxF;
   const auto plant_pos = Utils::snap_to_grid( plant_mb_cmp.position );

@@ -434,7 +434,7 @@ void RenderGameSystem::render_arrow_compass()
     {
       // tools can only be offered once spent (see AltarSystem::check_player_altar_offering)
       const auto &type = inv_slot->m_item->item_type;
-      if ( type == "item.axe" or type == "item.pickaxe" or type == "item.shovel" )
+      if ( type == "item.shovel" )
       {
         const auto *wear_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inv_entt );
         is_offerable = ( wear_cmp != nullptr ) and wear_cmp->m_level <= 0;

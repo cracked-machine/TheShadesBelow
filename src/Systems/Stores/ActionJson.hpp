@@ -138,7 +138,16 @@ inline Cmp::ActionRewards make_reward( const nlohmann::json &j )
   const auto make_one = []( const nlohmann::json &rw )
   {
     Cmp::ActionReward reward;
-    if ( rw.contains( "item" ) ) { reward.item = Sys::ItemKey( JsonDeserializer::get_string( rw, "item" ) ); }
+    if ( rw.contains( "item" ) and rw.at( "item" ).is_array() )
+    {
+      for ( const auto &pool_item : rw.at( "item" ) )
+      {
+        if ( not pool_item.is_string() ) throw std::runtime_error( "reward item array must only contain item key strings" );
+        reward.item_pool.emplace_back( pool_item.get<std::string>() );
+      }
+      if ( reward.item_pool.empty() ) throw std::runtime_error( "reward item array must not be empty" );
+    }
+    else if ( rw.contains( "item" ) ) { reward.item = Sys::ItemKey( JsonDeserializer::get_string( rw, "item" ) ); }
     if ( rw.contains( "wealth" ) ) { reward.wealth = JsonDeserializer::get_int( rw, "wealth" ); }
     if ( rw.contains( "altar" ) ) { reward.altar = make_reward_altar( JsonDeserializer::get_string( rw, "altar" ) ); }
     if ( rw.contains( "blood" ) ) { reward.blood = JsonDeserializer::get_int( rw, "blood" ); }
@@ -154,9 +163,13 @@ inline Cmp::ActionRewards make_reward( const nlohmann::json &j )
     {
       throw std::runtime_error( "reward blood (at least 1) is required by, and only allowed with, altar 'Blood'" );
     }
-    if ( ( rw.contains( "target" ) or rw.contains( "count" ) ) and reward.item.empty() )
+    if ( ( rw.contains( "target" ) or rw.contains( "count" ) ) and not reward.has_item() )
     {
       throw std::runtime_error( "reward target and count require an item" );
+    }
+    if ( not reward.item_pool.empty() and ( rw.contains( "target" ) or rw.contains( "count" ) ) )
+    {
+      throw std::runtime_error( "reward target and count are not allowed with an item array" );
     }
     if ( rw.contains( "count" ) and ( reward.target != Cmp::ActionReward::Target::NEARBY or reward.quantity < 1 ) )
     {

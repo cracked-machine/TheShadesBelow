@@ -40,6 +40,7 @@
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/NumAltars.hpp>
+#include <Components/Persistent/PlantsPerType.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/LevelDepth.hpp>
@@ -262,7 +263,7 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
       continue;
     }
 
-    // Item markers share this layer but are named by item id (e.g. "item.axe"), which isn't
+    // Item markers share this layer but are named by item id (e.g. "item.shovel"), which isn't
     // itself a valid sprite key - resolve the item's actual sprite type before lookup.
     const Sys::SpriteKey sprite_lookup_type = ms_type.contains( "item." ) ? Sys::ItemStore::instance().get( Sys::ItemKey( ms_type ) ).sprite_type
                                                                           : Sys::SpriteKey( ms_type );
@@ -313,7 +314,7 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
       continue;
     }
 
-    // Item markers share this layer but are named by item id (e.g. "item.axe"), which isn't
+    // Item markers share this layer but are named by item id (e.g. "item.shovel"), which isn't
     // itself a valid sprite key - resolve the item's actual sprite type before lookup.
     const Sys::SpriteKey sprite_lookup_type = ms_type.contains( "item." ) ? Sys::ItemStore::instance().get( Sys::ItemKey( ms_type ) ).sprite_type
                                                                           : Sys::SpriteKey( ms_type );
@@ -827,7 +828,7 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants()
 {
   std::vector<entt::entity> assigned_entts;
 
-  constexpr int kMinCountPerPlantType = 10;
+  const int plants_per_type = Sys::PersistSystem::get<Cmp::Persist::PlantsPerType>( reg() ).get_value();
 
   // Find all plant sprites. The map value will track count of each plant type added.
   std::unordered_map<Sys::SpriteKey, int> plant_tracker;
@@ -836,12 +837,12 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants()
                   std::ranges::to<std::unordered_map<Sys::SpriteKey, int>>();
 
   // helpers
-  const auto below_quota = [&]( const auto &kv ) { return kv.second < kMinCountPerPlantType; };
+  const auto below_quota = [&]( const auto &kv ) { return kv.second < plants_per_type; };
   const auto quota_reached = [&] { return std::ranges::none_of( plant_tracker, below_quota ); };
 
   // guard against endless failure (e.g. no free tiles left)
   std::size_t attempts = 0;
-  const std::size_t max_attempts = plant_tracker.size() * kMinCountPerPlantType * 10;
+  const std::size_t max_attempts = plant_tracker.size() * static_cast<std::size_t>( plants_per_type ) * 10;
 
   while ( not quota_reached() and attempts++ < max_attempts )
   {

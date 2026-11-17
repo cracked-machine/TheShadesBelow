@@ -65,7 +65,7 @@ public:
 
   //! @brief Create a generic world item entity, dispatching to create_explosive() for bombs.
   //! @param pos
-  //! @param item Item identifier, e.g. "item.pickaxe". See res/json/sprite_metadata.json.
+  //! @param item Item identifier, e.g. "item.shovel". See res/json/sprite_metadata.json.
   //! @param sfx Sound effect to play on placement, if not empty.
   //! @param sprite_idx Base frame within the item's sprite sheet, e.g. a random variant.
   //! @param zorder

@@ -9,10 +9,7 @@
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
 #include <Components/Persistent/AutoPickupDrops.hpp>
-#include <Components/Persistent/AxeGraveDigWear.hpp>
-#include <Components/Persistent/AxeObstacleDigWear.hpp>
-#include <Components/Persistent/AxePotSmashWear.hpp>
-#include <Components/Persistent/AxeSkeletonKillWear.hpp>
+#include <Components/Persistent/ShovelSkeletonKillWear.hpp>
 #include <Components/Persistent/AzazelFireballArc.hpp>
 #include <Components/Persistent/AzazelFireballColour.hpp>
 #include <Components/Persistent/AzazelFireballCooldown.hpp>
@@ -111,9 +108,7 @@
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
 #include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/PaidHealAmount.hpp>
-#include <Components/Persistent/PickaxeGraveDigWear.hpp>
-#include <Components/Persistent/PickaxeObstacleDigWear.hpp>
-#include <Components/Persistent/PickaxePotSmashWear.hpp>
+#include <Components/Persistent/PlantsPerType.hpp>
 #include <Components/Persistent/PlantWearPerForage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerCornerAssistTolerance.hpp>
@@ -272,6 +267,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::HealingBuildingOverride>();
   add_component<Cmp::Persist::PaidHealAmount>();
   add_component<Cmp::Persist::NumAltars>();
+  add_component<Cmp::Persist::PlantsPerType>();
   add_component<Cmp::Persist::MinNumRuins>();
   add_component<Cmp::Persist::MusicVolume>();
   add_component<Cmp::Persist::NpcActivateScale>();
@@ -321,10 +317,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ShopMaxItems>();
   add_component<Cmp::Persist::ShopMinPrice>();
   add_component<Cmp::Persist::ShopMaxPrice>();
-  add_component<Cmp::Persist::AxeGraveDigWear>();
-  add_component<Cmp::Persist::AxeObstacleDigWear>();
-  add_component<Cmp::Persist::AxePotSmashWear>();
-  add_component<Cmp::Persist::AxeSkeletonKillWear>();
+  add_component<Cmp::Persist::ShovelSkeletonKillWear>();
   add_component<Cmp::Persist::FearHealthDmgPerSec>();
   add_component<Cmp::Persist::DespairHealthDmgPerSec>();
   add_component<Cmp::Persist::HypoxiaHealthDmgPerSec>();
@@ -362,9 +355,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::WormholeAbortThreshold>();
   add_component<Cmp::Persist::PlantWearPerForage>();
   add_component<Cmp::Persist::GlovesWearPerForage>();
-  add_component<Cmp::Persist::PickaxeGraveDigWear>();
-  add_component<Cmp::Persist::PickaxeObstacleDigWear>();
-  add_component<Cmp::Persist::PickaxePotSmashWear>();
   add_component<Cmp::Persist::ShovelGraveDigWear>();
   add_component<Cmp::Persist::ShovelObstacleDigWear>();
   add_component<Cmp::Persist::ShovelPotSmashWear>();

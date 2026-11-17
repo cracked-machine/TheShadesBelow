@@ -53,7 +53,7 @@ public:
 
   //! @brief Keys of the same store compare and order by their underlying string.
   //! @note A member is enough here (no friend needed): since C++20 the compiler also tries the reversed
-  //! operands for == and <=>, so a literal on the left-hand side (`"item.axe" == key`) still converts.
+  //! operands for == and <=>, so a literal on the left-hand side (`"item.shovel" == key`) still converts.
   auto operator<=>( const StoreKey & ) const = default;
 
 private:
@@ -63,7 +63,7 @@ private:
 
 //! @brief Key into Sys::SpriteStore, e.g. "sprite.graveyard.pots"
 using SpriteKey = StoreKey<SpriteStore>;
-//! @brief Key into Sys::ItemStore, e.g. "item.axe"
+//! @brief Key into Sys::ItemStore, e.g. "item.shovel"
 using ItemKey = StoreKey<ItemStore>;
 //! @brief Key into Sys::NpcStore, e.g. "npc.shadowhand"
 using NpcKey = StoreKey<NpcStore>;

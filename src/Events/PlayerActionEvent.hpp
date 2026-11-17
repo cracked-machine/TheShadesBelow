@@ -17,7 +17,7 @@ struct PlayerActionEvent
     ACTIVATE,
     //! @brief Dig at diggable obstacles, plants, or graves near the player.
     DIG,
-    //! @brief Perform a melee (axe) attack.
+    //! @brief Perform a melee (shovel) attack.
     ATTACK,
     //! @brief Swap the inventory with the nearest world item (excludes plants)
     SWAP_INVENTORY,
@@ -37,7 +37,7 @@ struct PlayerActionEvent
     BURN,
     //! @brief Fly key is held this frame (witchesbroom). See Sys::FlyingSystem.
     FLY,
-    //! @brief Attempt to forage the mouse-selected plant the player is facing. See Sys::PlantSystem::forage_plant().
+    //! @brief Forage a plant. Currently unused: plants are no longer foraged, the shovel destroys them instead (see Sys::PlantSystem).
     FORAGE
   };
 

@@ -40,7 +40,7 @@ struct ActionWear
 //! res/json/npc.json. An empty name plays nothing.
 struct ActionSfx
 {
-  //! @brief Plays while the action is in progress, e.g. eating/drinking, an intermediate axe hit, a plant burning.
+  //! @brief Plays while the action is in progress, e.g. eating/drinking, an intermediate shovel hit on a plant, a plant burning.
   std::string loop;
   //! @brief Plays when the action completes or is applied.
   std::string final;

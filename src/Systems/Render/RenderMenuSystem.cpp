@@ -9,10 +9,7 @@
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
 #include <Components/Persistent/AutoPickupDrops.hpp>
-#include <Components/Persistent/AxeGraveDigWear.hpp>
-#include <Components/Persistent/AxeObstacleDigWear.hpp>
-#include <Components/Persistent/AxePotSmashWear.hpp>
-#include <Components/Persistent/AxeSkeletonKillWear.hpp>
+#include <Components/Persistent/ShovelSkeletonKillWear.hpp>
 #include <Components/Persistent/AzazelFireballArc.hpp>
 #include <Components/Persistent/AzazelFireballColour.hpp>
 #include <Components/Persistent/AzazelFireballCooldown.hpp>
@@ -111,9 +108,7 @@
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
 #include <Components/Persistent/NumAltars.hpp>
 #include <Components/Persistent/PaidHealAmount.hpp>
-#include <Components/Persistent/PickaxeGraveDigWear.hpp>
-#include <Components/Persistent/PickaxeObstacleDigWear.hpp>
-#include <Components/Persistent/PickaxePotSmashWear.hpp>
+#include <Components/Persistent/PlantsPerType.hpp>
 #include <Components/Persistent/PlantWearPerForage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerCornerAssistTolerance.hpp>
@@ -337,15 +332,9 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
 
     ImGui::SeparatorText( "Weapon Wear Settings" );
 
-    Sys::PersistSystem::get<Cmp::Persist::AxeObstacleDigWear>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::PickaxeObstacleDigWear>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ShovelObstacleDigWear>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::AxePotSmashWear>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::PickaxePotSmashWear>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ShovelPotSmashWear>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::AxeSkeletonKillWear>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::AxeGraveDigWear>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::PickaxeGraveDigWear>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::ShovelSkeletonKillWear>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ShovelGraveDigWear>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::BowReleaseWear>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlantWearPerForage>( reg() ).render_widget();
@@ -499,6 +488,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::GraveTrailGuideColour>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ExitKeyRequirement>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::NumAltars>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::PlantsPerType>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::HealingBuildingOverride>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PaidHealAmount>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MinNumRuins>( reg() ).render_widget();

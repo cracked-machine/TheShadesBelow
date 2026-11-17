@@ -4,7 +4,7 @@
 namespace Game::Cmp::Inventory
 {
 
-//! @brief Tracks the remaining condition of a wearable/usable item (e.g. an axe or shovel) as a
+//! @brief Tracks the remaining condition of a wearable/usable item (e.g. a shovel or bow) as a
 //! percentage, rendered as a wear-level overlay above the item.
 class WearLevel
 {

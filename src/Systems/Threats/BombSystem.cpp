@@ -188,7 +188,7 @@ void BombSystem::update( sf::Time dt )
       if ( item_entt == armed_entt ) return;
       // e.g. loot dropped by a grave this blast exhumed
       if ( reg().any_of<Cmp::Inventory::BlastProof>( item_entt ) ) return;
-      if ( item_cmp.item_type == "item.pickaxe" or item_cmp.item_type == "item.axe" or item_cmp.item_type == "item.shovel" )
+      if ( item_cmp.item_type == "item.shovel" )
       {
         auto dmg = Sys::PersistSystem::get<Cmp::Persist::BombDamage>( reg() ).get_value();
         get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );

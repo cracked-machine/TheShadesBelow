@@ -17,13 +17,11 @@
 #include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Particle/GraveHaloParticleSprite.hpp>
 #include <Components/Persistent/AltarBloodQuota.hpp>
-#include <Components/Persistent/AxeGraveDigWear.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
 #include <Components/Persistent/GraveTrailNominalHopCount.hpp>
 #include <Components/Persistent/GraveTrailNominalHopDistance.hpp>
 #include <Components/Persistent/GraveTrailStartCount.hpp>
-#include <Components/Persistent/PickaxeGraveDigWear.hpp>
 #include <Components/Persistent/ShovelGraveDigWear.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
@@ -129,10 +127,7 @@ void GraveSystem::update()
 bool GraveSystem::has_digging_tool_equipped()
 {
   auto [_, inventory_slot_type, _] = Utils::Player::get_inventory( reg() );
-  if ( not inventory_slot_type.contains( "pickaxe" ) and not inventory_slot_type.contains( "axe" ) and not inventory_slot_type.contains( "shovel" ) )
-  {
-    return false;
-  }
+  if ( inventory_slot_type != "item.shovel" ) { return false; }
 
   return Utils::Player::get_inventory_wear_level( reg() ) > 0;
 }
@@ -208,11 +203,8 @@ void GraveSystem::apply_dig_hit( entt::entity grave_entity, Cmp::Grave::MultiBlo
 {
   constexpr float kGraveMaxHp = 255.f;
 
-  auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-  float dmg = 0.f;
-  if ( inventory_type == "item.pickaxe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::PickaxeGraveDigWear>( reg() ).get_value(); }
-  else if ( inventory_type == "item.axe" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::AxeGraveDigWear>( reg() ).get_value(); }
-  else if ( inventory_type == "item.shovel" ) { dmg = Sys::PersistSystem::get<Cmp::Persist::ShovelGraveDigWear>( reg() ).get_value(); }
+  // has_digging_tool_equipped() guarantees the shovel is equipped
+  const float dmg = Sys::PersistSystem::get<Cmp::Persist::ShovelGraveDigWear>( reg() ).get_value();
   get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 
   grave_cmp.hp -= Utils::Maths::to_percent( kGraveMaxHp, Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).get_value() );

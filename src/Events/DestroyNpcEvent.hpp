@@ -19,12 +19,12 @@ namespace Game::Events
 class DestroyNpcEvent
 {
 public:
-  //! @brief What killed the NPC. Some NPCs only die to a particular cause, e.g. the Burryman to the axe.
+  //! @brief What killed the NPC. Some NPCs only die to a particular cause, e.g. the Burryman to the shovel (melee) or arrows.
   enum class Cause {
-    //! @brief Anything other than the player's axe or arrows, e.g. a bomb, fire or banishing.
+    //! @brief Anything other than the player's melee attack or arrows, e.g. a bomb, fire or banishing.
     OTHER,
-    //! @brief The player's axe.
-    AXE,
+    //! @brief The player's melee attack with the shovel.
+    MELEE,
     //! @brief An arrow fired by the player.
     ARROW
   };
@@ -43,7 +43,7 @@ public:
   }
   entt::entity m_npc_entity;
   std::optional<Sys::SpriteKey> m_death_anim;
-  //! @brief Only played if the NPC actually dies, e.g. not for the Burryman hit by anything but the axe or arrows.
+  //! @brief Only played if the NPC actually dies, e.g. not for the Burryman hit by anything but the shovel or arrows.
   std::optional<std::string> m_death_sfx;
   Cause m_cause;
 };

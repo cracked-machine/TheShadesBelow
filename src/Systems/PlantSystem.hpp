@@ -34,7 +34,7 @@ public:
   //! @param npc_navmesh
   //! @param player_navmesh
   //! @param ghost_navmesh
-  //! @param loot_sm loot drops, so foraged items don't drop on them
+  //! @param loot_sm loot drops, so plant drops don't land on them
   void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &npc_navmesh = nullptr,
              const PathFinding::SpatialHashGridSharedPtr &player_navmesh = nullptr,
              const PathFinding::SpatialHashGridSharedPtr &ghost_navmesh = nullptr, const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr )
@@ -70,11 +70,9 @@ private:
   //! @return entt::entity The new plant, or entt::null if its footprint isn't clear.
   entt::entity gen_plant( const Sys::ItemKey &plant_type, const Cmp::Position &pos_cmp );
 
-  //! @brief Forage the mouse-selected plant the player is facing, dropping its forage_action reward nearby.
-  //! Any inventory item except a torch, axe or shovel can forage; gloves stop the forage's health damage (not its benefits) and the drop's sting.
-  void forage_plant();
-
-  //! @brief Uses Cmp::SelectedPosition to mark the targetted Cmp::PlantMultiBlock then applies digging damage until the obstacle is destroyed.
+  //! @brief Uses Cmp::SelectedPosition to mark the mouse-selected Cmp::PlantMultiBlock the player is facing. With the shovel
+  //! equipped, applies its destroy_action: the plant is removed (after destroy_hits hits) and drops one random item of its
+  //! destroy_action reward (its drop, forage or the plant itself, see items.json).
   void player_plant_interact();
 
   //! @brief Attempt to burn a plant
@@ -84,7 +82,7 @@ private:
   //! @param dt
   void update_burning_plants( sf::Time dt );
 
-  //! @brief Destroy the NPCs (Cmp::Npc::SpawnedBy) a plant spawned, e.g. when it burns out or is chopped down.
+  //! @brief Destroy the NPCs (Cmp::Npc::SpawnedBy) a plant spawned, e.g. when it burns out or is destroyed by the shovel.
   //! @param plant_uuid The plant's Cmp::UUID.
   //! @param death_anim The death animation played for each NPC.
   void destroy_plant_spawned_npcs( const Cmp::UUID &plant_uuid, const Sys::SpriteKey &death_anim );
@@ -93,10 +91,10 @@ private:
   //! @param plant_uuid The plant's Cmp::UUID.
   void destroy_plant_spawned_loot( const Cmp::UUID &plant_uuid );
 
-  //! @brief Find a random free grid cell around the plant to drop a foraged item into. See Utils::is_free_spawn_area().
-  //! @param plant_mb_cmp The plant being foraged.
+  //! @brief Find a random free grid cell around the plant to drop its destroy_action reward into. See Utils::is_free_spawn_area().
+  //! @param plant_mb_cmp The plant being destroyed.
   //! @return sf::Vector2f The free cell, or the plant's head cell if every surrounding cell is occupied.
-  sf::Vector2f find_forage_drop_pos( const Cmp::PlantMultiBlock &plant_mb_cmp );
+  sf::Vector2f find_drop_pos( const Cmp::PlantMultiBlock &plant_mb_cmp );
 
   //! @brief all grid positions that block NPC pathfinding
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;
@@ -110,7 +108,7 @@ private:
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
 
-  //! @brief Loot drops, so foraged items don't drop on them.
+  //! @brief Loot drops, so plant drops don't land on them.
   PathFinding::SpatialHashGridWeakPtr m_loot_sm;
 };
 

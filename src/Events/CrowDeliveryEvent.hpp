@@ -16,7 +16,7 @@ namespace Game::Events
 struct CrowDeliveryEvent
 {
   //! @brief Construct a new CrowDeliveryEvent object
-  //! @param item Item identifier, e.g. "item.pickaxe". See res/json/items.json.
+  //! @param item Item identifier, e.g. "item.shovel". See res/json/items.json.
   explicit CrowDeliveryEvent( Sys::ItemKey item )
       : m_item( std::move( item ) )
   {

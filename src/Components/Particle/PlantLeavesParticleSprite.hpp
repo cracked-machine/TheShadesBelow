@@ -13,7 +13,7 @@ namespace Game::Cmp::Particle
 //! @brief Implementation detail — do not use externally
 namespace detail
 {
-//! @brief Individual leaf-debris particle for a plant destroyed by the axe, drawn as a jittered irregular polygon.
+//! @brief Individual leaf-debris particle for a plant destroyed by the shovel, drawn as a jittered irregular polygon.
 struct PlantLeavesParticle : public Cmp::Particle::ParticleBase
 {
   //! @brief Add some variation to colour of each particle
@@ -40,7 +40,7 @@ private:
 };
 } // namespace detail
 
-//! @brief Particle sprite for the leaf debris effect played when a plant is destroyed by the axe.
+//! @brief Particle sprite for the leaf debris effect played when a plant is destroyed by the shovel.
 class PlantLeavesParticleSprite : public SpriteBase<detail::PlantLeavesParticle>
 {
 public:

@@ -230,7 +230,7 @@ void LootSystem::check_loot_collision( sf::Time dt )
         const auto &inventory_slot = reg().get<Cmp::PlayerInventorySlot>( weapons_entity );
         if ( inventory_slot.empty() ) continue;
         const auto &sprite_type = inventory_slot.m_item->sprite_type;
-        if ( sprite_type.contains( "axe" ) or sprite_type.contains( "pickaxe" ) or sprite_type.contains( "shovel" ) or sprite_type.contains( "bow" ) )
+        if ( sprite_type.contains( "shovel" ) or sprite_type.contains( "bow" ) )
         {
           auto *wear_level_cmp = reg().try_get<Cmp::Inventory::WearLevel>( weapons_entity );
           if ( wear_level_cmp )

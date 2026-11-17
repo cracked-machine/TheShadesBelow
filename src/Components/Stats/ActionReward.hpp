@@ -8,6 +8,7 @@
 #include <Systems/Stores/StoreKey.hpp>
 
 #include <optional>
+#include <vector>
 
 namespace Game::Cmp
 {
@@ -19,6 +20,7 @@ namespace Game::Cmp
 //! loot, dropped beside the source.
 //! The item may end with '*' to pick a random item key with that prefix (e.g. "item.jewelry*"), and may set a target
 //! (inventory or nearby) and, when nearby, a count of items to drop.
+//! A destroy_action reward item may instead be an array of item keys (item_pool), one picked at random per drop.
 struct ActionReward
 {
   //! @brief Where a reward item is placed.
@@ -49,6 +51,9 @@ struct ActionReward
 
   //! @brief The item gained. Empty string if unused.
   Sys::ItemKey item;
+  //! @brief Item keys to pick one from at random, set when "item" is an array in items.json (destroy_action only).
+  //! Empty if unused, in which case item is used instead.
+  std::vector<Sys::ItemKey> item_pool;
   //! @brief The wealth gained. Zero if unused.
   int wealth{ 0 };
   //! @brief The altar effect. NONE if unused.
@@ -72,11 +77,13 @@ struct ActionReward
   int quantity{ 1 };
   //! @brief Whether the item ends with '*', i.e. is a random pick from the item keys with that prefix.
   [[nodiscard]] bool is_item_wildcard() const { return item.str().ends_with( '*' ); }
+  //! @brief Whether an item (single or pool) is set.
+  [[nodiscard]] bool has_item() const { return not item.empty() or not item_pool.empty(); }
   //! @brief The number of reward fields that are set.
-  //! @return int Count of item, wealth, altar and loot that are not their unused value.
+  //! @return int Count of item (or item_pool), wealth, altar and loot that are not their unused value.
   [[nodiscard]] int count() const
   {
-    return static_cast<int>( not item.empty() ) + static_cast<int>( wealth > 0 ) + static_cast<int>( altar != AltarEffect::NONE ) +
+    return static_cast<int>( has_item() ) + static_cast<int>( wealth > 0 ) + static_cast<int>( altar != AltarEffect::NONE ) +
            static_cast<int>( not loot.empty() );
   }
 };

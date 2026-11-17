@@ -12,7 +12,7 @@ struct AddInventoryEvent
 {
 
   //! @brief Construct a new AddInventoryEvent object
-  //! @param item Item identifier, e.g. "item.pickaxe". See res/json/items.json.
+  //! @param item Item identifier, e.g. "item.shovel". See res/json/items.json.
   explicit AddInventoryEvent( Sys::ItemKey item )
       : m_item( std::move( item ) )
   {

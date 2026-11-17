@@ -9,10 +9,10 @@
   },
   "tooltips": [
     {
-      "id": "first_pickaxe",
+      "id": "first_shovel",
       "trigger": "AddInventoryEvent",
-      "condition": { "item": "item.pickaxe" },
-      "text": "You carry a pickaxe. Use it to dig through obstacles.\nPress <Enter> to dismiss.",
+      "condition": { "item": "item.shovel" },
+      "text": "You carry a shovel. Use it to dig obstacles and graves, uproot plants and fight.\nPress <Enter> to dismiss.",
       "position": { "x": 0.5, "y": 0.85 },
       "frequency": "once",
       "duration_s": 6.0

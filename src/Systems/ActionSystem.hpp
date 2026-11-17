@@ -57,10 +57,8 @@ private:
   void check_player_smash_tablet();
 
   //! @brief Apply wear to the equipped tool via Events::UpdateDmgEvent. No-op if the tool is already broken.
-  //! @tparam PickaxeWear Persistent wear component used when the pickaxe is equipped
-  //! @tparam AxeWear Persistent wear component used when the axe is equipped
   //! @tparam ShovelWear Persistent wear component used when the shovel is equipped
-  template <typename PickaxeWear, typename AxeWear, typename ShovelWear>
+  template <typename ShovelWear>
   void apply_tool_wear();
 
   //! @brief Banish up to `max_count` NPCs of type NpcType that are visible in the world view, nearest to `origin` first.
@@ -70,8 +68,8 @@ private:
   template <typename NpcType>
   void banish_nearest_npcs( sf::Vector2f origin, int max_count );
 
-  //! @brief If player is carry suitable weapon did the action event occur in NPC vicinity?
-  void check_player_axe_npc_kill();
+  //! @brief With the shovel equipped, kill the mouse-selected skeleton or Burryman next to the player.
+  void check_player_melee_npc_kill();
 
   //! @brief Uses Cmp::SelectedPosition to mark the targetted Cmp::Obstacle/Cmp::Moveable entity.
   void select_moveable_obstacle();

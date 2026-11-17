@@ -11,7 +11,7 @@ namespace Game::Cmp::Particle
 //! @brief Implementation detail — do not use externally
 namespace detail
 {
-//! @brief Individual twig-debris particle for a plant destroyed by the axe.
+//! @brief Individual twig-debris particle for a plant destroyed by the shovel.
 struct PlantTwigsParticle : public Cmp::Particle::ParticleBase
 {
   //! @brief Add some variation to colour of each particle
@@ -32,7 +32,7 @@ private:
 };
 } // namespace detail
 
-//! @brief Particle sprite for the twig debris effect played when a plant is destroyed by the axe.
+//! @brief Particle sprite for the twig debris effect played when a plant is destroyed by the shovel.
 class PlantTwigsParticleSprite : public SpriteBase<detail::PlantTwigsParticle>
 {
 public:

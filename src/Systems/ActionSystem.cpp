@@ -19,14 +19,10 @@
 #include <Components/Npc/Skeleton.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
-#include <Components/Persistent/AxeObstacleDigWear.hpp>
-#include <Components/Persistent/AxePotSmashWear.hpp>
-#include <Components/Persistent/AxeSkeletonKillWear.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
-#include <Components/Persistent/PickaxeObstacleDigWear.hpp>
-#include <Components/Persistent/PickaxePotSmashWear.hpp>
 #include <Components/Persistent/ShovelObstacleDigWear.hpp>
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
+#include <Components/Persistent/ShovelSkeletonKillWear.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
 #include <Components/Position.hpp>
@@ -99,23 +95,20 @@ void ActionSystem::on_player_action( const Events::PlayerActionEvent &event )
     check_player_smash_pot();
     check_player_smash_tablet();
   }
-  else if ( event.action == Game::Events::PlayerActionEvent::GameActions::ATTACK ) { check_player_axe_npc_kill(); }
+  else if ( event.action == Game::Events::PlayerActionEvent::GameActions::ATTACK ) { check_player_melee_npc_kill(); }
   else if ( event.action == Events::PlayerActionEvent::GameActions::SELECT_POSITION ) { select_moveable_obstacle(); }
   else if ( event.action == Events::PlayerActionEvent::GameActions::DESELECT_POSITION ) { Utils::reset_all_selected_positions( reg() ); }
 }
 
-template <typename PickaxeWear, typename AxeWear, typename ShovelWear>
+template <typename ShovelWear>
 void ActionSystem::apply_tool_wear()
 {
   // already broken: no further wear, otherwise the break sound replays on every hit
   if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) { return; }
 
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-  float dmg = 0.f;
-  if ( inventory_type == "item.pickaxe" ) { dmg = Sys::PersistSystem::get<PickaxeWear>( reg() ).get_value(); }
-  else if ( inventory_type == "item.axe" ) { dmg = Sys::PersistSystem::get<AxeWear>( reg() ).get_value(); }
-  else if ( inventory_type == "item.shovel" ) { dmg = Sys::PersistSystem::get<ShovelWear>( reg() ).get_value(); }
-  else { return; }
+  if ( inventory_type != "item.shovel" ) { return; }
+  const float dmg = Sys::PersistSystem::get<ShovelWear>( reg() ).get_value();
   get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 }
 
@@ -123,11 +116,10 @@ void ActionSystem::check_player_dig_obstacle_collision()
 {
 
   auto [_, inventory_item, _] = Utils::Player::get_inventory( reg() );
-  if ( inventory_item != "item.pickaxe" and inventory_item != "item.axe" and inventory_item != "item.shovel" ) return;
+  if ( inventory_item != "item.shovel" ) return;
 
-  // a broken pickaxe still digs (very slowly), other broken tools are useless
-  const bool tool_broken = Utils::Player::get_inventory_wear_level( reg() ) <= 0;
-  if ( tool_broken and inventory_item != "item.pickaxe" ) { return; }
+  // a broken shovel is useless
+  if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) { return; }
 
   // abort if still in cooldown
   if ( Utils::Player::is_digging_on_cooldown( reg() ) ) { return; }
@@ -183,14 +175,10 @@ void ActionSystem::check_player_dig_obstacle_collision()
       reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
       // calculate new alpha value and apply to the current obstacle and any obstacle with matching UUID (cap sprite obstacles)
-      auto damage_per_hit = Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).get_value();
-      auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-      if ( inventory_type == "item.pickaxe" and tool_broken ) { damage_per_hit = damage_per_hit / 20; }
-      else if ( inventory_type == "item.pickaxe" ) { damage_per_hit = damage_per_hit / 2; }
-      else if ( inventory_type == "item.shovel" or inventory_type == "item.axe" ) { damage_per_hit = damage_per_hit / 5; }
+      const auto damage_per_hit = Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).get_value() / 2;
       obstacle_cmp.damage += damage_per_hit;
 
-      apply_tool_wear<Cmp::Persist::PickaxeObstacleDigWear, Cmp::Persist::AxeObstacleDigWear, Cmp::Persist::ShovelObstacleDigWear>();
+      apply_tool_wear<Cmp::Persist::ShovelObstacleDigWear>();
 
       // Destroy the obstacle?
       if ( obstacle_cmp.damage >= 100 )
@@ -303,11 +291,10 @@ void ActionSystem::check_player_smash_pot()
 {
 
   auto [_, inventory_slot_type, _] = Utils::Player::get_inventory( reg() );
-  if ( inventory_slot_type != "item.pickaxe" and inventory_slot_type != "item.axe" and inventory_slot_type != "item.shovel" ) { return; }
+  if ( inventory_slot_type != "item.shovel" ) { return; }
 
-  // a broken pickaxe still smashes pots, other broken tools are useless
-  const bool tool_broken = Utils::Player::get_inventory_wear_level( reg() ) <= 0;
-  if ( tool_broken and inventory_slot_type != "item.pickaxe" ) { return; }
+  // a broken shovel is useless
+  if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) { return; }
 
   // abort if still in cooldown
   if ( Utils::Player::is_digging_on_cooldown( reg() ) ) { return; }
@@ -330,7 +317,7 @@ void ActionSystem::check_player_smash_pot()
 
       reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
-      apply_tool_wear<Cmp::Persist::PickaxePotSmashWear, Cmp::Persist::AxePotSmashWear, Cmp::Persist::ShovelPotSmashWear>();
+      apply_tool_wear<Cmp::Persist::ShovelPotSmashWear>();
 
       // wait until we're outside of the view loop to break the container: LootSystem spawns loot with a Cmp::Position
       smashed_loot_entity = loot_entity;
@@ -368,11 +355,10 @@ void ActionSystem::check_player_smash_tablet()
 {
 
   auto [_, inventory_slot_type, _] = Utils::Player::get_inventory( reg() );
-  if ( inventory_slot_type != "item.pickaxe" and inventory_slot_type != "item.axe" and inventory_slot_type != "item.shovel" ) { return; }
+  if ( inventory_slot_type != "item.shovel" ) { return; }
 
-  // a broken pickaxe still smashes pots, other broken tools are useless
-  const bool tool_broken = Utils::Player::get_inventory_wear_level( reg() ) <= 0;
-  if ( tool_broken and inventory_slot_type != "item.pickaxe" ) { return; }
+  // a broken shovel is useless
+  if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) { return; }
 
   // abort if still in cooldown
   if ( Utils::Player::is_digging_on_cooldown( reg() ) ) { return; }
@@ -394,7 +380,7 @@ void ActionSystem::check_player_smash_tablet()
 
       reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
-      apply_tool_wear<Cmp::Persist::PickaxePotSmashWear, Cmp::Persist::AxePotSmashWear, Cmp::Persist::ShovelPotSmashWear>();
+      apply_tool_wear<Cmp::Persist::ShovelPotSmashWear>();
 
       SPDLOG_DEBUG( "Required hits {}", curse_tablet_cmp.m_required_hits );
       const float hit_dmg = 100.f / static_cast<float>( curse_tablet_cmp.m_required_hits );
@@ -441,13 +427,13 @@ void ActionSystem::check_player_smash_tablet()
   }
 }
 
-void ActionSystem::check_player_axe_npc_kill()
+void ActionSystem::check_player_melee_npc_kill()
 {
   PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock();
   if ( not pathfinding_navmesh ) return;
 
   auto [_, inventory_slot_type, _] = Utils::Player::get_inventory( reg() );
-  if ( inventory_slot_type != "item.axe" ) { return; }
+  if ( inventory_slot_type != "item.shovel" ) { return; }
 
   if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) { return; }
 
@@ -465,7 +451,7 @@ void ActionSystem::check_player_axe_npc_kill()
   SPDLOG_DEBUG( "position_view size: {}", position_view.size_hint() );
   for ( auto [npc_entity, npc_pos_cmp, npc_cmp, anim_cmp] : position_view.each() )
   {
-    // only skeletons and the Burryman can be axed
+    // only skeletons and the Burryman can be killed in melee
     const bool is_skeleton = anim_cmp.m_sprite_type.contains( "sprite.skeleton" );
     const bool is_burryman = reg().all_of<Cmp::Npc::Burryman>( npc_entity );
 
@@ -495,7 +481,7 @@ void ActionSystem::check_player_axe_npc_kill()
       // Add a new SelectedPosition component to the entity
       reg().emplace_or_replace<Cmp::SelectedPosition>( npc_entity, npc_pos_cmp.position );
 
-      float dmg = Sys::PersistSystem::get<Cmp::Persist::AxeSkeletonKillWear>( reg() ).get_value();
+      float dmg = Sys::PersistSystem::get<Cmp::Persist::ShovelSkeletonKillWear>( reg() ).get_value();
       get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
 
       // the final smash sound is the NPC's destroy_action sfx (see npc.json), played by the DestroyNpcEvent handler
@@ -515,7 +501,7 @@ void ActionSystem::check_player_axe_npc_kill()
 
       SPDLOG_DEBUG( "Killed NPC at position ({}, {})!", npc_pos_cmp.position.x, npc_pos_cmp.position.y );
       // now destroy the NPC
-      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entity, std::nullopt, std::nullopt, Events::DestroyNpcEvent::Cause::AXE ) );
+      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entity, std::nullopt, std::nullopt, Events::DestroyNpcEvent::Cause::MELEE ) );
     }
   }
 }
