@@ -32,7 +32,12 @@
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 
+#include <algorithm>
 #include <array>
+#include <cmath>
+#include <cstdint>
+#include <unordered_map>
+#include <random>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -119,28 +124,88 @@ sf::Vector2f HazardFieldSystem<HazardType>::update( sf::Time dt )
   return add_hazard_cell;
 }
 
+//! @copydoc HazardFieldSystem::candidate_view()
+template <ValidHazard HazardType>
+auto HazardFieldSystem<HazardType>::candidate_view()
+{
+  // every world position (Cmp::Armable) is a candidate. Obstacle caps sit over a neighbouring world position and are
+  // removed implicitly along with their obstacle by Factory::Obstacle::remove_obstacle(); loot/NPC containers and walls
+  // are never swallowed. Multiblocks, the exit, the spawn area and world items are excluded via reserved_sm by the callers.
+  return reg().template view<Cmp::Armable, Cmp::Position>(
+      entt::exclude<Cmp::ObstacleCap, Cmp::Wall, Cmp::LootContainer, Cmp::Npc::Container, HazardType, typename Traits::ExcludeHazard> );
+}
+
+//! @copydoc HazardFieldSystem::is_candidate()
+template <ValidHazard HazardType>
+bool HazardFieldSystem<HazardType>::is_candidate( entt::entity entity )
+{
+  // obstacles: only the main block (caps are handled by candidate_view()); open floor: only if this hazard type spreads onto it
+  if ( reg().template all_of<Cmp::Obstacle>( entity ) )
+  {
+    const auto *anim_cmp = reg().template try_get<Cmp::AnimData>( entity );
+    return anim_cmp and anim_cmp->m_sprite_type.contains( ".main" );
+  }
+  return Traits::spreads_to_open_floor;
+}
+
 //! @copydoc HazardFieldSystem::init_hazard_field()
 template <ValidHazard HazardType>
-sf::Vector2f HazardFieldSystem<HazardType>::init_hazard_field()
+std::vector<sf::Vector2f> HazardFieldSystem<HazardType>::init_hazard_field( std::span<const std::vector<sf::Vector2f>> candidate_sets )
 {
   // keep the field index in sync with the registry: re-entering the scene keeps existing cells,
   // a new level starts with none
   rebuild_field_sm();
 
+  std::vector<sf::Vector2f> seeded_positions;
   auto hazard_field_view = reg().template view<HazardType>( entt::exclude<typename Traits::ExcludeHazard> );
-  if ( hazard_field_view.size_hint() > 0 ) { return {}; }
+  if ( hazard_field_view.size_hint() > 0 ) { return seeded_positions; }
 
-  unsigned long seed = Sys::PersistSystem::get<typename Traits::SeedType>( reg() ).get_value();
-  auto [random_entity, random_pos] = Utils::Rnd::get_random_position(
-      reg(), Utils::Rnd::IncludePack<Cmp::Obstacle>{}, Utils::Rnd::ExcludePack<Cmp::Wall, Cmp::Exit, Cmp::Player::Character, Cmp::Npc::NPC>(), seed );
-  if ( random_entity == entt::null ) { return {}; }
   auto reserved_sm = m_reserved_sm.lock();
-  if ( reserved_sm && not reserved_sm->at( random_pos ).empty() ) { return {}; }
+  const unsigned long seed = Sys::PersistSystem::get<typename Traits::SeedType>( reg() ).get_value();
+  std::mt19937 rng( seed > 0 ? static_cast<std::mt19937::result_type>( seed ) : std::random_device{}() );
 
-  promote_to_hazard_cell( random_entity, random_pos, reserved_sm );
-  SPDLOG_INFO( "Added {} to position [{}, {}].", std::string( Traits::sprite_type ), random_pos.position.x, random_pos.position.y );
+  // world positions (Cmp::Armable) that the field may start on, indexed by grid cell - the same rules as spreading
+  const auto cell_key = []( sf::Vector2f p )
+  {
+    return ( static_cast<std::int64_t>( std::floor( p.x / Constants::kGridSizePxF.x ) ) << 32 ) bitor
+           static_cast<std::uint32_t>( static_cast<std::int32_t>( std::floor( p.y / Constants::kGridSizePxF.y ) ) );
+  };
+  std::unordered_map<std::int64_t, entt::entity> seed_cells;
+  auto seed_view = candidate_view();
+  for ( auto entity : seed_view )
+  {
+    if ( is_candidate( entity ) ) { seed_cells.emplace( cell_key( seed_view.template get<Cmp::Position>( entity ).position ), entity ); }
+  }
 
-  return random_pos.position;
+  for ( const auto &candidate_set : candidate_sets )
+  {
+    std::vector<sf::Vector2f> candidates( candidate_set.begin(), candidate_set.end() );
+    std::ranges::shuffle( candidates, rng );
+
+    bool seeded = false;
+    for ( const auto &candidate : candidates )
+    {
+      const Cmp::Position candidate_pos( candidate, Constants::kGridSizePxF );
+      if ( reserved_sm and not reserved_sm->at( candidate_pos ).empty() ) continue;
+
+      const auto it = seed_cells.find( cell_key( candidate ) );
+      if ( it == seed_cells.end() ) continue;
+      const auto entity = it->second;
+      // a cell seeded by an earlier set in this call is now a hazard cell
+      if ( reg().template any_of<HazardType, typename Traits::ExcludeHazard>( entity ) ) continue;
+
+      // copy: promote_to_hazard_cell() may swap-and-pop the Cmp::Position storage
+      const Cmp::Position pos = reg().template get<Cmp::Position>( entity );
+      promote_to_hazard_cell( entity, pos, reserved_sm );
+      SPDLOG_INFO( "Added {} to position [{}, {}].", std::string( Traits::sprite_type ), pos.position.x, pos.position.y );
+      seeded_positions.push_back( pos.position );
+      seeded = true;
+      break;
+    }
+    if ( not seeded ) { SPDLOG_WARN( "No valid position found to seed {} from {} candidates", std::string( Traits::sprite_type ), candidates.size() ); }
+  }
+
+  return seeded_positions;
 }
 
 //! @copydoc HazardFieldSystem::promote_to_hazard_cell()
@@ -245,22 +310,7 @@ sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field( sf::Time dt )
 
   auto reserved_sm = m_reserved_sm.lock();
   auto hazard_view = reg().template view<HazardType, Cmp::Position>();
-  // every world position (Cmp::Armable) is a candidate. Obstacle caps sit over a neighbouring world position and are
-  // removed implicitly along with their obstacle by Factory::Obstacle::remove_obstacle(); loot/NPC containers and walls
-  // are never swallowed. Multiblocks, the exit, the spawn area and world items are excluded via reserved_sm below.
-  auto candidate_view = reg().template view<Cmp::Armable, Cmp::Position>(
-      entt::exclude<Cmp::ObstacleCap, Cmp::Wall, Cmp::LootContainer, Cmp::Npc::Container, HazardType, typename Traits::ExcludeHazard> );
-
-  // obstacles: only the main block (caps are handled above); open floor: only if this hazard type spreads onto it
-  auto is_candidate = [&]( entt::entity entity )
-  {
-    if ( reg().template all_of<Cmp::Obstacle>( entity ) )
-    {
-      const auto *anim_cmp = reg().template try_get<Cmp::AnimData>( entity );
-      return anim_cmp and anim_cmp->m_sprite_type.contains( ".main" );
-    }
-    return Traits::spreads_to_open_floor;
-  };
+  auto candidate_view = this->candidate_view();
 
   Cmp::RandomInt hazard_spread_picker( 0, Traits::odds ); // 1 in 8 chance for picking an adjacent obstacle
 

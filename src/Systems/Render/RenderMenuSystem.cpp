@@ -82,7 +82,6 @@
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/LuckDropRate.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
-#include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcCrowFlightSpeed.hpp>
@@ -489,7 +488,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::PlantsPerType>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::HealingBuildingOverride>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PaidHealAmount>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::MinNumRuins>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RuinProcGenInitChance>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RuinProcGenMaxIterations>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RuinProcGenBirthThreshold>( reg() ).render_widget();

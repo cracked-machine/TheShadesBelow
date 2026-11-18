@@ -18,6 +18,9 @@
 #include <SFML/System/Time.hpp>
 #include <entt/entity/fwd.hpp>
 
+#include <span>
+#include <vector>
+
 //! @brief HazardFields are environmental dangers that spread throughout the maze,
 //! posing threats to both the player and NPCs. Examples include sinkholes (composed of many
 //! Cmp::SinkholeCell) that instantly kill any entity that falls into them, and corruption fields
@@ -71,9 +74,12 @@ public:
   //! @return The position of any newly added hazard cell, or an empty vector if none was added.
   sf::Vector2f update( sf::Time dt );
 
-  //! @brief Spawn the initial hazard cell for this hazard type at a random valid obstacle position, if one does not already exist.
-  //! @return The position of the newly spawned hazard cell, or an empty vector if one already exists or no valid position was found.
-  sf::Vector2f init_hazard_field();
+  //! @brief Seed one hazard field per candidate set, unless this hazard type already has cells (e.g. re-entering the scene).
+  //! Each field starts at a random position from its set that has a world entity, is not a wall, exit or other hazard,
+  //! and is not reserved. If HazardTraits::SeedType is non-zero the choice is deterministic.
+  //! @param candidate_sets One list of candidate pixel positions per field, e.g. the open tiles of one map quadrant.
+  //! @return The positions of the newly seeded hazard cells; empty if cells already existed.
+  std::vector<sf::Vector2f> init_hazard_field( std::span<const std::vector<sf::Vector2f>> candidate_sets );
 
 private:
   //! @brief Update the hazard field by spreading it to adjacent positions.
@@ -87,6 +93,15 @@ private:
   //!   further spreading.
   //! @param dt Frame delta, accumulated into m_spread_update_timer
   sf::Vector2f update_hazard_field( sf::Time dt );
+
+  //! @brief View of the world positions (Cmp::Armable) a field may start on or spread into, before the
+  //! reserved-positions check: excludes obstacle caps, walls, loot/NPC containers and existing hazard cells.
+  auto candidate_view();
+
+  //! @brief Whether a candidate_view() entity can become a hazard cell: an obstacle's main block, or open
+  //! floor when HazardTraits::spreads_to_open_floor.
+  //! @param entity Entity from candidate_view().
+  bool is_candidate( entt::entity entity );
 
   //! @brief Check for player collision with hazard fields.
   //! If a collision is detected, apply damage or instant death based on hazard type.

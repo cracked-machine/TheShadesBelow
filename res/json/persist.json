@@ -665,14 +665,6 @@
     "detail": "Paid heal amount (spring/barber)",
     "format": "%d"
   },
-  "MinNumRuins": {
-    "type": "int",
-    "value": 1,
-    "min_value": 1,
-    "max_value": 5,
-    "detail": "Min Number of Ruins",
-    "format": "%d"
-  },
   "MusicVolume": {
     "type": "float",
     "value": 0.0,

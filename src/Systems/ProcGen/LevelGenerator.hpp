@@ -68,15 +68,19 @@ public:
   //! @param scene_dimensions World bounds of the scene to scatter cobwebs within.
   void add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scene_dimensions );
 
-  //! @brief create multiblock sprites (i.e. graves, altars, crypts) for the graveyard scene.
-  void gen_graveyard_exterior_multiblocks();
+  //! @brief create multiblock sprites (crypt, healing building, ruin and graves) for the graveyard scene.
+  //!        The crypt, healing building and ruin are placed at the given positions (the scene's 'poi' markers);
+  //!        graves are scattered at random afterwards.
+  //! @param crypt_pos Top-left pixel position of the crypt.
+  //! @param healing_pos Top-left pixel position of the healing spring / barber surgeon building.
+  //! @param ruin_pos Top-left pixel position of the ruin.
+  void gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos, sf::Vector2f healing_pos, sf::Vector2f ruin_pos );
 
   //! @brief Find a valid spawn location for a large obstacle given a seed.
   //! @param ms Sprite sheet of the object being placed, used to size its collision hitbox
   //! @param seed Seed for the random position search
-  //! @param min_spacing_cells Minimum clearance (grid cells, both axes) from any altar, crypt, healing spring, ruin or the exit. 0 disables.
   //! @return std::pair<entt::entity, Cmp::Position>
-  std::pair<entt::entity, Cmp::Position> find_spawn_location( const Sprites::SpriteSheet &ms, unsigned long seed, int min_spacing_cells = 0 );
+  std::pair<entt::entity, Cmp::Position> find_spawn_location( const Sprites::SpriteSheet &ms, unsigned long seed );
 
   //! @brief Generate a number of plant world items in the new game area, via Events::CreatePlantEvent (see PlantSystem).
   //! @return std::vector<entt::entity>
@@ -130,10 +134,12 @@ private:
   void decorate_obstacles( const Sprites::SpriteSheet &ss_main, const Sprites::SpriteSheet &ss_cap, const std::function<std::size_t()> &pick_index,
                            float cap_y_offset, bool moveable );
 
-  //! @brief Spawn `count` multiblocks of the given type at random valid positions found via find_spawn_location().
-  //! @param min_spacing_cells Preferred clearance from other large buildings; halved on failure so `count` is still met.
+  //! @brief Spawn a multiblock of the given type at a fixed position and reserve it.
+  //! @param pos Top-left pixel position of the multiblock.
+  //! @param ss Sprite sheet of the multiblock.
+  //! @return The multiblock entity.
   template <typename MULTIBLOCK, typename MBSEGMENT>
-  std::vector<entt::entity> spawn_multiblocks( std::size_t count, const Sprites::SpriteSheet &ss, bool log = false, int min_spacing_cells = 0 );
+  entt::entity spawn_multiblock_at( sf::Vector2f pos, const Sprites::SpriteSheet &ss );
 
   //! @brief Spatial map for finding obstacles during level gen / cell automata algorithm
   PathFinding::SpatialHashGridUniquePtr m_obstacle_sm;

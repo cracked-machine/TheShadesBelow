@@ -59,6 +59,26 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
+            "id": 23,
+            "members": [
+            ],
+            "name": "path",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset",
+                "project"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
             "id": 10,
             "members": [
                 {
@@ -319,10 +339,10 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 23,
+            "id": 24,
             "members": [
             ],
-            "name": "path",
+            "name": "poi",
             "type": "class",
             "useAs": [
                 "property",

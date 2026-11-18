@@ -5,6 +5,8 @@
 #include <Utils/JsonDeserializer.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+#include <array>
+
 namespace Game::Scene
 {
 
@@ -99,6 +101,8 @@ public:
     std::multimap<std::string, sf::Vector2f> multiblock_objectlayer;
     //! @brief tile index list for the developer layout
     std::multimap<std::string, sf::Vector2f> developer_objectlayer;
+    //! @brief Point-of-interest marker positions (pixels) from the optional 'poi' object layer.
+    std::vector<sf::Vector2f> poi_objectlayer;
 
     //! @brief Player start location
     sf::Vector2u player_start_position{ 0, 0 };
@@ -173,6 +177,31 @@ public:
   //! @brief Get the path tileset
   //! @return PathTileSet
   [[nodiscard]] PathTileSet path_tileset() const { return m_map_data.path_tileset; }
+
+  //! @brief Get the point-of-interest marker positions (pixels) from the 'poi' object layer.
+  //! @return std::vector<sf::Vector2f> Empty if the scene has no 'poi' layer.
+  [[nodiscard]] std::vector<sf::Vector2f> poi_positions() const { return m_map_data.poi_objectlayer; }
+
+  //! @brief Get the 'poi' marker positions indexed by quadrant (see quadrant_of()).
+  //! @throws std::runtime_error unless there are exactly four markers, one in each quadrant.
+  //! @return std::array<sf::Vector2f, 4>
+  [[nodiscard]] std::array<sf::Vector2f, 4> poi_positions_by_quadrant() const;
+
+  //! @brief Get the map quadrant containing a pixel position, split at the map's centre point.
+  //! @param pos_px Pixel position.
+  //! @return std::size_t 0 = top-left, 1 = top-right, 2 = bottom-left, 3 = bottom-right.
+  [[nodiscard]] std::size_t quadrant_of( sf::Vector2f pos_px ) const;
+
+  //! @brief Get the pixel position of every levelgen tile with the given global tile ID.
+  //! @param gid Global tile ID, e.g. open_tile_id().
+  //! @return std::vector<sf::Vector2f>
+  [[nodiscard]] std::vector<sf::Vector2f> levelgen_positions( int gid ) const;
+
+  //! @brief Check that every levelgen cell under a footprint is an 'open' tile.
+  //! @param origin_px Top-left pixel position of the footprint.
+  //! @param grid_size Footprint size in grid cells.
+  //! @return true if every cell is inside the map and is an 'open' tile.
+  [[nodiscard]] bool is_open_footprint( sf::Vector2f origin_px, sf::Vector2u grid_size ) const;
 
   //! @brief  Get the bounding box (in pixels) of every 'spawn' tile in the levelgen layer.
   //!         Used to size procgen spawn rooms (e.g. Cmp::Crypt::RoomStart) to match the authored spawn area.

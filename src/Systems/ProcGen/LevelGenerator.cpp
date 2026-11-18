@@ -38,7 +38,6 @@
 #include <Components/Persistent/GraveTrailNominalHopCount.hpp>
 #include <Components/Persistent/HealingBuildingOverride.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
-#include <Components/Persistent/MinNumRuins.hpp>
 #include <Components/Persistent/PlantsPerType.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
@@ -549,17 +548,8 @@ void LevelGenerator::add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scen
   }
 }
 
-void LevelGenerator::gen_graveyard_exterior_multiblocks()
+void LevelGenerator::gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos, sf::Vector2f healing_pos, sf::Vector2f ruin_pos )
 {
-  // const size_t grave_num_multiplier = Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() ).get_value();
-  const size_t max_num_crypts = 1;
-  // one healing building per level: either a healing spring or a barber surgeon
-  const size_t max_num_healing_buildings = 1;
-  const auto &min_num_ruins = Sys::PersistSystem::get<Cmp::Persist::MinNumRuins>( reg() );
-
-  // minimum clearance (in grid cells, both axes) between the altar, crypts, healing springs and ruins
-  constexpr int kMinBuildingSpacingCells = 10;
-
   // spawn-location lookup for the graves; a failure is reported once, by the grave count check
   auto find_spawn_pos = [&]( const Sprites::SpriteSheet &ms ) -> std::optional<Cmp::Position>
   {
@@ -570,37 +560,34 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
 
   // the altar is not spawned here: graveyard.json places it, see build_scene_from_data()
 
-  // CRYPTS - one crypt serves every grave trail's crypt key, whichever altar started it
+  // CRYPT - one crypt serves every grave trail's crypt key, whichever altar started it
   const auto &crypt_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.crypt.closed" );
-  spawn_multiblocks<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( max_num_crypts, crypt_spritesheet,
-                                                                                  /*log=*/true, kMinBuildingSpacingCells );
+  spawn_multiblock_at<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( crypt_pos, crypt_spritesheet );
 
   // HEALING BUILDING - the healing spring and the barber surgeon share the exterior building, only the entrance differs
   const auto &healingspring_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.building.healingspring" );
-  auto healing_mb_entts = spawn_multiblocks<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>(
-      max_num_healing_buildings, healingspring_spritesheet, /*log=*/true, kMinBuildingSpacingCells );
-  for ( auto mb_entt : healing_mb_entts )
+  const auto healing_mb_entt = spawn_multiblock_at<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>(
+      healing_pos, healingspring_spritesheet );
   {
     // 0 = healing spring, 1 = barber surgeon; anything else is a 50/50 roll
     int building_kind = Sys::PersistSystem::get<Cmp::Persist::HealingBuildingOverride>( reg() ).get_value();
     if ( building_kind != 0 and building_kind != 1 ) { building_kind = Cmp::RandomInt( 0, 1 ).gen(); }
     const bool is_barber = building_kind == 1;
     SPDLOG_INFO( "Healing building is a {}", is_barber ? "Barber Surgeon" : "Healing Spring" );
-    if ( not is_barber ) continue;
-
-    const auto *mb_uuid = reg().try_get<Cmp::UUID>( mb_entt );
-    if ( mb_uuid == nullptr ) continue;
-    for ( auto [door_entt, door_cmp, door_uuid] : reg().view<Cmp::HealingSpringEntrance, Cmp::UUID>().each() )
+    const auto *mb_uuid = reg().try_get<Cmp::UUID>( healing_mb_entt );
+    if ( is_barber and mb_uuid != nullptr )
     {
-      if ( door_uuid != *mb_uuid ) continue;
-      reg().emplace_or_replace<Cmp::BarberSurgeonEntrance>( door_entt );
+      for ( auto [door_entt, door_cmp, door_uuid] : reg().view<Cmp::HealingSpringEntrance, Cmp::UUID>().each() )
+      {
+        if ( door_uuid != *mb_uuid ) continue;
+        reg().emplace_or_replace<Cmp::BarberSurgeonEntrance>( door_entt );
+      }
     }
   }
 
+  // RUIN
   const auto &ruin_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.ruin" );
-  spawn_multiblocks<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>( static_cast<std::size_t>( min_num_ruins.get_value() ),
-                                                                                ruin_spritesheet,
-                                                                                /*log=*/true, kMinBuildingSpacingCells );
+  spawn_multiblock_at<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>( ruin_pos, ruin_spritesheet );
 
   // GRAVES - placed last, so the larger buildings above get first pick of the space
   auto grave_meta_types = Sys::SpriteStore::instance().get_pattern( R"(graves\.\w+\.closed$)" );
@@ -705,38 +692,15 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks()
 }
 
 template <typename MULTIBLOCK, typename MBSEGMENT>
-std::vector<entt::entity> LevelGenerator::spawn_multiblocks( std::size_t count, const Sprites::SpriteSheet &ss, bool log, int min_spacing_cells )
+entt::entity LevelGenerator::spawn_multiblock_at( sf::Vector2f pos, const Sprites::SpriteSheet &ss )
 {
-  std::vector<entt::entity> entts_created;
-  for ( std::size_t i = 0; i < count; ++i )
-  {
-    // Try the requested spacing first, then halve it until a position is found, so the
-    // requested count is still met when the map is too crowded for the full spacing.
-    int spacing = min_spacing_cells;
-    auto [random_entity, random_origin_position] = find_spawn_location( ss, 0, spacing );
-    while ( random_entity == entt::null and spacing > 0 )
-    {
-      spacing /= 2;
-      SPDLOG_WARN( "No spawn position for {} with requested spacing, retrying with {} grid cells.", ss.type(), spacing );
-      std::tie( random_entity, random_origin_position ) = find_spawn_location( ss, 0, spacing );
-    }
-    if ( random_entity == entt::null )
-    {
-      SPDLOG_ERROR( "Failed to find valid spawn position for {}.", ss.type() );
-      continue;
-    }
-
-    auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<MULTIBLOCK, MBSEGMENT>( reg(), random_origin_position.position, ss, 0, 0,
-                                                                                                  m_reserved_sm.get() );
-    m_reserved_sm->insert( mb_entt, random_origin_position );
-    if ( log ) { SPDLOG_INFO( "Added {} to {},{}", ss.type(), random_origin_position.position.x, random_origin_position.position.y ); }
-    entts_created.push_back( mb_entt );
-  }
-  return entts_created;
+  auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<MULTIBLOCK, MBSEGMENT>( reg(), pos, ss, 0, 0, m_reserved_sm.get() );
+  m_reserved_sm->insert( mb_entt, Cmp::Position( pos, Constants::kGridSizePxF ) );
+  SPDLOG_INFO( "Added {} to {},{}", ss.type(), pos.x, pos.y );
+  return mb_entt;
 }
 
-std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( const Sprites::SpriteSheet &ms, unsigned long seed,
-                                                                            int min_spacing_cells )
+std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( const Sprites::SpriteSheet &ms, unsigned long seed )
 {
   constexpr int kMaxAttempts = 1000;
   int attempts = 0;
@@ -765,19 +729,7 @@ std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( cons
              not any_intersects<Cmp::Player::Character>( reg(), new_lo_hitbox );
     };
 
-    // Keep the large graveyard buildings at least `min_spacing_cells` apart in both axes, and away from the exit
-    auto is_spaced = [&]() -> bool
-    {
-      if ( min_spacing_cells <= 0 ) return true;
-      using Utils::Collision::any_intersects;
-      auto spacing_hitbox = Cmp::RectBounds::expanded( random_pos.position, lo_sprite_size, min_spacing_cells );
-      return not(
-          any_intersects<Cmp::Altar::Segment>( reg(), spacing_hitbox ) || any_intersects<Cmp::Crypt::BuildingSegment>( reg(), spacing_hitbox ) ||
-          any_intersects<Cmp::HealingSpringBuildingSegment>( reg(), spacing_hitbox ) ||
-          any_intersects<Cmp::Ruin::BuildingSegment>( reg(), spacing_hitbox ) || any_intersects<Cmp::Grave::ExitSegment>( reg(), spacing_hitbox ) );
-    };
-
-    if ( is_valid() and is_spaced() )
+    if ( is_valid() )
     {
       if ( current_seed != seed and seed > 0 )
       {

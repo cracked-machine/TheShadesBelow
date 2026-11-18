@@ -215,6 +215,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":99,
          "id":13,
+         "locked":true,
          "name":"path",
          "opacity":1,
          "type":"tilelayer",
@@ -2206,7 +2207,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -2252,8 +2253,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":1296,
-                 "y":1280
+                 "x":1536,
+                 "y":768
                 }, 
                 {
                  "height":0,
@@ -2265,8 +2266,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":288,
-                 "y":1280
+                 "x":784,
+                 "y":1536
                 }, 
                 {
                  "height":0,
@@ -2278,8 +2279,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":1296,
-                 "y":288
+                 "x":784,
+                 "y":48
                 }, 
                 {
                  "height":0,
@@ -2291,8 +2292,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":272,
-                 "y":304
+                 "x":48,
+                 "y":784
                 }, 
                 {
                  "height":0,
@@ -2467,9 +2468,72 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":15,
+         "name":"poi",
+         "objects":[
+                {
+                 "height":0,
+                 "id":347,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"poi",
+                 "visible":true,
+                 "width":0,
+                 "x":256,
+                 "y":320
+                }, 
+                {
+                 "height":0,
+                 "id":348,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"poi",
+                 "visible":true,
+                 "width":0,
+                 "x":1184,
+                 "y":320
+                }, 
+                {
+                 "height":0,
+                 "id":349,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"poi",
+                 "visible":true,
+                 "width":0,
+                 "x":240,
+                 "y":1184
+                }, 
+                {
+                 "height":0,
+                 "id":350,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"poi",
+                 "visible":true,
+                 "width":0,
+                 "x":1216,
+                 "y":1200
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":14,
- "nextobjectid":339,
+ "nextlayerid":16,
+ "nextobjectid":351,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

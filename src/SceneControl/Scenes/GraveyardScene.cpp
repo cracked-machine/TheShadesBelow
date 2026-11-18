@@ -25,6 +25,7 @@
 #include <Components/Player/GraveTrail.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
 #include <Components/Player/LevelDepth.hpp>
+#include <Components/Random.hpp>
 #include <Components/Ruin/BuildingMultiBlock.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
@@ -86,6 +87,7 @@
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/RuinSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 #include <Systems/TeleportSystem.hpp>
 #include <Systems/Threats/BombSystem.hpp>
@@ -99,7 +101,11 @@
 #include <Utils/Player.hpp>
 #include <Utils/Profiling.hpp>
 
+#include <array>
 #include <cmath>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace Game::Scene
 {
@@ -170,8 +176,30 @@ void GraveyardScene::on_init()
   auto &level_gen = m_sys.find<Sys::Store::Type::LevelGenerator>();
   level_gen.init( m_reserved_sm );
   level_gen.build_scene_from_data( *m_scene_data );
-  m_sys.find<Sys::Store::Type::ExitSystem>().create_exit();
-  level_gen.gen_graveyard_exterior_multiblocks();
+  // one point of interest per map quadrant: shuffle which POI goes on which 'poi' marker
+  auto poi_positions = m_scene_data->poi_positions_by_quadrant();
+  Cmp::RandomInt poi_rng( 0, 1 );
+  std::ranges::shuffle( poi_positions, poi_rng );
+  const auto &exit_pos = poi_positions[0];
+  const auto &crypt_pos = poi_positions[1];
+  const auto &healing_pos = poi_positions[2];
+  const auto &ruin_pos = poi_positions[3];
+  // the round map leaves less room near the edge: warn if a marker has been moved where its building no longer fits
+  for ( const auto &[pos, sprite_type] : std::array<std::pair<sf::Vector2f, std::string_view>, 4>{ {
+            { exit_pos, "sprite.graveyard.exit.locked" },
+            { crypt_pos, "sprite.graveyard.crypt.closed" },
+            { healing_pos, "sprite.graveyard.building.healingspring" },
+            { ruin_pos, "sprite.graveyard.ruin" },
+        } } )
+  {
+    const auto &ss = Sys::SpriteStore::instance().get( Sys::SpriteKey( std::string( sprite_type ) ) );
+    if ( not m_scene_data->is_open_footprint( pos, sf::Vector2u( ss.get_grid_size() ) ) )
+    {
+      SPDLOG_ERROR( "{} at 'poi' marker ({}, {}) overlaps non-open levelgen tiles", sprite_type, pos.x, pos.y );
+    }
+  }
+  m_sys.find<Sys::Store::Type::ExitSystem>().create_exit( exit_pos );
+  level_gen.gen_graveyard_exterior_multiblocks( crypt_pos, healing_pos, ruin_pos );
   level_gen.gen_loot_containers( map_size_grid );
   level_gen.gen_npc_containers( map_size_grid );
   level_gen.gen_random_plants();
@@ -204,14 +232,33 @@ void GraveyardScene::on_init()
 
   m_sys.find<Sys::Store::Type::RenderGameSystem>().init_world_view();
 
-  auto new_sinkhole_pos = m_sys.find<Sys::Store::Type::SinkHoleHazardSystem>().init_hazard_field();
-  if ( new_sinkhole_pos != sf::Vector2f{ 0, 0 } ) { floortiles.remove( new_sinkhole_pos ); }
+  // one hazard field per map quadrant, seeded on a random open tile in that quadrant: two sinkholes and two
+  // corruption fields, shuffled across the quadrants. The reserved path cross keeps each field in its quadrant.
+  std::array<std::vector<sf::Vector2f>, 4> open_by_quadrant;
+  for ( const auto &pos : m_scene_data->levelgen_positions( m_scene_data->open_tile_id() ) )
+  {
+    open_by_quadrant.at( m_scene_data->quadrant_of( pos ) ).push_back( pos );
+  }
+  std::array<bool, 4> quadrant_is_sinkhole{ true, true, false, false };
+  Cmp::RandomInt hazard_rng( 0, 1 );
+  std::ranges::shuffle( quadrant_is_sinkhole, hazard_rng );
+  std::vector<std::vector<sf::Vector2f>> sinkhole_sets;
+  std::vector<std::vector<sf::Vector2f>> corruption_sets;
+  for ( std::size_t quadrant = 0; quadrant < open_by_quadrant.size(); ++quadrant )
+  {
+    ( quadrant_is_sinkhole.at( quadrant ) ? sinkhole_sets : corruption_sets ).push_back( std::move( open_by_quadrant.at( quadrant ) ) );
+  }
+
+  for ( const auto &new_sinkhole_pos : m_sys.find<Sys::Store::Type::SinkHoleHazardSystem>().init_hazard_field( sinkhole_sets ) )
+  {
+    floortiles.remove( new_sinkhole_pos );
+  }
 
   auto floor_entity = m_reg.create();
   m_reg.emplace<Sprites::Containers::VertexFloor>( floor_entity, floortiles );
   m_reg.emplace<Cmp::ZOrderValue>( floor_entity, -16.f );
 
-  m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().init_hazard_field();
+  m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().init_hazard_field( corruption_sets );
   m_sys.find<Sys::Store::Type::WormholeSystem>().spawn_wormhole( Sys::WormholeSystem::SpawnPhase::InitialSpawn );
 
   Factory::Particle::add_flame_for_world_items( m_reg, "graveyard.torch.particle.flame" );

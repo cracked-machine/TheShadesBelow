@@ -199,6 +199,22 @@ void SceneData::deserialize_tilelayers( const nlohmann::json &json )
     }
   };
 
+  //! @brief POI layer - point markers, only the position is used
+  auto get_poi_list = [&]( const nlohmann::json &j, std::vector<sf::Vector2f> &out )
+  {
+    if ( not j.contains( "objects" ) ) throw std::runtime_error( "Missing JSON property 'objects' in poi layer" );
+    try
+    {
+      for ( const auto &object : j.at( "objects" ) )
+      {
+        out.emplace_back( get_float( object, "x" ), get_float( object, "y" ) );
+      }
+    } catch ( const nlohmann::json::type_error &e )
+    {
+      throw std::runtime_error( std::string( "JSON Error: poi layer - " ) + e.what() );
+    }
+  };
+
   m_map_data.map_size = sf::Vector2u( get_int( json, "width" ), get_int( json, "height" ) );
 
   if ( json.contains( "layers" ) )
@@ -213,6 +229,7 @@ void SceneData::deserialize_tilelayers( const nlohmann::json &json )
       if ( layer.at( "name" ).get<std::string>() == "solid" ) { get_solid_list( layer, m_map_data.solid_objectlayer ); }
       if ( layer.at( "name" ).get<std::string>() == "multiblock" ) { get_multiblock_list( layer, m_map_data.multiblock_objectlayer ); }
       if ( layer.at( "name" ).get<std::string>() == "developer" ) { get_developer_list( layer, m_map_data.developer_objectlayer ); }
+      if ( layer.at( "name" ).get<std::string>() == "poi" ) { get_poi_list( layer, m_map_data.poi_objectlayer ); }
     }
     if ( m_map_data.levelgen_tilelayer.empty() ) { throw std::runtime_error( "Missing JSON property tilelayer: 'levelgen'" ); }
   }
@@ -282,6 +299,62 @@ sf::FloatRect SceneData::get_spawn_area_bounds() const
                          static_cast<float>( min_grid.y ) * static_cast<float>( Constants::kGridSizePx.y ) },
            sf::Vector2f{ static_cast<float>( max_grid.x - min_grid.x + 1 ) * static_cast<float>( Constants::kGridSizePx.x ),
                          static_cast<float>( max_grid.y - min_grid.y + 1 ) * static_cast<float>( Constants::kGridSizePx.y ) } };
+}
+
+std::array<sf::Vector2f, 4> SceneData::poi_positions_by_quadrant() const
+{
+  const auto &pois = m_map_data.poi_objectlayer;
+  if ( pois.size() != 4 ) { throw std::runtime_error( "Expected 4 markers in 'poi' layer, found " + std::to_string( pois.size() ) ); }
+
+  std::array<sf::Vector2f, 4> result{};
+  std::array<bool, 4> found{};
+  for ( const auto &pos : pois )
+  {
+    const auto quadrant = quadrant_of( pos );
+    if ( found[quadrant] ) { throw std::runtime_error( "More than one 'poi' marker in quadrant " + std::to_string( quadrant ) ); }
+    found[quadrant] = true;
+    result[quadrant] = pos;
+  }
+  return result;
+}
+
+std::size_t SceneData::quadrant_of( sf::Vector2f pos_px ) const
+{
+  const auto [_, map_size_px] = map_size();
+  const std::size_t right = pos_px.x >= map_size_px.x / 2.f ? 1 : 0;
+  const std::size_t bottom = pos_px.y >= map_size_px.y / 2.f ? 1 : 0;
+  return right + ( 2 * bottom );
+}
+
+std::vector<sf::Vector2f> SceneData::levelgen_positions( int gid ) const
+{
+  std::vector<sf::Vector2f> result;
+  const auto w = m_map_data.map_size.x;
+  for ( const auto [i, tile] : std::views::enumerate( m_map_data.levelgen_tilelayer ) )
+  {
+    if ( tile != gid ) continue;
+    const auto col = static_cast<unsigned int>( i ) % w;
+    const auto row = static_cast<unsigned int>( i ) / w;
+    result.emplace_back( static_cast<float>( col ) * Constants::kGridSizePxF.x, static_cast<float>( row ) * Constants::kGridSizePxF.y );
+  }
+  return result;
+}
+
+bool SceneData::is_open_footprint( sf::Vector2f origin_px, sf::Vector2u grid_size ) const
+{
+  const auto first_col = static_cast<int>( origin_px.x / Constants::kGridSizePxF.x );
+  const auto first_row = static_cast<int>( origin_px.y / Constants::kGridSizePxF.y );
+  const auto w = static_cast<int>( m_map_data.map_size.x );
+  const auto h = static_cast<int>( m_map_data.map_size.y );
+  for ( int row = first_row; row < first_row + static_cast<int>( grid_size.y ); ++row )
+  {
+    for ( int col = first_col; col < first_col + static_cast<int>( grid_size.x ); ++col )
+    {
+      if ( col < 0 or row < 0 or col >= w or row >= h ) return false;
+      if ( m_map_data.levelgen_tilelayer.at( static_cast<std::size_t>( ( row * w ) + col ) ) != open_tile_id() ) return false;
+    }
+  }
+  return true;
 }
 
 std::pair<sf::Vector2u, sf::Vector2f> SceneData::map_size() const

@@ -32,9 +32,9 @@ public:
   //! @param ev
   void on_player_action( Events::PlayerActionEvent ev );
 
-  //! @brief Create the exit in the game area
-  //! @param spawn_position
-  void create_exit();
+  //! @brief Create the exit multiblock in the game area
+  //! @param pos Top-left pixel position of the exit multiblock, e.g. a 'poi' marker from the scene data.
+  void create_exit( sf::Vector2f pos );
 
   //! @brief Check for player collision with open exit to complete level
   void check_exit_collision();
