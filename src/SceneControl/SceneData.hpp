@@ -35,6 +35,8 @@ public:
     int exit_tile_id{ 0 };
     //! @brief Reserved cell
     int reserved_tile_id{ 0 };
+    //! @brief Path cell
+    int path_tile_id{ 0 };
 
     //! @brief Should be 16x16 pixels
     sf::Vector2u tile_size;
@@ -65,6 +67,18 @@ public:
     sf::Vector2u tile_size;
   };
 
+  //! @brief The wall tileset
+  struct PathTileSet
+  {
+    //! @brief The offset for the tile indexes within this tileset relative to the other tilesets.
+    //! @note  This value is created and managed by Tiled application.
+    int first_gid;
+    //! @brief The SpriteSheet name. This must use a SpriteSheet defined in res/json/spritesheets.json.
+    std::string name;
+    //! @brief Should be 16x16 pixels
+    sf::Vector2u tile_size;
+  };
+
   //! @brief Main data structure holding all deserialized scene data.
   struct Data
   {
@@ -77,6 +91,8 @@ public:
     std::vector<int> player_tilelayer;
     //! @brief tile index list for the wall layout
     std::vector<int> wall_tilelayer;
+    //! @brief tile index list for the path layout
+    std::vector<int> path_tilelayer;
     //! @brief tile index list for the object layout
     std::vector<sf::FloatRect> solid_objectlayer;
     //! @brief tile index list for the mutliblock layout
@@ -93,6 +109,8 @@ public:
     FloorTileSet floor_tileset;
     //! @brief wall tileset
     WallTileSet wall_tileset;
+    //! @brief path tileset
+    PathTileSet path_tileset;
   };
 
   //! @brief Construct a new Scene Data object, deserializing the given Tiled JSON scene file.
@@ -120,6 +138,9 @@ public:
   //! @brief Get the global tile ID (gid) of the reserved tile in the levelgen layer.
   //! @return int
   [[nodiscard]] int reserved_tile_id() const { return m_map_data.main_tileset.reserved_tile_id + m_map_data.main_tileset.first_gid; }
+  //! @brief Get the global tile ID (gid) of the path tile in the levelgen layer
+  //! @return int
+  [[nodiscard]] int path_tile_id() const { return m_map_data.main_tileset.path_tile_id + m_map_data.main_tileset.first_gid; }
 
   //! @brief Get the multiblock object layer, mapping each object's marker name (a sprite, item or npc type) to its position.
   //! @return std::multimap<std::string, sf::Vector2f>
@@ -134,6 +155,9 @@ public:
   //! @brief Get the wall tile layer's tile index list.
   //! @return std::vector<int>
   [[nodiscard]] std::vector<int> wall_tilelayer() const { return m_map_data.wall_tilelayer; }
+  //! @brief Get the path tile layer's tile index list.
+  //! @return std::vector<int>
+  [[nodiscard]] std::vector<int> path_tilelayer() const { return m_map_data.path_tilelayer; }
   //! @brief Get the file path of the floor tileset's image.
   //! @return std::filesystem::path
   [[nodiscard]] std::filesystem::path floor_tileset_image() const { return m_map_data.floor_tileset.tileset_image; }
@@ -146,6 +170,9 @@ public:
   //! @brief Get the wall tileset.
   //! @return WallTileSet
   [[nodiscard]] WallTileSet wall_tileset() const { return m_map_data.wall_tileset; }
+  //! @brief Get the path tileset
+  //! @return PathTileSet
+  [[nodiscard]] PathTileSet path_tileset() const { return m_map_data.path_tileset; }
 
   //! @brief  Get the bounding box (in pixels) of every 'spawn' tile in the levelgen layer.
   //!         Used to size procgen spawn rooms (e.g. Cmp::Crypt::RoomStart) to match the authored spawn area.
@@ -172,6 +199,12 @@ private:
   //! @return true if a wall tileset was found and deserialized
   //! @return false otherwise
   bool deserialize_int_wall_tileset( const nlohmann::json &json );
+
+  //! @brief Get the embedded path tileset from the JSON object
+  //! @param json The JSON input
+  //! @return true if a path tileset was found and deserialized
+  //! @return false otherwise
+  bool deserialize_int_path_tileset( const nlohmann::json &json );
 
   //! @brief Get the external main tileset from the JSON object
   //! @param scene_tilemap_path Used for meaningful logging

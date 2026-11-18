@@ -71,7 +71,6 @@
         {
          "draworder":"topdown",
          "id":5,
-         "locked":true,
          "name":"multiblock",
          "objects":[
                 {
@@ -96,7 +95,6 @@
         {
          "draworder":"topdown",
          "id":4,
-         "locked":true,
          "name":"solid",
          "objects":[
                 {

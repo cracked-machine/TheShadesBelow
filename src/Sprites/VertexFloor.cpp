@@ -4,6 +4,7 @@
 #include <SceneControl/SceneData.hpp>
 #include <Sprites/VertexFloor.hpp>
 #include <Utils/Constants.hpp>
+#include <Utils/JsonDeserializer.hpp>
 #include <Utils/Utils.hpp>
 
 #include <SFML/Graphics/Color.hpp>
@@ -68,12 +69,6 @@ void VertexFloor::create( const PathFinding::SpatialHashGrid &void_sm, const Sce
   const unsigned int tiles_per_row = texture_size.x / tile_size.x;
 
   Cmp::RandomInt floortile_picker{ 0, static_cast<int>( sc->floor_tileset_pool().size() - 1 ) };
-  // let json fix seed if specified as non-zero
-  // if ( sc->get_random_seed() != 0 )
-  // {
-  //   floortile_picker.seed( static_cast<unsigned long>( sc->get_random_seed() ) );
-  //   SPDLOG_DEBUG( "Using random seed: {}", sc->random_seed );
-  // }
 
   // resize the vertex array for squares made of two triangles
   m_vertices.setPrimitiveType( sf::PrimitiveType::Triangles );

@@ -16,6 +16,7 @@ void SceneData::deserialize( const std::filesystem::path &json_scene_file_path )
 
   bool found_floor_tileset = false;
   bool found_wall_tileset = false;
+  bool found_path_tileset = false;
   bool found_main_tileset = false;
 
   deserialize_tilelayers( scene_tilemap_json );
@@ -24,6 +25,7 @@ void SceneData::deserialize( const std::filesystem::path &json_scene_file_path )
     // embedded tilesets
     if ( not found_floor_tileset ) { found_floor_tileset = deserialize_int_floor_tileset( tileset ); }
     if ( not found_wall_tileset ) { found_wall_tileset = deserialize_int_wall_tileset( tileset ); }
+    if ( not found_path_tileset ) { found_path_tileset = deserialize_int_path_tileset( tileset ); }
 
     // external 'main' tileset metadata
     if ( not found_main_tileset ) { found_main_tileset = deserialize_ext_main_tileset( json_scene_file_path, tileset ); }
@@ -58,6 +60,16 @@ bool SceneData::deserialize_int_wall_tileset( const nlohmann::json &json )
   m_map_data.wall_tileset.first_gid = get_int( json, "firstgid" );
   m_map_data.wall_tileset.name = get_string( json, "name" );
   m_map_data.wall_tileset.tile_size = sf::Vector2u( get_int( json, "tilewidth" ), get_int( json, "tileheight" ) );
+  return true;
+}
+
+bool SceneData::deserialize_int_path_tileset( const nlohmann::json &json )
+{
+
+  if ( not json.contains( "class" ) or json.at( "class" ).get<std::string>() != "path" ) return false;
+  m_map_data.path_tileset.first_gid = get_int( json, "firstgid" );
+  m_map_data.path_tileset.name = get_string( json, "name" );
+  m_map_data.path_tileset.tile_size = sf::Vector2u( get_int( json, "tilewidth" ), get_int( json, "tileheight" ) );
   return true;
 }
 
@@ -97,13 +109,14 @@ bool SceneData::deserialize_ext_main_tileset( const std::filesystem::path &scene
       else if ( type == "player"   ) { m_map_data.main_tileset.player_tile_id   = id; }
       else if ( type == "exit"     ) { m_map_data.main_tileset.exit_tile_id     = id; }
       else if ( type == "reserved" ) { m_map_data.main_tileset.reserved_tile_id = id; }
+      else if ( type == "path"     ) { m_map_data.main_tileset.path_tile_id     = id; }
       else { SPDLOG_WARN( "Unknown 'type' found in main tileset: {}", type ); }
       // clang-format on
 
       found_types.insert( type );
     }
 
-    for ( const std::string required : { "void", "wall", "open", "spawn", "player", "exit", "reserved" } )
+    for ( const std::string required : { "void", "wall", "open", "spawn", "player", "exit", "reserved", "path" } )
     {
       if ( not found_types.contains( required ) ) throw std::runtime_error( "Missing required tile type '" + required + "' in main tileset" );
     }
@@ -196,6 +209,7 @@ void SceneData::deserialize_tilelayers( const nlohmann::json &json )
       if ( layer.at( "name" ).get<std::string>() == "levelgen" ) { get_list( layer, "data", m_map_data.levelgen_tilelayer ); }
       if ( layer.at( "name" ).get<std::string>() == "player" ) { get_list( layer, "data", m_map_data.player_tilelayer ); }
       if ( layer.at( "name" ).get<std::string>() == "wall" ) { get_list( layer, "data", m_map_data.wall_tilelayer ); }
+      if ( layer.at( "name" ).get<std::string>() == "path" ) { get_list( layer, "data", m_map_data.path_tilelayer ); }
       if ( layer.at( "name" ).get<std::string>() == "solid" ) { get_solid_list( layer, m_map_data.solid_objectlayer ); }
       if ( layer.at( "name" ).get<std::string>() == "multiblock" ) { get_multiblock_list( layer, m_map_data.multiblock_objectlayer ); }
       if ( layer.at( "name" ).get<std::string>() == "developer" ) { get_developer_list( layer, m_map_data.developer_objectlayer ); }

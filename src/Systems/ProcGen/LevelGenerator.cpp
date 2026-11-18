@@ -173,6 +173,25 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
     }
   }
 
+  // Paths
+  if ( not scene_data.path_tileset().name.empty() )
+  {
+    const Sprites::SpriteSheet &path_ms = Sys::SpriteStore::instance().get( Sys::SpriteKey( scene_data.path_tileset().name ) );
+    for ( const auto [i, tile] : std::views::enumerate( scene_data.path_tilelayer() ) )
+    {
+      auto row = i / w; // increments every 'w' tiles
+      auto col = i % w; // wraps back to zero every 'w' tiles
+      sf::Vector2f new_pos( static_cast<float>( col ) * Constants::kGridSizePxF.x, static_cast<float>( row ) * Constants::kGridSizePxF.y );
+      if ( tile >= scene_data.path_tileset().first_gid )
+      {
+        // get the relative index using the offset from the json data
+        auto entt = Factory::Wall::add_path_entity( reg(), new_pos, path_ms, tile - scene_data.path_tileset().first_gid );
+        // reserve it so obstacle/cellular-automata procgen doesn't repurpose the path entity (and overwrite its sprite)
+        m_reserved_sm->insert( entt, Cmp::Position( new_pos, Constants::kGridSizePxF ) );
+      }
+    }
+  }
+
   // Levelgen layer
   for ( const auto [i, tile] : std::views::enumerate( scene_data.levelgen_tilelayer() ) )
   {

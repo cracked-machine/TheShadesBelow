@@ -27,6 +27,14 @@ namespace Game::Factory::Wall
 //! @return entt::entity
 entt::entity add_wall_entity( entt::registry &reg, const sf::Vector2f &pos, const Sprites::SpriteSheet &ms, std::size_t sprite_index );
 
+//! @brief Create a path entity.
+//! @param reg
+//! @param pos
+//! @param ms
+//! @param sprite_index
+//! @return entt::entity
+entt::entity add_path_entity( entt::registry &reg, const sf::Vector2f &pos, const Sprites::SpriteSheet &ms, std::size_t sprite_index );
+
 //! @brief Create a bare position entity, without any sprite or wall component. The caller is
 //! responsible for reserving the entity's position (it is not reserved here).
 //! @param reg

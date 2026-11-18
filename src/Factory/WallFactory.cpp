@@ -40,6 +40,22 @@ entt::entity add_wall_entity( entt::registry &reg, const sf::Vector2f &pos, cons
   return entity;
 }
 
+entt::entity add_path_entity( entt::registry &reg, const sf::Vector2f &pos, const Sprites::SpriteSheet &ms, std::size_t sprite_index )
+{
+  auto entity = reg.create();
+  reg.emplace_or_replace<Cmp::Position>( entity, pos, Constants::kGridSizePxF );
+  // clang-format off
+  reg.emplace_or_replace<Cmp::AnimData>( entity, Cmp::AnimData::Config{ 
+      .sprite_type = ms.type(), 
+      .frame_index_offset = static_cast<size_t>(sprite_index),
+      .enabled = true
+  });
+  // clang-format on
+  // path tiles are flat ground: the sheet's AbsoluteZOrder keeps them above the floor and behind everything y-sorted
+  reg.emplace_or_replace<Cmp::ZOrderValue>( entity, ms.zorder( sprite_index, pos.y ) );
+  return entity;
+}
+
 entt::entity add_reservedposition( entt::registry &reg, const sf::Vector2f &pos )
 {
   auto entity = reg.create();
