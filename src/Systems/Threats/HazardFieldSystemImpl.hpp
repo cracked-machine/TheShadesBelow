@@ -19,6 +19,7 @@
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Wall.hpp>
+#include <Components/WorldTile.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
@@ -141,17 +142,17 @@ sf::Vector2f HazardFieldSystem<HazardType>::update( sf::Time dt )
 template <ValidHazard HazardType>
 auto HazardFieldSystem<HazardType>::candidate_view()
 {
-  // every world position (Cmp::Armable) is a candidate. Obstacle caps sit over a neighbouring world position and are
+  // every world tile (Cmp::WorldTile) is a candidate. Obstacle caps sit over a neighbouring world position and are
   // removed implicitly along with their obstacle by Factory::Obstacle::remove_obstacle(); loot/NPC containers and walls
   // are never swallowed. Multiblocks, the exit, the spawn area and world items are excluded via reserved_sm by the callers.
-  return reg().template view<Cmp::Armable, Cmp::Position>( Detail::CandidateExclude<HazardType, typename Traits::ExcludeHazard>{} );
+  return reg().template view<Cmp::WorldTile, Cmp::Position>( Detail::CandidateExclude<HazardType, typename Traits::ExcludeHazard>{} );
 }
 
 //! @copydoc HazardFieldSystem::in_candidate_view()
 template <ValidHazard HazardType>
 bool HazardFieldSystem<HazardType>::in_candidate_view( entt::entity entity )
 {
-  return reg().valid( entity ) and reg().template all_of<Cmp::Armable, Cmp::Position>( entity ) and
+  return reg().valid( entity ) and reg().template all_of<Cmp::WorldTile, Cmp::Position>( entity ) and
          not Detail::has_any_excluded( reg(), entity, Detail::CandidateExclude<HazardType, typename Traits::ExcludeHazard>{} );
 }
 
@@ -184,7 +185,7 @@ std::vector<sf::Vector2f> HazardFieldSystem<HazardType>::init_hazard_field( std:
   const unsigned long seed = Sys::PersistSystem::get<typename Traits::SeedType>( reg() ).get_value();
   std::mt19937 rng( seed > 0 ? static_cast<std::mt19937::result_type>( seed ) : std::random_device{}() );
 
-  // world positions (Cmp::Armable) that the field may start on, indexed by grid cell - the same rules as spreading
+  // world tiles (Cmp::WorldTile) that the field may start on, indexed by grid cell - the same rules as spreading
   const auto cell_key = []( sf::Vector2f p )
   {
     return ( static_cast<std::int64_t>( std::floor( p.x / Constants::kGridSizePxF.x ) ) << 32 ) bitor

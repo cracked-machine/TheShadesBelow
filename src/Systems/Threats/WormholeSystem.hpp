@@ -71,7 +71,7 @@ private:
   //! @return bool true if the player is flying over the singularity before the threshold - skip this frame's jump processing.
   bool abort_jump_if_flying_over();
 
-  //! @brief Remove all entities within the `bounds` and replace with new Position/Armable entities.
+  //! @brief Remove all entities within the `bounds` and replace them with new world tiles (Cmp::WorldTile).
   //! @param bounds The world-space rect to sweep for occupying entities.
   void clear_footprint( const sf::FloatRect &bounds );
 

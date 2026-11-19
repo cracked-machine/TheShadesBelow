@@ -98,7 +98,7 @@ private:
   //! @param dt Frame delta, accumulated into m_spread_update_timer
   sf::Vector2f update_hazard_field( sf::Time dt );
 
-  //! @brief View of the world positions (Cmp::Armable) a field may start on or spread into, before the
+  //! @brief View of the world tiles (Cmp::WorldTile) a field may start on or spread into, before the
   //! reserved-positions check: excludes obstacle caps, walls, loot/NPC containers and existing hazard cells.
   auto candidate_view();
 

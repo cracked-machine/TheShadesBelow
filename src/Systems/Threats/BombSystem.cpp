@@ -368,8 +368,9 @@ void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_en
 
   if ( auto world_tile_sm = m_world_tile_sm.lock() )
   {
-    // only the cells inside the blast square, instead of every Armable entity in the scene. The other Armable
-    // entities (multiblock segments) sit on reserved cells, whose floor tile already takes the marker path above.
+    // only the world tiles inside the blast square, instead of every Armable entity in the scene. The Armable
+    // entities that aren't world tiles (multiblock segments) sit on reserved cells, whose floor tile already takes the
+    // marker path above; NPCs are excluded anyway.
     const sf::Vector2f epicenter_px( static_cast<float>( centerTile.x ) * Constants::kGridSizePxF.x,
                                      static_cast<float>( centerTile.y ) * Constants::kGridSizePxF.y );
     const sf::FloatRect blast_bounds( epicenter_px - Constants::kGridSizePxF * static_cast<float>( blast_radius ),

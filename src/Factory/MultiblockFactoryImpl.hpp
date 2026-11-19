@@ -9,6 +9,7 @@
 #include <Components/Altar/Segment.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Armable.hpp>
+#include <Components/WorldTile.hpp>
 #include <Components/Crypt/Entrance.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Grave/PlantSegment.hpp>
@@ -182,14 +183,14 @@ std::vector<entt::entity> create_multiblock_segments( entt::registry &reg, entt:
   PathFinding::SpatialHashGrid segment_map;
 
   // cache upfront so we dont add mutate the view whilst iterating it.
-  // Only accept genuine world tiles (created with Cmp::Armable): a bare Cmp::Position view
+  // Only accept genuine world tiles (Cmp::WorldTile): a bare Cmp::Position view
   // also matches the player, NPCs and dropped items standing inside the bounds, which would
   // get segments created at their (possibly off-grid) positions and be reserved.
   std::vector<entt::entity> world_pos_entt_list;
   const auto consider_tile = [&]( entt::entity pos_entity, const Cmp::Position &pos_cmp )
   {
     if ( not pos_cmp.findIntersection( new_multiblock_bounds ) ) return;
-    if ( not reg.all_of<Cmp::Armable>( pos_entity ) ) return;
+    if ( not reg.all_of<Cmp::WorldTile>( pos_entity ) ) return;
     if ( reg.any_of<MULTIBLOCK, MBSEGMENT, Cmp::Player::Character, Cmp::Npc::NPC, Cmp::WorldItem>( pos_entity ) ) return;
     // Plants may be grown over an already-reserved tile (e.g. an obstacle) - every other
     // multiblock type still needs the tile free to avoid overlapping another structure.

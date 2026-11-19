@@ -2,7 +2,7 @@
 #include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
-#include <Components/Armable.hpp>
+#include <Components/WorldTile.hpp>
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/ObjectiveMultiBlock.hpp>
 #include <Components/Grave/ExitMultiBlock.hpp>
@@ -444,7 +444,7 @@ bool FlyingSystem::is_free_landing_area( const sf::FloatRect &area, bool allow_h
 {
   const Cmp::RectBounds cell_bounds = Cmp::RectBounds::scaled( area.position, area.size, 1.f );
   // must be a walkable world position, i.e. not void/out of bounds
-  if ( not any_overlaps<Cmp::Armable>( reg(), cell_bounds ) ) return false;
+  if ( not any_overlaps<Cmp::WorldTile>( reg(), cell_bounds ) ) return false;
   if ( any_overlaps<Cmp::Player::NoPath>( reg(), cell_bounds ) ) return false;
   if ( any_overlaps<Cmp::Player::PendingNoPath>( reg(), cell_bounds ) ) return false;
   // sinkholes/lava: the hazard systems make a landed player fall in

@@ -52,12 +52,12 @@
 #include <Components/Persistent/AzazelFireballSpeed.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
-#include <Components/Persistent/NpcRenderOffset.hpp>
 #include <Components/Persistent/NpcCrowFlightSpeed.hpp>
-#include <Components/Persistent/NpcCrowPerchSpeed.hpp>
-#include <Components/Persistent/NpcCrowPerchRange.hpp>
 #include <Components/Persistent/NpcCrowMaxPerchWait.hpp>
+#include <Components/Persistent/NpcCrowPerchRange.hpp>
+#include <Components/Persistent/NpcCrowPerchSpeed.hpp>
 #include <Components/Persistent/NpcMimicTint.hpp>
+#include <Components/Persistent/NpcRenderOffset.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
 #include <Components/Plant/KillNpcTimer.hpp>
@@ -200,7 +200,7 @@ void NpcSystem::check_npc_proximity( sf::Time dt )
 
 void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
 {
-  SPDLOG_INFO( "Creating NPC {}, max {}", event.m_npc_type.str(), event.m_max_instances );
+  SPDLOG_DEBUG( "Creating NPC {}, max {}", event.m_npc_type.str(), event.m_max_instances );
   if ( event.m_max_instances > 0 and not event.m_source_uuid.empty() )
   {
     if ( Utils::Npc::count_spawned_by( reg(), event.m_source_uuid ) >= event.m_max_instances ) return;
@@ -231,7 +231,7 @@ void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
   if ( auto navmesh = navmesh_for( npc_entt ) ) { navmesh->insert( npc_entt, reg().get<Cmp::Position>( npc_entt ) ); }
   if ( not event.m_source_uuid.empty() )
   {
-    SPDLOG_INFO( "Created SpawnedBy cmp: {}", event.m_source_uuid.str() );
+    SPDLOG_DEBUG( "Created SpawnedBy cmp: {}", event.m_source_uuid.str() );
     reg().emplace_or_replace<Cmp::Npc::SpawnedBy>( npc_entt, event.m_source_uuid );
   }
   if ( event.m_on_created ) { event.m_on_created( npc_entt ); }
@@ -1358,11 +1358,12 @@ void NpcSystem::check_plant_kill_npc( sf::Time dt )
     {
       // each kill plays the plant's proximity_action "final" sfx (see items.json)
       const auto &kill_sfx = proximity_action.sfx().final;
-      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, kill_npc->death_anim,
-                                                                  kill_sfx.empty() ? std::nullopt : std::optional<std::string>( kill_sfx ) ) );
+      get_systems_event_queue().trigger(
+          Events::DestroyNpcEvent( npc_entt, kill_npc->death_anim, kill_sfx.empty() ? std::nullopt : std::optional<std::string>( kill_sfx ) ) );
       if ( kill_npc->wear_per_kill > 0.f ) get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, kill_npc->wear_per_kill ) );
     }
-    get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( plant_worlditem_cmp.item_type, Cmp::ProximityAction::kKey, proximity_action ) );
+    get_systems_event_queue().trigger(
+        Events::GrimoireItemUpdateEvent( plant_worlditem_cmp.item_type, Cmp::ProximityAction::kKey, proximity_action ) );
     // a plant worn out by its kills withers away, like a fully foraged one
     if ( Utils::is_plant_depleted( reg(), plant_entt ) ) worn_out_plants.push_back( plant_entt );
   }

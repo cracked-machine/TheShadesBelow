@@ -126,8 +126,8 @@ entt::entity create_npc( entt::registry &reg, Cmp::Position pos_cmp, const Sys::
   reg.emplace_or_replace<Cmp::UUID>( new_pos_entity, Cmp::UUID::generate() );
   reg.emplace_or_replace<Cmp::Npc::NPC>( new_pos_entity, npc_cmp );
   // lift the sprite so it looks centred on its grid cell, as the player does. Visual only
-  reg.emplace_or_replace<Cmp::AbsoluteRenderOffset>(
-      new_pos_entity, sf::Vector2f{ 0.f, Sys::PersistSystem::get<Cmp::Persist::NpcRenderOffset>( reg ).get_value() } );
+  reg.emplace_or_replace<Cmp::AbsoluteRenderOffset>( new_pos_entity,
+                                                     sf::Vector2f{ 0.f, Sys::PersistSystem::get<Cmp::Persist::NpcRenderOffset>( reg ).get_value() } );
 
   // clang-format off
   reg.emplace_or_replace<Cmp::AnimData>( new_pos_entity, Cmp::AnimData::Config{ 
@@ -136,7 +136,7 @@ entt::entity create_npc( entt::registry &reg, Cmp::Position pos_cmp, const Sys::
   });
   // clang-format on
 
-  SPDLOG_INFO( "Spawned NPC {} ({}) at position ({}, {})", static_cast<int>( new_pos_entity ), npc_type, pos_cmp.position.x, pos_cmp.position.y );
+  SPDLOG_DEBUG( "Spawned NPC {} ({}) at position ({}, {})", static_cast<int>( new_pos_entity ), npc_type, pos_cmp.position.x, pos_cmp.position.y );
 
   if ( npc_type == "npc.ghost" )
   {

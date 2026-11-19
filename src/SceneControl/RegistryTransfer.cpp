@@ -3,6 +3,7 @@
 #include <Components/AbsoluteRotation.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Armable.hpp>
+#include <Components/WorldTile.hpp>
 #include <Components/Crypt/EnteredDoor.hpp>
 #include <Components/Crypt/Lever.hpp>
 #include <Components/Crypt/ObjectiveMultiBlock.hpp>
@@ -136,7 +137,7 @@ RegistryTransfer::RegCopy RegistryTransfer::copy_reg( IScene &scene, Scene::RegC
       if ( source_registry.any_of<Cmp::Player::Character>( entity ) ) { continue; }
 
       // Skip transfer on deny list components
-      if ( source_registry.any_of<Cmp::Obstacle, Cmp::Armable, Cmp::Npc::NoPathFinding, Cmp::FootStepTimer, Cmp::FootStepAlpha, Cmp::Crypt::RoomOpen,
+      if ( source_registry.any_of<Cmp::Obstacle, Cmp::Armable, Cmp::WorldTile, Cmp::Npc::NoPathFinding, Cmp::FootStepTimer, Cmp::FootStepAlpha, Cmp::Crypt::RoomOpen,
                                   Cmp::Crypt::RoomClosed, Cmp::Crypt::RoomStart, Cmp::Crypt::RoomEnd, Cmp::Crypt::PassageBlock, Cmp::Crypt::Lever,
                                   Cmp::Crypt::ObjectiveMultiBlock, Cmp::Player::ArrowCompass>( entity ) )
       {

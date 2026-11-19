@@ -35,7 +35,7 @@ PathFinding::SpatialHashGridSharedPtr create_player_navmesh( entt::registry &reg
 //! @return The new navmesh.
 PathFinding::SpatialHashGridSharedPtr create_open_navmesh( entt::registry &reg );
 
-//! @brief Build the world-tile lookup grid: every Cmp::Armable + Cmp::Position entity, one bucket per map cell.
+//! @brief Build the world-tile lookup grid: every Cmp::WorldTile entity, one bucket per map cell.
 //! @note Call straight after LevelGenerator::build_scene_from_data(), while only the world tiles exist.
 //! Used only to find "the world tile at this cell" without scanning the registry - see Scene::m_world_tile_sm.
 //! @param reg

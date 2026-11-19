@@ -55,6 +55,7 @@
 #include <Components/Spring/HealingSpringBuildingSegment.hpp>
 #include <Components/Spring/HealingSpringEntrance.hpp>
 #include <Components/Wall.hpp>
+#include <Components/WorldTile.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <PathFinding/AStar.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
@@ -518,6 +519,7 @@ void DebugOverlaySystem::render_ui_entity_inspect()
     if ( reg().all_of<Cmp::HealingSpringEntrance>( entity ) ) text_line( " HealingSpringEntrance", sf::Color::Cyan );
     if ( reg().all_of<Cmp::BarberSurgeonEntrance>( entity ) ) text_line( " BarberSurgeonEntrance", sf::Color::Cyan );
     if ( reg().all_of<Cmp::WorldItem>( entity ) ) text_line( " WorldItem", sf::Color::Green );
+    if ( reg().all_of<Cmp::WorldTile>( entity ) ) text_line( " WorldTile", sf::Color::Green );
     if ( reg().all_of<Cmp::Player::Illuminated>( entity ) ) text_line( " Illuminated", sf::Color::Yellow );
     if ( reg().all_of<Cmp::Grave::TrailMarker>( entity ) ) text_line( " TrailMarker", sf::Color::Green );
     if ( reg().all_of<Cmp::Grave::TrailStart>( entity ) ) text_line( " TrailStart", sf::Color::Yellow );
@@ -587,7 +589,7 @@ void DebugOverlaySystem::render_spatial_grid_neighbours( const Cmp::Position &qu
 }
 
 void DebugOverlaySystem::render_pathfinding_vector( const Cmp::Position &start_pos_cmp, const Cmp::Position &end_pos_cmp, sf::Color color,
-                                                   PathFinding::QueryCompass query_compass, std::span<const sf::Vector2i> footprint_cells )
+                                                    PathFinding::QueryCompass query_compass, std::span<const sf::Vector2i> footprint_cells )
 {
   if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), start_pos_cmp ) ) return;
 
