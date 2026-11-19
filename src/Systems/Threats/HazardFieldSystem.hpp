@@ -64,10 +64,14 @@ public:
   //! @brief init the weak pointers for the reserved-positions grid and the NPC navmesh.
   //! @param reserved_sm Positions the field must never spread into.
   //! @param npc_navmesh NPC pathfinding navmesh; cells are removed from it as the field spreads over open floor.
-  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &npc_navmesh )
+  //! @param world_tile_sm World-tile lookup (see Scene::m_world_tile_sm) used to find spread candidates around each
+  //! hazard cell; null falls back to scanning candidate_view().
+  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &npc_navmesh,
+             const PathFinding::SpatialHashGridSharedPtr &world_tile_sm = nullptr )
   {
     m_reserved_sm = reserved_sm;
     m_npc_navmesh = npc_navmesh;
+    m_world_tile_sm = world_tile_sm;
   }
 
   //! @brief Spread the hazard field, then check for player and NPC collisions with it.
@@ -97,6 +101,10 @@ private:
   //! @brief View of the world positions (Cmp::Armable) a field may start on or spread into, before the
   //! reserved-positions check: excludes obstacle caps, walls, loot/NPC containers and existing hazard cells.
   auto candidate_view();
+
+  //! @brief Whether `entity` would appear in candidate_view(), for entities found via m_world_tile_sm instead of the view.
+  //! @param entity Any entity, possibly invalid.
+  bool in_candidate_view( entt::entity entity );
 
   //! @brief Whether a candidate_view() entity can become a hazard cell: an obstacle's main block, or open
   //! floor when HazardTraits::spreads_to_open_floor.
@@ -155,6 +163,9 @@ private:
 
   //! @brief NPC pathfinding navmesh, so NPCs stop routing over cells the field spreads into.
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;
+
+  //! @brief World-tile lookup, so spreading only checks the 3x3 cells around each hazard cell.
+  PathFinding::SpatialHashGridWeakPtr m_world_tile_sm;
 
   //! @brief Spatial index of this system's hazard cells (one bucket per grid cell), used to track the
   //! structure of the field as it spreads.

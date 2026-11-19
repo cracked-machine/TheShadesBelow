@@ -41,6 +41,7 @@
 #include <string_view>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace Game::Sys
 {
@@ -97,6 +98,18 @@ inline const std::array<SinkholeDiagonal, 4> kSinkholeDiagonalOffsets{ {
     { { Constants::kGridSizePxF.x, Constants::kGridSizePxF.y }, kSouth | kEast, Cmp::Hazard::SinkholeCorners::kSouthEast },
     { { -Constants::kGridSizePxF.x, Constants::kGridSizePxF.y }, kSouth | kWest, Cmp::Hazard::SinkholeCorners::kSouthWest },
 } };
+//! @brief The components that keep a world position out of HazardFieldSystem::candidate_view(); shared with
+//! HazardFieldSystem::in_candidate_view() so the view and the grid lookup can't drift apart.
+template <typename HazardType, typename ExcludeHazard>
+using CandidateExclude = entt::exclude_t<Cmp::ObstacleCap, Cmp::Wall, Cmp::LootContainer, Cmp::Npc::Container, HazardType, ExcludeHazard>;
+
+//! @brief True if `entity` has any of the components in an entt::exclude_t list.
+template <typename... Excluded>
+bool has_any_excluded( const entt::registry &reg, entt::entity entity, entt::exclude_t<Excluded...> )
+{
+  return reg.any_of<Excluded...>( entity );
+}
+
 } // namespace Detail
 
 //! @copydoc HazardFieldSystem::HazardFieldSystem(entt::registry&,sf::RenderWindow&,Audio::SoundBank&)
@@ -131,8 +144,15 @@ auto HazardFieldSystem<HazardType>::candidate_view()
   // every world position (Cmp::Armable) is a candidate. Obstacle caps sit over a neighbouring world position and are
   // removed implicitly along with their obstacle by Factory::Obstacle::remove_obstacle(); loot/NPC containers and walls
   // are never swallowed. Multiblocks, the exit, the spawn area and world items are excluded via reserved_sm by the callers.
-  return reg().template view<Cmp::Armable, Cmp::Position>(
-      entt::exclude<Cmp::ObstacleCap, Cmp::Wall, Cmp::LootContainer, Cmp::Npc::Container, HazardType, typename Traits::ExcludeHazard> );
+  return reg().template view<Cmp::Armable, Cmp::Position>( Detail::CandidateExclude<HazardType, typename Traits::ExcludeHazard>{} );
+}
+
+//! @copydoc HazardFieldSystem::in_candidate_view()
+template <ValidHazard HazardType>
+bool HazardFieldSystem<HazardType>::in_candidate_view( entt::entity entity )
+{
+  return reg().valid( entity ) and reg().template all_of<Cmp::Armable, Cmp::Position>( entity ) and
+         not Detail::has_any_excluded( reg(), entity, Detail::CandidateExclude<HazardType, typename Traits::ExcludeHazard>{} );
 }
 
 //! @copydoc HazardFieldSystem::is_candidate()
@@ -309,10 +329,14 @@ sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field( sf::Time dt )
   m_spread_update_timer = sf::Time::Zero;
 
   auto reserved_sm = m_reserved_sm.lock();
+  auto world_tile_sm = m_world_tile_sm.lock();
   auto hazard_view = reg().template view<HazardType, Cmp::Position>();
   auto candidate_view = this->candidate_view();
 
   Cmp::RandomInt hazard_spread_picker( 0, Traits::odds ); // 1 in 8 chance for picking an adjacent obstacle
+
+  // reused per hazard cell: the 3x3 neighbourhood from the world-tile / field grids
+  std::vector<entt::entity> nearby_entts;
 
   for ( auto [hazard_entity, hazard_cmp, position_cmp] : hazard_view.each() )
   {
@@ -323,19 +347,42 @@ sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field( sf::Time dt )
     auto hazard_hitbox = sf::FloatRect( position_cmp.position - Constants::kGridSizePxF, Constants::kGridSizePxF * 3.f );
     int adjacent_hazard_fields = 0;
 
-    // add new hazard cell
-    for ( auto candidate_entity : candidate_view )
+    // Roll for one candidate; returns true if it was promoted to a new hazard cell.
+    const auto try_spread_to = [&]( entt::entity candidate_entity, const Cmp::Position &candidate_pos_cmp ) -> bool
     {
-      const auto &candidate_pos_cmp = candidate_view.template get<Cmp::Position>( candidate_entity );
-      if ( not hazard_hitbox.findIntersection( candidate_pos_cmp ) ) continue;
-      if ( reserved_sm && not reserved_sm->at( candidate_pos_cmp ).empty() ) continue;
-      if ( not is_candidate( candidate_entity ) ) continue;
+      if ( not hazard_hitbox.findIntersection( candidate_pos_cmp ) ) return false;
+      if ( reserved_sm and not reserved_sm->at( candidate_pos_cmp ).empty() ) return false;
+      if ( not is_candidate( candidate_entity ) ) return false;
       SPDLOG_DEBUG( "Hazard candidate cell {}", static_cast<uint32_t>( candidate_entity ) );
 
       auto hazard_pick = hazard_spread_picker.gen();
       SPDLOG_DEBUG( "hazard_pick:{}", hazard_pick );
-      if ( hazard_pick == 0 )
+      return hazard_pick == 0;
+    };
+
+    // add new hazard cell
+    if ( world_tile_sm )
+    {
+      // only the 3x3 cells around this hazard cell, shuffled so no direction is favoured by bucket order
+      nearby_entts = world_tile_sm->neighbours( position_cmp );
+      std::ranges::shuffle( nearby_entts, hazard_spread_picker );
+      for ( auto candidate_entity : nearby_entts )
       {
+        if ( not in_candidate_view( candidate_entity ) ) continue;
+        // copy: promote_to_hazard_cell() can swap-and-pop the Cmp::Position storage (see its doc)
+        const Cmp::Position candidate_pos_cmp = reg().template get<Cmp::Position>( candidate_entity );
+        if ( not try_spread_to( candidate_entity, candidate_pos_cmp ) ) continue;
+        promote_to_hazard_cell( candidate_entity, candidate_pos_cmp, reserved_sm );
+        SPDLOG_DEBUG( "New hazard field created at entity {}", static_cast<uint32_t>( candidate_entity ) );
+        return candidate_pos_cmp.position; // only add one hazard cell per update period
+      }
+    }
+    else
+    {
+      for ( auto candidate_entity : candidate_view )
+      {
+        const auto &candidate_pos_cmp = candidate_view.template get<Cmp::Position>( candidate_entity );
+        if ( not try_spread_to( candidate_entity, candidate_pos_cmp ) ) continue;
         // copy: promote_to_hazard_cell() can swap-and-pop the Cmp::Position storage (see its doc)
         const Cmp::Position new_cell_pos = candidate_pos_cmp;
         promote_to_hazard_cell( candidate_entity, new_cell_pos, reserved_sm );
@@ -344,11 +391,18 @@ sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field( sf::Time dt )
       }
     }
 
-    // update adjacent hazard cell count
-    for ( auto [adj_hazard_entity, adj_hazard_cmp, adj_pos_cmp] : hazard_view.each() )
+    // update adjacent hazard cell count from this system's own hazard-cell grid (3x3 around this cell),
+    // instead of comparing against every hazard cell. De-duplicate in case an entity was inserted twice.
+    nearby_entts = m_field_sm.neighbours( position_cmp );
+    std::ranges::sort( nearby_entts );
+    const auto duplicates = std::ranges::unique( nearby_entts );
+    nearby_entts.erase( duplicates.begin(), duplicates.end() );
+    for ( auto adj_hazard_entity : nearby_entts )
     {
-      if ( hazard_entity == adj_hazard_entity ) continue;
-      if ( hazard_hitbox.findIntersection( adj_pos_cmp ) ) { adjacent_hazard_fields++; }
+      if ( hazard_entity == adj_hazard_entity or not reg().valid( adj_hazard_entity ) ) continue;
+      if ( not reg().template all_of<HazardType>( adj_hazard_entity ) ) continue;
+      const auto *adj_pos_cmp = reg().template try_get<Cmp::Position>( adj_hazard_entity );
+      if ( adj_pos_cmp and hazard_hitbox.findIntersection( *adj_pos_cmp ) ) { adjacent_hazard_fields++; }
     }
 
     // if the hazard field is surrounded by hazard fields, then we can exclude it from future

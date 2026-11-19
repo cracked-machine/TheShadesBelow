@@ -53,12 +53,23 @@ void ExitSystem::create_exit( sf::Vector2f pos )
   const auto &kGraveExitSpritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.exit.locked" );
   auto reserved_sm = m_reserved_sm.lock();
 
+  auto world_tile_sm = m_world_tile_sm.lock();
+
   // Remove the existing world/obstacle entity at the exit origin first
-  const auto world_entt = Utils::get_world_pos_entt( reg(), Cmp::Position( pos, Constants::kGridSizePxF ) );
+  const Cmp::Position origin_cell( pos, Constants::kGridSizePxF );
+  entt::entity world_entt = entt::null;
+  if ( world_tile_sm )
+  {
+    for ( auto tile_entt : world_tile_sm->at( origin_cell ) )
+    {
+      if ( reg().valid( tile_entt ) ) { world_entt = tile_entt; break; }
+    }
+  }
+  else { world_entt = Utils::get_world_pos_entt( reg(), origin_cell ); }
   if ( world_entt != entt::null ) { Factory::Obstacle::remove_obstacle( reg(), world_entt, Factory::Obstacle::DeleteExtras::Yes, reserved_sm ); }
 
   Factory::Multiblock::add_multiblock_with_segments<Cmp::Grave::ExitMultiBlock, Cmp::Grave::ExitSegment>( reg(), pos, kGraveExitSpritesheet, 0, 0,
-                                                                                                        reserved_sm.get() );
+                                                                                                        reserved_sm.get(), world_tile_sm.get() );
   SPDLOG_INFO( "Added {} to ({}, {})", kGraveExitSpritesheet.type(), pos.x, pos.y );
 }
 

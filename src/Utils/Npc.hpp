@@ -24,19 +24,6 @@ struct LightSources;
 namespace Game::Utils::Npc
 {
 
-//! @brief Find the world entity (excluding player/NPC/footstep entities) whose position intersects `npc_pos`.
-//! @param reg reference to the entt registry
-//! @param npc_pos The position to test for intersection.
-//! @return entt::entity The matching world entity, or entt::null if none intersects.
-entt::entity get_world_pos_entt( entt::registry &reg, Cmp::Position npc_pos );
-
-//! @brief Find the world entity (excluding player/NPC/footstep entities) whose position intersects
-//! `npc_entt`'s own position.
-//! @param reg reference to the entt registry
-//! @param npc_entt The NPC entity whose Cmp::Position is used for the intersection test.
-//! @return entt::entity The matching world entity, or entt::null if `npc_entt` has no Cmp::Position or none intersects.
-entt::entity get_world_pos_entt( entt::registry &reg, entt::entity npc_entt );
-
 //! @brief Count the live NPCs spawned by a world item (see Cmp::Npc::SpawnedBy and Cmp::SpawnNpcEffect::max_instances).
 //! @param reg reference to the entt registry
 //! @param source_uuid The Cmp::UUID of the spawning world item.

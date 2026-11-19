@@ -24,9 +24,14 @@ public:
   //! @param scenemanager_event_dispatcher
   ExitSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::dispatcher &scenemanager_event_dispatcher );
 
-  //! @brief init the weak pointer for the reserved-positions grid, ahead of exit placement.
+  //! @brief init the weak pointers for the reserved-positions grid and world-tile lookup, ahead of exit placement.
   //! @param reserved_sm
-  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm ) { m_reserved_sm = reserved_sm; }
+  //! @param world_tile_sm World-tile lookup (see Scene::m_world_tile_sm); null falls back to scanning the registry.
+  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &world_tile_sm = nullptr )
+  {
+    m_reserved_sm = reserved_sm;
+    m_world_tile_sm = world_tile_sm;
+  }
 
   //! @brief Event handler for unlocking the exit
   //! @param ev
@@ -55,6 +60,9 @@ private:
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
+
+  //! @brief World-tile lookup, used to find the tile under the exit without a registry scan.
+  PathFinding::SpatialHashGridWeakPtr m_world_tile_sm;
 };
 
 } // namespace Game::Sys

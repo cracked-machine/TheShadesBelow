@@ -43,6 +43,7 @@
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Threats/BombSystem.hpp>
 #include <Utils/Collision.hpp>
+#include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Random.hpp>
@@ -54,6 +55,7 @@
 #include <set>
 #include <spdlog/spdlog.h>
 #include <utility>
+#include <vector>
 
 namespace
 {
@@ -328,14 +330,14 @@ void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_en
   // rather than re-scanning and re-computing distances once per layer. entt::null marks a cell that only gets a marker.
   std::vector<std::vector<std::pair<entt::entity, sf::Vector2i>>> entities_by_layer( static_cast<std::size_t>( std::max( blast_radius, 0 ) ) + 1 );
 
-  for ( auto [destructable_entity, destructable_cmp, destructable_pos] : all_obstacle_view.each() )
+  const auto bucket_candidate = [&]( entt::entity destructable_entity, const Cmp::Position &destructable_pos )
   {
-    if ( destructable_entity == epicenter_entity || reg().any_of<Cmp::Armed>( destructable_entity ) ) continue;
+    if ( destructable_entity == epicenter_entity || reg().any_of<Cmp::Armed>( destructable_entity ) ) return;
 
     sf::Vector2i grid_position = Utils::get_grid_position<int>( reg(), destructable_entity ).value();
     int distance_from_center = Utils::Maths::getChebyshevDistance( grid_position, centerTile );
 
-    if ( distance_from_center < 1 or distance_from_center > blast_radius ) continue;
+    if ( distance_from_center < 1 or distance_from_center > blast_radius ) return;
 
     const auto reserved_entities = reserved_sm ? reserved_sm->at( destructable_pos ) : std::vector<entt::entity>{};
     if ( not reserved_entities.empty() or reg().all_of<Cmp::Exit>( destructable_entity ) )
@@ -354,7 +356,7 @@ void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_en
       raise_to( destructable_entity );
       for ( entt::entity reserved_entt : reserved_entities )
         raise_to( reserved_entt );
-      continue;
+      return;
     }
 
     if ( reg().any_of<Cmp::LootContainer>( destructable_entity ) )
@@ -362,6 +364,28 @@ void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_en
       SPDLOG_DEBUG( "Arming loot container entity {}", static_cast<int>( destructable_entity ) );
     }
     entities_by_layer[static_cast<std::size_t>( distance_from_center )].emplace_back( destructable_entity, grid_position );
+  };
+
+  if ( auto world_tile_sm = m_world_tile_sm.lock() )
+  {
+    // only the cells inside the blast square, instead of every Armable entity in the scene. The other Armable
+    // entities (multiblock segments) sit on reserved cells, whose floor tile already takes the marker path above.
+    const sf::Vector2f epicenter_px( static_cast<float>( centerTile.x ) * Constants::kGridSizePxF.x,
+                                     static_cast<float>( centerTile.y ) * Constants::kGridSizePxF.y );
+    const sf::FloatRect blast_bounds( epicenter_px - Constants::kGridSizePxF * static_cast<float>( blast_radius ),
+                                      Constants::kGridSizePxF * static_cast<float>( 2 * blast_radius + 1 ) );
+    for ( auto destructable_entity : world_tile_sm->query_rect( blast_bounds ) )
+    {
+      if ( not reg().valid( destructable_entity ) or not all_obstacle_view.contains( destructable_entity ) ) continue;
+      bucket_candidate( destructable_entity, all_obstacle_view.get<Cmp::Position>( destructable_entity ) );
+    }
+  }
+  else
+  {
+    for ( auto [destructable_entity, destructable_cmp, destructable_pos] : all_obstacle_view.each() )
+    {
+      bucket_candidate( destructable_entity, destructable_pos );
+    }
   }
 
   // For each layer from 1 to BLAST_RADIUS, sort clockwise and arm
@@ -434,8 +458,15 @@ void BombSystem::arm_player_bomb()
 
   // caps share a cell with the floor entity beneath them, so skip them or one bomb would plant two epicentres
   auto destructable_view = reg().view<Cmp::Armable, Cmp::Position>( exclude<Cmp::ObstacleCap> );
-  for ( auto [destructable_entity, destructable_cmp, destructable_pos_cmp] : destructable_view.each() )
+  // with the world-tile grid, only the cells around the player; otherwise every Armable entity
+  std::vector<entt::entity> nearby_entts;
+  auto world_tile_sm = m_world_tile_sm.lock();
+  if ( world_tile_sm ) { nearby_entts = world_tile_sm->neighbours( player_pos ); }
+  else { nearby_entts.assign( destructable_view.begin(), destructable_view.end() ); }
+  for ( auto destructable_entity : nearby_entts )
   {
+    if ( not reg().valid( destructable_entity ) or not destructable_view.contains( destructable_entity ) ) continue;
+    const auto &destructable_pos_cmp = destructable_view.get<Cmp::Position>( destructable_entity );
     // make a copy and reduce/center the player hitbox to avoid arming a neighbouring location
     auto player_hitbox = sf::FloatRect( player_pos );
     player_hitbox.size.x /= 2.f;

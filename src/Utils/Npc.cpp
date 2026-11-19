@@ -1,6 +1,5 @@
 #include <Components/AnimData.hpp>
 #include <Components/Direction.hpp>
-#include <Components/FootStepTimer.hpp>
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/LerpSpeed.hpp>
 #include <Components/Npc/Npc.hpp>
@@ -31,30 +30,6 @@
 
 namespace Game::Utils::Npc
 {
-
-entt::entity get_world_pos_entt( entt::registry &reg, Cmp::Position npc_pos )
-{
-
-  auto excl = entt::exclude<Cmp::Player::Character, Cmp::Npc::NPC, Cmp::FootStepTimer>;
-  for ( auto [world_entt, world_pos_cmp] : reg.view<Cmp::Position>( excl ).each() )
-  {
-    if ( npc_pos.findIntersection( world_pos_cmp ) ) return world_entt;
-  }
-  return entt::null;
-}
-
-entt::entity get_world_pos_entt( entt::registry &reg, entt::entity npc_entt )
-{
-  auto *npc_pos = reg.try_get<Cmp::Position>( npc_entt );
-  if ( not npc_pos ) return entt::null;
-
-  auto excl = entt::exclude<Cmp::Player::Character, Cmp::Npc::NPC, Cmp::FootStepTimer>;
-  for ( auto [world_entt, world_pos_cmp] : reg.view<Cmp::Position>( excl ).each() )
-  {
-    if ( npc_pos->findIntersection( world_pos_cmp ) ) return world_entt;
-  }
-  return entt::null;
-}
 
 int count_spawned_by( entt::registry &reg, const Cmp::UUID &source_uuid )
 {
