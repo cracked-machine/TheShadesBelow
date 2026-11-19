@@ -104,6 +104,7 @@
 #include <functional>
 #include <optional>
 #include <ranges>
+#include <string_view>
 #include <spdlog/fmt/ranges.h>
 #include <spdlog/spdlog.h>
 #include <tuple>
@@ -667,7 +668,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos,
       if ( not pos ) break;
 
       auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<Cmp::Grave::MultiBlock, Cmp::Grave::Segment>(
-          reg(), pos->position, spritesheet, index, 0, m_reserved_sm.get() );
+          reg(), pos->position, spritesheet, index, 0, m_reserved_sm.get(), m_world_tile_sm.lock().get() );
       m_reserved_sm->insert( mb_entt, pos.value() );
       // fix the roll at creation; the consequence is resolved against the player's current luck when needed
       auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 100 ).gen(), min_blood_chance_pct,
@@ -694,7 +695,8 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos,
 template <typename MULTIBLOCK, typename MBSEGMENT>
 entt::entity LevelGenerator::spawn_multiblock_at( sf::Vector2f pos, const Sprites::SpriteSheet &ss )
 {
-  auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<MULTIBLOCK, MBSEGMENT>( reg(), pos, ss, 0, 0, m_reserved_sm.get() );
+  auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<MULTIBLOCK, MBSEGMENT>( reg(), pos, ss, 0, 0, m_reserved_sm.get(),
+                                                                                               m_world_tile_sm.lock().get() );
   m_reserved_sm->insert( mb_entt, Cmp::Position( pos, Constants::kGridSizePxF ) );
   SPDLOG_INFO( "Added {} to {},{}", ss.type(), pos.x, pos.y );
   return mb_entt;
@@ -838,25 +840,36 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants()
   const auto below_quota = [&]( const auto &kv ) { return kv.second < plants_per_type; };
   const auto quota_reached = [&] { return std::ranges::none_of( plant_tracker, below_quota ); };
 
-  // guard against endless failure (e.g. no free tiles left)
-  std::size_t attempts = 0;
-  const std::size_t max_attempts = plant_tracker.size() * static_cast<std::size_t>( plants_per_type ) * 10;
-
-  while ( not quota_reached() and attempts++ < max_attempts )
+  // Snapshot every candidate position once and visit them in random order, instead of re-scanning the
+  // registry for a random position on every attempt. Each tile is tried at most once.
+  auto candidate_view = reg().view<Cmp::Position>( entt::exclude<Cmp::Player::Character, Cmp::Obstacle> );
+  std::vector<std::pair<entt::entity, Cmp::Position>> candidates;
+  for ( auto [tile_entt, pos_cmp] : candidate_view.each() )
   {
-    auto [random_entity, random_pos] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{},
-                                                                        0 );
+    candidates.emplace_back( tile_entt, pos_cmp );
+  }
+  Cmp::RandomInt shuffle_rng( 0, 1 );
+  std::ranges::shuffle( candidates, shuffle_rng );
 
-    // Build a list of plant type that are still short of the quota and pick one by random
-    std::vector<decltype( plant_tracker )::iterator> candidates;
+  // PlantSystem re-adds the "sprite." prefix itself (to match the bare "item.plant.*" markers used elsewhere), so strip it back off here.
+  constexpr std::string_view kSpritePrefix = "sprite.";
+
+  std::vector<decltype( plant_tracker )::iterator> plant_types_below_quota;
+  for ( const auto &[random_entity, random_pos] : candidates )
+  {
+    if ( quota_reached() ) break;
+
+    // cheap O(1) rejection before doing any plant work - PlantSystem re-checks the whole footprint
+    if ( not m_reserved_sm->at( random_pos ).empty() ) continue;
+
+    // Build a list of plant types that are still short of the quota and pick one at random
+    plant_types_below_quota.clear();
     for ( auto it = plant_tracker.begin(); it != plant_tracker.end(); ++it )
     {
-      if ( below_quota( *it ) ) candidates.push_back( it );
+      if ( below_quota( *it ) ) plant_types_below_quota.push_back( it );
     }
-    auto selected_plant_iter = candidates.at( Cmp::RandomInt( 0, static_cast<int>( candidates.size() - 1 ) ).gen() );
+    auto selected_plant_iter = plant_types_below_quota.at( Cmp::RandomInt( 0, static_cast<int>( plant_types_below_quota.size() - 1 ) ).gen() );
 
-    // PlantSystem re-adds the "sprite." prefix itself (to match the bare "item.plant.*" markers used elsewhere), so strip it back off here.
-    const std::string kSpritePrefix = "sprite.";
     const Sys::ItemKey chosen_plant_item_type( selected_plant_iter->first.str().substr( kSpritePrefix.size() ) );
 
     // Create the plant in the game area and increment the tracker counter
@@ -872,7 +885,7 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants()
 
   if ( not quota_reached() )
   {
-    SPDLOG_WARN( "gen_random_plants: hit attempt cap ({}) before every plant type reached its minimum count", max_attempts );
+    SPDLOG_WARN( "gen_random_plants: ran out of free positions ({} candidates) before every plant type reached its minimum count", candidates.size() );
   }
 
   SPDLOG_INFO( "plant_tracker: {}", plant_tracker );
@@ -887,6 +900,7 @@ void LevelGenerator::init( const PathFinding::SpatialHashGridSharedPtr &reserved
 
   m_reserved_sm = reserved_sm;
   m_reserved_sm->clear();
+  m_world_tile_sm.reset();
 }
 
 } // namespace Game::Sys::ProcGen

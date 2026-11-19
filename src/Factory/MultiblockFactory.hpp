@@ -121,12 +121,15 @@ void update_segments( entt::registry &reg, const Sprites::SpriteSheet &ss, entt:
 //! @param mb_pos_cmp
 //! @param ss Sprite sheet providing the door position and grid size.
 //! @param reserved_sm If provided, skips positions already reserved and reserves each new segment's position.
+//! @param world_tile_sm If provided, world tiles under the multiblock are looked up in this grid instead of
+//! scanning every Cmp::Position in the registry. See Scene::m_world_tile_sm.
 //! @return The newly created segment entities.
 template <typename MULTIBLOCK, typename MBSEGMENT>
   requires IsMB<MULTIBLOCK> && IsMBSegment<MBSEGMENT>
 std::vector<entt::entity> create_multiblock_segments( entt::registry &reg, entt::entity multiblock_entity, const Cmp::UUID &uuid,
                                                       Cmp::Position mb_pos_cmp, const Sprites::SpriteSheet &ss,
-                                                      PathFinding::SpatialHashGrid *reserved_sm = nullptr );
+                                                      PathFinding::SpatialHashGrid *reserved_sm = nullptr,
+                                                      const PathFinding::SpatialHashGrid *world_tile_sm = nullptr );
 
 } // namespace detail
 
@@ -139,12 +142,15 @@ std::vector<entt::entity> create_multiblock_segments( entt::registry &reg, entt:
 //! @param ss_index Sprite frame index within `ss`.
 //! @param zorder Explicit z-order; if 0, falls back to the sprite sheet's json z-order, then to the y-position.
 //! @param reserved_sm If provided, skips positions already reserved and reserves the root and each new segment's position.
+//! @param world_tile_sm If provided, world tiles under the multiblock are looked up in this grid instead of
+//! scanning every Cmp::Position in the registry. See Scene::m_world_tile_sm.
 //! @return The multiblock root entity and its created segment entities.
 template <typename MULTIBLOCK, typename MBSEGMENT>
   requires IsMB<MULTIBLOCK> && IsMBSegment<MBSEGMENT>
 std::pair<entt::entity, std::vector<entt::entity>> add_multiblock_with_segments( entt::registry &reg, sf::Vector2f position,
                                                                                  const Sprites::SpriteSheet &ss, size_t ss_index = 0,
-                                                                                 float zorder = 0, PathFinding::SpatialHashGrid *reserved_sm = nullptr );
+                                                                                 float zorder = 0, PathFinding::SpatialHashGrid *reserved_sm = nullptr,
+                                                                                 const PathFinding::SpatialHashGrid *world_tile_sm = nullptr );
 
 } // namespace Game::Factory::Multiblock
 

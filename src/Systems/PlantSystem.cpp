@@ -48,6 +48,7 @@
 
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/System/Time.hpp>
+#include <algorithm>
 #include <cmath>
 #include <entt/entity/registry.hpp>
 #include <spdlog/spdlog.h>
@@ -139,6 +140,12 @@ entt::entity PlantSystem::gen_plant( const Sys::ItemKey &plant_type, const Cmp::
   // Plants can span more than one grid row (e.g. 1x2), so every cell in the footprint - not
   // just the origin - must be a real, unreserved world tile. Otherwise a plant can overlap a
   // reserved tile it doesn't share an entity with, e.g. the player spawn.
+  auto world_tile_sm = m_world_tile_sm.lock();
+  const auto is_world_tile = [&]( const Cmp::Position &cell_pos )
+  {
+    if ( not world_tile_sm ) return Utils::get_world_pos_entt( reg(), cell_pos ) != entt::null;
+    return std::ranges::any_of( world_tile_sm->at( cell_pos ), [&]( entt::entity e ) { return reg().valid( e ); } );
+  };
   auto plant_grid_size = plant_spritesheet.get_grid_size();
   bool footprint_clear = true;
   for ( int gy = 0; gy < plant_grid_size.y and footprint_clear; ++gy )
@@ -147,7 +154,7 @@ entt::entity PlantSystem::gen_plant( const Sys::ItemKey &plant_type, const Cmp::
     {
       sf::Vector2f pos_offset( static_cast<float>( gx ) * Constants::kGridSizePxF.x, static_cast<float>( gy ) * Constants::kGridSizePxF.y );
       Cmp::Position cell_pos( pos + pos_offset, Constants::kGridSizePxF );
-      if ( Utils::get_world_pos_entt( reg(), cell_pos ) == entt::null or not reserved_sm->at( cell_pos ).empty() )
+      if ( not is_world_tile( cell_pos ) or not reserved_sm->at( cell_pos ).empty() )
       {
         footprint_clear = false;
         break;
@@ -159,7 +166,7 @@ entt::entity PlantSystem::gen_plant( const Sys::ItemKey &plant_type, const Cmp::
   {
     // now create the plant at a new entt
     auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>(
-        reg(), pos, plant_spritesheet, item_cmp.sprite_index(), /*zorder=*/0, reserved_sm.get() );
+        reg(), pos, plant_spritesheet, item_cmp.sprite_index(), /*zorder=*/0, reserved_sm.get(), world_tile_sm.get() );
 
     // Add the worlditem now so we don't have to look it up later when digging up the plant
     const auto &plant_item = Sys::ItemStore::instance().get( plant_type );
@@ -168,17 +175,7 @@ entt::entity PlantSystem::gen_plant( const Sys::ItemKey &plant_type, const Cmp::
     if ( plant_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( mb_entt, 100.f ); }
     if ( plant_item.stings() ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( mb_entt ); }
 
-    // Protect every cell covered by this plant: segment entities carry the UUID and
-    // are at each tile position. Insert them so subsequent placement calls see them
-    // as reserved via the O(1) navmesh check.
-    auto *mb_uuid = reg().try_get<Cmp::UUID>( mb_entt );
-    if ( mb_uuid )
-    {
-      for ( auto [seg_entt, seg_cmp, seg_pos, seg_uuid] : reg().view<Cmp::PlantSegment, Cmp::Position, Cmp::UUID>().each() )
-      {
-        if ( seg_uuid == *mb_uuid ) reserved_sm->insert( seg_entt, seg_pos );
-      }
-    }
+    // Every covered cell is already reserved: create_multiblock_segments() inserts each segment into reserved_sm.
     return mb_entt;
   }
   return entt::null;

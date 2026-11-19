@@ -1,5 +1,6 @@
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
+#include <Components/Armable.hpp>
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/InteriorMultiBlock.hpp>
 #include <Components/Grave/MultiBlock.hpp>
@@ -98,6 +99,16 @@ PathFinding::SpatialHashGridSharedPtr create_open_navmesh( entt::registry &reg )
     open_navmesh->insert( pos_entt, pos_cmp );
   }
   return open_navmesh;
+}
+
+PathFinding::SpatialHashGridSharedPtr create_world_tile_grid( entt::registry &reg )
+{
+  PathFinding::SpatialHashGridSharedPtr world_tile_grid = std::make_shared<PathFinding::SpatialHashGrid>();
+  for ( auto [pos_entt, armable_cmp, pos_cmp] : reg.view<Cmp::Armable, Cmp::Position>().each() )
+  {
+    world_tile_grid->insert( pos_entt, pos_cmp );
+  }
+  return world_tile_grid;
 }
 
 void populate_render_position_grid( entt::registry &reg, PathFinding::SpatialHashGrid &render_position_grid )

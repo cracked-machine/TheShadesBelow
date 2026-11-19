@@ -39,6 +39,11 @@ public:
   //!        populated incrementally as this generation pass places entities.
   void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm );
 
+  //! @brief Set the scene's world-tile lookup grid (see Scene::m_world_tile_sm). It's built after
+  //!        build_scene_from_data(), so it's set separately from init().
+  //! @param world_tile_sm
+  void set_world_tile_sm( const PathFinding::SpatialHashGridSharedPtr &world_tile_sm ) { m_world_tile_sm = world_tile_sm; }
+
   //! @brief Generate game area using data from the SceneData object.
   //! @param scene_data The deserialized scene data to build the game area from
   void build_scene_from_data( const Scene::SceneData &scene_data );
@@ -153,6 +158,9 @@ private:
   //! @brief Scene-owned spatial map for reserving positions during procedural generation, shared
   //!        with gameplay Systems for the lifetime of the scene.
   PathFinding::SpatialHashGridSharedPtr m_reserved_sm;
+
+  //! @brief Scene-owned world-tile lookup, passed to the multiblock factory to avoid full Cmp::Position scans.
+  PathFinding::SpatialHashGridWeakPtr m_world_tile_sm;
 };
 
 } // namespace Game::Sys::ProcGen

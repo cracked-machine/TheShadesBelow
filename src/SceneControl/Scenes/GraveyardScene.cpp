@@ -176,6 +176,10 @@ void GraveyardScene::on_init()
   auto &level_gen = m_sys.find<Sys::Store::Type::LevelGenerator>();
   level_gen.init( m_reserved_sm );
   level_gen.build_scene_from_data( *m_scene_data );
+  // world-tile lookup: built now, while only the tiles exist, so plant/multiblock placement can skip full registry scans
+  m_world_tile_sm = Factory::Pathfinding::create_world_tile_grid( m_reg );
+  level_gen.set_world_tile_sm( m_world_tile_sm );
+  m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, m_world_tile_sm );
   // one point of interest per map quadrant: shuffle which POI goes on which 'poi' marker
   auto poi_positions = m_scene_data->poi_positions_by_quadrant();
   Cmp::RandomInt poi_rng( 0, 1 );
@@ -431,12 +435,13 @@ void GraveyardScene::reinit_system_spatial_maps()
   m_sys.find<Sys::Store::Type::WispSystem>().init( m_open_navmesh );
   m_sys.find<Sys::Store::Type::BombSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::ActionSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm );
-  m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_loot_sm );
+  m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, m_world_tile_sm, m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh,
+                                                    m_loot_sm );
   m_sys.find<Sys::Store::Type::LootSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm, m_loot_sm );
   m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_generic_npc_navmesh, m_ghost_navmesh, m_loot_sm );
   m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
-  m_sys.find<Sys::Store::Type::WormholeSystem>().init( m_generic_npc_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::WormholeSystem>().init( m_generic_npc_navmesh, m_reserved_sm, m_world_tile_sm );
   m_sys.find<Sys::Store::Type::DebugOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm );
   m_sys.find<Sys::Store::Type::WatchmanSystem>().init( m_reserved_sm );
   m_sys.find<Sys::Store::Type::SinkHoleHazardSystem>().init( m_reserved_sm, m_generic_npc_navmesh );

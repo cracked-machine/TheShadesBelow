@@ -27,6 +27,9 @@
 #include <Sprites/SpriteSheet.hpp>
 #include <Utils/Constants.hpp>
 
+#include <span>
+#include <vector>
+
 namespace Game::Factory::Multiblock
 {
 
@@ -83,15 +86,18 @@ void create_multiblock( entt::registry &reg, entt::entity entity, const Cmp::UUI
 //! @param ss Sprite sheet providing the collision mask and z-order lookup tables.
 //! @param mb_entt
 //! @param mb_cmp Multiblock bounds used to find owned segments and their relative grid position.
+//! @note update_segment_entities() does the per-segment work for a known list of segments; update_segments()
+//! finds them by scanning every MBSEGMENT, which gets expensive when many multiblocks of one type exist.
 template <typename MULTIBLOCK, typename MBSEGMENT>
   requires IsMB<MULTIBLOCK> && IsMBSegment<MBSEGMENT>
-void update_segments( entt::registry &reg, const Sprites::SpriteSheet &ss, [[maybe_unused]] entt::entity mb_entt, MULTIBLOCK mb_cmp )
+void update_segment_entities( entt::registry &reg, const Sprites::SpriteSheet &ss, const MULTIBLOCK &mb_cmp, std::span<const entt::entity> segments )
 {
-  auto collision_masks = ss.walking_collision_mask();
+  const auto collision_masks = ss.walking_collision_mask();
 
-  for ( auto [entity, segment_cmp, pos_cmp] : reg.view<MBSEGMENT, Cmp::Position>().each() )
+  for ( auto entity : segments )
   {
-    if ( not pos_cmp.findIntersection( mb_cmp ) ) continue;
+    auto &segment_cmp = reg.get<MBSEGMENT>( entity );
+    const auto &pos_cmp = reg.get<Cmp::Position>( entity );
 
     float rel_x = pos_cmp.position.x - mb_cmp.position.x;
     float rel_y = pos_cmp.position.y - mb_cmp.position.y;
@@ -102,7 +108,10 @@ void update_segments( entt::registry &reg, const Sprites::SpriteSheet &ss, [[may
     std::size_t calculated_grid_index = ( rel_grid_y * ss.get_grid_size().x ) + rel_grid_x;
 
     bool new_collision_mask = true;
-    if ( not collision_masks.empty() && collision_masks.size() > calculated_grid_index ) { new_collision_mask = collision_masks.at( calculated_grid_index ); }
+    if ( not collision_masks.empty() && collision_masks.size() > calculated_grid_index )
+    {
+      new_collision_mask = collision_masks.at( calculated_grid_index );
+    }
 
     segment_cmp.set_collision_mask( new_collision_mask );
     reg.emplace_or_replace<Cmp::ZOrderValue>( entity, ss.zorder( calculated_grid_index, pos_cmp.position.y ) );
@@ -135,6 +144,18 @@ void update_segments( entt::registry &reg, const Sprites::SpriteSheet &ss, [[may
   }
 }
 
+template <typename MULTIBLOCK, typename MBSEGMENT>
+  requires IsMB<MULTIBLOCK> && IsMBSegment<MBSEGMENT>
+void update_segments( entt::registry &reg, const Sprites::SpriteSheet &ss, [[maybe_unused]] entt::entity mb_entt, MULTIBLOCK mb_cmp )
+{
+  std::vector<entt::entity> segments;
+  for ( auto [entity, segment_cmp, pos_cmp] : reg.view<MBSEGMENT, Cmp::Position>().each() )
+  {
+    if ( pos_cmp.findIntersection( mb_cmp ) ) segments.push_back( entity );
+  }
+  update_segment_entities<MULTIBLOCK, MBSEGMENT>( reg, ss, mb_cmp, segments );
+}
+
 //! @brief Create one MBSEGMENT entity per world tile inside the multiblock's bounds, tagging the door tile
 //! with the type-appropriate entrance/exit component.
 //! @tparam MULTIBLOCK Multiblock bounds component type.
@@ -144,12 +165,14 @@ void update_segments( entt::registry &reg, const Sprites::SpriteSheet &ss, [[may
 //! @param uuid Identifier shared with the multiblock root entity.
 //! @param mb_pos_cmp
 //! @param ss Sprite sheet providing the door position and grid size.
+//! @param reserved_sm If provided, skips positions already reserved and reserves each new segment's position.
+//! @param world_tile_sm If provided, candidate world tiles come from this grid instead of a full Cmp::Position scan.
 //! @return The newly created segment entities.
 template <typename MULTIBLOCK, typename MBSEGMENT>
   requires IsMB<MULTIBLOCK> && IsMBSegment<MBSEGMENT>
 std::vector<entt::entity> create_multiblock_segments( entt::registry &reg, entt::entity multiblock_entity, const Cmp::UUID &uuid,
                                                       Cmp::Position mb_pos_cmp, const Sprites::SpriteSheet &ss,
-                                                      PathFinding::SpatialHashGrid *reserved_sm )
+                                                      PathFinding::SpatialHashGrid *reserved_sm, const PathFinding::SpatialHashGrid *world_tile_sm )
 {
 
   MULTIBLOCK new_multiblock_bounds = reg.get<MULTIBLOCK>( multiblock_entity );
@@ -163,18 +186,34 @@ std::vector<entt::entity> create_multiblock_segments( entt::registry &reg, entt:
   // also matches the player, NPCs and dropped items standing inside the bounds, which would
   // get segments created at their (possibly off-grid) positions and be reserved.
   std::vector<entt::entity> world_pos_entt_list;
-  for ( auto [pos_entity, pos_cmp] : reg.view<Cmp::Position>().each() )
+  const auto consider_tile = [&]( entt::entity pos_entity, const Cmp::Position &pos_cmp )
   {
-    if ( not pos_cmp.findIntersection( new_multiblock_bounds ) ) continue;
-    if ( not reg.all_of<Cmp::Armable>( pos_entity ) ) continue;
-    if ( reg.any_of<MULTIBLOCK, MBSEGMENT, Cmp::Player::Character, Cmp::Npc::NPC, Cmp::WorldItem>( pos_entity ) ) continue;
+    if ( not pos_cmp.findIntersection( new_multiblock_bounds ) ) return;
+    if ( not reg.all_of<Cmp::Armable>( pos_entity ) ) return;
+    if ( reg.any_of<MULTIBLOCK, MBSEGMENT, Cmp::Player::Character, Cmp::Npc::NPC, Cmp::WorldItem>( pos_entity ) ) return;
     // Plants may be grown over an already-reserved tile (e.g. an obstacle) - every other
     // multiblock type still needs the tile free to avoid overlapping another structure.
     if constexpr ( not std::is_same_v<MBSEGMENT, Cmp::PlantSegment> )
     {
-      if ( ( reserved_sm != nullptr ) && not reserved_sm->at( pos_cmp ).empty() ) continue;
+      if ( ( reserved_sm != nullptr ) && not reserved_sm->at( pos_cmp ).empty() ) return;
     }
     world_pos_entt_list.push_back( pos_entity );
+  };
+  if ( world_tile_sm != nullptr )
+  {
+    // O(cells covered) lookup; the filters above still apply, so the result matches the full scan.
+    for ( auto pos_entity : world_tile_sm->query_rect( new_multiblock_bounds ) )
+    {
+      if ( not reg.valid( pos_entity ) or not reg.all_of<Cmp::Position>( pos_entity ) ) continue;
+      consider_tile( pos_entity, reg.get<Cmp::Position>( pos_entity ) );
+    }
+  }
+  else
+  {
+    for ( auto [pos_entity, pos_cmp] : reg.view<Cmp::Position>().each() )
+    {
+      consider_tile( pos_entity, pos_cmp );
+    }
   }
 
   std::vector<entt::entity> created_entts;
@@ -227,7 +266,13 @@ std::vector<entt::entity> create_multiblock_segments( entt::registry &reg, entt:
     segment_map.insert( new_segment_entt, pos_cmp );
   }
 
-  update_segments<MULTIBLOCK, MBSEGMENT>( reg, ss, multiblock_entity, new_multiblock_bounds );
+  if constexpr ( std::is_same_v<MBSEGMENT, Cmp::PlantSegment> )
+  {
+    // Only update this plant's own segments. Scanning every plant segment per plant made bulk generation O(n^2),
+    // and would re-derive any overlapping neighbour's collision/z-order from this plant's sprite sheet.
+    update_segment_entities<MULTIBLOCK, MBSEGMENT>( reg, ss, new_multiblock_bounds, created_entts );
+  }
+  else { update_segments<MULTIBLOCK, MBSEGMENT>( reg, ss, multiblock_entity, new_multiblock_bounds ); }
 
   return created_entts;
 }
@@ -247,7 +292,8 @@ template <typename MULTIBLOCK, typename MBSEGMENT>
   requires IsMB<MULTIBLOCK> && IsMBSegment<MBSEGMENT>
 std::pair<entt::entity, std::vector<entt::entity>> add_multiblock_with_segments( entt::registry &reg, sf::Vector2f position,
                                                                                  const Sprites::SpriteSheet &ss, size_t ss_index, float zorder,
-                                                                                 PathFinding::SpatialHashGrid *reserved_sm )
+                                                                                 PathFinding::SpatialHashGrid *reserved_sm,
+                                                                                 const PathFinding::SpatialHashGrid *world_tile_sm )
 {
   auto mb_entt = reg.create();
   Cmp::Position new_pos_cmp( position, ss.sprite_size() );
@@ -256,12 +302,15 @@ std::pair<entt::entity, std::vector<entt::entity>> add_multiblock_with_segments(
   reg.emplace_or_replace<Cmp::Position>( mb_entt, new_pos_cmp.position, ss.sprite_size() );
 
   Multiblock::detail::create_multiblock<MULTIBLOCK>( reg, mb_entt, uuid, new_pos_cmp, ss, ss_index );
-  auto segment_entt_list = Multiblock::detail::create_multiblock_segments<MULTIBLOCK, MBSEGMENT>( reg, mb_entt, uuid, new_pos_cmp, ss, reserved_sm );
+  auto segment_entt_list = Multiblock::detail::create_multiblock_segments<MULTIBLOCK, MBSEGMENT>( reg, mb_entt, uuid, new_pos_cmp, ss, reserved_sm,
+                                                                                                 world_tile_sm );
 
-  for ( auto [mb_entt, mb_cmp, mb_zorder_cmp] : reg.view<MULTIBLOCK, Cmp::ZOrderValue>().each() )
+  // Use the function param if explicitly set, otherwise the json zorder resolved against the y-axis position.
+  // Only the new root: `ss`/`ss_index` describe this multiblock, not others of the same type.
+  if ( auto *mb_zorder_cmp = reg.try_get<Cmp::ZOrderValue>( mb_entt ) )
   {
-    // Use the function param if explicitly set, otherwise the json zorder resolved against the y-axis position
-    mb_zorder_cmp.set( zorder != 0 ? zorder : ss.zorder( ss_index, static_cast<sf::FloatRect>( mb_cmp ).position.y ) );
+    const auto &mb_cmp = reg.get<MULTIBLOCK>( mb_entt );
+    mb_zorder_cmp->set( zorder != 0 ? zorder : ss.zorder( ss_index, static_cast<sf::FloatRect>( mb_cmp ).position.y ) );
   }
   return { mb_entt, segment_entt_list };
 }

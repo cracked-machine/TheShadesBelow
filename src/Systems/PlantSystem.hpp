@@ -28,18 +28,21 @@ public:
   //! @param sound_bank
   PlantSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
-  //! @brief init the weak pointers for the pathfinding navmeshes. reserved_sm is first so it can be set before level
-  //! generation, when the navmeshes don't exist yet.
+  //! @brief init the weak pointers for the pathfinding navmeshes. reserved_sm and world_tile_sm are first so they can be
+  //! set before level generation, when the navmeshes don't exist yet.
   //! @param reserved_sm
+  //! @param world_tile_sm world-tile lookup (see Scene::m_world_tile_sm); null falls back to scanning the registry
   //! @param npc_navmesh
   //! @param player_navmesh
   //! @param ghost_navmesh
   //! @param loot_sm loot drops, so plant drops don't land on them
-  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &npc_navmesh = nullptr,
+  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &world_tile_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &npc_navmesh = nullptr,
              const PathFinding::SpatialHashGridSharedPtr &player_navmesh = nullptr,
              const PathFinding::SpatialHashGridSharedPtr &ghost_navmesh = nullptr, const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr )
   {
     m_reserved_sm = reserved_sm;
+    m_world_tile_sm = world_tile_sm;
     m_npc_navmesh = npc_navmesh;
     m_player_navmesh = player_navmesh;
     m_ghost_navmesh = ghost_navmesh;
@@ -110,6 +113,9 @@ private:
 
   //! @brief Loot drops, so plant drops don't land on them.
   PathFinding::SpatialHashGridWeakPtr m_loot_sm;
+
+  //! @brief World-tile lookup used by gen_plant() instead of scanning every Cmp::Position. See Scene::m_world_tile_sm.
+  PathFinding::SpatialHashGridWeakPtr m_world_tile_sm;
 };
 
 } // namespace Game::Sys

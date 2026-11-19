@@ -35,6 +35,13 @@ PathFinding::SpatialHashGridSharedPtr create_player_navmesh( entt::registry &reg
 //! @return The new navmesh.
 PathFinding::SpatialHashGridSharedPtr create_open_navmesh( entt::registry &reg );
 
+//! @brief Build the world-tile lookup grid: every Cmp::Armable + Cmp::Position entity, one bucket per map cell.
+//! @note Call straight after LevelGenerator::build_scene_from_data(), while only the world tiles exist.
+//! Used only to find "the world tile at this cell" without scanning the registry - see Scene::m_world_tile_sm.
+//! @param reg
+//! @return The new grid.
+PathFinding::SpatialHashGridSharedPtr create_world_tile_grid( entt::registry &reg );
+
 //! @brief Build the grid of loot drops (Cmp::Loot) used to find free spawn/drop cells.
 //! @note Loot dropped afterwards is kept in sync by Factory::Loot::create_loot_drop() / destroy_loot_drop().
 //! @param reg

@@ -276,6 +276,7 @@ void WormholeSystem::spawn_wormhole( SpawnPhase phase )
 void WormholeSystem::clear_footprint( const sf::FloatRect &bounds )
 {
   auto reserved_sm = m_reserved_sm.lock();
+  auto world_tile_sm = m_world_tile_sm.lock();
   std::vector<std::pair<entt::entity, sf::Vector2f>> kill_list;
   for ( auto [entity, occupant_pos] : reg().view<Cmp::Position>().each() )
   {
@@ -291,6 +292,7 @@ void WormholeSystem::clear_footprint( const sf::FloatRect &bounds )
   {
     if ( not reg().valid( entity ) ) continue;
     Factory::Obstacle::remove_obstacle( reg(), entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
+    if ( world_tile_sm ) world_tile_sm->remove( entity, Cmp::Position( pos, Constants::kGridSizePxF ) );
     reg().destroy( entity );
   }
 
@@ -301,7 +303,8 @@ void WormholeSystem::clear_footprint( const sf::FloatRect &bounds )
     auto it = std::ranges::find( new_list, pos );
     if ( it == new_list.end() )
     {
-      Factory::Obstacle::create_world_pos( reg(), pos );
+      auto tile_entt = Factory::Obstacle::create_world_pos( reg(), pos );
+      if ( world_tile_sm ) world_tile_sm->insert( tile_entt, Cmp::Position( pos, Constants::kGridSizePxF ) );
       new_list.push_back( pos );
     }
   }

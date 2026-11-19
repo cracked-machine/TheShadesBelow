@@ -33,10 +33,13 @@ public:
   //! @brief init the weak pointer for the pathfinding navmesh
   //! @param npc_navmesh
   //! @param reserved_sm
-  void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr )
+  //! @param world_tile_sm world-tile lookup kept in sync when clear_footprint() recreates tiles (see Scene::m_world_tile_sm)
+  void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &world_tile_sm = nullptr )
   {
     m_npc_navmesh = npc_navmesh;
     m_reserved_sm = reserved_sm;
+    m_world_tile_sm = world_tile_sm;
   }
 
   //! @brief Track actors colliding with the wormhole via Cmp::PendingTeleport, drop the component if
@@ -88,6 +91,9 @@ private:
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
+
+  //! @brief World-tile lookup; destroyed/recreated tiles are removed/re-inserted to keep it in sync.
+  PathFinding::SpatialHashGridWeakPtr m_world_tile_sm;
 };
 
 } // namespace Game::Sys

@@ -64,6 +64,10 @@ protected:
   PathFinding::SpatialHashGridSharedPtr m_reserved_sm;
   //! @brief Loot drops (Cmp::Loot), used to find free spawn/drop cells
   PathFinding::SpatialHashGridSharedPtr m_loot_sm;
+  //! @brief World tiles only (Cmp::Armable entities from level data), one per map cell. Single purpose: O(1)
+  //! "which world tile is at this cell?" lookups, replacing full Cmp::Position scans (e.g. plant/multiblock placement).
+  //! Built once after level data is loaded; WormholeSystem keeps it in sync when it recreates tiles. Null in scenes that don't build it.
+  PathFinding::SpatialHashGridSharedPtr m_world_tile_sm;
 
   //! @brief Deserialised JSON scene data. See res/scenes
   SceneMapSharedPtr m_scene_data;
