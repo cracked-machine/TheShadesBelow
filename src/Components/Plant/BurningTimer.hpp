@@ -5,14 +5,9 @@
 namespace Game::Cmp::Plant
 {
 
-//! @brief
+//! @brief Time a plant has been burning for. The burn duration comes from Cmp::Persist::PlantBurnTime.
 class BurningTimer : public sf::Time
 {
-public:
-  sf::Time timeout() { return m_timeout; }
-
-private:
-  sf::Time m_timeout{ sf::seconds( 9.0f ) };
 };
 
 } // namespace Game::Cmp::Plant

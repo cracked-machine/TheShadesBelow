@@ -10,6 +10,7 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/SpawnedBy.hpp>
 #include <Components/Particle/EmberParticleSprite.hpp>
+#include <Components/Persistent/PlantBurnTime.hpp>
 #include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/DiggingTimer.hpp>
 #include <Components/Position.hpp>
@@ -296,6 +297,10 @@ void PlantSystem::update_burning_plants( sf::Time dt )
   static const std::string kPlantFireTag = "graveyard.plant.particle.flame";
   static const std::string kPlantSmokeTag = "graveyard.plant.particle.smoke";
 
+  // negative burn time (-1) means plants burn forever
+  const float burn_time = Sys::PersistSystem::get<Cmp::Persist::PlantBurnTime>( reg() ).get_value();
+  const bool burns_forever = burn_time < 0.f;
+
   for ( auto [plant_entt, plant_cmp, plant_uuid] : reg().view<Cmp::PlantMultiBlock, Cmp::UUID>().each() )
   {
     auto *burn_timer = reg().try_get<Cmp::Plant::BurningTimer>( plant_entt );
@@ -306,7 +311,7 @@ void PlantSystem::update_burning_plants( sf::Time dt )
     Cmp::ActionSfx burn_sfx;
     if ( const auto *burn_item = reg().try_get<Cmp::WorldItem>( plant_entt ) ) { burn_sfx = burn_item->get_action<Cmp::BurnAction>().sfx(); }
 
-    if ( *burn_timer < burn_timer->timeout() )
+    if ( burns_forever or *burn_timer < sf::seconds( burn_time ) )
     {
       // update player stats with burn_action: apply once if interval == 0, otherwise every `interval`
       // seconds. BurningTimeAccumulator resets to zero at the start of each burn, so a one-shot fires

@@ -107,6 +107,7 @@
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
 #include <Components/Persistent/PaidHealAmount.hpp>
 #include <Components/Persistent/PlantsPerType.hpp>
+#include <Components/Persistent/PlantBurnTime.hpp>
 #include <Components/Persistent/PlantWearPerForage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerCornerAssistTolerance.hpp>
@@ -349,6 +350,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::FlyingTransitionTime>();
   add_component<Cmp::Persist::FlyingLandingOverlap>();
   add_component<Cmp::Persist::WormholeAbortThreshold>();
+  add_component<Cmp::Persist::PlantBurnTime>();
   add_component<Cmp::Persist::PlantWearPerForage>();
   add_component<Cmp::Persist::GlovesWearPerForage>();
   add_component<Cmp::Persist::ShovelGraveDigWear>();

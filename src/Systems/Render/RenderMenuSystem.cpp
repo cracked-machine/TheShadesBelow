@@ -107,6 +107,7 @@
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
 #include <Components/Persistent/PaidHealAmount.hpp>
 #include <Components/Persistent/PlantsPerType.hpp>
+#include <Components/Persistent/PlantBurnTime.hpp>
 #include <Components/Persistent/PlantWearPerForage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
 #include <Components/Persistent/PlayerCornerAssistTolerance.hpp>
@@ -327,6 +328,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterTint>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterShimmer>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::StatChangeDisplayDuration>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::PlantBurnTime>( reg() ).render_widget();
 
     ImGui::SeparatorText( "Weapon Wear Settings" );
 

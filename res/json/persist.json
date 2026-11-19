@@ -297,6 +297,14 @@
     "detail": "Broom flight: vertical lift of the player sprite (px)",
     "format": "%.1f"
   },
+  "PlantBurnTime": {
+    "type": "float",
+    "value": 10.0,
+    "min_value": -1.0,
+    "max_value": 120.0,
+    "detail": "Plant burn time (s), -1 = forever",
+    "format": "%.1f"
+  },
   "PlantWearPerForage": {
     "type": "float",
     "value": 10.0,
