@@ -7,7 +7,6 @@
 #include <Events/CryptEntryRefusedEvent.hpp>
 #include <Events/DismissTooltipEvent.hpp>
 #include <Events/GrimoireDiscoveryEvent.hpp>
-#include <Events/InsufficientAnimaEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Systems/Render/BaseOverlaySystem.hpp>
 
@@ -60,10 +59,6 @@ public:
   //! @param event
   void on_grimoire_discovery_event( const Events::GrimoireDiscoveryEvent &event );
 
-  //! @brief Record a candidate for tooltips triggered by "InsufficientAnimaEvent".
-  //! @param event
-  void on_insufficient_anima_event( const Events::InsufficientAnimaEvent &event );
-
   //! @brief Record a candidate for tooltips triggered by "BloodRefusedEvent".
   //! @param event
   void on_blood_refused_event( const Events::BloodRefusedEvent &event );
@@ -110,7 +105,7 @@ private:
     //! @brief unique id, stored in Cmp::Persist::TooltipsSeen
     std::string id;
     //! @brief name of the event that triggers this tooltip, e.g. "AddInventoryEvent", "ItemPickedUpEvent",
-    //! "GrimoireDiscoveryEvent", "InsufficientAnimaEvent", "BloodRefusedEvent",
+    //! "GrimoireDiscoveryEvent", "BloodRefusedEvent",
     //! "AltarApproachedEvent" or "CryptEntryRefusedEvent"
     std::string trigger;
     //! @brief optional item key condition, empty matches any item. A trailing '*' matches any item key with that

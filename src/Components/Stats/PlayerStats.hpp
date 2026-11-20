@@ -61,7 +61,7 @@ public:
   //! @brief Get the player's current toxicity.
   //! @return int Toxicity value, in [0, 100].
   [[nodiscard]] int luck() const { return m_luck; }
-  //! @brief Get the player's current anima, earned from plants and spent activating altars.
+  //! @brief Get the player's current anima, earned from plants and spent at the healing spring.
   //! @return int Anima value, in [0, 100].
   [[nodiscard]] int anima() const { return m_anima; }
   //! @brief Get the player's current toxidrome affliction.

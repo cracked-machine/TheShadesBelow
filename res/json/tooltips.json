@@ -35,15 +35,6 @@
       "duration_s": 4.0
     },
     {
-      "id": "exitkey_no_anima",
-      "trigger": "InsufficientAnimaEvent",
-      "condition": { "item": "item.exitkey" },
-      "text": "The exit key can only be offered when you have anima.\nOffer or eat plants to gain anima.",
-      "position": { "x": 0.5, "y": 0.85 },
-      "frequency": "always",
-      "duration_s": 4.0
-    },
-    {
       "id": "altar_approach",
       "trigger": "AltarApproachedEvent",
       "text": "Bring me the blood of the dead.",

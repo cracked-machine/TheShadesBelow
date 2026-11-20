@@ -9,7 +9,6 @@
 #include <Components/AnimData.hpp>
 #include <Components/Armable.hpp>
 #include <Components/DestroyedObstacle.hpp>
-#include <Components/Inventory/FlashUIAnima.hpp>
 #include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/FlashUIInventory.hpp>
@@ -51,7 +50,6 @@
 #include <Events/CreateItemEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/GraveTrailCompleteEvent.hpp>
-#include <Events/InsufficientAnimaEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Factory/AltarFactory.hpp>
@@ -253,7 +251,8 @@ bool AltarSystem::grant_offering_reward( entt::entity altar_entity, Cmp::Altar::
     case AltarEffect::EXTRA_LIFE:
       return offering_for_extra_life( altar_entity, altar_cmp, altar_uuid );
     case AltarEffect::CRYPT_KEY:
-      return offering_cryptkey( altar_cmp );
+      offering_cryptkey( altar_cmp );
+      return true;
     case AltarEffect::TOXIC_IMMUNITY:
       offering_for_toxic_immunity( altar_cmp, reward->tick );
       return true;
@@ -365,25 +364,10 @@ void AltarSystem::activate_graveyard_altar( entt::entity altar_entity, const Cmp
   get_systems_event_queue().trigger( Events::AltarActivatedEvent{ Cmp::Position( altar_cmp.position, altar_cmp.size ) } );
 }
 
-bool AltarSystem::can_afford_offering( const Sys::ItemKey &item_key )
+void AltarSystem::offering_cryptkey( const Cmp::Altar::MultiBlock &altar_cmp )
 {
-  // the item's (negative) offering anima is its cost, paid by check_player_altar_offering() once the altar accepts it
-  const int anima_cost = -Utils::Player::get_action_from_item_store<Cmp::OfferingAction>( item_key ).anima();
-  if ( Utils::Player::get_stats( reg() ).anima() >= anima_cost ) return true;
-
-  SPDLOG_INFO( "Not enough anima to offer {} (need {})", item_key.str(), anima_cost );
-  // signal UI to flash the anima meter and explain why
-  reg().emplace_or_replace<Cmp::FlashUIAnima>( reg().create() );
-  get_systems_event_queue().trigger( Events::InsufficientAnimaEvent( item_key ) );
-  return false;
-}
-
-bool AltarSystem::offering_cryptkey( const Cmp::Altar::MultiBlock &altar_cmp )
-{
-  if ( not can_afford_offering( "item.exitkey" ) ) return false;
   play_offering_anim( altar_cmp, OfferingAnimType::KEY );
   m_sound_bank.get_effect( "crypt_altar_activate" ).play();
-  return true;
 }
 
 void AltarSystem::activate_altar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid,

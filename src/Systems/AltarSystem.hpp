@@ -79,14 +79,9 @@ private:
   //! Cmp::Persist::AltarBloodQuota activates the altar, see activate_graveyard_altar().
   //! @return false if the altar refused the offering, e.g. it is not a graveyard altar or an altar is already activated
   bool offering_blood( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid, int blood );
-  //! @brief Accept the exit key in exchange for the crypt key, at any graveyard altar whether activated or not. The exit
-  //! key's (negative) offering anima is its cost. check_player_altar_offering() puts the crypt key in the player's hand
-  //! once the exit key has been destroyed.
-  //! @return false if the altar refused the offering, i.e. the player can't afford it
-  bool offering_cryptkey( const Cmp::Altar::MultiBlock &altar_cmp );
-  //! @brief Whether the player has enough anima to pay the item's (negative) offering anima. If not, flash the anima
-  //! meter and send Events::InsufficientAnimaEvent to explain why.
-  bool can_afford_offering( const Sys::ItemKey &item_key );
+  //! @brief Accept the exit key in exchange for the crypt key, at any graveyard altar whether activated or not.
+  //! check_player_altar_offering() puts the crypt key in the player's hand once the exit key has been destroyed.
+  void offering_cryptkey( const Cmp::Altar::MultiBlock &altar_cmp );
   //! @brief Put an altar reward key (e.g. the crypt key) straight into the player's (empty) hand and flash the inventory UI
   void give_reward_key( const Sys::ItemKey &item_key );
 

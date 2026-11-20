@@ -426,7 +426,7 @@ void HudOverlaySystem::render_ui_meters( sf::Time dt )
       meter_inner_color = sf::Color( 255, 165, 0 ); // orange
       should_render = true;
 
-      // flash when the altar is refused for lack of anima
+      // flash when something is refused for lack of anima
       if ( update_flash_toggle<Cmp::FlashUIAnima>( dt ) ) { meter_outer_color = sf::Color::Cyan; }
     }
     else if ( meter.name == "tachycardia_meter" )

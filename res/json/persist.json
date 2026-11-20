@@ -260,7 +260,7 @@
   },
   "InventorySlotCount": {
     "type": "int",
-    "value": 2,
+    "value": 5,
     "min_value": 1,
     "max_value": 5,
     "detail": "Inventory slot count",
