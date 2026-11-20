@@ -10,6 +10,7 @@
 #include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/SideEffects.hpp>
+#include <Components/WeaponDamage.hpp>
 #include <Factory/ToxicityFactory.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Utils/JsonDeserializer.hpp>
@@ -280,6 +281,15 @@ template <typename Action>
     action.set_sfx( Cmp::ActionSfx{ sfx.value( "loop", std::string{} ), sfx.at( "final" ).get<std::string>() } );
   }
   return action;
+}
+
+//! @brief Convert a "damage_to_weapon" or "damage_from_weapon" object: { "pickaxe", "axe", "shovel", "bow" }, all required.
+inline Cmp::WeaponDamage make_weapon_damage( const nlohmann::json &j )
+{
+  return Cmp::WeaponDamage{ .pickaxe = j.at( "pickaxe" ).get<int>(),
+                            .axe = j.at( "axe" ).get<int>(),
+                            .shovel = j.at( "shovel" ).get<int>(),
+                            .bow = j.at( "bow" ).get<int>() };
 }
 
 } // namespace Game::Sys::Detail

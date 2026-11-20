@@ -41,13 +41,13 @@
     "detail": "Armed Detonation Delay Increment",
     "format": "%.3f"
   },
-  "ShovelSkeletonKillWear": {
+  "MeleeHitCooldown": {
     "type": "float",
-    "value": 3.0,
+    "value": 0.3,
     "min_value": 0.0,
-    "max_value": 5.0,
-    "detail": "Shovel wear: killing skeleton",
-    "format": "%.1f"
+    "max_value": 2.0,
+    "detail": "Seconds between shovel melee hits on the same NPC",
+    "format": "%.2f"
   },
   "AltarBloodOfferingHealth": {
     "type": "int",
@@ -288,6 +288,16 @@
     "type": "bool",
     "value": false,
     "detail": "Auto pick up reward drops into an empty inventory slot"
+  },
+  "ShowHealthBar": {
+    "type": "bool",
+    "value": true,
+    "detail": "Show a health bar over damaged plants and NPCs"
+  },
+  "ShowDamageText": {
+    "type": "bool",
+    "value": true,
+    "detail": "Show floating damage numbers when plants and NPCs are hit"
   },
   "PlayerRenderOffset": {
     "type": "float",

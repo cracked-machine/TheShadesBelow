@@ -43,7 +43,12 @@ private:
   //! @brief Check if NPC is hit by arrow
   void check_npc_arrow_collision();
 
-  //! @brief Damage done to the bow by the item the arrow landed in ("damage_to_weapon.bow" in items.json)
+  //! @brief The plant the arrow landed in, if any. The hit is applied by Utils::Player::apply_weapon_hit().
+  //! @param arrow_pos_cmp The landed arrow position
+  //! @return The Cmp::PlantMultiBlock entity, or entt::null if the arrow did not land in a plant
+  entt::entity get_plant_at( const Cmp::Position &arrow_pos_cmp );
+
+  //! @brief Damage done to the bow by the non-plant item the arrow landed in ("damage_to_weapon.bow" in items.json)
   //! @param arrow_pos_cmp The landed arrow position
   //! @return The damage, or zero if the arrow did not land in an item
   int get_bow_damage_at( const Cmp::Position &arrow_pos_cmp );

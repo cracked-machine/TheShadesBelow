@@ -22,7 +22,7 @@
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
 #include <Components/Persistent/ShovelObstacleDigWear.hpp>
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
-#include <Components/Persistent/ShovelSkeletonKillWear.hpp>
+#include <Components/Persistent/MeleeHitCooldown.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
 #include <Components/Position.hpp>
@@ -437,6 +437,10 @@ void ActionSystem::check_player_melee_npc_kill()
 
   if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) { return; }
 
+  // this runs every frame the attack button is held, so space the hits out
+  const float hit_cooldown = Sys::PersistSystem::get<Cmp::Persist::MeleeHitCooldown>( reg() ).get_value();
+  if ( m_melee_hit_clock.getElapsedTime().asSeconds() < hit_cooldown ) { return; }
+
   // Remove any existing SelectedPosition from NPCs only — this runs every frame the attack button is
   // held with no cooldown of its own, so clearing the whole registry's SelectedPosition here would
   // also wipe unrelated selections (e.g. the obstacle currently being dug) set by other systems
@@ -451,11 +455,10 @@ void ActionSystem::check_player_melee_npc_kill()
   SPDLOG_DEBUG( "position_view size: {}", position_view.size_hint() );
   for ( auto [npc_entity, npc_pos_cmp, npc_cmp, anim_cmp] : position_view.each() )
   {
-    // only skeletons and the Burryman can be killed in melee
+    // only NPCs the shovel can hurt (damage_from_weapon.shovel above 0 in npc.json) can be hit in melee
+    if ( npc_cmp.damage_from_weapon.shovel <= 0 ) continue;
     const bool is_skeleton = anim_cmp.m_sprite_type.contains( "sprite.skeleton" );
     const bool is_burryman = reg().all_of<Cmp::Npc::Burryman>( npc_entity );
-
-    if ( not is_skeleton and not is_burryman ) continue;
     auto mouse_position_bounds = Utils::get_mouse_bounds_in_gameview( m_window, RenderSystem::get_world_view() );
     if ( mouse_position_bounds.findIntersection( npc_pos_cmp ) )
     {
@@ -481,8 +484,9 @@ void ActionSystem::check_player_melee_npc_kill()
       // Add a new SelectedPosition component to the entity
       reg().emplace_or_replace<Cmp::SelectedPosition>( npc_entity, npc_pos_cmp.position );
 
-      float dmg = Sys::PersistSystem::get<Cmp::Persist::ShovelSkeletonKillWear>( reg() ).get_value();
-      get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
+      // the hit takes the NPC's damage_from_weapon.shovel from its health and wears the shovel by its damage_to_weapon.shovel
+      m_melee_hit_clock.restart();
+      const bool killed = Utils::Player::apply_weapon_hit( reg(), npc_entity, "item.shovel" );
 
       // the final smash sound is the NPC's destroy_action sfx (see npc.json), played by the DestroyNpcEvent handler
       m_sound_bank.get_effect( "axe_whip" ).play();
@@ -499,9 +503,11 @@ void ActionSystem::check_player_melee_npc_kill()
                                               npc_pos_cmp.getCenter(), npc_pos_cmp.position.y );
       }
 
+      if ( not killed ) return;
       SPDLOG_DEBUG( "Killed NPC at position ({}, {})!", npc_pos_cmp.position.x, npc_pos_cmp.position.y );
       // now destroy the NPC
       get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entity, std::nullopt, std::nullopt, Events::DestroyNpcEvent::Cause::MELEE ) );
+      return;
     }
   }
 }

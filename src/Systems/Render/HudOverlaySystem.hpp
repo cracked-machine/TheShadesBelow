@@ -125,6 +125,15 @@ private:
   //! inside an overlay window.
   void render_altar_blood_meters();
 
+  //! @brief Render a red ImGui::ProgressBar along the top of each on-screen plant and NPC whose Cmp::Health is below 100.
+  //! Hidden when Cmp::Persist::ShowHealthBar is off. Must be called inside an overlay window.
+  void render_world_health_bars();
+
+  //! @brief Render each Cmp::DamagePopup as a red "-N" rising and fading above where the hit landed, then destroy it once
+  //! it has faded. Hidden (but still aged) when Cmp::Persist::ShowDamageText is off. Must be called inside an overlay window.
+  //! @param dt Frame time, to age the popups.
+  void render_damage_popups( sf::Time dt );
+
   //! @brief Render the halo effect around the graves that are marked as ghost spawners. Only active when player is carrying ElderFlute.
   void render_ghost_grave_halos();
 

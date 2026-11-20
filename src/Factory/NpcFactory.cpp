@@ -2,6 +2,7 @@
 #include <Components/AnimData.hpp>
 #include <Components/Armable.hpp>
 #include <Components/Armed.hpp>
+#include <Components/Health.hpp>
 #include <Components/DeathPosition.hpp>
 #include <Components/Direction.hpp>
 #include <Components/Greyscale.hpp>
@@ -125,6 +126,8 @@ entt::entity create_npc( entt::registry &reg, Cmp::Position pos_cmp, const Sys::
   reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 0, 0 } );
   reg.emplace_or_replace<Cmp::UUID>( new_pos_entity, Cmp::UUID::generate() );
   reg.emplace_or_replace<Cmp::Npc::NPC>( new_pos_entity, npc_cmp );
+  // weapon hits drain it by the NPC's damage_from_weapon (npc.json); at zero the NPC dies
+  reg.emplace_or_replace<Cmp::Health>( new_pos_entity, 100.f );
   // lift the sprite so it looks centred on its grid cell, as the player does. Visual only
   reg.emplace_or_replace<Cmp::AbsoluteRenderOffset>( new_pos_entity,
                                                      sf::Vector2f{ 0.f, Sys::PersistSystem::get<Cmp::Persist::NpcRenderOffset>( reg ).get_value() } );

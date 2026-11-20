@@ -322,7 +322,6 @@ void RenderGameSystem::draw_animated_sprite( entt::entity entity )
                             angle, tint, shader );
 
   // per-entity decorations drawn on top of the sprite
-  if ( const auto *wear_cmp = reg().try_get<Cmp::Inventory::WearLevel>( entity ) ) render_wear_level( wear_cmp->m_level, pos_cmp );
   if ( const auto *armed_cmp = reg().try_get<Cmp::Armed>( entity ) ) render_armed_indicator( *armed_cmp, pos_cmp );
   if ( const auto *corners_cmp = reg().try_get<Cmp::Hazard::SinkholeCorners>( entity ) ) render_sinkhole_corners( *corners_cmp, pos_cmp );
   if ( const auto *burr_cmp = reg().try_get<Cmp::BurrCount>( entity ); burr_cmp and reg().all_of<Cmp::Npc::NPC>( entity ) )
@@ -628,25 +627,6 @@ void RenderGameSystem::render_held_item( const sf::FloatRect &body_rect, sf::Vec
     safe_render_sprite_world( anim_cmp->m_sprite_type, sf::FloatRect( body_rect.position + offset, Constants::kGridSizePxF ), 0, scale, alpha,
                               Constants::kGridSizePxF / 2.f, rotation );
   }
-}
-
-void RenderGameSystem::render_wear_level( float wearlevel, const Cmp::Position &pos )
-{
-
-  float icon_border = 0.f;
-  float padding = 1.f;
-  float icon_height = 2.f;
-  float icon_width = pos.size.x - ( padding * 2 );
-
-  sf::RectangleShape icon( { ( icon_width / 100.f ) * wearlevel, icon_height } );
-  icon.setOutlineColor( sf::Color::Black );
-  icon.setOutlineThickness( icon_border );
-  icon.setFillColor( sf::Color( 255, 0, 0, 224 ) );
-
-  // anchor to the bottom of the entity so multi-cell sprites (e.g. plants) show the bar at their base
-  icon.setPosition( { pos.position.x + ( padding ), pos.position.y + pos.size.y - icon_height - ( padding ) } );
-
-  draw_world( icon );
 }
 
 void RenderGameSystem::render_flight_shadow()

@@ -3,6 +3,7 @@
 
 #include <Events/CreatePlantEvent.hpp>
 #include <Events/DestroyPlantEvent.hpp>
+#include <Events/PlantKilledEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -73,6 +74,11 @@ private:
   //! @param event
   void on_destroy_plant_event( const Events::DestroyPlantEvent &event );
 
+  //! @brief A player weapon hit (shovel or arrow, see Utils::Player::apply_weapon_hit) took the plant's health to zero:
+  //! drop one random item of its destroy_action reward, apply its destroy_action and side effects, then remove it.
+  //! @param event
+  void on_plant_killed_event( const Events::PlantKilledEvent &event );
+
   //! @brief Generate the given plant type in the game area.
   //! @param plant_type The plant world item, e.g. "item.plant.nettle"
   //! @param pos_cmp Position to place the plant
@@ -80,8 +86,8 @@ private:
   entt::entity gen_plant( const Sys::ItemKey &plant_type, const Cmp::Position &pos_cmp );
 
   //! @brief Uses Cmp::SelectedPosition to mark the mouse-selected Cmp::PlantMultiBlock the player is facing. With the shovel
-  //! equipped, applies its destroy_action: the plant is removed (after destroy_hits hits) and drops one random item of its
-  //! destroy_action reward (its drop, forage or the plant itself, see items.json).
+  //! equipped, each hit takes its damage_from_weapon.shovel (items.json) from its health. At zero health the plant is
+  //! killed, see on_plant_killed_event().
   void player_plant_interact();
 
   //! @brief Attempt to burn a plant

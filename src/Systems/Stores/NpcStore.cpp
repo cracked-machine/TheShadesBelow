@@ -41,6 +41,8 @@ void NpcStore::init_store()
 
     Cmp::Npc::NPC npc( mtype_list, lerp_speed );
     npc.npc_type = key_type( item_key );
+    npc.damage_from_weapon = Detail::make_weapon_damage( item_value.at( "damage_from_weapon" ) );
+    npc.damage_to_weapon = Detail::make_weapon_damage( item_value.at( "damage_to_weapon" ) );
     for ( const auto &action_entry : item_value.at( "actions" ) )
     {
       for ( const auto &[action_key, action_value] : action_entry.items() )

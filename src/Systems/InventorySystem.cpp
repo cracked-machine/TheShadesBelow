@@ -4,6 +4,7 @@
 #include <Components/Crypt/Chest.hpp>
 #include <Components/Crypt/ObjectiveMultiBlock.hpp>
 #include <Components/Grave/CurseTablet.hpp>
+#include <Components/Health.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
@@ -343,9 +344,9 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
     // on_player_action_event) can hand it back via the normal pickup_world_item path instead of
     // having to re-derive an item id from the multiblock's sprite.
     reg().emplace_or_replace<Cmp::WorldItem>( mb_entt, *inventory_slot_cmp->m_item );
-    // keep the remaining forage count when the plant is replanted
-    auto *plant_wearlevel_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inventory_slot_entt );
-    if ( plant_wearlevel_cmp ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( mb_entt, plant_wearlevel_cmp->m_level ); }
+    // a carried plant keeps its health as the slot's wear level, so it is replanted with the health it was dug up with
+    const auto *plant_wearlevel_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inventory_slot_entt );
+    reg().emplace_or_replace<Cmp::Health>( mb_entt, plant_wearlevel_cmp ? plant_wearlevel_cmp->m_level : 100.f );
     if ( reg().all_of<Cmp::Inventory::StingDamage>( inventory_slot_entt ) ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( mb_entt ); }
 
     // rebuild the m_player_navmesh here
@@ -451,9 +452,11 @@ void InventorySystem::update_item_expiry_damage( sf::Time dt )
 
   // Collect world entities first - don't modify the registry while iterating its views
   std::vector<entt::entity> world_items;
-  for ( auto [worlditem_entt, worlditem_cmp, wearlevel_cmp] : reg().view<Cmp::WorldItem, Cmp::Inventory::WearLevel>().each() )
+  for ( auto [worlditem_entt, worlditem_cmp] : reg().view<Cmp::WorldItem>().each() )
   {
     if ( worlditem_cmp.world_expiry() == sf::Time::Zero ) continue;
+    // plants decay through their health, everything else through its wear level
+    if ( not reg().any_of<Cmp::Inventory::WearLevel, Cmp::Health>( worlditem_entt ) ) continue;
     world_items.push_back( worlditem_entt );
   }
   for ( auto worlditem_entt : world_items )
@@ -558,9 +561,16 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
     reg.emplace_or_replace<Cmp::Grave::CurseTablet>( inventory_entity, *curse_tablet_cmp );
   }
 
-  // transfer the wear level from the worlditem to the new player inventory item
-  auto *wear_level_cmp = reg.try_get<Cmp::Inventory::WearLevel>( world_item_entt );
-  if ( wear_level_cmp ) { reg.emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, wear_level_cmp->m_level ); }
+  // transfer the wear level from the worlditem to the new player inventory item. A plant's health is carried as the
+  // slot's wear level, if the plant item wears at all
+  if ( const auto *wear_level_cmp = reg.try_get<Cmp::Inventory::WearLevel>( world_item_entt ) )
+  {
+    reg.emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, wear_level_cmp->m_level );
+  }
+  else if ( const auto *health_cmp = reg.try_get<Cmp::Health>( world_item_entt ); health_cmp and reg.get<Cmp::WorldItem>( world_item_entt ).has_wear() )
+  {
+    reg.emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, health_cmp->m_level );
+  }
   if ( reg.all_of<Cmp::Inventory::StingDamage>( world_item_entt ) ) { reg.emplace_or_replace<Cmp::Inventory::StingDamage>( inventory_entity ); }
 
   // now destroy the world item entt

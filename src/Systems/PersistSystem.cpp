@@ -10,7 +10,9 @@
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
 #include <Components/Persistent/AutoPickupDrops.hpp>
-#include <Components/Persistent/ShovelSkeletonKillWear.hpp>
+#include <Components/Persistent/MeleeHitCooldown.hpp>
+#include <Components/Persistent/ShowDamageText.hpp>
+#include <Components/Persistent/ShowHealthBar.hpp>
 #include <Components/Persistent/AzazelFireballArc.hpp>
 #include <Components/Persistent/AzazelFireballColour.hpp>
 #include <Components/Persistent/AzazelFireballCooldown.hpp>
@@ -318,7 +320,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ShopMaxItems>();
   add_component<Cmp::Persist::ShopMinPrice>();
   add_component<Cmp::Persist::ShopMaxPrice>();
-  add_component<Cmp::Persist::ShovelSkeletonKillWear>();
+  add_component<Cmp::Persist::MeleeHitCooldown>();
   add_component<Cmp::Persist::FearHealthDmgPerSec>();
   add_component<Cmp::Persist::DespairHealthDmgPerSec>();
   add_component<Cmp::Persist::HypoxiaHealthDmgPerSec>();
@@ -348,6 +350,8 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::StowedTorchLit>();
   add_component<Cmp::Persist::InventorySlotRollover>();
   add_component<Cmp::Persist::AutoPickupDrops>();
+  add_component<Cmp::Persist::ShowHealthBar>();
+  add_component<Cmp::Persist::ShowDamageText>();
   add_component<Cmp::Persist::FlyingOscillationAmplitude>();
   add_component<Cmp::Persist::FlyingLiftOffset>();
   add_component<Cmp::Persist::PlayerRenderOffset>();

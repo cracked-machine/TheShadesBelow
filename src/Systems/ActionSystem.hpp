@@ -4,6 +4,8 @@
 #include <Events/PlayerActionEvent.hpp>
 #include <Systems/BaseSystem.hpp>
 
+#include <SFML/System/Clock.hpp>
+
 namespace Game::PathFinding
 {
 class SpatialHashGrid;
@@ -68,8 +70,13 @@ private:
   template <typename NpcType>
   void banish_nearest_npcs( sf::Vector2f origin, int max_count );
 
-  //! @brief With the shovel equipped, kill the mouse-selected skeleton or Burryman next to the player.
+  //! @brief With the shovel equipped, hit the mouse-selected NPC next to the player: it loses its damage_from_weapon.shovel
+  //! (npc.json) and dies at zero health. NPCs with a shovel damage of 0 can't be hit. At most one hit per
+  //! Cmp::Persist::MeleeHitCooldown.
   void check_player_melee_npc_kill();
+
+  //! @brief Time since the last shovel melee hit, see check_player_melee_npc_kill().
+  sf::Clock m_melee_hit_clock;
 
   //! @brief Uses Cmp::SelectedPosition to mark the targetted Cmp::Obstacle/Cmp::Moveable entity.
   void select_moveable_obstacle();

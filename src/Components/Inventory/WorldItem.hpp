@@ -5,6 +5,7 @@
 #include <Components/Random.hpp>
 #include <Components/Stats/ActionSet.hpp>
 #include <Components/Stats/BaseActionFwd.hpp>
+#include <Components/WeaponDamage.hpp>
 #include <SFML/System/Time.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
@@ -195,9 +196,16 @@ public:
   int get_shovel_damage() const { return m_shovel_damage; }
   int get_bow_damage() const { return m_bow_damage; }
 
-  //! @brief Number of shovel hits needed to destroy this plant, see "destroy_hits" in items.json. Defaults to 1.
-  int get_destroy_hits() const { return m_destroy_hits; }
-  void set_destroy_hits( int destroy_hits ) { m_destroy_hits = destroy_hits; }
+  //! @brief Damage done to each weapon by this item, see "damage_to_weapon" in items.json.
+  WeaponDamage damage_to_weapon() const
+  {
+    return WeaponDamage{ .pickaxe = m_pickaxe_damage, .axe = m_axe_damage, .shovel = m_shovel_damage, .bow = m_bow_damage };
+  }
+
+  //! @brief Health points this plant loses to a hit from each weapon, see "damage_from_weapon" in items.json (plants only,
+  //! zero for every other item). A weapon doing zero damage can't hurt the plant.
+  const WeaponDamage &damage_from_weapon() const { return m_damage_from_weapon; }
+  void set_damage_from_weapon( const WeaponDamage &damage ) { m_damage_from_weapon = damage; }
 
   //! @brief Whether the item can be eaten, drunk or neither.
   Consumable consumable_type() const { return m_consumable; }
@@ -258,8 +266,8 @@ private:
   //! @brief Damage done to a bow by this item.
   int m_bow_damage{ 0 };
 
-  //! @brief Number of shovel hits needed to destroy this plant. Imported from items.json.
-  int m_destroy_hits{ 1 };
+  //! @brief Health points this plant loses to each weapon. Imported from items.json.
+  WeaponDamage m_damage_from_weapon;
 
   //! @brief Whether the item can be eaten, drunk or neither. Imported from items.json.
   Consumable m_consumable{ Consumable::NONE };

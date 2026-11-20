@@ -10,7 +10,9 @@
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
 #include <Components/Persistent/AutoPickupDrops.hpp>
-#include <Components/Persistent/ShovelSkeletonKillWear.hpp>
+#include <Components/Persistent/MeleeHitCooldown.hpp>
+#include <Components/Persistent/ShowDamageText.hpp>
+#include <Components/Persistent/ShowHealthBar.hpp>
 #include <Components/Persistent/AzazelFireballArc.hpp>
 #include <Components/Persistent/AzazelFireballColour.hpp>
 #include <Components/Persistent/AzazelFireballCooldown.hpp>
@@ -293,6 +295,9 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::InventorySlotCount>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::InventorySlotRollover>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AutoPickupDrops>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::ShowHealthBar>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::ShowDamageText>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::MeleeHitCooldown>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::StowedTorchLit>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerMovementSpeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::TachycardiaMovementSpeed>( reg() ).render_widget();
@@ -336,7 +341,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
 
     Sys::PersistSystem::get<Cmp::Persist::ShovelObstacleDigWear>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ShovelPotSmashWear>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::ShovelSkeletonKillWear>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ShovelGraveDigWear>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::BowReleaseWear>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlantWearPerForage>( reg() ).render_widget();

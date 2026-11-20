@@ -1,11 +1,15 @@
 #include <Components/Altar/Activated.hpp>
 #include <Components/Altar/BloodCount.hpp>
 #include <Components/Altar/MultiBlock.hpp>
+#include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Crypt/ShuffleTimer.hpp>
+#include <Components/DamagePopup.hpp>
 #include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/MultiBlock.hpp>
+#include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Hazard/FieldCell.hpp>
+#include <Components/Health.hpp>
 #include <Components/Inventory/FlashUIAnima.hpp>
 #include <Components/Inventory/FlashUICadaver.hpp>
 #include <Components/Inventory/FlashUIExtraLife.hpp>
@@ -20,6 +24,8 @@
 #include <Components/Persistent/AltarBloodQuota.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
+#include <Components/Persistent/ShowDamageText.hpp>
+#include <Components/Persistent/ShowHealthBar.hpp>
 #include <Components/Persistent/StatChangeDisplayDuration.hpp>
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
@@ -96,6 +102,8 @@ void HudOverlaySystem::update( sf::Time dt )
   begin_overlay_window( "##hud_meters" );
   // first, so the HUD draws over the altar meters
   PROFILED( render_altar_blood_meters() );
+  PROFILED( render_world_health_bars() );
+  PROFILED( render_damage_popups( dt ) );
   PROFILED( render_ui_meters( dt ) );
   PROFILED( render_ui_labels( dt ) );
   PROFILED( render_ui_texts() );
@@ -756,6 +764,88 @@ void HudOverlaySystem::render_altar_blood_meters()
     }
     draw_list->AddRect( ImVec2( top_left.x, top_left.y ), ImVec2( bottom_right.x, bottom_right.y ), ImGui::GetColorU32( to_imvec4( kMeterOutline ) ),
                         0.f, 0, kMeterWorldOutline * px_per_world_unit );
+  }
+}
+
+void HudOverlaySystem::render_world_health_bars()
+{
+  if ( not Sys::PersistSystem::get<Cmp::Persist::ShowHealthBar>( reg() ).get_value() ) return;
+
+  // the bar's inset and height in world pixels
+  constexpr float kWorldPadding = 1.f;
+  constexpr float kWorldHeight = 2.f;
+  const ImVec4 kFill = to_imvec4( sf::Color( 255, 0, 0, 224 ) );
+  const ImVec4 kBackground = to_imvec4( sf::Color( 0, 0, 0, 128 ) );
+
+  const sf::View &world_view = Sys::RenderSystem::get_world_view();
+  ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, 0.f );
+  ImGui::PushStyleVar( ImGuiStyleVar_FrameRounding, 0.f );
+  ImGui::PushStyleColor( ImGuiCol_PlotHistogram, kFill );
+  ImGui::PushStyleColor( ImGuiCol_FrameBg, kBackground );
+  for ( auto [entity, health_cmp] : reg().view<Cmp::Health>().each() )
+  {
+    // full health shows nothing, so undamaged plants and NPCs don't clutter the screen
+    if ( health_cmp.m_level >= 100.f ) continue;
+
+    // a plant spans its multiblock; an NPC its position, lifted by its render offset like its sprite
+    sf::FloatRect bounds;
+    if ( const auto *plant_mb_cmp = reg().try_get<Cmp::PlantMultiBlock>( entity ) ) { bounds = *plant_mb_cmp; }
+    else if ( const auto *pos_cmp = reg().try_get<Cmp::Position>( entity ) )
+    {
+      bounds = *pos_cmp;
+      if ( const auto *render_offset_cmp = reg().try_get<Cmp::AbsoluteRenderOffset>( entity ) ) bounds.position += render_offset_cmp->getOffset();
+    }
+    else { continue; }
+    if ( not Utils::is_visible_in_view( world_view, bounds ) ) continue;
+
+    const sf::Vector2f world_top_left( bounds.position.x + kWorldPadding, bounds.position.y + kWorldPadding );
+    const sf::Vector2f world_size( bounds.size.x - ( kWorldPadding * 2.f ), kWorldHeight );
+    const sf::Vector2f top_left( m_window.mapCoordsToPixel( world_top_left, world_view ) );
+    const sf::Vector2f bottom_right( m_window.mapCoordsToPixel( world_top_left + world_size, world_view ) );
+
+    ImGui::PushID( static_cast<int>( entity ) );
+    ImGui::SetCursorScreenPos( ImVec2( top_left.x, top_left.y ) );
+    ImGui::ProgressBar( std::clamp( health_cmp.m_level / 100.f, 0.f, 1.f ), ImVec2( bottom_right.x - top_left.x, bottom_right.y - top_left.y ), "" );
+    ImGui::PopID();
+  }
+  ImGui::PopStyleColor( 2 );
+  ImGui::PopStyleVar( 2 );
+}
+
+void HudOverlaySystem::render_damage_popups( sf::Time dt )
+{
+  // how long a number shows, how far it rises (world px) and its size (world px)
+  constexpr float kLifetimeSeconds = 0.8f;
+  constexpr float kWorldRise = 8.f;
+  constexpr float kWorldFontSize = 8.f;
+
+  const bool show = Sys::PersistSystem::get<Cmp::Persist::ShowDamageText>( reg() ).get_value();
+  const sf::View &world_view = Sys::RenderSystem::get_world_view();
+  // ImGui draws in window pixels
+  const float px_per_world_unit = static_cast<float>( m_window.getSize().y ) / world_view.getSize().y;
+
+  // age every popup even while hidden, so turning the setting back on doesn't show stale numbers. Destroyed after the loop
+  std::vector<entt::entity> expired;
+  for ( auto [entity, popup_cmp] : reg().view<Cmp::DamagePopup>().each() )
+  {
+    popup_cmp.elapsed += dt;
+    const float progress = popup_cmp.elapsed.asSeconds() / kLifetimeSeconds;
+    if ( progress >= 1.f )
+    {
+      expired.push_back( entity );
+      continue;
+    }
+    if ( not show ) continue;
+
+    const sf::Vector2f world_pos( popup_cmp.world_pos.x, popup_cmp.world_pos.y - ( kWorldRise * progress ) );
+    const sf::Vector2f screen_pos( m_window.mapCoordsToPixel( world_pos, world_view ) );
+    const auto alpha = static_cast<std::uint8_t>( 255.f * ( 1.f - progress ) );
+    draw_text( std::format( "-{}", static_cast<int>( std::round( popup_cmp.amount ) ) ), kWorldFontSize * px_per_world_unit, screen_pos,
+               sf::Color( 255, 64, 64, alpha ), TextAlign::CENTER, sf::Color( 0, 0, 0, alpha ), px_per_world_unit );
+  }
+  for ( auto entity : expired )
+  {
+    reg().destroy( entity );
   }
 }
 

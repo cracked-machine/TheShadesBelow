@@ -170,11 +170,6 @@ private:
   //! @param alpha The player's alpha, so the item fades with the player.
   void render_held_item( const sf::FloatRect &body_rect, sf::Vector2f facing, sf::Vector2f scale, uint8_t alpha );
 
-  //! @brief Draw a small wear-level bar above an item, filled proportionally to `wearlevel`.
-  //! @param wearlevel
-  //! @param pos
-  void render_wear_level( float wearlevel, const Cmp::Position &pos );
-
   //! @brief Draw a semi-transparent ground shadow at the flying player's logical position
   //! (see FlyingSystem::shadow_bounds). Drawn from render_zorder_queue() at FlyingSystem::shadow_zorder().
   void render_flight_shadow();

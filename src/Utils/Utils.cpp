@@ -1,5 +1,6 @@
 #include <Components/BurrCount.hpp>
 #include <Components/Exit.hpp>
+#include <Components/Health.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LerpPosition.hpp>
@@ -226,8 +227,8 @@ entt::entity get_world_pos_entt( entt::registry &reg, Cmp::Position match )
 
 bool is_plant_depleted( entt::registry &reg, entt::entity plant_entt )
 {
-  const auto *wearlevel_cmp = reg.try_get<Cmp::Inventory::WearLevel>( plant_entt );
-  return wearlevel_cmp and wearlevel_cmp->m_level <= 0;
+  const auto *health_cmp = reg.try_get<Cmp::Health>( plant_entt );
+  return health_cmp and health_cmp->m_level <= 0;
 }
 
 std::string wrap_text_to_width( const std::string &text, std::size_t max_chars_per_line )

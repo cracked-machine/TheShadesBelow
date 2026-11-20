@@ -2,11 +2,14 @@
 #include <cmath>
 
 #include <Components/AbsoluteAlpha.hpp>
+#include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Crypt/RoomLavaPitCell.hpp>
+#include <Components/DamagePopup.hpp>
 #include <Components/Direction.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
+#include <Components/Health.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
@@ -21,6 +24,7 @@
 #include <Components/Persistent/StowedTorchLit.hpp>
 #include <Components/Persistent/BradycardiaMovementSpeed.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
+#include <Components/Persistent/ShowDamageText.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
 #include <Components/Persistent/TachycardiaMovementSpeed.hpp>
 #include <Components/Persistent/StartingAnima.hpp>
@@ -72,6 +76,8 @@
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/GrimoireItemUpdateEvent.hpp>
+#include <Events/UpdateDmgEvent.hpp>
+#include <Systems/BaseSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
@@ -656,6 +662,54 @@ Cmp::Player::GraveTrail &trail_position( entt::registry &reg )
   auto *trail_pos_cmp = reg.try_get<Cmp::Player::GraveTrail>( player_entt );
   if ( not trail_pos_cmp ) throw std::runtime_error( "Player has no Cmp::Player::GraveTrail component." );
   return *trail_pos_cmp;
+}
+
+bool apply_weapon_hit( entt::registry &reg, entt::entity target_entt, const Sys::ItemKey &weapon )
+{
+  auto *health_cmp = reg.try_get<Cmp::Health>( target_entt );
+  if ( not health_cmp ) return false;
+
+  // a plant's weapon damage is in its items.json entry, an NPC's in its npc.json entry. The popup rises from the top-centre
+  Cmp::WeaponDamage damage_from;
+  Cmp::WeaponDamage damage_to;
+  sf::Vector2f popup_pos;
+  if ( const auto *plant_mb_cmp = reg.try_get<Cmp::PlantMultiBlock>( target_entt ) )
+  {
+    const auto &plant_item = reg.get<Cmp::WorldItem>( target_entt );
+    damage_from = plant_item.damage_from_weapon();
+    damage_to = plant_item.damage_to_weapon();
+    popup_pos = { plant_mb_cmp->position.x + ( plant_mb_cmp->size.x / 2.f ), plant_mb_cmp->position.y };
+  }
+  else if ( const auto *npc_cmp = reg.try_get<Cmp::Npc::NPC>( target_entt ) )
+  {
+    damage_from = npc_cmp->damage_from_weapon;
+    damage_to = npc_cmp->damage_to_weapon;
+    const auto &pos_cmp = reg.get<Cmp::Position>( target_entt );
+    popup_pos = { pos_cmp.position.x + ( pos_cmp.size.x / 2.f ), pos_cmp.position.y };
+    if ( const auto *render_offset_cmp = reg.try_get<Cmp::AbsoluteRenderOffset>( target_entt ) ) popup_pos += render_offset_cmp->getOffset();
+  }
+  else { return false; }
+
+  auto &event_queue = Sys::BaseSystem::get_systems_event_queue();
+  auto [held_entt, held_type, _] = get_inventory( reg );
+  if ( const int wear = damage_to.get( weapon ); wear > 0 and held_type == weapon )
+  {
+    event_queue.trigger( Events::UpdateDmgEvent( held_entt, static_cast<float>( wear ) ) );
+  }
+
+  const auto damage = static_cast<float>( damage_from.get( weapon ) );
+  if ( damage <= 0.f ) return false;
+  // the popup shows the health actually lost, so overkill on a weak target reads as its remaining health
+  const float health_lost = std::min( damage, health_cmp->m_level );
+  event_queue.trigger( Events::UpdateDmgEvent( target_entt, damage ) );
+
+  if ( Sys::PersistSystem::get<Cmp::Persist::ShowDamageText>( reg ).get_value() and health_lost > 0.f )
+  {
+    reg.emplace<Cmp::DamagePopup>( reg.create(), Cmp::DamagePopup{ .world_pos = popup_pos, .amount = health_lost } );
+  }
+  // re-fetch: the event handlers may have touched the storage
+  const auto *after_cmp = reg.try_get<Cmp::Health>( target_entt );
+  return after_cmp and after_cmp->m_level <= 0.f;
 }
 
 } // namespace Game::Utils::Player

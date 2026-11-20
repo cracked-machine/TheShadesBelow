@@ -3,18 +3,18 @@
 #include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AbsoluteRotation.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
+#include <Components/Health.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/Container.hpp>
-#include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/Npc.hpp>
-#include <Components/Npc/Wisp.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
 #include <Components/Random.hpp>
 #include <Components/Weapons/Arrow.hpp>
 #include <Components/Weapons/InFlight.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
+#include <Events/PlantKilledEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
@@ -88,6 +88,7 @@ void ArrowSystem::update( sf::Time dt )
 void ArrowSystem::update_arrow_trajectory( sf::Time dt )
 {
   std::vector<float> bow_damages;
+  std::vector<entt::entity> hit_plants;
   for ( auto [arrow_entt, arrow_cmp, arrow_pos_cmp] : reg().view<Cmp::Weapons::Projectiles::Arrow, Cmp::Position>().each() )
   {
     if ( arrow_cmp.m_fixed_time_step_accumulator >= arrow_cmp.fixed_time_step_max() )
@@ -131,7 +132,8 @@ void ArrowSystem::update_arrow_trajectory( sf::Time dt )
           m_sound_bank.get_effect( "draw_bow" ).stop();
           m_sound_bank.get_effect( "release_bow" ).stop();
           reg().remove<Cmp::Weapons::Projectiles::InFlight>( arrow_entt );
-          if ( auto bow_dmg = get_bow_damage_at( arrow_pos_cmp ); bow_dmg > 0 ) { bow_damages.push_back( static_cast<float>( bow_dmg ) ); }
+          if ( auto plant_entt = get_plant_at( arrow_pos_cmp ); plant_entt != entt::null ) { hit_plants.push_back( plant_entt ); }
+          else if ( auto bow_dmg = get_bow_damage_at( arrow_pos_cmp ); bow_dmg > 0 ) { bow_damages.push_back( static_cast<float>( bow_dmg ) ); }
 
           if ( auto *rotation_cmp = reg().try_get<Cmp::AbsoluteRotation>( arrow_entt ) ) arrow_cmp.m_rest_angle = rotation_cmp->getAngle();
 
@@ -175,6 +177,17 @@ void ArrowSystem::update_arrow_trajectory( sf::Time dt )
     else { arrow_cmp.m_fixed_time_step_accumulator += dt; }
   }
 
+  // after the view loop: killing a plant drops its reward, which creates entities with a Cmp::Position. The hit wears the
+  // bow by the plant's damage_to_weapon.bow
+  for ( auto plant_entt : hit_plants )
+  {
+    if ( not reg().valid( plant_entt ) ) continue;
+    if ( Utils::Player::apply_weapon_hit( reg(), plant_entt, "item.longbow" ) )
+    {
+      get_systems_event_queue().trigger( Events::PlantKilledEvent( plant_entt ) );
+    }
+  }
+
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_type != "item.longbow" ) return;
   for ( auto dmg : bow_damages )
@@ -183,12 +196,18 @@ void ArrowSystem::update_arrow_trajectory( sf::Time dt )
   }
 }
 
+entt::entity ArrowSystem::get_plant_at( const Cmp::Position &arrow_pos_cmp )
+{
+  for ( auto [plant_entt, plant_mb_cmp] : reg().view<Cmp::PlantMultiBlock>().each() )
+  {
+    if ( not reg().all_of<Cmp::WorldItem, Cmp::Health>( plant_entt ) ) continue;
+    if ( plant_mb_cmp.findIntersection( arrow_pos_cmp ) ) return plant_entt;
+  }
+  return entt::null;
+}
+
 int ArrowSystem::get_bow_damage_at( const Cmp::Position &arrow_pos_cmp )
 {
-  for ( auto [plant_entt, plant_mb_cmp, plant_item_cmp] : reg().view<Cmp::PlantMultiBlock, Cmp::WorldItem>().each() )
-  {
-    if ( plant_mb_cmp.findIntersection( arrow_pos_cmp ) ) return plant_item_cmp.get_bow_damage();
-  }
   for ( auto [item_entt, item_cmp, item_pos_cmp] : reg().view<Cmp::WorldItem, Cmp::Position>( entt::exclude<Cmp::PlantMultiBlock> ).each() )
   {
     if ( item_pos_cmp.findIntersection( arrow_pos_cmp ) ) return item_cmp.get_bow_damage();
@@ -206,12 +225,23 @@ void ArrowSystem::check_npc_arrow_collision()
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position>().each() )
     {
       if ( not reg().any_of<Cmp::Weapons::Projectiles::InFlight>( arrow_entt ) ) continue;
-      if ( reg().any_of<Cmp::Npc::Ghost, Cmp::Npc::Wisp>( npc_entt ) ) continue;
+      // arrows pass through NPCs the bow can't hurt (damage_from_weapon.bow of 0 in npc.json, e.g. ghosts and wisps)
+      if ( npc_cmp.damage_from_weapon.bow <= 0 ) continue;
       if ( not npc_pos_cmp.findIntersection( arrow_pos_cmp ) ) continue;
       cached_npc_pos_cmp = npc_pos_cmp;
       cached_npc_type = npc_cmp.npc_type;
+
+      // the arrow stops in the NPC it hits, so it only damages it once. It lands where it is: the trajectory update
+      // sees it at its destination and lets it rest, then cleans it up
+      reg().remove<Cmp::Weapons::Projectiles::InFlight>( arrow_entt );
+      arrow_cmp.m_destination = arrow_pos_cmp.getCenter();
+      m_sound_bank.get_effect( std::string( "arrow_hit" + std::to_string( Cmp::RandomInt( 1, 4 ).gen() ) ) ).play();
+
       // the death sfx is the NPC's destroy_action sfx (see npc.json), played by the DestroyNpcEvent handler
-      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, std::nullopt, std::nullopt, Events::DestroyNpcEvent::Cause::ARROW ) );
+      if ( Utils::Player::apply_weapon_hit( reg(), npc_entt, "item.longbow" ) )
+      {
+        get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, std::nullopt, std::nullopt, Events::DestroyNpcEvent::Cause::ARROW ) );
+      }
     }
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::Container, Cmp::Position>().each() )
     {

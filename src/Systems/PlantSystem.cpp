@@ -2,6 +2,7 @@
 #include <Components/DroppedBy.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
+#include <Components/Health.hpp>
 #include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
@@ -27,6 +28,7 @@
 #include <Events/DestroyLootEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/DestroyPlantEvent.hpp>
+#include <Events/PlantKilledEvent.hpp>
 #include <Events/GrimoireItemUpdateEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
@@ -66,6 +68,7 @@ PlantSystem::PlantSystem( entt::registry &reg, sf::RenderWindow &window, Audio::
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&PlantSystem::on_player_action>( this );
   std::ignore = get_systems_event_queue().sink<Events::CreatePlantEvent>().connect<&PlantSystem::on_create_plant_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::DestroyPlantEvent>().connect<&PlantSystem::on_destroy_plant_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::PlantKilledEvent>().connect<&PlantSystem::on_plant_killed_event>( this );
   SPDLOG_DEBUG( "PlantSystem initialized" );
 }
 
@@ -181,8 +184,8 @@ entt::entity PlantSystem::gen_plant( const Sys::ItemKey &plant_type, const Cmp::
     // Add the worlditem now so we don't have to look it up later when digging up the plant
     const auto &plant_item = Sys::ItemStore::instance().get( plant_type );
     reg().emplace_or_replace<Cmp::WorldItem>( mb_entt, plant_item );
-    // the wear level limits how many items can be foraged from the plant
-    if ( plant_item.has_wear() ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( mb_entt, 100.f ); }
+    // weapon hits, foraging, decay and kills all drain the plant's health
+    reg().emplace_or_replace<Cmp::Health>( mb_entt, 100.f );
     if ( plant_item.stings() ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( mb_entt ); }
 
     // Every covered cell is already reserved: create_multiblock_segments() inserts each segment into reserved_sm.
@@ -218,19 +221,10 @@ void PlantSystem::player_plant_interact()
       reg().emplace_or_replace<Cmp::SelectedPosition>( plant_entt, plant_mb_cmp.position );
       reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
-      auto *plant_item = reg().try_get<Cmp::WorldItem>( plant_entt );
-      if ( not plant_item ) continue;
+      if ( not reg().all_of<Cmp::WorldItem>( plant_entt ) ) continue;
 
       auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
       if ( inventory_type != "item.shovel" ) continue;
-
-      // copy the rewards: creating items or removing the plant below can invalidate plant_item
-      const auto destroy_reward = plant_item->get_reward<Cmp::DestroyAction>();
-      const auto destroy_hits = plant_item->get_destroy_hits();
-      const auto destroy_sfx = plant_item->get_action<Cmp::DestroyAction>().sfx();
-      const auto shovel_damage = static_cast<float>( plant_item->get_shovel_damage() );
-      const Cmp::Position plant_bounds( plant_mb_cmp.position, plant_mb_cmp.size );
-      const Cmp::Position plant_pos_cmp( plant_mb_cmp.position, Constants::kGridSizePxF );
 
       if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) { return; }
 
@@ -244,43 +238,50 @@ void PlantSystem::player_plant_interact()
       Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, planttwigs_particle_uuid,
                                             plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
 
-      // each hit wears the shovel
-      get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), shovel_damage ) );
-
-      // tougher plants (destroy_hits in items.json) lose 1/destroy_hits of their wear level per hit, rounded up so
-      // exactly destroy_hits hits destroy the plant
-      if ( destroy_hits > 1 )
+      // the hit takes the plant's damage_from_weapon.shovel from its health and wears the shovel by its damage_to_weapon.shovel
+      if ( Utils::Player::apply_weapon_hit( reg(), plant_entt, "item.shovel" ) )
       {
-        get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, std::ceil( 100.f / static_cast<float>( destroy_hits ) ) ) );
-        if ( not Utils::is_plant_depleted( reg(), plant_entt ) )
-        {
-          // intermediate hits play the destroy_action "loop" sfx, the final hit its "final" sfx
-          if ( not destroy_sfx.loop.empty() ) { m_sound_bank.get_effect( destroy_sfx.loop ).play(); }
-          continue;
-        }
+        on_plant_killed_event( Events::PlantKilledEvent( plant_entt ) );
+        return;
       }
-
-      // drop one random item of the destroy_action reward (drop, forage or the plant itself, see items.json) beside the
-      // plant. It is a reward for the player, so it may be picked up straight into an empty slot (Cmp::Persist::AutoPickupDrops).
-      // Plants without a destroy_action.reward.item drop nothing.
-      if ( destroy_reward and destroy_reward->target == Cmp::ActionReward::Target::DEFAULT )
-      {
-        get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( find_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
-                                                                    Sys::ItemStore::instance().pick_reward_item( *destroy_reward ), "drop_loot",
-                                                                    0.f, false, 0, entt::null, {}, /*sting=*/true, /*auto_pickup=*/true ) );
-      }
-      // the shovel occupies the inventory, so an inventory reward is dropped nearby
-      else if ( destroy_reward ) { grant_item_reward( *destroy_reward, plant_bounds, plant_entt ); }
-      const auto destroy_action = Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
-
-      trigger_side_effects( destroy_action, plant_pos_cmp, plant_entt );
-      // its loot is left for the player to collect
-      destroy_plant_spawned_npcs( plant_uuid_cmp, Sys::SpriteKey( "sprite.death.anim.bloodsplat" ) );
-      get_systems_event_queue().trigger( Events::DestroyPlantEvent( plant_entt ) );
-      play_action_sfx( destroy_action );
+      // intermediate hits play the destroy_action "loop" sfx, the final hit its "final" sfx
+      const auto destroy_sfx = reg().get<Cmp::WorldItem>( plant_entt ).get_action<Cmp::DestroyAction>().sfx();
+      if ( not destroy_sfx.loop.empty() ) { m_sound_bank.get_effect( destroy_sfx.loop ).play(); }
       return;
     }
   }
+}
+
+void PlantSystem::on_plant_killed_event( const Events::PlantKilledEvent &event )
+{
+  const auto plant_entt = event.m_plant_entity;
+  if ( not reg().valid( plant_entt ) or not reg().all_of<Cmp::PlantMultiBlock, Cmp::WorldItem, Cmp::UUID>( plant_entt ) ) return;
+
+  // copy everything needed: creating items or removing the plant below can invalidate the component references
+  const auto plant_mb_cmp = reg().get<Cmp::PlantMultiBlock>( plant_entt );
+  const auto plant_uuid_cmp = reg().get<Cmp::UUID>( plant_entt );
+  const auto destroy_reward = reg().get<Cmp::WorldItem>( plant_entt ).get_reward<Cmp::DestroyAction>();
+  const Cmp::Position plant_bounds( plant_mb_cmp.position, plant_mb_cmp.size );
+  const Cmp::Position plant_pos_cmp( plant_mb_cmp.position, Constants::kGridSizePxF );
+
+  // drop one random item of the destroy_action reward (drop, forage or the plant itself, see items.json) beside the
+  // plant. It is a reward for the player, so it may be picked up straight into an empty slot (Cmp::Persist::AutoPickupDrops).
+  // Plants without a destroy_action.reward.item drop nothing.
+  if ( destroy_reward and destroy_reward->target == Cmp::ActionReward::Target::DEFAULT )
+  {
+    get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( find_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
+                                                                Sys::ItemStore::instance().pick_reward_item( *destroy_reward ), "drop_loot", 0.f,
+                                                                false, 0, entt::null, {}, /*sting=*/true, /*auto_pickup=*/true ) );
+  }
+  // the weapon occupies the inventory, so an inventory reward is dropped nearby
+  else if ( destroy_reward ) { grant_item_reward( *destroy_reward, plant_bounds, plant_entt ); }
+  const auto destroy_action = Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
+
+  trigger_side_effects( destroy_action, plant_pos_cmp, plant_entt );
+  // its loot is left for the player to collect
+  destroy_plant_spawned_npcs( plant_uuid_cmp, Sys::SpriteKey( "sprite.death.anim.bloodsplat" ) );
+  get_systems_event_queue().trigger( Events::DestroyPlantEvent( plant_entt ) );
+  play_action_sfx( destroy_action );
 }
 
 void PlantSystem::try_burn_plant()

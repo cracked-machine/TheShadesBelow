@@ -72,14 +72,11 @@ void ItemStore::init_store()
       throw std::runtime_error( "Item '" + item_key + "' sprite.index " + std::to_string( sprite_index ) + " is out of range for '" +
                                 sprite_mtype.str() + "' in " + m_json_file_path.string() );
     }
-    auto damage_to_weapon = item_value.at( "damage_to_weapon" );
-    auto pickaxe_damage = damage_to_weapon.at( "pickaxe" ).get<int>();
-    auto axe_damage = damage_to_weapon.at( "axe" ).get<int>();
-    auto shovel_damage = damage_to_weapon.at( "shovel" ).get<int>();
-    auto bow_damage = damage_to_weapon.at( "bow" ).get<int>();
+    const auto damage_to_weapon = Detail::make_weapon_damage( item_value.at( "damage_to_weapon" ) );
     auto consumable = make_consumable_property( item_value.at( "consumable" ).get<std::string>() );
     Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, static_cast<std::size_t>( sprite_index ),
-                              sprite_random ? Sys::SpriteStore::instance().get( sprite_mtype ).sheet_size() : 0, pickaxe_damage, axe_damage, shovel_damage, bow_damage, consumable );
+                              sprite_random ? Sys::SpriteStore::instance().get( sprite_mtype ).sheet_size() : 0, damage_to_weapon.pickaxe,
+                              damage_to_weapon.axe, damage_to_weapon.shovel, damage_to_weapon.bow, consumable );
     if ( item_value.contains( "shop" ) )
     {
       const auto &shop_json = item_value.at( "shop" );
@@ -114,21 +111,14 @@ void ItemStore::init_store()
         }
       }
     }
-    if ( item_value.contains( "destroy_hits" ) )
+    // plants have health, so every plant says how much each weapon hurts it; nothing else may
+    const bool is_plant = item_key.starts_with( "item.plant." );
+    if ( is_plant != item_value.contains( "damage_from_weapon" ) )
     {
-      const auto destroy_hits = Utils::JsonDeserializer::get_int( item_value, "destroy_hits" );
-      if ( not item_key.starts_with( "item.plant." ) )
-      {
-        throw std::runtime_error( "Item '" + item_key + "' destroy_hits is only allowed on plant items in " + m_json_file_path.string() );
-      }
-      // each hit wears the plant down, so it must have a world wear level to be destroyed over several hits
-      if ( destroy_hits < 1 or ( destroy_hits > 1 and not worlditem.wears_in_world() ) )
-      {
-        throw std::runtime_error( "Item '" + item_key + "' destroy_hits must be 1, or above 1 with a spawn_action wear, in " +
-                                  m_json_file_path.string() );
-      }
-      worlditem.set_destroy_hits( destroy_hits );
+      throw std::runtime_error( "Item '" + item_key + "' damage_from_weapon is required on plant items and only allowed on them in " +
+                                m_json_file_path.string() );
     }
+    if ( is_plant ) { worlditem.set_damage_from_weapon( Detail::make_weapon_damage( item_value.at( "damage_from_weapon" ) ) ); }
     // an offering reward is exactly one of item, wealth or altar, and each altar location has at most one reward
     const auto offering_rewards = worlditem.get_rewards<Cmp::OfferingAction>();
     for ( auto it = offering_rewards.begin(); it != offering_rewards.end(); ++it )

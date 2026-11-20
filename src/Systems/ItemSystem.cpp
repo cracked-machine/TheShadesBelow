@@ -4,6 +4,7 @@
 #include <Components/DropCount.hpp>
 #include <Components/Grave/CurseTablet.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
+#include <Components/Health.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
@@ -115,6 +116,15 @@ void ItemSystem::on_destroy_item_event( Game::Events::DestroyItemEvent ev )
 void ItemSystem::on_swap_world_item_event( const Events::SwapWorldItemEvent &ev ) { swap_world_item( ev.m_entt, ev.m_new_item, ev.m_sfx ); }
 void ItemSystem::on_update_dmg_event( const Events::UpdateDmgEvent &ev )
 {
+  // plants and NPCs have health instead of a wear level. A plant at zero health stays depleted: whoever drained it
+  // (weapon hit, foraging, decay, kills) decides whether it is removed
+  if ( auto *health_cmp = reg().try_get<Cmp::Health>( ev.m_item_entt ) )
+  {
+    const float sign = ev.m_type == Events::UpdateDmgEvent::ADD ? 1.f : -1.f;
+    health_cmp->m_level = std::clamp( health_cmp->m_level + ( sign * ev.m_amount ), 0.f, 100.f );
+    return;
+  }
+
   // don't assume the item has a wear level
   if ( reg().all_of<Cmp::WorldItem, Cmp::Inventory::WearLevel>( ev.m_item_entt ) )
   {

@@ -358,6 +358,16 @@ Cmp::Player::Doglegs &get_doglegs( entt::registry &reg );
 
 Cmp::Player::GraveTrail &trail_position( entt::registry &reg );
 
+//! @brief Apply a player weapon hit to a plant (Cmp::PlantMultiBlock + Cmp::WorldItem) or NPC (Cmp::Npc::NPC).
+//! @details The target loses its "damage_from_weapon" for this weapon from its Cmp::Health, and spawns a Cmp::DamagePopup
+//! if Cmp::Persist::ShowDamageText is on. The weapon wears by the target's "damage_to_weapon", but only while it is still
+//! the player's held item (an arrow may land after the bow is swapped out). Killing the target is left to the caller.
+//! @param reg reference to the entt registry
+//! @param target_entt The plant multiblock or NPC entity that was hit.
+//! @param weapon The weapon's item key, e.g. "item.shovel" or "item.longbow".
+//! @return bool True if the hit took the target's health to zero.
+bool apply_weapon_hit( entt::registry &reg, entt::entity target_entt, const Sys::ItemKey &weapon );
+
 } // namespace Game::Utils::Player
 
 #endif // SRC_UTILS_PLAYER_HPP__

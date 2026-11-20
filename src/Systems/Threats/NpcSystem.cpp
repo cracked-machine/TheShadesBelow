@@ -1,6 +1,7 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/AbsoluteAlpha.hpp>
 #include <Components/AbsoluteRenderOffset.hpp>
+#include <Components/Health.hpp>
 #include <Components/AbsoluteTint.hpp>
 #include <Components/Altar/Segment.hpp>
 #include <Components/AnimData.hpp>
@@ -1334,11 +1335,11 @@ void NpcSystem::check_plant_kill_npc( sf::Time dt )
 
     // collect first: the event handler modifies this storage
     const auto kill_bounds = Cmp::RectBounds::expanded( plant_mb_cmp, kill_npc->trigger_range );
-    // don't kill more NPCs than the plant's remaining wear allows
+    // don't kill more NPCs than the plant's remaining health allows
     std::size_t kills_left = std::numeric_limits<std::size_t>::max();
-    if ( const auto *wearlevel_cmp = reg().try_get<Cmp::Inventory::WearLevel>( plant_entt ); wearlevel_cmp and kill_npc->wear_per_kill > 0.f )
+    if ( const auto *health_cmp = reg().try_get<Cmp::Health>( plant_entt ); health_cmp and kill_npc->wear_per_kill > 0.f )
     {
-      kills_left = static_cast<std::size_t>( std::ceil( wearlevel_cmp->m_level / kill_npc->wear_per_kill ) );
+      kills_left = static_cast<std::size_t>( std::ceil( health_cmp->m_level / kill_npc->wear_per_kill ) );
     }
     std::vector<entt::entity> npcs;
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position>().each() )

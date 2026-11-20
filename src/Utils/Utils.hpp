@@ -105,11 +105,11 @@ void reset_all_selected_positions( entt::registry &reg );
 //! @return entt::entity The first matching entity, or entt::null if none intersects.
 entt::entity get_world_pos_entt( entt::registry &reg, Cmp::Position match );
 
-//! @brief True if the plant has a Cmp::Inventory::WearLevel and it has been fully foraged.
+//! @brief True if the plant has a Cmp::Health and it has been drained to zero (weapon hits, foraging, decay or kills).
 //! @note Depleted plants are removed from the world (see PlantSystem::player_plant_interact).
 //! @param reg reference to the entt registry
 //! @param plant_entt The plant multiblock entity.
-//! @return bool True if the plant's wear level is at or below zero.
+//! @return bool True if the plant's Cmp::Health is at or below zero.
 bool is_plant_depleted( entt::registry &reg, entt::entity plant_entt );
 
 //! @brief Find a random cell in the nearest ring of grid cells around `source` that has a free cell,

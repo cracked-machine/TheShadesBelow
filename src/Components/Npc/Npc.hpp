@@ -3,6 +3,7 @@
 
 #include <Components/Stats/ActionSet.hpp>
 #include <Components/Stats/BaseActionFwd.hpp>
+#include <Components/WeaponDamage.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
 #include <typeindex>
@@ -47,6 +48,13 @@ public:
 
   //! @brief Interpolation speed used when smoothing this NPC's movement.
   float m_lerp_speed{ 0 };
+
+  //! @brief Health points this NPC loses to a hit from each weapon, see "damage_from_weapon" in npc.json. A weapon doing
+  //! zero damage can't hurt the NPC (e.g. arrows pass through ghosts).
+  WeaponDamage damage_from_weapon;
+
+  //! @brief Wear done to each weapon by hitting this NPC, see "damage_to_weapon" in npc.json.
+  WeaponDamage damage_to_weapon;
 
   //! @brief Get the action/time pair keyed by ActionT. Every action is optional in npc.json: if absent, a zeroed
   //! (no effect) action is inserted, so the returned timer is owned by this NPC. Use has_action() beforehand if
