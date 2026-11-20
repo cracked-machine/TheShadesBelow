@@ -4,12 +4,22 @@
 namespace Game::Cmp::SceneSettings
 {
 
-//! @brief Scene-level setting for the pause overlay, toggled with the P key. While enabled the scene keeps drawing the
-//! world but stops advancing it, and Sys::PauseOverlaySystem draws the pause overlay on top.
+//! @brief Scene-level pause setting. While paused, for any reason, the scene keeps drawing the world but stops advancing
+//! it. A single reason is held, so the pause menu and a pausing tooltip can never be active together.
 struct Paused
 {
-  //! @brief Whether the game is paused.
-  bool enabled{ false };
+  //! @brief Why the scene is paused
+  enum class Reason {
+    //! @brief Not paused
+    NONE,
+    //! @brief The pause menu is open (P key), see Sys::PauseOverlaySystem
+    PAUSEMENU,
+    //! @brief A tooltip with "pause": true is shown, see Sys::TooltipOverlaySystem
+    TOOLTIP
+  };
+
+  //! @brief Why the scene is paused, NONE if it is not.
+  Reason reason{ Reason::NONE };
 };
 
 } // namespace Game::Cmp::SceneSettings

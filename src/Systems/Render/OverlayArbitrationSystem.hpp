@@ -23,14 +23,17 @@ class Store;
 class OverlayArbitrationSystem : public BaseSystem
 {
 public:
-  //! @brief The modal overlays. While one is open, gameplay is paused and the other can't open.
+  //! @brief The modal overlays. While one is open, gameplay is paused and no other can open.
   enum class Modal {
     //! @brief No modal overlay is open.
     NONE,
-    //! @brief The pause overlay (Cmp::SceneSettings::Paused) is open.
-    PAUSE,
+    //! @brief The pause menu (Cmp::SceneSettings::Paused::Reason::PAUSEMENU) is open.
+    PAUSEMENU,
     //! @brief The grimoire overlay (Cmp::Grimoire::is_enabled) is open.
-    GRIMOIRE
+    GRIMOIRE,
+    //! @brief A pausing tooltip (Cmp::SceneSettings::Paused::Reason::TOOLTIP) is shown. Only Enter, which dismisses it,
+    //! gets through; it resumes by itself when the tooltip expires.
+    TOOLTIP
   };
 
   //! @brief Construct a new Overlay Arbitration System object
@@ -46,7 +49,7 @@ public:
   //! @param world_dt World frame time (zero while paused), for the HUD.
   void update( sf::Time dt, sf::Time world_dt );
 
-  //! @brief The open modal overlay. The pause overlay wins over the grimoire.
+  //! @brief The open modal overlay. The pause menu wins over the grimoire, which wins over a pausing tooltip.
   //! @param reg
   [[nodiscard]] static Modal active_modal( entt::registry &reg );
 
@@ -84,7 +87,7 @@ private:
   //! @brief Render the shared ImGui frame on top of everything drawn so far.
   void end_frame();
 
-  //! @brief True while the scene is paused (Cmp::SceneSettings::Paused).
+  //! @brief True while the pause menu is open (Cmp::SceneSettings::Paused::Reason::PAUSEMENU).
   [[nodiscard]] bool is_paused();
 
   //! @brief True if the current scene has the shop overlay.

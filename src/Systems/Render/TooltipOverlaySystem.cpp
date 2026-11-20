@@ -1,6 +1,10 @@
+#include <Audio/SoundBank.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/ResetTutorial.hpp>
 #include <Components/Persistent/TooltipsSeen.hpp>
+#include <Components/Player/Character.hpp>
+#include <Components/Position.hpp>
+#include <Components/SceneSettings/Paused.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/TooltipOverlaySystem.hpp>
@@ -38,6 +42,10 @@ sf::Color get_colour( const nlohmann::json &json_data, const sf::Color &fallback
   return { json_data.value( "r", fallback.r ), json_data.value( "g", fallback.g ), json_data.value( "b", fallback.b ),
            json_data.value( "a", fallback.a ) };
 }
+
+//! @brief The longest a pausing tooltip waits for the sound effects playing when it triggered, so an unusually long
+//! effect can't hold a tutorial back.
+constexpr sf::Time kMaxSfxDeferral = sf::seconds( 3.f );
 
 } // namespace
 
@@ -100,12 +108,15 @@ void TooltipOverlaySystem::load_definitions( const std::string &path )
     def.id = entry.value( "id", "" );
     def.trigger = entry.value( "trigger", "" );
     def.text = entry.value( "text", "" );
-    def.duration = sf::seconds( entry.value( "duration_s", def.duration.asSeconds() ) );
+    def.pause = entry.value( "pause", false );
+    // a pausing tooltip without a duration waits for Enter; otherwise it times out (by default after 5 seconds)
+    if ( entry.contains( "duration_s" ) ) { def.duration = sf::seconds( entry.value( "duration_s", 0.f ) ); }
+    else if ( def.pause ) { def.duration = std::nullopt; }
     if ( entry.contains( "condition" ) and entry["condition"].is_object() ) { def.item = entry["condition"].value( "item", "" ); }
     const auto position = parse_position( entry );
     if ( not position )
     {
-      SPDLOG_WARN( "Skipping tooltip '{}': 'position' must be {{\"x\", \"y\"}} or \"above_source\"", def.id );
+      SPDLOG_WARN( "Skipping tooltip '{}': 'position' must be {{\"x\", \"y\"}}, \"above_source\" or \"above_player\"", def.id );
       continue;
     }
     def.position = *position;
@@ -129,9 +140,12 @@ std::optional<TooltipOverlaySystem::TooltipPosition> TooltipOverlaySystem::parse
   TooltipPosition position;
   if ( not entry.contains( "position" ) ) { return position; }
   const auto &json_position = entry["position"];
-  if ( json_position.is_string() and json_position.get<std::string>() == "above_source" )
+  if ( json_position.is_string() )
   {
-    position.above_source = true;
+    const auto anchor = json_position.get<std::string>();
+    if ( anchor == "above_source" ) { position.anchor = TooltipPosition::Anchor::SOURCE; }
+    else if ( anchor == "above_player" ) { position.anchor = TooltipPosition::Anchor::PLAYER; }
+    else { return std::nullopt; }
     return position;
   }
   if ( json_position.is_object() )
@@ -203,9 +217,11 @@ void TooltipOverlaySystem::update( sf::Time dt )
       const auto *def = find_match( candidate );
       if ( not def ) { continue; }
 
-      // a repeating notification must not hide a one-time tutorial; otherwise the newest tooltip replaces the active one
-      if ( def->frequency == Frequency::ALWAYS and m_active and m_active->frequency == Frequency::ONCE ) { continue; }
-      m_active = ActiveTooltip{ format_text( *def, candidate ), def->duration, def->frequency, def->position, candidate.source_bounds };
+      ActiveTooltip tooltip{ format_text( *def, candidate ), def->duration, def->frequency, def->position, candidate.source_bounds, def->pause };
+      // pausing now would cut off the effects already playing (e.g. the pickup sound), so wait for them to finish
+      const sf::Time sfx_remaining = def->pause ? m_sound_bank.effects_remaining_time() : sf::Time::Zero;
+      if ( sfx_remaining > sf::Time::Zero ) { m_pending = PendingTooltip{ std::move( tooltip ), std::min( sfx_remaining, kMaxSfxDeferral ) }; }
+      else { activate( std::move( tooltip ) ); }
       if ( def->frequency == Frequency::ONCE )
       {
         m_seen.insert( def->id );
@@ -217,13 +233,59 @@ void TooltipOverlaySystem::update( sf::Time dt )
   }
   m_candidates.clear();
 
-  if ( m_active )
+  if ( m_pending )
   {
-    m_active->remaining -= dt;
-    if ( m_active->remaining <= sf::Time::Zero ) { m_active.reset(); }
+    m_pending->delay -= dt;
+    if ( m_pending->delay <= sf::Time::Zero )
+    {
+      activate( std::move( m_pending->tooltip ) );
+      m_pending.reset();
+    }
   }
 
+  if ( m_active and m_active->remaining )
+  {
+    *m_active->remaining -= dt;
+    if ( *m_active->remaining <= sf::Time::Zero ) { m_active.reset(); }
+  }
+
+  sync_pause_setting();
   render();
+}
+
+void TooltipOverlaySystem::activate( ActiveTooltip tooltip )
+{
+  // a repeating notification must not hide a one-time tutorial; otherwise the newest tooltip replaces the active one
+  if ( tooltip.frequency == Frequency::ALWAYS and m_active and m_active->frequency == Frequency::ONCE ) { return; }
+  m_active = std::move( tooltip );
+}
+
+void TooltipOverlaySystem::on_dismiss_tooltip_event( [[maybe_unused]] const Events::DismissTooltipEvent &event )
+{
+  m_active.reset();
+  // resume now, so gameplay doesn't stay paused until the next update()
+  sync_pause_setting();
+}
+
+void TooltipOverlaySystem::sync_pause_setting()
+{
+  using Reason = Cmp::SceneSettings::Paused::Reason;
+  auto paused_view = reg().view<Cmp::SceneSettings::Paused>();
+  if ( paused_view.empty() ) { return; }
+  Reason &reason = paused_view.get<Cmp::SceneSettings::Paused>( paused_view.front() ).reason;
+
+  const bool want_pause = m_active and m_active->pause;
+  // only ever NONE <-> TOOLTIP: a tooltip pause never starts while the pause menu is open, nor closes it
+  if ( want_pause and reason == Reason::NONE )
+  {
+    reason = Reason::TOOLTIP;
+    on_modal_open();
+  }
+  else if ( not want_pause and reason == Reason::TOOLTIP )
+  {
+    reason = Reason::NONE;
+    on_modal_close();
+  }
 }
 
 void TooltipOverlaySystem::check_reset()
@@ -235,6 +297,7 @@ void TooltipOverlaySystem::check_reset()
   // m_seen must be cleared too, otherwise sync_seen() would merge the old ids straight back
   m_seen.clear();
   m_active.reset();
+  m_pending.reset();
   PersistSystem::get<Cmp::Persist::TooltipsSeen>( reg() ).get_value().clear();
   reset.get_value() = false;
   PersistSystem::save_component<Cmp::Persist::TooltipsSeen>( reg() );
@@ -264,7 +327,10 @@ const TooltipOverlaySystem::TooltipDef *TooltipOverlaySystem::find_match( const 
 std::string TooltipOverlaySystem::format_text( const TooltipDef &def, const Candidate &candidate )
 {
   static constexpr std::string_view kItemPlaceholder = "{item}";
+  static constexpr std::string_view kDismissHint = "\nPress <Enter> to dismiss.";
   std::string text = def.text;
+  // only Enter hides a tooltip without a duration, so tell the player
+  if ( not def.duration ) { text += kDismissHint; }
   const auto pos = text.find( kItemPlaceholder );
   if ( pos == std::string::npos or candidate.item.empty() ) { return text; }
 
@@ -279,14 +345,23 @@ std::string TooltipOverlaySystem::format_text( const TooltipDef &def, const Cand
 sf::Vector2f TooltipOverlaySystem::panel_centre( sf::Vector2f panel_size, sf::Vector2f display_size ) const
 {
   const TooltipPosition &position = m_active->position;
-  if ( not position.above_source or not m_active->source_bounds )
-  {
-    return { display_size.x * position.screen.x, display_size.y * position.screen.y };
-  }
 
-  // centred above the source's top edge, recomputed every frame so the panel follows the camera
+  // the world bounds to sit above, if the anchor has any
+  std::optional<sf::FloatRect> anchor_bounds;
+  if ( position.anchor == TooltipPosition::Anchor::SOURCE ) { anchor_bounds = m_active->source_bounds; }
+  else if ( position.anchor == TooltipPosition::Anchor::PLAYER )
+  {
+    for ( auto [entity, player_cmp, player_pos] : reg().view<const Cmp::Player::Character, const Cmp::Position>().each() )
+    {
+      anchor_bounds = player_pos;
+      break;
+    }
+  }
+  if ( not anchor_bounds ) { return { display_size.x * position.screen.x, display_size.y * position.screen.y }; }
+
+  // centred above the anchor's top edge, recomputed every frame so the panel follows the camera
   constexpr float kSourceGapPx = 8.f;
-  const sf::FloatRect &bounds = *m_active->source_bounds;
+  const sf::FloatRect &bounds = *anchor_bounds;
   const sf::Vector2f top_centre = world_to_screen( { bounds.position.x + ( bounds.size.x * 0.5f ), bounds.position.y } );
   sf::Vector2f centre{ top_centre.x, top_centre.y - kSourceGapPx - ( panel_size.y * 0.5f ) };
   // keep the whole panel on screen, e.g. when the source is near the view edge

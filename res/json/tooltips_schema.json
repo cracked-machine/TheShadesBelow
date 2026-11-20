@@ -63,11 +63,16 @@
               {
                 "const": "above_source",
                 "description": "Centred above the world object that raised the event (e.g. the altar), following the camera. Falls back to the default if the event carries no object"
+              },
+              {
+                "const": "above_player",
+                "description": "Centred above the player, following the camera. Falls back to the default if the scene has no player"
               }
             ]
           },
           "frequency": {"type": "string", "enum": ["once", "always", "disabled"]},
-          "duration_s": {"type": "number", "exclusiveMinimum": 0, "description": "Seconds the tooltip is displayed for"}
+          "duration_s": {"type": "number", "exclusiveMinimum": 0, "description": "Seconds the tooltip is displayed for. Optional: defaults to 5, except for a pausing tooltip, which without it stays until dismissed with Enter and has \"Press <Enter> to dismiss.\" appended to its text"},
+          "pause": {"type": "boolean", "description": "Optional, default false. If true, gameplay is paused while the tooltip is shown; it resumes when the tooltip expires or is dismissed with Enter. Omit \"duration_s\" to pause until Enter is pressed"}
         },
         "required": ["id", "trigger", "text"],
         "additionalProperties": false

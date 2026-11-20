@@ -40,14 +40,15 @@ Cmp::SceneSettings::Paused *PauseOverlaySystem::find_paused()
 bool PauseOverlaySystem::is_open()
 {
   const auto *paused = find_paused();
-  return paused and paused->enabled;
+  return paused and paused->reason == Cmp::SceneSettings::Paused::Reason::PAUSEMENU;
 }
 
 void PauseOverlaySystem::open()
 {
   auto *paused = find_paused();
-  if ( not paused or paused->enabled ) { return; }
-  paused->enabled = true;
+  // refused while paused for any reason, e.g. a pausing tooltip: the pause menu never opens on top of it
+  if ( not paused or paused->reason != Cmp::SceneSettings::Paused::Reason::NONE ) { return; }
+  paused->reason = Cmp::SceneSettings::Paused::Reason::PAUSEMENU;
   on_modal_open();
   SPDLOG_DEBUG( "Game paused" );
 }
@@ -64,8 +65,8 @@ void PauseOverlaySystem::close()
 void PauseOverlaySystem::force_resume()
 {
   auto *paused = find_paused();
-  if ( not paused or not paused->enabled ) { return; }
-  paused->enabled = false;
+  if ( not paused or paused->reason != Cmp::SceneSettings::Paused::Reason::PAUSEMENU ) { return; }
+  paused->reason = Cmp::SceneSettings::Paused::Reason::NONE;
   on_modal_close();
 }
 

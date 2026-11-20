@@ -1,21 +1,22 @@
 {
   "enabled": true,
   "panel": {
-    "font_size": 24,
-    "padding": 12,
-    "fill_colour": { "r": 0, "g": 0, "b": 0, "a": 180 },
-    "line_colour": { "r": 200, "g": 200, "b": 200, "a": 255 },
-    "text_colour": { "r": 255, "g": 255, "b": 255, "a": 255 }
+    "font_size": 30,
+    "padding": 20,
+    "fill_colour": { "r": 170, "g": 170, "b": 127, "a": 255 },
+    "line_colour": { "r": 85, "g": 85, "b": 0, "a": 255 },
+    "text_colour": { "r": 0, "g": 0, "b": 0, "a": 255 }
   },
   "tooltips": [
     {
       "id": "first_shovel",
-      "trigger": "AddInventoryEvent",
+      "trigger": "ItemPickedUpEvent",
       "condition": { "item": "item.shovel" },
-      "text": "You carry a shovel. Use it to dig obstacles and graves, uproot plants and fight.\nPress <Enter> to dismiss.",
-      "position": { "x": 0.5, "y": 0.85 },
+      "text": "You carry a shovel. Use it to dig obstacles and graves, uproot plants and fight.",
+      "position": "above_player",
       "frequency": "once",
-      "duration_s": 6.0
+      "duration_s": 6.0,
+      "pause": true
     },
     {
       "id": "first_witchesbroom",

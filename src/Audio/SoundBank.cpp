@@ -3,6 +3,7 @@
 #include <SFML/Audio/PlaybackDevice.hpp>
 #include <SFML/Audio/SoundChannel.hpp>
 #include <Utils/JsonDeserializer.hpp>
+#include <algorithm>
 #include <spdlog/spdlog.h>
 #include <thread>
 
@@ -85,6 +86,21 @@ void SoundBank::pause_effects()
     // a paused source is silent, so restoring its volume now is inaudible and keeps it correct for any later play()
     effects_data->control.setVolume( effects_data->paused_volume );
   }
+}
+
+sf::Time SoundBank::effects_remaining_time() const
+{
+  sf::Time longest = sf::Time::Zero;
+  for ( const auto &[name, effects_data] : sounds )
+  {
+    const auto &control = effects_data.control;
+    if ( control.getStatus() != sf::Sound::Status::Playing or control.isLooping() ) { continue; }
+    const sf::Time remaining = effects_data.buffer->getDuration() - control.getPlayingOffset();
+    // a higher pitch plays faster
+    const float pitch = control.getPitch() > 0.f ? control.getPitch() : 1.f;
+    longest = std::max( longest, remaining / pitch );
+  }
+  return longest;
 }
 
 void SoundBank::resume_effects()

@@ -10,8 +10,8 @@ namespace Game::Sys
 {
 
 //! @brief Draws the transparent pause overlay: a "Paused" title and the music/effects volume sliders, drawn over the
-//! frozen gameplay scene. The pause state is the scene's Cmp::SceneSettings::Paused component; the scene itself stops
-//! advancing the world while it is set. OverlayArbitrationSystem opens and closes it on Events::OverlayEvent PAUSE_TOGGLE.
+//! frozen gameplay scene. The pause menu is open while the scene's Cmp::SceneSettings::Paused reason is PAUSEMENU; the
+//! scene itself stops advancing the world while it is paused. OverlayArbitrationSystem opens and closes it on Events::OverlayEvent PAUSE_TOGGLE.
 class PauseOverlaySystem : public BaseOverlaySystem
 {
 public:
@@ -21,16 +21,19 @@ public:
   //! @param sound_bank
   PauseOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
-  //! @brief True while the current scene is paused. False for scenes without a Cmp::SceneSettings::Paused component.
+  //! @brief True while the pause menu is open (Cmp::SceneSettings::Paused::Reason::PAUSEMENU). False for scenes without a
+  //! Cmp::SceneSettings::Paused component, or while paused by a tooltip.
   [[nodiscard]] bool is_open();
 
-  //! @brief Pause the scene: cancels any bow draw and pauses the sound effects. No-op if already paused.
+  //! @brief Open the pause menu: cancels any bow draw and pauses the sound effects. No-op if already paused for any
+  //! reason, so it never opens during a pausing tooltip.
   void open();
 
-  //! @brief Resume the scene, saving the volume settings and resuming the sound effects. No-op if not paused.
+  //! @brief Close the pause menu, saving the volume settings and resuming the sound effects. No-op if it is not open.
   void close();
 
-  //! @brief Unpause without saving, e.g. when the scene is left while paused. Resumes the sound effects. No-op if not paused.
+  //! @brief Close the pause menu without saving, e.g. when the scene is left while paused. Resumes the sound effects.
+  //! No-op if it is not open.
   void force_resume();
 
   //! @brief Draw the pause overlay and its volume sliders, if paused, and apply the slider values.

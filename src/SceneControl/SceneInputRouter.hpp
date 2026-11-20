@@ -82,7 +82,7 @@ private:
   //! @brief Process input while the pause overlay is shown. Gameplay is paused, so only P (resume), the volume sliders
   //!        (via ImGui) and the common window events are handled.
   void pause_overlay_input_handler();
-  //! @brief Check whether the pause overlay is open (see OverlayArbitrationSystem::active_modal()).
+  //! @brief Check whether the pause menu is open (see OverlayArbitrationSystem::active_modal()).
   //! @return true if paused, false if not or the scene has no pause setting.
   bool is_paused();
   //! @brief Trigger a PAUSE_TOGGLE overlay event.
@@ -94,6 +94,13 @@ private:
   //! @brief Check whether the player's grimoire overlay is open in the current scene's registry.
   //! @return true if the grimoire is open, false if it is closed or there is no player.
   bool is_grimoire_open();
+  //! @brief Process input while a pausing tooltip is shown. Gameplay is paused, so only Enter (dismiss the tooltip) and
+  //!        the common window events are handled.
+  void tooltip_pause_input_handler();
+  //! @brief Check whether a pausing tooltip is shown (see OverlayArbitrationSystem::active_modal()).
+  //! @return true if gameplay is paused by a tooltip
+  bool is_tooltip_paused();
+
   //! @brief Trigger the held-key grimoire actions: G toggles the overlay, Left/Right turn pages.
   void process_grimoire_keys();
 

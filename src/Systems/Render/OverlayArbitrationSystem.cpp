@@ -36,6 +36,14 @@ bool setting_enabled( entt::registry &reg )
   return view.template get<SceneSetting>( view.front() ).enabled;
 }
 
+//! @brief Why the scene is paused (Cmp::SceneSettings::Paused), or NONE if the scene has no pause setting.
+Cmp::SceneSettings::Paused::Reason pause_reason( entt::registry &reg )
+{
+  auto view = reg.view<Cmp::SceneSettings::Paused>();
+  if ( view.empty() ) { return Cmp::SceneSettings::Paused::Reason::NONE; }
+  return view.get<Cmp::SceneSettings::Paused>( view.front() ).reason;
+}
+
 //! @brief True if the player's grimoire is open.
 bool grimoire_open( entt::registry &reg )
 {
@@ -65,8 +73,11 @@ void OverlayArbitrationSystem::update( sf::Time dt, sf::Time world_dt )
   if ( has_spring() ) { PROFILED( m_sys.find<Store::Type::SpringOverlaySystem>().update( dt ) ); }
   if ( has_barber() ) { PROFILED( m_sys.find<Store::Type::BarberOverlaySystem>().update( dt ) ); }
   if ( has_level_depth() ) { PROFILED( m_sys.find<Store::Type::HudOverlaySystem>().render_level_depth() ); }
-  // the tooltip countdown stops while gameplay is paused, by either modal overlay
-  if ( active_modal( reg() ) == Modal::NONE ) { PROFILED( m_sys.find<Store::Type::TooltipOverlaySystem>().update( dt ) ); }
+  // the tooltip countdown stops while the pause menu or grimoire is open, but not during its own (tooltip) pause
+  if ( const Modal modal = active_modal( reg() ); modal == Modal::NONE or modal == Modal::TOOLTIP )
+  {
+    PROFILED( m_sys.find<Store::Type::TooltipOverlaySystem>().update( dt ) );
+  }
   // real dt even while paused, so the grimoire can still be paged
   if ( has_grimoire() ) { PROFILED( m_sys.find<Store::Type::GrimoireOverlaySystem>().update( dt ) ); }
   PROFILED( m_sys.find<Store::Type::PauseOverlaySystem>().update( dt ) );
@@ -78,8 +89,10 @@ void OverlayArbitrationSystem::update( sf::Time dt, sf::Time world_dt )
 
 OverlayArbitrationSystem::Modal OverlayArbitrationSystem::active_modal( entt::registry &reg )
 {
-  if ( setting_enabled<Cmp::SceneSettings::Paused>( reg ) ) { return Modal::PAUSE; }
+  const auto reason = pause_reason( reg );
+  if ( reason == Cmp::SceneSettings::Paused::Reason::PAUSEMENU ) { return Modal::PAUSEMENU; }
   if ( grimoire_open( reg ) ) { return Modal::GRIMOIRE; }
+  if ( reason == Cmp::SceneSettings::Paused::Reason::TOOLTIP ) { return Modal::TOOLTIP; }
   return Modal::NONE;
 }
 
@@ -161,7 +174,7 @@ void OverlayArbitrationSystem::begin_frame( sf::Time dt )
 
 void OverlayArbitrationSystem::end_frame() { ImGui::SFML::Render( m_window ); }
 
-bool OverlayArbitrationSystem::is_paused() { return setting_enabled<Cmp::SceneSettings::Paused>( reg() ); }
+bool OverlayArbitrationSystem::is_paused() { return pause_reason( reg() ) == Cmp::SceneSettings::Paused::Reason::PAUSEMENU; }
 
 bool OverlayArbitrationSystem::has_shop() { return Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::SHOP ); }
 

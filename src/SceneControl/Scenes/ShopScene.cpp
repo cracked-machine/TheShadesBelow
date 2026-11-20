@@ -66,7 +66,7 @@ void ShopScene::on_init()
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowPathFinding>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowNavmesh>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowDebugStats>( scene_settings_entt, false );
-  m_reg.emplace_or_replace<Cmp::SceneSettings::Paused>( scene_settings_entt, false );
+  m_reg.emplace_or_replace<Cmp::SceneSettings::Paused>( scene_settings_entt, Cmp::SceneSettings::Paused::Reason::NONE );
   m_reg.emplace_or_replace<Cmp::SceneSettings::Shaders>( scene_settings_entt, true );
   m_reg.emplace_or_replace<Cmp::SceneSettings::Footsteps>( scene_settings_entt, true );
 
@@ -157,9 +157,8 @@ void ShopScene::on_exit()
 
 void ShopScene::do_update( sf::Time dt )
 {
-  // the pause overlay pauses gameplay: the world is still drawn, but nothing in it advances
-  auto &pause_overlay = m_sys.find<Sys::Store::Type::PauseOverlaySystem>();
-  const bool paused = pause_overlay.is_open();
+  // the pause menu and pausing tooltips pause gameplay: the world is still drawn, but nothing in it advances
+  const bool paused = Sys::OverlayArbitrationSystem::active_modal( m_reg ) != Sys::OverlayArbitrationSystem::Modal::NONE;
   const sf::Time world_dt = paused ? sf::Time::Zero : dt;
 
   if ( not paused )

@@ -28,13 +28,19 @@ namespace Game::Sys
 {
 
 //! @brief Displays data-driven help messages (res/json/tooltips.json) in a panel in front of the game. Each tooltip's
-//! "position" places the panel at a fixed point on screen, or above the world object that triggered it (e.g. an altar).
+//! "position" places the panel at a fixed point on screen, above the world object that triggered it (e.g. an altar),
+//! or above the player.
 //! @details Listens to game events without consuming them. Event handlers only record a candidate; candidates are
 //! evaluated in update(), which runs in the next scene update, so every other handler for the event has already
 //! run and game state is up to date, regardless of the dispatcher's handler order.
 //! A repeating ("always") tooltip never replaces an active one-time ("once") tooltip, so a notification raised in the
 //! same frame as a tutorial (e.g. picking up an item) cannot hide it. A tooltip's text may contain "{item}", which is
 //! replaced by the display name of the item carried by the triggering event.
+//! A tooltip with "pause": true pauses gameplay while it is shown (Cmp::SceneSettings::Paused::Reason::TOOLTIP). It keeps
+//! counting down in real time, so gameplay resumes when it expires or is dismissed with Enter. Without "duration_s" it
+//! stays until dismissed with Enter, and "Press <Enter> to dismiss." is appended to its text. It never starts while the
+//! pause menu is open. Pausing would cut off the sound effects playing when it triggered (e.g. the pickup sound), so it
+//! is held back until they finish, see PendingTooltip.
 class TooltipOverlaySystem : public BaseOverlaySystem
 {
 public:
@@ -45,7 +51,8 @@ public:
   TooltipOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank );
 
   //! @brief Process the reset request, evaluate pending candidates, count down the active tooltip and draw it.
-  //! @note OverlayArbitrationSystem skips this while the game is paused, so the countdown stops too.
+  //! @note OverlayArbitrationSystem skips this while the pause menu or grimoire is open, so the countdown stops too. It
+  //! still runs during this system's own tooltip pause.
   //! @param dt the frame delta time
   void update( sf::Time dt ) override;
 
@@ -81,9 +88,9 @@ public:
   //! @param event
   void on_crypt_entry_refused_event( [[maybe_unused]] const Events::CryptEntryRefusedEvent &event );
 
-  //! @brief Hide the active tooltip before its timer expires.
+  //! @brief Hide the active tooltip before its timer expires, resuming gameplay if it paused it.
   //! @param event
-  void on_dismiss_tooltip_event( [[maybe_unused]] const Events::DismissTooltipEvent &event ) { m_active.reset(); }
+  void on_dismiss_tooltip_event( [[maybe_unused]] const Events::DismissTooltipEvent &event );
 
 private:
   //! @brief Draw the active tooltip panel (if any) in screen space.
@@ -102,9 +109,19 @@ private:
   //! @brief Where a tooltip's panel is drawn, "position" in res/json/tooltips.json
   struct TooltipPosition
   {
-    //! @brief true for "above_source": centred above the world bounds carried by the triggering event, following the
-    //! camera. Falls back to `screen` if the event carries no bounds.
-    bool above_source{ false };
+    //! @brief What the panel is anchored to
+    enum class Anchor
+    {
+      //! @brief centred at `screen`
+      SCREEN,
+      //! @brief "above_source": centred above the world bounds carried by the triggering event, following the camera.
+      //! Falls back to `screen` if the event carries no bounds.
+      SOURCE,
+      //! @brief "above_player": centred above the player, following the camera. Falls back to `screen` if there is no
+      //! player in the scene.
+      PLAYER
+    };
+    Anchor anchor{ Anchor::SCREEN };
     //! @brief panel centre as a fraction of the display resolution
     sf::Vector2f screen{ 0.5f, 0.85f };
   };
@@ -125,10 +142,13 @@ private:
     std::string text;
     //! @brief how often the tooltip may be shown
     Frequency frequency{ Frequency::ONCE };
-    //! @brief how long the tooltip is displayed for
-    sf::Time duration{ sf::seconds( 5.f ) };
+    //! @brief how long the tooltip is displayed for, std::nullopt to stay until dismissed with Enter (a pausing
+    //! tooltip without "duration_s")
+    std::optional<sf::Time> duration{ sf::seconds( 5.f ) };
     //! @brief where the panel is drawn
     TooltipPosition position;
+    //! @brief optional "pause": true pauses gameplay while the tooltip is shown
+    bool pause{ false };
   };
 
   //! @brief An event occurrence recorded by an event handler, waiting to be evaluated by update()
@@ -138,7 +158,7 @@ private:
     std::string trigger;
     //! @brief item key carried by the event, if any
     std::string item;
-    //! @brief world bounds of the object that raised the event, if any (see TooltipPosition::above_source)
+    //! @brief world bounds of the object that raised the event, if any (see TooltipPosition::Anchor::SOURCE)
     std::optional<sf::FloatRect> source_bounds{};
   };
 
@@ -147,14 +167,26 @@ private:
   {
     //! @brief the message to display
     std::string text;
-    //! @brief time left before the tooltip is hidden
-    sf::Time remaining;
+    //! @brief time left before the tooltip is hidden, std::nullopt to stay until dismissed with Enter
+    std::optional<sf::Time> remaining;
     //! @brief the frequency of the definition being displayed, see update()
     Frequency frequency;
     //! @brief where the panel is drawn
     TooltipPosition position;
     //! @brief world bounds of the object that raised the event, if any
     std::optional<sf::FloatRect> source_bounds;
+    //! @brief true if gameplay is paused while this tooltip is shown
+    bool pause{ false };
+  };
+
+  //! @brief A pausing tooltip waiting for the sound effects that were playing when it triggered to finish. Effects
+  //! started afterwards don't extend the wait, so continuously replayed effects (e.g. footsteps) can't hold it back.
+  struct PendingTooltip
+  {
+    //! @brief the tooltip to show once the delay has passed
+    ActiveTooltip tooltip;
+    //! @brief time left before the tooltip is shown
+    sf::Time delay;
   };
 
   //! @brief Panel style from res/json/tooltips.json
@@ -183,12 +215,21 @@ private:
   //! @note Each scene registry holds its own copy loaded at scene init, so a scene lower in the stack can be stale.
   void sync_seen();
 
+  //! @brief Make `tooltip` the active tooltip, unless it is repeating ("always") and a one-time ("once") tooltip is
+  //! already shown: a repeating notification must not hide a one-time tutorial.
+  //! @param tooltip
+  void activate( ActiveTooltip tooltip );
+
+  //! @brief Pause gameplay (Cmp::SceneSettings::Paused::Reason::TOOLTIP) while a pausing tooltip is active, and resume it
+  //! when there is none. Never overrides the pause menu (PAUSEMENU). No-op for scenes without a pause setting.
+  void sync_pause_setting();
+
   //! @brief Find the first definition that matches the candidate and is allowed to show.
   //! @param candidate
   //! @return const TooltipDef* the matching definition, or nullptr
   const TooltipDef *find_match( const Candidate &candidate ) const;
 
-  //! @brief Read a tooltip's "position": an {"x", "y"} screen fraction or "above_source".
+  //! @brief Read a tooltip's "position": an {"x", "y"} screen fraction, "above_source" or "above_player".
   //! @param entry the tooltip's json object
   //! @return std::optional<TooltipPosition> the position (the default if omitted), or std::nullopt if malformed
   static std::optional<TooltipPosition> parse_position( const nlohmann::json &entry );
@@ -198,7 +239,8 @@ private:
   //! @param display_size the display resolution
   sf::Vector2f panel_centre( sf::Vector2f panel_size, sf::Vector2f display_size ) const;
 
-  //! @brief Get the definition's text with "{item}" replaced by the display name of the candidate's item.
+  //! @brief Get the definition's text with "{item}" replaced by the display name of the candidate's item, and
+  //! "Press <Enter> to dismiss." appended if it has no duration.
   //! @param def
   //! @param candidate
   //! @return std::string the text to display
@@ -218,6 +260,9 @@ private:
 
   //! @brief the tooltip being displayed, if any
   std::optional<ActiveTooltip> m_active;
+
+  //! @brief a pausing tooltip waiting for the current sound effects to finish, if any
+  std::optional<PendingTooltip> m_pending;
 
   //! @brief seen tooltip ids for the whole session, see sync_seen()
   std::set<std::string> m_seen;

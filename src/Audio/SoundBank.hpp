@@ -3,6 +3,7 @@
 
 #include <Audio/EffectsItem.hpp>
 #include <Audio/MusicItem.hpp>
+#include <SFML/System/Time.hpp>
 #include <chrono>
 #include <filesystem>
 #include <unordered_map>
@@ -41,6 +42,11 @@ public:
   //! @brief Resumes every sound effect that was paused (e.g. by pause_effects()), fading each back in to avoid clicks.
   //! @note Blocks for kFadeDuration when anything is paused.
   void resume_effects();
+
+  //! @brief The longest remaining playback time of the sound effects playing now, allowing for their pitch. Looping
+  //! effects are ignored, as they never finish.
+  //! @return sf::Time Zero if no (non-looping) effect is playing
+  [[nodiscard]] sf::Time effects_remaining_time() const;
 
   //! @brief Returns a reference to the pooled sf::Sound instance for `name`.
   //! Bind with `auto &`/`const auto &` - copying into a local (`auto`) creates a

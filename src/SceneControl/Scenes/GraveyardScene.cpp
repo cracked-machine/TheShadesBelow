@@ -123,7 +123,7 @@ void GraveyardScene::on_init()
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowPathFinding>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowNavmesh>( scene_settings_entt, false );
   m_reg.emplace_or_replace<Cmp::SceneSettings::ShowDebugStats>( scene_settings_entt, false );
-  m_reg.emplace_or_replace<Cmp::SceneSettings::Paused>( scene_settings_entt, false );
+  m_reg.emplace_or_replace<Cmp::SceneSettings::Paused>( scene_settings_entt, Cmp::SceneSettings::Paused::Reason::NONE );
   m_reg.emplace_or_replace<Cmp::SceneSettings::Shaders>( scene_settings_entt, true );
   m_reg.emplace_or_replace<Cmp::SceneSettings::Footsteps>( scene_settings_entt, true );
 
@@ -345,7 +345,7 @@ void GraveyardScene::do_update( sf::Time dt )
 {
   ZoneScoped;
 
-  // the grimoire and the pause overlay pause gameplay: the world is still drawn, but nothing in it advances
+  // the pause menu, the grimoire and pausing tooltips pause gameplay: the world is still drawn, but nothing in it advances
   const bool paused = Sys::OverlayArbitrationSystem::active_modal( m_reg ) != Sys::OverlayArbitrationSystem::Modal::NONE;
   const sf::Time world_dt = paused ? sf::Time::Zero : dt;
 

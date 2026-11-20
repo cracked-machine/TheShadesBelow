@@ -132,6 +132,11 @@ void SceneInputRouter::graveyard_scene_state_handler()
     grimoire_overlay_input_handler();
     return;
   }
+  if ( is_tooltip_paused() )
+  {
+    tooltip_pause_input_handler();
+    return;
+  }
 
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
@@ -202,6 +207,11 @@ void SceneInputRouter::crypt_scene_state_handler()
     pause_overlay_input_handler();
     return;
   }
+  if ( is_tooltip_paused() )
+  {
+    tooltip_pause_input_handler();
+    return;
+  }
 
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
@@ -259,6 +269,11 @@ void SceneInputRouter::healing_spring_scene_state_handler()
     pause_overlay_input_handler();
     return;
   }
+  if ( is_tooltip_paused() )
+  {
+    tooltip_pause_input_handler();
+    return;
+  }
 
   using namespace sf::Keyboard;
   // while the player stands at the spring/barber, the wheel picks the heal menu row and E buys it
@@ -307,6 +322,11 @@ void SceneInputRouter::shop_scene_state_handler()
     pause_overlay_input_handler();
     return;
   }
+  if ( is_tooltip_paused() )
+  {
+    tooltip_pause_input_handler();
+    return;
+  }
 
   using namespace sf::Keyboard;
   while ( const std::optional event = m_window.pollEvent() )
@@ -350,6 +370,11 @@ void SceneInputRouter::ruin_scene_state_handler()
   if ( is_paused() )
   {
     pause_overlay_input_handler();
+    return;
+  }
+  if ( is_tooltip_paused() )
+  {
+    tooltip_pause_input_handler();
     return;
   }
 
@@ -445,7 +470,7 @@ void SceneInputRouter::pause_overlay_input_handler()
   }
 }
 
-bool SceneInputRouter::is_paused() { return Sys::OverlayArbitrationSystem::active_modal( reg() ) == Sys::OverlayArbitrationSystem::Modal::PAUSE; }
+bool SceneInputRouter::is_paused() { return Sys::OverlayArbitrationSystem::active_modal( reg() ) == Sys::OverlayArbitrationSystem::Modal::PAUSEMENU; }
 
 void SceneInputRouter::toggle_pause()
 {
@@ -465,6 +490,27 @@ void SceneInputRouter::grimoire_overlay_input_handler()
     process_grimoire_wheel( *event );
   }
   process_grimoire_keys();
+}
+
+void SceneInputRouter::tooltip_pause_input_handler()
+{
+  // gameplay is paused while a pausing tooltip is shown, so only Enter (dismiss) gets through. P (pause), the grimoire
+  // and the F3 debug keys are blocked: no modal overlay or the debug panels may open during a tooltip pause (see
+  // OverlayArbitrationSystem).
+  while ( const std::optional event = m_window.pollEvent() )
+  {
+    forward_to_imgui( *event );
+    if ( dispatch_common_window_event( *event ) ) continue;
+    if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
+    {
+      if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
+    }
+  }
+}
+
+bool SceneInputRouter::is_tooltip_paused()
+{
+  return Sys::OverlayArbitrationSystem::active_modal( reg() ) == Sys::OverlayArbitrationSystem::Modal::TOOLTIP;
 }
 
 bool SceneInputRouter::is_grimoire_open()
