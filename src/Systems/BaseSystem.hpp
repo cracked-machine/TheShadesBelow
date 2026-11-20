@@ -1,10 +1,19 @@
 #ifndef SRC_SYSTEMS_BASESYSTEM_HPP__
 #define SRC_SYSTEMS_BASESYSTEM_HPP__
 
+#include <Components/Altar/MultiBlock.hpp>
+#include <Components/Crypt/BuildingMultiBlock.hpp>
+#include <Components/Crypt/BuildingSegment.hpp>
+#include <Components/Grave/ExitMultiBlock.hpp>
+#include <Components/Grave/ExitSegment.hpp>
+#include <Components/Ruin/BuildingMultiBlock.hpp>
+#include <Components/Ruin/BuildingSegment.hpp>
+#include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
+#include <Components/Spring/HealingSpringBuildingSegment.hpp>
 #include <entt/entity/entity.hpp>
-#include <functional>
 #include <entt/entity/fwd.hpp>
 #include <entt/signal/dispatcher.hpp>
+#include <functional>
 
 #include <PathFinding/SmartPointers.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -15,6 +24,12 @@ namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
 namespace Game::PathFinding{ class SpatialHashGrid; }
 namespace Game::Cmp { class BaseAction; class Position; struct ActionReward; struct ActionSfx; }
+namespace Game::Cmp::Altar { class MultiBlock; class Segment; }
+namespace Game::Cmp::Crypt { class BuildingMultiBlock; class BuildingSegment; }
+namespace Game::Cmp::Grave { class ExitMultiBlock; class ExitSegment; }
+namespace Game::Cmp::Ruin { class BuildingMultiBlock; class BuildingSegment; }
+namespace Game::Cmp { class HealingSpringBuildingMultiBlock; class HealingSpringBuildingSegment; }
+
 // clang-format on
 
 namespace Game::Sys
@@ -95,6 +110,10 @@ protected:
   void grant_item_reward( const Cmp::ActionReward &reward, const Cmp::Position &source, entt::entity source_entt = entt::null,
                           const std::function<void( entt::entity )> &on_created = {} );
 
+  //! @brief Sync the multiblock's z-order to the current player-segment collision.
+  template <class MULTIBLOCK, class MBSEGMENT>
+  void update_mb_zorder();
+
   //! @brief Entity registry: non-owning, re-assignable reference (by SceneManager).
   //! The registry is owned by the current Scene.
   std::reference_wrapper<entt::registry> m_reg;
@@ -109,6 +128,12 @@ private:
   //! @brief Prevent access to uninitialised dispatcher - use get_systems_event_queue()
   static std::unique_ptr<entt::dispatcher> m_systems_event_queue;
 };
+
+extern template void BaseSystem::update_mb_zorder<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>();
+extern template void BaseSystem::update_mb_zorder<Cmp::Grave::ExitMultiBlock, Cmp::Grave::ExitSegment>();
+extern template void BaseSystem::update_mb_zorder<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>();
+extern template void BaseSystem::update_mb_zorder<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>();
+extern template void BaseSystem::update_mb_zorder<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>();
 
 } // namespace Game::Sys
 

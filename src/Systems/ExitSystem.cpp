@@ -13,6 +13,7 @@
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
 
+#include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/SpawnArea.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
@@ -46,6 +47,15 @@ ExitSystem::ExitSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&ExitSystem::on_player_action>( this );
 }
 
+void ExitSystem::update( [[maybe_unused]] sf::Time dt )
+{
+  if ( Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::GRAVEYARD ) )
+  {
+    update_mb_zorder<Cmp::Grave::ExitMultiBlock, Cmp::Grave::ExitSegment>();
+    check_exit_collision();
+  }
+}
+
 void ExitSystem::create_exit( sf::Vector2f pos )
 {
   if ( not reg().view<Cmp::Exit>().empty() ) { throw std::runtime_error( "create_exit() called but an exit already exists in this scene" ); }
@@ -62,14 +72,18 @@ void ExitSystem::create_exit( sf::Vector2f pos )
   {
     for ( auto tile_entt : world_tile_sm->at( origin_cell ) )
     {
-      if ( reg().valid( tile_entt ) ) { world_entt = tile_entt; break; }
+      if ( reg().valid( tile_entt ) )
+      {
+        world_entt = tile_entt;
+        break;
+      }
     }
   }
   else { world_entt = Utils::get_world_pos_entt( reg(), origin_cell ); }
   if ( world_entt != entt::null ) { Factory::Obstacle::remove_obstacle( reg(), world_entt, Factory::Obstacle::DeleteExtras::Yes, reserved_sm ); }
 
   Factory::Multiblock::add_multiblock_with_segments<Cmp::Grave::ExitMultiBlock, Cmp::Grave::ExitSegment>( reg(), pos, kGraveExitSpritesheet, 0, 0,
-                                                                                                        reserved_sm.get(), world_tile_sm.get() );
+                                                                                                          reserved_sm.get(), world_tile_sm.get() );
   SPDLOG_INFO( "Added {} to ({}, {})", kGraveExitSpritesheet.type(), pos.x, pos.y );
 }
 

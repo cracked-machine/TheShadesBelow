@@ -64,12 +64,6 @@ private:
   //! @brief Store of game systems the scene drives each update
   Sys::Store &m_sys;
 
-  //! @brief Elapsed time since the scene was last entered, used to gate exit collision checks
-  sf::Time m_scene_exit_cooldown_timer;
-
-  //! @brief Minimum time after entering the scene before exit collisions (e.g. crypt entrance) are checked
-  sf::Time m_scene_exit_cooldown_time{ sf::seconds( 2 ) };
-
   //! @brief Whether the grimoire overlay UI is currently open
   bool m_grimoire_overlay_open{ false };
 

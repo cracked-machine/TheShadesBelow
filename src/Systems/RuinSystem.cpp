@@ -2,10 +2,10 @@
 #include <Components/Direction.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
-#include <Components/ObstacleCap.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/ShadowHand.hpp>
 #include <Components/Npc/Spider.hpp>
+#include <Components/ObstacleCap.hpp>
 #include <Components/Particle/BlockParticle.hpp>
 #include <Components/Persistent/RuinMaxSpiders.hpp>
 #include <Components/Player/Character.hpp>
@@ -30,6 +30,7 @@
 #include <Components/Ruin/StairsSegment.hpp>
 #include <Components/Ruin/StairsUpperMultiBlock.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
+#include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/Stats/BaseAction.hpp>
 
 #include <Components/Wall.hpp>
@@ -69,7 +70,25 @@ RuinSystem::RuinSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
     : BaseSystem( reg, window, sound_bank ),
       m_scenemanager_event_dispatcher( scenemanager_event_dispatcher )
 {
-  SPDLOG_DEBUG( "PlayerSystem initialized" );
+  SPDLOG_DEBUG( "RuinSystem initialized" );
+}
+
+void RuinSystem::update( [[maybe_unused]] sf::Time dt )
+{
+  if ( Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::GRAVEYARD ) )
+  {
+    update_mb_zorder<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>();
+    check_entrance_collision();
+  }
+  else if ( Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::RUIN_LOWER_FLOOR ) )
+  {
+    m_exit_cooldown_timer += dt;
+    if ( m_exit_cooldown_timer >= m_exit_cooldown_timeout )
+    {
+      check_exit_collision();
+      m_exit_cooldown_timer = sf::Time::Zero;
+    }
+  }
 }
 
 void RuinSystem::check_entrance_collision()
@@ -101,23 +120,6 @@ void RuinSystem::check_entrance_collision()
     SPDLOG_INFO( "Last known graveyard position {}, {}", last_known_pos.position.x, last_known_pos.position.y );
     Factory::Player::add_player_last_graveyard_pos( reg(), last_known_pos );
     break;
-  }
-}
-
-void RuinSystem::update_exit_zorder()
-{
-  auto player_pos = Utils::Player::get_position( reg() );
-
-  for ( auto [mb_entt, mb_cmp, mb_z_cmp] : reg().view<Cmp::Ruin::BuildingMultiBlock, Cmp::ZOrderValue>().each() )
-  {
-    if ( not player_pos.findIntersection( mb_cmp ) ) continue;
-    auto segment_view = reg().view<Cmp::Ruin::BuildingSegment, Cmp::Position, Cmp::ZOrderValue>();
-    for ( auto [segment_entt, segment_cmp, segment_pos_cmp, segment_z_cmp] : segment_view.each() )
-    {
-      if ( not player_pos.findIntersection( segment_pos_cmp ) ) continue;
-      mb_z_cmp.set( segment_z_cmp.get() );
-      SPDLOG_DEBUG( "Updated zorder to {}", segment_z_cmp.get() );
-    }
   }
 }
 

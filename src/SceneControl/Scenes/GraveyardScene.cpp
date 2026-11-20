@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <Audio/SoundBank.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Direction.hpp>
@@ -17,8 +16,8 @@
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
-#include <Components/Persistent/RetainAnimaBetweenLevels.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
+#include <Components/Persistent/RetainAnimaBetweenLevels.hpp>
 #include <Components/Persistent/RuinProcGenMaxIterations.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
@@ -80,10 +79,10 @@
 #include <Systems/ProcGen/DowsingGuideSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/ProcGen/TrailGuideSystem.hpp>
-#include <Systems/Render/PauseOverlaySystem.hpp>
 #include <Systems/Render/DebugOverlaySystem.hpp>
-#include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/OverlayArbitrationSystem.hpp>
+#include <Systems/Render/PauseOverlaySystem.hpp>
+#include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/RuinSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
@@ -100,6 +99,7 @@
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Profiling.hpp>
+#include <algorithm>
 
 #include <array>
 #include <cmath>
@@ -318,8 +318,6 @@ void GraveyardScene::on_enter()
   // check if the player inventory has a torch, if so light it up!
   Factory::Particle::add_flame_for_player_inventory_slot( m_reg );
 
-  m_scene_exit_cooldown_timer = sf::Time::Zero;
-
   // Set the default footstep SFX for this scene
   m_reg.emplace_or_replace<Cmp::Player::Footstep>( Utils::Player::get_entity( m_reg ), Cmp::Player::Footstep::Type::GRASS );
 }
@@ -398,26 +396,15 @@ void GraveyardScene::do_update( sf::Time dt )
     PROFILED( m_sys.find<Sys::Store::Type::DowsingGuideSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::TrailGuideSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::GraveSystem>().update() );
-
-    PROFILED( m_sys.find<Sys::Store::Type::CryptSystem>().update_exit_zorder() );
-    m_scene_exit_cooldown_timer += dt;
-    if ( m_scene_exit_cooldown_timer >= m_scene_exit_cooldown_time )
-    {
-      PROFILED( m_sys.find<Sys::Store::Type::CryptSystem>().check_entrance_collision() );
-    }
-
-    PROFILED( m_sys.find<Sys::Store::Type::CryptSystem>().unlock_crypt_door() );
+    PROFILED( m_sys.find<Sys::Store::Type::CryptSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::AltarSystem>().update( dt ) );
-    PROFILED( m_sys.find<Sys::Store::Type::HealingSpringSystem>().update_building_zorder() );
-    PROFILED( m_sys.find<Sys::Store::Type::HealingSpringSystem>().check_entrance_collision() );
-    PROFILED( m_sys.find<Sys::Store::Type::RuinSystem>().update_exit_zorder() );
+    PROFILED( m_sys.find<Sys::Store::Type::HealingSpringSystem>().update( dt ) );
+    PROFILED( m_sys.find<Sys::Store::Type::RuinSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::RuinSystem>().check_entrance_collision() );
     PROFILED( m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::LightningSystem>().update( dt ) );
-
-    PROFILED( m_sys.find<Sys::Store::Type::ExitSystem>().update_exit_zorder() );
-    PROFILED( m_sys.find<Sys::Store::Type::ExitSystem>().check_exit_collision() );
+    PROFILED( m_sys.find<Sys::Store::Type::ExitSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::ArrowSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::BurrSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::InventorySystem>().update( dt ) );
@@ -438,10 +425,11 @@ void GraveyardScene::reinit_system_spatial_maps()
 {
   m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, m_ghost_navmesh, m_reserved_sm, m_loot_sm, m_item_sm );
   m_sys.find<Sys::Store::Type::WispSystem>().init( m_open_navmesh );
-  m_sys.find<Sys::Store::Type::BombSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm, m_world_tile_sm, m_hazard_sm );
+  m_sys.find<Sys::Store::Type::BombSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm, m_world_tile_sm,
+                                                   m_hazard_sm );
   m_sys.find<Sys::Store::Type::ActionSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm );
-  m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, m_world_tile_sm, m_item_sm, m_hazard_sm, m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh,
-                                                    m_loot_sm );
+  m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, m_world_tile_sm, m_item_sm, m_hazard_sm, m_generic_npc_navmesh, m_player_navmesh,
+                                                    m_ghost_navmesh, m_loot_sm );
   m_sys.find<Sys::Store::Type::LootSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm, m_loot_sm, m_item_sm );
   m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_item_sm, m_generic_npc_navmesh, m_ghost_navmesh, m_loot_sm );
   m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm, m_item_sm );
@@ -449,8 +437,10 @@ void GraveyardScene::reinit_system_spatial_maps()
   m_sys.find<Sys::Store::Type::WormholeSystem>().init( m_generic_npc_navmesh, m_reserved_sm, m_world_tile_sm, m_item_sm, m_hazard_sm );
   m_sys.find<Sys::Store::Type::DebugOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm, m_item_sm, m_hazard_sm );
   m_sys.find<Sys::Store::Type::WatchmanSystem>().init( m_reserved_sm, m_item_sm, m_hazard_sm );
-  m_sys.find<Sys::Store::Type::SinkHoleHazardSystem>().init( m_reserved_sm, m_generic_npc_navmesh, m_world_tile_sm, m_loot_sm, m_item_sm, m_hazard_sm );
-  m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().init( m_reserved_sm, m_generic_npc_navmesh, m_world_tile_sm, m_loot_sm, m_item_sm, m_hazard_sm );
+  m_sys.find<Sys::Store::Type::SinkHoleHazardSystem>().init( m_reserved_sm, m_generic_npc_navmesh, m_world_tile_sm, m_loot_sm, m_item_sm,
+                                                             m_hazard_sm );
+  m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().init( m_reserved_sm, m_generic_npc_navmesh, m_world_tile_sm, m_loot_sm, m_item_sm,
+                                                               m_hazard_sm );
 }
 
 entt::registry &GraveyardScene::registry() { return m_reg; }

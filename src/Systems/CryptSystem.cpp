@@ -27,15 +27,16 @@
 #include <Components/Particle/LavaFireballParticleSprite.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Player/HazardBalance.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/HazardBalance.hpp>
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
+#include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
@@ -84,21 +85,36 @@ namespace Game::Sys
 
 void CryptSystem::update( sf::Time dt )
 {
-  if ( m_variant ) m_variant->update( dt );
-
-  check_exit_collision();
-
-  // check collisions with lava pit/spike traps
-  if ( Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled )
+  if ( Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::GRAVEYARD ) )
   {
-    check_lava_pit_collision();
-    check_spike_trap_collision();
+    update_mb_zorder<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>();
+    m_scene_entrance_cooldown_timer += dt;
+    if ( m_scene_entrance_cooldown_timer >= m_scene_entrance_cooldown_time )
+    {
+      check_entrance_collision();
+      m_scene_entrance_cooldown_timer = sf::Time::Zero;
+    }
+    unlock_crypt_door();
   }
+  else
+  {
 
-  check_lever_activation();
-  check_lava_pit_activation_by_proximity();
-  do_lava_pit_animation( dt );
-  check_spike_trap_activation_by_proximity( dt );
+    if ( m_variant ) m_variant->update( dt );
+
+    check_exit_collision();
+
+    // check collisions with lava pit/spike traps
+    if ( Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled )
+    {
+      check_lava_pit_collision();
+      check_spike_trap_collision();
+    }
+
+    check_lever_activation();
+    check_lava_pit_activation_by_proximity();
+    do_lava_pit_animation( dt );
+    check_spike_trap_activation_by_proximity( dt );
+  }
 }
 
 void CryptSystem::on_player_action( Events::PlayerActionEvent &event )
@@ -137,23 +153,6 @@ void CryptSystem::on_room_event( Events::CryptRoomEvent &event )
   if ( event.type == Events::CryptRoomEvent::Type::SHUFFLE_PASSAGES ) { m_variant->shuffle(); }
   else if ( event.type == Events::CryptRoomEvent::Type::FINAL_PASSAGE ) { m_variant->unlock_objective(); }
   else if ( event.type == Events::CryptRoomEvent::Type::EXIT_ALL_PASSAGES ) { m_variant->unlock_exit(); }
-}
-
-void CryptSystem::update_exit_zorder()
-{
-  auto player_pos = Utils::Player::get_position( reg() );
-
-  for ( auto [mb_entt, mb_cmp, mb_z_cmp] : reg().view<Cmp::Crypt::BuildingMultiBlock, Cmp::ZOrderValue>().each() )
-  {
-    if ( not player_pos.findIntersection( mb_cmp ) ) continue;
-    auto segment_view = reg().view<Cmp::Crypt::BuildingSegment, Cmp::Position, Cmp::ZOrderValue>();
-    for ( auto [segment_entt, segment_cmp, segment_pos_cmp, segment_z_cmp] : segment_view.each() )
-    {
-      if ( not player_pos.findIntersection( segment_pos_cmp ) ) continue;
-      mb_z_cmp.set( segment_z_cmp.get() );
-      SPDLOG_DEBUG( "Updated zorder to {}", segment_z_cmp.get() );
-    }
-  }
 }
 
 void CryptSystem::check_entrance_collision()

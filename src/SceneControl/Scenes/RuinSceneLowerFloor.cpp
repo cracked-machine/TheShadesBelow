@@ -48,10 +48,10 @@
 #include <Systems/ProcGen/CellAutomataSystem.hpp>
 #include <Systems/ProcGen/DLASystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
-#include <Systems/Render/PauseOverlaySystem.hpp>
 #include <Systems/Render/DebugOverlaySystem.hpp>
-#include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/OverlayArbitrationSystem.hpp>
+#include <Systems/Render/PauseOverlaySystem.hpp>
+#include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/RuinSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
@@ -267,7 +267,7 @@ void RuinSceneLowerFloor::do_update( sf::Time dt )
     // `check_exit_collision()` may reset the player curse so it must be called after `check_activate_player_curse()`
     // or we incorrectly re-trigger the curse effects before we can leave this function and exit the scene.
     // i.e. the witch scream triggers again as we leave the scene
-    m_sys.find<Store::Type::RuinSystem>().check_exit_collision();
+    m_sys.find<Store::Type::RuinSystem>().update( dt );
 
     m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
   }

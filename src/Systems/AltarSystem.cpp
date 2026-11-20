@@ -30,6 +30,7 @@
 #include <Components/Player/Wealth.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
+#include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/OfferingAction.hpp>
 #include <Components/Stats/PlayerStats.hpp>
@@ -122,15 +123,19 @@ void AltarSystem::on_player_action( Events::PlayerActionEvent ev )
 
 void AltarSystem::update( sf::Time dt )
 {
-  if ( auto *altar_timer = reg().try_get<Cmp::Altar::ActivationTimer>( Utils::Player::get_entity( reg() ) ) ) *altar_timer += dt;
-  check_player_approached_altar();
-  // tidy up any dead altar offering animations
-  auto altar_offering_view = reg().view<Cmp::Altar::Offering, Cmp::AnimData>();
-  for ( auto [altar_offering_entt, altar_offering_cmp, altar_offering_anim_cmp] : altar_offering_view.each() )
+  if ( Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::GRAVEYARD ) )
   {
-    if ( not altar_offering_anim_cmp.m_enabled )
+    update_mb_zorder<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>();
+    if ( auto *altar_timer = reg().try_get<Cmp::Altar::ActivationTimer>( Utils::Player::get_entity( reg() ) ) ) *altar_timer += dt;
+    check_player_approached_altar();
+    // tidy up any dead altar offering animations
+    auto altar_offering_view = reg().view<Cmp::Altar::Offering, Cmp::AnimData>();
+    for ( auto [altar_offering_entt, altar_offering_cmp, altar_offering_anim_cmp] : altar_offering_view.each() )
     {
-      if ( reg().valid( altar_offering_entt ) ) { reg().destroy( altar_offering_entt ); }
+      if ( not altar_offering_anim_cmp.m_enabled )
+      {
+        if ( reg().valid( altar_offering_entt ) ) { reg().destroy( altar_offering_entt ); }
+      }
     }
   }
 }
@@ -177,11 +182,7 @@ bool AltarSystem::check_player_altar_offering( entt::entity altar_entity, Cmp::A
   const auto &item = Sys::ItemStore::instance().get( inventory_type );
   if ( not item.is_offerable() ) return false;
 
-  auto is_carrying_tool = [&]()
-  {
-    return item.item_type.contains( "item.shovel" ) or
-           item.item_type.contains( "item.dowsingrod" );
-  };
+  auto is_carrying_tool = [&]() { return item.item_type.contains( "item.shovel" ) or item.item_type.contains( "item.dowsingrod" ); };
 
   // only spent tools can be offered
   if ( is_carrying_tool() and Utils::Player::get_inventory_wear_level( reg() ) > 0 ) { return false; }

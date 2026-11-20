@@ -29,12 +29,11 @@ public:
     std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&HealingSpringSystem::on_player_action>( this );
   }
 
+  void update( sf::Time dt );
+
   //! @brief Capture Events::PlayerActionEvent::GameActions::ACTIVATE. Calls check_inventory_deposit().
   //! @param ev
   void on_player_action( Events::PlayerActionEvent ev );
-
-  //! @brief Sync the building multiblock's z-order to the segment the player is currently standing on.
-  void update_building_zorder();
 
   //! @brief Check for collisions with the entrance. Enters the barber surgeon scene if the entrance has a
   //! Cmp::BarberSurgeonEntrance, otherwise the healing spring scene.
@@ -71,13 +70,13 @@ private:
   entt::dispatcher &m_scenemanager_event_dispatcher;
 
   //! @brief Time since the last inventory deposit check.
-  sf::Time m_inventory_deposit_interval{};
+  sf::Time m_inventory_deposit_interval;
 
   //! @brief The exit event to enqueue once m_exit_delay_remaining runs out, if a delayed exit is pending.
   std::optional<Events::SceneManagerEvent::Type> m_pending_exit;
 
   //! @brief Time left before the pending exit is enqueued.
-  sf::Time m_exit_delay_remaining{};
+  sf::Time m_exit_delay_remaining;
 };
 
 } // namespace Game::Sys

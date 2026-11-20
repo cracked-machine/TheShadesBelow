@@ -1,12 +1,23 @@
 #include <Audio/SoundBank.hpp>
 
+#include <Components/Altar/MultiBlock.hpp>
+#include <Components/Altar/Segment.hpp>
+#include <Components/Crypt/BuildingMultiBlock.hpp>
+#include <Components/Crypt/BuildingSegment.hpp>
+#include <Components/Grave/ExitMultiBlock.hpp>
+#include <Components/Grave/ExitSegment.hpp>
 #include <Components/Player/RepelNpc.hpp>
 #include <Components/Player/ToxicImmunity.hpp>
 #include <Components/Position.hpp>
+#include <Components/Ruin/BuildingMultiBlock.hpp>
+#include <Components/Ruin/BuildingSegment.hpp>
+#include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
+#include <Components/Spring/HealingSpringBuildingSegment.hpp>
 #include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/SideEffects.hpp>
 #include <Components/UUID.hpp>
+#include <Components/ZOrderValue.hpp>
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/CreateNpcEvent.hpp>
@@ -76,9 +87,9 @@ void BaseSystem::trigger_side_effects( const Cmp::BaseAction &action, const Cmp:
     }
     // beside the source (plant, player...) by default, or centred on it (e.g. on an altar)
     const auto placement = effects.spawn_npc->location == Cmp::SpawnNpcEffect::Location::CENTER ? Events::CreateNpcEvent::Placement::CENTER
-                                                                                                 : Events::CreateNpcEvent::Placement::NEARBY;
-    get_systems_event_queue().trigger( Events::CreateNpcEvent( Sys::NpcKey( effects.spawn_npc->npc_type ), pos_cmp, effects.spawn_npc->max_instances,
-                                                               source_uuid, {}, placement ) );
+                                                                                                : Events::CreateNpcEvent::Placement::NEARBY;
+    get_systems_event_queue().trigger(
+        Events::CreateNpcEvent( Sys::NpcKey( effects.spawn_npc->npc_type ), pos_cmp, effects.spawn_npc->max_instances, source_uuid, {}, placement ) );
   }
   // a null target lets LightningSystem pick a working lightning rod in view, otherwise the player
   if ( effects.lightning and effects.lightning->roll( player_luck ) ) { get_systems_event_queue().trigger( Events::LightningEvent{} ); }
@@ -118,11 +129,35 @@ void BaseSystem::grant_item_reward( const Cmp::ActionReward &reward, const Cmp::
   const int quantity = reward.target == Cmp::ActionReward::Target::NEARBY ? reward.quantity : 1;
   for ( int i = 0; i < quantity; ++i )
   {
-    get_systems_event_queue().trigger(
-        Events::CreateItemEvent( source, item_store.pick_item( reward.item ), "drop_loot", 0.f, /*spawn_nearby=*/true, reward.max_instances, source_entt,
-                                 on_created, /*sting=*/true, /*auto_pickup=*/true ) );
+    get_systems_event_queue().trigger( Events::CreateItemEvent( source, item_store.pick_item( reward.item ), "drop_loot", 0.f, /*spawn_nearby=*/true,
+                                                                reward.max_instances, source_entt, on_created, /*sting=*/true,
+                                                                /*auto_pickup=*/true ) );
   }
 }
+
+template <class MULTIBLOCK, class MBSEGMENT>
+void BaseSystem::update_mb_zorder()
+{
+  auto player_pos = Utils::Player::get_position( reg() );
+
+  for ( auto [mb_entt, mb_cmp, mb_z_cmp] : reg().view<MULTIBLOCK, Cmp::ZOrderValue>().each() )
+  {
+    if ( not player_pos.findIntersection( mb_cmp ) ) continue;
+    auto segment_view = reg().view<MBSEGMENT, Cmp::Position, Cmp::ZOrderValue>();
+    for ( auto [segment_entt, segment_cmp, segment_pos_cmp, segment_z_cmp] : segment_view.each() )
+    {
+      if ( not player_pos.findIntersection( segment_pos_cmp ) ) continue;
+      mb_z_cmp.set( segment_z_cmp.get() );
+      SPDLOG_DEBUG( "Updated zorder to {}", segment_z_cmp.get() );
+    }
+  }
+}
+
+template void BaseSystem::update_mb_zorder<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>();
+template void BaseSystem::update_mb_zorder<Cmp::Grave::ExitMultiBlock, Cmp::Grave::ExitSegment>();
+template void BaseSystem::update_mb_zorder<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>();
+template void BaseSystem::update_mb_zorder<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>();
+template void BaseSystem::update_mb_zorder<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>();
 
 // initialised by first call to getEventDispatcher()
 std::unique_ptr<entt::dispatcher> BaseSystem::m_systems_event_queue = nullptr;

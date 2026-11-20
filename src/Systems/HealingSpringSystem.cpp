@@ -7,6 +7,7 @@
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
+#include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/Spring/BarberSurgeonEntrance.hpp>
 #include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
 #include <Components/Spring/HealingSpringBuildingSegment.hpp>
@@ -27,27 +28,19 @@
 namespace Game::Sys
 {
 
+void HealingSpringSystem::update( [[maybe_unused]] sf::Time dt )
+{
+  if ( Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::GRAVEYARD ) )
+  {
+    update_mb_zorder<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>();
+    check_entrance_collision();
+  }
+}
+
 void HealingSpringSystem::on_player_action( Events::PlayerActionEvent ev )
 {
   if ( ev.action != Events::PlayerActionEvent::GameActions::ACTIVATE ) return;
   check_inventory_deposit();
-}
-
-void HealingSpringSystem::update_building_zorder()
-{
-  auto player_pos = Utils::Player::get_position( reg() );
-
-  for ( auto [mb_entt, mb_cmp, mb_z_cmp] : reg().view<Cmp::HealingSpringBuildingMultiBlock, Cmp::ZOrderValue>().each() )
-  {
-    if ( not player_pos.findIntersection( mb_cmp ) ) continue;
-    auto segment_view = reg().view<Cmp::HealingSpringBuildingSegment, Cmp::Position, Cmp::ZOrderValue>();
-    for ( auto [segment_entt, segment_cmp, segment_pos_cmp, segment_z_cmp] : segment_view.each() )
-    {
-      if ( not player_pos.findIntersection( segment_pos_cmp ) ) continue;
-      mb_z_cmp.set( segment_z_cmp.get() );
-      SPDLOG_DEBUG( "Updated zorder to {}", segment_z_cmp.get() );
-    }
-  }
 }
 
 void HealingSpringSystem::check_entrance_collision()
@@ -68,7 +61,7 @@ void HealingSpringSystem::check_entrance_collision()
 
     if ( not player_pos.findIntersection( decreased_entrance_bounds.getBounds() ) ) continue;
     const auto enter_type = reg().all_of<Cmp::BarberSurgeonEntrance>( door_entity ) ? Events::SceneManagerEvent::Type::ENTER_BARBERSURGEON
-                                                                                     : Events::SceneManagerEvent::Type::ENTER_SACREDSPRING;
+                                                                                    : Events::SceneManagerEvent::Type::ENTER_SACREDSPRING;
     m_scenemanager_event_dispatcher.enqueue<Events::SceneManagerEvent>( enter_type );
 
     Factory::Player::remove_player_last_graveyard_pos( reg() );

@@ -8,7 +8,10 @@
 
 #include <SFML/System/Vector2.hpp>
 
-namespace Game::Cmp { class Exit; }
+namespace Game::Cmp
+{
+class Exit;
+}
 
 namespace Game::Sys
 {
@@ -32,6 +35,8 @@ public:
     m_reserved_sm = reserved_sm;
     m_world_tile_sm = world_tile_sm;
   }
+
+  void update( sf::Time dt );
 
   //! @brief Event handler for unlocking the exit
   //! @param ev
