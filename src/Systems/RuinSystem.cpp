@@ -2,6 +2,7 @@
 #include <Components/Direction.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
+#include <Components/ObstacleCap.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/ShadowHand.hpp>
 #include <Components/Npc/Spider.hpp>
@@ -290,6 +291,7 @@ void RuinSystem::gen_lowerfloor_bookcases( sf::FloatRect scene_dimensions )
   {
     if ( Utils::Collision::any_intersects<Cmp::Ruin::Bookcase>( reg(), pos ) ) { return true; }
     if ( Utils::Collision::any_intersects<Cmp::Npc::NoPathFinding>( reg(), pos ) ) { return true; }
+    if ( Utils::Collision::any_intersects<Cmp::ObstacleCap>( reg(), pos ) ) { return true; }
     if ( reserved_sm && not reserved_sm->query_rect( pos.getBounds() ).empty() ) { return true; }
 
     // ensure bookcase is inside scene
@@ -532,6 +534,8 @@ void RuinSystem::create_spiders( sf::FloatRect scene_boundary )
   auto has_collision = [&]( const Cmp::RectBounds &pos )
   {
     if ( Utils::Collision::any_intersects<Cmp::Npc::NoPathFinding>( reg(), pos ) ) { return true; }
+    // block caps sit on the cell above each moveable block; component check so it stays right after blocks move
+    if ( Utils::Collision::any_intersects<Cmp::ObstacleCap>( reg(), pos ) ) { return true; }
     if ( Utils::Collision::any_intersects<Cmp::Ruin::StairsSegment>( reg(), pos ) ) { return true; }
     if ( reserved_sm && not reserved_sm->at( Cmp::Position( pos.position(), pos.size() ) ).empty() ) { return true; }
     if ( item_sm && not item_sm->at( Cmp::Position( pos.position(), pos.size() ) ).empty() ) { return true; }

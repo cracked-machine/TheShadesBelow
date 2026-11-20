@@ -145,25 +145,6 @@ bool LevelGenerator::is_area_taken( const sf::FloatRect &bounds ) const
 
 void LevelGenerator::discard_claims() { m_claims_sm.clear(); }
 
-void LevelGenerator::promote_claims_to_reserved()
-{
-  // only the obstacles and their caps become structures - NPC spawn claims are temporary wherever they are
-  const auto promote_if_claimed = [this]( entt::entity entt, const Cmp::Position &pos_cmp )
-  {
-    const auto claimed = m_claims_sm.at( pos_cmp );
-    if ( std::ranges::find( claimed, entt ) != claimed.end() ) m_reserved_sm->insert( entt, pos_cmp );
-  };
-  for ( auto [entt, obstacle_cmp, pos_cmp] : reg().view<Cmp::Obstacle, Cmp::Position>().each() )
-  {
-    promote_if_claimed( entt, pos_cmp );
-  }
-  for ( auto entt : reg().view<Cmp::ObstacleCap, Cmp::Position>() )
-  {
-    promote_if_claimed( entt, reg().get<Cmp::Position>( entt ) );
-  }
-  m_claims_sm.clear();
-}
-
 void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
 {
 

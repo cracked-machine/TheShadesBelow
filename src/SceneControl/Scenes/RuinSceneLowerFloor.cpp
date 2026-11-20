@@ -115,8 +115,9 @@ void RuinSceneLowerFloor::on_init()
                    level_gen.get_obstacle_sm(), level_gen.get_claims_sm() );
 
   level_gen.decorate_ruin_interior_obstacles();
-  // the ruin's interior obstacles are permanent structures that runtime placement (e.g. spiders) must avoid
-  level_gen.promote_claims_to_reserved();
+  // the interior obstacles are moveable puzzle blocks, not structures: their rules come from components that move with
+  // them (Cmp::Moveable, Cmp::Npc::NoPathFinding, Cmp::ObstacleCap), so the generation claims are simply dropped
+  level_gen.discard_claims();
   m_sys.find<Sys::Store::Type::RuinSystem>().remove_rune_markings_neighbouring_cobwebs( level_gen.get_non_obstacle_sm() );
 
   // add access hitbox just above horizontal centerpoint
@@ -282,6 +283,8 @@ void RuinSceneLowerFloor::reinit_navmesh()
   m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_item_sm, m_generic_npc_navmesh, nullptr, m_loot_sm );
   m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm, m_item_sm );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
+  // this scene's own grids - otherwise ActionSystem keeps reading the graveyard's while the player is in the ruin
+  m_sys.find<Sys::Store::Type::ActionSystem>().init( m_generic_npc_navmesh, m_player_navmesh, nullptr, m_reserved_sm );
   m_sys.find<Sys::Store::Type::DebugOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm, m_item_sm, nullptr );
   m_sys.find<Sys::Store::Type::RuinSystem>().init( m_generic_npc_navmesh, m_reserved_sm, m_item_sm );
 }

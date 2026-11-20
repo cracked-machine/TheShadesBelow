@@ -136,13 +136,10 @@ public:
   //! @return bool true if any cell under `bounds` is taken.
   bool is_area_taken( const sf::FloatRect &bounds ) const;
 
-  //! @brief End of level generation where the claimed obstacles/caps/containers/NPC spawn cells don't need protecting
-  //!        any more (graveyard): drop every claim.
+  //! @brief End of level generation: the claimed obstacles/caps/containers/NPC spawn cells don't need protecting any more,
+  //!        so drop every claim.
   void discard_claims();
 
-  //! @brief End of level generation where the claimed obstacles are permanent structures that runtime placement must avoid
-  //!        (ruin lower floor): move every claim into the scene's reserved grid, then drop the claims.
-  void promote_claims_to_reserved();
 
 private:
   //! @brief Roll `init_chance` for `entity`/`pos_cmp` and, if it succeeds, register it as an obstacle in
@@ -178,8 +175,8 @@ private:
   PathFinding::SpatialHashGridSharedPtr m_reserved_sm;
 
   //! @brief Cells claimed by placements made during this generation pass (obstacles, obstacle caps, loot containers,
-  //!        developer-layer NPC spawn cells), so later passes don't overlap them. Not structures: discard_claims() or
-  //!        promote_claims_to_reserved() ends their life once generation is done.
+  //!        developer-layer NPC spawn cells), so later passes don't overlap them. Not structures: discard_claims() ends
+  //!        their life once generation is done.
   PathFinding::SpatialHashGrid m_claims_sm;
 
   //! @brief Scene-owned ground world items, so generation passes don't place over them.

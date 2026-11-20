@@ -511,11 +511,11 @@ void ActionSystem::select_moveable_obstacle()
   // project one grid position in the direction that the player is currently facing to find the obstacle selection
   auto selected_position = Utils::Player::get_projected_position( reg() );
 
-  auto reserved_sm = m_reserved_sm.lock();
+  // Cmp::Moveable is the authority (it's removed when a block gets stuck in a cobweb); a grid entry would go stale as soon
+  // as the block moves
   auto position_view = reg().view<Cmp::Position, Cmp::Obstacle, Cmp::Moveable>( entt::exclude<Cmp::SelectedPosition> );
   for ( auto [obst_entity, obst_pos_cmp, obst_cmp, move_cmp] : position_view.each() )
   {
-    if ( reserved_sm && not reserved_sm->at( obst_pos_cmp ).empty() ) continue;
     if ( selected_position.findIntersection( obst_pos_cmp ) )
     {
       SPDLOG_INFO( "Found moveable entity at position: [{}, {}]!", obst_pos_cmp.position.x, obst_pos_cmp.position.y );

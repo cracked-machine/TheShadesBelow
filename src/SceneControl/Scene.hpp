@@ -61,7 +61,7 @@ protected:
   //! @brief Player navmesh for blocking movement
   PathFinding::SpatialHashGridSharedPtr m_player_navmesh;
   //! @brief Static structures only: walls, paths, spawn/exit tiles, solid cells, multiblocks (incl. plants), runes, NPC
-  //! containers, and ruin/crypt obstacles. Procgen must not modify them and bombs only mark them. Not for items (m_item_sm),
+  //! containers, and crypt obstacles. Procgen must not modify them and bombs only mark them. Not for items (m_item_sm),
   //! hazards (m_hazard_sm) or temporary level-generation claims (LevelGenerator::m_claims_sm).
   PathFinding::SpatialHashGridSharedPtr m_reserved_sm;
   //! @brief Loot drops (Cmp::Loot), used to find free spawn/drop cells
