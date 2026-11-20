@@ -73,7 +73,7 @@ RuinSystem::RuinSystem( entt::registry &reg, sf::RenderWindow &window, Audio::So
   SPDLOG_DEBUG( "RuinSystem initialized" );
 }
 
-void RuinSystem::update( [[maybe_unused]] sf::Time dt )
+void RuinSystem::update( sf::Time dt, sf::Vector2f map_size_pixel )
 {
   if ( Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::GRAVEYARD ) )
   {
@@ -82,12 +82,33 @@ void RuinSystem::update( [[maybe_unused]] sf::Time dt )
   }
   else if ( Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::RUIN_LOWER_FLOOR ) )
   {
+    check_floor_access_collision( dt, Cmp::Ruin::FloorAccess::Direction::TO_UPPER );
+    check_movement_slowdowns();
+    creaking_rope_update( dt );
+    check_puzzle_status();
+
+    if ( check_activate_player_curse( map_size_pixel ) ) { create_spiders( sf::FloatRect( { 0, 0 }, map_size_pixel ) ); }
+
+    // `check_exit_collision()` may reset the player curse so it must be called after `check_activate_player_curse()`
+    // or we incorrectly re-trigger the curse effects before we can leave this function and exit the scene.
+    // i.e. the witch scream triggers again as we leave the scene
     m_exit_cooldown_timer += dt;
     if ( m_exit_cooldown_timer >= m_exit_cooldown_timeout )
     {
       check_exit_collision();
       m_exit_cooldown_timer = sf::Time::Zero;
     }
+  }
+  else if ( Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::RUIN_UPPER_FLOOR ) )
+  {
+    check_floor_access_collision( dt, Cmp::Ruin::FloorAccess::Direction::TO_LOWER );
+    check_movement_slowdowns();
+
+    [[maybe_unused]] bool player_curse_active = check_activate_player_curse( map_size_pixel );
+    // if ( player_curse_active ) { Factory::Shader::add_curse( shader_sys, map_size_pixel ); }
+
+    update_shadow_hand_pos( map_size_pixel );
+    check_player_shadow_hand_collision( dt );
   }
 }
 

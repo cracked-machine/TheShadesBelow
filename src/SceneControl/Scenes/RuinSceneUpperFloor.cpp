@@ -195,20 +195,13 @@ void RuinSceneUpperFloor::do_update( sf::Time dt )
     m_sys.find<Store::Type::NpcSystem>().update( dt );
     m_sys.find<Sys::Store::Type::FootstepSystem>().update( dt );
     m_sys.find<Store::Type::LootSystem>().check_loot_collision( dt );
-    m_sys.find<Store::Type::RuinSystem>().check_floor_access_collision( dt, Cmp::Ruin::FloorAccess::Direction::TO_LOWER );
-    m_sys.find<Store::Type::RuinSystem>().check_movement_slowdowns();
-
     m_sys.find<Store::Type::PlayerSystem>().update( dt );
     m_sys.find<Store::Type::InventorySystem>().update( dt );
     m_sys.find<Store::Type::ShaderSystem>().update( dt );
     m_sys.find<Store::Type::PlayerSystem>().disable_damage_cooldown();
 
     auto [_, map_size_pixel] = m_scene_data->map_size();
-    [[maybe_unused]] bool player_curse_active = m_sys.find<Store::Type::RuinSystem>().check_activate_player_curse( map_size_pixel );
-    // if ( player_curse_active ) { Factory::Shader::add_curse( m_sys.find<Sys::Store::Type::ShaderSystem>(), map_size_pixel ); }
-
-    m_sys.find<Store::Type::RuinSystem>().update_shadow_hand_pos( map_size_pixel );
-    m_sys.find<Store::Type::RuinSystem>().check_player_shadow_hand_collision( dt );
+    m_sys.find<Store::Type::RuinSystem>().update( dt, map_size_pixel );
 
     m_sys.find<Sys::Store::Type::ParticleSystem>().update( dt );
   }

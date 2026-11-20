@@ -51,7 +51,10 @@ public:
     m_item_sm = item_sm;
   }
 
-  void update( sf::Time dt );
+  //! @brief Per-frame update; dispatches to the current scene (graveyard, ruin lower floor or ruin upper floor).
+  //! @param dt Frame delta time
+  //! @param map_size_pixel Current scene's map size in pixels (used by the curse, shadow hand and spiders)
+  void update( sf::Time dt, sf::Vector2f map_size_pixel );
 
   //! @brief Check for player collision with the ruin entrance
   void check_entrance_collision();

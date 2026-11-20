@@ -399,8 +399,7 @@ void GraveyardScene::do_update( sf::Time dt )
     PROFILED( m_sys.find<Sys::Store::Type::CryptSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::AltarSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::HealingSpringSystem>().update( dt ) );
-    PROFILED( m_sys.find<Sys::Store::Type::RuinSystem>().update( dt ) );
-    PROFILED( m_sys.find<Sys::Store::Type::RuinSystem>().check_entrance_collision() );
+    PROFILED( m_sys.find<Sys::Store::Type::RuinSystem>().update( dt, m_scene_data->map_size().second ) );
     PROFILED( m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::LightningSystem>().update( dt ) );
