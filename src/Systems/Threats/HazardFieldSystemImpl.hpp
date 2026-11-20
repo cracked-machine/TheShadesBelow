@@ -326,7 +326,8 @@ template <ValidHazard HazardType>
 sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field( sf::Time dt )
 {
   m_spread_update_timer += dt;
-  if ( m_spread_update_timer < m_update_period ) return {};
+  const sf::Time spread_period = sf::seconds( Sys::PersistSystem::get<typename Traits::SpreadPeriodType>( reg() ).get_value() );
+  if ( m_spread_update_timer < spread_period ) return {};
   m_spread_update_timer = sf::Time::Zero;
 
   auto reserved_sm = m_reserved_sm.lock();
@@ -334,7 +335,7 @@ sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field( sf::Time dt )
   auto hazard_view = reg().template view<HazardType, Cmp::Position>();
   auto candidate_view = this->candidate_view();
 
-  Cmp::RandomInt hazard_spread_picker( 0, Traits::odds ); // 1 in 8 chance for picking an adjacent obstacle
+  Cmp::RandomInt hazard_spread_picker( 0, Traits::odds ); // 1-in-(odds + 1) chance per eligible adjacent cell
 
   // reused per hazard cell: the 3x3 neighbourhood from the world-tile / field grids
   std::vector<entt::entity> nearby_entts;

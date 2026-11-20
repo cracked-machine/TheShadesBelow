@@ -353,6 +353,14 @@
     "detail": "Corruption Damage",
     "format": "%d"
   },
+  "CorruptionSpreadPeriod": {
+    "type": "float",
+    "value": 5.0,
+    "min_value": 0.1,
+    "max_value": 30.0,
+    "detail": "Seconds between corruption spread ticks (at most one new cell per tick)",
+    "format": "%.1f seconds"
+  },
   "CryptNpcSpawnCount": {
     "type": "int",
     "value": 5,
@@ -1061,6 +1069,14 @@
     "max_value": 5.0,
     "detail": "Shovel wear: smashing pot",
     "format": "%.1f"
+  },
+  "SinkholeSpreadPeriod": {
+    "type": "float",
+    "value": 5.0,
+    "min_value": 0.1,
+    "max_value": 30.0,
+    "detail": "Seconds between sinkhole spread ticks (at most one new cell per tick)",
+    "format": "%.1f seconds"
   },
   "StatChangeDisplayDuration": {
     "type": "float",

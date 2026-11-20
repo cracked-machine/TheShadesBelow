@@ -27,6 +27,7 @@
 #include <Components/Persistent/BurrThrowCooldown.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
 #include <Components/Persistent/CorruptionDamage.hpp>
+#include <Components/Persistent/CorruptionSpreadPeriod.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
@@ -141,6 +142,7 @@
 #include <Components/Persistent/ShovelObstacleDigWear.hpp>
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
+#include <Components/Persistent/SinkholeSpreadPeriod.hpp>
 #include <Components/Persistent/StartingAnima.hpp>
 #include <Components/Persistent/StartingDespair.hpp>
 #include <Components/Persistent/StartingFear.hpp>
@@ -221,6 +223,8 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::HeldItemScale>();
   add_component<Cmp::Persist::HeldItemSideOffsetX>();
   add_component<Cmp::Persist::CorruptionDamage>();
+  add_component<Cmp::Persist::CorruptionSpreadPeriod>();
+  add_component<Cmp::Persist::SinkholeSpreadPeriod>();
   add_component<Cmp::Persist::CryptShuffleTimeout>();
   add_component<Cmp::Persist::CryptNpcSpawnCount>();
   add_component<Cmp::Persist::CryptVariantOverride>();

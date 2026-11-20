@@ -4,7 +4,9 @@
 #include <Components/Hazard/CorruptionCell.hpp>
 #include <Components/Hazard/SinkholeCell.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
+#include <Components/Persistent/CorruptionSpreadPeriod.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
+#include <Components/Persistent/SinkholeSpreadPeriod.hpp>
 #include <Components/Player/Mortality.hpp>
 #include <Sprites/SpriteSheet.hpp>
 
@@ -22,6 +24,8 @@ struct HazardTraits<Cmp::SinkholeCell>
 {
   //! @brief Persisted RNG seed component used to pick this hazard's initial spawn position.
   using SeedType = Cmp::Persist::SinkholeSeed;
+  //! @brief Persisted seconds between spread ticks.
+  using SpreadPeriodType = Cmp::Persist::SinkholeSpreadPeriod;
   //! @brief Hazard component type that must not already be present on a cell for it to become a sinkhole.
   using ExcludeHazard = Cmp::CorruptionCell;
   //! @brief Whether contact with this hazard kills the player/NPC outright rather than applying gradual damage.
@@ -30,7 +34,7 @@ struct HazardTraits<Cmp::SinkholeCell>
   static constexpr Cmp::Player::Mortality::State mortality_state = Cmp::Player::Mortality::State::FALLING;
   //! @brief AnimData sprite type identifier used when spawning a sinkhole cell.
   static constexpr std::string_view sprite_type = "sprite.graveyard.hazard.sinkhole";
-  //! @brief Denominator of the 1-in-N chance used each spread tick to convert an adjacent cell into a new sinkhole cell.
+  //! @brief Each eligible adjacent cell is converted with a 1-in-(odds + 1) chance per spread tick.
   static constexpr int odds = 2;
   //! @brief Whether the field spreads into open floor as well as obstacles. Reserved positions (multiblocks, walls,
   //! exit, spawn area, world items) and loot/NPC containers are always off limits.
@@ -43,6 +47,8 @@ struct HazardTraits<Cmp::CorruptionCell>
 {
   //! @brief Persisted RNG seed component used to pick this hazard's initial spawn position.
   using SeedType = Cmp::Persist::CorruptionSeed;
+  //! @brief Persisted seconds between spread ticks.
+  using SpreadPeriodType = Cmp::Persist::CorruptionSpreadPeriod;
   //! @brief Hazard component type that must not already be present on a cell for it to become corrupted.
   using ExcludeHazard = Cmp::SinkholeCell;
   //! @brief Whether contact with this hazard kills the player/NPC outright rather than applying gradual damage.
@@ -51,10 +57,10 @@ struct HazardTraits<Cmp::CorruptionCell>
   static constexpr Cmp::Player::Mortality::State mortality_state = Cmp::Player::Mortality::State::DECAYING;
   //! @brief AnimData sprite type identifier used when spawning a corruption cell.
   static constexpr std::string_view sprite_type = "sprite.graveyard.hazard.corruption";
-  //! @brief Denominator of the 1-in-N chance used each spread tick to convert an adjacent obstacle into a new corruption cell.
-  static constexpr int odds = 7;
-  //! @brief Whether the field spreads into open floor as well as obstacles. Corruption only consumes obstacles.
-  static constexpr bool spreads_to_open_floor = false;
+  //! @brief Each eligible adjacent obstacle is converted with a 1-in-(odds + 1) chance per spread tick.
+  static constexpr int odds = 2;
+  //! @brief Whether the field spreads into open floor as well as obstacles.
+  static constexpr bool spreads_to_open_floor = true;
 };
 
 } // namespace Game::Sys

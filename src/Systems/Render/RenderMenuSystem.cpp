@@ -27,6 +27,7 @@
 #include <Components/Persistent/BurrThrowCooldown.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
 #include <Components/Persistent/CorruptionDamage.hpp>
+#include <Components/Persistent/CorruptionSpreadPeriod.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
@@ -137,6 +138,7 @@
 #include <Components/Persistent/ShovelObstacleDigWear.hpp>
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
+#include <Components/Persistent/SinkholeSpreadPeriod.hpp>
 #include <Components/Persistent/StartingAnima.hpp>
 #include <Components/Persistent/StartingDespair.hpp>
 #include <Components/Persistent/StartingFear.hpp>
@@ -371,6 +373,8 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     ImGui::SeparatorText( "Hazard Settings" );
 
     Sys::PersistSystem::get<Cmp::Persist::CorruptionDamage>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::CorruptionSpreadPeriod>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::SinkholeSpreadPeriod>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::HazardBalanceOverlap>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::HazardBalanceTimeout>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::LightningDamage>( reg() ).render_widget();

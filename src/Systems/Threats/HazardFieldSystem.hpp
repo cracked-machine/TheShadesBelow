@@ -152,10 +152,6 @@ private:
   //!
   sf::Time m_spread_update_timer{ sf::Time::Zero };
 
-  //! @brief Time period for updating hazard fields.
-  //!
-  sf::Time m_update_period{ sf::seconds( 5.0f ) }; // seconds between adding new hazard fields
-
   sf::Time m_dmg_timer{ sf::Time::Zero };
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
