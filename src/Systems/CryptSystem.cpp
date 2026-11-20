@@ -467,11 +467,14 @@ void CryptSystem::gen_crypt_initial_interior()
   auto reserved_sm = m_reserved_sm.lock();
   PathFinding::SpatialHashGrid pre_existing_reserved;
   if ( reserved_sm ) pre_existing_reserved = *reserved_sm;
+  // world items (e.g. the crypt key) aren't structures, but must never be walled in
+  auto item_sm = m_item_sm.lock();
 
   auto position_view = reg().view<Cmp::Position>( entt::exclude<Cmp::Player::Character> );
   for ( auto [pos_entt, pos_cmp] : position_view.each() )
   {
     if ( not pre_existing_reserved.at( pos_cmp ).empty() ) continue;
+    if ( item_sm and not item_sm->at( pos_cmp ).empty() ) continue;
     bool add_interior_wall = true;
     for ( auto [start_room_entity, start_room_cmp] : reg().view<Cmp::Crypt::RoomStart>().each() )
     {
@@ -501,6 +504,7 @@ void CryptSystem::create_initial_closed_rooms( sf::Vector2u map_grid_size, const
   const int max_attempts = params.max_attempts;
 
   auto reserved_sm = m_reserved_sm.lock();
+  auto item_sm = m_item_sm.lock();
 
   int room_count = 0;
   int current_attempt = 0;
@@ -534,6 +538,7 @@ void CryptSystem::create_initial_closed_rooms( sf::Vector2u map_grid_size, const
 
     // make sure the room's origin doesn't land on an already-reserved position (walls, markers, etc.)
     if ( not overlaps_existing && reserved_sm && not reserved_sm->at( pos ).empty() ) { overlaps_existing = true; }
+    if ( not overlaps_existing && item_sm && not item_sm->at( pos ).empty() ) { overlaps_existing = true; }
 
     // check for intersection with existing rooms
     if ( not overlaps_existing )
@@ -608,6 +613,7 @@ void CryptSystem::create_initial_closed_rooms( sf::Vector2u map_grid_size, const
       for ( auto [pos_entt, pos_cmp] : reg().view<Cmp::Position>().each() )
       {
         if ( reserved_sm && not reserved_sm->at( pos_cmp ).empty() ) continue;
+        if ( item_sm && not item_sm->at( pos_cmp ).empty() ) continue;
         if ( reg().any_of<Cmp::FootStepTimer, Cmp::FootStepAlpha, Cmp::Direction>( pos_entt ) ) continue;
         if ( reg().any_of<Cmp::Wall, Cmp::Exit>( pos_entt ) ) continue;
 

@@ -42,16 +42,19 @@ public:
 
   //! @brief init the weak pointer for the pathfinding navmesh
   //! @param npc_navmesh
+  //! @param hazard_sm Sinkhole/corruption cells (see Scene::m_hazard_sm).
   void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &player_navmesh,
              const PathFinding::SpatialHashGridSharedPtr &ghost_navmesh = nullptr,
              const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr,
-             const PathFinding::SpatialHashGridSharedPtr &world_tile_sm = nullptr )
+             const PathFinding::SpatialHashGridSharedPtr &world_tile_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &hazard_sm = nullptr )
   {
     m_npc_navmesh = npc_navmesh;
     m_player_navmesh = player_navmesh;
     m_ghost_navmesh = ghost_navmesh;
     m_reserved_sm = reserved_sm;
     m_world_tile_sm = world_tile_sm;
+    m_hazard_sm = hazard_sm;
   }
 
   //! @brief Detonate any armed bombs whose fuse has expired: destroys obstacles, loot containers, npc containers and nearby items, damages the
@@ -74,6 +77,9 @@ private:
 
   //! @brief World-tile lookup (see Scene::m_world_tile_sm), so blasts only visit cells near the epicentre. Null scans the registry.
   PathFinding::SpatialHashGridWeakPtr m_world_tile_sm;
+
+  //! @brief Sinkhole/corruption cells (see Scene::m_hazard_sm).
+  PathFinding::SpatialHashGridWeakPtr m_hazard_sm;
 
   //! @brief Recursively arm all destructable entities in concentric rings out from an epicenter, up to blast_radius layers, in clockwise order per
   //! layer.

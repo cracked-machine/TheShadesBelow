@@ -36,12 +36,15 @@ public:
   //! @param npc_navmesh
   //! @param player_navmesh
   //! @param reserved_sm
+  //! @param item_sm Ground world items (see Scene::m_item_sm).
   void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &player_navmesh,
-             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr )
+             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &item_sm = nullptr )
   {
     m_npc_navmesh = npc_navmesh;
     m_player_navmesh = player_navmesh;
     m_reserved_sm = reserved_sm;
+    m_item_sm = item_sm;
   }
 
   //! @brief Per-frame update function
@@ -129,6 +132,9 @@ private:
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
+
+  //! @brief Ground world items (see Scene::m_item_sm).
+  PathFinding::SpatialHashGridWeakPtr m_item_sm;
 
   //! @brief Time since the last pickup/drop; swaps are ignored until Cmp::Persist::InventorySwapCooldown has passed.
   sf::Time m_swap_item_cooldown_timer;

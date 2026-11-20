@@ -100,14 +100,15 @@ void CryptScene::on_init()
   // Positions reserved from procgen/algorithmic changes. Must exist before generation starts,
   // since room/interior carving and passage caching below query and populate it.
   m_reserved_sm = std::make_shared<PathFinding::SpatialHashGrid>();
-  m_sys.find<Sys::Store::Type::CryptSystem>().init( nullptr, nullptr, m_reserved_sm );
+  m_item_sm = std::make_shared<PathFinding::SpatialHashGrid>();
+  m_sys.find<Sys::Store::Type::CryptSystem>().init( nullptr, nullptr, m_reserved_sm, nullptr, m_item_sm );
   m_sys.find<Sys::Store::Type::PassageSystem>().init_reserved_sm( m_reserved_sm );
-  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm );
+  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_item_sm );
 
   // create the empty game area
   auto player_start_area = m_scene_data->get_spawn_area_bounds();
   auto &random_level_sys = m_sys.find<Sys::Store::Type::LevelGenerator>();
-  random_level_sys.init( m_reserved_sm );
+  random_level_sys.init( m_reserved_sm, m_item_sm );
   random_level_sys.build_scene_from_data( *m_scene_data );
   auto &crypt_sys = m_sys.find<Sys::Store::Type::CryptSystem>();
   auto &passage_sys = m_sys.find<Sys::Store::Type::PassageSystem>();
@@ -242,14 +243,15 @@ void CryptScene::do_update( sf::Time dt )
 
 void CryptScene::reinit_navmesh()
 {
-  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, nullptr, nullptr, m_loot_sm );
-  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_generic_npc_navmesh, nullptr, m_loot_sm );
+  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, nullptr, nullptr, m_loot_sm, m_item_sm );
+  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_item_sm, m_generic_npc_navmesh, nullptr, m_loot_sm );
+  m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm, m_item_sm );
   m_sys.find<Sys::Store::Type::PassageSystem>().init_nav_mesh( m_generic_npc_navmesh );
   m_sys.find<Sys::Store::Type::DowsingGuideSystem>().init( m_generic_npc_navmesh );
-  m_sys.find<Sys::Store::Type::CryptSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm, m_loot_sm );
-  m_sys.find<Sys::Store::Type::LootSystem>().init( m_generic_npc_navmesh, m_player_navmesh, nullptr, m_reserved_sm, m_loot_sm );
+  m_sys.find<Sys::Store::Type::CryptSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm, m_loot_sm, m_item_sm );
+  m_sys.find<Sys::Store::Type::LootSystem>().init( m_generic_npc_navmesh, m_player_navmesh, nullptr, m_reserved_sm, m_loot_sm, m_item_sm );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
-  m_sys.find<Sys::Store::Type::DebugOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::DebugOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm, m_item_sm, nullptr );
 }
 
 entt::registry &CryptScene::registry() { return m_reg; }

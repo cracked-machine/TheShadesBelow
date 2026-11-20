@@ -36,7 +36,11 @@ public:
   //! @param player_navmesh
   //! @param ghost_navmesh
   //! @param loot_sm loot drops, so plant drops don't land on them
+  //! @param item_sm Ground world items (see Scene::m_item_sm).
+  //! @param hazard_sm Sinkhole/corruption cells (see Scene::m_hazard_sm).
   void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &world_tile_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &item_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &hazard_sm = nullptr,
              const PathFinding::SpatialHashGridSharedPtr &npc_navmesh = nullptr,
              const PathFinding::SpatialHashGridSharedPtr &player_navmesh = nullptr,
              const PathFinding::SpatialHashGridSharedPtr &ghost_navmesh = nullptr, const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr )
@@ -47,6 +51,8 @@ public:
     m_player_navmesh = player_navmesh;
     m_ghost_navmesh = ghost_navmesh;
     m_loot_sm = loot_sm;
+    m_item_sm = item_sm;
+    m_hazard_sm = hazard_sm;
   }
 
   //! @brief frame updates
@@ -116,6 +122,12 @@ private:
 
   //! @brief World-tile lookup used by gen_plant() instead of scanning every Cmp::Position. See Scene::m_world_tile_sm.
   PathFinding::SpatialHashGridWeakPtr m_world_tile_sm;
+
+  //! @brief Ground world items (see Scene::m_item_sm).
+  PathFinding::SpatialHashGridWeakPtr m_item_sm;
+
+  //! @brief Sinkhole/corruption cells (see Scene::m_hazard_sm).
+  PathFinding::SpatialHashGridWeakPtr m_hazard_sm;
 };
 
 } // namespace Game::Sys

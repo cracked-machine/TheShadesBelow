@@ -24,7 +24,15 @@ public:
 
   //! @brief init the weak pointer for the reserved-positions grid.
   //! @param reserved_sm
-  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm ) { m_reserved_sm = reserved_sm; }
+  //! @param item_sm Ground world items (see Scene::m_item_sm).
+  //! @param hazard_sm Sinkhole/corruption cells (see Scene::m_hazard_sm).
+  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &item_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &hazard_sm = nullptr )
+  {
+    m_reserved_sm = reserved_sm;
+    m_item_sm = item_sm;
+    m_hazard_sm = hazard_sm;
+  }
 
   //! @brief Rate-limit and trigger Watchman NPC spawning in the graveyard scene
   //! @param dt Delta time since last update call
@@ -68,6 +76,12 @@ private:
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
+
+  //! @brief Ground world items (see Scene::m_item_sm).
+  PathFinding::SpatialHashGridWeakPtr m_item_sm;
+
+  //! @brief Sinkhole/corruption cells (see Scene::m_hazard_sm).
+  PathFinding::SpatialHashGridWeakPtr m_hazard_sm;
 };
 
 } // namespace Game::Sys

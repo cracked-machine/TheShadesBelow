@@ -67,14 +67,20 @@ public:
   //! @param world_tile_sm World-tile lookup (see Scene::m_world_tile_sm) used to find spread candidates around each
   //! hazard cell; null falls back to scanning candidate_view().
   //! @param loot_sm Loot drops (Cmp::Loot); any on a cell the field takes over are destroyed.
+  //! @param item_sm Ground world items (see Scene::m_item_sm).
+  //! @param hazard_sm Sinkhole/corruption cells (see Scene::m_hazard_sm).
   void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &npc_navmesh,
              const PathFinding::SpatialHashGridSharedPtr &world_tile_sm = nullptr,
-             const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr )
+             const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &item_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &hazard_sm = nullptr )
   {
     m_reserved_sm = reserved_sm;
     m_npc_navmesh = npc_navmesh;
     m_world_tile_sm = world_tile_sm;
     m_loot_sm = loot_sm;
+    m_item_sm = item_sm;
+    m_hazard_sm = hazard_sm;
   }
 
   //! @brief Spread the hazard field, then check for player and NPC collisions with it.
@@ -113,6 +119,10 @@ private:
   //! floor when HazardTraits::spreads_to_open_floor.
   //! @param entity Entity from candidate_view().
   bool is_candidate( entt::entity entity );
+
+  //! @brief Whether a quest key (exit/crypt key) lies on this cell. Keys block the field so a level can't become unwinnable.
+  //! @param pos The cell to test.
+  bool holds_key_item( const Cmp::Position &pos );
 
   //! @brief Check for player collision with hazard fields.
   //! If a collision is detected, apply damage or instant death based on hazard type.
@@ -168,6 +178,12 @@ private:
 
   //! @brief Loot drops, destroyed when the field spreads onto their cell.
   PathFinding::SpatialHashGridWeakPtr m_loot_sm;
+
+  //! @brief Ground world items (see Scene::m_item_sm).
+  PathFinding::SpatialHashGridWeakPtr m_item_sm;
+
+  //! @brief Sinkhole/corruption cells (see Scene::m_hazard_sm).
+  PathFinding::SpatialHashGridWeakPtr m_hazard_sm;
 
   //! @brief Spatial index of this system's hazard cells (one bucket per grid cell), used to track the
   //! structure of the field as it spreads.

@@ -223,6 +223,9 @@ void WatchmanSystem::spawn_watchman()
     auto reserved_sm = m_reserved_sm.lock();
     auto [_, rnd_pos_cmp] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 0 );
     if ( reserved_sm && not reserved_sm->at( rnd_pos_cmp ).empty() ) return;
+    // don't spawn on a dropped item or into a sinkhole/corruption cell
+    if ( auto item_sm = m_item_sm.lock(); item_sm and not item_sm->at( rnd_pos_cmp ).empty() ) return;
+    if ( auto hazard_sm = m_hazard_sm.lock(); hazard_sm and not hazard_sm->at( rnd_pos_cmp ).empty() ) return;
     get_systems_event_queue().trigger( Events::CreateNpcEvent( "npc.nightwatchman", rnd_pos_cmp ) );
     SPDLOG_INFO( "Spawned Watchman at {},{}", rnd_pos_cmp.x(), rnd_pos_cmp.y() );
   }

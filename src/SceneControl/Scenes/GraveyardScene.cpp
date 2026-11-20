@@ -137,14 +137,17 @@ void GraveyardScene::on_init()
   // creates or queries reserved entities (ItemSystem/ExitSystem are wired up now since their
   // events/calls can fire mid-generation, before reinit_system_spatial_maps() runs).
   m_reserved_sm = std::make_shared<PathFinding::SpatialHashGrid>();
-  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm );
+  // ground items are indexed as they're created (level-gen item markers included); hazard cells as the fields spread
+  m_item_sm = std::make_shared<PathFinding::SpatialHashGrid>();
+  m_hazard_sm = std::make_shared<PathFinding::SpatialHashGrid>();
+  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_item_sm );
   m_sys.find<Sys::Store::Type::ExitSystem>().init( m_reserved_sm );
-  m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm );
+  m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, nullptr, m_item_sm, m_hazard_sm );
 
   // create the player, or increment the level counter and restart the grave trail for the new level
   if ( m_reg.view<Cmp::Player::Character>().size() == 0 )
   {
-    Factory::Player::create_player( m_reg, m_reserved_sm );
+    Factory::Player::create_player( m_reg );
     // Sys::BaseSystem::get_systems_event_queue().trigger( Events::AddInventoryEvent( "item.shovel" ) );
   }
   else
@@ -174,12 +177,12 @@ void GraveyardScene::on_init()
 
   // Create the level contents - "reserved" spatial map prevents overlap
   auto &level_gen = m_sys.find<Sys::Store::Type::LevelGenerator>();
-  level_gen.init( m_reserved_sm );
+  level_gen.init( m_reserved_sm, m_item_sm );
   level_gen.build_scene_from_data( *m_scene_data );
   // world-tile lookup: built now, while only the tiles exist, so plant/multiblock placement can skip full registry scans
   m_world_tile_sm = Factory::Pathfinding::create_world_tile_grid( m_reg );
   level_gen.set_world_tile_sm( m_world_tile_sm );
-  m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, m_world_tile_sm );
+  m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, m_world_tile_sm, m_item_sm, m_hazard_sm );
   m_sys.find<Sys::Store::Type::ExitSystem>().init( m_reserved_sm, m_world_tile_sm );
   // one point of interest per map quadrant: shuffle which POI goes on which 'poi' marker
   auto poi_positions = m_scene_data->poi_positions_by_quadrant();
@@ -213,10 +216,11 @@ void GraveyardScene::on_init()
   level_gen.add_graveyard_exterior_obstacles( init_chance.get_value() );
 
   auto &cellauto_parser = m_sys.find<Sys::Store::Type::CellAutomataSystem>();
-  cellauto_parser.iterate( level_gen.get_obstacle_sm(), level_gen.get_reserved_sm() );
+  cellauto_parser.iterate( level_gen.get_obstacle_sm(), level_gen.get_reserved_sm(), level_gen.get_claims_sm() );
 
   level_gen.decorate_graveyard_exterior_obstacles();
-  level_gen.cleanup_reserved();
+  // obstacles, caps, loot containers and NPC spawn cells only needed protecting while the level was generated
+  level_gen.discard_claims();
 
   // create navmeshes for pathfinding
   m_generic_npc_navmesh = Factory::Pathfinding::create_npc_navmesh( m_reg );
@@ -432,21 +436,21 @@ void GraveyardScene::do_update( sf::Time dt )
 
 void GraveyardScene::reinit_system_spatial_maps()
 {
-  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, m_ghost_navmesh, m_reserved_sm, m_loot_sm );
+  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, m_ghost_navmesh, m_reserved_sm, m_loot_sm, m_item_sm );
   m_sys.find<Sys::Store::Type::WispSystem>().init( m_open_navmesh );
-  m_sys.find<Sys::Store::Type::BombSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm, m_world_tile_sm );
+  m_sys.find<Sys::Store::Type::BombSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm, m_world_tile_sm, m_hazard_sm );
   m_sys.find<Sys::Store::Type::ActionSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm );
-  m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, m_world_tile_sm, m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh,
+  m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, m_world_tile_sm, m_item_sm, m_hazard_sm, m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh,
                                                     m_loot_sm );
-  m_sys.find<Sys::Store::Type::LootSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm, m_loot_sm );
-  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_generic_npc_navmesh, m_ghost_navmesh, m_loot_sm );
-  m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::LootSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_ghost_navmesh, m_reserved_sm, m_loot_sm, m_item_sm );
+  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_item_sm, m_generic_npc_navmesh, m_ghost_navmesh, m_loot_sm );
+  m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm, m_item_sm );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
-  m_sys.find<Sys::Store::Type::WormholeSystem>().init( m_generic_npc_navmesh, m_reserved_sm, m_world_tile_sm );
-  m_sys.find<Sys::Store::Type::DebugOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm );
-  m_sys.find<Sys::Store::Type::WatchmanSystem>().init( m_reserved_sm );
-  m_sys.find<Sys::Store::Type::SinkHoleHazardSystem>().init( m_reserved_sm, m_generic_npc_navmesh, m_world_tile_sm, m_loot_sm );
-  m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().init( m_reserved_sm, m_generic_npc_navmesh, m_world_tile_sm, m_loot_sm );
+  m_sys.find<Sys::Store::Type::WormholeSystem>().init( m_generic_npc_navmesh, m_reserved_sm, m_world_tile_sm, m_item_sm, m_hazard_sm );
+  m_sys.find<Sys::Store::Type::DebugOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm, m_item_sm, m_hazard_sm );
+  m_sys.find<Sys::Store::Type::WatchmanSystem>().init( m_reserved_sm, m_item_sm, m_hazard_sm );
+  m_sys.find<Sys::Store::Type::SinkHoleHazardSystem>().init( m_reserved_sm, m_generic_npc_navmesh, m_world_tile_sm, m_loot_sm, m_item_sm, m_hazard_sm );
+  m_sys.find<Sys::Store::Type::CorruptionHazardSystem>().init( m_reserved_sm, m_generic_npc_navmesh, m_world_tile_sm, m_loot_sm, m_item_sm, m_hazard_sm );
 }
 
 entt::registry &GraveyardScene::registry() { return m_reg; }

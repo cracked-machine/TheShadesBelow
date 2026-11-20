@@ -33,9 +33,7 @@ void create_loot_container( entt::registry &registry, entt::entity entt, Cmp::Po
 //! entity into them afterwards to make the tile traversable for NPCs again.
 //! @param registry
 //! @param loot_entity
-//! @param reserved_sm If provided, un-reserves the container's position.
-void destroy_loot_container( entt::registry &registry, entt::entity loot_entity,
-                             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr );
+void destroy_loot_container( entt::registry &registry, entt::entity loot_entity );
 
 namespace detail
 {

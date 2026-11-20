@@ -6,6 +6,7 @@
 #include <Components/Exit.hpp>
 #include <Components/Hazard/CorruptionCell.hpp>
 #include <Components/Hazard/SinkholeCorners.hpp>
+#include <Components/Inventory/WorldItem.hpp>
 #include <Components/Loot.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/Container.hpp>
@@ -24,6 +25,7 @@
 #include <Components/ZOrderValue.hpp>
 #include <Events/DestroyLootEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
+#include <Events/DestroyitemEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <SFML/System/Time.hpp>
@@ -210,6 +212,7 @@ std::vector<sf::Vector2f> HazardFieldSystem<HazardType>::init_hazard_field( std:
     {
       const Cmp::Position candidate_pos( candidate, Constants::kGridSizePxF );
       if ( reserved_sm and not reserved_sm->at( candidate_pos ).empty() ) continue;
+      if ( holds_key_item( candidate_pos ) ) continue;
 
       const auto it = seed_cells.find( cell_key( candidate ) );
       if ( it == seed_cells.end() ) continue;
@@ -237,9 +240,8 @@ void HazardFieldSystem<HazardType>::promote_to_hazard_cell( entt::entity entity,
                                                             const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
 {
   Factory::Obstacle::remove_obstacle( reg(), entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
-  // remove_obstacle() above un-reserves this position; re-reserve it now the entity is a hazard cell,
-  // otherwise BombSystem's blast-arming sweep will still find it via its leftover Cmp::Armable
-  if ( reserved_sm ) { reserved_sm->insert( entity, pos ); }
+  // index the hazard cell; BombSystem reads this to only mark (not arm) hazard cells
+  if ( auto hazard_sm = m_hazard_sm.lock() ) { hazard_sm->insert( entity, pos ); }
   // open floor is in the NPC navmesh; drop the whole bucket like Cmp::Npc::NoPathFinding does at navmesh build time
   if ( auto npc_navmesh = m_npc_navmesh.lock() ) { npc_navmesh->remove_all( pos ); }
   // clang-format off
@@ -265,6 +267,31 @@ void HazardFieldSystem<HazardType>::promote_to_hazard_cell( entt::entity entity,
       get_systems_event_queue().trigger( Events::DestroyLootEvent( loot_entt ) );
     }
   }
+
+  // ...and any dropped world item. Keys never get here: holds_key_item() keeps the field off their cells.
+  if ( auto item_sm = m_item_sm.lock() )
+  {
+    for ( auto item_entt : item_sm->at( pos ) )
+    {
+      if ( not reg().valid( item_entt ) or not reg().template all_of<Cmp::WorldItem>( item_entt ) ) continue;
+      get_systems_event_queue().trigger( Events::DestroyItemEvent( item_entt ) );
+    }
+  }
+}
+
+//! @copydoc HazardFieldSystem::holds_key_item()
+template <ValidHazard HazardType>
+bool HazardFieldSystem<HazardType>::holds_key_item( const Cmp::Position &pos )
+{
+  const auto item_sm = m_item_sm.lock();
+  if ( not item_sm ) return false;
+  return std::ranges::any_of( item_sm->at( pos ),
+                              [&]( entt::entity item_entt )
+                              {
+                                if ( not reg().valid( item_entt ) ) return false;
+                                const auto *item_cmp = reg().template try_get<Cmp::WorldItem>( item_entt );
+                                return item_cmp and ( item_cmp->item_type == "item.exitkey" or item_cmp->item_type == "item.cryptkey" );
+                              } );
 }
 
 //! @copydoc HazardFieldSystem::rebuild_field_sm()
@@ -367,6 +394,7 @@ sf::Vector2f HazardFieldSystem<HazardType>::update_hazard_field( sf::Time dt )
     {
       if ( not hazard_hitbox.findIntersection( candidate_pos_cmp ) ) return false;
       if ( reserved_sm and not reserved_sm->at( candidate_pos_cmp ).empty() ) return false;
+      if ( holds_key_item( candidate_pos_cmp ) ) return false;
       if ( not is_candidate( candidate_entity ) ) return false;
       SPDLOG_DEBUG( "Hazard candidate cell {}", static_cast<uint32_t>( candidate_entity ) );
 

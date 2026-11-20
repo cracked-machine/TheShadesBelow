@@ -66,7 +66,7 @@
 namespace Game::Factory::Player
 {
 
-void create_player( entt::registry &reg, const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
+void create_player( entt::registry &reg )
 {
   SPDLOG_DEBUG( "Creating player entity" );
   auto entity = reg.create();
@@ -79,7 +79,6 @@ void create_player( entt::registry &reg, const PathFinding::SpatialHashGridShare
   Cmp::Position player_pos( start_pos, Constants::kGridSizePxF );
   reg.emplace_or_replace<Cmp::Position>( entity, player_pos );
   reg.emplace_or_replace<Cmp::Player::Character>( entity );
-  if ( reserved_sm ) reserved_sm->insert( entity, player_pos );
   reg.emplace_or_replace<Cmp::PlayerStats>( entity, Utils::Player::make_starting_stats( reg ) );
 
   reg.emplace_or_replace<Cmp::Direction>( entity, sf::Vector2f{ 0, 0 } );

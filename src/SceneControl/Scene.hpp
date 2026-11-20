@@ -60,7 +60,9 @@ protected:
   PathFinding::SpatialHashGridSharedPtr m_open_navmesh;
   //! @brief Player navmesh for blocking movement
   PathFinding::SpatialHashGridSharedPtr m_player_navmesh;
-  //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
+  //! @brief Static structures only: walls, paths, spawn/exit tiles, solid cells, multiblocks (incl. plants), runes, NPC
+  //! containers, and ruin/crypt obstacles. Procgen must not modify them and bombs only mark them. Not for items (m_item_sm),
+  //! hazards (m_hazard_sm) or temporary level-generation claims (LevelGenerator::m_claims_sm).
   PathFinding::SpatialHashGridSharedPtr m_reserved_sm;
   //! @brief Loot drops (Cmp::Loot), used to find free spawn/drop cells
   PathFinding::SpatialHashGridSharedPtr m_loot_sm;
@@ -68,6 +70,12 @@ protected:
   //! "which world tile is at this cell?" lookups, replacing full Cmp::Position scans (e.g. plant/multiblock placement).
   //! Built once after level data is loaded; WormholeSystem keeps it in sync when it recreates tiles. Null in scenes that don't build it.
   PathFinding::SpatialHashGridSharedPtr m_world_tile_sm;
+  //! @brief Ground world items (Cmp::WorldItem with a Position, not plants). Single purpose: "is there an item on this cell?".
+  //! Kept in sync by ItemSystem (create/destroy), InventorySystem (drop/pick up) and NpcSystem (lift/place).
+  PathFinding::SpatialHashGridSharedPtr m_item_sm;
+  //! @brief Sinkhole/corruption cells. Single purpose: "is this cell a hazard?" for systems that aren't the hazard's own
+  //! (bombs, plants, spawning). Filled by HazardFieldSystem::promote_to_hazard_cell(). Null in scenes without hazards.
+  PathFinding::SpatialHashGridSharedPtr m_hazard_sm;
 
   //! @brief Deserialised JSON scene data. See res/scenes
   SceneMapSharedPtr m_scene_data;

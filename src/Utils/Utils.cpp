@@ -346,6 +346,7 @@ bool is_free_spawn_area( entt::registry &reg, const sf::FloatRect &area, const S
       if ( std::ranges::any_of( bucket, [&]( entt::entity e ) { return reg.valid( e ) and reg.any_of<Cmp::WorldItem, Cmp::Loot>( e ); } ) )
         return false;
       if ( grids.reserved_sm and not grids.reserved_sm->at( cell_pos ).empty() ) return false;
+      if ( grids.item_sm and std::ranges::any_of( grids.item_sm->at( cell_pos ), [&]( entt::entity e ) { return reg.valid( e ); } ) ) return false;
     }
   }
 

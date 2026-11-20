@@ -35,10 +35,16 @@ public:
   //! @brief init the weak pointer for the pathfinding navmesh
   //! @param spatial_grid_ptr
   //! @param reserved_sm
-  void init( const PathFinding::SpatialHashGridSharedPtr &spatial_grid_ptr, const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr )
+  //! @param item_sm Ground world items (see Scene::m_item_sm).
+  //! @param hazard_sm Sinkhole/corruption cells (see Scene::m_hazard_sm).
+  void init( const PathFinding::SpatialHashGridSharedPtr &spatial_grid_ptr, const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &item_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &hazard_sm = nullptr )
   {
     m_npc_navmesh = spatial_grid_ptr;
     m_reserved_sm = reserved_sm;
+    m_item_sm = item_sm;
+    m_hazard_sm = hazard_sm;
   }
 
   //! @brief Render whichever debug visualisations are enabled in the current scene settings. The debug panels are only
@@ -160,6 +166,12 @@ private:
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.
   PathFinding::SpatialHashGridWeakPtr m_reserved_sm;
+
+  //! @brief Ground world items (see Scene::m_item_sm).
+  PathFinding::SpatialHashGridWeakPtr m_item_sm;
+
+  //! @brief Sinkhole/corruption cells (see Scene::m_hazard_sm).
+  PathFinding::SpatialHashGridWeakPtr m_hazard_sm;
 };
 
 } // namespace Game::Sys

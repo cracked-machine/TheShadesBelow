@@ -63,7 +63,7 @@ void LootSystem::on_create_loot_event( const Events::CreateLootEvent &event )
   auto ghost_navmesh = m_ghost_navmesh.lock();
   auto loot_sm = m_loot_sm.lock();
   auto reserved_sm = m_reserved_sm.lock();
-  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
+  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get(), m_item_sm.lock().get() };
   auto cell = Utils::find_random_cell_near( event.m_source, kLootDropSearchRadius, [&]( const sf::Vector2f &cell_pos )
   { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); } );
   if ( not cell )
@@ -114,10 +114,8 @@ void LootSystem::on_destroy_loot_container_event( const Events::DestroyLootConta
 
   // copy the position: destroy_loot_container removes components from this entity
   Cmp::Position destroyed_pos_cmp = reg().get<Cmp::Position>( loot_entity );
-  auto reserved_sm = m_reserved_sm.lock();
-
   m_sound_bank.get_effect( "break_pot" ).play();
-  Factory::Loot::destroy_loot_container( reg(), loot_entity, reserved_sm );
+  Factory::Loot::destroy_loot_container( reg(), loot_entity );
 
   // add the position to the spatial grid so it can be used in pathfinding
   if ( PathFinding::SpatialHashGridSharedPtr pathfinding_navmesh = m_npc_navmesh.lock() )
@@ -149,7 +147,7 @@ void LootSystem::on_destroy_loot_container_event( const Events::DestroyLootConta
         // no spatial exclude for the player: they may be adjacent to the container's tile when it breaks
         Factory::ExcludePack<Cmp::Obstacle>{},
         /*zorder_offset=*/-8.f, 
-        reserved_sm.get(),
+        m_reserved_sm.lock().get(),
         m_loot_sm.lock().get()
     );
     // clang-format on

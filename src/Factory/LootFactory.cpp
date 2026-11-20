@@ -33,17 +33,12 @@ void create_loot_container( entt::registry &reg, entt::entity entt, Cmp::Positio
   reg.emplace_or_replace<Cmp::ZOrderValue>( entt, pos_cmp.position.y - zorder );
 }
 
-void destroy_loot_container( entt::registry &registry, entt::entity loot_container_entity,
-                             const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
+void destroy_loot_container( entt::registry &registry, entt::entity loot_container_entity )
 {
   registry.remove<Cmp::LootContainer>( loot_container_entity );
   registry.remove<Cmp::Player::NoPath>( loot_container_entity );
   registry.remove<Cmp::Npc::NoPathFinding>( loot_container_entity );
   registry.remove<Cmp::Particle::BlockParticle>( loot_container_entity );
-  if ( reserved_sm )
-  {
-    if ( auto *pos_cmp = registry.try_get<Cmp::Position>( loot_container_entity ) ) reserved_sm->remove( loot_container_entity, *pos_cmp );
-  }
   registry.remove<Cmp::AnimData>( loot_container_entity );
   registry.remove<Cmp::ZOrderValue>( loot_container_entity );
 }

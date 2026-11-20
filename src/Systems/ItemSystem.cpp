@@ -64,7 +64,8 @@ void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev )
     auto loot_sm = m_loot_sm.lock();
     auto reserved_sm = m_reserved_sm.lock();
     const Utils::SpawnGrids grids{
-        .navmesh = npc_navmesh.get(), .ghost_navmesh = ghost_navmesh.get(), .loot_sm = loot_sm.get(), .reserved_sm = reserved_sm.get() };
+        .navmesh = npc_navmesh.get(), .ghost_navmesh = ghost_navmesh.get(), .loot_sm = loot_sm.get(), .reserved_sm = reserved_sm.get(),
+        .item_sm = m_item_sm.lock().get() };
     auto cell = Utils::find_random_cell_near( ev.m_pos, kItemDropSearchRadius, [&]( const sf::Vector2f &cell_pos )
     { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); } );
     if ( not cell )
@@ -104,6 +105,10 @@ void ItemSystem::on_destroy_item_event( Game::Events::DestroyItemEvent ev )
 {
   if ( not reg().valid( ev.m_item_entity ) ) return;
   SPDLOG_DEBUG( "Destroying world item {}", static_cast<uint32_t>( ev.m_item_entity ) );
+  if ( auto item_sm = m_item_sm.lock() )
+  {
+    if ( const auto *pos_cmp = reg().try_get<Cmp::Position>( ev.m_item_entity ) ) item_sm->remove( ev.m_item_entity, *pos_cmp );
+  }
   reg().destroy( ev.m_item_entity );
 }
 
@@ -154,7 +159,7 @@ entt::entity ItemSystem::create_world_item( Cmp::Position pos, const Sys::ItemKe
   auto world_item_entt = reg().create();
   Cmp::Position world_item_pos( pos.position, pos.size );
   reg().emplace_or_replace<Cmp::Position>( world_item_entt, world_item_pos );
-  if ( auto reserved_sm = m_reserved_sm.lock() ) reserved_sm->insert( world_item_entt, world_item_pos );
+  if ( auto item_sm = m_item_sm.lock() ) item_sm->insert( world_item_entt, world_item_pos );
 
   // clang-format off
   reg().emplace_or_replace<Cmp::AnimData>( world_item_entt, Cmp::AnimData::Config{ 
@@ -219,6 +224,7 @@ void ItemSystem::create_explosive( Cmp::Position pos, const Sys::ItemKey &item, 
   reg().emplace_or_replace<Cmp::ZOrderValue>( world_carry_item_entt, pos.position.y - 1.f + zorder );
   reg().emplace_or_replace<Cmp::WorldItem>( world_carry_item_entt, world_item );
   reg().emplace_or_replace<Cmp::Npc::NoPathFinding>( world_carry_item_entt );
+  if ( auto item_sm = m_item_sm.lock() ) item_sm->insert( world_carry_item_entt, pos );
 
   SPDLOG_INFO( "Placed {} at {},{}", item, pos.position.x, pos.position.y );
 }

@@ -528,11 +528,13 @@ void RuinSystem::reset_player_curse()
 void RuinSystem::create_spiders( sf::FloatRect scene_boundary )
 {
   auto reserved_sm = m_reserved_sm.lock();
+  auto item_sm = m_item_sm.lock();
   auto has_collision = [&]( const Cmp::RectBounds &pos )
   {
     if ( Utils::Collision::any_intersects<Cmp::Npc::NoPathFinding>( reg(), pos ) ) { return true; }
     if ( Utils::Collision::any_intersects<Cmp::Ruin::StairsSegment>( reg(), pos ) ) { return true; }
     if ( reserved_sm && not reserved_sm->at( Cmp::Position( pos.position(), pos.size() ) ).empty() ) { return true; }
+    if ( item_sm && not item_sm->at( Cmp::Position( pos.position(), pos.size() ) ).empty() ) { return true; }
 
     // ensure spider is inside scene
     if ( not Cmp::RectBounds::scaled( pos.position(), pos.size(), 1.5f ).findIntersection( scene_boundary ) ) { return true; }

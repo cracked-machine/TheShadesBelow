@@ -30,8 +30,11 @@ public:
   //! @brief Run the cellular-automata birth/survival rule over every non-reserved position for the given
   //!        number of iterations, adding or removing obstacles depending on live-neighbour counts.
   //! @param levelgen_spatialgrid Spatial grid of level-gen obstacles to read/update
-  //! @param reserved_sm Positions excluded from the automata pass (e.g. spawn/reserved areas)
-  void iterate( PathFinding::SpatialHashGrid &levelgen_spatialgrid, PathFinding::SpatialHashGrid &reserved_sm );
+  //! @param reserved_sm Structures excluded from the automata pass (e.g. spawn/reserved areas); read only
+  //! @param claims_sm Placements claimed during level generation (see LevelGenerator::m_claims_sm). Obstacles born or
+  //!        killed by the automata are added to / removed from it.
+  void iterate( PathFinding::SpatialHashGrid &levelgen_spatialgrid, const PathFinding::SpatialHashGrid &reserved_sm,
+                PathFinding::SpatialHashGrid &claims_sm );
 };
 
 } // namespace Game::Sys::ProcGen

@@ -16,8 +16,11 @@
 namespace Game::Sys::ProcGen
 {
 
-void CellAutomataSystem::iterate( PathFinding::SpatialHashGrid &levelgen_spatialgrid, PathFinding::SpatialHashGrid &reserved_sm )
+void CellAutomataSystem::iterate( PathFinding::SpatialHashGrid &levelgen_spatialgrid, const PathFinding::SpatialHashGrid &reserved_sm,
+                                  PathFinding::SpatialHashGrid &claims_sm )
 {
+  const auto is_taken = [&]( const Cmp::Position &pos ) { return not reserved_sm.at( pos ).empty() or not claims_sm.at( pos ).empty(); };
+
   auto iterations = Sys::PersistSystem::get<Cmp::Persist::GraveyardProcGenMaxIterations>( m_reg ).get_value();
   auto birth_threshold = Sys::PersistSystem::get<Cmp::Persist::GraveyardProcGenBirthThreshold>( m_reg ).get_value();
   auto survival_threshold = Sys::PersistSystem::get<Cmp::Persist::GraveyardProcGenSurvivalThreshold>( m_reg ).get_value();
@@ -35,12 +38,11 @@ void CellAutomataSystem::iterate( PathFinding::SpatialHashGrid &levelgen_spatial
       // 3. Otherwise, the cell is dead.
       const bool is_alive = reg().any_of<Cmp::Obstacle>( pos_entt );
 
-      // Positions reserved before this pass started (walls, structures, spawn, etc.) that are not
-      // themselves obstacles are permanently off-limits - skip them entirely. Positions that became
-      // obstacles during this same proc-gen pass are also inserted into reserved_sm (see below), but
-      // must stay eligible for survival/death checks like any other obstacle, so only skip when not
+      // Structures (reserved_sm) and other placements claimed this generation pass that are not
+      // themselves obstacles are off-limits - skip them entirely. Obstacles are claimed too (see below),
+      // but must stay eligible for survival/death checks like any other obstacle, so only skip when not
       // already alive.
-      if ( not is_alive && not reserved_sm.at( pos_cmp ).empty() ) continue;
+      if ( not is_alive and is_taken( pos_cmp ) ) continue;
 
       std::vector<entt::entity> neighbour_list = levelgen_spatialgrid.neighbours( pos_cmp );
       SPDLOG_DEBUG( "#{} at {},{} has {} nieghbours", static_cast<uint32_t>( pos_entt ), pos_cmp.x(), pos_cmp.y(), neighbour_list.size() );
@@ -49,14 +51,10 @@ void CellAutomataSystem::iterate( PathFinding::SpatialHashGrid &levelgen_spatial
 
       if ( should_be_alive )
       {
-        if ( reserved_sm.at( pos_cmp ).empty() )
+        if ( not is_taken( pos_cmp ) )
         {
-          // Bypass add_obstacle to avoid its O(n) reserved-position scan in this hot loop;
-          // reserved_grid.at() above is already the correct O(1) guard.
-          // reg().emplace_or_replace<Cmp::Obstacle>( pos_entt );
-          // reg().emplace_or_replace<Cmp::Npc::NoPathFinding>( pos_entt );
           Factory::Obstacle::add_obstacle( reg(), pos_entt );
-          reserved_sm.insert( pos_entt, pos_cmp );
+          claims_sm.insert( pos_entt, pos_cmp );
         }
       }
       else
@@ -65,7 +63,7 @@ void CellAutomataSystem::iterate( PathFinding::SpatialHashGrid &levelgen_spatial
         if ( not reg().any_of<Cmp::Player::Character>( pos_entt ) )
         {
           Factory::Obstacle::remove_obstacle( reg(), pos_entt );
-          reserved_sm.remove( pos_entt, pos_cmp );
+          claims_sm.remove( pos_entt, pos_cmp );
         }
       }
     }

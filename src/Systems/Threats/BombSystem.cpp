@@ -30,6 +30,7 @@
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
+#include <Events/DestroyitemEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/ExhumeGraveEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
@@ -202,7 +203,7 @@ void BombSystem::update( sf::Time dt )
         // Skip if this carryitem was already armed (already processed or being processed)
         if ( reg().any_of<Cmp::Armed>( item_entt ) )
         {
-          if ( reg().valid( item_entt ) ) { reg().destroy( item_entt ); }
+          get_systems_event_queue().trigger( Events::DestroyItemEvent( item_entt ) );
           return;
         }
 
@@ -211,10 +212,7 @@ void BombSystem::update( sf::Time dt )
         arm_entt( item_entt );
         SPDLOG_INFO( "Chain reaction triggered for bomb entity {} ", static_cast<int>( item_entt ) );
       }
-      else
-      {
-        if ( reg().valid( item_entt ) ) { reg().destroy( item_entt ); }
-      }
+      else { get_systems_event_queue().trigger( Events::DestroyItemEvent( item_entt ) ); }
     } );
 
     // Check player explosion damage
@@ -315,6 +313,7 @@ void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_en
   // The cap's cell is still armed and scorched through its own floor entity.
   auto all_obstacle_view = reg().view<Cmp::Armable, Cmp::Position>( exclude<Cmp::Npc::NPC, Cmp::ObstacleCap> );
   auto reserved_sm = m_reserved_sm.lock();
+  auto hazard_sm = m_hazard_sm.lock();
 
   // cells already showing a marker (e.g. from an overlapping blast), so each cell gets at most one
   std::set<std::pair<int, int>> marked_cells;
@@ -340,7 +339,9 @@ void BombSystem::place_concentric_bomb_pattern( const entt::entity &epicenter_en
     if ( distance_from_center < 1 or distance_from_center > blast_radius ) return;
 
     const auto reserved_entities = reserved_sm ? reserved_sm->at( destructable_pos ) : std::vector<entt::entity>{};
-    if ( not reserved_entities.empty() or reg().all_of<Cmp::Exit>( destructable_entity ) )
+    // structures, hazard cells and the exit only get a marker - they're never armed
+    const bool is_hazard_cell = hazard_sm and not hazard_sm->at( destructable_pos ).empty();
+    if ( not reserved_entities.empty() or is_hazard_cell or reg().all_of<Cmp::Exit>( destructable_entity ) )
     {
       const std::pair<int, int> cell{ grid_position.x, grid_position.y };
       if ( marked_cells.emplace( cell ).second )

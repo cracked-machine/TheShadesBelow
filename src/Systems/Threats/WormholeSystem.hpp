@@ -34,12 +34,18 @@ public:
   //! @param npc_navmesh
   //! @param reserved_sm
   //! @param world_tile_sm world-tile lookup kept in sync when clear_footprint() recreates tiles (see Scene::m_world_tile_sm)
+  //! @param item_sm Ground world items (see Scene::m_item_sm).
+  //! @param hazard_sm Sinkhole/corruption cells (see Scene::m_hazard_sm).
   void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr,
-             const PathFinding::SpatialHashGridSharedPtr &world_tile_sm = nullptr )
+             const PathFinding::SpatialHashGridSharedPtr &world_tile_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &item_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &hazard_sm = nullptr )
   {
     m_npc_navmesh = npc_navmesh;
     m_reserved_sm = reserved_sm;
     m_world_tile_sm = world_tile_sm;
+    m_item_sm = item_sm;
+    m_hazard_sm = hazard_sm;
   }
 
   //! @brief Track actors colliding with the wormhole via Cmp::PendingTeleport, drop the component if
@@ -94,6 +100,12 @@ private:
 
   //! @brief World-tile lookup; destroyed/recreated tiles are removed/re-inserted to keep it in sync.
   PathFinding::SpatialHashGridWeakPtr m_world_tile_sm;
+
+  //! @brief Ground world items (see Scene::m_item_sm).
+  PathFinding::SpatialHashGridWeakPtr m_item_sm;
+
+  //! @brief Sinkhole/corruption cells (see Scene::m_hazard_sm).
+  PathFinding::SpatialHashGridWeakPtr m_hazard_sm;
 };
 
 } // namespace Game::Sys

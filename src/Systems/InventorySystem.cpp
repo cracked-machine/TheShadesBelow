@@ -391,6 +391,7 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
   reg().emplace_or_replace<Cmp::ZOrderValue>( world_item_entt, pos.y - 1.f );
   reg().emplace_or_replace<Cmp::WorldItem>( world_item_entt, *inventory_slot_cmp->m_item );
   reg().emplace_or_replace<Cmp::Npc::NoPathFinding>( world_item_entt );
+  if ( auto item_sm = m_item_sm.lock() ) item_sm->insert( world_item_entt, reg().get<Cmp::Position>( world_item_entt ) );
 
   // try to copy any relevant components over to the new world carryitem entt
   auto *inventory_slot_level_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inventory_slot_entt );
@@ -563,9 +564,9 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
   get_systems_event_queue().trigger( Events::DestroyPlantEvent( world_item_entt ) );
   if ( reg.valid( world_item_entt ) )
   {
-    if ( auto reserved_sm = m_reserved_sm.lock(); reserved_sm )
+    if ( auto item_sm = m_item_sm.lock() )
     {
-      if ( auto *pos_cmp = reg.try_get<Cmp::Position>( world_item_entt ) ) reserved_sm->remove( world_item_entt, *pos_cmp );
+      if ( auto *pos_cmp = reg.try_get<Cmp::Position>( world_item_entt ) ) item_sm->remove( world_item_entt, *pos_cmp );
     }
     reg.destroy( world_item_entt );
   }

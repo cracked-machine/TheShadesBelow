@@ -20,6 +20,7 @@
 #include <Components/Stats/DestroyAction.hpp>
 #include <Components/Stats/SideEffects.hpp>
 #include <Components/UUID.hpp>
+#include <Components/WorldTile.hpp>
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/CreatePlantEvent.hpp>
@@ -112,8 +113,11 @@ void PlantSystem::on_destroy_plant_event( const Events::DestroyPlantEvent &event
     // replanting here silently skips segment creation. Match tiles against the segment's
     // position so reservations held by neighbouring structures are untouched.
     if ( not reserved_sm ) continue;
+    // only this segment and the world tile under it - anything else reserved on the cell belongs to someone else
+    reserved_sm->remove( seg_entt, seg_pos_cmp );
     for ( auto tile_entt : reserved_sm->at( seg_pos_cmp ) )
     {
+      if ( not reg().valid( tile_entt ) or not reg().all_of<Cmp::WorldTile>( tile_entt ) ) continue;
       reserved_sm->remove( tile_entt, seg_pos_cmp );
       // the tile is walkable again for NPCs, unless it blocks in its own right (e.g. an obstacle)
       if ( npc_navmesh and not reg().any_of<Cmp::Npc::NoPathFinding>( tile_entt ) ) { npc_navmesh->insert( tile_entt, seg_pos_cmp ); }
@@ -141,6 +145,11 @@ entt::entity PlantSystem::gen_plant( const Sys::ItemKey &plant_type, const Cmp::
   // just the origin - must be a real, unreserved world tile. Otherwise a plant can overlap a
   // reserved tile it doesn't share an entity with, e.g. the player spawn.
   auto world_tile_sm = m_world_tile_sm.lock();
+  // dropped items and hazard cells aren't structures, but a plant mustn't grow over them either
+  auto item_sm = m_item_sm.lock();
+  auto hazard_sm = m_hazard_sm.lock();
+  const auto occupied_by = [&]( const PathFinding::SpatialHashGridSharedPtr &grid, const Cmp::Position &cell_pos )
+  { return grid and std::ranges::any_of( grid->at( cell_pos ), [&]( entt::entity e ) { return reg().valid( e ); } ); };
   const auto is_world_tile = [&]( const Cmp::Position &cell_pos )
   {
     if ( not world_tile_sm ) return Utils::get_world_pos_entt( reg(), cell_pos ) != entt::null;
@@ -154,7 +163,8 @@ entt::entity PlantSystem::gen_plant( const Sys::ItemKey &plant_type, const Cmp::
     {
       sf::Vector2f pos_offset( static_cast<float>( gx ) * Constants::kGridSizePxF.x, static_cast<float>( gy ) * Constants::kGridSizePxF.y );
       Cmp::Position cell_pos( pos + pos_offset, Constants::kGridSizePxF );
-      if ( not is_world_tile( cell_pos ) or not reserved_sm->at( cell_pos ).empty() )
+      if ( not is_world_tile( cell_pos ) or not reserved_sm->at( cell_pos ).empty() or occupied_by( item_sm, cell_pos ) or
+           occupied_by( hazard_sm, cell_pos ) )
       {
         footprint_clear = false;
         break;
@@ -468,7 +478,7 @@ sf::Vector2f PlantSystem::find_drop_pos( const Cmp::PlantMultiBlock &plant_mb_cm
   auto ghost_navmesh = m_ghost_navmesh.lock();
   auto loot_sm = m_loot_sm.lock();
   auto reserved_sm = m_reserved_sm.lock();
-  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
+  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get(), m_item_sm.lock().get() };
 
   // one ring around the plant footprint, picked at random
   auto cell = Utils::find_random_cell_near( plant_mb_cmp, 1, [&]( const sf::Vector2f &cell_pos )

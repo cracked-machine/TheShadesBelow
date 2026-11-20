@@ -485,6 +485,11 @@ void DebugOverlaySystem::render_ui_entity_inspect()
     {
       text_line( "  Reserved", sf::Color::Red );
     }
+    if ( auto item_sm = m_item_sm.lock(); item_sm and not item_sm->at( pos_cmp ).empty() ) { text_line( "  Item cell", sf::Color::Cyan ); }
+    if ( auto hazard_sm = m_hazard_sm.lock(); hazard_sm and not hazard_sm->at( pos_cmp ).empty() )
+    {
+      text_line( "  Hazard cell", sf::Color::Magenta );
+    }
     if ( reg().all_of<Cmp::Npc::NoPathFinding>( entity ) ) text_line( "  NpcNoPathFinding", sf::Color::Red );
     if ( reg().all_of<Cmp::Player::NoPath>( entity ) ) text_line( " NoPath", sf::Color::Red );
     if ( reg().all_of<Cmp::Player::PendingNoPath>( entity ) ) text_line( " PendingNoPath", sf::Color::Yellow );

@@ -280,7 +280,7 @@ void NpcSystem::on_crow_delivery_event( const Events::CrowDeliveryEvent &event )
   auto ghost_navmesh = m_ghost_navmesh.lock();
   auto loot_sm = m_loot_sm.lock();
   auto reserved_sm = m_reserved_sm.lock();
-  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
+  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get(), m_item_sm.lock().get() };
   const Cmp::Position player_pos = Utils::Player::get_position( reg() );
   auto cell = Utils::find_random_cell_near( player_pos, kCrowDropRadius, [&]( const sf::Vector2f &cell_pos )
   { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); } );
@@ -331,7 +331,7 @@ void NpcSystem::drop_crow_item( Cmp::Npc::Crow &crow_cmp )
   auto ghost_navmesh = m_ghost_navmesh.lock();
   auto loot_sm = m_loot_sm.lock();
   auto reserved_sm = m_reserved_sm.lock();
-  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
+  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get(), m_item_sm.lock().get() };
   const auto is_free = [&]( const sf::Vector2f &cell_pos )
   { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); };
   sf::Vector2f drop_pos = crow_cmp.drop_position;
@@ -346,9 +346,9 @@ void NpcSystem::drop_crow_item( Cmp::Npc::Crow &crow_cmp )
 
 void NpcSystem::lift_world_item( entt::entity item_entt )
 {
-  if ( auto reserved_sm = m_reserved_sm.lock() )
+  if ( auto item_sm = m_item_sm.lock() )
   {
-    if ( const auto *pos_cmp = reg().try_get<Cmp::Position>( item_entt ) ) reserved_sm->remove( item_entt, *pos_cmp );
+    if ( const auto *pos_cmp = reg().try_get<Cmp::Position>( item_entt ) ) item_sm->remove( item_entt, *pos_cmp );
   }
   // keeps every other component (wear level, uuid, dowsing target...) for when it is put back
   reg().remove<Cmp::Position, Cmp::AnimData, Cmp::ZOrderValue>( item_entt );
@@ -361,7 +361,7 @@ void NpcSystem::place_world_item( entt::entity item_entt, sf::Vector2f cell )
   reg().emplace_or_replace<Cmp::AnimData>(
       item_entt, Cmp::AnimData::Config{ .sprite_type = reg().get<Cmp::WorldItem>( item_entt ).sprite_type, .enabled = false } );
   reg().emplace_or_replace<Cmp::ZOrderValue>( item_entt, cell.y - 1.f );
-  if ( auto reserved_sm = m_reserved_sm.lock() ) reserved_sm->insert( item_entt, item_pos );
+  if ( auto item_sm = m_item_sm.lock() ) item_sm->insert( item_entt, item_pos );
 }
 
 sf::Vector2f NpcSystem::npc_sprite_size( const Sys::NpcKey &npc_type )
@@ -378,7 +378,7 @@ std::optional<sf::Vector2f> NpcSystem::find_nearby_spawn_cell( const Cmp::Positi
   auto ghost_navmesh = m_ghost_navmesh.lock();
   auto loot_sm = m_loot_sm.lock();
   auto reserved_sm = m_reserved_sm.lock();
-  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
+  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get(), m_item_sm.lock().get() };
   // the NPC's whole footprint must be free, not just its top-left cell
   return Utils::find_random_cell_near( source, kNpcSpawnSearchRadius, [&]( const sf::Vector2f &cell )
   { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell, npc_size ), grids ); } );
@@ -1095,7 +1095,7 @@ void NpcSystem::drop_burryman_items( entt::entity burryman_entity, const Cmp::Po
   auto ghost_navmesh = m_ghost_navmesh.lock();
   auto loot_sm = m_loot_sm.lock();
   auto reserved_sm = m_reserved_sm.lock();
-  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get() };
+  const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get(), m_item_sm.lock().get() };
 
   // scatter the items: each one gets its own free cell around him
   std::vector<sf::Vector2f> used_cells;

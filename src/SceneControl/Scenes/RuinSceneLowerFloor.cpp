@@ -96,11 +96,12 @@ void RuinSceneLowerFloor::on_init()
 
   // Positions reserved from procgen/algorithmic changes. Must exist before generation starts.
   m_reserved_sm = std::make_shared<PathFinding::SpatialHashGrid>();
-  m_sys.find<SystemStoreType::ItemSystem>().init( m_reserved_sm );
+  m_item_sm = std::make_shared<PathFinding::SpatialHashGrid>();
+  m_sys.find<SystemStoreType::ItemSystem>().init( m_reserved_sm, m_item_sm );
 
   // generate the empty game area
   auto &level_gen = m_sys.find<SystemStoreType::LevelGenerator>();
-  level_gen.init( m_reserved_sm );
+  level_gen.init( m_reserved_sm, m_item_sm );
   level_gen.build_scene_from_data( *m_scene_data );
   level_gen.add_ruin_rune_markers();
   auto max_cobwebs = Sys::PersistSystem::get<Cmp::Persist::RuinMaxCobwebs>( m_reg ).get_value();
@@ -111,9 +112,11 @@ void RuinSceneLowerFloor::on_init()
   const auto &max_iterations = Sys::PersistSystem::get<Cmp::Persist::RuinProcGenMaxIterations>( m_reg );
   auto &dla_sys = m_sys.find<Sys::Store::Type::DiffusionLtdAggrSystem>();
   dla_sys.iterate( sf::FloatRect( { 0.f, 0.f }, map_size_pixel ), sf::Vector2f{ 224.f, 144.f }, max_iterations.get_value(),
-                   level_gen.get_obstacle_sm(), *m_reserved_sm );
+                   level_gen.get_obstacle_sm(), level_gen.get_claims_sm() );
 
   level_gen.decorate_ruin_interior_obstacles();
+  // the ruin's interior obstacles are permanent structures that runtime placement (e.g. spiders) must avoid
+  level_gen.promote_claims_to_reserved();
   m_sys.find<Sys::Store::Type::RuinSystem>().remove_rune_markings_neighbouring_cobwebs( level_gen.get_non_obstacle_sm() );
 
   // add access hitbox just above horizontal centerpoint
@@ -275,11 +278,12 @@ void RuinSceneLowerFloor::do_update( sf::Time dt )
 
 void RuinSceneLowerFloor::reinit_navmesh()
 {
-  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, nullptr, nullptr, m_loot_sm );
-  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_generic_npc_navmesh, nullptr, m_loot_sm );
+  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, nullptr, nullptr, m_loot_sm, m_item_sm );
+  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_item_sm, m_generic_npc_navmesh, nullptr, m_loot_sm );
+  m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm, m_item_sm );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
-  m_sys.find<Sys::Store::Type::DebugOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm );
-  m_sys.find<Sys::Store::Type::RuinSystem>().init( m_generic_npc_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::DebugOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm, m_item_sm, nullptr );
+  m_sys.find<Sys::Store::Type::RuinSystem>().init( m_generic_npc_navmesh, m_reserved_sm, m_item_sm );
 }
 
 entt::registry &RuinSceneLowerFloor::registry() { return m_reg; }

@@ -35,9 +35,9 @@ public:
   ~LevelGenerator() = default;
 
   //! @brief Call this to make sure the level data is reset before regenerating a new scene
-  //! @param reserved_sm Scene-owned grid of positions reserved from procgen/algorithmic changes,
-  //!        populated incrementally as this generation pass places entities.
-  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm );
+  //! @param reserved_sm Scene-owned grid of static structures, populated incrementally as this generation pass places them.
+  //! @param item_sm Scene-owned grid of ground world items (see Scene::m_item_sm); generation never places over an item.
+  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &item_sm = nullptr );
 
   //! @brief Set the scene's world-tile lookup grid (see Scene::m_world_tile_sm). It's built after
   //!        build_scene_from_data(), so it's set separately from init().
@@ -121,15 +121,33 @@ public:
   //! @return PathFinding::SpatialHashGrid&
   PathFinding::SpatialHashGrid &get_reserved_sm();
 
-  //! @brief Post-levelgen Cmp::Obstacle/Cmp::ObstacleCap entities are no longer needed in the reserved spatial map
-  void cleanup_reserved();
+  //! @brief Get the level-generation claims grid (see m_claims_sm).
+  //! @return PathFinding::SpatialHashGrid&
+  PathFinding::SpatialHashGrid &get_claims_sm();
+
+  //! @brief Whether a generation pass must skip this cell: a structure (reserved), a world item, or a placement claimed
+  //!        earlier in this pass.
+  //! @param pos The cell to test.
+  //! @return bool true if the cell is taken.
+  bool is_cell_taken( const Cmp::Position &pos ) const;
+
+  //! @brief Rect variant of is_cell_taken() for multi-cell footprints.
+  //! @param bounds World-space rectangle to test.
+  //! @return bool true if any cell under `bounds` is taken.
+  bool is_area_taken( const sf::FloatRect &bounds ) const;
+
+  //! @brief End of level generation where the claimed obstacles/caps/containers/NPC spawn cells don't need protecting
+  //!        any more (graveyard): drop every claim.
+  void discard_claims();
+
+  //! @brief End of level generation where the claimed obstacles are permanent structures that runtime placement must avoid
+  //!        (ruin lower floor): move every claim into the scene's reserved grid, then drop the claims.
+  void promote_claims_to_reserved();
 
 private:
   //! @brief Roll `init_chance` for `entity`/`pos_cmp` and, if it succeeds, register it as an obstacle in
-  //!        both `m_obstacle_sm` and `reserved_sm`.
-  //! @param pass_navmesh_to_factory Whether Factory::Obstacle::add_obstacle() should itself check `reserved_sm`
-  //!        (graveyard case) or whether the caller has already guaranteed the position is free (ruin case).
-  void try_place_obstacle( entt::entity entity, const Cmp::Position &pos_cmp, float init_chance, bool pass_navmesh_to_factory );
+  //!        both `m_obstacle_sm` and `m_claims_sm`. Callers must already have checked is_cell_taken().
+  void try_place_obstacle( entt::entity entity, const Cmp::Position &pos_cmp, float init_chance );
 
   //! @brief Shared obstacle-decoration pass: sprites the obstacle entity and its paired "cap" entity, tagging
   //!        both with a shared UUID.
@@ -158,6 +176,14 @@ private:
   //! @brief Scene-owned spatial map for reserving positions during procedural generation, shared
   //!        with gameplay Systems for the lifetime of the scene.
   PathFinding::SpatialHashGridSharedPtr m_reserved_sm;
+
+  //! @brief Cells claimed by placements made during this generation pass (obstacles, obstacle caps, loot containers,
+  //!        developer-layer NPC spawn cells), so later passes don't overlap them. Not structures: discard_claims() or
+  //!        promote_claims_to_reserved() ends their life once generation is done.
+  PathFinding::SpatialHashGrid m_claims_sm;
+
+  //! @brief Scene-owned ground world items, so generation passes don't place over them.
+  PathFinding::SpatialHashGridWeakPtr m_item_sm;
 
   //! @brief Scene-owned world-tile lookup, passed to the multiblock factory to avoid full Cmp::Position scans.
   PathFinding::SpatialHashGridWeakPtr m_world_tile_sm;

@@ -38,13 +38,16 @@ public:
   //! @param npc_navmesh used to find a free cell for spawn_nearby items
   //! @param ghost_navmesh used to find a free cell for spawn_nearby items
   //! @param loot_sm used to find a free cell for spawn_nearby items
-  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &npc_navmesh = nullptr,
+  //! @param item_sm Ground world items (see Scene::m_item_sm).
+  void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm,
+             const PathFinding::SpatialHashGridSharedPtr &item_sm = nullptr, const PathFinding::SpatialHashGridSharedPtr &npc_navmesh = nullptr,
              const PathFinding::SpatialHashGridSharedPtr &ghost_navmesh = nullptr, const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr )
   {
     m_reserved_sm = reserved_sm;
     m_npc_navmesh = npc_navmesh;
     m_ghost_navmesh = ghost_navmesh;
     m_loot_sm = loot_sm;
+    m_item_sm = item_sm;
   }
 
   //! @brief Event handler that forwards to create_world_item(). With `m_spawn_nearby` the item drops on a random free
@@ -102,6 +105,9 @@ private:
 
   //! @brief Loot drops (Cmp::Loot)
   PathFinding::SpatialHashGridWeakPtr m_loot_sm;
+
+  //! @brief Ground world items (see Scene::m_item_sm).
+  PathFinding::SpatialHashGridWeakPtr m_item_sm;
 };
 
 } // namespace Game::Sys

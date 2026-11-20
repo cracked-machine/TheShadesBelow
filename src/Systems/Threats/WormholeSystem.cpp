@@ -356,7 +356,12 @@ std::pair<entt::entity, Cmp::Position> WormholeSystem::find_spawn_location( unsi
     // Check collisions with walls, graves, shrines, and positions reserved from algorithmic changes
     using Utils::Collision::any_intersects;
     auto reserved_sm = m_reserved_sm.lock();
-    bool is_valid = not any_intersects<Cmp::Wall>( reg(), wormhole_bounds ) && not any_intersects<Cmp::Grave::Segment>( reg(), wormhole_bounds ) &&
+    // clear_footprint() destroys everything under the wormhole, so its whole footprint must be free of world items (e.g. keys)
+    auto item_sm = m_item_sm.lock();
+    // inset by a pixel: query_rect() includes the next row/column when a rect ends exactly on a cell edge
+    const sf::FloatRect footprint( wormhole_bounds.getBounds().position, wormhole_bounds.getBounds().size - sf::Vector2f( 1.f, 1.f ) );
+    const bool covers_item = item_sm and not item_sm->query_rect( footprint ).empty();
+    bool is_valid = not covers_item && not any_intersects<Cmp::Wall>( reg(), wormhole_bounds ) && not any_intersects<Cmp::Grave::Segment>( reg(), wormhole_bounds ) &&
                     not any_intersects<Cmp::Altar::Segment>( reg(), wormhole_bounds ) &&
                     not any_intersects<Cmp::Crypt::BuildingSegment>( reg(), wormhole_bounds ) &&
                     not any_intersects<Cmp::Grave::ExitSegment>( reg(), wormhole_bounds ) &&

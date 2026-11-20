@@ -130,8 +130,10 @@ struct SpawnGrids
   const PathFinding::SpatialHashGrid *ghost_navmesh = nullptr;
   //! @brief Loot drops (Cmp::Loot). Optional.
   const PathFinding::SpatialHashGrid *loot_sm = nullptr;
-  //! @brief Cells reserved from procgen/algorithmic changes, including dropped world items. Optional.
+  //! @brief Static structures (see Scene::m_reserved_sm). Optional.
   const PathFinding::SpatialHashGrid *reserved_sm = nullptr;
+  //! @brief Ground world items (see Scene::m_item_sm), including ones dropped after the navmesh was built. Optional.
+  const PathFinding::SpatialHashGrid *item_sm = nullptr;
 };
 
 //! @brief Whether something can be spawned/dropped on `area`: every grid cell under it is a walkable, unreserved world

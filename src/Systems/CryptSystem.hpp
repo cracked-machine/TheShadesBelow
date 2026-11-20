@@ -53,13 +53,16 @@ public:
 
   //! @brief init the weak pointer for the spatial grid
   //! @param spatial_grid_ptr
+  //! @param item_sm Ground world items (see Scene::m_item_sm).
   void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &player_navmesh,
-             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr, const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr )
+             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr, const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &item_sm = nullptr )
   {
     m_npc_navmesh = npc_navmesh;
     m_player_navmesh = player_navmesh;
     m_reserved_sm = reserved_sm;
     m_loot_sm = loot_sm;
+    m_item_sm = item_sm;
   }
 
   //! @brief Set the variant that owns the crypt's layout/progression policy. Non-owning; the CryptScene owns it.
@@ -259,6 +262,9 @@ private:
 
   //! @brief Loot drops (Cmp::Loot)
   PathFinding::SpatialHashGridWeakPtr m_loot_sm;
+
+  //! @brief Ground world items (see Scene::m_item_sm).
+  PathFinding::SpatialHashGridWeakPtr m_item_sm;
 };
 
 } // namespace Game::Sys

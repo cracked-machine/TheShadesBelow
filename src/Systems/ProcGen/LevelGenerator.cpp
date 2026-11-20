@@ -127,29 +127,41 @@ PathFinding::SpatialHashGrid &LevelGenerator::get_void_sm() { return *m_void_sm;
 PathFinding::SpatialHashGrid &LevelGenerator::get_non_obstacle_sm() { return *m_non_obstacle_sm; }
 PathFinding::SpatialHashGrid &LevelGenerator::get_reserved_sm() { return *m_reserved_sm; }
 
-void LevelGenerator::cleanup_reserved()
-{
-  // NPCs move away from their spawn cells, so only reserve those for the duration of level generation
-  for ( auto [npc_entt, npc_cmp, npc_footprint_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Npc::Footprint, Cmp::Position>().each() )
-  {
-    for ( const auto &cell_pos : npc_footprint_cmp.world_cells( npc_pos_cmp.position ) )
-    {
-      m_reserved_sm->remove( npc_entt, cell_pos );
-    }
-  }
+PathFinding::SpatialHashGrid &LevelGenerator::get_claims_sm() { return m_claims_sm; }
 
-  for ( auto entt : reg().view<Cmp::Obstacle, Cmp::Position>() )
+bool LevelGenerator::is_cell_taken( const Cmp::Position &pos ) const
+{
+  if ( not m_reserved_sm->at( pos ).empty() or not m_claims_sm.at( pos ).empty() ) return true;
+  const auto item_sm = m_item_sm.lock();
+  return item_sm and not item_sm->at( pos ).empty();
+}
+
+bool LevelGenerator::is_area_taken( const sf::FloatRect &bounds ) const
+{
+  if ( not m_reserved_sm->query_rect( bounds ).empty() or not m_claims_sm.query_rect( bounds ).empty() ) return true;
+  const auto item_sm = m_item_sm.lock();
+  return item_sm and not item_sm->query_rect( bounds ).empty();
+}
+
+void LevelGenerator::discard_claims() { m_claims_sm.clear(); }
+
+void LevelGenerator::promote_claims_to_reserved()
+{
+  // only the obstacles and their caps become structures - NPC spawn claims are temporary wherever they are
+  const auto promote_if_claimed = [this]( entt::entity entt, const Cmp::Position &pos_cmp )
   {
-    m_reserved_sm->remove( entt, reg().get<Cmp::Position>( entt ) );
+    const auto claimed = m_claims_sm.at( pos_cmp );
+    if ( std::ranges::find( claimed, entt ) != claimed.end() ) m_reserved_sm->insert( entt, pos_cmp );
+  };
+  for ( auto [entt, obstacle_cmp, pos_cmp] : reg().view<Cmp::Obstacle, Cmp::Position>().each() )
+  {
+    promote_if_claimed( entt, pos_cmp );
   }
   for ( auto entt : reg().view<Cmp::ObstacleCap, Cmp::Position>() )
   {
-    m_reserved_sm->remove( entt, reg().get<Cmp::Position>( entt ) );
+    promote_if_claimed( entt, reg().get<Cmp::Position>( entt ) );
   }
-  for ( auto entt : reg().view<Cmp::LootContainer, Cmp::Position>() )
-  {
-    m_reserved_sm->remove( entt, reg().get<Cmp::Position>( entt ) );
-  }
+  m_claims_sm.clear();
 }
 
 void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
@@ -306,13 +318,13 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
     // allow "npc." markers in the multiblock layer
     if ( ms_type.contains( "npc." ) )
     {
-      // keep level generation from placing obstacles under the NPC - released again in cleanup_reserved()
+      // keep level generation from placing obstacles under the NPC - claims only last for this generation pass
       auto reserve_npc_cells = [this]( entt::entity new_npc_entt )
       {
         const auto &[npc_footprint_cmp, npc_pos_cmp] = reg().get<Cmp::Npc::Footprint, Cmp::Position>( new_npc_entt );
         for ( const auto &cell_pos : npc_footprint_cmp.world_cells( npc_pos_cmp.position ) )
         {
-          m_reserved_sm->insert( new_npc_entt, cell_pos );
+          m_claims_sm.insert( new_npc_entt, cell_pos );
         }
       };
       get_systems_event_queue().trigger(
@@ -341,11 +353,11 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
       auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
       if ( inventory_type == "item.witchesjar" and ms.type().contains( "witchesjar" ) ) continue;
 
-      // make sure we mark the *world* entt as reserved
+      // only place items on real world positions; ItemSystem indexes the item in the scene's item grid, which
+      // is_cell_taken() checks, so later generation passes won't cover it
       auto world_pos_entt = Utils::get_world_pos_entt( reg(), Cmp::Position( pos, ms.sprite_size() ) );
       if ( world_pos_entt != entt::null )
       {
-        m_reserved_sm->insert( world_pos_entt, Cmp::Position( pos, ms.sprite_size() ) );
         get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( pos, ms.sprite_size() ), Sys::ItemKey( ms_type ) ) );
       }
     }
@@ -357,13 +369,13 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
     // allow "npc." markers in the multiblock layer
     if ( ms_type.contains( "npc." ) )
     {
-      // keep level generation from placing obstacles under the NPC - released again in cleanup_reserved()
+      // keep level generation from placing obstacles under the NPC - claims only last for this generation pass
       auto reserve_npc_cells = [this]( entt::entity new_npc_entt )
       {
         const auto &[npc_footprint_cmp, npc_pos_cmp] = reg().get<Cmp::Npc::Footprint, Cmp::Position>( new_npc_entt );
         for ( const auto &cell_pos : npc_footprint_cmp.world_cells( npc_pos_cmp.position ) )
         {
-          m_reserved_sm->insert( new_npc_entt, cell_pos );
+          m_claims_sm.insert( new_npc_entt, cell_pos );
         }
       };
       get_systems_event_queue().trigger(
@@ -392,11 +404,11 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
       auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
       if ( inventory_type == "item.witchesjar" and ms.type().contains( "witchesjar" ) ) continue;
 
-      // make sure we mark the *world* entt as reserved
+      // only place items on real world positions; ItemSystem indexes the item in the scene's item grid, which
+      // is_cell_taken() checks, so later generation passes won't cover it
       auto world_pos_entt = Utils::get_world_pos_entt( reg(), Cmp::Position( pos, ms.sprite_size() ) );
       if ( world_pos_entt != entt::null )
       {
-        m_reserved_sm->insert( world_pos_entt, Cmp::Position( pos, ms.sprite_size() ) );
         get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( pos, ms.sprite_size() ), Sys::ItemKey( ms_type ) ) );
       }
     }
@@ -404,23 +416,12 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
 #endif // NDEBUG
 }
 
-void LevelGenerator::try_place_obstacle( entt::entity entity, const Cmp::Position &pos_cmp, float init_chance, bool pass_navmesh_to_factory )
+void LevelGenerator::try_place_obstacle( entt::entity entity, const Cmp::Position &pos_cmp, float init_chance )
 {
   if ( Cmp::RandomFloat{ 0.f, 1.f }.gen() >= init_chance ) return;
-
-  bool placed;
-  if ( pass_navmesh_to_factory ) { placed = Factory::Obstacle::add_obstacle( reg(), entity, m_reserved_sm.get() ); }
-  else
-  {
-    Factory::Obstacle::add_obstacle( reg(), entity );
-    placed = true;
-  }
-
-  if ( placed )
-  {
-    m_obstacle_sm->insert( entity, pos_cmp );
-    m_reserved_sm->insert( entity, pos_cmp );
-  }
+  if ( not Factory::Obstacle::add_obstacle( reg(), entity ) ) return;
+  m_obstacle_sm->insert( entity, pos_cmp );
+  m_claims_sm.insert( entity, pos_cmp );
 }
 
 void LevelGenerator::add_graveyard_exterior_obstacles( float init_chance )
@@ -428,17 +429,17 @@ void LevelGenerator::add_graveyard_exterior_obstacles( float init_chance )
   auto position_view = reg().view<Cmp::Position>( entt::exclude<Cmp::Player::Character> );
   for ( auto [entity, pos_cmp] : position_view.each() )
   {
-    if ( not m_reserved_sm->at( pos_cmp ).empty() ) continue;
-    try_place_obstacle( entity, pos_cmp, init_chance, /*pass_navmesh_to_factory=*/true );
+    if ( is_cell_taken( pos_cmp ) ) continue;
+    try_place_obstacle( entity, pos_cmp, init_chance );
   }
 }
 
 void LevelGenerator::decorate_obstacles( const Sprites::SpriteSheet &ss_main, const Sprites::SpriteSheet &ss_cap,
                                          const std::function<std::size_t()> &pick_index, float cap_y_offset, bool moveable )
 {
-  // Note: entities with Cmp::Obstacle here are never themselves reserved (try_place_obstacle only
-  // inserts them into m_reserved_sm to block *other* candidates from being picked, which is exactly
-  // why every one of them must still be decorated here).
+  // Note: entities with Cmp::Obstacle here are only claimed (try_place_obstacle inserts them into
+  // m_claims_sm to block *other* candidates from being picked), never skipped, so every one of them
+  // is decorated here.
   auto obstacle_view = reg().view<Cmp::Obstacle, Cmp::Position>( entt::exclude<Cmp::Player::Character> );
   for ( auto [obstacle_entt, obstacle_cmp, obstacle_pos_cmp] : obstacle_view.each() )
   {
@@ -453,7 +454,7 @@ void LevelGenerator::decorate_obstacles( const Sprites::SpriteSheet &ss_main, co
     Cmp::Position cap_position( { obstacle_pos_cmp.x(), obstacle_pos_cmp.y() - obstacle_pos_cmp.size.y }, obstacle_pos_cmp.size );
     reg().emplace_or_replace<Cmp::Position>( cap_entt, cap_position );
     Factory::Obstacle::decorate_obstacle( reg(), cap_entt, cap_position, ss_cap, idx, obstacle_pos_cmp.y() + cap_y_offset, false );
-    m_reserved_sm->insert( cap_entt, cap_position );
+    m_claims_sm.insert( cap_entt, cap_position );
     reg().emplace_or_replace<Cmp::UUID>( cap_entt, uuid );
     Factory::Obstacle::add_obstacle_cap( reg(), cap_entt );
   }
@@ -473,7 +474,7 @@ void LevelGenerator::add_ruin_interior_obstacles( float init_chance )
   auto position_view = reg().view<Cmp::Position>( entt::exclude<Cmp::Player::Character, Cmp::Exit> );
   for ( auto [entity, pos_cmp] : position_view.each() )
   {
-    if ( m_reserved_sm->at( pos_cmp ).empty() ) { try_place_obstacle( entity, pos_cmp, init_chance, /*pass_navmesh_to_factory=*/false ); }
+    if ( not is_cell_taken( pos_cmp ) ) { try_place_obstacle( entity, pos_cmp, init_chance ); }
   }
 }
 
@@ -499,7 +500,7 @@ void LevelGenerator::add_ruin_rune_markers()
     auto [rnd_entt, rnd_pos] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character>{} );
     // A random pick can land on an already-reserved position - retry with a new pick rather than
     // giving up on this rune marker, otherwise unlucky rolls silently place fewer than intended.
-    if ( not m_reserved_sm->at( rnd_pos ).empty() ) continue;
+    if ( is_cell_taken( rnd_pos ) ) continue;
     m_reserved_sm->insert( rnd_entt, rnd_pos );
     const auto &rune_ss = Sys::SpriteStore::instance().get( "sprite.ruin.runemarking.inactive" );
     auto idx = rune_ss.get_random_texture_index();
@@ -539,7 +540,7 @@ void LevelGenerator::add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scen
     attempts++;
     auto [rnd_entt, rnd_pos] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character>{} );
     if ( rnd_entt == entt::null ) continue;
-    if ( not m_reserved_sm->at( rnd_pos ).empty() ) continue;
+    if ( is_cell_taken( rnd_pos ) ) continue;
 
     if ( has_collision( Cmp::RectBounds::scaled( { rnd_pos.position }, gridsize, 1 ) ) ) continue;
     const auto &cobweb_ss = Sys::SpriteStore::instance().get( "sprite.ruin.cobweb" );
@@ -727,7 +728,7 @@ std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( cons
              not any_intersects<Cmp::Ruin::BuildingSegment>( reg(), new_lo_hitbox ) and
              not any_intersects<Cmp::Crypt::ObjectiveSegment>( reg(), new_lo_hitbox ) and
              not any_intersects<Cmp::Grave::ExitSegment>( reg(), new_lo_hitbox ) and
-             m_reserved_sm->query_rect( new_lo_hitbox.getBounds() ).empty() and not any_intersects<Cmp::SpawnArea>( reg(), new_lo_hitbox ) and
+             not is_area_taken( new_lo_hitbox.getBounds() ) and not any_intersects<Cmp::SpawnArea>( reg(), new_lo_hitbox ) and
              not any_intersects<Cmp::Player::Character>( reg(), new_lo_hitbox );
     };
 
@@ -763,14 +764,14 @@ std::vector<entt::entity> LevelGenerator::gen_loot_containers( sf::Vector2u map_
     auto [random_entity,
           random_origin_position] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 0 );
 
-    if ( m_reserved_sm->at( random_origin_position ).empty() )
+    if ( not is_cell_taken( random_origin_position ) )
     {
       float zorder = Sys::SpriteStore::instance().get( "sprite.graveyard.pots" ).sprite_size().y;
 
       Cmp::RandomInt pot_picker( 0, 2 );
       Factory::Loot::create_loot_container( reg(), random_entity, random_origin_position, "sprite.graveyard.pots", pot_picker.gen(), zorder );
       assigned_entts.push_back( random_entity );
-      m_reserved_sm->insert( random_entity, random_origin_position );
+      m_claims_sm.insert( random_entity, random_origin_position );
     }
   }
   if ( assigned_entts.size() < num_loot_containers )
@@ -805,7 +806,7 @@ std::vector<entt::entity> LevelGenerator::gen_npc_containers( sf::Vector2u map_g
     auto [random_entity,
           random_origin_position] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 0 );
 
-    if ( m_reserved_sm->at( random_origin_position ).empty() )
+    if ( not is_cell_taken( random_origin_position ) )
     {
       // pick a random texture index for the npc container
       const Sys::SpriteKey npc_type = "sprite.graveyard.bones";
@@ -859,8 +860,8 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants()
   {
     if ( quota_reached() ) break;
 
-    // cheap O(1) rejection before doing any plant work - PlantSystem re-checks the whole footprint
-    if ( not m_reserved_sm->at( random_pos ).empty() ) continue;
+    // cheap O(1) rejection before doing any plant work - PlantSystem re-checks the whole footprint against structures
+    if ( is_cell_taken( random_pos ) ) continue;
 
     // Build a list of plant types that are still short of the quota and pick one at random
     plant_types_below_quota.clear();
@@ -871,6 +872,20 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants()
     auto selected_plant_iter = plant_types_below_quota.at( Cmp::RandomInt( 0, static_cast<int>( plant_types_below_quota.size() - 1 ) ).gen() );
 
     const Sys::ItemKey chosen_plant_item_type( selected_plant_iter->first.str().substr( kSpritePrefix.size() ) );
+
+    // PlantSystem only knows about structures, so reject footprints that overlap this pass's claims
+    // (e.g. a loot container under the top cell of a 1x2 plant) here
+    const auto plant_grid_size = Sys::SpriteStore::instance().get( selected_plant_iter->first ).get_grid_size();
+    bool footprint_claimed = false;
+    for ( int gy = 0; gy < static_cast<int>( plant_grid_size.y ) and not footprint_claimed; ++gy )
+    {
+      for ( int gx = 0; gx < static_cast<int>( plant_grid_size.x ) and not footprint_claimed; ++gx )
+      {
+        const sf::Vector2f offset( static_cast<float>( gx ) * Constants::kGridSizePxF.x, static_cast<float>( gy ) * Constants::kGridSizePxF.y );
+        footprint_claimed = is_cell_taken( Cmp::Position( random_pos.position + offset, Constants::kGridSizePxF ) );
+      }
+    }
+    if ( footprint_claimed ) continue;
 
     // Create the plant in the game area and increment the tracker counter
     bool created = false;
@@ -892,7 +907,7 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants()
   return assigned_entts;
 }
 
-void LevelGenerator::init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
+void LevelGenerator::init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &item_sm )
 {
   m_obstacle_sm->clear();
   m_void_sm->clear();
@@ -900,6 +915,8 @@ void LevelGenerator::init( const PathFinding::SpatialHashGridSharedPtr &reserved
 
   m_reserved_sm = reserved_sm;
   m_reserved_sm->clear();
+  m_claims_sm.clear();
+  m_item_sm = item_sm;
   m_world_tile_sm.reset();
 }
 

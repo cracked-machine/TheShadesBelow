@@ -80,10 +80,11 @@ void ShopScene::on_init()
   auto player_start_area = Cmp::RectBounds::scaled( player_start_position, Constants::kGridSizePxF, 1.f, Cmp::RectBounds::ScaleAxis::XY );
   // Positions reserved from procgen/algorithmic changes. Must exist before generation starts.
   m_reserved_sm = std::make_shared<PathFinding::SpatialHashGrid>();
-  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm );
+  m_item_sm = std::make_shared<PathFinding::SpatialHashGrid>();
+  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_item_sm );
 
   auto &random_level_sys = m_sys.find<Sys::Store::Type::LevelGenerator>();
-  random_level_sys.init( m_reserved_sm );
+  random_level_sys.init( m_reserved_sm, m_item_sm );
   random_level_sys.build_scene_from_data( *m_scene_data );
 
   m_floormap.create( random_level_sys.get_void_sm(), m_scene_data );
@@ -212,10 +213,11 @@ void ShopScene::close_overlay()
 
 void ShopScene::reinit_navmesh()
 {
-  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, nullptr, nullptr, m_loot_sm );
-  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_generic_npc_navmesh, nullptr, m_loot_sm );
+  m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, nullptr, nullptr, m_loot_sm, m_item_sm );
+  m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_item_sm, m_generic_npc_navmesh, nullptr, m_loot_sm );
+  m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm, m_item_sm );
   m_sys.find<Sys::Store::Type::PlayerSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_open_navmesh );
-  m_sys.find<Sys::Store::Type::DebugOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm );
+  m_sys.find<Sys::Store::Type::DebugOverlaySystem>().init( m_generic_npc_navmesh, m_reserved_sm, m_item_sm, nullptr );
 }
 
 entt::registry &ShopScene::registry() { return m_reg; }

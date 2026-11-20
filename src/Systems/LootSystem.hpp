@@ -30,15 +30,18 @@ public:
   //! @param ghost_navmesh
   //! @param reserved_sm
   //! @param loot_sm loot drops, kept in sync as loot is dropped and removed
+  //! @param item_sm Ground world items (see Scene::m_item_sm).
   void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &player_navmesh,
              const PathFinding::SpatialHashGridSharedPtr &ghost_navmesh = nullptr,
-             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr, const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr )
+             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr, const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &item_sm = nullptr )
   {
     m_npc_navmesh = npc_navmesh;
     m_player_navmesh = player_navmesh;
     m_ghost_navmesh = ghost_navmesh;
     m_reserved_sm = reserved_sm;
     m_loot_sm = loot_sm;
+    m_item_sm = item_sm;
   }
 
   //! @brief Check for player collision with loot items i.e. player picks up loot
@@ -79,6 +82,9 @@ private:
 
   //! @brief Loot drops (Cmp::Loot)
   PathFinding::SpatialHashGridWeakPtr m_loot_sm;
+
+  //! @brief Ground world items (see Scene::m_item_sm).
+  PathFinding::SpatialHashGridWeakPtr m_item_sm;
 };
 
 } // namespace Game::Sys
