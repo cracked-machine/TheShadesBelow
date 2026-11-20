@@ -66,12 +66,15 @@ public:
   //! @param npc_navmesh NPC pathfinding navmesh; cells are removed from it as the field spreads over open floor.
   //! @param world_tile_sm World-tile lookup (see Scene::m_world_tile_sm) used to find spread candidates around each
   //! hazard cell; null falls back to scanning candidate_view().
+  //! @param loot_sm Loot drops (Cmp::Loot); any on a cell the field takes over are destroyed.
   void init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &npc_navmesh,
-             const PathFinding::SpatialHashGridSharedPtr &world_tile_sm = nullptr )
+             const PathFinding::SpatialHashGridSharedPtr &world_tile_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr )
   {
     m_reserved_sm = reserved_sm;
     m_npc_navmesh = npc_navmesh;
     m_world_tile_sm = world_tile_sm;
+    m_loot_sm = loot_sm;
   }
 
   //! @brief Spread the hazard field, then check for player and NPC collisions with it.
@@ -162,6 +165,9 @@ private:
 
   //! @brief World-tile lookup, so spreading only checks the 3x3 cells around each hazard cell.
   PathFinding::SpatialHashGridWeakPtr m_world_tile_sm;
+
+  //! @brief Loot drops, destroyed when the field spreads onto their cell.
+  PathFinding::SpatialHashGridWeakPtr m_loot_sm;
 
   //! @brief Spatial index of this system's hazard cells (one bucket per grid cell), used to track the
   //! structure of the field as it spreads.

@@ -6,6 +6,7 @@
 #include <Components/Exit.hpp>
 #include <Components/Hazard/CorruptionCell.hpp>
 #include <Components/Hazard/SinkholeCorners.hpp>
+#include <Components/Loot.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/Container.hpp>
 #include <Components/Npc/ElderMother.hpp>
@@ -21,6 +22,7 @@
 #include <Components/Wall.hpp>
 #include <Components/WorldTile.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/DestroyLootEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/ObstacleFactory.hpp>
@@ -252,6 +254,17 @@ void HazardFieldSystem<HazardType>::promote_to_hazard_cell( entt::entity entity,
 
   m_field_sm.insert( entity, pos );
   if constexpr ( std::is_same_v<HazardType, Cmp::SinkholeCell> ) { retile_sinkhole_cell_and_neighbours( entity, pos ); }
+
+  // the field swallows any dropped loot on this cell. at() returns a copy, so LootSystem removing the
+  // loot from loot_sm while handling the event can't disturb this loop.
+  if ( auto loot_sm = m_loot_sm.lock() )
+  {
+    for ( auto loot_entt : loot_sm->at( pos ) )
+    {
+      if ( not reg().valid( loot_entt ) or not reg().template all_of<Cmp::Loot>( loot_entt ) ) continue;
+      get_systems_event_queue().trigger( Events::DestroyLootEvent( loot_entt ) );
+    }
+  }
 }
 
 //! @copydoc HazardFieldSystem::rebuild_field_sm()
