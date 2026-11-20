@@ -37,10 +37,36 @@
     {
       "id": "altar_approach",
       "trigger": "AltarApproachedEvent",
-      "text": "Bring me the blood of the dead.",
+      "text": "Offer me your blood.\nPress <E> to bleed for the altar.",
       "position": "above_source",
       "frequency": "always",
       "duration_s": 5.0
+    },
+    {
+      "id": "first_blood_offering",
+      "trigger": "AltarBloodOfferedEvent",
+      "text": "The altar drank some of your health as blood.\nIf your health runs out, you die. Drink blood vials from graves to heal.",
+      "position": "above_source",
+      "frequency": "once",
+      "duration_s": 6.0
+    },
+    {
+      "id": "first_blood_vial",
+      "trigger": "ItemPickedUpEvent",
+      "condition": { "item": "item.grave.blood*" },
+      "text": "The blood of the dead. Drink it to restore your health,\nthen return to the altar.",
+      "position": { "x": 0.5, "y": 0.85 },
+      "frequency": "once",
+      "duration_s": 6.0
+    },
+    {
+      "id": "blood_full_health",
+      "trigger": "ConsumeRefusedEvent",
+      "condition": { "item": "item.grave.blood*" },
+      "text": "You are already at full health.",
+      "position": { "x": 0.5, "y": 0.85 },
+      "frequency": "always",
+      "duration_s": 3.0
     },
     {
       "id": "blood_trail_in_progress",

@@ -37,8 +37,6 @@ struct ActionReward
   enum class AltarEffect {
     //! @brief No altar effect.
     NONE,
-    //! @brief Add blood to the graveyard altar's quota (see blood); the altar activates once it is filled.
-    BLOOD,
     //! @brief Banish all ghosts (witches jar).
     BANISH,
     //! @brief Gain an extra life, respawning the player when they die (witches jar at the crypt altar).
@@ -58,8 +56,6 @@ struct ActionReward
   int wealth{ 0 };
   //! @brief The altar effect. NONE if unused.
   AltarEffect altar{ AltarEffect::NONE };
-  //! @brief The blood added to a graveyard altar's quota, "blood" in items.json. Non-zero if and only if altar is BLOOD.
-  int blood{ 0 };
   //! @brief The kind of altar this reward is granted at (offering_action only). std::nullopt means any altar.
   std::optional<Altar::Kind> location;
   //! @brief How long (seconds) a timed altar effect lasts, e.g. TOXIC_IMMUNITY (offering_action only). Zero if unused.

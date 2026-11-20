@@ -234,8 +234,6 @@ std::string GrimoireOverlaySystem::reward_display_name( const Cmp::ActionReward 
   if ( reward.wealth > 0 ) { return std::format( "+{} wealth", reward.wealth ); }
   switch ( reward.altar )
   {
-    case Cmp::ActionReward::AltarEffect::BLOOD:
-      return std::format( "+{} altar blood", reward.blood );
     case Cmp::ActionReward::AltarEffect::BANISH:
       return "banishes ghosts";
     case Cmp::ActionReward::AltarEffect::EXTRA_LIFE:

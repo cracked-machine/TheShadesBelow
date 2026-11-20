@@ -112,8 +112,8 @@ private:
   //! @param by what opened the grave
   void spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, entt::entity grave_entity, ExhumedBy exhumedby );
 
-  //! @brief Drop altar blood, see spawn_grave_loot(). Any item whose offering reward adds blood
-  //! (Cmp::WorldItem::get_blood_reward()) can drop. Nothing drops if no graveyard altar can take blood.
+  //! @brief Drop a blood vial, drunk to restore the health the player bleeds into graveyard altars. See
+  //! spawn_grave_loot(). Any blood item that heals (Cmp::WorldItem::get_blood_heal()) can drop.
   //! @param grave_entity the grave the loot came from
   //! @param by what opened the grave
   void spawn_blood_loot( entt::entity grave_entity, ExhumedBy by );

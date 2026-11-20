@@ -2,6 +2,7 @@
 #include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/CarryAction.hpp>
+#include <Components/Stats/ConsumeAction.hpp>
 #include <Components/Stats/DestroyAction.hpp>
 #include <Components/Stats/ForageAction.hpp>
 #include <Components/Stats/OfferingAction.hpp>
@@ -34,11 +35,12 @@ std::optional<ActionReward> WorldItem::get_offering_reward( Altar::Kind location
   return at<OfferingAction>().action.reward( location );
 }
 
-int WorldItem::get_blood_reward() const
+bool WorldItem::is_blood() const { return item_type.str().starts_with( kBloodItemPrefix ); }
+
+int WorldItem::get_blood_heal() const
 {
-  const auto reward = get_offering_reward( Altar::Kind::GRAVEYARD );
-  if ( not reward or reward->altar != ActionReward::AltarEffect::BLOOD ) return 0;
-  return reward->blood;
+  if ( not is_blood() or not has_action<ConsumeAction>() ) return 0;
+  return at<ConsumeAction>().action.health();
 }
 
 std::optional<SpawnNpcEffect> WorldItem::get_offering_npc_spawn_effect() const { return get_spawn_npc_effect<OfferingAction>(); }

@@ -4,7 +4,6 @@
 #include <Components/DroppedBy.hpp>
 #include <Components/FootStepTimer.hpp>
 #include <Components/Inventory/FlashUICadaver.hpp>
-#include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/FlashUIInventory.hpp>
 #include <Components/Inventory/FlashUIWealth.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
@@ -13,7 +12,6 @@
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Obstacle.hpp>
-#include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Wealth.hpp>
@@ -127,9 +125,8 @@ void LootSystem::on_destroy_loot_container_event( const Events::DestroyLootConta
   Factory::Particle::add_pot_ps( reg(), "graveyard.pot.particle.dig", 20, 2.f, 50.f, 10.f, pot_particle_uuid, destroyed_pos_cmp.position,
                                  destroyed_pos_cmp.position.y );
 
-  // drop loot - 50% chance
-  auto loot_choices = std::vector<Sys::SpriteKey>{ "sprite.graveyard.loot.health", "sprite.graveyard.loot.repair" };
-  const auto &loot_ss = Sys::SpriteStore::instance().get_random( loot_choices );
+  // drop repair loot - 50% chance. Pots don't drop health: the player heals by drinking grave blood vials
+  const auto &loot_ss = Sys::SpriteStore::instance().get( "sprite.graveyard.loot.repair" );
   Cmp::RandomInt do_drop( 0, 1 );
   if ( do_drop.gen() == 0 )
   {
@@ -204,18 +201,7 @@ void LootSystem::check_loot_collision( sf::Time dt )
     if ( !reg().valid( effect.player_entity ) ) continue;
 
     // Apply the effect
-    if ( effect.type == "sprite.graveyard.loot.health" )
-    {
-      auto &health_bonus = Sys::PersistSystem::get<Cmp::Persist::HealthBonus>( reg() );
-
-      // signal UI to flash
-      auto flash_entt = reg().create();
-      reg().emplace_or_replace<Cmp::FlashUIHealth>( flash_entt );
-
-      Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ health_bonus.get_value() }, {}, {}, {}, {}, {}, {} } );
-      collect_loot( effect.loot_entity );
-    }
-    else if ( effect.type == "sprite.graveyard.loot.repair" )
+    if ( effect.type == "sprite.graveyard.loot.repair" )
     {
       // update the wear level of the first matching tool in the player inventory, if any: the selected slot first, then
       // the others in slot order

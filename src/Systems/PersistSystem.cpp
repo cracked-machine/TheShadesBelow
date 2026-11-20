@@ -1,5 +1,6 @@
 
 
+#include <Components/Persistent/AltarBloodOfferingHealth.hpp>
 #include <Components/Persistent/AltarBloodQuota.hpp>
 #include <Components/Persistent/AltarOfferingCooldown.hpp>
 #include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
@@ -67,7 +68,6 @@
 #include <Components/Persistent/HazardBalanceOverlap.hpp>
 #include <Components/Persistent/HazardBalanceTimeout.hpp>
 #include <Components/Persistent/HealingBuildingOverride.hpp>
-#include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/HeldItemOffset.hpp>
 #include <Components/Persistent/HeldItemRotation.hpp>
 #include <Components/Persistent/HeldItemRotationSouth.hpp>
@@ -256,7 +256,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::GraveyardProcGenSurvivalThreshold>();
   add_component<Cmp::Persist::HazardBalanceOverlap>();
   add_component<Cmp::Persist::HazardBalanceTimeout>();
-  add_component<Cmp::Persist::HealthBonus>();
   add_component<Cmp::Persist::LavaFireballDamage>();
   add_component<Cmp::Persist::AzazelFireballDamage>();
   add_component<Cmp::Persist::AzazelFireballCooldown>();
@@ -264,6 +263,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::AzazelFireballArc>();
   add_component<Cmp::Persist::AzazelFireballColour>();
   add_component<Cmp::Persist::AltarBloodQuota>();
+  add_component<Cmp::Persist::AltarBloodOfferingHealth>();
   add_component<Cmp::Persist::AltarOfferingCooldown>();
   add_component<Cmp::Persist::AltarSummonOfferingCooldown>();
   add_component<Cmp::Persist::LightningDamage>();

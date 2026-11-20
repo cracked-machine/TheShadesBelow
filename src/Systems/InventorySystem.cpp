@@ -7,6 +7,7 @@
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
+#include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
@@ -23,10 +24,12 @@
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/Stats/ConsumeAction.hpp>
+#include <Components/Stats/PlayerStats.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/AddInventoryEvent.hpp>
+#include <Events/ConsumeRefusedEvent.hpp>
 #include <Events/DestroyPlantEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
@@ -588,6 +591,14 @@ void InventorySystem::try_consume_item()
   if ( item_type.consumable_type() == Cmp::WorldItem::Consumable::NONE ) return;
 
   auto player_entt = Utils::Player::get_entity( reg() );
+  // blood only heals, so it would be wasted at full health
+  if ( item_type.is_blood() and Utils::Player::get_stats( reg() ).is_full_health() and not reg().any_of<Cmp::Player::ConsumeTimer>( player_entt ) )
+  {
+    // signal UI to flash
+    reg().emplace_or_replace<Cmp::FlashUIHealth>( reg().create() );
+    get_systems_event_queue().trigger( Events::ConsumeRefusedEvent( item_type.item_type ) );
+    return;
+  }
   if ( not reg().any_of<Cmp::Player::ConsumeTimer>( player_entt ) ) { reg().emplace_or_replace<Cmp::Player::ConsumeTimer>( player_entt ); }
 }
 

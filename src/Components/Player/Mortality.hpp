@@ -48,6 +48,8 @@ public:
     EXHAUSTED = 16,
     //! @brief When player hallucinogen reaches 100
     INSANITY = 17,
+    //! @brief Killed bleeding their last health into a graveyard altar
+    SACRIFICED = 18,
 
     //! @brief Player is dead. final state. end the game.
     DEAD = 255

@@ -27,7 +27,6 @@ inline Cmp::ActionReward::AltarEffect make_reward_altar( const std::string &alta
 {
   using AltarEffect = Cmp::ActionReward::AltarEffect;
   if ( altar == "None" ) return AltarEffect::NONE;
-  if ( altar == "Blood" ) return AltarEffect::BLOOD;
   if ( altar == "Banish" ) return AltarEffect::BANISH;
   if ( altar == "ExtraLife" ) return AltarEffect::EXTRA_LIFE;
   if ( altar == "CryptKey" ) return AltarEffect::CRYPT_KEY;
@@ -150,7 +149,6 @@ inline Cmp::ActionRewards make_reward( const nlohmann::json &j )
     else if ( rw.contains( "item" ) ) { reward.item = Sys::ItemKey( JsonDeserializer::get_string( rw, "item" ) ); }
     if ( rw.contains( "wealth" ) ) { reward.wealth = JsonDeserializer::get_int( rw, "wealth" ); }
     if ( rw.contains( "altar" ) ) { reward.altar = make_reward_altar( JsonDeserializer::get_string( rw, "altar" ) ); }
-    if ( rw.contains( "blood" ) ) { reward.blood = JsonDeserializer::get_int( rw, "blood" ); }
     if ( rw.contains( "location" ) ) { reward.location = make_reward_location( JsonDeserializer::get_string( rw, "location" ) ); }
     if ( rw.contains( "loot" ) ) { reward.loot = Sys::SpriteKey( JsonDeserializer::get_string( rw, "loot" ) ); }
     if ( rw.contains( "trigger_range" ) ) { reward.trigger_range = JsonDeserializer::get_int( rw, "trigger_range" ); }
@@ -159,10 +157,6 @@ inline Cmp::ActionRewards make_reward( const nlohmann::json &j )
     if ( rw.contains( "target" ) ) { reward.target = make_reward_target( JsonDeserializer::get_string( rw, "target" ) ); }
     if ( rw.contains( "count" ) ) { reward.quantity = JsonDeserializer::get_int( rw, "count" ); }
     if ( reward.count() == 0 ) throw std::runtime_error( "reward must set at least one of item, wealth, altar or loot" );
-    if ( ( reward.altar == Cmp::ActionReward::AltarEffect::BLOOD ) != ( reward.blood > 0 ) or reward.blood < 0 )
-    {
-      throw std::runtime_error( "reward blood (at least 1) is required by, and only allowed with, altar 'Blood'" );
-    }
     if ( ( rw.contains( "target" ) or rw.contains( "count" ) ) and not reward.has_item() )
     {
       throw std::runtime_error( "reward target and count require an item" );

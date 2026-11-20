@@ -6,7 +6,7 @@
 namespace Game::Cmp::Altar
 {
 
-//! @brief The blood offered at a graveyard altar (see "offering_action.reward.blood" in items.json). Once it reaches
+//! @brief The blood offered at a graveyard altar (the player's health, see Cmp::Persist::AltarBloodOfferingHealth). Once it reaches
 //! Cmp::Persist::AltarBloodQuota the altar activates and starts the grave trail (see Sys::AltarSystem).
 class BloodCount
 {

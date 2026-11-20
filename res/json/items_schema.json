@@ -305,13 +305,8 @@
         },
         "altar": {
           "type": "string",
-          "enum": ["None", "Blood", "Banish", "ExtraLife", "CryptKey", "ToxicImmunity"],
-          "description": "The altar effect (offering_action only). Blood: add reward.blood to the graveyard altar's blood quota; the altar activates once the quota is filled (requires blood). Banish: banish all ghosts. ExtraLife: respawn at the crypt start when the player dies (crypt altar only). CryptKey: unlock the crypt key (exit key). ToxicImmunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
-        },
-        "blood": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "The blood added to a graveyard altar's quota (offering_action only, required by and only allowed with altar Blood). The altar activates and starts its grave trail once its blood reaches AltarBloodQuota (persist.json)."
+          "enum": ["None", "Banish", "ExtraLife", "CryptKey", "ToxicImmunity"],
+          "description": "The altar effect (offering_action only). Banish: banish all ghosts. ExtraLife: respawn at the crypt start when the player dies (crypt altar only). CryptKey: unlock the crypt key (exit key). ToxicImmunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
         },
         "location": {
           "type": "string",
@@ -355,12 +350,9 @@
     },
     "offering_reward_entry": {
       "allOf": [{ "$ref": "#/definitions/reward" }],
-      "propertyNames": { "enum": ["item", "wealth", "altar", "blood", "location", "tick", "target", "count"] },
+      "propertyNames": { "enum": ["item", "wealth", "altar", "location", "tick", "target", "count"] },
       "oneOf": [{ "required": ["item"] }, { "required": ["wealth"] }, { "required": ["altar"] }],
-      "dependencies": { "tick": ["altar"], "blood": ["altar"] },
-      "if": { "properties": { "altar": { "const": "Blood" } }, "required": ["altar"] },
-      "then": { "required": ["blood"] },
-      "else": { "not": { "required": ["blood"] } }
+      "dependencies": { "tick": ["altar"] }
     },
     "no_altar_reward": {
       "description": "A single reward object. Altar effects are only applied by offering_action, so any other action may not set reward.altar.",

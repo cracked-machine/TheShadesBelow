@@ -102,7 +102,7 @@ struct ArrowCompass
     m_cached_item_type = item_type;
     m_cached_is_offerable = is_offerable;
 
-    m_cached_is_blood = not item_type.empty() and Sys::ItemStore::instance().get( item_type ).get_blood_reward() > 0;
+    m_cached_is_blood = not item_type.empty() and Sys::ItemStore::instance().get( item_type ).is_blood();
 
     // the crypt key has its own needle; the (offerable) exit key falls through to point at the altar as well as the exit
     if ( item_type.contains( "cryptkey" ) )
@@ -282,7 +282,7 @@ private:
         break;
       }
       case Mode::BLOOD: {
-        // mirrors AltarSystem::offering_blood(): once any altar is activated, no altar accepts blood. An altar activates
+        // mirrors AltarSystem::offering_player_blood(): once any altar is activated, no altar accepts blood. An altar activates
         // the moment its quota fills, so every other graveyard altar is still taking blood.
         needle.target.reset();
         if ( not reg.view<Cmp::Altar::Activated>().empty() ) break;
@@ -339,7 +339,7 @@ private:
 
   Sys::ItemKey m_cached_item_type;
   bool m_cached_is_offerable{ false };
-  //! @brief Whether the cached inventory item is a blood offering
+  //! @brief Whether the cached inventory item is a blood vial, which guides the player back to an altar needing blood
   bool m_cached_is_blood{ false };
   bool m_retarget_pending{ true };
 

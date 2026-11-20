@@ -19,18 +19,22 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/SummonOffering.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
+#include <Components/Persistent/AltarBloodOfferingHealth.hpp>
 #include <Components/Persistent/AltarBloodQuota.hpp>
 #include <Components/Persistent/AltarOfferingCooldown.hpp>
 #include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/KeysCount.hpp>
+#include <Components/Player/Mortality.hpp>
+#include <Components/Player/TookDamage.hpp>
 #include <Components/Player/ToxicImmunity.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/Stats/ActionReward.hpp>
+#include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/OfferingAction.hpp>
 #include <Components/Stats/PlayerStats.hpp>
 #include <Components/Stats/SideEffects.hpp>
@@ -46,12 +50,14 @@
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/AltarActivatedEvent.hpp>
 #include <Events/AltarApproachedEvent.hpp>
+#include <Events/AltarBloodOfferedEvent.hpp>
 #include <Events/BloodRefusedEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/GraveTrailCompleteEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
+#include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/AltarFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
@@ -175,6 +181,12 @@ bool AltarSystem::check_player_altar_offering( entt::entity altar_entity, Cmp::A
   auto *altar_uuid_cmp = reg().try_get<Cmp::UUID>( altar_entity );
   if ( not altar_uuid_cmp ) throw std::runtime_error( "Altar does not have UUID" );
 
+  // an item the altar accepts is offered instead of the player's blood
+  return try_offer_held_item( altar_entity, altar_cmp, *altar_uuid_cmp ) or offering_player_blood( altar_entity, altar_cmp, *altar_uuid_cmp );
+}
+
+bool AltarSystem::try_offer_held_item( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
+{
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_type == "" ) return false;
   const auto &item = Sys::ItemStore::instance().get( inventory_type );
@@ -187,7 +199,7 @@ bool AltarSystem::check_player_altar_offering( entt::entity altar_entity, Cmp::A
 
   // the altar refuses an offering whose NPC it has already summoned up to max_instances, otherwise the item is consumed for nothing
   if ( const auto spawn_npc = item.get_offering_npc_spawn_effect();
-       spawn_npc and spawn_npc->max_instances > 0 and Utils::Npc::count_spawned_by( reg(), *altar_uuid_cmp ) >= spawn_npc->max_instances )
+       spawn_npc and spawn_npc->max_instances > 0 and Utils::Npc::count_spawned_by( reg(), altar_uuid ) >= spawn_npc->max_instances )
   {
     return false;
   }
@@ -197,7 +209,7 @@ bool AltarSystem::check_player_altar_offering( entt::entity altar_entity, Cmp::A
   if ( not reward and not item.get_rewards<Cmp::OfferingAction>().empty() ) return false;
 
   // the altar may refuse the offering (e.g. a relic once the exitkey has dropped), so only consume the item once it has accepted
-  if ( not grant_offering_reward( altar_entity, altar_cmp, *altar_uuid_cmp, reward ) ) return false;
+  if ( not grant_offering_reward( altar_entity, altar_cmp, altar_uuid, reward ) ) return false;
 
   SPDLOG_INFO( "Player made an offering: {}", item.item_type );
   const auto offering_action = Utils::Player::apply_action_from_item_store<Cmp::OfferingAction>( reg(), item.item_type );
@@ -213,7 +225,7 @@ bool AltarSystem::check_player_altar_offering( entt::entity altar_entity, Cmp::A
     std::function<void( entt::entity )> on_created;
     if ( offering_action.side_effects().spawn_npc )
     {
-      on_created = [this, summoner = *altar_uuid_cmp]( entt::entity item_entt )
+      on_created = [this, summoner = altar_uuid]( entt::entity item_entt )
       { reg().emplace_or_replace<Cmp::Npc::SummonOffering>( item_entt, summoner ); };
     }
     offering_for_item( altar_cmp, *reward, on_created );
@@ -243,8 +255,6 @@ bool AltarSystem::grant_offering_reward( entt::entity altar_entity, Cmp::Altar::
   using AltarEffect = Cmp::ActionReward::AltarEffect;
   switch ( reward->altar )
   {
-    case AltarEffect::BLOOD:
-      return offering_blood( altar_entity, altar_cmp, altar_uuid, reward->blood );
     case AltarEffect::BANISH:
       offering_for_banish( altar_cmp );
       return true;
@@ -328,29 +338,51 @@ bool AltarSystem::offering_for_extra_life( entt::entity altar_entity, const Cmp:
   return true;
 }
 
-bool AltarSystem::offering_blood( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid, int blood )
+bool AltarSystem::offering_player_blood( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
 {
   if ( altar_cmp.get_kind() != Cmp::Altar::Kind::GRAVEYARD ) return false;
   auto *blood_cmp = reg().try_get<Cmp::Altar::BloodCount>( altar_entity );
   if ( not blood_cmp ) return false;
+  // the player must face the altar, not just stand near it
+  if ( not Utils::Player::get_projected_position( reg() ).findIntersection( altar_cmp ) ) return false;
+  if ( Utils::Player::get_mortality( reg() ).state != Cmp::Player::Mortality::State::ALIVE ) return false;
 
-  auto [_, item_type, _] = Utils::Player::get_inventory( reg() );
-  if ( item_type.empty() ) return false;
+  const int quota = Sys::PersistSystem::get<Cmp::Persist::AltarBloodQuota>( reg() ).get_value();
+  if ( blood_cmp->is_full( quota ) ) return false;
 
+  const sf::FloatRect altar_bounds( altar_cmp.position, altar_cmp.size );
   // once an altar is activated its grave trail must be completed first, so no altar takes blood until then
   if ( not reg().view<Cmp::Altar::Activated>().empty() )
   {
-    SPDLOG_INFO( "An altar is already activated, refusing {} until its grave trail is complete", item_type );
-    get_systems_event_queue().trigger( Events::BloodRefusedEvent( Sys::ItemKey( item_type ), sf::FloatRect( altar_cmp.position, altar_cmp.size ) ) );
+    SPDLOG_INFO( "An altar is already activated, refusing blood until its grave trail is complete" );
+    get_systems_event_queue().trigger( Events::BloodRefusedEvent{ altar_bounds } );
     return false;
   }
 
-  const int quota = Sys::PersistSystem::get<Cmp::Persist::AltarBloodQuota>( reg() ).get_value();
-  blood_cmp->add( blood, quota );
-  SPDLOG_INFO( "Offered {} for {} blood ({} of {})", item_type, blood, blood_cmp->value(), quota );
-  play_offering_anim( altar_cmp, OfferingAnimType::DEFAULT );
+  // the altar takes the player's health as its blood
+  const int blood = Sys::PersistSystem::get<Cmp::Persist::AltarBloodOfferingHealth>( reg() ).get_value();
+  auto &player_stats = Utils::Player::get_stats( reg() );
+  player_stats.apply( Cmp::BaseAction( Cmp::Stats::Health{ -blood }, {}, {}, {}, {}, {}, {} ) );
+  const auto player_entt = Utils::Player::get_entity( reg() );
+  reg().emplace_or_replace<Cmp::Player::TookDamage>( player_entt );
+  // signal UI to flash
+  reg().emplace_or_replace<Cmp::FlashUIHealth>( reg().create() );
+  m_sound_bank.get_effect( "damage_player" ).play();
 
+  blood_cmp->add( blood, quota );
+  SPDLOG_INFO( "Player bled {} health into altar (health:{}, blood {} of {})", blood, player_stats.health(), blood_cmp->value(), quota );
+  play_offering_anim( altar_cmp, OfferingAnimType::DEFAULT );
+  get_systems_event_queue().trigger( Events::AltarBloodOfferedEvent{ altar_bounds } );
+
+  // the player paid for the blood, so it counts even if it was their last
   if ( blood_cmp->is_full( quota ) ) activate_graveyard_altar( altar_entity, altar_cmp, altar_uuid );
+
+  if ( player_stats.health() <= 0 )
+  {
+    Utils::Player::get_mortality( reg() ).last_damage_cause = Cmp::Player::Mortality::State::SACRIFICED;
+    get_systems_event_queue().trigger(
+        Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::SACRIFICED, Utils::Player::get_position( reg() ) ) );
+  }
   return true;
 }
 

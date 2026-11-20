@@ -49,9 +49,17 @@
     "detail": "Shovel wear: killing skeleton",
     "format": "%.1f"
   },
+  "AltarBloodOfferingHealth": {
+    "type": "int",
+    "value": 10,
+    "min_value": 1,
+    "max_value": 50,
+    "detail": "Health the player bleeds into a graveyard altar per offering (adds the same blood)",
+    "format": "%d"
+  },
   "AltarBloodQuota": {
     "type": "int",
-    "value": 50,
+    "value": 100,
     "min_value": 1,
     "max_value": 500,
     "detail": "Altar Blood Quota",
@@ -616,14 +624,6 @@
     "max_value": 3.0,
     "detail": "How long the player balances on a lethal hazard's edge before falling in",
     "format": "%.2f seconds"
-  },
-  "HealthBonus": {
-    "type": "int",
-    "value": 25,
-    "min_value": 1,
-    "max_value": 50,
-    "detail": "Health Bonus",
-    "format": "%d"
   },
   "HypoxiaHealthDmgPerSec": {
     "type": "int",

@@ -585,20 +585,21 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos,
     // sized per cadaver part, not per altar: each part takes one altar activation and one trail, whichever altar is used.
     // Sized for the longest trail of the run, at the deepest level
     const auto max_level_depth = static_cast<size_t>( std::max( 1, Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value() ) );
-    // the blood drops one altar activation needs on average: a blood grave picks evenly from every blood item (see
-    // GraveSystem::spawn_blood_loot()), so each drop adds the items' mean blood
+    // the blood drops one altar activation needs on average: the altar takes the player's health as blood, and a blood
+    // grave picks evenly from every blood vial (see GraveSystem::spawn_blood_loot()), so each drop gives back the
+    // vials' mean heal in health, which buys as much altar blood
     size_t blood_reward_total = 0;
     size_t blood_item_count = 0;
     for ( const auto &item_key : Sys::ItemStore::instance().get_all() )
     {
-      const int blood = Sys::ItemStore::instance().get( item_key ).get_blood_reward();
+      const int blood = Sys::ItemStore::instance().get( item_key ).get_blood_heal();
       if ( blood <= 0 ) continue;
       blood_reward_total += static_cast<size_t>( blood );
       blood_item_count++;
     }
     if ( blood_item_count == 0 )
     {
-      SPDLOG_WARN( "No item in items.json has an offering_action blood reward: altars cannot be activated" );
+      SPDLOG_WARN( "No blood item in items.json has a consume_action health: grave blood drops cannot be sized" );
       blood_reward_total = 1;
       blood_item_count = 1;
     }

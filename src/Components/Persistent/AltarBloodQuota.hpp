@@ -5,7 +5,7 @@
 namespace Game::Cmp::Persist
 {
 
-//! @brief Blood a graveyard altar must be offered (see "offering_action.reward.blood" in items.json) before it
+//! @brief Blood a graveyard altar must be offered (the player's health, see Cmp::Persist::AltarBloodOfferingHealth) before it
 //! activates, lighting its centre column and starting the grave trail. See Sys::AltarSystem and Cmp::Altar::BloodCount.
 class AltarBloodQuota : public BasePersistent<int>
 {

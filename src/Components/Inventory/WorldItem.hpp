@@ -10,6 +10,7 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <typeindex>
 #include <typeinfo>
 #include <utility>
@@ -161,9 +162,16 @@ public:
   //! @return The reward, or std::nullopt if the item can't be offered at that kind of altar.
   std::optional<ActionReward> get_offering_reward( Altar::Kind location ) const;
 
-  //! @brief The blood this item adds to a graveyard altar's quota ("offering_action.reward.blood" in items.json).
-  //! @return The blood, or 0 if the item is not a blood offering.
-  int get_blood_reward() const;
+  //! @brief Whether this item is a grave blood vial (an item key starting kBloodItemPrefix), drunk to restore the
+  //! health the player bleeds into a graveyard altar. See Sys::AltarSystem.
+  bool is_blood() const;
+
+  //! @brief The health a blood vial restores when drunk ("consume_action.health" in items.json).
+  //! @return The health, or 0 if the item is not a blood vial.
+  int get_blood_heal() const;
+
+  //! @brief Item key prefix shared by every grave blood vial, e.g. "item.grave.blood.small"
+  static constexpr std::string_view kBloodItemPrefix{ "item.grave.blood" };
 
   //! @brief The npc spawn effect for offering this item at the altar ("side_effects.spawn_npc" in items.json).
   //! @return The reward, or std::nullopt if the item can't be offered.

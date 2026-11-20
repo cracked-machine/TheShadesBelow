@@ -1602,7 +1602,8 @@ void PlayerSystem::on_player_mortality_event( Game::Events::PlayerMortalityEvent
       common_death_throes();
       break;
     }
-    case Cmp::Player::Mortality::State::EXHAUSTED: {
+    case Cmp::Player::Mortality::State::EXHAUSTED:
+    case Cmp::Player::Mortality::State::SACRIFICED: {
       m_sound_bank.stop_all();
       const auto &sprite = Sys::SpriteStore::instance().get( "sprite.death.anim.bloodsplat" );
       Factory::Player::create_player_death_anim( reg(), ev.m_death_pos, sprite );

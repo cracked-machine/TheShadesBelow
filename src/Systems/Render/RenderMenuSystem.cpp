@@ -1,5 +1,6 @@
 
 
+#include <Components/Persistent/AltarBloodOfferingHealth.hpp>
 #include <Components/Persistent/AltarBloodQuota.hpp>
 #include <Components/Persistent/AltarOfferingCooldown.hpp>
 #include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
@@ -67,7 +68,6 @@
 #include <Components/Persistent/HazardBalanceOverlap.hpp>
 #include <Components/Persistent/HazardBalanceTimeout.hpp>
 #include <Components/Persistent/HealingBuildingOverride.hpp>
-#include <Components/Persistent/HealthBonus.hpp>
 #include <Components/Persistent/HeldItemOffset.hpp>
 #include <Components/Persistent/HeldItemRotation.hpp>
 #include <Components/Persistent/HeldItemRotationSouth.hpp>
@@ -385,6 +385,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::AzazelFireballArc>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AzazelFireballColour>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AltarBloodQuota>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::AltarBloodOfferingHealth>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AltarOfferingCooldown>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AltarSummonOfferingCooldown>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::EmberDamage>( reg() ).render_widget();
@@ -413,7 +414,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     // Loot Settings
     ImGui::SeparatorText( "Loot Settings" );
 
-    Sys::PersistSystem::get<Cmp::Persist::HealthBonus>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::BombBonus>( reg() ).render_widget();
 
     // NPC Settings

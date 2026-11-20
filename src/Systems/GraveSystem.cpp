@@ -1,9 +1,6 @@
 
 #include <Audio/SoundBank.hpp>
 #include <Components/AbsoluteAlpha.hpp>
-#include <Components/Altar/Activated.hpp>
-#include <Components/Altar/BloodCount.hpp>
-#include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/Exhumed.hpp>
@@ -16,7 +13,6 @@
 #include <Components/Npc/Crow.hpp>
 #include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Particle/GraveHaloParticleSprite.hpp>
-#include <Components/Persistent/AltarBloodQuota.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
 #include <Components/Persistent/GraveTrailNominalHopCount.hpp>
@@ -423,31 +419,15 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
 
 void GraveSystem::spawn_blood_loot( entt::entity grave_entity, ExhumedBy by )
 {
-  // blood is only of use while some graveyard altar can still take it
-  const int quota = Sys::PersistSystem::get<Cmp::Persist::AltarBloodQuota>( reg() ).get_value();
-  bool altar_needs_blood = false;
-  for ( auto [altar_entt, altar_mb, blood_cmp] : reg().view<Cmp::Altar::MultiBlock, Cmp::Altar::BloodCount>().each() )
-  {
-    if ( altar_mb.get_kind() != Cmp::Altar::Kind::GRAVEYARD or reg().all_of<Cmp::Altar::Activated>( altar_entt ) or blood_cmp.is_full( quota ) )
-      continue;
-    altar_needs_blood = true;
-    break;
-  }
-  if ( not altar_needs_blood )
-  {
-    SPDLOG_WARN( "Grave rolled blood but no altar can take it" );
-    return;
-  }
-
-  // any item whose offering adds blood will do, so new blood items join the pool through items.json alone
+  // any blood vial that heals will do, so new blood items join the pool through items.json alone
   std::vector<Sys::ItemKey> loot_pool;
   for ( const auto &item_key : Sys::ItemStore::instance().get_all() )
   {
-    if ( Sys::ItemStore::instance().get( item_key ).get_blood_reward() > 0 ) loot_pool.push_back( item_key );
+    if ( Sys::ItemStore::instance().get( item_key ).get_blood_heal() > 0 ) loot_pool.push_back( item_key );
   }
   if ( loot_pool.empty() )
   {
-    SPDLOG_WARN( "Grave rolled blood but no item in items.json has an offering_action blood reward" );
+    SPDLOG_WARN( "Grave rolled blood but no blood item in items.json has a consume_action health" );
     return;
   }
   spawn_grave_loot( loot_pool, grave_entity, by );

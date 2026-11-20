@@ -49,6 +49,8 @@ public:
   //! @brief Get the player's current health.
   //! @return int Health value, in [0, 100].
   [[nodiscard]] int health() const { return m_health; }
+  //! @brief Whether the player's health is at its maximum (100).
+  [[nodiscard]] bool is_full_health() const { return m_health >= 100; }
   //! @brief Get the player's current fear.
   //! @return int Fear value, in [0, 100].
   [[nodiscard]] int fear() const { return m_fear; }

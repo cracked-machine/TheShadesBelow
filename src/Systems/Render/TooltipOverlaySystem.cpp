@@ -50,6 +50,8 @@ TooltipOverlaySystem::TooltipOverlaySystem( entt::registry &reg, sf::RenderWindo
   std::ignore = get_systems_event_queue().sink<Events::GrimoireDiscoveryEvent>().connect<&TooltipOverlaySystem::on_grimoire_discovery_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::BloodRefusedEvent>().connect<&TooltipOverlaySystem::on_blood_refused_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::AltarApproachedEvent>().connect<&TooltipOverlaySystem::on_altar_approached_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::AltarBloodOfferedEvent>().connect<&TooltipOverlaySystem::on_altar_blood_offered_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::ConsumeRefusedEvent>().connect<&TooltipOverlaySystem::on_consume_refused_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::CryptEntryRefusedEvent>().connect<&TooltipOverlaySystem::on_crypt_entry_refused_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::DismissTooltipEvent>().connect<&TooltipOverlaySystem::on_dismiss_tooltip_event>( this );
   SPDLOG_DEBUG( "TooltipOverlaySystem initialized with {} tooltips", m_definitions.size() );
@@ -161,13 +163,25 @@ void TooltipOverlaySystem::on_grimoire_discovery_event( const Events::GrimoireDi
 void TooltipOverlaySystem::on_blood_refused_event( const Events::BloodRefusedEvent &event )
 {
   if ( not m_enabled ) { return; }
-  m_candidates.push_back( { "BloodRefusedEvent", event.m_item.str(), event.m_altar_bounds } );
+  m_candidates.push_back( { "BloodRefusedEvent", "", event.altar_bounds } );
 }
 
 void TooltipOverlaySystem::on_altar_approached_event( const Events::AltarApproachedEvent &event )
 {
   if ( not m_enabled ) { return; }
   m_candidates.push_back( { "AltarApproachedEvent", "", event.altar_bounds } );
+}
+
+void TooltipOverlaySystem::on_altar_blood_offered_event( const Events::AltarBloodOfferedEvent &event )
+{
+  if ( not m_enabled ) { return; }
+  m_candidates.push_back( { "AltarBloodOfferedEvent", "", event.altar_bounds } );
+}
+
+void TooltipOverlaySystem::on_consume_refused_event( const Events::ConsumeRefusedEvent &event )
+{
+  if ( not m_enabled ) { return; }
+  m_candidates.push_back( { "ConsumeRefusedEvent", event.m_item.str() } );
 }
 
 void TooltipOverlaySystem::on_crypt_entry_refused_event( [[maybe_unused]] const Events::CryptEntryRefusedEvent &event )
