@@ -106,7 +106,6 @@
 #include <Components/Persistent/NpcWatchmanSweepAmplitude.hpp>
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
 #include <Components/Persistent/PaidHealAmount.hpp>
-#include <Components/Persistent/PlantsPerType.hpp>
 #include <Components/Persistent/PlantBurnTime.hpp>
 #include <Components/Persistent/PlantWearPerForage.hpp>
 #include <Components/Persistent/PlayerAnimStrideLength.hpp>
@@ -263,7 +262,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::LightningDamage>();
   add_component<Cmp::Persist::HealingBuildingOverride>();
   add_component<Cmp::Persist::PaidHealAmount>();
-  add_component<Cmp::Persist::PlantsPerType>();
   add_component<Cmp::Persist::MusicVolume>();
   add_component<Cmp::Persist::NpcActivateScale>();
   add_component<Cmp::Persist::NpcCrowFlightSpeed>();

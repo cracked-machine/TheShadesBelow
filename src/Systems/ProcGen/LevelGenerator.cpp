@@ -37,7 +37,6 @@
 #include <Components/Persistent/GraveOddsTorch.hpp>
 #include <Components/Persistent/HealingBuildingOverride.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
-#include <Components/Persistent/PlantsPerType.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/LevelDepth.hpp>
@@ -803,85 +802,108 @@ std::vector<entt::entity> LevelGenerator::gen_npc_containers( sf::Vector2u map_g
   return assigned_entts;
 }
 
-std::vector<entt::entity> LevelGenerator::gen_random_plants()
+std::vector<entt::entity> LevelGenerator::gen_random_plants( const Scene::SceneData &scene_data )
 {
   std::vector<entt::entity> assigned_entts;
 
-  const int plants_per_type = Sys::PersistSystem::get<Cmp::Persist::PlantsPerType>( reg() ).get_value();
-
-  // Find all plant sprites. The map value will track count of each plant type added.
-  std::unordered_map<Sys::SpriteKey, int> plant_tracker;
-  plant_tracker = Sys::SpriteStore::instance().get_pattern( R"(sprite\.item\.plant\..*)" ) |
-                  std::views::transform( []( const auto &type ) { return std::pair{ type, 0 }; } ) |
-                  std::ranges::to<std::unordered_map<Sys::SpriteKey, int>>();
+  // Every plant item with a non-zero items.json "spawn_count_per_quadrant" (a per-quadrant quota), tracking how many of it were
+  // placed in the current quadrant against that quota
+  struct PlantQuota
+  {
+    int placed{ 0 };
+    int quota{ 0 };
+  };
+  std::unordered_map<Sys::ItemKey, PlantQuota> plant_tracker;
+  for ( const auto &item_key : Sys::ItemStore::instance().get_all() )
+  {
+    if ( not item_key.str().starts_with( "item.plant." ) ) continue;
+    const int quota = Sys::ItemStore::instance().get( item_key ).spawn_count_per_quadrant();
+    if ( quota > 0 ) plant_tracker.emplace( item_key, PlantQuota{ .placed = 0, .quota = quota } );
+  }
+  if ( plant_tracker.empty() )
+  {
+    SPDLOG_INFO( "gen_random_plants: every plant has a spawn_count_per_quadrant of 0, no plants generated" );
+    return assigned_entts;
+  }
 
   // helpers
-  const auto below_quota = [&]( const auto &kv ) { return kv.second < plants_per_type; };
+  const auto below_quota = [&]( const auto &kv ) { return kv.second.placed < kv.second.quota; };
   const auto quota_reached = [&] { return std::ranges::none_of( plant_tracker, below_quota ); };
 
-  // Snapshot every candidate position once and visit them in random order, instead of re-scanning the
-  // registry for a random position on every attempt. Each tile is tried at most once.
+  // Snapshot every candidate position once, bucketed by map quadrant, and visit each quadrant's candidates in
+  // random order, instead of re-scanning the registry for a random position on every attempt. Each tile is tried at most once.
+  using Candidate = std::pair<entt::entity, Cmp::Position>;
+  std::array<std::vector<Candidate>, 4> candidates_by_quadrant;
   auto candidate_view = reg().view<Cmp::Position>( entt::exclude<Cmp::Player::Character, Cmp::Obstacle> );
-  std::vector<std::pair<entt::entity, Cmp::Position>> candidates;
   for ( auto [tile_entt, pos_cmp] : candidate_view.each() )
   {
-    candidates.emplace_back( tile_entt, pos_cmp );
+    candidates_by_quadrant.at( scene_data.quadrant_of( pos_cmp.position ) ).emplace_back( tile_entt, pos_cmp );
   }
   Cmp::RandomInt shuffle_rng( 0, 1 );
-  std::ranges::shuffle( candidates, shuffle_rng );
-
-  // PlantSystem re-adds the "sprite." prefix itself (to match the bare "item.plant.*" markers used elsewhere), so strip it back off here.
-  constexpr std::string_view kSpritePrefix = "sprite.";
 
   std::vector<decltype( plant_tracker )::iterator> plant_types_below_quota;
-  for ( const auto &[random_entity, random_pos] : candidates )
+  for ( std::size_t quadrant = 0; quadrant < candidates_by_quadrant.size(); ++quadrant )
   {
-    if ( quota_reached() ) break;
-
-    // cheap O(1) rejection before doing any plant work - PlantSystem re-checks the whole footprint against structures
-    if ( is_cell_taken( random_pos ) ) continue;
-
-    // Build a list of plant types that are still short of the quota and pick one at random
-    plant_types_below_quota.clear();
-    for ( auto it = plant_tracker.begin(); it != plant_tracker.end(); ++it )
+    auto &candidates = candidates_by_quadrant.at( quadrant );
+    std::ranges::shuffle( candidates, shuffle_rng );
+    for ( auto &[_, tracked] : plant_tracker )
     {
-      if ( below_quota( *it ) ) plant_types_below_quota.push_back( it );
+      tracked.placed = 0;
     }
-    auto selected_plant_iter = plant_types_below_quota.at( Cmp::RandomInt( 0, static_cast<int>( plant_types_below_quota.size() - 1 ) ).gen() );
 
-    const Sys::ItemKey chosen_plant_item_type( selected_plant_iter->first.str().substr( kSpritePrefix.size() ) );
-
-    // PlantSystem only knows about structures, so reject footprints that overlap this pass's claims
-    // (e.g. a loot container under the top cell of a 1x2 plant) here
-    const auto plant_grid_size = Sys::SpriteStore::instance().get( selected_plant_iter->first ).get_grid_size();
-    bool footprint_claimed = false;
-    for ( int gy = 0; gy < static_cast<int>( plant_grid_size.y ) and not footprint_claimed; ++gy )
+    for ( const auto &[random_entity, random_pos] : candidates )
     {
-      for ( int gx = 0; gx < static_cast<int>( plant_grid_size.x ) and not footprint_claimed; ++gx )
+      if ( quota_reached() ) break;
+
+      // cheap O(1) rejection before doing any plant work - PlantSystem re-checks the whole footprint against structures
+      if ( is_cell_taken( random_pos ) ) continue;
+
+      // Build a list of plant types that are still short of the quota and pick one at random
+      plant_types_below_quota.clear();
+      for ( auto it = plant_tracker.begin(); it != plant_tracker.end(); ++it )
       {
-        const sf::Vector2f offset( static_cast<float>( gx ) * Constants::kGridSizePxF.x, static_cast<float>( gy ) * Constants::kGridSizePxF.y );
-        footprint_claimed = is_cell_taken( Cmp::Position( random_pos.position + offset, Constants::kGridSizePxF ) );
+        if ( below_quota( *it ) ) plant_types_below_quota.push_back( it );
+      }
+      auto selected_plant_iter = plant_types_below_quota.at( Cmp::RandomInt( 0, static_cast<int>( plant_types_below_quota.size() - 1 ) ).gen() );
+
+      const Sys::ItemKey &chosen_plant_item_type = selected_plant_iter->first;
+
+      // PlantSystem only knows about structures, so reject footprints that overlap this pass's claims
+      // (e.g. a loot container under the top cell of a 1x2 plant) here
+      const auto &plant_sprite_type = Sys::ItemStore::instance().get( chosen_plant_item_type ).sprite_type;
+      const auto plant_grid_size = Sys::SpriteStore::instance().get( plant_sprite_type ).get_grid_size();
+      bool footprint_claimed = false;
+      for ( int gy = 0; gy < static_cast<int>( plant_grid_size.y ) and not footprint_claimed; ++gy )
+      {
+        for ( int gx = 0; gx < static_cast<int>( plant_grid_size.x ) and not footprint_claimed; ++gx )
+        {
+          const sf::Vector2f offset( static_cast<float>( gx ) * Constants::kGridSizePxF.x, static_cast<float>( gy ) * Constants::kGridSizePxF.y );
+          footprint_claimed = is_cell_taken( Cmp::Position( random_pos.position + offset, Constants::kGridSizePxF ) );
+        }
+      }
+      if ( footprint_claimed ) continue;
+
+      // Create the plant in the game area and increment the tracker counter
+      bool created = false;
+      get_systems_event_queue().trigger(
+          Events::CreatePlantEvent( chosen_plant_item_type, random_pos, [&created]( [[maybe_unused]] entt::entity plant_entt ) { created = true; } ) );
+      if ( created )
+      {
+        assigned_entts.push_back( random_entity );
+        ++selected_plant_iter->second.placed;
       }
     }
-    if ( footprint_claimed ) continue;
 
-    // Create the plant in the game area and increment the tracker counter
-    bool created = false;
-    get_systems_event_queue().trigger(
-        Events::CreatePlantEvent( chosen_plant_item_type, random_pos, [&created]( [[maybe_unused]] entt::entity plant_entt ) { created = true; } ) );
-    if ( created )
+    if ( not quota_reached() )
     {
-      assigned_entts.push_back( random_entity );
-      ++selected_plant_iter->second;
+      SPDLOG_WARN( "gen_random_plants: quadrant {} ran out of free positions ({} candidates) before every plant type reached its spawn_count_per_quadrant",
+                   quadrant, candidates.size() );
+    }
+    for ( const auto &[plant_type, tracked] : plant_tracker )
+    {
+      SPDLOG_INFO( "plant_tracker: quadrant {} {} placed {} of {}", quadrant, plant_type, tracked.placed, tracked.quota );
     }
   }
-
-  if ( not quota_reached() )
-  {
-    SPDLOG_WARN( "gen_random_plants: ran out of free positions ({} candidates) before every plant type reached its minimum count", candidates.size() );
-  }
-
-  SPDLOG_INFO( "plant_tracker: {}", plant_tracker );
   return assigned_entts;
 }
 

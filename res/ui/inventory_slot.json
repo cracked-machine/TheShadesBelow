@@ -1,5 +1,5 @@
 { "compressionlevel":-1,
- "height":16,
+ "height":14,
  "infinite":false,
  "layers":[
         {
@@ -8,7 +8,7 @@
          "name":"slot",
          "objects":[
                 {
-                 "height":160,
+                 "height":140,
                  "id":1,
                  "name":"slot_highlight",
                  "opacity":1,
@@ -31,12 +31,12 @@
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
-                 "width":170,
-                 "x":0,
+                 "width":140,
+                 "x":10,
                  "y":0
                 }, 
                 {
-                 "height":90,
+                 "height":60,
                  "id":2,
                  "name":"slot_icon",
                  "opacity":1,
@@ -59,9 +59,9 @@
                  "rotation":0,
                  "type":"ui_icon",
                  "visible":true,
-                 "width":150,
-                 "x":10,
-                 "y":22
+                 "width":80,
+                 "x":40,
+                 "y":40
                 }, 
                 {
                  "height":0,
@@ -84,32 +84,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":85,
-                 "y":118
-                }, 
-                {
-                 "height":0,
-                 "id":4,
-                 "name":"slot_number",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"align",
-                         "type":"string",
-                         "value":"left"
-                        }, 
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":14
-                        }],
-                 "rotation":0,
-                 "type":"ui_label",
-                 "visible":true,
-                 "width":0,
-                 "x":6,
-                 "y":4
+                 "x":80,
+                 "y":10
                 }, 
                 {
                  "height":10,
@@ -119,9 +95,33 @@
                  "rotation":0,
                  "type":"ui_meter",
                  "visible":true,
-                 "width":150,
-                 "x":10,
-                 "y":144
+                 "width":100,
+                 "x":30,
+                 "y":120
+                }, 
+                {
+                 "height":0,
+                 "id":6,
+                 "name":"slot_count",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"align",
+                         "type":"string",
+                         "value":"right"
+                        }, 
+                        {
+                         "name":"font_size",
+                         "type":"int",
+                         "value":20
+                        }],
+                 "rotation":0,
+                 "type":"ui_label",
+                 "visible":true,
+                 "width":0,
+                 "x":120,
+                 "y":90
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -130,7 +130,7 @@
          "y":0
         }],
  "nextlayerid":2,
- "nextobjectid":6,
+ "nextobjectid":7,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",
@@ -139,5 +139,5 @@
  "tilewidth":10,
  "type":"map",
  "version":"1.10",
- "width":17
+ "width":16
 }

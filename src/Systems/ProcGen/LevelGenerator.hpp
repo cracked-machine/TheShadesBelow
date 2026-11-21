@@ -87,9 +87,11 @@ public:
   //! @return std::pair<entt::entity, Cmp::Position>
   std::pair<entt::entity, Cmp::Position> find_spawn_location( const Sprites::SpriteSheet &ms, unsigned long seed );
 
-  //! @brief Generate a number of plant world items in the new game area, via Events::CreatePlantEvent (see PlantSystem).
+  //! @brief Generate plant world items in the new game area, via Events::CreatePlantEvent (see PlantSystem).
+  //!        Each plant's items.json "spawn_count_per_quadrant" is placed in every map quadrant (see SceneData::quadrant_of()).
+  //! @param scene_data Scene data used to split the map into quadrants
   //! @return std::vector<entt::entity>
-  std::vector<entt::entity> gen_random_plants();
+  std::vector<entt::entity> gen_random_plants( const Scene::SceneData &scene_data );
 
   //! @brief Scatter loot containers across the map at random unreserved positions.
   //! @param reg

@@ -634,14 +634,6 @@
     "detail": "Lightning Rod Debris Damage",
     "format": "%d"
   },
-  "PlantsPerType": {
-    "type": "int",
-    "value": 100,
-    "min_value": 0,
-    "max_value": 500,
-    "detail": "Plants generated per plant type",
-    "format": "%d"
-  },
   "HealingBuildingOverride": {
     "type": "int",
     "value": -1,

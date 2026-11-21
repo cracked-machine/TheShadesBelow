@@ -63,6 +63,11 @@
             "bow":     { "type": "integer", "minimum": 0 }
           }
         },
+        "spawn_count_per_quadrant": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Required on plants (item.plant.*), not allowed on other items. Number of this plant generated per map quadrant (so 4x this per level); 0 = never generated."
+        },
         "actions": {
           "type": "array",
           "description": "List of actions available for this item",

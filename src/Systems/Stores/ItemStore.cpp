@@ -120,6 +120,21 @@ void ItemStore::init_store()
                                 m_json_file_path.string() );
     }
     if ( is_plant ) { worlditem.set_damage_from_weapon( Detail::make_weapon_damage( item_value.at( "damage_from_weapon" ) ) ); }
+    // every plant says how many of it the level generator places; nothing else may
+    if ( is_plant != item_value.contains( "spawn_count_per_quadrant" ) )
+    {
+      throw std::runtime_error( "Item '" + item_key + "' spawn_count_per_quadrant is required on plant items and only allowed on them in " +
+                                m_json_file_path.string() );
+    }
+    if ( is_plant )
+    {
+      const int spawn_count = item_value.at( "spawn_count_per_quadrant" ).get<int>();
+      if ( spawn_count < 0 )
+      {
+        throw std::runtime_error( "Item '" + item_key + "' spawn_count_per_quadrant must not be negative in " + m_json_file_path.string() );
+      }
+      worlditem.set_spawn_count_per_quadrant( spawn_count );
+    }
     // an offering reward is exactly one of item, wealth or altar, and each altar location has at most one reward
     const auto offering_rewards = worlditem.get_rewards<Cmp::OfferingAction>();
     for ( auto it = offering_rewards.begin(); it != offering_rewards.end(); ++it )

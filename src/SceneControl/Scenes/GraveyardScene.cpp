@@ -207,7 +207,7 @@ void GraveyardScene::on_init()
   level_gen.gen_graveyard_exterior_multiblocks( crypt_pos, healing_pos, ruin_pos );
   level_gen.gen_loot_containers( map_size_grid );
   level_gen.gen_npc_containers( map_size_grid );
-  level_gen.gen_random_plants();
+  level_gen.gen_random_plants( *m_scene_data );
 
   const auto &init_chance = Sys::PersistSystem::get<Cmp::Persist::GraveyardProcGenInitChance>( m_reg );
   level_gen.add_graveyard_exterior_obstacles( init_chance.get_value() );

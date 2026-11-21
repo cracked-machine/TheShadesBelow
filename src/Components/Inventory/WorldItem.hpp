@@ -208,6 +208,11 @@ public:
   const WeaponDamage &damage_from_weapon() const { return m_damage_from_weapon; }
   void set_damage_from_weapon( const WeaponDamage &damage ) { m_damage_from_weapon = damage; }
 
+  //! @brief Number of this plant the level generator places per map quadrant, see "spawn_count_per_quadrant" in items.json (plants only,
+  //! zero for every other item). Zero means the plant is never generated.
+  int spawn_count_per_quadrant() const { return m_spawn_count_per_quadrant; }
+  void set_spawn_count_per_quadrant( int count ) { m_spawn_count_per_quadrant = count; }
+
   //! @brief Whether the item can be eaten, drunk or neither.
   Consumable consumable_type() const { return m_consumable; }
 
@@ -274,6 +279,9 @@ private:
 
   //! @brief Health points this plant loses to each weapon. Imported from items.json.
   WeaponDamage m_damage_from_weapon;
+
+  //! @brief Number of this plant generated per level. Imported from items.json.
+  int m_spawn_count_per_quadrant{ 0 };
 
   //! @brief Whether the item can be eaten, drunk or neither. Imported from items.json.
   Consumable m_consumable{ Consumable::NONE };
