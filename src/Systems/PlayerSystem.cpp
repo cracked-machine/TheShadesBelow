@@ -1356,7 +1356,12 @@ bool PlayerSystem::is_valid_move( const sf::FloatRect &target_position )
 
   // update_player_position() calls is_valid_move() for both axes every frame, even the axis with
   // zero direction (its target is just the player's current tile), which must never be blocked.
-  if ( target_position.position == Utils::Player::get_position( reg() ).position ) return true;
+  const auto &player_pos_cmp = Utils::Player::get_position( reg() );
+  if ( target_position.position == player_pos_cmp.position ) return true;
+
+  // grass blocks like a wall while Cmp::Persist::GrassSlowFactor is zero (same inset as the obstacle test above)
+  const auto current_bounds = Cmp::RectBounds::scaled( player_pos_cmp.position, player_pos_cmp.size, inset_scale );
+  if ( Utils::is_blocked_by_grass( reg(), current_bounds.getBounds(), search_bounds.getBounds() ) ) return false;
 
   // lethal hazard cells block like a wall; update_player_position() starts the balance window when its
   // real forward move is blocked by one (corner-assist/gap-catch probes must not)

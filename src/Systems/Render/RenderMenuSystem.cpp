@@ -9,6 +9,7 @@
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
 #include <Components/Persistent/MeleeHitCooldown.hpp>
+#include <Components/Persistent/NpcDamageTextOffset.hpp>
 #include <Components/Persistent/ShowDamageText.hpp>
 #include <Components/Persistent/ShowHealthBar.hpp>
 #include <Components/Persistent/AzazelFireballArc.hpp>
@@ -292,6 +293,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::InventorySlotRollover>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ShowHealthBar>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ShowDamageText>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::NpcDamageTextOffset>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MeleeHitCooldown>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::StowedTorchLit>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerMovementSpeed>( reg() ).render_widget();

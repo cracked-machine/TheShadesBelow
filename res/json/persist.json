@@ -294,6 +294,14 @@
     "value": true,
     "detail": "Show floating damage numbers when plants and NPCs are hit"
   },
+  "NpcDamageTextOffset": {
+    "type": "float",
+    "value": 0.0,
+    "min_value": -16.0,
+    "max_value": 16.0,
+    "detail": "Vertical offset of NPC damage numbers from the top of the sprite (px, positive is over the sprite, negative is above)",
+    "format": "%1f"
+  },
   "PlayerRenderOffset": {
     "type": "float",
     "value": -4.0,
@@ -320,10 +328,10 @@
   },
   "GrassSlowFactor": {
     "type": "float",
-    "value": 0.6,
-    "min_value": 0.1,
+    "value": 0,
+    "min_value": 0.0,
     "max_value": 1.0,
-    "detail": "Grass: movement speed multiplier",
+    "detail": "Grass: movement speed multiplier (0: grass blocks the player instead)",
     "format": "%.2f"
   },
   "PlantWearPerForage": {

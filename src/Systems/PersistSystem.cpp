@@ -9,6 +9,7 @@
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
 #include <Components/Persistent/MeleeHitCooldown.hpp>
+#include <Components/Persistent/NpcDamageTextOffset.hpp>
 #include <Components/Persistent/ShowDamageText.hpp>
 #include <Components/Persistent/ShowHealthBar.hpp>
 #include <Components/Persistent/AzazelFireballArc.hpp>
@@ -340,6 +341,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::InventorySlotRollover>();
   add_component<Cmp::Persist::ShowHealthBar>();
   add_component<Cmp::Persist::ShowDamageText>();
+  add_component<Cmp::Persist::NpcDamageTextOffset>();
   add_component<Cmp::Persist::FlyingOscillationAmplitude>();
   add_component<Cmp::Persist::FlyingLiftOffset>();
   add_component<Cmp::Persist::PlayerRenderOffset>();

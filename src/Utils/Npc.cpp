@@ -4,7 +4,6 @@
 #include <Components/Npc/LerpSpeed.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/SpawnedBy.hpp>
-#include <Components/Npc/Spider.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Position.hpp>
 #include <Components/UUID.hpp>
@@ -30,6 +29,40 @@
 
 namespace Game::Utils::Npc
 {
+
+namespace
+{
+
+//! @brief Whether any cell `npc_entity` would stand on at `next_position` is taken by another NPC.
+//! A mid-lerp NPC takes the cells it is heading to, not the ones it is leaving. NPCs whose footprint
+//! doesn't collide never take a cell.
+bool next_cells_occupied( entt::registry &reg, entt::entity npc_entity, const Cmp::Npc::Footprint &footprint, sf::Vector2f next_position )
+{
+  const auto snap = []( const Cmp::Position &cell ) { return Utils::snap_to_grid( cell.position, Utils::Rounding::TOWARDS_ZERO ); };
+
+  for ( auto [other_entt, other_npc_cmp, other_pos_cmp] : reg.view<Cmp::Npc::NPC, Cmp::Position>().each() )
+  {
+    if ( other_entt == npc_entity ) continue;
+
+    const auto *other_footprint = reg.try_get<Cmp::Npc::Footprint>( other_entt );
+    if ( other_footprint and not other_footprint->collides() ) continue;
+
+    const auto *other_lerp_cmp = reg.try_get<Cmp::LerpPosition>( other_entt );
+    const sf::Vector2f other_pos = other_lerp_cmp ? other_lerp_cmp->m_target : other_pos_cmp.position;
+
+    const auto is_other_cell = [&]( const Cmp::Position &cell )
+    {
+      const auto next_cell = snap( cell );
+      if ( not other_footprint ) return snap( Cmp::Position( other_pos, Constants::kGridSizePxF ) ) == next_cell;
+      return std::ranges::any_of( other_footprint->world_cells( other_pos ),
+                                  [&]( const Cmp::Position &other_cell ) { return snap( other_cell ) == next_cell; } );
+    };
+    if ( std::ranges::any_of( footprint.world_cells( next_position ), is_other_cell ) ) return true;
+  }
+  return false;
+}
+
+} // namespace
 
 int count_spawned_by( entt::registry &reg, const Cmp::UUID &source_uuid )
 {
@@ -84,7 +117,7 @@ PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGri
 
   // don't intterupt NPC mid-lerp or it causes indecisive pathfinding
   auto *npc_lerp_pos_cmp = reg.try_get<Cmp::LerpPosition>( npc_entity );
-  if ( npc_lerp_pos_cmp && npc_lerp_pos_cmp->m_lerp_factor < 1.0f ) return PathfindResult::Blocked;
+  if ( npc_lerp_pos_cmp and npc_lerp_pos_cmp->m_lerp_factor < 1.0f ) return PathfindResult::Blocked;
 
   // allow ghosts to sneak through corners
   auto query_compass = PathFinding::QueryCompass::CARDINAL;
@@ -151,23 +184,12 @@ PathfindResult pathfind_toward( entt::registry &reg, PathFinding::SpatialHashGri
   if ( distance_to_target == sf::Vector2f( 0.0f, 0.0f ) ) return PathfindResult::Blocked;
 
   // prevent NPC warping via another NPCs pathfinding
-  const bool too_far = std::abs( distance_to_target.x ) >= Constants::kGridSizePxF.x * 1.5f ||
+  const bool too_far = std::abs( distance_to_target.x ) >= Constants::kGridSizePxF.x * 1.5f or
                        std::abs( distance_to_target.y ) >= Constants::kGridSizePxF.y * 1.5f;
   if ( too_far ) return PathfindResult::Blocked;
 
-  // spiders wait until the next cell is free of other spiders, otherwise they stack into one visual blob
-  if ( reg.all_of<Cmp::Npc::Spider>( npc_entity ) )
-  {
-    const auto next_cell = Utils::snap_to_grid( next_npc_pos.position, Utils::Rounding::TOWARDS_ZERO );
-    for ( auto other_entt : reg.view<Cmp::Npc::Spider, Cmp::Position>() )
-    {
-      if ( other_entt == npc_entity ) continue;
-      // a mid-lerp spider occupies the cell it is heading to, not the one it is leaving
-      auto *other_lerp_cmp = reg.try_get<Cmp::LerpPosition>( other_entt );
-      const auto &other_pos = other_lerp_cmp ? other_lerp_cmp->m_target : reg.get<Cmp::Position>( other_entt ).position;
-      if ( Utils::snap_to_grid( other_pos, Utils::Rounding::TOWARDS_ZERO ) == next_cell ) return PathfindResult::Blocked;
-    }
-  }
+  // NPCs wait until their next cells are free of other NPCs, otherwise they stack into one visual blob
+  if ( next_cells_occupied( reg, npc_entity, footprint, next_position ) ) return PathfindResult::Blocked;
 
   auto norm_direction = Cmp::Direction( distance_to_target.normalized() );
 

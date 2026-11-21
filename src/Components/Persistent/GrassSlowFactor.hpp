@@ -6,6 +6,7 @@ namespace Game::Cmp::Persist
 {
 
 //! @brief Multiplier applied to the movement speed of the player and ground NPCs while they walk through grass.
+//! At 0 grass blocks the player instead (and slows nothing), see Utils::is_blocked_by_grass().
 class GrassSlowFactor : public BasePersistent<float>
 {
 public:

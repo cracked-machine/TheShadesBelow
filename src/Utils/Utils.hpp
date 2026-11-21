@@ -200,8 +200,18 @@ float get_burr_speed_multiplier( entt::registry &reg, entt::entity entt, const C
 //! @brief Movement speed multiplier from walking through grass (Cmp::Plant::Grass) at `pos`.
 //! @param reg reference to the entt registry
 //! @param pos The moving entity's current position. A centred half-size hitbox is used, so neighbouring cells don't count.
-//! @return float Cmp::Persist::GrassSlowFactor if `pos` is in grass, else 1.f. Grass doesn't stack.
+//! @return float Cmp::Persist::GrassSlowFactor if `pos` is in grass, else 1.f. Grass doesn't stack. Also 1.f while
+//! the factor is zero: grass then blocks the player instead of slowing (see is_blocked_by_grass()).
 float get_grass_speed_multiplier( entt::registry &reg, const Cmp::Position &pos );
+
+//! @brief Whether grass (Cmp::Plant::Grass) blocks a move from `from` to `to`. Grass only blocks while
+//! Cmp::Persist::GrassSlowFactor is zero, and only a move into grass that `from` isn't already in, so an
+//! entity caught in grass (e.g. when the setting changes) can still walk out of it.
+//! @param reg reference to the entt registry
+//! @param from The mover's current collision bounds.
+//! @param to The mover's target collision bounds.
+//! @return true if the move is blocked by grass.
+bool is_blocked_by_grass( entt::registry &reg, const sf::FloatRect &from, const sf::FloatRect &to );
 
 //! @brief Get the Grid Position object
 //! @tparam Signedness The signedness of the grid position coordinates (int or unsigned int).

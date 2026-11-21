@@ -29,6 +29,7 @@
 #include <Components/Persistent/StowedTorchLit.hpp>
 #include <Components/Persistent/BradycardiaMovementSpeed.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
+#include <Components/Persistent/NpcDamageTextOffset.hpp>
 #include <Components/Persistent/ShowDamageText.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
 #include <Components/Persistent/TachycardiaMovementSpeed.hpp>
@@ -732,7 +733,9 @@ bool apply_weapon_hit( entt::registry &reg, entt::entity target_entt, const Sys:
     damage_from = npc_cmp->damage_from_weapon;
     damage_to = npc_cmp->damage_to_weapon;
     const auto &pos_cmp = reg.get<Cmp::Position>( target_entt );
-    popup_pos = { pos_cmp.position.x + ( pos_cmp.size.x / 2.f ), pos_cmp.position.y };
+    // positive offset moves the number down over the sprite, negative moves it up above the sprite
+    const float text_offset = Sys::PersistSystem::get<Cmp::Persist::NpcDamageTextOffset>( reg ).get_value();
+    popup_pos = { pos_cmp.position.x + ( pos_cmp.size.x / 2.f ), pos_cmp.position.y + text_offset };
     if ( const auto *render_offset_cmp = reg.try_get<Cmp::AbsoluteRenderOffset>( target_entt ) ) popup_pos += render_offset_cmp->getOffset();
   }
   else { return false; }

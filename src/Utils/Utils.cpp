@@ -294,12 +294,25 @@ float get_burr_speed_multiplier( entt::registry &reg, entt::entity entt, const C
 
 float get_grass_speed_multiplier( entt::registry &reg, const Cmp::Position &pos )
 {
+  const float slow_factor = Sys::PersistSystem::get<Cmp::Persist::GrassSlowFactor>( reg ).get_value();
+  // a zero factor means grass blocks the player (see is_blocked_by_grass), so nothing walking in it is slowed
+  if ( slow_factor <= 0.f ) return 1.f;
   const auto hitbox = Cmp::RectBounds::scaled( pos, 0.5f );
   for ( auto [grass_entt, grass_mb_cmp] : reg.view<Cmp::Plant::Grass, Cmp::PlantMultiBlock>().each() )
   {
-    if ( hitbox.findIntersection( grass_mb_cmp ) ) { return Sys::PersistSystem::get<Cmp::Persist::GrassSlowFactor>( reg ).get_value(); }
+    if ( hitbox.findIntersection( grass_mb_cmp ) ) { return slow_factor; }
   }
   return 1.f;
+}
+
+bool is_blocked_by_grass( entt::registry &reg, const sf::FloatRect &from, const sf::FloatRect &to )
+{
+  if ( Sys::PersistSystem::get<Cmp::Persist::GrassSlowFactor>( reg ).get_value() > 0.f ) return false;
+  for ( auto [grass_entt, grass_mb_cmp] : reg.view<Cmp::Plant::Grass, Cmp::PlantMultiBlock>().each() )
+  {
+    if ( to.findIntersection( grass_mb_cmp ) and not from.findIntersection( grass_mb_cmp ) ) return true;
+  }
+  return false;
 }
 
 bool is_current_scene( entt::registry &reg, Cmp::SceneSettings::SceneId scene_id )
