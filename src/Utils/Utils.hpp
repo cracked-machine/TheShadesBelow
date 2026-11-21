@@ -197,6 +197,12 @@ bool is_current_scene( entt::registry &reg, Cmp::SceneSettings::SceneId scene_id
 //! @return float Compounded multiplier in (0, 1], see Cmp::Persist::BurrSlowFactor. 1.f if there are no burrs.
 float get_burr_speed_multiplier( entt::registry &reg, entt::entity entt, const Cmp::Position &pos );
 
+//! @brief Movement speed multiplier from walking through grass (Cmp::Plant::Grass) at `pos`.
+//! @param reg reference to the entt registry
+//! @param pos The moving entity's current position. A centred half-size hitbox is used, so neighbouring cells don't count.
+//! @return float Cmp::Persist::GrassSlowFactor if `pos` is in grass, else 1.f. Grass doesn't stack.
+float get_grass_speed_multiplier( entt::registry &reg, const Cmp::Position &pos );
+
 //! @brief Get the Grid Position object
 //! @tparam Signedness The signedness of the grid position coordinates (int or unsigned int).
 //! @param registry reference to the entt registry

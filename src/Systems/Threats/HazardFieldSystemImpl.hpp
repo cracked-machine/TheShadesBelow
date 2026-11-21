@@ -29,6 +29,7 @@
 #include <Events/DestroyitemEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/ObstacleFactory.hpp>
+#include <Factory/PlantFactory.hpp>
 #include <SFML/System/Time.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
@@ -241,6 +242,8 @@ void HazardFieldSystem<HazardType>::promote_to_hazard_cell( entt::entity entity,
                                                             const PathFinding::SpatialHashGridSharedPtr &reserved_sm )
 {
   Factory::Obstacle::remove_obstacle( reg(), entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
+  // grass doesn't reserve its cell, so a hazard can seed or spread onto it: the hazard replaces it
+  Factory::Plant::destroy_grass_in( reg(), pos );
   // index the hazard cell; BombSystem reads this to only mark (not arm) hazard cells
   if ( auto hazard_sm = m_hazard_sm.lock() ) { hazard_sm->insert( entity, pos ); }
   // open floor is in the NPC navmesh; drop the whole bucket like Cmp::Npc::NoPathFinding does at navmesh build time

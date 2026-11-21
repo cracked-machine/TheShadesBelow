@@ -48,6 +48,8 @@
 #include <Components/Persistent/FuseDelay.hpp>
 #include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveClusterExternalPadding.hpp>
+#include <Components/Persistent/GrassSlowFactor.hpp>
+#include <Components/Persistent/GrassSpawnChance.hpp>
 #include <Components/Persistent/GraveClusterGridSize.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveOddsBlood.hpp>
@@ -328,6 +330,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::ToxicImmunityMeterShimmer>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::StatChangeDisplayDuration>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlantBurnTime>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::GrassSlowFactor>( reg() ).render_widget();
 
     ImGui::SeparatorText( "Weapon Wear Settings" );
 
@@ -482,6 +485,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
       render_vslider_row( odds_settings );
     }
     Sys::PersistSystem::get<Cmp::Persist::GraveClusterGridSize>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::GrassSpawnChance>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveClusterExternalPadding>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ExitKeyRequirement>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PaidHealAmount>( reg() ).render_widget();

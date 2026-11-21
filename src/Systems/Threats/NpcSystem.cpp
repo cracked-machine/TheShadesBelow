@@ -775,7 +775,8 @@ void NpcSystem::update_animation()
       else if ( npc_dir_cmp.y < 0 ) { anim_cmp.m_sprite_type = "sprite.player.walk.north"; }
       else if ( npc_dir_cmp.y > 0 ) { anim_cmp.m_sprite_type = "sprite.player.walk.south"; }
     }
-    else if ( anim_cmp.m_sprite_type.contains( "sprite.eldermother" ) )
+    // single-direction sprites drawn facing east: mirror them when heading west, keep the last facing when moving vertically
+    else if ( anim_cmp.m_sprite_type.contains( "sprite.eldermother" ) or anim_cmp.m_sprite_type == "sprite.tick" )
     {
       if ( npc_dir_cmp.x > 0 ) { anim_cmp.m_flip_x = false; }
       else if ( npc_dir_cmp.x < 0 ) { anim_cmp.m_flip_x = true; }
@@ -1288,7 +1289,10 @@ void NpcSystem::update_movement_for( PathFinding::SpatialHashGrid &navmesh, entt
 
   // re-evaluated every frame so the NPC speeds back up mid-step as burrs expire
   const float burr_multiplier = Utils::get_burr_speed_multiplier( reg(), npc_entity, *pos_cmp );
-  lerp_pos_cmp->m_lerp_factor += lerp_pos_cmp->m_lerp_speed * burr_multiplier * dt.asSeconds();
+  // airborne NPCs fly over the grass
+  const bool airborne = reg().any_of<Cmp::Npc::Ghost, Cmp::Npc::Wisp, Cmp::Npc::Crow>( npc_entity );
+  const float grass_multiplier = airborne ? 1.f : Utils::get_grass_speed_multiplier( reg(), *pos_cmp );
+  lerp_pos_cmp->m_lerp_factor += lerp_pos_cmp->m_lerp_speed * burr_multiplier * grass_multiplier * dt.asSeconds();
 
   // lerp has completed
   if ( lerp_pos_cmp->m_lerp_factor >= 1.0f )

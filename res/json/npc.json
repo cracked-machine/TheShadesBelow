@@ -170,6 +170,20 @@
       { "collision_action":   { "health": -4, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "venom", "toxicity": 10 }, "tick": 0 }}
     ]
   },
+  "npc.tick": {
+    "sprites": [ "sprite.tick"],
+    "lerpspeed": 1.5,
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 1, "bow": 0 },
+    "actions": [
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
+                                "sfx": { "loop": "tick_loop", "final": "tick_final" } }},
+      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "proximity_action":   { "health": 0, "fear": 1, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 5 }},
+      { "projectile_action":  { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "collision_action":   { "health": -4, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+    ]
+  },
   "npc.wisp": {
     "sprites": [ "sprite.wisp.east",  "sprite.wisp.west"],
     "lerpspeed": 1.5,

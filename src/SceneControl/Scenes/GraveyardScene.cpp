@@ -214,6 +214,8 @@ void GraveyardScene::on_init()
   cellauto_parser.iterate( level_gen.get_obstacle_sm(), level_gen.get_reserved_sm(), level_gen.get_claims_sm() );
 
   level_gen.decorate_graveyard_exterior_obstacles();
+  // grass fills whatever ground is still free, so it goes last - before the claims protecting containers and obstacles are dropped
+  level_gen.gen_grass( *m_scene_data );
   // obstacles, caps, loot containers and NPC spawn cells only needed protecting while the level was generated
   level_gen.discard_claims();
 

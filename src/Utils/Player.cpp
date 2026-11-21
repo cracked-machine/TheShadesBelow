@@ -262,8 +262,12 @@ float get_speed_penalty( entt::registry &reg )
 {
   auto *penalty_cmp = reg.try_get<Cmp::Player::SpeedPenalty>( get_entity( reg ) );
   float penalty = penalty_cmp ? penalty_cmp->m_penalty : 1.f;
-  // a flying player passes over burrs on the ground
-  if ( not is_flying( reg ) ) penalty *= Utils::get_burr_speed_multiplier( reg, get_entity( reg ), get_position( reg ) );
+  // a flying player passes over burrs and grass on the ground
+  if ( not is_flying( reg ) )
+  {
+    penalty *= Utils::get_burr_speed_multiplier( reg, get_entity( reg ), get_position( reg ) );
+    penalty *= Utils::get_grass_speed_multiplier( reg, get_position( reg ) );
+  }
   return penalty;
 }
 

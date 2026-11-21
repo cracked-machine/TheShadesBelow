@@ -103,6 +103,12 @@ public:
   //! @return std::vector<entt::entity>
   std::vector<entt::entity> gen_random_plants( const Scene::SceneData &scene_data );
 
+  //! @brief Grow grass (Cmp::Plant::kGrassItem, via Events::CreatePlantEvent) on the free open-ground cells of every map quadrant,
+  //!        each with a Cmp::Persist::GrassSpawnChance percent chance. Call after the obstacles are decorated and before
+  //!        discard_claims(), so it only fills what graves, plants, containers and obstacles left free.
+  //! @param scene_data Scene data used to find the open levelgen tiles and split the map into quadrants
+  void gen_grass( const Scene::SceneData &scene_data );
+
   //! @brief Scatter loot containers across the map at random unreserved positions.
   //! @param reg
   //! @param map_grid_size Map size in grid cells; determines how many containers to place.

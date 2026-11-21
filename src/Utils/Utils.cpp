@@ -6,7 +6,10 @@
 #include <Components/LerpPosition.hpp>
 #include <Components/Loot.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Persistent/BurrSlowFactor.hpp>
+#include <Components/Persistent/GrassSlowFactor.hpp>
+#include <Components/Plant/Grass.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
 #include <Components/Player/RuinLocation.hpp>
@@ -287,6 +290,16 @@ float get_burr_speed_multiplier( entt::registry &reg, entt::entity entt, const C
     }
   }
   return multiplier;
+}
+
+float get_grass_speed_multiplier( entt::registry &reg, const Cmp::Position &pos )
+{
+  const auto hitbox = Cmp::RectBounds::scaled( pos, 0.5f );
+  for ( auto [grass_entt, grass_mb_cmp] : reg.view<Cmp::Plant::Grass, Cmp::PlantMultiBlock>().each() )
+  {
+    if ( hitbox.findIntersection( grass_mb_cmp ) ) { return Sys::PersistSystem::get<Cmp::Persist::GrassSlowFactor>( reg ).get_value(); }
+  }
+  return 1.f;
 }
 
 bool is_current_scene( entt::registry &reg, Cmp::SceneSettings::SceneId scene_id )

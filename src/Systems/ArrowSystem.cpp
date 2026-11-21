@@ -10,6 +10,7 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
 #include <Components/Random.hpp>
+#include <Components/Stats/DestroyAction.hpp>
 #include <Components/Weapons/Arrow.hpp>
 #include <Components/Weapons/InFlight.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
@@ -237,10 +238,16 @@ void ArrowSystem::check_npc_arrow_collision()
       arrow_cmp.m_destination = arrow_pos_cmp.getCenter();
       m_sound_bank.get_effect( std::string( "arrow_hit" + std::to_string( Cmp::RandomInt( 1, 4 ).gen() ) ) ).play();
 
-      // the death sfx is the NPC's destroy_action sfx (see npc.json), played by the DestroyNpcEvent handler
+      // intermediate hits play the destroy_action "loop" sfx (see npc.json), the killing hit its "final" sfx, played by
+      // the DestroyNpcEvent handler
       if ( Utils::Player::apply_weapon_hit( reg(), npc_entt, "item.longbow" ) )
       {
         get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, std::nullopt, std::nullopt, Events::DestroyNpcEvent::Cause::ARROW ) );
+      }
+      else
+      {
+        const auto &destroy_sfx = npc_cmp.at<Cmp::DestroyAction>().action.sfx();
+        if ( not destroy_sfx.loop.empty() ) { m_sound_bank.get_effect( destroy_sfx.loop ).play(); }
       }
     }
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::Container, Cmp::Position>().each() )

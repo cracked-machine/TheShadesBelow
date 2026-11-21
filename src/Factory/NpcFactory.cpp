@@ -25,6 +25,7 @@
 #include <Components/Npc/ShockwaveTimer.hpp>
 #include <Components/Npc/Skeleton.hpp>
 #include <Components/Npc/Spider.hpp>
+#include <Components/Npc/Tick.hpp>
 #include <Components/Npc/Watchman.hpp>
 #include <Components/Npc/WatchmanSearchlight.hpp>
 #include <Components/Npc/Wisp.hpp>
@@ -186,6 +187,12 @@ entt::entity create_npc( entt::registry &reg, Cmp::Position pos_cmp, const Sys::
   else if ( npc_type == "npc.spider" )
   {
     reg.emplace_or_replace<Cmp::Npc::Spider>( new_pos_entity );
+    reg.emplace_or_replace<Cmp::Npc::LerpSpeed>( new_pos_entity, npc_cmp.m_lerp_speed );
+    reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 1, 1 } );
+  }
+  else if ( npc_type == "npc.tick" )
+  {
+    reg.emplace_or_replace<Cmp::Npc::Tick>( new_pos_entity );
     reg.emplace_or_replace<Cmp::Npc::LerpSpeed>( new_pos_entity, npc_cmp.m_lerp_speed );
     reg.emplace_or_replace<Cmp::Direction>( new_pos_entity, sf::Vector2f{ 1, 1 } );
   }

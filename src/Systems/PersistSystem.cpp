@@ -48,6 +48,8 @@
 #include <Components/Persistent/FuseDelay.hpp>
 #include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/GraveClusterExternalPadding.hpp>
+#include <Components/Persistent/GrassSlowFactor.hpp>
+#include <Components/Persistent/GrassSpawnChance.hpp>
 #include <Components/Persistent/GraveClusterGridSize.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveOddsBlood.hpp>
@@ -345,6 +347,8 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::FlyingLandingOverlap>();
   add_component<Cmp::Persist::WormholeAbortThreshold>();
   add_component<Cmp::Persist::PlantBurnTime>();
+  add_component<Cmp::Persist::GrassSlowFactor>();
+  add_component<Cmp::Persist::GrassSpawnChance>();
   add_component<Cmp::Persist::PlantWearPerForage>();
   add_component<Cmp::Persist::GlovesWearPerForage>();
   add_component<Cmp::Persist::ShovelGraveDigWear>();

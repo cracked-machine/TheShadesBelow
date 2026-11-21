@@ -690,6 +690,20 @@
         }
       }
     },
+    "sprite.graveyard.grass": {
+      "spritesheet": {
+        "displayname": "sprite.graveyard.grass",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [0, 1],
+        "walking_collision_mask": [false],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
     "sprite.graveyard.building.healingspring": {
       "spritesheet": {
         "displayname": "sprite.graveyard.building.healingspring",
@@ -2074,6 +2088,7 @@
         }
       }
     },
+
     "sprite.item.talisman": {
       "spritesheet": {
         "displayname": "Talisman",
@@ -3030,6 +3045,20 @@
       "spritesheet": {
         "displayname": "Spider",
         "texture_path": "res/textures/npcspider.png",
+        "sprite_indices": [0, 1, 2, 3],
+        "walking_collision_mask": [true],
+        "indices_per_sequence": 4,
+        "framerate": 3,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.tick": {
+      "spritesheet": {
+        "displayname": "Tick",
+        "texture_path": "res/textures/npctick.png",
         "sprite_indices": [0, 1, 2, 3],
         "walking_collision_mask": [true],
         "indices_per_sequence": 4,

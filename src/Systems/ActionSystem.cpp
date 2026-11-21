@@ -29,6 +29,7 @@
 #include <Components/Random.hpp>
 #include <Components/SelectedPosition.hpp>
 #include <Components/Stats/CarryAction.hpp>
+#include <Components/Stats/DestroyAction.hpp>
 #include <Components/UUID.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
@@ -488,7 +489,6 @@ void ActionSystem::check_player_melee_npc_kill()
       m_melee_hit_clock.restart();
       const bool killed = Utils::Player::apply_weapon_hit( reg(), npc_entity, "item.shovel" );
 
-      // the final smash sound is the NPC's destroy_action sfx (see npc.json), played by the DestroyNpcEvent handler
       m_sound_bank.get_effect( "axe_whip" ).play();
       if ( is_skeleton )
       {
@@ -503,7 +503,13 @@ void ActionSystem::check_player_melee_npc_kill()
                                               npc_pos_cmp.getCenter(), npc_pos_cmp.position.y );
       }
 
-      if ( not killed ) return;
+      // intermediate hits play the destroy_action "loop" sfx, the final hit its "final" sfx (played by the DestroyNpcEvent handler)
+      if ( not killed )
+      {
+        const auto &destroy_sfx = npc_cmp.at<Cmp::DestroyAction>().action.sfx();
+        if ( not destroy_sfx.loop.empty() ) { m_sound_bank.get_effect( destroy_sfx.loop ).play(); }
+        return;
+      }
       SPDLOG_DEBUG( "Killed NPC at position ({}, {})!", npc_pos_cmp.position.x, npc_pos_cmp.position.y );
       // now destroy the NPC
       get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entity, std::nullopt, std::nullopt, Events::DestroyNpcEvent::Cause::MELEE ) );

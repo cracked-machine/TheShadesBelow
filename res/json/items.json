@@ -490,6 +490,28 @@
                                 "sfx": { "final": "shrine_lighting" } }}
     ]
   },
+  "item.plant.grass": {
+    "sprite": { "name": "sprite.graveyard.grass", "random": true },
+    "consumable": "none",
+    "stackable": false,
+    "auto_pickup": false,
+    "shop": { "enabled": false, "base_price": 10 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 1, "shovel": 1, "bow": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 100, "bow": 0 },
+    "spawn_count_per_quadrant": 0,
+    "actions": [
+      { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
+                                "side_effects": {"spawn_npc": {"probability": "player_luck", "type": "npc.tick"}},
+                                "sfx": {"final": "chopping_final"} }},
+      { "forage_action":      { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+    ]
+  },
   "item.plant.burdock": {
     "sprite": { "name": "sprite.item.plant.burdock" },
     "consumable": "none",

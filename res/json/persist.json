@@ -318,6 +318,14 @@
     "detail": "Plant burn time (s), -1 = forever",
     "format": "%.1f"
   },
+  "GrassSlowFactor": {
+    "type": "float",
+    "value": 0.6,
+    "min_value": 0.1,
+    "max_value": 1.0,
+    "detail": "Grass: movement speed multiplier",
+    "format": "%.2f"
+  },
   "PlantWearPerForage": {
     "type": "float",
     "value": 10.0,
@@ -539,6 +547,14 @@
     "min_value": 0,
     "max_value": 100,
     "detail": "Talisman",
+    "format": "%d"
+  },
+  "GrassSpawnChance": {
+    "type": "int",
+    "value": 60,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Grass: chance (%) per free open cell",
     "format": "%d"
   },
   "GraveClusterGridSize": {

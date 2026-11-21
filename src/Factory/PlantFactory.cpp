@@ -4,13 +4,16 @@
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Inventory/WorldItem.hpp>
+#include <Components/Plant/Grass.hpp>
 // #include <Components/PlantObstacle.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Position.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/DestroyPlantEvent.hpp>
 #include <Factory/PlantFactory.hpp>
+#include <Systems/BaseSystem.hpp>
 #include <Utils/Random.hpp>
 #include <Utils/Utils.hpp>
 #include <entt/entity/registry.hpp>
@@ -32,7 +35,7 @@ void remove_plant_mb( entt::registry &reg, entt::entity plant_entt )
   {
     if ( *plant_uuid_cmp == other_uuid_cmp )
     {
-      SPDLOG_INFO( "Found segment entt {}", static_cast<uint32_t>( other_uuid_entt ) );
+      SPDLOG_DEBUG( "Found segment entt {}", static_cast<uint32_t>( other_uuid_entt ) );
       to_destroy.push_back( other_uuid_entt );
     }
   }
@@ -43,6 +46,20 @@ void remove_plant_mb( entt::registry &reg, entt::entity plant_entt )
 
   // now destroy the redundant plant multiblock entity
   if ( reg.valid( plant_entt ) ) reg.destroy( plant_entt );
+}
+
+void destroy_grass_in( entt::registry &reg, const sf::FloatRect &area )
+{
+  // collect first: the event handler destroys the multiblock entities
+  std::vector<entt::entity> grass;
+  for ( auto [grass_entt, grass_mb_cmp] : reg.view<Cmp::Plant::Grass, Cmp::PlantMultiBlock>().each() )
+  {
+    if ( grass_mb_cmp.findIntersection( area ) ) grass.push_back( grass_entt );
+  }
+  for ( auto grass_entt : grass )
+  {
+    Sys::BaseSystem::get_systems_event_queue().trigger( Events::DestroyPlantEvent( grass_entt ) );
+  }
 }
 
 } // namespace Game::Factory::Plant

@@ -17,6 +17,7 @@
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
+#include <Components/Plant/Grass.hpp>
 #include <Components/Grave/Segment.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
@@ -27,6 +28,7 @@
 #include <Components/ObstacleCap.hpp>
 #include <Components/Persistent/BloodMinChance.hpp>
 #include <Components/Persistent/GraveClusterExternalPadding.hpp>
+#include <Components/Persistent/GrassSpawnChance.hpp>
 #include <Components/Persistent/GraveClusterGridSize.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveOddsBlood.hpp>
@@ -926,6 +928,32 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants( const Scene::SceneD
     }
   }
   return assigned_entts;
+}
+
+void LevelGenerator::gen_grass( const Scene::SceneData &scene_data )
+{
+  const int spawn_chance = Sys::PersistSystem::get<Cmp::Persist::GrassSpawnChance>( reg() ).get_value();
+  const Sys::ItemKey grass_item( std::string( Cmp::Plant::kGrassItem ) );
+  Cmp::RandomInt chance_rng( 0, 99 );
+
+  std::array<std::size_t, 4> placed_by_quadrant{};
+  for ( const auto &pos : scene_data.levelgen_positions( scene_data.open_tile_id() ) )
+  {
+    // structures, this pass's claims (obstacles and their caps, loot/NPC containers) and ground items
+    const Cmp::Position pos_cmp( pos, Constants::kGridSizePxF );
+    if ( is_cell_taken( pos_cmp ) ) continue;
+    if ( chance_rng.gen() >= spawn_chance ) continue;
+
+    // PlantSystem re-checks the cell is a free world tile, clear of items and hazards
+    bool created = false;
+    get_systems_event_queue().trigger(
+        Events::CreatePlantEvent( grass_item, pos_cmp, [&created]( [[maybe_unused]] entt::entity grass_entt ) { created = true; } ) );
+    if ( created ) ++placed_by_quadrant.at( scene_data.quadrant_of( pos ) );
+  }
+  for ( std::size_t quadrant = 0; quadrant < placed_by_quadrant.size(); ++quadrant )
+  {
+    SPDLOG_INFO( "gen_grass: quadrant {} has {} grass ({}% chance per free cell)", quadrant, placed_by_quadrant.at( quadrant ), spawn_chance );
+  }
 }
 
 void LevelGenerator::init( const PathFinding::SpatialHashGridSharedPtr &reserved_sm, const PathFinding::SpatialHashGridSharedPtr &item_sm )

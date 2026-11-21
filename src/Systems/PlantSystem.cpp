@@ -15,6 +15,7 @@
 #include <Components/Particle/EmberParticleSprite.hpp>
 #include <Components/Persistent/PlantBurnTime.hpp>
 #include <Components/Plant/BurningTimer.hpp>
+#include <Components/Plant/Grass.hpp>
 #include <Components/Player/DiggingTimer.hpp>
 #include <Components/Position.hpp>
 #include <Components/SelectedPosition.hpp>
@@ -104,7 +105,8 @@ void PlantSystem::on_destroy_plant_event( const Events::DestroyPlantEvent &event
 
   auto npc_navmesh = m_npc_navmesh.lock();
   auto player_navmesh = m_player_navmesh.lock();
-  auto reserved_sm = m_reserved_sm.lock();
+  // grass never reserved its tile (see gen_plant), so any reservation on its cell belongs to something else
+  auto reserved_sm = reg().all_of<Cmp::Plant::Grass>( plant_entt ) ? nullptr : m_reserved_sm.lock();
 
   for ( auto [seg_entt, plant_segment_cmp, seg_pos_cmp, seg_uuid_cmp] : reg().view<Cmp::PlantSegment, Cmp::Position, Cmp::UUID>().each() )
   {
@@ -179,9 +181,13 @@ entt::entity PlantSystem::gen_plant( const Sys::ItemKey &plant_type, const Cmp::
 
   if ( footprint_clear )
   {
+    // grass covers most of the free ground, so it doesn't reserve its tile: hazards, drops and spawns may still use
+    // the cell, and remove the grass when they do (see Factory::Plant::destroy_grass_in())
+    const bool is_grass = plant_type.str() == Cmp::Plant::kGrassItem;
     // now create the plant at a new entt
     auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>(
-        reg(), pos, plant_spritesheet, item_cmp.sprite_index(), /*zorder=*/0, reserved_sm.get(), world_tile_sm.get() );
+        reg(), pos, plant_spritesheet, item_cmp.sprite_index(), /*zorder=*/0, is_grass ? nullptr : reserved_sm.get(), world_tile_sm.get() );
+    if ( is_grass ) { reg().emplace_or_replace<Cmp::Plant::Grass>( mb_entt ); }
 
     // Add the worlditem now so we don't have to look it up later when digging up the plant
     const auto &plant_item = Sys::ItemStore::instance().get( plant_type );
@@ -190,7 +196,7 @@ entt::entity PlantSystem::gen_plant( const Sys::ItemKey &plant_type, const Cmp::
     reg().emplace_or_replace<Cmp::Health>( mb_entt, 100.f );
     if ( plant_item.stings() ) { reg().emplace_or_replace<Cmp::Inventory::StingDamage>( mb_entt ); }
 
-    // Every covered cell is already reserved: create_multiblock_segments() inserts each segment into reserved_sm.
+    // Every covered cell is already reserved (except grass): create_multiblock_segments() inserts each segment into reserved_sm.
     return mb_entt;
   }
   return entt::null;
@@ -289,9 +295,10 @@ void PlantSystem::on_plant_killed_event( const Events::PlantKilledEvent &event )
   else if ( destroy_reward ) { grant_item_reward( *destroy_reward, plant_bounds, plant_entt, lay_plant_on_side ); }
   const auto destroy_action = Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
 
-  trigger_side_effects( destroy_action, plant_pos_cmp, plant_entt );
-  // its loot is left for the player to collect
+  // the NPCs the plant spawned while alive die with it; its loot is left for the player to collect. Done before the
+  // destroy_action side effects, otherwise an NPC they spawn (e.g. a tick from grass) is linked to the plant and dies at once
   destroy_plant_spawned_npcs( plant_uuid_cmp, Sys::SpriteKey( "sprite.death.anim.bloodsplat" ) );
+  trigger_side_effects( destroy_action, plant_pos_cmp, plant_entt );
   get_systems_event_queue().trigger( Events::DestroyPlantEvent( plant_entt ) );
   play_action_sfx( destroy_action );
 }
