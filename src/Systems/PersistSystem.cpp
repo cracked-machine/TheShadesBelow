@@ -1,6 +1,5 @@
 
 
-#include <Components/Persistent/AltarBloodOfferingHealth.hpp>
 #include <Components/Persistent/AltarBloodQuota.hpp>
 #include <Components/Persistent/AltarOfferingCooldown.hpp>
 #include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
@@ -74,6 +73,7 @@
 #include <Components/Persistent/HeldItemSideOffsetX.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/InventorySlotCount.hpp>
+#include <Components/Persistent/InventoryStackSize.hpp>
 #include <Components/Persistent/InventorySlotRollover.hpp>
 #include <Components/Persistent/InventorySwapCooldown.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
@@ -258,7 +258,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::AzazelFireballArc>();
   add_component<Cmp::Persist::AzazelFireballColour>();
   add_component<Cmp::Persist::AltarBloodQuota>();
-  add_component<Cmp::Persist::AltarBloodOfferingHealth>();
   add_component<Cmp::Persist::AltarOfferingCooldown>();
   add_component<Cmp::Persist::AltarSummonOfferingCooldown>();
   add_component<Cmp::Persist::LightningDamage>();
@@ -341,6 +340,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::BurrThrowCooldown>();
   add_component<Cmp::Persist::InventorySwapCooldown>();
   add_component<Cmp::Persist::InventorySlotCount>();
+  add_component<Cmp::Persist::InventoryStackSize>();
   add_component<Cmp::Persist::StowedTorchLit>();
   add_component<Cmp::Persist::InventorySlotRollover>();
   add_component<Cmp::Persist::AutoPickupDrops>();

@@ -5,7 +5,7 @@
 namespace Game::Cmp::Persist
 {
 
-//! @brief Blood a graveyard altar must be offered (the player's health, see Cmp::Persist::AltarBloodOfferingHealth) before it
+//! @brief Blood a graveyard altar must be offered (poured from blood vials, see Cmp::WorldItem::get_blood_heal()) before it
 //! activates, lighting its centre column and sending a crow to the key grave. See Sys::AltarSystem and Cmp::Altar::BloodCount.
 class AltarBloodQuota : public BasePersistent<int>
 {

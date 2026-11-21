@@ -20,6 +20,7 @@
 #include <Components/Inventory/Grimoire.hpp>
 #include <Components/Grave/CurseTablet.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
+#include <Components/Inventory/StackCount.hpp>
 #include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
@@ -323,6 +324,7 @@ void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
   registry.storage<Cmp::PlayerInventorySlot>();
   registry.storage<Cmp::Player::SelectedInventorySlot>();
   registry.storage<Cmp::Inventory::StingDamage>();
+  registry.storage<Cmp::Inventory::StackCount>();
   registry.storage<Cmp::Npc::SummonOffering>();
   registry.storage<Cmp::Grave::CurseTablet>();
   registry.storage<Cmp::TorchRadius>();

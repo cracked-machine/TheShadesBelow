@@ -10,7 +10,6 @@
 #include <Components/Armable.hpp>
 #include <Components/DestroyedObstacle.hpp>
 #include <Components/Inventory/FlashUIExtraLife.hpp>
-#include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/FlashUIInventory.hpp>
 #include <Components/Inventory/FlashUIWealth.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
@@ -19,7 +18,6 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/SummonOffering.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
-#include <Components/Persistent/AltarBloodOfferingHealth.hpp>
 #include <Components/Persistent/AltarBloodQuota.hpp>
 #include <Components/Persistent/AltarOfferingCooldown.hpp>
 #include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
@@ -27,7 +25,6 @@
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Player/Mortality.hpp>
-#include <Components/Player/TookDamage.hpp>
 #include <Components/Player/ToxicImmunity.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Random.hpp>
@@ -57,7 +54,6 @@
 #include <Events/KeyGraveExhumedEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
-#include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/AltarFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
@@ -181,8 +177,8 @@ bool AltarSystem::check_player_altar_offering( entt::entity altar_entity, Cmp::A
   auto *altar_uuid_cmp = reg().try_get<Cmp::UUID>( altar_entity );
   if ( not altar_uuid_cmp ) throw std::runtime_error( "Altar does not have UUID" );
 
-  // an item the altar accepts is offered instead of the player's blood
-  return try_offer_held_item( altar_entity, altar_cmp, *altar_uuid_cmp ) or offering_player_blood( altar_entity, altar_cmp, *altar_uuid_cmp );
+  // an item the altar accepts is offered, otherwise a held blood vial is poured into a graveyard altar
+  return try_offer_held_item( altar_entity, altar_cmp, *altar_uuid_cmp ) or offering_blood_vial( altar_entity, altar_cmp, *altar_uuid_cmp );
 }
 
 bool AltarSystem::try_offer_held_item( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
@@ -338,7 +334,7 @@ bool AltarSystem::offering_for_extra_life( entt::entity altar_entity, const Cmp:
   return true;
 }
 
-bool AltarSystem::offering_player_blood( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
+bool AltarSystem::offering_blood_vial( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid )
 {
   if ( altar_cmp.get_kind() != Cmp::Altar::Kind::GRAVEYARD ) return false;
   auto *blood_cmp = reg().try_get<Cmp::Altar::BloodCount>( altar_entity );
@@ -346,6 +342,14 @@ bool AltarSystem::offering_player_blood( entt::entity altar_entity, Cmp::Altar::
   // the player must face the altar, not just stand near it
   if ( not Utils::Player::get_projected_position( reg() ).findIntersection( altar_cmp ) ) return false;
   if ( Utils::Player::get_mortality( reg() ).state != Cmp::Player::Mortality::State::ALIVE ) return false;
+
+  // the altar only takes blood poured from a vial held in the selected slot
+  const auto slot_entt = Utils::Player::get_inventory_entt( reg() );
+  if ( slot_entt == entt::null ) return false;
+  const auto &vial = *reg().get<Cmp::PlayerInventorySlot>( slot_entt ).m_item;
+  if ( not vial.is_blood() ) return false;
+  const int blood = vial.get_blood_heal();
+  if ( blood <= 0 ) return false;
 
   const int quota = Sys::PersistSystem::get<Cmp::Persist::AltarBloodQuota>( reg() ).get_value();
   if ( blood_cmp->is_full( quota ) ) return false;
@@ -359,30 +363,19 @@ bool AltarSystem::offering_player_blood( entt::entity altar_entity, Cmp::Altar::
     return false;
   }
 
-  // the altar takes the player's health as its blood
-  const int blood = Sys::PersistSystem::get<Cmp::Persist::AltarBloodOfferingHealth>( reg() ).get_value();
-  auto &player_stats = Utils::Player::get_stats( reg() );
-  player_stats.apply( Cmp::BaseAction( Cmp::Stats::Health{ -blood }, {}, {}, {}, {}, {}, {} ) );
-  const auto player_entt = Utils::Player::get_entity( reg() );
-  reg().emplace_or_replace<Cmp::Player::TookDamage>( player_entt );
+  // pour one vial of the held stack into the altar
+  const Sys::ItemKey vial_type = vial.item_type;
+  Factory::Player::take_one_from_slot( reg(), slot_entt );
   // signal UI to flash
-  reg().emplace_or_replace<Cmp::FlashUIHealth>( reg().create() );
-  m_sound_bank.get_effect( "damage_player" ).play();
+  reg().emplace_or_replace<Cmp::FlashUIInventory>( reg().create() );
+  m_sound_bank.get_effect( "shrine_lighting" ).play();
 
   blood_cmp->add( blood, quota );
-  SPDLOG_INFO( "Player bled {} health into altar (health:{}, blood {} of {})", blood, player_stats.health(), blood_cmp->value(), quota );
+  SPDLOG_INFO( "Player poured {} ({} blood) into altar (blood {} of {})", vial_type.str(), blood, blood_cmp->value(), quota );
   play_offering_anim( altar_cmp, OfferingAnimType::DEFAULT );
   get_systems_event_queue().trigger( Events::AltarBloodOfferedEvent{ altar_bounds } );
 
-  // the player paid for the blood, so it counts even if it was their last
   if ( blood_cmp->is_full( quota ) ) activate_graveyard_altar( altar_entity, altar_cmp, altar_uuid );
-
-  if ( player_stats.health() <= 0 )
-  {
-    Utils::Player::get_mortality( reg() ).last_damage_cause = Cmp::Player::Mortality::State::SACRIFICED;
-    get_systems_event_queue().trigger(
-        Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::SACRIFICED, Utils::Player::get_position( reg() ) ) );
-  }
   return true;
 }
 

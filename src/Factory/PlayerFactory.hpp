@@ -42,12 +42,19 @@ entt::entity create_empty_inventory_slot( entt::registry &reg, uint8_t idx );
 //! @param slot_entt the slot entity to empty
 void clear_inventory_slot( entt::registry &reg, entt::entity slot_entt );
 
+//! @brief Use up one item from an inventory slot: decrement its Cmp::Inventory::StackCount, or empty the slot (see
+//! clear_inventory_slot()) when it holds its last item.
+//! @param reg the ECS registry
+//! @param slot_entt the slot entity to take from
+void take_one_from_slot( entt::registry &reg, entt::entity slot_entt );
+
 //! @brief Make sure there is exactly one inventory slot entity for each index `0..count-1`, creating missing slots empty
 //! and removing slots beyond the current Cmp::Persist::InventorySlotCount.
 //! @param reg the ECS registry
 void ensure_inventory_slots( entt::registry &reg );
 
-//! @brief Empty one player inventory slot holding the given item type, preferring the selected slot.
+//! @brief Use up one item of the given type from a player inventory slot holding it, preferring the selected slot (see
+//! take_one_from_slot(): a stack loses one item, a single item empties its slot).
 //! See "item.xxxx" in res/json/items.json
 //! @param reg the ECS registry
 //! @param type the type to destroy

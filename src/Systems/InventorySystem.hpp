@@ -112,6 +112,13 @@ private:
   //! @param idx The slot index, or std::nullopt for the selected slot.
   void pickup_world_item( entt::registry &reg, entt::entity world_item_entt, std::optional<uint8_t> idx = std::nullopt );
 
+  //! @brief Move as much of a world item's stack as fits into an inventory slot's stack (see Utils::Player::can_stack()).
+  //! The world item keeps any leftover count, or is destroyed once it has all been taken.
+  //! @param slot_entt The inventory slot whose stack it joins.
+  //! @param world_item_entt The world item to take from.
+  //! @return bool true if any of it was taken.
+  bool merge_into_stack( entt::entity slot_entt, entt::entity world_item_entt );
+
   void try_consume_item();
 
   //! @brief Eat the selected inventory item if it is edible or drinkable.

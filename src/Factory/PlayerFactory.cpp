@@ -12,6 +12,7 @@
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/Grimoire.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
+#include <Components/Inventory/StackCount.hpp>
 #include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/LastDirection.hpp>
@@ -170,8 +171,18 @@ void clear_inventory_slot( entt::registry &reg, entt::entity slot_entt )
   slot_cmp->m_item.reset();
   // every per-item component a slot can carry. Add any new per-item component here, so an emptied slot never keeps
   // stale item state. The entity itself is kept so the slot never moves.
-  reg.remove<Cmp::Inventory::WearLevel, Cmp::Inventory::StingDamage, Cmp::UUID, Cmp::AnimData, Cmp::Inventory::DowsingTarget,
-             Cmp::Npc::SummonOffering, Cmp::Grave::CurseTablet, Cmp::ZOrderValue>( slot_entt );
+  reg.remove<Cmp::Inventory::WearLevel, Cmp::Inventory::StingDamage, Cmp::Inventory::StackCount, Cmp::UUID, Cmp::AnimData,
+             Cmp::Inventory::DowsingTarget, Cmp::Npc::SummonOffering, Cmp::Grave::CurseTablet, Cmp::ZOrderValue>( slot_entt );
+}
+
+void take_one_from_slot( entt::registry &reg, entt::entity slot_entt )
+{
+  if ( auto *stack_cmp = reg.try_get<Cmp::Inventory::StackCount>( slot_entt ); stack_cmp and stack_cmp->m_count > 1 )
+  {
+    stack_cmp->m_count--;
+    return;
+  }
+  clear_inventory_slot( reg, slot_entt );
 }
 
 void ensure_inventory_slots( entt::registry &reg )
@@ -206,14 +217,14 @@ void ensure_inventory_slots( entt::registry &reg )
 
 void destroy_inventory( entt::registry &reg, const Sys::ItemKey &type )
 {
-  // prefer the selected slot, so using the held item never empties a different slot holding the same item
+  // prefer the selected slot, so using the held item never takes from a different slot holding the same item
   const auto selected_entt = Utils::Player::get_selected_slot_entt( reg );
   if ( selected_entt != entt::null )
   {
     const auto &selected_cmp = reg.get<Cmp::PlayerInventorySlot>( selected_entt );
     if ( not selected_cmp.empty() and selected_cmp.m_item->item_type == type )
     {
-      clear_inventory_slot( reg, selected_entt );
+      take_one_from_slot( reg, selected_entt );
       return;
     }
   }
@@ -223,7 +234,7 @@ void destroy_inventory( entt::registry &reg, const Sys::ItemKey &type )
     if ( slot_entt == entt::null ) continue;
     const auto &slot_cmp = reg.get<Cmp::PlayerInventorySlot>( slot_entt );
     if ( slot_cmp.empty() or slot_cmp.m_item->item_type != type ) continue;
-    clear_inventory_slot( reg, slot_entt );
+    take_one_from_slot( reg, slot_entt );
     return;
   }
 }

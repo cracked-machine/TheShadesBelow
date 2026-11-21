@@ -10,17 +10,22 @@
 #include <Components/Direction.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Health.hpp>
+#include <Components/Grave/CurseTablet.hpp>
+#include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
+#include <Components/Inventory/StackCount.hpp>
 #include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/LerpPosition.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Npc/SummonOffering.hpp>
 #include <Components/Npc/Wisp.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/InventorySlotCount.hpp>
+#include <Components/Persistent/InventoryStackSize.hpp>
 #include <Components/Persistent/StowedTorchLit.hpp>
 #include <Components/Persistent/BradycardiaMovementSpeed.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
@@ -308,6 +313,56 @@ std::optional<uint8_t> get_first_empty_slot_idx( entt::registry &reg )
     if ( slot_entt == entt::null or reg.get<Cmp::PlayerInventorySlot>( slot_entt ).empty() ) return idx;
   }
   return std::nullopt;
+}
+
+int get_stack_count( entt::registry &reg, entt::entity entt )
+{
+  const auto *stack_cmp = reg.try_get<Cmp::Inventory::StackCount>( entt );
+  return stack_cmp ? stack_cmp->m_count : 1;
+}
+
+bool can_stack( entt::registry &reg, entt::entity slot_entt, entt::entity world_item_entt )
+{
+  if ( not reg.valid( slot_entt ) or not reg.valid( world_item_entt ) ) return false;
+  const auto *slot_cmp = reg.try_get<Cmp::PlayerInventorySlot>( slot_entt );
+  const auto *world_item_cmp = reg.try_get<Cmp::WorldItem>( world_item_entt );
+  if ( not slot_cmp or slot_cmp->empty() or not world_item_cmp ) return false;
+  if ( not world_item_cmp->is_stackable() or slot_cmp->m_item->item_type != world_item_cmp->item_type ) return false;
+  if ( reg.all_of<Cmp::PlantMultiBlock>( world_item_entt ) ) return false;
+
+  // a stack is one set of item state, so items carrying their own state never merge. Every world item has a UUID
+  // (see Sys::ItemSystem::create_world_item()), but it is only state when a particle (e.g. a torch's flame) is bound to it
+  auto has_bound_particle = [&reg]( entt::entity entt )
+  {
+    const auto *uuid_cmp = reg.try_get<Cmp::UUID>( entt );
+    if ( not uuid_cmp ) return false;
+    for ( auto [ps_entt, ps_owner, ps_uuid_cmp] : reg.view<Cmp::Particle::SpriteOwner, Cmp::UUID>().each() )
+    {
+      if ( ps_uuid_cmp == *uuid_cmp ) return true;
+    }
+    return false;
+  };
+  auto has_instance_state = [&reg, &has_bound_particle]( entt::entity entt )
+  {
+    return reg.any_of<Cmp::Inventory::WearLevel, Cmp::Inventory::DowsingTarget, Cmp::Npc::SummonOffering, Cmp::Grave::CurseTablet>( entt ) or
+           has_bound_particle( entt );
+  };
+  if ( has_instance_state( slot_entt ) or has_instance_state( world_item_entt ) ) return false;
+
+  const int max_stack = Sys::PersistSystem::get<Cmp::Persist::InventoryStackSize>( reg ).get_value();
+  return get_stack_count( reg, slot_entt ) < max_stack;
+}
+
+entt::entity find_stackable_slot( entt::registry &reg, entt::entity world_item_entt )
+{
+  if ( const auto selected_entt = get_selected_slot_entt( reg ); can_stack( reg, selected_entt, world_item_entt ) ) return selected_entt;
+  const auto count = get_inventory_slot_count( reg );
+  for ( uint8_t idx = 0; idx < count; ++idx )
+  {
+    const auto slot_entt = get_inventory_slot_entt( reg, idx );
+    if ( slot_entt != entt::null and can_stack( reg, slot_entt, world_item_entt ) ) return slot_entt;
+  }
+  return entt::null;
 }
 
 entt::entity get_selected_slot_entt( entt::registry &reg ) { return get_inventory_slot_entt( reg, get_selected_slot_idx( reg ) ); }

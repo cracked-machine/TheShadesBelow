@@ -5,6 +5,7 @@
         {
          "draworder":"topdown",
          "id":7,
+         "locked":true,
          "name":"inventory",
          "objects":[
                 {
@@ -1358,7 +1359,7 @@
                  "y":20
                 }, 
                 {
-                 "height":200,
+                 "height":180,
                  "id":109,
                  "name":"inventory_outline",
                  "opacity":1,
@@ -1381,9 +1382,9 @@
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
-                 "width":210,
-                 "x":510,
-                 "y":850
+                 "width":190,
+                 "x":520,
+                 "y":860
                 }, 
                 {
                  "height":300,

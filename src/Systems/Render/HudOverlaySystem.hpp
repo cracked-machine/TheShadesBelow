@@ -182,6 +182,8 @@ private:
   static constexpr const char *kSlotNameName = "slot_name";
   //! @brief res/ui/inventory_slot.json ui_label for the slot number
   static constexpr const char *kSlotNumberName = "slot_number";
+  //! @brief res/ui/inventory_slot.json ui_label for the stack count of a stackable item (Cmp::Inventory::StackCount)
+  static constexpr const char *kSlotCountName = "slot_count";
   //! @brief res/ui/inventory_slot.json ui_meter for the wear level ImGui::ProgressBar
   static constexpr const char *kSlotWearName = "slot_wear";
 

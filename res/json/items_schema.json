@@ -5,7 +5,7 @@
   "patternProperties": {
     "^(item\\..+|ERROR_SPRITE)$": {
       "type": "object",
-      "required": ["sprite", "damage_to_weapon", "actions"],
+      "required": ["sprite", "stackable", "damage_to_weapon", "actions"],
       "additionalProperties": false,
       "properties": {
         "sprite": {
@@ -24,6 +24,10 @@
           "type": "string",
           "enum": ["none", "edible", "drinkable"],
           "description": "Can the item be eaten or drunk."
+        },
+        "stackable": {
+          "type": "boolean",
+          "description": "Whether multiple items of this type stack in one inventory slot, up to Cmp::Persist::InventoryStackSize."
         },
         "shop": {
           "type": "object",

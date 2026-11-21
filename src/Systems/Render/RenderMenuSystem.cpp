@@ -1,6 +1,5 @@
 
 
-#include <Components/Persistent/AltarBloodOfferingHealth.hpp>
 #include <Components/Persistent/AltarBloodQuota.hpp>
 #include <Components/Persistent/AltarOfferingCooldown.hpp>
 #include <Components/Persistent/AltarSummonOfferingCooldown.hpp>
@@ -74,6 +73,7 @@
 #include <Components/Persistent/HeldItemSideOffsetX.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/InventorySlotCount.hpp>
+#include <Components/Persistent/InventoryStackSize.hpp>
 #include <Components/Persistent/InventorySlotRollover.hpp>
 #include <Components/Persistent/InventorySwapCooldown.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
@@ -290,6 +290,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::HeldItemScale>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::InventorySwapCooldown>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::InventorySlotCount>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::InventoryStackSize>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::InventorySlotRollover>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AutoPickupDrops>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ShowHealthBar>( reg() ).render_widget();
@@ -386,7 +387,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::AzazelFireballArc>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AzazelFireballColour>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AltarBloodQuota>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::AltarBloodOfferingHealth>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AltarOfferingCooldown>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::AltarSummonOfferingCooldown>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::EmberDamage>( reg() ).render_widget();

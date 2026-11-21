@@ -44,7 +44,7 @@ private:
   void check_player_approached_altar();
 
   //! @brief Make an offering at the altar once its cooldown has passed: the held item if the altar accepts it (see
-  //! try_offer_held_item()), otherwise the player's blood (see offering_player_blood()).
+  //! try_offer_held_item()), otherwise a held blood vial (see offering_blood_vial()).
   //! @param altar_entity
   //! @param altar_cmp
   //! @return true if an offering was made, false if there was nothing to offer or the altar refused it
@@ -81,12 +81,12 @@ private:
   //! @brief Grant the player a Cmp::Player::ExtraLife at the crypt altar: lights the altar, respawn at the crypt start.
   //! @return false if the altar refused the offering, e.g. the player already has an extra life, or it is not the crypt altar
   bool offering_for_extra_life( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
-  //! @brief Take Cmp::Persist::AltarBloodOfferingHealth from the player's health and add it to the facing graveyard
-  //! altar's Cmp::Altar::BloodCount. The offering that fills Cmp::Persist::AltarBloodQuota activates the altar, see
-  //! activate_graveyard_altar(). The player dies (Cmp::Player::Mortality::State::SACRIFICED) if it takes their last health.
-  //! @return false if the altar refused the offering, e.g. it is not a graveyard altar, the player isn't facing it, it
-  //! is full or an altar is already activated
-  bool offering_player_blood( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
+  //! @brief Pour one blood vial (Cmp::WorldItem::is_blood()) from the player's selected slot into the facing graveyard
+  //! altar, adding the vial's blood (Cmp::WorldItem::get_blood_heal()) to its Cmp::Altar::BloodCount. The player's health
+  //! is untouched. The offering that fills Cmp::Persist::AltarBloodQuota activates the altar, see activate_graveyard_altar().
+  //! @return false if the altar refused the offering, e.g. it is not a graveyard altar, the player isn't facing it or
+  //! holding a blood vial, it is full or an altar is already activated
+  bool offering_blood_vial( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
   //! @brief Accept the exit key in exchange for the crypt key, at any graveyard altar whether activated or not.
   //! check_player_altar_offering() puts the crypt key in the player's hand once the exit key has been destroyed.
   void offering_cryptkey( const Cmp::Altar::MultiBlock &altar_cmp );

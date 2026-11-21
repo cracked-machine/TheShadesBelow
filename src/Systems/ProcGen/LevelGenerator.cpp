@@ -581,9 +581,9 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos,
     // one key grave per exit key, and the exit key is also traded at an altar for the crypt key
     const size_t exit_and_crypt_key_multiplier = 2;
     // sized per cadaver part, not per altar: each part takes one altar activation and one key grave, whichever altar is used
-    // the blood drops one altar activation needs on average: the altar takes the player's health as blood, and a blood
-    // grave picks evenly from every blood vial (see GraveSystem::spawn_blood_loot()), so each drop gives back the
-    // vials' mean heal in health, which buys as much altar blood
+    // the blood drops one altar activation needs on average: each blood vial poured into the altar gives its heal value
+    // as blood, and a blood grave picks evenly from every blood vial (see GraveSystem::spawn_blood_loot()), so each drop
+    // gives the vials' mean heal in altar blood
     size_t blood_reward_total = 0;
     size_t blood_item_count = 0;
     for ( const auto &item_key : Sys::ItemStore::instance().get_all() )

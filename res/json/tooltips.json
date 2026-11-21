@@ -16,7 +16,7 @@
       "position": "above_player",
       "frequency": "once",
       "duration_s": 6.0,
-      "pause": true
+      "pause": false
     },
     {
       "id": "first_witchesbroom",
@@ -31,14 +31,14 @@
       "id": "grimoire_updated",
       "trigger": "GrimoireDiscoveryEvent",
       "text": "Grimoire updated: {item}\nPress <G> to open the grimoire.",
-      "position": { "x": 0.5, "y": 0.85 },
-      "frequency": "always",
+      "position": { "x": 0.5, "y": 0.7 },
+      "frequency": "once",
       "duration_s": 4.0
     },
     {
       "id": "altar_approach",
       "trigger": "AltarApproachedEvent",
-      "text": "Offer me your blood.\nPress <E> to bleed for the altar.",
+      "text": "Offer me blood.\nHold a blood vial and press <E> to pour it.",
       "position": "above_source",
       "frequency": "always",
       "duration_s": 5.0
@@ -46,19 +46,19 @@
     {
       "id": "first_blood_offering",
       "trigger": "AltarBloodOfferedEvent",
-      "text": "The altar drank some of your health as blood.\nIf your health runs out, you die. Drink blood vials from graves to heal.",
-      "position": "above_source",
+      "text": "The altar drank the vial's blood.\nFill it to summon the crow.",
+      "position": "above_player",
       "frequency": "once",
-      "duration_s": 6.0
+      "pause": true
     },
     {
       "id": "first_blood_vial",
       "trigger": "ItemPickedUpEvent",
       "condition": { "item": "item.grave.blood*" },
-      "text": "The blood of the dead. Drink it to restore your health,\nthen return to the altar.",
-      "position": { "x": 0.5, "y": 0.85 },
+      "text": "The blood of the dead. Vials stack in one slot.\nPour them into the altar, or drink one to restore your health.",
+      "position": "above_player",
       "frequency": "once",
-      "duration_s": 6.0
+      "pause": true
     },
     {
       "id": "blood_full_health",

@@ -6,8 +6,8 @@
 namespace Game::Events
 {
 
-//! @brief Notification that a graveyard altar has just taken the player's health as blood
-//! (Cmp::Persist::AltarBloodOfferingHealth).
+//! @brief Notification that the player has just poured a blood vial into a graveyard altar
+//! (see Sys::AltarSystem::offering_blood_vial()).
 //! @note Sent by Sys::AltarSystem. See Sys::TooltipOverlaySystem.
 struct AltarBloodOfferedEvent
 {

@@ -352,6 +352,14 @@ void HudOverlaySystem::render_inventory_slot( uint8_t idx, bool selected, bool f
     place_imgui_text( *name_cmp, slot_origin, Sys::SpriteStore::instance().get( slot_cmp->m_item->sprite_type ).display_name() );
   }
 
+  if ( const auto *count_cmp = find_element( layout.m_labels, kSlotCountName ); count_cmp and has_item )
+  {
+    if ( const int stack_count = Utils::Player::get_stack_count( reg(), slot_entt ); stack_count > 1 )
+    {
+      place_imgui_text( *count_cmp, slot_origin, std::format( "x{}", stack_count ) );
+    }
+  }
+
   const auto *wear_cmp = has_item ? reg().try_get<Cmp::Inventory::WearLevel>( slot_entt ) : nullptr;
   if ( const auto *meter_cmp = find_element( layout.m_meters, kSlotWearName ); meter_cmp and wear_cmp )
   {

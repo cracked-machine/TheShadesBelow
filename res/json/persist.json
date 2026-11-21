@@ -49,14 +49,6 @@
     "detail": "Seconds between shovel melee hits on the same NPC",
     "format": "%.2f"
   },
-  "AltarBloodOfferingHealth": {
-    "type": "int",
-    "value": 10,
-    "min_value": 1,
-    "max_value": 50,
-    "detail": "Health the player bleeds into a graveyard altar per offering (adds the same blood)",
-    "format": "%d"
-  },
   "AltarBloodQuota": {
     "type": "int",
     "value": 100,
@@ -274,6 +266,14 @@
     "detail": "Inventory slot count",
     "format": "%d"
   },
+  "InventoryStackSize": {
+    "type": "int",
+    "value": 5,
+    "min_value": 1,
+    "max_value": 20,
+    "detail": "Max stackable items in one inventory slot",
+    "format": "%d"
+  },
   "StowedTorchLit": {
     "type": "bool",
     "value": false,
@@ -476,7 +476,7 @@
   },
   "GraveNumMultiplier": {
     "type": "int",
-    "value": 30,
+    "value": 60,
     "min_value": 20,
     "max_value": 100,
     "detail": "Grave Number Multiplier",
@@ -500,7 +500,7 @@
   },
   "GraveOddsCurseTablet": {
     "type": "int",
-    "value": 50,
+    "value": 5,
     "min_value": 0,
     "max_value": 100,
     "detail": "Curse",
@@ -508,7 +508,7 @@
   },
   "GraveOddsBombTrap": {
     "type": "int",
-    "value": 50,
+    "value": 40,
     "min_value": 0,
     "max_value": 100,
     "detail": "Bomb",
@@ -516,7 +516,7 @@
   },
   "GraveOddsTorch": {
     "type": "int",
-    "value": 50,
+    "value": 10,
     "min_value": 0,
     "max_value": 100,
     "detail": "Torch",
@@ -524,7 +524,7 @@
   },
   "GraveOddsNpcTrap": {
     "type": "int",
-    "value": 50,
+    "value": 40,
     "min_value": 0,
     "max_value": 100,
     "detail": "NPC",
@@ -532,7 +532,7 @@
   },
   "GraveOddsBlood": {
     "type": "int",
-    "value": 30,
+    "value": 50,
     "min_value": 0,
     "max_value": 100,
     "detail": "Blood",
@@ -540,7 +540,7 @@
   },
   "GraveOddsTalisman": {
     "type": "int",
-    "value": 1,
+    "value": 0,
     "min_value": 0,
     "max_value": 100,
     "detail": "Talisman",

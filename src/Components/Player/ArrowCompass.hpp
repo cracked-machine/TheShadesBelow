@@ -282,7 +282,7 @@ private:
         break;
       }
       case Mode::BLOOD: {
-        // mirrors AltarSystem::offering_player_blood(): once any altar is activated, no altar accepts blood. An altar activates
+        // mirrors AltarSystem::offering_blood_vial(): once any altar is activated, no altar accepts blood. An altar activates
         // the moment its quota fills, so every other graveyard altar is still taking blood.
         needle.target.reset();
         if ( not reg.view<Cmp::Altar::Activated>().empty() ) break;

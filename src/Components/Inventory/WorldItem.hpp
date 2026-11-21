@@ -163,11 +163,12 @@ public:
   //! @return The reward, or std::nullopt if the item can't be offered at that kind of altar.
   std::optional<ActionReward> get_offering_reward( Altar::Kind location ) const;
 
-  //! @brief Whether this item is a grave blood vial (an item key starting kBloodItemPrefix), drunk to restore the
-  //! health the player bleeds into a graveyard altar. See Sys::AltarSystem.
+  //! @brief Whether this item is a grave blood vial (an item key starting kBloodItemPrefix), poured into a graveyard altar
+  //! as its blood, or drunk to restore health. See Sys::AltarSystem.
   bool is_blood() const;
 
-  //! @brief The health a blood vial restores when drunk ("consume_action.health" in items.json).
+  //! @brief The health a blood vial restores when drunk, and the blood it gives a graveyard altar when poured
+  //! ("consume_action.health" in items.json).
   //! @return The health, or 0 if the item is not a blood vial.
   int get_blood_heal() const;
 
@@ -213,6 +214,11 @@ public:
   //! @brief Whether the item can be stocked by the shop, see "shop.enabled" in items.json. Defaults to false.
   bool is_shop_item() const { return m_shop; }
   void set_shop_item( bool shop ) { m_shop = shop; }
+
+  //! @brief Whether several of this item stack in one inventory slot, see "stackable" in items.json and
+  //! Cmp::Inventory::StackCount. The stack is capped at Cmp::Persist::InventoryStackSize.
+  bool is_stackable() const { return m_stackable; }
+  void set_stackable( bool stackable ) { m_stackable = stackable; }
 
   //! @brief Shop base price, see "shop.base_price" in items.json. The shop price fluctuates +/-20% from this, biased by player luck.
   int get_shop_base_price() const { return m_shop_base_price; }
@@ -274,6 +280,9 @@ private:
 
   //! @brief Whether the item can be stocked by the shop. Imported from items.json.
   bool m_shop{ false };
+
+  //! @brief Whether several of this item stack in one inventory slot. Imported from items.json.
+  bool m_stackable{ false };
 
   //! @brief Shop base price, fluctuated +/-20% by luck to get the shop price. Imported from items.json.
   int m_shop_base_price{ 0 };

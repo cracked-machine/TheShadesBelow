@@ -174,6 +174,29 @@ entt::entity get_inventory_slot_entt( entt::registry &reg, uint8_t idx );
 //! @return std::optional<uint8_t> The slot index, or std::nullopt if every slot holds an item.
 std::optional<uint8_t> get_first_empty_slot_idx( entt::registry &reg );
 
+//! @brief Get how many items an inventory slot or world item holds (Cmp::Inventory::StackCount).
+//! @param reg The registry.
+//! @param entt The slot or world item entity.
+//! @return int The stack count, 1 if the entity has no Cmp::Inventory::StackCount.
+int get_stack_count( entt::registry &reg, entt::entity entt );
+
+//! @brief Check whether a world item can be added to an inventory slot's stack: both hold the same stackable item
+//! (items.json "stackable"), the slot is below Cmp::Persist::InventoryStackSize, and neither carries per-instance item
+//! state (wear, a particle bound to its UUID, dowsing target, summoning offering, curse tablet) that a stack would lose.
+//! Plants never stack. A merged item's own UUID is dropped; the slot keeps its own.
+//! @param reg The registry.
+//! @param slot_entt The inventory slot entity.
+//! @param world_item_entt The world item entity.
+//! @return bool true if at least one item of the world item can join the slot's stack.
+bool can_stack( entt::registry &reg, entt::entity slot_entt, entt::entity world_item_entt );
+
+//! @brief Find an inventory slot whose stack the world item can join (see can_stack()), the selected slot first, then
+//! in slot order.
+//! @param reg The registry.
+//! @param world_item_entt The world item entity.
+//! @return entt::entity The slot entity, or entt::null if no slot can take it.
+entt::entity find_stackable_slot( entt::registry &reg, entt::entity world_item_entt );
+
 //! @brief Get the selected inventory slot entity, whether it is empty or not.
 //! @param reg reference to the entt registry
 //! @return entt::entity The slot entity, or entt::null if there is no slot with the selected index.

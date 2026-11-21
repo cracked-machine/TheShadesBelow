@@ -6,7 +6,7 @@
 namespace Game::Cmp::Altar
 {
 
-//! @brief The blood offered at a graveyard altar (the player's health, see Cmp::Persist::AltarBloodOfferingHealth). Once it reaches
+//! @brief The blood offered at a graveyard altar (poured from blood vials, see Cmp::WorldItem::get_blood_heal()). Once it reaches
 //! Cmp::Persist::AltarBloodQuota the altar activates and a crow leads the player to the key grave (see Sys::AltarSystem).
 class BloodCount
 {

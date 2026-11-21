@@ -11,10 +11,12 @@
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
+#include <Components/Inventory/StackCount.hpp>
 #include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Persistent/InventorySlotRollover.hpp>
+#include <Components/Persistent/InventoryStackSize.hpp>
 #include <Components/Persistent/InventorySwapCooldown.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
@@ -119,6 +121,12 @@ void InventorySystem::on_pickup_world_item_event( Events::PickupWorldItemEvent e
 
   // queued from the drop, so the item may have gone (e.g. picked up or destroyed) and the slots may have filled since
   if ( not reg().valid( ev.world_item_entt ) or not reg().all_of<Cmp::WorldItem>( ev.world_item_entt ) ) return;
+  // a stackable item joins a stack it matches first, then any leftover takes an empty slot
+  if ( const auto stack_slot_entt = Utils::Player::find_stackable_slot( reg(), ev.world_item_entt ); stack_slot_entt != entt::null )
+  {
+    merge_into_stack( stack_slot_entt, ev.world_item_entt );
+    if ( not reg().valid( ev.world_item_entt ) ) return;
+  }
   const auto slot_idx = Utils::Player::get_first_empty_slot_idx( reg() );
   if ( not slot_idx ) return; // every slot is full, so it stays on the ground
   pickup_world_item( reg(), ev.world_item_entt, slot_idx );
@@ -296,6 +304,21 @@ void InventorySystem::swap_inventory()
   if ( m_swap_item_cooldown_timer < swap_cooldown ) return;
 
   auto player_pos = Cmp::RectBounds::scaled( Utils::Player::get_position( reg() ), 0.5 );
+
+  // a stackable item on the ground joins the held stack, rather than swapping places with it
+  if ( const auto selected_entt = Utils::Player::get_selected_slot_entt( reg() ); selected_entt != entt::null )
+  {
+    auto world_item_view = reg().view<Cmp::WorldItem, Cmp::Position>( entt::exclude<Cmp::PlantMultiBlock> );
+    for ( auto [world_item_entt, world_item_cmp, world_item_pos_cmp] : world_item_view.each() )
+    {
+      if ( not player_pos.findIntersection( world_item_pos_cmp ) ) continue;
+      if ( not Utils::Player::can_stack( reg(), selected_entt, world_item_entt ) ) continue;
+      merge_into_stack( selected_entt, world_item_entt );
+      m_swap_item_cooldown_timer = sf::Time::Zero;
+      return;
+    }
+  }
+
   Sys::SpriteKey existing_player_inventory_type;
 
   // drop the selected slot's item if it has one
@@ -412,6 +435,11 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
   if ( reg().all_of<Cmp::Inventory::StingDamage>( inventory_slot_entt ) )
   {
     reg().emplace_or_replace<Cmp::Inventory::StingDamage>( world_item_entt );
+  }
+  // the whole stack drops as one world item
+  if ( const auto *stack_cmp = reg().try_get<Cmp::Inventory::StackCount>( inventory_slot_entt ) )
+  {
+    reg().emplace_or_replace<Cmp::Inventory::StackCount>( world_item_entt, stack_cmp->m_count );
   }
 
   if ( const auto *offering_cmp = reg().try_get<Cmp::Npc::SummonOffering>( inventory_slot_entt ) )
@@ -581,6 +609,10 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
     reg.emplace_or_replace<Cmp::Inventory::WearLevel>( inventory_entity, health_cmp->m_level );
   }
   if ( reg.all_of<Cmp::Inventory::StingDamage>( world_item_entt ) ) { reg.emplace_or_replace<Cmp::Inventory::StingDamage>( inventory_entity ); }
+  if ( const auto *stack_cmp = reg.try_get<Cmp::Inventory::StackCount>( world_item_entt ) )
+  {
+    reg.emplace_or_replace<Cmp::Inventory::StackCount>( inventory_entity, stack_cmp->m_count );
+  }
 
   // now destroy the world item entt
   get_systems_event_queue().trigger( Events::DestroyPlantEvent( world_item_entt ) );
@@ -599,6 +631,46 @@ void InventorySystem::pickup_world_item( entt::registry &reg, entt::entity world
     // enqueued rather than triggered, as callers may still be iterating registry views
     get_systems_event_queue().enqueue( Events::ItemPickedUpEvent( picked_up_item ) );
   }
+}
+
+bool InventorySystem::merge_into_stack( entt::entity slot_entt, entt::entity world_item_entt )
+{
+  if ( not Utils::Player::can_stack( reg(), slot_entt, world_item_entt ) ) return false;
+  const int max_stack = Sys::PersistSystem::get<Cmp::Persist::InventoryStackSize>( reg() ).get_value();
+  const int slot_count = Utils::Player::get_stack_count( reg(), slot_entt );
+  const int ground_count = Utils::Player::get_stack_count( reg(), world_item_entt );
+  const int taken = std::min( max_stack - slot_count, ground_count );
+  if ( taken <= 0 ) return false;
+
+  // copy the item key now, the world item entt may be destroyed below
+  const Sys::ItemKey picked_up_item = reg().get<Cmp::WorldItem>( world_item_entt ).item_type;
+
+  // the same effects as any other pickup, see pickup_world_item()
+  const auto spawn_action = Utils::Player::apply_action_from_world_item<Cmp::SpawnAction>( reg(), world_item_entt );
+  if ( const auto *world_item_pos_cmp = reg().try_get<Cmp::Position>( world_item_entt ) )
+  {
+    trigger_side_effects( spawn_action, *world_item_pos_cmp, world_item_entt );
+  }
+
+  reg().emplace_or_replace<Cmp::Inventory::StackCount>( slot_entt, slot_count + taken );
+  if ( reg().valid( world_item_entt ) )
+  {
+    if ( ground_count > taken ) { reg().emplace_or_replace<Cmp::Inventory::StackCount>( world_item_entt, ground_count - taken ); }
+    else
+    {
+      if ( auto item_sm = m_item_sm.lock() )
+      {
+        if ( auto *pos_cmp = reg().try_get<Cmp::Position>( world_item_entt ) ) item_sm->remove( world_item_entt, *pos_cmp );
+      }
+      reg().destroy( world_item_entt );
+    }
+  }
+
+  SPDLOG_DEBUG( "Stacked {} x{} into inventory slot (now {})", picked_up_item.str(), taken, slot_count + taken );
+  m_sound_bank.get_effect( "equip_inventory" ).play();
+  // enqueued rather than triggered, as callers may still be iterating registry views
+  get_systems_event_queue().enqueue( Events::ItemPickedUpEvent( picked_up_item ) );
+  return true;
 }
 
 void InventorySystem::try_consume_item()
@@ -682,10 +754,10 @@ void InventorySystem::consume_inventory( sf::Time dt )
     reg().remove<Cmp::Player::ConsumeTimer>( Utils::Player::get_entity( reg() ) );
     const auto consume_action = Utils::Player::apply_action_from_inventory_item<Cmp::ConsumeAction>( reg() );
     trigger_side_effects( consume_action, Utils::Player::get_position( reg() ) );
-    // empty the selected slot itself, not another slot holding the same item
+    // use up one item of the selected slot itself, not another slot holding the same item
     if ( auto inventory_entt = Utils::Player::get_inventory_entt( reg() ); inventory_entt != entt::null )
     {
-      Factory::Player::clear_inventory_slot( reg(), inventory_entt );
+      Factory::Player::take_one_from_slot( reg(), inventory_entt );
     }
   }
 }
