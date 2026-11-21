@@ -369,6 +369,7 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
     // keep the frame the item already has (e.g. rolled by sprite.random when it first spawned)
     const auto *slot_anim_cmp = reg().try_get<Cmp::AnimData>( inventory_slot_entt );
     const std::size_t sprite_idx = slot_anim_cmp ? slot_anim_cmp->getFrameIndexOffset() : inventory_slot_cmp->m_item->sprite_index();
+    // a new, unrotated multiblock: a plant dropped on its side (see PlantSystem::on_plant_killed_event) stands upright again
     auto [mb_entt, segment_entt_list] = Factory::Multiblock::add_multiblock_with_segments<Cmp::PlantMultiBlock, Cmp::PlantSegment>(
         reg(), plant_pos, spritesheet, /*ss_index=*/sprite_idx, /*zorder=*/0, m_reserved_sm.lock().get() );
 

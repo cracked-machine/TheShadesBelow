@@ -1,4 +1,6 @@
 #include <Audio/SoundBank.hpp>
+#include <Components/AbsoluteOffset.hpp>
+#include <Components/AbsoluteRotation.hpp>
 #include <Components/DroppedBy.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
@@ -267,14 +269,24 @@ void PlantSystem::on_plant_killed_event( const Events::PlantKilledEvent &event )
   // drop one random item of the destroy_action reward (drop, forage or the plant itself, see items.json) beside the
   // plant. It is a reward for the player, so it may be picked up straight into an empty slot (items.json "auto_pickup").
   // Plants without a destroy_action.reward.item drop nothing.
+  // A dropped plant item (e.g. the plant itself) lies on its side: its 1x2 sprite is rotated 90 degrees about the centre
+  // of its top tile, so the top stays on the drop cell and the base lies in the cell to its left. Replanting builds a
+  // fresh, unrotated multiblock (see InventorySystem), so it stands upright again.
+  const auto lay_plant_on_side = [this]( entt::entity item_entt )
+  {
+    const auto *item_cmp = reg().try_get<Cmp::WorldItem>( item_entt );
+    if ( not item_cmp or not item_cmp->item_type.str().starts_with( "item.plant." ) ) return;
+    reg().emplace_or_replace<Cmp::AbsoluteRotation>( item_entt, 90.f );
+    reg().emplace_or_replace<Cmp::AbsoluteOffset>( item_entt, Constants::kGridSizePxF / 2.f );
+  };
   if ( destroy_reward and destroy_reward->target == Cmp::ActionReward::Target::DEFAULT )
   {
     get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( find_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
                                                                 Sys::ItemStore::instance().pick_reward_item( *destroy_reward ), "drop_loot", 0.f,
-                                                                false, 0, entt::null, {}, /*sting=*/true, /*player_reward=*/true ) );
+                                                                false, 0, entt::null, lay_plant_on_side, /*sting=*/true, /*player_reward=*/true ) );
   }
   // the weapon occupies the inventory, so an inventory reward is dropped nearby
-  else if ( destroy_reward ) { grant_item_reward( *destroy_reward, plant_bounds, plant_entt ); }
+  else if ( destroy_reward ) { grant_item_reward( *destroy_reward, plant_bounds, plant_entt, lay_plant_on_side ); }
   const auto destroy_action = Utils::Player::apply_action_from_world_item<Cmp::DestroyAction>( reg(), plant_entt );
 
   trigger_side_effects( destroy_action, plant_pos_cmp, plant_entt );
