@@ -57,10 +57,6 @@
 #include <Components/Persistent/GraveOddsNpcTrap.hpp>
 #include <Components/Persistent/GraveOddsTalisman.hpp>
 #include <Components/Persistent/GraveOddsTorch.hpp>
-#include <Components/Persistent/GraveTrailGuideColour.hpp>
-#include <Components/Persistent/GraveTrailNominalHopCount.hpp>
-#include <Components/Persistent/GraveTrailNominalHopDistance.hpp>
-#include <Components/Persistent/GraveTrailStartCount.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
@@ -88,6 +84,7 @@
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcCrowFlightSpeed.hpp>
+#include <Components/Persistent/NpcCrowGuideApproachDistance.hpp>
 #include <Components/Persistent/NpcCrowMaxPerchWait.hpp>
 #include <Components/Persistent/NpcCrowPerchRange.hpp>
 #include <Components/Persistent/NpcCrowPerchSpeed.hpp>
@@ -456,6 +453,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::NpcCrowPerchSpeed>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::NpcCrowPerchRange>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::NpcCrowMaxPerchWait>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::NpcCrowGuideApproachDistance>( reg() ).render_widget();
 
     // Audio
     ImGui::SeparatorText( "Audio" );
@@ -475,9 +473,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     ImGui::SeparatorText( "Procedural Generation" );
 
     Sys::PersistSystem::get<Cmp::Persist::GraveNumMultiplier>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalHopDistance>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalHopCount>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::GraveTrailStartCount>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::BloodMinChance>( reg() ).render_widget();
 
@@ -493,7 +488,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
       render_vslider_row( odds_settings );
     }
     Sys::PersistSystem::get<Cmp::Persist::GraveCountMargin>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::GraveTrailGuideColour>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ExitKeyRequirement>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlantsPerType>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::HealingBuildingOverride>( reg() ).render_widget();

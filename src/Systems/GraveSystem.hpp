@@ -39,9 +39,8 @@ private:
   //! @param event
   void on_player_action( const Events::PlayerActionEvent &event );
 
-  //! @brief Handler for Events::AltarActivatedEvent. Tags Cmp::Persist::GraveTrailStartCount random un-exhumed graves, at least
-  //! 10 grid cells clear of the altar, with Cmp::Grave::TrailStart. Each start faces a different edge of the altar until all
-  //! four edges have one. Exhuming any one of them starts the key grave trail.
+  //! @brief Handler for Events::AltarActivatedEvent. Tags one random un-exhumed grave, out of view if possible, with
+  //! Cmp::Grave::KeyGrave and sends Events::CrowGuideEvent so a crow leads the player to it.
   //! @param event
   void on_altar_activated( const Events::AltarActivatedEvent &event );
 
@@ -66,23 +65,6 @@ private:
   //! @param grave_anim_cmp
   void apply_dig_hit( entt::entity grave_entity, Cmp::Grave::MultiBlock &grave_cmp, Cmp::AnimData &grave_anim_cmp );
 
-  //! @brief Outcome of pick_next_trail_grave(), telling the caller whether the trail has ended
-  enum class TrailStep {
-    ADVANCED, //!< the trail moved on to a new grave
-    COMPLETE, //!< the trail has run its full length and ends here, at the exit key
-    NO_GRAVES //!< no un-exhumed graves are left to point at, so the trail ends here early
-  };
-
-  //! @brief Point source_entt's Cmp::Grave::TrailMarker arrow at a random un-exhumed grave and give that grave the next Cmp::Grave::TrailMarker
-  //! @details Every other Cmp::Grave::TrailMarker is removed first, so only the latest arrow is shown. The target is
-  //! picked from graves within Cmp::Persist::GraveTrailNominalHopDistance plus the level depth grid cells, preferring
-  //! ones that don't lie back the way the player came; if none are in range, the nearest grave is used instead.
-  //! @param source_entt the grave just exhumed
-  //! @return TrailStep::COMPLETE if the trail has run its full length (Cmp::Persist::GraveTrailNominalHopCount plus the
-  //! level depth), TrailStep::NO_GRAVES if no graves are left to point at, otherwise TrailStep::ADVANCED. On either of
-  //! the first two the caller ends the trail with finish_trail().
-  TrailStep pick_next_trail_grave( entt::entity source_entt );
-
   //! @brief What opened a grave, which decides where its loot/key/bomb ends up
   enum class ExhumedBy {
     PLAYER, //!< dug by the player: loot drops at the player, bombs centre on them
@@ -99,11 +81,11 @@ private:
   //! @param by what opened the grave
   void open_grave( entt::entity grave_entity, Cmp::AnimData &grave_anim_cmp, ExhumedBy by );
 
-  //! @brief End the grave trail at grave_entity: drop the exit key beside the grave (blast proof) for the player to pick
-  //! up, restart the trail and send Events::GraveTrailCompleteEvent so AltarSystem releases the activated altar.
+  //! @brief Drop the exit key beside the key grave (blast proof) for the player to pick up, send its guide crow away
+  //! and send Events::KeyGraveExhumedEvent so AltarSystem releases the activated altar.
   //! The player can carry the exit key to the exit, or offer it at an altar for the crypt key.
-  //! @param grave_entity the last grave of the trail
-  void finish_trail( entt::entity grave_entity );
+  //! @param grave_entity the key grave
+  void drop_exit_key( entt::entity grave_entity );
 
   //! @brief Pick a random item from the pool, drop it as loot, and apply its Cmp::SpawnAction modifiers to the player.
   //! ExhumedBy::PLAYER drops it at the player; ExhumedBy::BOMB drops it beside the grave, spared by the blast.

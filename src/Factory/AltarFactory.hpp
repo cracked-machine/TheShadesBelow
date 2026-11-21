@@ -9,7 +9,7 @@ namespace Game::Factory::Altar
 {
 
 //! @brief Tag of the centre column particles shown, along with the altar's active sprite, while a graveyard altar is
-//! activated (Cmp::Altar::Activated) and its grave trail is in progress.
+//! activated (Cmp::Altar::Activated) and its key grave is yet to be exhumed.
 inline constexpr const char *kActivatedParticleTag = "graveyard.altar.particle.activated";
 //! @brief Tag of the sparkle particles shown, along with the altar's active sprite, while the player holds its extra life.
 inline constexpr const char *kExtraLifeParticleTag = "altar.particle.extralife";
@@ -28,8 +28,8 @@ void create_altar_offering_anim( entt::registry &reg, Cmp::Position pos, Sys::Sp
 Sys::SpriteKey get_altar_sprite( const Sys::SpriteKey &sprite_type, bool active );
 
 //! @brief Remove the extra life effect from every altar in the scene: revert the active sprites and destroy the extra
-//! life particles. The candles are left as they are, and so is an altar activated for a grave trail
-//! (Cmp::Altar::Activated), which keeps its active sprite until the trail is complete.
+//! life particles. The candles are left as they are, and so is an altar activated for a key grave
+//! (Cmp::Altar::Activated), which keeps its active sprite until the key grave is exhumed.
 //! @param reg
 void deactivate_altars( entt::registry &reg );
 

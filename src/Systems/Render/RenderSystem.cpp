@@ -181,6 +181,7 @@ void RenderSystem::render_rectbounds( Cmp::RectBounds &bounds, sf::Color color )
 }
 
 sf::View RenderSystem::s_world_view{};
+float RenderSystem::s_hud_left_inset{ 0.f };
 ZOrderQueue RenderSystem::s_zorder_queue{};
 
 } // namespace Game::Sys

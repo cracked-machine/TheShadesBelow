@@ -72,7 +72,7 @@
     {
       "id": "blood_trail_in_progress",
       "trigger": "BloodRefusedEvent",
-      "text": "An altar has already been activated.\nComplete its grave trail before activating another altar.",
+      "text": "An altar has already been activated.\nFollow the crow to the key grave before activating another altar.",
       "position": "above_source",
       "frequency": "always",
       "duration_s": 4.0

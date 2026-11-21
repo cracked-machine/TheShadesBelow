@@ -8,7 +8,7 @@ namespace Game::Events
 
 //! @brief Triggered by AltarSystem once an altar's blood quota (Cmp::Persist::AltarBloodQuota) is filled, and it
 //! becomes Cmp::Altar::Activated.
-//! GraveSystem responds by choosing the key grave trail start graves.
+//! GraveSystem responds by choosing the key grave and sending a guide crow to it.
 struct AltarActivatedEvent
 {
   //! @brief The activated altar's bounds

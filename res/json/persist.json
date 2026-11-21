@@ -482,30 +482,6 @@
     "detail": "Grave Number Multiplier",
     "format": "%d"
   },
-  "GraveTrailNominalHopDistance": {
-    "type": "int",
-    "value": 15,
-    "min_value": 3,
-    "max_value": 50,
-    "detail": "Grave Trail Nominal Hop Distance (grid)",
-    "format": "%d"
-  },
-  "GraveTrailNominalHopCount": {
-    "type": "int",
-    "value": 3,
-    "min_value": 1,
-    "max_value": 10,
-    "detail": "Grave Trail Nominal Hop Count",
-    "format": "%d"
-  },
-  "GraveTrailStartCount": {
-    "type": "int",
-    "value": 3,
-    "min_value": 1,
-    "max_value": 5,
-    "detail": "Grave Trail Start Count",
-    "format": "%d"
-  },
   "MaxLevelDepth": {
     "type": "int",
     "value": 5,
@@ -556,7 +532,7 @@
   },
   "GraveOddsBlood": {
     "type": "int",
-    "value": 5,
+    "value": 30,
     "min_value": 0,
     "max_value": 100,
     "detail": "Blood",
@@ -577,15 +553,6 @@
     "max_value": 100,
     "detail": "Grave Count Margin",
     "format": "%d%%"
-  },
-  "GraveTrailGuideColour": {
-    "type": "sf::Color",
-    "value": {
-      "r": 255,
-      "g": 140,
-      "b": 0,
-      "a": 255
-    }
   },
   "GraveyardProcGenBirthThreshold": {
     "type": "int",
@@ -730,6 +697,14 @@
     "max_value": 32.0,
     "detail": "Crow Perch Range",
     "format": "%.1f pixels"
+  },
+  "NpcCrowGuideApproachDistance": {
+    "type": "float",
+    "value": 3.0,
+    "min_value": 1.0,
+    "max_value": 10.0,
+    "detail": "Crow Guide Approach Distance",
+    "format": "%.1f tiles"
   },
   "NpcCrowPerchSpeed": {
     "type": "float",

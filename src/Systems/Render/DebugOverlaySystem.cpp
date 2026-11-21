@@ -23,8 +23,7 @@
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Grave/Segment.hpp>
-#include <Components/Grave/TrailMarker.hpp>
-#include <Components/Grave/TrailStart.hpp>
+#include <Components/Grave/KeyGrave.hpp>
 #include <Components/Hazard/CorruptionCell.hpp>
 #include <Components/Hazard/SinkholeCell.hpp>
 #include <Components/Inventory/WorldItem.hpp>
@@ -102,8 +101,7 @@ constexpr sf::Color kPassageBlockColour = sf::Color::Black;
 constexpr sf::Color kSelectedPositionColour = sf::Color::Yellow;
 constexpr sf::Color kHalfViewColour = sf::Color::Red;
 constexpr sf::Color kGraveNpcTrapColour = sf::Color::Blue;
-constexpr sf::Color kGraveTrailMarkerColour = sf::Color::Green;
-constexpr sf::Color kGraveTrailStartColour = sf::Color::Yellow;
+constexpr sf::Color kKeyGraveColour = sf::Color::Yellow;
 
 //! @brief Convert an sf::Color to an ImGui colour.
 ImVec4 to_imvec4( sf::Color c ) { return { c.r / 255.f, c.g / 255.f, c.b / 255.f, c.a / 255.f }; }
@@ -249,21 +247,12 @@ void DebugOverlaySystem::render_debug_stats()
     }
   }
 
-  if ( m_highlights.grave_trail_markers )
+  if ( m_highlights.key_grave )
   {
-    for ( auto [grave_entt, grave_mb, trail_cmp] : reg().view<Cmp::Grave::MultiBlock, Cmp::Grave::TrailMarker>().each() )
+    for ( auto [grave_entt, grave_mb] : reg().view<Cmp::Grave::MultiBlock, Cmp::Grave::KeyGrave>().each() )
     {
       if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), grave_mb ) ) continue;
-      render_square( grave_mb.position, grave_mb.size, kGraveTrailMarkerColour );
-    }
-  }
-
-  if ( m_highlights.grave_trail_start )
-  {
-    for ( auto [grave_entt, grave_mb] : reg().view<Cmp::Grave::MultiBlock, Cmp::Grave::TrailStart>().each() )
-    {
-      if ( not Utils::is_visible_in_view( RenderSystem::get_world_view(), grave_mb ) ) continue;
-      render_square( grave_mb.position, grave_mb.size, kGraveTrailStartColour );
+      render_square( grave_mb.position, grave_mb.size, kKeyGraveColour );
     }
   }
 
@@ -326,8 +315,7 @@ void DebugOverlaySystem::render_ui_highlight_options()
 
     ImGui::SeparatorText( "Graveyard" );
     row( "Grave NPC traps", m_highlights.grave_npc_traps, kGraveNpcTrapColour );
-    row( "Grave trail markers", m_highlights.grave_trail_markers, kGraveTrailMarkerColour );
-    row( "Grave trail start", m_highlights.grave_trail_start, kGraveTrailStartColour );
+    row( "Key grave", m_highlights.key_grave, kKeyGraveColour );
 
     ImGui::SeparatorText( "General" );
     row( "Selected positions", m_highlights.selected_positions, kSelectedPositionColour );
@@ -526,8 +514,7 @@ void DebugOverlaySystem::render_ui_entity_inspect()
     if ( reg().all_of<Cmp::WorldItem>( entity ) ) text_line( " WorldItem", sf::Color::Green );
     if ( reg().all_of<Cmp::WorldTile>( entity ) ) text_line( " WorldTile", sf::Color::Green );
     if ( reg().all_of<Cmp::Player::Illuminated>( entity ) ) text_line( " Illuminated", sf::Color::Yellow );
-    if ( reg().all_of<Cmp::Grave::TrailMarker>( entity ) ) text_line( " TrailMarker", sf::Color::Green );
-    if ( reg().all_of<Cmp::Grave::TrailStart>( entity ) ) text_line( " TrailStart", sf::Color::Yellow );
+    if ( reg().all_of<Cmp::Grave::KeyGrave>( entity ) ) text_line( " KeyGrave", sf::Color::Yellow );
     if ( auto *cmp = reg().try_get<Cmp::Npc::SpawnedBy>( entity ) ) text_line( " SpawnedBy: " + cmp->m_source.str(), sf::Color::White );
 
     if ( auto *cmp = reg().try_get<Cmp::UUID>( entity ) ) text_line( " " + cmp->str(), sf::Color::White );

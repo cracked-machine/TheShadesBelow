@@ -7,7 +7,7 @@ namespace Game::Events
 {
 
 //! @brief Notification that an altar refused the player's blood because an altar is already activated
-//! (Cmp::Altar::Activated), so its grave trail must be completed before any altar takes blood again.
+//! (Cmp::Altar::Activated), so its key grave must be exhumed before any altar takes blood again.
 //! @note Sent by Sys::AltarSystem. See Sys::TooltipOverlaySystem.
 struct BloodRefusedEvent
 {

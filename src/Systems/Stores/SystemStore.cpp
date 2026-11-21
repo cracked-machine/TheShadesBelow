@@ -23,7 +23,6 @@
 #include <Systems/ProcGen/DowsingGuideSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/ProcGen/PassageSystem.hpp>
-#include <Systems/ProcGen/TrailGuideSystem.hpp>
 #include <Systems/Render/GrimoireOverlaySystem.hpp>
 #include <Systems/Render/PauseOverlaySystem.hpp>
 #include <Systems/Render/DebugOverlaySystem.hpp>
@@ -73,7 +72,6 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
   emplace<Type::CellAutomataSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::DiffusionLtdAggrSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::DowsingGuideSystem>( m_initial_reg, window, sound_bank );
-  emplace<Type::TrailGuideSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::CorruptionHazardSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::CryptSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );
   emplace<Type::ExitSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );

@@ -35,7 +35,6 @@
 #include <Components/Player/Doglegs.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/FootstepType.hpp>
-#include <Components/Player/GraveTrail.hpp>
 #include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
@@ -311,7 +310,6 @@ void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
   registry.storage<Cmp::Position>();
   registry.storage<Cmp::Player::Character>();
   registry.storage<Cmp::Player::LevelDepth>();
-  registry.storage<Cmp::Player::GraveTrail>();
   registry.storage<Cmp::PlayerStats>();
   registry.storage<Cmp::Player::Wealth>();
   registry.storage<Cmp::Player::Curse>();

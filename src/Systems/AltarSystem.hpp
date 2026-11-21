@@ -9,7 +9,7 @@
 // clang-format off
 namespace Game::Cmp::Altar { class MultiBlock; }
 namespace Game::Cmp { struct ActionReward; struct UUID; }
-namespace Game::Events { class PlayerActionEvent; struct GraveTrailCompleteEvent; }
+namespace Game::Events { class PlayerActionEvent; struct KeyGraveExhumedEvent; }
 // clang-format on
 
 namespace Game::Sys
@@ -34,10 +34,10 @@ private:
   //! altar the player is near.
   void on_player_action( Events::PlayerActionEvent ev );
 
-  //! @brief Capture Events::GraveTrailCompleteEvent. Resets the activated altar: puts out its centre column, reverts its
+  //! @brief Capture Events::KeyGraveExhumedEvent. Resets the activated altar: puts out its centre column, reverts its
   //! inactive sprite, empties its Cmp::Altar::BloodCount and removes Cmp::Altar::Activated, so it (or any other altar)
   //! takes its blood quota again.
-  void on_grave_trail_complete( const Events::GraveTrailCompleteEvent &event );
+  void on_key_grave_exhumed( const Events::KeyGraveExhumedEvent &event );
 
   //! @brief Send Events::AltarApproachedEvent on the frame the player comes near a graveyard altar still waiting for
   //! blood. Once per approach: the player must leave every such altar before it is sent again.
@@ -55,7 +55,7 @@ private:
   bool try_offer_held_item( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
 
   //! @brief Activate a graveyard altar whose blood quota is filled: lights its centre column, marks it
-  //! Cmp::Altar::Activated and sends Events::AltarActivatedEvent so GraveSystem starts the grave trail.
+  //! Cmp::Altar::Activated and sends Events::AltarActivatedEvent so GraveSystem chooses the key grave.
   void activate_graveyard_altar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
 
   //! @brief Grant the item's "offering_action.reward" for this altar's location (see items.json). An item with no reward
@@ -95,8 +95,8 @@ private:
 
   //! @brief Light the altar: swap to its active sprite, add its centre particles and play the activate sound.
   //! @param particle_tag Factory::Altar::kExtraLifeParticleTag for an extra life (undone by
-  //! Factory::Player::remove_player_extra_life()), or Factory::Altar::kActivatedParticleTag for a grave trail (undone
-  //! by on_grave_trail_complete()).
+  //! Factory::Player::remove_player_extra_life()), or Factory::Altar::kActivatedParticleTag for a key grave hunt (undone
+  //! by on_key_grave_exhumed()).
   //! @note Does nothing if the altar is already active.
   void activate_altar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid, const char *particle_tag );
   //! @brief Play the offering animation/sound above the altar and start the activation cooldown

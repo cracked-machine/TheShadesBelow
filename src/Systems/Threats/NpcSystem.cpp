@@ -10,6 +10,7 @@
 #include <Components/DeathPosition.hpp>
 #include <Components/Direction.hpp>
 #include <Components/FootStepTimer.hpp>
+#include <Components/Grave/KeyGrave.hpp>
 #include <Components/Grave/ExitSegment.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
@@ -54,6 +55,7 @@
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcCrowFlightSpeed.hpp>
+#include <Components/Persistent/NpcCrowGuideApproachDistance.hpp>
 #include <Components/Persistent/NpcCrowMaxPerchWait.hpp>
 #include <Components/Persistent/NpcCrowPerchRange.hpp>
 #include <Components/Persistent/NpcCrowPerchSpeed.hpp>
@@ -62,6 +64,7 @@
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
 #include <Components/Plant/KillNpcTimer.hpp>
+#include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Mortality.hpp>
 #include <Components/Player/NoPath.hpp>
@@ -85,6 +88,7 @@
 #include <Components/ZOrderValue.hpp>
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/CrowDeliveryEvent.hpp>
+#include <Events/CrowGuideEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/DestroyPlantEvent.hpp>
 #include <Events/GrimoireItemUpdateEvent.hpp>
@@ -139,6 +143,7 @@ NpcSystem::NpcSystem( entt::registry &reg, sf::RenderWindow &window, Audio::Soun
   std::ignore = get_systems_event_queue().sink<Events::DestroyNpcEvent>().connect<&NpcSystem::on_destroy_npc_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::CreateNpcEvent>().connect<&NpcSystem::on_create_npc_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::CrowDeliveryEvent>().connect<&NpcSystem::on_crow_delivery_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::CrowGuideEvent>().connect<&NpcSystem::on_crow_guide_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::NpcProximityEvent>().connect<&NpcSystem::on_npc_proximity_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::NpcCollisionEvent>().connect<&NpcSystem::on_npc_collision_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::NpcProjectileEvent>().connect<&NpcSystem::on_npc_projectile_event>( this );
@@ -320,6 +325,78 @@ void NpcSystem::on_crow_delivery_event( const Events::CrowDeliveryEvent &event )
   anim_cmp.m_flip_x = dir.x < 0.0f;
   anim_cmp.m_enabled = true;
   SPDLOG_INFO( "Crow {} delivering {} ({}%) to [{},{}]", static_cast<int>( crow_entt ), event.m_item.str(), best_level, cell->x, cell->y );
+}
+
+void NpcSystem::on_crow_guide_event( const Events::CrowGuideEvent &event )
+{
+  if ( not reg().valid( event.key_grave ) ) return;
+
+  // takes off from the altar the player has just lit
+  const sf::Vector2f crow_size = npc_sprite_size( "npc.crow" );
+  auto crow_entt = Factory::Npc::create_npc( reg(), Cmp::Position( event.altar_position.getCenter() - crow_size / 2.0f, crow_size ), "npc.crow" );
+  if ( crow_entt == entt::null )
+  {
+    SPDLOG_WARN( "Failed to create the guide crow for key grave {}", static_cast<uint32_t>( event.key_grave ) );
+    return;
+  }
+  apply_npc_spawn_action( crow_entt );
+  auto &crow_cmp = reg().get<Cmp::Npc::Crow>( crow_entt );
+  crow_cmp.guide_grave = event.key_grave;
+  launch_guide_leg( crow_entt, crow_cmp, reg().get<Cmp::Position>( crow_entt ), reg().get<Cmp::AnimData>( crow_entt ) );
+  SPDLOG_INFO( "Guide crow {} leading to key grave {}", static_cast<int>( crow_entt ), static_cast<uint32_t>( event.key_grave ) );
+}
+
+void NpcSystem::launch_guide_leg( entt::entity crow_entt, Cmp::Npc::Crow &crow_cmp, const Cmp::Position &crow_pos_cmp, Cmp::AnimData &anim_cmp )
+{
+  const auto *grave_pos_cmp = reg().valid( crow_cmp.guide_grave ) ? reg().try_get<Cmp::Position>( crow_cmp.guide_grave ) : nullptr;
+  if ( not grave_pos_cmp )
+  {
+    crow_cmp.flee = true;
+    return;
+  }
+
+  const sf::View &world_view = Sys::RenderSystem::get_world_view();
+  const sf::Vector2f player_centre = Utils::Player::get_position( reg() ).getCenter();
+  std::optional<sf::Vector2f> edge;
+  if ( not Utils::is_visible_in_view( Utils::calculate_view_bounds( world_view ), *grave_pos_cmp ) )
+  {
+    const auto edge_point = Cmp::Player::ArrowCompass::edge_point( *grave_pos_cmp, player_centre, world_view, Sys::RenderSystem::get_hud_left_inset() );
+    if ( edge_point ) edge = edge_point->first;
+  }
+
+  sf::Vector2f landing;
+  if ( edge )
+  {
+    // stand on open ground near the edge point rather than in a wall, if there is any
+    auto npc_navmesh = m_npc_navmesh.lock();
+    auto ghost_navmesh = m_ghost_navmesh.lock();
+    auto loot_sm = m_loot_sm.lock();
+    auto reserved_sm = m_reserved_sm.lock();
+    const Utils::SpawnGrids grids{ npc_navmesh.get(), ghost_navmesh.get(), loot_sm.get(), reserved_sm.get(), m_item_sm.lock().get() };
+    const sf::Vector2f half_grid = Constants::kGridSizePxF / 2.0f;
+    const auto cell = Utils::find_random_cell_near( sf::FloatRect( *edge - half_grid, Constants::kGridSizePxF ), kCrowGuideLandingRadius,
+                                                    [&]( const sf::Vector2f &cell_pos )
+    { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); } );
+    landing = cell ? *cell + half_grid : *edge;
+    crow_cmp.on_key_grave = false;
+  }
+  else
+  {
+    // the grave is in view: perch on top of it, top-left aligned with the grave
+    landing = { grave_pos_cmp->getCenter().x, grave_pos_cmp->position.y + crow_pos_cmp.size.y / 2.0f };
+    crow_cmp.on_key_grave = true;
+  }
+
+  crow_cmp.landing_centre = landing;
+  crow_cmp.perch_target_x.reset();
+  crow_cmp.perch_wait = sf::Time::Zero;
+  const sf::Vector2f offset = landing - crow_pos_cmp.getCenter();
+  crow_cmp.flight_direction = offset.lengthSquared() > 0.0f ? offset.normalized() : sf::Vector2f( 0.0f, -1.0f );
+  reg().emplace_or_replace<Cmp::Direction>( crow_entt, *crow_cmp.flight_direction );
+  anim_cmp.m_sprite_type = "sprite.crow.fly";
+  // the sprite faces east, so mirror it to fly west
+  anim_cmp.m_flip_x = crow_cmp.flight_direction->x < 0.0f;
+  anim_cmp.m_enabled = true;
 }
 
 void NpcSystem::drop_crow_item( Cmp::Npc::Crow &crow_cmp )
@@ -778,6 +855,7 @@ void NpcSystem::update_crows( sf::Time dt )
   const float perch_speed = Sys::PersistSystem::get<Cmp::Persist::NpcCrowPerchSpeed>( reg() ).get_value();
   const float perch_range = Sys::PersistSystem::get<Cmp::Persist::NpcCrowPerchRange>( reg() ).get_value();
   const float max_perch_wait = Sys::PersistSystem::get<Cmp::Persist::NpcCrowMaxPerchWait>( reg() ).get_value();
+  const float guide_approach_px = Constants::kGridSizePxF.x * Sys::PersistSystem::get<Cmp::Persist::NpcCrowGuideApproachDistance>( reg() ).get_value();
   const sf::FloatRect view_bounds = Utils::calculate_view_bounds( Sys::RenderSystem::get_world_view() );
   const Cmp::Position player_pos = Utils::Player::get_position( reg() );
 
@@ -804,6 +882,45 @@ void NpcSystem::update_crows( sf::Time dt )
       reg().patch<Cmp::ZOrderValue>( crow_entt, [&]( auto &zorder_cmp ) { zorder_cmp.set( zorder ); } );
       // still flying in from off screen, so no off-view kill check
       continue;
+    }
+
+    // guide: fly to the landing point, then wait there for the player to catch up
+    if ( crow_cmp.guide_grave != entt::null and not crow_cmp.flee )
+    {
+      if ( not reg().valid( crow_cmp.guide_grave ) or not reg().all_of<Cmp::Grave::KeyGrave>( crow_cmp.guide_grave ) )
+      {
+        // the key grave is gone without this crow being sent away: fly off as if it had been
+        crow_cmp.flee = true;
+      }
+      else if ( crow_cmp.landing_centre )
+      {
+        const sf::Vector2f to_landing = *crow_cmp.landing_centre - pos_cmp.getCenter();
+        const float step = flight_speed * dt.asSeconds();
+        if ( to_landing.length() > step ) { pos_cmp.position += to_landing.normalized() * step; }
+        else
+        {
+          // touch down: perch here, pacing either side of the landing point
+          pos_cmp.position = *crow_cmp.landing_centre - pos_cmp.size / 2.0f;
+          crow_cmp.perch_center_x = crow_cmp.landing_centre->x;
+          crow_cmp.landing_centre.reset();
+          crow_cmp.flight_direction.reset();
+          anim_cmp.m_sprite_type = "sprite.crow.idle";
+        }
+        const float zorder = Sys::SpriteStore::instance().get( anim_cmp.m_sprite_type ).zorder( 0, pos_cmp.position.y );
+        reg().patch<Cmp::ZOrderValue>( crow_entt, [&]( auto &zorder_cmp ) { zorder_cmp.set( zorder ); } );
+        continue;
+      }
+      else
+      {
+        // the player has caught up, or has left the crow behind: fly on. On the key grave, only being left behind
+        // moves the crow; there it waits for the grave to be exhumed
+        const bool approached = not crow_cmp.on_key_grave and ( player_pos.getCenter() - pos_cmp.getCenter() ).length() <= guide_approach_px;
+        if ( approached or not Utils::is_visible_in_view( view_bounds, pos_cmp ) )
+        {
+          launch_guide_leg( crow_entt, crow_cmp, pos_cmp, anim_cmp );
+          continue;
+        }
+      }
     }
 
     if ( not crow_cmp.flee )
@@ -853,7 +970,11 @@ void NpcSystem::update_crows( sf::Time dt )
         set_perch_direction();
       }
       else { pos_cmp.position.x += std::copysign( step, remaining ); }
-      if ( auto navmesh = navmesh_for( crow_entt ) ) { navmesh->update( crow_entt, old_position, pos_cmp ); }
+      // a guide crow lands wherever it is leading the player, so it is never on a navmesh
+      if ( crow_cmp.guide_grave == entt::null )
+      {
+        if ( auto navmesh = navmesh_for( crow_entt ) ) { navmesh->update( crow_entt, old_position, pos_cmp ); }
+      }
       continue;
     }
     if ( not crow_cmp.flight_direction )

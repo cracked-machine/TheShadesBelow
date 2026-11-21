@@ -17,8 +17,8 @@
 // clang-format off
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
-namespace Game::Events { class UpdateNpcPositionEvent; class DestroyNpcEvent; struct CreateNpcEvent; struct CrowDeliveryEvent; struct NpcProximityEvent; struct NpcCollisionEvent; struct NpcProjectileEvent; }
-namespace Game::Cmp { class Position; class BaseAction; }
+namespace Game::Events { class UpdateNpcPositionEvent; class DestroyNpcEvent; struct CreateNpcEvent; struct CrowDeliveryEvent; struct CrowGuideEvent; struct NpcProximityEvent; struct NpcCollisionEvent; struct NpcProjectileEvent; }
+namespace Game::Cmp { class Position; class BaseAction; class AnimData; }
 namespace Game::Cmp { class Direction; class LerpPosition; } 
 namespace Game::Cmp::Player { class Mortality; } 
 namespace Game::Cmp::Npc { class NPC; class Shockwave; struct Crow; }
@@ -117,6 +117,20 @@ private:
   //! @param event
   void on_crow_delivery_event( const Game::Events::CrowDeliveryEvent &event );
 
+  //! @brief Send a guide crow from the activated altar towards the key grave (see Events::CrowGuideEvent). It is never put
+  //! on a navmesh: it flies over everything.
+  //! @param event
+  void on_crow_guide_event( const Game::Events::CrowGuideEvent &event );
+
+  //! @brief Send a guide crow on its next leg: onto the key grave if it is in view, otherwise to land at the view edge
+  //! (clear of the HUD) on the line from the player towards the grave, snapped to a free cell nearby if there is one.
+  //! Makes the crow flee if its grave is gone.
+  //! @param crow_entt
+  //! @param crow_cmp
+  //! @param crow_pos_cmp
+  //! @param anim_cmp
+  void launch_guide_leg( entt::entity crow_entt, Cmp::Npc::Crow &crow_cmp, const Cmp::Position &crow_pos_cmp, Cmp::AnimData &anim_cmp );
+
   //! @brief Drop a courier crow's carried item on its drop cell, or on the nearest free cell if that one has been taken
   //! since, and clear Cmp::Npc::Crow::carried.
   //! @param crow_cmp
@@ -172,7 +186,9 @@ private:
 
   //! @brief Each perched Cmp::Npc::Crow randomly waits a while or moves to a random spot along its grave. Fly any fleeing crow in a straight
   //! line away from the player, over all obstacles, and destroy it once it has left the current view. A courier crow
-  //! (Cmp::Npc::Crow::carried) flies in to its drop cell, drops its item and flies back out the way it came.
+  //! (Cmp::Npc::Crow::carried) flies in to its drop cell, drops its item and flies back out the way it came. A guide crow
+  //! (Cmp::Npc::Crow::guide_grave) flies to its landing point and perches there; it flies on (see launch_guide_leg())
+  //! when the player comes within Cmp::Persist::NpcCrowGuideApproachDistance or it drops out of view.
   void update_crows( sf::Time dt );
 
   //! @brief Azazel shoots a straight fireball at the player every Cmp::Persist::AzazelFireballCooldown while on screen,
@@ -271,6 +287,8 @@ private:
 
   //! @brief How many rings out from the player on_crow_delivery_event() searches for a free drop cell.
   static constexpr int kCrowDropRadius = 3;
+  //! @brief How many rings out from its view edge point launch_guide_leg() searches for a free cell for a guide crow.
+  static constexpr int kCrowGuideLandingRadius = 1;
 
   //! @brief Update NPC animation
   void update_animation();

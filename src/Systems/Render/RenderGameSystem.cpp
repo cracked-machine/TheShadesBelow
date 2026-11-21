@@ -6,7 +6,6 @@
 #include <Components/AbsoluteScale.hpp>
 #include <Components/AbsoluteTint.hpp>
 #include <Components/Altar/MultiBlock.hpp>
-#include <Components/Altar/TrailGuide.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Armed.hpp>
 #include <Components/BurrCount.hpp>
@@ -19,10 +18,8 @@
 #include <Components/Crypt/RoomLavaPit.hpp>
 #include <Components/Exit.hpp>
 #include <Components/FractalCurve.hpp>
-#include <Components/Grave/Exhumed.hpp>
 #include <Components/Grave/ExitMultiBlock.hpp>
 #include <Components/Grave/MultiBlock.hpp>
-#include <Components/Grave/TrailMarker.hpp>
 #include <Components/Greyscale.hpp>
 #include <Components/Hazard/SinkholeCorners.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
@@ -144,7 +141,6 @@ void RenderGameSystem::render_game( sf::Time dt, const PathFinding::SpatialHashG
   PROFILED( render_shockwaves() );
   PROFILED( render_arrow_compass() );
   PROFILED( render_crow_delivery_indicators() );
-  PROFILED( render_trail_markers() );
 
   PROFILED( render_lightning_strike( dt ) );
   PROFILED( render_obstacle_cracks() );
@@ -200,8 +196,6 @@ void RenderGameSystem::render_zorder_queue()
     {
       if ( entity == Utils::Player::get_inventory_entt( reg() ) ) { draw_world( Utils::Player::get_doglegs( reg() ).m_markers ); }
     }
-    // the chevrons from the activated altar to the trail start graves
-    else if ( auto *trail_guide = reg().try_get<Cmp::Altar::TrailGuide>( entity ) ) { draw_world( trail_guide->paths.m_markers ); }
   }
   if ( shadow_z ) render_flight_shadow();
 }
@@ -447,6 +441,7 @@ void RenderGameSystem::render_arrow_compass()
     // UI outlines are in screen pixels; scale the inset into world units
     update_compass_left_inset();
     const float left_inset = m_compass_left_inset_px * s_world_view.getSize().x / get_screen_view().getSize().x;
+    s_hud_left_inset = left_inset;
 
     compass.for_each_needle( [&]( const Cmp::Player::ArrowCompass::Needle &needle )
     {
@@ -528,21 +523,6 @@ void RenderGameSystem::render_crow_delivery_indicators()
     }
     it->second.setPosition( edge->first );
     draw_world( it->second );
-  }
-}
-
-void RenderGameSystem::render_trail_markers()
-{
-  const auto view_bounds = Utils::calculate_view_bounds( RenderSystem::get_world_view() );
-  const sf::Vector2f half_grid = Constants::kGridSizePxF / 2.f;
-  // an un-exhumed marker is the hidden target grave, so only the exhumed marker (GraveSystem keeps just the latest) shows an arrow
-  for ( auto [grave_entt, marker_cmp, grave_pos_cmp] : reg().view<Cmp::Grave::TrailMarker, Cmp::Position, Cmp::Grave::Exhumed>().each() )
-  {
-    if ( not Utils::is_visible_in_view( view_bounds, grave_pos_cmp ) ) continue;
-
-    // the origin is the sprite centre, so the arrow is turned in place over the middle of the grave
-    safe_render_sprite_world( "sprite.graveyard.arrowtrail", { grave_pos_cmp.getCenter() - half_grid, Constants::kGridSizePxF }, 0, { 1.f, 1.f }, 255,
-                              half_grid, marker_cmp.angle );
   }
 }
 

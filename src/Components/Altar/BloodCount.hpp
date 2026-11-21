@@ -7,7 +7,7 @@ namespace Game::Cmp::Altar
 {
 
 //! @brief The blood offered at a graveyard altar (the player's health, see Cmp::Persist::AltarBloodOfferingHealth). Once it reaches
-//! Cmp::Persist::AltarBloodQuota the altar activates and starts the grave trail (see Sys::AltarSystem).
+//! Cmp::Persist::AltarBloodQuota the altar activates and a crow leads the player to the key grave (see Sys::AltarSystem).
 class BloodCount
 {
 public:

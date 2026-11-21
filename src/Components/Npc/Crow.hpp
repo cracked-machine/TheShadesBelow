@@ -32,6 +32,13 @@ struct Crow
   entt::entity carried{ entt::null };
   //! @brief Top-left of the grid cell the carried item is dropped on.
   sf::Vector2f drop_position{};
+  //! @brief Cmp::Grave::KeyGrave grave this guide crow is leading the player to, or entt::null for any other crow.
+  //! See NpcSystem::on_crow_guide_event.
+  entt::entity guide_grave{ entt::null };
+  //! @brief World point a guide crow's centre is flying to land on. std::nullopt while perched.
+  std::optional<sf::Vector2f> landing_centre{ std::nullopt };
+  //! @brief Set once a guide crow is headed for, or perched on, the key grave itself rather than the view edge.
+  bool on_key_grave{ false };
 };
 
 } // namespace Game::Cmp::Npc

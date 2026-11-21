@@ -154,8 +154,7 @@ private:
     bool selected_positions{ false };
     bool half_view_bounds{ false };
     bool grave_npc_traps{ false };
-    bool grave_trail_markers{ false };
-    bool grave_trail_start{ false };
+    bool key_grave{ false };
   };
 
   //! @brief The current debug rectangle toggles.

@@ -6,7 +6,6 @@ namespace Game::Cmp::Persist
 {
 
 //! @brief The deepest level of a run. Completing it ends the run and returns to the title, see LevelCompleteScene.
-//! LevelGenerator also sizes every level's grave count for the trail length at this depth.
 class MaxLevelDepth : public BasePersistent<int>
 {
 public:

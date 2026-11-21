@@ -21,7 +21,6 @@
 #include <Components/Persistent/RuinProcGenMaxIterations.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
-#include <Components/Player/GraveTrail.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Random.hpp>
@@ -78,7 +77,6 @@
 #include <Systems/ProcGen/DLASystem.hpp>
 #include <Systems/ProcGen/DowsingGuideSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
-#include <Systems/ProcGen/TrailGuideSystem.hpp>
 #include <Systems/Render/DebugOverlaySystem.hpp>
 #include <Systems/Render/OverlayArbitrationSystem.hpp>
 #include <Systems/Render/PauseOverlaySystem.hpp>
@@ -144,7 +142,7 @@ void GraveyardScene::on_init()
   m_sys.find<Sys::Store::Type::ExitSystem>().init( m_reserved_sm );
   m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, nullptr, m_item_sm, m_hazard_sm );
 
-  // create the player, or increment the level counter and restart the grave trail for the new level
+  // create the player, or increment the level counter for the new level
   if ( m_reg.view<Cmp::Player::Character>().size() == 0 )
   {
     Factory::Player::create_player( m_reg );
@@ -153,7 +151,6 @@ void GraveyardScene::on_init()
   else
   {
     Utils::Player::get_level_depth( m_reg ).increment_count( 1 );
-    Utils::Player::trail_position( m_reg ) = Cmp::Player::GraveTrail{};
     // every level starts with the Cmp::Persist::Starting* stats; anima is kept if it is retained between levels
     // (otherwise LevelCompleteScene has normally converted it all to wealth already)
     Utils::Player::reset_stats_to_starting( m_reg, Sys::PersistSystem::get<Cmp::Persist::RetainAnimaBetweenLevels>( m_reg ).get_value() );
@@ -394,7 +391,6 @@ void GraveyardScene::do_update( sf::Time dt )
     PROFILED( m_sys.find<Sys::Store::Type::PlantSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::FootstepSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::DowsingGuideSystem>().update( dt ) );
-    PROFILED( m_sys.find<Sys::Store::Type::TrailGuideSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::GraveSystem>().update() );
     PROFILED( m_sys.find<Sys::Store::Type::CryptSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::AltarSystem>().update( dt ) );

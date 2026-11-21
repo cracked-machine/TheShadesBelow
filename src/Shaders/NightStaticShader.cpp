@@ -53,7 +53,7 @@ void NightStaticShader::update( entt::registry &reg, sf::Time dt )
   {
     auto ps_tag = particle_cmp.sprite->get_tag();
     // an altar activated by an extra life glows until the extra life is spent and its particles are destroyed.
-    // A graveyard altar activated for a grave trail adds no light of its own: the shader takes each pixel's colour from
+    // A graveyard altar activated for a key grave adds no light of its own: the shader takes each pixel's colour from
     // its strongest light, so a blue light amid the four corner flames would show as a hard-edged blue diamond
     const bool is_extra_life = ps_tag == Factory::Altar::kExtraLifeParticleTag;
     if ( not ps_tag.contains( "particle.flame" ) and not is_extra_life ) continue;

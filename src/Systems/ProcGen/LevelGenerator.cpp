@@ -35,7 +35,6 @@
 #include <Components/Persistent/GraveOddsNpcTrap.hpp>
 #include <Components/Persistent/GraveOddsTalisman.hpp>
 #include <Components/Persistent/GraveOddsTorch.hpp>
-#include <Components/Persistent/GraveTrailNominalHopCount.hpp>
 #include <Components/Persistent/HealingBuildingOverride.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/PlantsPerType.hpp>
@@ -543,7 +542,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos,
 
   // the altar is not spawned here: graveyard.json places it, see build_scene_from_data()
 
-  // CRYPT - one crypt serves every grave trail's crypt key, whichever altar started it
+  // CRYPT - one crypt serves every key grave's crypt key, whichever altar started it
   const auto &crypt_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.crypt.closed" );
   spawn_multiblock_at<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( crypt_pos, crypt_spritesheet );
 
@@ -577,14 +576,11 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos,
   if ( grave_meta_types.size() < 2 ) { SPDLOG_WARN( "No GRAVE spritesheets found in SpriteStore" ); }
   else
   {
-    const size_t trail_size = Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalHopCount>( reg() ).get_value();
     const size_t max_cadaver_count = Utils::Player::get_cadaver( reg() ).size();
     // const size_t level_depth = Utils::Player::get_level_depth( reg() ).get_count();
+    // one key grave per exit key, and the exit key is also traded at an altar for the crypt key
     const size_t exit_and_crypt_key_multiplier = 2;
-    const size_t trail_start_count = 1;
-    // sized per cadaver part, not per altar: each part takes one altar activation and one trail, whichever altar is used.
-    // Sized for the longest trail of the run, at the deepest level
-    const auto max_level_depth = static_cast<size_t>( std::max( 1, Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value() ) );
+    // sized per cadaver part, not per altar: each part takes one altar activation and one key grave, whichever altar is used
     // the blood drops one altar activation needs on average: the altar takes the player's health as blood, and a blood
     // grave picks evenly from every blood vial (see GraveSystem::spawn_blood_loot()), so each drop gives back the
     // vials' mean heal in health, which buys as much altar blood
@@ -606,7 +602,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos,
     const auto blood_quota = static_cast<size_t>( std::max( 1, Sys::PersistSystem::get<Cmp::Persist::AltarBloodQuota>( reg() ).get_value() ) );
     // quota / mean reward, rounded up: quota * count / total
     const size_t blood_drops_per_activation = ( blood_quota * blood_item_count + blood_reward_total - 1 ) / blood_reward_total;
-    // trail graves skip their consequence, so each altar activation's blood is dug from graves off the trail
+    // the key grave skips its consequence, so each altar activation's blood is dug from other graves
     // the odds line is fixed per level, so settings changes take effect from the next level
     using Slot = Cmp::Grave::Consequence::Slot;
     using ConsequenceType = Cmp::Grave::Consequence::Type;
@@ -630,14 +626,14 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos,
     // the chance for very unlucky players, which GraveCountMargin covers
     const auto blood_chance = static_cast<size_t>( max_blood_floor_pct );
     const size_t blood_graves = ( blood_drops_per_activation * 100 + blood_chance - 1 ) / blood_chance;
-    const size_t trail_graves = ( trail_size + max_level_depth ) * exit_and_crypt_key_multiplier + trail_start_count;
-    const size_t base_num_graves = ( trail_graves + blood_graves ) * max_cadaver_count;
+    const size_t key_graves = exit_and_crypt_key_multiplier;
+    const size_t base_num_graves = ( key_graves + blood_graves ) * max_cadaver_count;
     // the blood graves above are only the average needed (luck and the small/large mix vary it), and bombs blast graves
     // open, so add a margin on top
     const auto margin_pct = static_cast<size_t>( std::max( 0, Sys::PersistSystem::get<Cmp::Persist::GraveCountMargin>( reg() ).get_value() ) );
     const size_t required_num_graves = ( base_num_graves * ( 100 + margin_pct ) + 99 ) / 100;
-    SPDLOG_INFO( "Graves required: {} = ({} trail + {} blood ({} drops at {}%) per cadaver part) x {} parts + {}% margin", required_num_graves,
-                 trail_graves, blood_graves, blood_drops_per_activation, blood_chance, max_cadaver_count, margin_pct );
+    SPDLOG_INFO( "Graves required: {} = ({} key + {} blood ({} drops at {}%) per cadaver part) x {} parts + {}% margin", required_num_graves,
+                 key_graves, blood_graves, blood_drops_per_activation, blood_chance, max_cadaver_count, margin_pct );
 
     std::map<Cmp::Grave::Consequence::Type, int> grave_consequences_distribution;
     std::size_t placed_num_graves = 0;

@@ -138,9 +138,6 @@ private:
   //! @brief Draw a compass needle's label beside its arrow, in world space.
   void render_compass_label( std::string_view label, sf::Color color, const Cmp::Player::ArrowCompass::Placement &placement );
 
-  //! @brief Used by GraveyardScene to point each Cmp::Grave::TrailMarker grave towards its target grave
-  void render_trail_markers();
-
   //! @brief Draw the burrs stuck to an NPC, one burr sprite per Cmp::BurrCount burr, where each struck.
   //! @param burr_cmp The NPC's burrs.
   //! @param body_rect The NPC's on-screen bounds.

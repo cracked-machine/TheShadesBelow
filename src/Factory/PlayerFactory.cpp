@@ -26,7 +26,6 @@
 #include <Components/Player/Doglegs.hpp>
 #include <Components/Player/ExtraLife.hpp>
 #include <Components/Player/FootstepType.hpp>
-#include <Components/Player/GraveTrail.hpp>
 #include <Components/Player/HeartBeat.hpp>
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
@@ -114,7 +113,6 @@ void create_player( entt::registry &reg )
   reg.emplace_or_replace<Cmp::Player::HeartBeat>( entity );
   reg.emplace_or_replace<Cmp::Player::Doglegs>( entity );
   reg.emplace_or_replace<Cmp::Grimoire>( entity );
-  reg.emplace_or_replace<Cmp::Player::GraveTrail>( entity );
   reg.emplace_or_replace<Cmp::Player::SelectedInventorySlot>( entity );
   ensure_inventory_slots( reg );
 }

@@ -57,10 +57,6 @@
 #include <Components/Persistent/GraveOddsNpcTrap.hpp>
 #include <Components/Persistent/GraveOddsTalisman.hpp>
 #include <Components/Persistent/GraveOddsTorch.hpp>
-#include <Components/Persistent/GraveTrailGuideColour.hpp>
-#include <Components/Persistent/GraveTrailNominalHopCount.hpp>
-#include <Components/Persistent/GraveTrailNominalHopDistance.hpp>
-#include <Components/Persistent/GraveTrailStartCount.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
@@ -88,6 +84,7 @@
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcCrowFlightSpeed.hpp>
+#include <Components/Persistent/NpcCrowGuideApproachDistance.hpp>
 #include <Components/Persistent/NpcCrowMaxPerchWait.hpp>
 #include <Components/Persistent/NpcCrowPerchRange.hpp>
 #include <Components/Persistent/NpcCrowPerchSpeed.hpp>
@@ -239,9 +236,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ExitKeyRequirement>();
   add_component<Cmp::Persist::FuseDelay>();
   add_component<Cmp::Persist::GraveNumMultiplier>();
-  add_component<Cmp::Persist::GraveTrailNominalHopDistance>();
-  add_component<Cmp::Persist::GraveTrailNominalHopCount>();
-  add_component<Cmp::Persist::GraveTrailStartCount>();
   add_component<Cmp::Persist::MaxLevelDepth>();
   add_component<Cmp::Persist::BloodMinChance>();
   add_component<Cmp::Persist::GraveOddsCurseTablet>();
@@ -251,7 +245,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::GraveOddsBlood>();
   add_component<Cmp::Persist::GraveOddsTalisman>();
   add_component<Cmp::Persist::GraveCountMargin>();
-  add_component<Cmp::Persist::GraveTrailGuideColour>();
   add_component<Cmp::Persist::GraveyardProcGenInitChance>();
   add_component<Cmp::Persist::GraveyardProcGenMaxIterations>();
   add_component<Cmp::Persist::GraveyardProcGenBirthThreshold>();
@@ -278,6 +271,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::NpcCrowPerchSpeed>();
   add_component<Cmp::Persist::NpcCrowPerchRange>();
   add_component<Cmp::Persist::NpcCrowMaxPerchWait>();
+  add_component<Cmp::Persist::NpcCrowGuideApproachDistance>();
   add_component<Cmp::Persist::NpcMimicTint>();
   add_component<Cmp::Persist::NpcRenderOffset>();
   add_component<Cmp::Persist::NpcPushBack>();

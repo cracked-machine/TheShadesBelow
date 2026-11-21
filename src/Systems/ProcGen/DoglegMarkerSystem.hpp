@@ -16,7 +16,7 @@ namespace Game::Sys::ProcGen
 
 //! @brief Base for the guides that send a train of colored chevrons along paths towards a landmark. Derived systems
 //! decide which paths to add to a Cmp::Player::Doglegs each frame, then call update_markers() to lay the chevrons
-//! along them. See DowsingGuideSystem and TrailGuideSystem.
+//! along them. See DowsingGuideSystem.
 class DoglegMarkerSystem : public BaseSystem
 {
 public:

@@ -6,8 +6,7 @@
 #include <Components/Grave/Exhumed.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/Segment.hpp>
-#include <Components/Grave/TrailMarker.hpp>
-#include <Components/Grave/TrailStart.hpp>
+#include <Components/Grave/KeyGrave.hpp>
 #include <Components/Inventory/BlastProof.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Npc/Crow.hpp>
@@ -15,13 +14,9 @@
 #include <Components/Particle/GraveHaloParticleSprite.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
-#include <Components/Persistent/GraveTrailNominalHopCount.hpp>
-#include <Components/Persistent/GraveTrailNominalHopDistance.hpp>
-#include <Components/Persistent/GraveTrailStartCount.hpp>
 #include <Components/Persistent/ShovelGraveDigWear.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
-#include <Components/Player/GraveTrail.hpp>
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Position.hpp>
@@ -34,8 +29,9 @@
 #include <Events/AltarActivatedEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/CreateNpcEvent.hpp>
+#include <Events/CrowGuideEvent.hpp>
 #include <Events/ExhumeGraveEvent.hpp>
-#include <Events/GraveTrailCompleteEvent.hpp>
+#include <Events/KeyGraveExhumedEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/ParticleFactory.hpp>
@@ -45,7 +41,6 @@
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
-#include <Utils/Cardinal.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
@@ -55,11 +50,6 @@
 #include <entt/entity/fwd.hpp>
 
 #include <algorithm>
-#include <array>
-#include <cmath>
-#include <limits>
-#include <optional>
-#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -232,123 +222,6 @@ Cmp::Position GraveSystem::grave_bounds( entt::entity grave_entity )
   return Cmp::Position( grave_cmp.position, grave_cmp.size );
 }
 
-GraveSystem::TrailStep GraveSystem::pick_next_trail_grave( entt::entity source_entt )
-{
-  constexpr float kTrailBacktrackExclusionDeg = 35.f;
-
-  auto &trail_position = Utils::Player::trail_position( reg() );
-  const size_t trail_size = Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalHopCount>( reg() ).get_value();
-  const size_t hop_distance = Sys::PersistSystem::get<Cmp::Persist::GraveTrailNominalHopDistance>( reg() ).get_value();
-  const size_t level_depth = Utils::Player::get_level_depth( reg() ).get_count();
-  const unsigned int max_trail_size = trail_size + level_depth;
-  // deeper levels spread the trail further apart
-  const float max_hop_px = static_cast<float>( hop_distance + level_depth ) * Constants::kGridSizePxF.x;
-
-  // the crow perched on the grave just opened flies away, so at most one crow is ever perched on the trail
-  for ( auto [crow_entt, crow_cmp] : reg().view<Cmp::Npc::Crow>().each() )
-  {
-    // a courier crow still flying in keeps going until it has dropped its item
-    if ( crow_cmp.carried != entt::null ) continue;
-    crow_cmp.flee = true;
-  }
-
-  if ( trail_position.size() >= static_cast<size_t>( max_trail_size ) )
-  {
-    // the trail is complete: the caller drops the exit key instead, and the trail's last arrow goes with it
-    reg().clear<Cmp::Grave::TrailMarker>();
-    return TrailStep::COMPLETE;
-  }
-
-  // no un-exhumed graves left to point at
-  auto interred_view = reg().view<Cmp::Position, Cmp::Grave::MultiBlock>( entt::exclude<Cmp::Grave::Exhumed> );
-  if ( interred_view.begin() == interred_view.end() )
-  {
-    SPDLOG_WARN( "No un-exhumed graves left, skipping trail marker for {}", static_cast<uint32_t>( source_entt ) );
-    // nowhere left to point: drop the arrow that led here and this grave's own (angle-less) target marker
-    reg().clear<Cmp::Grave::TrailMarker>();
-    return TrailStep::NO_GRAVES;
-  }
-
-  const auto &source_pos = reg().get<Cmp::Position>( source_entt );
-
-  // direction back towards the previous trail grave, if any: candidates in that direction would send the player back the way they came
-  std::optional<sf::Angle> backtrack_angle;
-  const auto prev_entt = trail_position.size() > 0 ? trail_position.at( trail_position.size() - 1 ) : entt::entity{ entt::null };
-  if ( reg().valid( prev_entt ) )
-  {
-    if ( const auto *prev_pos = reg().try_get<Cmp::Position>( prev_entt ) )
-    {
-      backtrack_angle = Utils::Maths::angle( prev_pos->getCenter() - source_pos.getCenter() );
-    }
-  }
-
-  // only graves within hop range are candidates, so each hop is a short walk rather than a trek across the map
-  std::vector<std::pair<entt::entity, Cmp::Position>> all_candidates;
-  std::vector<std::pair<entt::entity, Cmp::Position>> forward_candidates;
-  std::optional<std::pair<entt::entity, Cmp::Position>> nearest;
-  float nearest_distance = std::numeric_limits<float>::max();
-  for ( auto [cand_entt, cand_pos, cand_mb] : interred_view.each() )
-  {
-    const float distance = Utils::Maths::getEuclideanDistance( cand_pos.getCenter(), source_pos.getCenter() );
-    if ( distance < nearest_distance )
-    {
-      nearest_distance = distance;
-      nearest.emplace( cand_entt, cand_pos );
-    }
-    if ( distance > max_hop_px ) continue;
-
-    all_candidates.emplace_back( cand_entt, cand_pos );
-    auto cand_angle = Utils::Maths::angle( cand_pos.getCenter() - source_pos.getCenter() );
-    if ( backtrack_angle and cand_angle and std::abs( ( *cand_angle - *backtrack_angle ).wrapSigned().asDegrees() ) <= kTrailBacktrackExclusionDeg )
-    {
-      continue;
-    }
-    forward_candidates.emplace_back( cand_entt, cand_pos );
-  }
-
-  // every grave in range lies back the way the player came: allow backtracking rather than stall the trail
-  if ( forward_candidates.empty() and not all_candidates.empty() )
-  {
-    SPDLOG_DEBUG( "No trail candidates outside the backtrack cone, falling back to all {} graves in range", all_candidates.size() );
-    forward_candidates = std::move( all_candidates );
-  }
-  // no grave within hop range: head for the nearest one rather than stall the trail
-  if ( forward_candidates.empty() and nearest )
-  {
-    SPDLOG_DEBUG( "No trail candidates within {} px, falling back to the nearest grave at {} px", max_hop_px, nearest_distance );
-    forward_candidates.push_back( *nearest );
-  }
-
-  // point the source grave's arrow at a random un-exhumed grave
-  Cmp::RandomInt candidate_picker( 0, static_cast<int>( forward_candidates.size() ) - 1 );
-  auto [target_entt, target_pos] = forward_candidates.at( static_cast<std::size_t>( candidate_picker.gen() ) );
-  auto angle = Utils::Maths::angle( target_pos.getCenter() - source_pos.getCenter() ).value_or( sf::Angle::Zero );
-  // only the latest arrow is shown: older arrows would send a backtracking player the wrong way. The trail's history is
-  // kept in Utils::Player::trail_position(), not in the markers
-  reg().clear<Cmp::Grave::TrailMarker>();
-  reg().emplace_or_replace<Cmp::Grave::TrailMarker>( source_entt, angle );
-  // the only un-exhumed grave with a marker is the current target; its angle is set once it is exhumed
-  reg().emplace_or_replace<Cmp::Grave::TrailMarker>( target_entt );
-  auto *uuid_cmp = reg().try_get<Cmp::UUID>( target_entt );
-  if ( uuid_cmp )
-  {
-    const auto &target_pos_cmp = reg().get<Cmp::Position>( target_entt );
-    const float perch_center_x = target_pos_cmp.getCenter().x;
-    get_systems_event_queue().trigger( Events::CreateNpcEvent( "npc.crow", target_pos_cmp, 1, *uuid_cmp,
-                                                               [this, perch_center_x]( entt::entity crow_entt )
-    { reg().get<Cmp::Npc::Crow>( crow_entt ).perch_center_x = perch_center_x; } ) );
-  }
-  trail_position.push_back( source_entt );
-
-  std::stringstream trailss;
-  for ( auto entt : trail_position )
-  {
-    trailss << " " << static_cast<uint32_t>( entt );
-  }
-  SPDLOG_INFO( "Trail {}/{}: {}", trail_position.size(), max_trail_size, trailss.str() );
-  return TrailStep::ADVANCED;
-}
-
 void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_anim_cmp, ExhumedBy by )
 {
   if ( std::string::size_type n = grave_anim_cmp.m_sprite_type.str().find( ".closed" ); n != std::string::npos )
@@ -360,24 +233,13 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
     if ( by == ExhumedBy::PLAYER ) { m_sound_bank.get_effect( "pickaxe_final" ).play(); }
   }
 
-  // exhume early so this grave can never be chosen as its own next target
   reg().emplace_or_replace<Cmp::Grave::Exhumed>( grave_entity );
 
-  // the player chose this trail start: the unused starts are discarded and the trail moves on from here
-  if ( reg().all_of<Cmp::Grave::TrailStart>( grave_entity ) )
+  // the key grave skips its own consequence: it holds the exit key
+  if ( reg().all_of<Cmp::Grave::KeyGrave>( grave_entity ) )
   {
-    reg().clear<Cmp::Grave::TrailStart>();
-    SPDLOG_INFO( "Grave {} started the trail", static_cast<uint32_t>( grave_entity ) );
-    // nowhere for the trail to go: hand over the key now so the level can still be exited
-    if ( pick_next_trail_grave( grave_entity ) != TrailStep::ADVANCED ) { finish_trail( grave_entity ); }
-    return;
-  }
-
-  // a grave on the trail skips its own consequence: it either points onwards or, at the end of the trail (or when no
-  // graves are left to point at), holds the exit key
-  if ( reg().all_of<Cmp::Grave::TrailMarker>( grave_entity ) )
-  {
-    if ( pick_next_trail_grave( grave_entity ) != TrailStep::ADVANCED ) { finish_trail( grave_entity ); }
+    reg().remove<Cmp::Grave::KeyGrave>( grave_entity );
+    drop_exit_key( grave_entity );
     return;
   }
 
@@ -476,24 +338,7 @@ void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, 
   trigger_side_effects( spawn_action, Utils::Player::get_position( reg() ) );
 }
 
-namespace
-{
-
-//! @brief Which edge of the altar a grave faces: the side its centre lies beyond, measured relative to the altar's
-//! half size so a wide altar still has distinct north/south faces
-Utils::Cardinal facing_edge( const sf::FloatRect &altar, sf::Vector2f grave_center )
-{
-  const sf::Vector2f half_size = altar.size / 2.f;
-  const sf::Vector2f delta = grave_center - altar.getCenter();
-  const float x = half_size.x > 0.f ? delta.x / half_size.x : delta.x;
-  const float y = half_size.y > 0.f ? delta.y / half_size.y : delta.y;
-  if ( std::abs( x ) >= std::abs( y ) ) return x >= 0.f ? Utils::Cardinal::East : Utils::Cardinal::West;
-  return y >= 0.f ? Utils::Cardinal::South : Utils::Cardinal::North;
-}
-
-} // namespace
-
-void GraveSystem::finish_trail( entt::entity grave_entity )
+void GraveSystem::drop_exit_key( entt::entity grave_entity )
 {
   const Sys::ItemKey kExitKey{ "item.exitkey" };
 
@@ -506,85 +351,46 @@ void GraveSystem::finish_trail( entt::entity grave_entity )
   const auto spawn_action = Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), kExitKey );
   play_action_sfx( spawn_action );
   trigger_side_effects( spawn_action, bounds );
-  SPDLOG_INFO( "Grave trail complete, exit key exhumed" );
+  SPDLOG_INFO( "Key grave {} exhumed, exit key dropped", static_cast<uint32_t>( grave_entity ) );
 
-  // restart the trail so the next altar's trail runs its full length, and let AltarSystem release the activated altar
-  // so the player can activate another. Enqueued as the caller may be iterating registry views
-  Utils::Player::trail_position( reg() ) = Cmp::Player::GraveTrail{};
-  get_systems_event_queue().enqueue( Events::GraveTrailCompleteEvent{} );
+  // its job done, the guide crow flies away for good
+  for ( auto [crow_entt, crow_cmp] : reg().view<Cmp::Npc::Crow>().each() )
+  {
+    if ( crow_cmp.guide_grave == grave_entity ) crow_cmp.flee = true;
+  }
+
+  // let AltarSystem release the activated altar so the player can activate another. Enqueued as the caller may be
+  // iterating registry views
+  get_systems_event_queue().enqueue( Events::KeyGraveExhumedEvent{} );
 }
 
 void GraveSystem::on_altar_activated( const Events::AltarActivatedEvent &event )
 {
-  // trail starts are kept clear of the altar, so following the guide out to one is a journey
-  constexpr float kTrailStartMinAltarDistanceGrid = 10.f;
-  const sf::Vector2f margin = Constants::kGridSizePxF * kTrailStartMinAltarDistanceGrid;
-  const sf::FloatRect exclusion_zone{ event.altar_position.position - margin, event.altar_position.size + ( margin * 2.f ) };
-  const sf::Vector2f altar_center = event.altar_position.getCenter();
-
-  // candidates are grouped by the altar edge they face, so the starts can be spread around the altar
-  using SideBuckets = std::array<std::vector<std::pair<entt::entity, float>>, Utils::Cardinal::Count>;
-  SideBuckets candidates;
-  SideBuckets too_close;
-  auto interred_view = reg().view<Cmp::Position, Cmp::Grave::MultiBlock>( entt::exclude<Cmp::Grave::Exhumed, Cmp::Grave::TrailMarker> );
-  for ( auto [grave_entt, grave_pos, grave_mb] : interred_view.each() )
+  // any un-exhumed grave can hold the key, but one out of view makes the crow's guidance worth following
+  const sf::FloatRect view_bounds = Utils::calculate_view_bounds( RenderSystem::get_world_view() );
+  std::vector<entt::entity> hidden;
+  std::vector<entt::entity> visible;
+  for ( auto [grave_entt, grave_pos, grave_mb] : reg().view<Cmp::Position, Cmp::Grave::MultiBlock>( entt::exclude<Cmp::Grave::Exhumed> ).each() )
   {
-    const auto side = static_cast<std::size_t>( facing_edge( event.altar_position, grave_pos.getCenter() ).value() );
-    const float distance = Utils::Maths::getEuclideanDistance( grave_pos.getCenter(), altar_center );
-    auto &buckets = grave_pos.findIntersection( exclusion_zone ) ? too_close : candidates;
-    buckets[side].emplace_back( grave_entt, distance );
+    ( Utils::is_visible_in_view( view_bounds, grave_pos ) ? visible : hidden ).push_back( grave_entt );
+  }
+  const auto &pool = hidden.empty() ? visible : hidden;
+  if ( pool.empty() )
+  {
+    // nowhere to hide the key: hand it over now so the level can still be exited
+    SPDLOG_WARN( "No un-exhumed graves left to hold the exit key" );
+    spawn_grave_loot( { "item.exitkey" }, entt::null, ExhumedBy::PLAYER );
+    get_systems_event_queue().enqueue( Events::KeyGraveExhumedEvent{} );
+    return;
   }
 
-  auto is_empty = []( const SideBuckets &buckets ) { return std::ranges::all_of( buckets, []( const auto &bucket ) { return bucket.empty(); } ); };
-
-  Cmp::RandomInt shuffle_rng( 0, 1 );
-  SideBuckets *pool = &candidates;
-  if ( is_empty( candidates ) )
-  {
-    if ( is_empty( too_close ) )
-    {
-      // nowhere for the trail to start: hand over the key now so the level can still be exited
-      SPDLOG_WARN( "No un-exhumed graves left for the trail to start from" );
-      spawn_grave_loot( { "item.exitkey" }, entt::null, ExhumedBy::PLAYER );
-      return;
-    }
-    // every grave is near the altar (e.g. a small map): fall back to the farthest ones on each side
-    SPDLOG_WARN( "No graves at least {} cells from the altar, using the farthest graves as trail starts", kTrailStartMinAltarDistanceGrid );
-    for ( auto &bucket : too_close )
-      std::ranges::sort( bucket, std::ranges::greater{}, &std::pair<entt::entity, float>::second );
-    pool = &too_close;
-  }
-  else
-  {
-    for ( auto &bucket : candidates )
-      std::shuffle( bucket.begin(), bucket.end(), shuffle_rng );
-  }
-
-  // take one grave from each side in a random order, so each start faces a different altar edge; only once every
-  // side with graves has a start does a side get a second one
-  std::array<std::size_t, Utils::Cardinal::Count> side_order{ 0, 1, 2, 3 };
-  std::shuffle( side_order.begin(), side_order.end(), shuffle_rng );
-
-  const auto start_count = static_cast<std::size_t>(
-      std::max( 1, Sys::PersistSystem::get<Cmp::Persist::GraveTrailStartCount>( reg() ).get_value() ) );
-  std::array<std::size_t, Utils::Cardinal::Count> taken{};
-  std::size_t assigned = 0;
-  bool took_any = true;
-  while ( assigned < start_count and took_any )
-  {
-    took_any = false;
-    for ( auto side : side_order )
-    {
-      if ( assigned >= start_count ) break;
-      auto &bucket = ( *pool )[side];
-      if ( taken[side] >= bucket.size() ) continue;
-      reg().emplace_or_replace<Cmp::Grave::TrailStart>( bucket[taken[side]++].first );
-      ++assigned;
-      took_any = true;
-    }
-  }
-  SPDLOG_INFO( "Altar activated: {} trail start graves assigned (E/S/W/N: {}/{}/{}/{})", assigned, taken[Utils::Cardinal::East],
-               taken[Utils::Cardinal::South], taken[Utils::Cardinal::West], taken[Utils::Cardinal::North] );
+  Cmp::RandomInt grave_picker( 0, static_cast<int>( pool.size() ) - 1 );
+  const entt::entity key_grave = pool.at( static_cast<std::size_t>( grave_picker.gen() ) );
+  reg().emplace_or_replace<Cmp::Grave::KeyGrave>( key_grave );
+  SPDLOG_INFO( "Altar activated: grave {} holds the exit key ({} hidden / {} visible candidates)", static_cast<uint32_t>( key_grave ),
+               hidden.size(), visible.size() );
+  // NpcSystem sends the guide crow from the altar
+  get_systems_event_queue().enqueue( Events::CrowGuideEvent{ .key_grave = key_grave, .altar_position = event.altar_position } );
 }
 
 void GraveSystem::on_player_action( const Events::PlayerActionEvent &event )

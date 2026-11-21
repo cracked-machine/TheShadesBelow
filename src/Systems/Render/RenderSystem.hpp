@@ -44,6 +44,11 @@ public:
   //! @return const sf::View&
   static const sf::View &get_world_view() { return s_world_view; }
 
+  //! @brief Width, in world units, of the HUD panels down the left of the world view, so world-space overlays and
+  //! guides can stay clear of them. Kept current by RenderGameSystem.
+  //! @return float
+  static float get_hud_left_inset() { return s_hud_left_inset; }
+
   //! @brief Get the screen resolution view. See Cmp::Persist::DisplayResolution.
   //! @return const sf::View&
   const sf::View &get_screen_view() { return m_window.getDefaultView(); }
@@ -188,6 +193,9 @@ protected:
 
   //! @brief Current view of the game world.
   static sf::View s_world_view;
+
+  //! @brief See get_hud_left_inset().
+  static float s_hud_left_inset;
 
   //! @brief The z-order queue shared by the render systems. Refreshed each frame by RenderGameSystem::render_game(),
   //! so it is only valid to read after that call.

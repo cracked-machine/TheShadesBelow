@@ -54,7 +54,7 @@
 #include <Events/BloodRefusedEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
-#include <Events/GraveTrailCompleteEvent.hpp>
+#include <Events/KeyGraveExhumedEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
@@ -84,12 +84,12 @@ AltarSystem::AltarSystem( entt::registry &reg, sf::RenderWindow &window, Audio::
     : BaseSystem( reg, window, sound_bank )
 {
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&AltarSystem::on_player_action>( this );
-  std::ignore = get_systems_event_queue().sink<Events::GraveTrailCompleteEvent>().connect<&AltarSystem::on_grave_trail_complete>( this );
+  std::ignore = get_systems_event_queue().sink<Events::KeyGraveExhumedEvent>().connect<&AltarSystem::on_key_grave_exhumed>( this );
 }
 
-void AltarSystem::on_grave_trail_complete( [[maybe_unused]] const Events::GraveTrailCompleteEvent &event )
+void AltarSystem::on_key_grave_exhumed( [[maybe_unused]] const Events::KeyGraveExhumedEvent &event )
 {
-  // reset the activated altar to unlit, so it takes its blood quota again for another trail
+  // reset the activated altar to unlit, so it takes its blood quota again for another key grave
   for ( auto [altar_entt, blood_cmp, altar_uuid] : reg().view<Cmp::Altar::Activated, Cmp::Altar::BloodCount, Cmp::UUID>().each() )
   {
     blood_cmp.reset();
@@ -107,7 +107,7 @@ void AltarSystem::on_grave_trail_complete( [[maybe_unused]] const Events::GraveT
     {
       anim_cmp->m_sprite_type = Factory::Altar::get_altar_sprite( anim_cmp->m_sprite_type, false );
     }
-    SPDLOG_INFO( "Grave trail complete, altar {} reset", static_cast<uint32_t>( altar_entt ) );
+    SPDLOG_INFO( "Key grave exhumed, altar {} reset", static_cast<uint32_t>( altar_entt ) );
   }
   reg().clear<Cmp::Altar::Activated>();
 }
@@ -321,7 +321,7 @@ bool AltarSystem::offering_for_extra_life( entt::entity altar_entity, const Cmp:
   // refuse the offering while an extra life is already active, so it isn't wasted
   if ( Utils::Player::player_has_extra_life( reg() ) ) return false;
 
-  // only the crypt altar grants an extra life; a graveyard altar's active sprite shows its grave trail instead
+  // only the crypt altar grants an extra life; a graveyard altar's active sprite shows its key grave hunt instead
   if ( altar_cmp.get_kind() != Cmp::Altar::Kind::CRYPT ) return false;
   if ( not Utils::Player::get_projected_position( reg() ).findIntersection( altar_cmp ) ) return false;
 
@@ -351,10 +351,10 @@ bool AltarSystem::offering_player_blood( entt::entity altar_entity, Cmp::Altar::
   if ( blood_cmp->is_full( quota ) ) return false;
 
   const sf::FloatRect altar_bounds( altar_cmp.position, altar_cmp.size );
-  // once an altar is activated its grave trail must be completed first, so no altar takes blood until then
+  // once an altar is activated its key grave must be exhumed first, so no altar takes blood until then
   if ( not reg().view<Cmp::Altar::Activated>().empty() )
   {
-    SPDLOG_INFO( "An altar is already activated, refusing blood until its grave trail is complete" );
+    SPDLOG_INFO( "An altar is already activated, refusing blood until its key grave is exhumed" );
     get_systems_event_queue().trigger( Events::BloodRefusedEvent{ altar_bounds } );
     return false;
   }
@@ -392,7 +392,7 @@ void AltarSystem::activate_graveyard_altar( entt::entity altar_entity, const Cmp
   activate_altar( altar_entity, altar_cmp, altar_uuid, Factory::Altar::kActivatedParticleTag );
   reg().emplace_or_replace<Cmp::Altar::Activated>( altar_entity );
   SPDLOG_INFO( "Altar {} activated", static_cast<uint32_t>( altar_entity ) );
-  // GraveSystem picks the trail start graves that TrailGuideSystem then guides the player to
+  // GraveSystem picks the key grave and sends a crow to guide the player to it
   get_systems_event_queue().trigger( Events::AltarActivatedEvent{ Cmp::Position( altar_cmp.position, altar_cmp.size ) } );
 }
 

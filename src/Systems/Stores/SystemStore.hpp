@@ -11,7 +11,7 @@
 // clang-format off
 namespace Game::Audio { class SoundBank; }
 namespace sf { class RenderWindow; }
-namespace Game::Sys::ProcGen { class CellAutomataSystem; class DLASystem; class DowsingGuideSystem; class LevelGenerator; class TrailGuideSystem; }
+namespace Game::Sys::ProcGen { class CellAutomataSystem; class DLASystem; class DowsingGuideSystem; class LevelGenerator; }
 // clang-format on
 
 namespace Game::Sys
@@ -94,8 +94,6 @@ public:
     DiffusionLtdAggrSystem,
     //! @brief Key for ProcGen::DowsingGuideSystem.
     DowsingGuideSystem,
-    //! @brief Key for ProcGen::TrailGuideSystem.
-    TrailGuideSystem,
     //! @brief Key for ActionSystem.
     ActionSystem,
     //! @brief Key for ExitSystem.
@@ -255,7 +253,6 @@ template<> struct Store::SystemTraits<Store::Type::CorruptionHazardSystem>   { u
 template<> struct Store::SystemTraits<Store::Type::CryptSystem>            { using type = Game::Sys::CryptSystem; };
 template<> struct Store::SystemTraits<Store::Type::DiffusionLtdAggrSystem> { using type = ProcGen::DLASystem; };
 template<> struct Store::SystemTraits<Store::Type::DowsingGuideSystem>     { using type = ProcGen::DowsingGuideSystem; };
-template<> struct Store::SystemTraits<Store::Type::TrailGuideSystem>       { using type = ProcGen::TrailGuideSystem; };
 template<> struct Store::SystemTraits<Store::Type::ExitSystem>               { using type = ExitSystem; };
 template<> struct Store::SystemTraits<Store::Type::FootstepSystem>           { using type = FootstepSystem; };
 template<> struct Store::SystemTraits<Store::Type::GraveSystem>              { using type = GraveSystem; };
