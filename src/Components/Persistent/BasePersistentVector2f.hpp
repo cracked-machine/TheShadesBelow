@@ -32,21 +32,21 @@ public:
   //! @return std::string the detail string
   [[nodiscard]] std::string get_detail() const { return m_detail; }
 
-  //! @brief Render an x slider and a y slider, each with -/+ step buttons, on one row followed by the label.
+  //! @brief Render an x slider and a y slider, each with -/+ step buttons, side by side in the first table column, and the
+  //! label wrapped in the second (see Utils::imgui_labelled_row).
   void render_widget()
   {
-    ImGui::PushID( this );
     const char *label = m_detail.empty() ? m_name.c_str() : m_detail.c_str();
     const char *fmt = m_format.empty() ? "%.3f" : m_format.c_str();
     const float step = Utils::imgui_format_step( fmt );
-    const float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
-    const float component_width = ( ImGui::CalcItemWidth() - spacing ) * 0.5f;
-    Utils::imgui_step_slider_body( "x", &x, &m_min_value, &m_max_value, fmt, step, component_width );
-    ImGui::SameLine( 0.f, spacing );
-    Utils::imgui_step_slider_body( "y", &y, &m_min_value, &m_max_value, fmt, step, component_width );
-    ImGui::SameLine( 0.f, spacing );
-    ImGui::TextUnformatted( label );
-    ImGui::PopID();
+    Utils::imgui_labelled_row( this, label, [&]( float width )
+    {
+      const float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+      const float component_width = ( width - spacing ) * 0.5f;
+      Utils::imgui_step_slider_body( "x", &x, &m_min_value, &m_max_value, fmt, step, component_width );
+      ImGui::SameLine( 0.f, spacing );
+      Utils::imgui_step_slider_body( "y", &y, &m_min_value, &m_max_value, fmt, step, component_width );
+    } );
   }
 
   //! @brief Deserialise this vector from json (res/json/persist.json).

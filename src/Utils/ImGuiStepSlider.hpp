@@ -151,6 +151,36 @@ bool imgui_step_vslider( const char *id, const ImVec2 &size, T *value, const T *
   return changed;
 }
 
+//! @brief Width (px) of the empty spacer column between the widget and the label in imgui_labelled_row().
+inline constexpr float kImGuiLabelledRowSpacerPx = 5.f;
+
+//! @brief Render a widget and its label as a one-row, three-column table: the widget in a fixed-width first column
+//! (the usual item width, so consecutive rows line up), an empty kImGuiLabelledRowSpacerPx spacer column, and the
+//! label in a stretched last column, wrapped at its edge.
+//! @param id unique ImGui id for the row (e.g. the owning object's address)
+//! @param label the text shown in the second column
+//! @param draw_widget callable taking the first column's width (float) and drawing the widget without a visible label
+template <typename DrawWidget>
+void imgui_labelled_row( const void *id, const char *label, DrawWidget &&draw_widget )
+{
+  const float widget_width = ImGui::CalcItemWidth();
+  ImGui::PushID( id );
+  if ( ImGui::BeginTable( "##labelled_row", 3 ) )
+  {
+    ImGui::TableSetupColumn( "##widget", ImGuiTableColumnFlags_WidthFixed, widget_width );
+    ImGui::TableSetupColumn( "##spacer", ImGuiTableColumnFlags_WidthFixed, kImGuiLabelledRowSpacerPx );
+    ImGui::TableSetupColumn( "##label", ImGuiTableColumnFlags_WidthStretch );
+    ImGui::TableNextRow();
+    ImGui::TableSetColumnIndex( 0 );
+    draw_widget( ImGui::GetContentRegionAvail().x );
+    ImGui::TableSetColumnIndex( 2 );
+    ImGui::AlignTextToFramePadding();
+    ImGui::TextWrapped( "%s", label );
+    ImGui::EndTable();
+  }
+  ImGui::PopID();
+}
+
 //! @brief Drop-in replacement for ImGui::SliderScalar with -/+ step buttons between the slider and its label.
 //! @details The slider and buttons together occupy the usual item width, so it lines up with other widgets.
 //! @return true if the value changed this frame

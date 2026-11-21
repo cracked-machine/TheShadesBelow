@@ -1,6 +1,7 @@
 #ifndef SRC_COMPONENTS_PERSISTENT_RESERVEDARMEDBLOCKCOLOURBORDER_HPP__
 #define SRC_COMPONENTS_PERSISTENT_RESERVEDARMEDBLOCKCOLOURBORDER_HPP__
 
+#include <Utils/ImGuiStepSlider.hpp>
 #include <imgui.h>
 #include <nlohmann/json.hpp>
 
@@ -32,7 +33,13 @@ public:
   {
     std::array<float, 4> colour = { static_cast<float>( r ) / 255.f, static_cast<float>( g ) / 255.f, static_cast<float>( b ) / 255.f,
                                     static_cast<float>( a ) / 255.f };
-    if ( ImGui::ColorEdit4( "ReservedArmedBlockColourBorder", colour.data() ) )
+    bool changed = false;
+    Utils::imgui_labelled_row( this, "ReservedArmedBlockColourBorder", [&]( float width )
+    {
+      ImGui::SetNextItemWidth( width );
+      changed = ImGui::ColorEdit4( "##colour", colour.data() );
+    } );
+    if ( changed )
     {
       r = static_cast<uint8_t>( colour[0] * 255.f );
       g = static_cast<uint8_t>( colour[1] * 255.f );

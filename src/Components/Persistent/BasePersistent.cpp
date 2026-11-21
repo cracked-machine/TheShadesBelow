@@ -82,25 +82,32 @@ void BasePersistent<T>::deserialize( const nlohmann::json &json_data )
 template <typename T>
 void BasePersistent<T>::render_widget()
 {
-  ImGui::PushID( this );
-
   const char *label = detail.empty() ? "<Invalid Label>" : detail.c_str();
 
-  if constexpr ( std::is_same_v<T, bool> ) { ImGui::Checkbox( label, get_value_ptr() ); }
+  // widget in the first table column, the detail wrapped in the second, so long details don't run off the edge of the window
+  auto labelled_slider = [&]( auto *value, const auto *min, const auto *max, const char *fmt, auto step )
+  {
+    Utils::imgui_labelled_row( this, label, [&]( float width ) { Utils::imgui_step_slider_body( "##value", value, min, max, fmt, step, width ); } );
+  };
+
+  if constexpr ( std::is_same_v<T, bool> )
+  {
+    Utils::imgui_labelled_row( this, label, [&]( float ) { ImGui::Checkbox( "##value", get_value_ptr() ); } );
+  }
   else if constexpr ( std::is_same_v<T, float> )
   {
     const char *fmt = format.empty() ? "%.3f" : format.c_str();
-    Utils::imgui_step_slider( label, get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt, Utils::imgui_format_step( fmt ) );
+    labelled_slider( get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt, Utils::imgui_format_step( fmt ) );
   }
   else if constexpr ( std::is_same_v<T, uint8_t> or std::is_same_v<T, uint16_t> or std::is_same_v<T, int32_t> or std::is_same_v<T, int> )
   {
     const char *fmt = format.empty() ? "%d" : format.c_str();
-    Utils::imgui_step_slider( label, get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt, T{ 1 } );
+    labelled_slider( get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt, T{ 1 } );
   }
   else if constexpr ( std::is_same_v<T, uint32_t> )
   {
     const char *fmt = format.empty() ? "%u" : format.c_str();
-    Utils::imgui_step_slider( label, get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt, T{ 1 } );
+    labelled_slider( get_value_ptr(), get_min_value_ptr(), get_max_value_ptr(), fmt, T{ 1 } );
   }
   else if constexpr ( std::is_same_v<T, uint64_t> )
   {
@@ -108,7 +115,7 @@ void BasePersistent<T>::render_widget()
     // ImGui requires max_value <= IM_U64_MAX / 2 for sliders
     constexpr uint64_t imgui_max_limit = std::numeric_limits<uint64_t>::max() / 2;
     uint64_t clamped_max = std::min( max_value, imgui_max_limit );
-    Utils::imgui_step_slider( label, get_value_ptr(), get_min_value_ptr(), &clamped_max, fmt, T{ 1 } );
+    labelled_slider( get_value_ptr(), get_min_value_ptr(), &clamped_max, fmt, T{ 1 } );
   }
   else if constexpr ( std::is_same_v<T, int64_t> )
   {
@@ -116,15 +123,13 @@ void BasePersistent<T>::render_widget()
     // ImGui requires max_value <= IM_S64_MAX / 2 for sliders
     constexpr int64_t imgui_max_limit = std::numeric_limits<int64_t>::max() / 2;
     int64_t clamped_max = std::min( max_value, imgui_max_limit );
-    Utils::imgui_step_slider( label, get_value_ptr(), get_min_value_ptr(), &clamped_max, fmt, T{ 1 } );
+    labelled_slider( get_value_ptr(), get_min_value_ptr(), &clamped_max, fmt, T{ 1 } );
   }
   else
   {
     // Fallback for unsupported types - just show the value as text
     ImGui::Text( "%s: (unsupported type)", label );
   }
-
-  ImGui::PopID();
 }
 
 // Explicit instantiations
