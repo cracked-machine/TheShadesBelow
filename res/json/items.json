@@ -498,7 +498,7 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
-    "spawn_count_per_quadrant": 25,
+    "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "sfx": { "loop": "burning", "final": "" } }},
@@ -563,7 +563,7 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
-    "spawn_count_per_quadrant": 25,
+    "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "side_effects": { "spawn_npc": { "type": "npc.eldermother", "probability": "always", "max_instances": 1 } }, 
@@ -632,7 +632,7 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
-    "spawn_count_per_quadrant": 25,
+    "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": ["halucinogen", "bradycardia"], "toxicity": 5 }, "tick": 1, 
                                 "sfx": { "loop": "burning", "final": "" } }},
@@ -682,7 +682,7 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 25, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
-    "spawn_count_per_quadrant": 25,
+    "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
                                 "side_effects": { "lightning": { "probability": "always" } }, 
@@ -751,7 +751,7 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
-    "spawn_count_per_quadrant": 25,
+    "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": ["halucinogen", "tachycardia"], "toxicity": 5 }, "tick": 1, 
                                 "sfx": { "loop": "burning", "final": "" } }},
@@ -818,7 +818,7 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
-    "spawn_count_per_quadrant": 25,
+    "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "phototoxia", "toxicity": 5 }, "tick": 3, 
                                 "sfx": { "loop": "burning", "final": "" } }},
@@ -868,7 +868,7 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
-    "spawn_count_per_quadrant": 25,
+    "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "sfx": { "loop": "burning", "final": "" } }},
@@ -934,7 +934,7 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
-    "spawn_count_per_quadrant": 25,
+    "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "tachycardia", "toxicity": 10 }, "tick": 1, 
                                 "sfx": { "loop": "burning", "final": "" } }},
@@ -984,7 +984,7 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 34, "bow": 0 },
-    "spawn_count_per_quadrant": 6,
+    "spawn_count_per_quadrant": 2,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "sfx": { "loop": "burning", "final": "" } }},
@@ -1048,7 +1048,7 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
-    "spawn_count_per_quadrant": 25,
+    "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "sfx": { "loop": "burning", "final": "" } }},
@@ -1115,7 +1115,7 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
-    "spawn_count_per_quadrant": 25,
+    "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "sfx": { "loop": "burning", "final": "" } }},
@@ -1182,7 +1182,7 @@
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
-    "spawn_count_per_quadrant": 25,
+    "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "anima": 0, "toxidrome": { "type": "bradycardia", "toxicity": 10 }, "tick": 2, 
                                 "sfx": { "loop": "burning", "final": "" } }},

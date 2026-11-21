@@ -541,17 +541,25 @@
     "detail": "Talisman",
     "format": "%d"
   },
-  "GraveCountMargin": {
+  "GraveClusterGridSize": {
     "type": "int",
-    "value": 25,
+    "value": 5,
+    "min_value": 1,
+    "max_value": 10,
+    "detail": "Grave Cluster Grid Size",
+    "format": "%d"
+  },
+  "GraveClusterExternalPadding": {
+    "type": "int",
+    "value": 4,
     "min_value": 0,
-    "max_value": 100,
-    "detail": "Grave Count Margin",
-    "format": "%d%%"
+    "max_value": 10,
+    "detail": "Grave Cluster External Padding",
+    "format": "%d"
   },
   "GraveyardProcGenBirthThreshold": {
     "type": "int",
-    "value": 2,
+    "value": 6,
     "min_value": 0,
     "max_value": 10,
     "detail": "GraveyardProcGenBirthThreshold",
@@ -575,7 +583,7 @@
   },
   "GraveyardProcGenSurvivalThreshold": {
     "type": "int",
-    "value": 5,
+    "value": 9,
     "min_value": 0,
     "max_value": 10,
     "detail": "GraveyardProcGenSurvivalThreshold",

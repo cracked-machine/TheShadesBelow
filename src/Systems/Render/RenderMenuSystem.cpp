@@ -47,7 +47,8 @@
 #include <Components/Persistent/FlyingTransitionTime.hpp>
 #include <Components/Persistent/FuseDelay.hpp>
 #include <Components/Persistent/GlovesWearPerForage.hpp>
-#include <Components/Persistent/GraveCountMargin.hpp>
+#include <Components/Persistent/GraveClusterExternalPadding.hpp>
+#include <Components/Persistent/GraveClusterGridSize.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveOddsBlood.hpp>
 #include <Components/Persistent/GraveOddsBombTrap.hpp>
@@ -484,7 +485,8 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
       };
       render_vslider_row( odds_settings );
     }
-    Sys::PersistSystem::get<Cmp::Persist::GraveCountMargin>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::GraveClusterGridSize>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::GraveClusterExternalPadding>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ExitKeyRequirement>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::HealingBuildingOverride>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PaidHealAmount>( reg() ).render_widget();

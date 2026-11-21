@@ -8,8 +8,10 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Window.hpp>
 
+#include <array>
 #include <cstddef>
 #include <functional>
+#include <vector>
 
 // clang-format off
 namespace Game::Cmp { class Position; class RectBounds; }
@@ -74,12 +76,18 @@ public:
   void add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scene_dimensions );
 
   //! @brief create multiblock sprites (crypt, healing building, ruin and graves) for the graveyard scene.
-  //!        The crypt, healing building and ruin are placed at the given positions (the scene's 'poi' markers);
-  //!        graves are scattered at random afterwards.
+  //!        The crypt, healing building and ruin are placed at the given positions (the scene's 'poi' markers).
+  //!        Graves are then laid out in clusters, as many as fit in each map quadrant: each cluster is an N x N grid
+  //!        (Cmp::Persist::GraveClusterGridSize) of 2x2-cell grave slots with kGraveClusterInternalPadding cells between
+  //!        slots, and Cmp::Persist::GraveClusterExternalPadding cells between clusters. A grave is omitted when its
+  //!        footprint is not open levelgen ground or is already taken (walls, paths, buildings, ...). The clusters'
+  //!        internal padding cells are kept for gen_random_plants().
+  //! @param scene_data Scene data used to split the map into quadrants and find open levelgen tiles
   //! @param crypt_pos Top-left pixel position of the crypt.
   //! @param healing_pos Top-left pixel position of the healing spring / barber surgeon building.
   //! @param ruin_pos Top-left pixel position of the ruin.
-  void gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos, sf::Vector2f healing_pos, sf::Vector2f ruin_pos );
+  void gen_graveyard_exterior_multiblocks( const Scene::SceneData &scene_data, sf::Vector2f crypt_pos, sf::Vector2f healing_pos,
+                                           sf::Vector2f ruin_pos );
 
   //! @brief Find a valid spawn location for a large obstacle given a seed.
   //! @param ms Sprite sheet of the object being placed, used to size its collision hitbox
@@ -87,8 +95,10 @@ public:
   //! @return std::pair<entt::entity, Cmp::Position>
   std::pair<entt::entity, Cmp::Position> find_spawn_location( const Sprites::SpriteSheet &ms, unsigned long seed );
 
-  //! @brief Generate plant world items in the new game area, via Events::CreatePlantEvent (see PlantSystem).
-  //!        Each plant's items.json "spawn_count_per_quadrant" is placed in every map quadrant (see SceneData::quadrant_of()).
+  //! @brief Generate plant world items in the internal padding of the grave clusters, via Events::CreatePlantEvent (see
+  //!        PlantSystem). Each plant's items.json "spawn_count_per_quadrant" is placed in every map quadrant (see
+  //!        SceneData::quadrant_of()), as far as that quadrant's cluster padding allows. Call after
+  //!        gen_graveyard_exterior_multiblocks().
   //! @param scene_data Scene data used to split the map into quadrants
   //! @return std::vector<entt::entity>
   std::vector<entt::entity> gen_random_plants( const Scene::SceneData &scene_data );
@@ -144,6 +154,17 @@ public:
 
 
 private:
+  //! @brief Grid cells per side of a grave cluster slot: fits both the 2x2 large and the 1x2 small graves.
+  static constexpr int kGraveSlotCells{ 2 };
+  //! @brief Grid cells between neighbouring grave slots inside a grave cluster.
+  static constexpr int kGraveClusterInternalPadding{ 1 };
+
+  //! @brief Whether a multiblock hitbox collides with walls, graves, buildings, the spawn area or the player.
+  //!        Does not check the reserved/claims/item grids, see is_area_taken() / is_cell_taken().
+  //! @param hitbox World-space hitbox to test.
+  //! @return bool true on any collision.
+  bool has_structure_collision( const Cmp::RectBounds &hitbox );
+
   //! @brief Roll `init_chance` for `entity`/`pos_cmp` and, if it succeeds, register it as an obstacle in
   //!        both `m_obstacle_sm` and `m_claims_sm`. Callers must already have checked is_cell_taken().
   void try_place_obstacle( entt::entity entity, const Cmp::Position &pos_cmp, float init_chance );
@@ -186,6 +207,10 @@ private:
 
   //! @brief Scene-owned world-tile lookup, passed to the multiblock factory to avoid full Cmp::Position scans.
   PathFinding::SpatialHashGridWeakPtr m_world_tile_sm;
+
+  //! @brief Pixel positions of every grave cluster's internal padding cells, by map quadrant (see SceneData::quadrant_of()).
+  //!        Filled by gen_graveyard_exterior_multiblocks(), used as the plant candidates by gen_random_plants().
+  std::array<std::vector<sf::Vector2f>, 4> m_grave_cluster_padding;
 };
 
 } // namespace Game::Sys::ProcGen

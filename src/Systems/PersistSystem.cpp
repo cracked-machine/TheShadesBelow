@@ -47,7 +47,8 @@
 #include <Components/Persistent/FlyingTransitionTime.hpp>
 #include <Components/Persistent/FuseDelay.hpp>
 #include <Components/Persistent/GlovesWearPerForage.hpp>
-#include <Components/Persistent/GraveCountMargin.hpp>
+#include <Components/Persistent/GraveClusterExternalPadding.hpp>
+#include <Components/Persistent/GraveClusterGridSize.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveOddsBlood.hpp>
 #include <Components/Persistent/GraveOddsBombTrap.hpp>
@@ -242,7 +243,8 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::GraveOddsNpcTrap>();
   add_component<Cmp::Persist::GraveOddsBlood>();
   add_component<Cmp::Persist::GraveOddsTalisman>();
-  add_component<Cmp::Persist::GraveCountMargin>();
+  add_component<Cmp::Persist::GraveClusterGridSize>();
+  add_component<Cmp::Persist::GraveClusterExternalPadding>();
   add_component<Cmp::Persist::GraveyardProcGenInitChance>();
   add_component<Cmp::Persist::GraveyardProcGenMaxIterations>();
   add_component<Cmp::Persist::GraveyardProcGenBirthThreshold>();

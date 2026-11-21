@@ -16,6 +16,7 @@
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/Container.hpp>
+#include <Components/Npc/Crow.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Persistent/ArmedOffDelay.hpp>
@@ -238,6 +239,8 @@ void BombSystem::update( sf::Time dt )
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp, npc_anim_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::AnimData>().each() )
     {
       if ( npc_anim_cmp.m_sprite_type.contains( "sprite.ghost" ) ) continue;
+      // crows can't be killed, see NpcSystem::on_destroy_npc_event
+      if ( reg().any_of<Cmp::Npc::Crow>( npc_entt ) ) continue;
       if ( npc_pos_cmp.findIntersection( armed_pos_cmp ) ) exploded_npcs.push_back( npc_entt );
     }
 

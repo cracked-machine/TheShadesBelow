@@ -25,9 +25,9 @@
 #include <Components/Npc/Footprint.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/ObstacleCap.hpp>
-#include <Components/Persistent/AltarBloodQuota.hpp>
 #include <Components/Persistent/BloodMinChance.hpp>
-#include <Components/Persistent/GraveCountMargin.hpp>
+#include <Components/Persistent/GraveClusterExternalPadding.hpp>
+#include <Components/Persistent/GraveClusterGridSize.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveOddsBlood.hpp>
 #include <Components/Persistent/GraveOddsBombTrap.hpp>
@@ -37,7 +37,6 @@
 #include <Components/Persistent/GraveOddsTorch.hpp>
 #include <Components/Persistent/HealingBuildingOverride.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
-#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Position.hpp>
@@ -100,7 +99,6 @@
 #include <cmath>
 #include <cstdint>
 #include <functional>
-#include <optional>
 #include <ranges>
 #include <string_view>
 #include <spdlog/fmt/ranges.h>
@@ -111,6 +109,18 @@
 
 namespace Game::Sys::ProcGen
 {
+
+namespace
+{
+
+//! @brief Unique key for the grid cell containing a pixel position.
+std::int64_t cell_key( sf::Vector2f p )
+{
+  return ( static_cast<std::int64_t>( std::floor( p.x / Constants::kGridSizePxF.x ) ) << 32 ) bitor
+         static_cast<std::uint32_t>( static_cast<std::int32_t>( std::floor( p.y / Constants::kGridSizePxF.y ) ) );
+}
+
+} // namespace
 
 LevelGenerator::LevelGenerator( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
     : BaseSystem( reg, window, sound_bank ),
@@ -218,11 +228,6 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
   // The add_solid_* factories only tag entities that already exist under the rect, and an empty cell (e.g. a
   // levelgen "wall" tile with no wall-layer tile) is walkable. So give every empty cell under a solid its own
   // entity first - the factories then make it block like any other solid cell.
-  const auto cell_key = []( sf::Vector2f p )
-  {
-    return ( static_cast<std::int64_t>( std::floor( p.x / Constants::kGridSizePxF.x ) ) << 32 ) bitor
-           static_cast<std::uint32_t>( static_cast<std::int32_t>( std::floor( p.y / Constants::kGridSizePxF.y ) ) );
-  };
   std::unordered_set<std::int64_t> occupied_cells;
   for ( auto [entt, pos_cmp] : reg().view<Cmp::Position>().each() )
   {
@@ -529,16 +534,9 @@ void LevelGenerator::add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scen
   }
 }
 
-void LevelGenerator::gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos, sf::Vector2f healing_pos, sf::Vector2f ruin_pos )
+void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData &scene_data, sf::Vector2f crypt_pos, sf::Vector2f healing_pos,
+                                                         sf::Vector2f ruin_pos )
 {
-  // spawn-location lookup for the graves; a failure is reported once, by the grave count check
-  auto find_spawn_pos = [&]( const Sprites::SpriteSheet &ms ) -> std::optional<Cmp::Position>
-  {
-    auto [random_entity, random_origin_position] = find_spawn_location( ms, 0 );
-    if ( random_entity == entt::null ) { return std::nullopt; }
-    return random_origin_position;
-  };
-
   // the altar is not spawned here: graveyard.json places it, see build_scene_from_data()
 
   // CRYPT - one crypt serves every key grave's crypt key, whichever altar started it
@@ -571,37 +569,14 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos,
   spawn_multiblock_at<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>( ruin_pos, ruin_spritesheet );
 
   // GRAVES - placed last, so the larger buildings above get first pick of the space
+  for ( auto &padding : m_grave_cluster_padding )
+  {
+    padding.clear();
+  }
   auto grave_meta_types = Sys::SpriteStore::instance().get_pattern( R"(graves\.\w+\.closed$)" );
   if ( grave_meta_types.size() < 2 ) { SPDLOG_WARN( "No GRAVE spritesheets found in SpriteStore" ); }
   else
   {
-    const size_t max_cadaver_count = Utils::Player::get_cadaver( reg() ).size();
-    // const size_t level_depth = Utils::Player::get_level_depth( reg() ).get_count();
-    // one key grave per exit key, and the exit key is also traded at an altar for the crypt key
-    const size_t exit_and_crypt_key_multiplier = 2;
-    // sized per cadaver part, not per altar: each part takes one altar activation and one key grave, whichever altar is used
-    // the blood drops one altar activation needs on average: each blood vial poured into the altar gives its heal value
-    // as blood, and a blood grave picks evenly from every blood vial (see GraveSystem::spawn_blood_loot()), so each drop
-    // gives the vials' mean heal in altar blood
-    size_t blood_reward_total = 0;
-    size_t blood_item_count = 0;
-    for ( const auto &item_key : Sys::ItemStore::instance().get_all() )
-    {
-      const int blood = Sys::ItemStore::instance().get( item_key ).get_blood_heal();
-      if ( blood <= 0 ) continue;
-      blood_reward_total += static_cast<size_t>( blood );
-      blood_item_count++;
-    }
-    if ( blood_item_count == 0 )
-    {
-      SPDLOG_WARN( "No blood item in items.json has a consume_action health: grave blood drops cannot be sized" );
-      blood_reward_total = 1;
-      blood_item_count = 1;
-    }
-    const auto blood_quota = static_cast<size_t>( std::max( 1, Sys::PersistSystem::get<Cmp::Persist::AltarBloodQuota>( reg() ).get_value() ) );
-    // quota / mean reward, rounded up: quota * count / total
-    const size_t blood_drops_per_activation = ( blood_quota * blood_item_count + blood_reward_total - 1 ) / blood_reward_total;
-    // the key grave skips its consequence, so each altar activation's blood is dug from other graves
     // the odds line is fixed per level, so settings changes take effect from the next level
     using Slot = Cmp::Grave::Consequence::Slot;
     using ConsequenceType = Cmp::Grave::Consequence::Type;
@@ -613,7 +588,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos,
         Slot{ .type = ConsequenceType::BLOOD, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsBlood>( reg() ).get_value() },
         Slot{ .type = ConsequenceType::TALISMAN, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsTalisman>( reg() ).get_value() },
     } );
-    // Consequence caps the floor at the blood band width, so size for the capped value
+    // Consequence caps the floor at the blood band width
     int max_blood_floor_pct = Cmp::Grave::Consequence::max_blood_floor_pct( consequence_line );
     if ( max_blood_floor_pct < 1 )
     {
@@ -621,51 +596,108 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( sf::Vector2f crypt_pos,
       max_blood_floor_pct = 1;
     }
     const int min_blood_chance_pct = std::clamp( Sys::PersistSystem::get<Cmp::Persist::BloodMinChance>( reg() ).get_value(), 1, max_blood_floor_pct );
-    // sized for the blood chance at neutral luck, the width of the blood band; Cmp::Persist::BloodMinChance only floors
-    // the chance for very unlucky players, which GraveCountMargin covers
-    const auto blood_chance = static_cast<size_t>( max_blood_floor_pct );
-    const size_t blood_graves = ( blood_drops_per_activation * 100 + blood_chance - 1 ) / blood_chance;
-    const size_t key_graves = exit_and_crypt_key_multiplier;
-    const size_t base_num_graves = ( key_graves + blood_graves ) * max_cadaver_count;
-    // the blood graves above are only the average needed (luck and the small/large mix vary it), and bombs blast graves
-    // open, so add a margin on top
-    const auto margin_pct = static_cast<size_t>( std::max( 0, Sys::PersistSystem::get<Cmp::Persist::GraveCountMargin>( reg() ).get_value() ) );
-    const size_t required_num_graves = ( base_num_graves * ( 100 + margin_pct ) + 99 ) / 100;
-    SPDLOG_INFO( "Graves required: {} = ({} key + {} blood ({} drops at {}%) per cadaver part) x {} parts + {}% margin", required_num_graves,
-                 key_graves, blood_graves, blood_drops_per_activation, blood_chance, max_cadaver_count, margin_pct );
+
+    // cluster geometry, in grid cells
+    const int slots_per_side = std::max( 1, Sys::PersistSystem::get<Cmp::Persist::GraveClusterGridSize>( reg() ).get_value() );
+    const int external_padding = std::max( 0, Sys::PersistSystem::get<Cmp::Persist::GraveClusterExternalPadding>( reg() ).get_value() );
+    const int slot_stride = kGraveSlotCells + kGraveClusterInternalPadding;
+    const int cluster_cells = ( slots_per_side * kGraveSlotCells ) + ( ( slots_per_side - 1 ) * kGraveClusterInternalPadding );
+    const int cluster_stride = cluster_cells + external_padding;
+
+    // quadrant cell ranges, split where SceneData::quadrant_of() splits: cell c is in the right/bottom half when c >= size / 2
+    const auto [map_size_grid, _] = scene_data.map_size();
+    const std::array<int, 2> split{ ( static_cast<int>( map_size_grid.x ) + 1 ) / 2, ( static_cast<int>( map_size_grid.y ) + 1 ) / 2 };
+    const std::array<int, 2> map_cells{ static_cast<int>( map_size_grid.x ), static_cast<int>( map_size_grid.y ) };
+
+    const auto cell_px = []( int col, int row )
+    { return sf::Vector2f( static_cast<float>( col ) * Constants::kGridSizePxF.x, static_cast<float>( row ) * Constants::kGridSizePxF.y ); };
 
     std::map<Cmp::Grave::Consequence::Type, int> grave_consequences_distribution;
     std::size_t placed_num_graves = 0;
-    for ( std::size_t i = 0; i < required_num_graves; ++i )
+    for ( std::size_t quadrant = 0; quadrant < m_grave_cluster_padding.size(); ++quadrant )
     {
-      const auto &spritesheet = Sys::SpriteStore::instance().get_random( grave_meta_types );
-      auto index = spritesheet.get_random_texture_index();
-      SPDLOG_DEBUG( "Selected {}, {}", spritesheet.get_sprite_type(), index );
-      auto pos = find_spawn_pos( spritesheet );
-      // find_spawn_location() already made many random attempts, so the graveyard is full: further graves will not fit either
-      if ( not pos ) break;
+      // quadrant index is right + 2 * bottom, see SceneData::quadrant_of()
+      const bool right = ( quadrant % 2 ) == 1;
+      const bool bottom = ( quadrant / 2 ) == 1;
+      const int q_first_col = right ? split[0] : 0;
+      const int q_first_row = bottom ? split[1] : 0;
+      const int q_cols = ( right ? map_cells[0] : split[0] ) - q_first_col;
+      const int q_rows = ( bottom ? map_cells[1] : split[1] ) - q_first_row;
 
-      auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<Cmp::Grave::MultiBlock, Cmp::Grave::Segment>(
-          reg(), pos->position, spritesheet, index, 0, m_reserved_sm.get(), m_world_tile_sm.lock().get() );
-      m_reserved_sm->insert( mb_entt, pos.value() );
-      // fix the roll at creation; the consequence is resolved against the player's current luck when needed
-      auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 100 ).gen(), min_blood_chance_pct,
-                                                                             consequence_line );
-      // simulate the rolls now to get an idea of the distribution with game start player luck
-      grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck() )]++;
-      placed_num_graves++;
+      // as many clusters as fit, the block of clusters centred in the quadrant
+      const int clusters_x = std::max( 0, ( q_cols + external_padding ) / cluster_stride );
+      const int clusters_y = std::max( 0, ( q_rows + external_padding ) / cluster_stride );
+      if ( clusters_x == 0 or clusters_y == 0 )
+      {
+        SPDLOG_WARN( "Grave clusters: quadrant {} ({}x{} cells) is too small for a {}x{} cell cluster", quadrant, q_cols, q_rows, cluster_cells,
+                     cluster_cells );
+        continue;
+      }
+      const int offset_x = ( q_cols - ( ( clusters_x * cluster_stride ) - external_padding ) ) / 2;
+      const int offset_y = ( q_rows - ( ( clusters_y * cluster_stride ) - external_padding ) ) / 2;
+
+      std::size_t quadrant_graves = 0;
+      for ( int cy = 0; cy < clusters_y; ++cy )
+      {
+        for ( int cx = 0; cx < clusters_x; ++cx )
+        {
+          const int cluster_col = q_first_col + offset_x + ( cx * cluster_stride );
+          const int cluster_row = q_first_row + offset_y + ( cy * cluster_stride );
+
+          // internal padding: every cluster cell between the slots, kept for the plants
+          for ( int ly = 0; ly < cluster_cells; ++ly )
+          {
+            for ( int lx = 0; lx < cluster_cells; ++lx )
+            {
+              if ( ( lx % slot_stride ) < kGraveSlotCells and ( ly % slot_stride ) < kGraveSlotCells ) continue;
+              m_grave_cluster_padding.at( quadrant ).push_back( cell_px( cluster_col + lx, cluster_row + ly ) );
+            }
+          }
+
+          for ( int sy = 0; sy < slots_per_side; ++sy )
+          {
+            for ( int sx = 0; sx < slots_per_side; ++sx )
+            {
+              const int slot_col = cluster_col + ( sx * slot_stride );
+              const int slot_row = cluster_row + ( sy * slot_stride );
+              const sf::Vector2f slot_pos = cell_px( slot_col, slot_row );
+
+              const auto &spritesheet = Sys::SpriteStore::instance().get_random( grave_meta_types );
+              const auto grave_grid_size = spritesheet.get_grid_size();
+
+              // omit the grave where the cluster overlaps walls, paths, buildings or the edge of the open ground
+              if ( not scene_data.is_open_footprint( slot_pos, sf::Vector2u( grave_grid_size ) ) ) continue;
+              bool footprint_taken = false;
+              for ( int gy = 0; gy < static_cast<int>( grave_grid_size.y ) and not footprint_taken; ++gy )
+              {
+                for ( int gx = 0; gx < static_cast<int>( grave_grid_size.x ) and not footprint_taken; ++gx )
+                {
+                  footprint_taken = is_cell_taken( Cmp::Position( cell_px( slot_col + gx, slot_row + gy ), Constants::kGridSizePxF ) );
+                }
+              }
+              if ( footprint_taken ) continue;
+              if ( has_structure_collision( Cmp::RectBounds::scaled( slot_pos, spritesheet.sprite_size(), 1.f ) ) ) continue;
+
+              const auto index = spritesheet.get_random_texture_index();
+              const Cmp::Position grave_pos( slot_pos, spritesheet.sprite_size() );
+              auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<Cmp::Grave::MultiBlock, Cmp::Grave::Segment>(
+                  reg(), slot_pos, spritesheet, index, 0, m_reserved_sm.get(), m_world_tile_sm.lock().get() );
+              m_reserved_sm->insert( mb_entt, grave_pos );
+              // fix the roll at creation; the consequence is resolved against the player's current luck when needed
+              auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 100 ).gen(),
+                                                                                     min_blood_chance_pct, consequence_line );
+              // simulate the rolls now to get an idea of the distribution with game start player luck
+              grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck() )]++;
+              quadrant_graves++;
+            }
+          }
+        }
+      }
+      SPDLOG_INFO( "Grave clusters: quadrant {} has {}x{} clusters of {}x{} slots, {} graves placed", quadrant, clusters_x, clusters_y, slots_per_side,
+                   slots_per_side, quadrant_graves );
+      placed_num_graves += quadrant_graves;
     }
-    if ( placed_num_graves < base_num_graves )
-    {
-      SPDLOG_ERROR( "Only added {} of the {} graves required: the level may run out of graves before every cadaver part is found", placed_num_graves,
-                    base_num_graves );
-    }
-    else if ( placed_num_graves < required_num_graves )
-    {
-      SPDLOG_ERROR( "Only added {} of the {} graves required with the {}% margin (baseline of {} met)", placed_num_graves, required_num_graves,
-                    margin_pct, base_num_graves );
-    }
-    else { SPDLOG_INFO( "Added {} graves", placed_num_graves ); }
+    SPDLOG_INFO( "Added {} graves", placed_num_graves );
     SPDLOG_INFO( "Grave Consequences dist at current luck: {}", grave_consequences_distribution );
   }
 }
@@ -678,6 +710,16 @@ entt::entity LevelGenerator::spawn_multiblock_at( sf::Vector2f pos, const Sprite
   m_reserved_sm->insert( mb_entt, Cmp::Position( pos, Constants::kGridSizePxF ) );
   SPDLOG_INFO( "Added {} to {},{}", ss.type(), pos.x, pos.y );
   return mb_entt;
+}
+
+bool LevelGenerator::has_structure_collision( const Cmp::RectBounds &hitbox )
+{
+  using Utils::Collision::any_intersects;
+  return any_intersects<Cmp::Wall>( reg(), hitbox ) or any_intersects<Cmp::Grave::Segment>( reg(), hitbox ) or
+         any_intersects<Cmp::Altar::Segment>( reg(), hitbox ) or any_intersects<Cmp::Crypt::BuildingSegment>( reg(), hitbox ) or
+         any_intersects<Cmp::HealingSpringBuildingSegment>( reg(), hitbox ) or any_intersects<Cmp::Ruin::BuildingSegment>( reg(), hitbox ) or
+         any_intersects<Cmp::Crypt::ObjectiveSegment>( reg(), hitbox ) or any_intersects<Cmp::Grave::ExitSegment>( reg(), hitbox ) or
+         any_intersects<Cmp::SpawnArea>( reg(), hitbox ) or any_intersects<Cmp::Player::Character>( reg(), hitbox );
 }
 
 std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( const Sprites::SpriteSheet &ms, unsigned long seed )
@@ -695,21 +737,7 @@ std::pair<entt::entity, Cmp::Position> LevelGenerator::find_spawn_location( cons
     auto new_lo_hitbox = Cmp::RectBounds::scaled( random_pos.position, lo_sprite_size, 1.f );
 
     // Check collisions with walls, graves, shrines, the exit, and anything else already claiming this position
-    auto is_valid = [&]() -> bool
-    {
-      using Utils::Collision::any_intersects;
-      return not any_intersects<Cmp::Wall>( reg(), new_lo_hitbox ) and not any_intersects<Cmp::Grave::Segment>( reg(), new_lo_hitbox ) and
-             not any_intersects<Cmp::Altar::Segment>( reg(), new_lo_hitbox ) and
-             not any_intersects<Cmp::Crypt::BuildingSegment>( reg(), new_lo_hitbox ) and
-             not any_intersects<Cmp::HealingSpringBuildingSegment>( reg(), new_lo_hitbox ) and
-             not any_intersects<Cmp::Ruin::BuildingSegment>( reg(), new_lo_hitbox ) and
-             not any_intersects<Cmp::Crypt::ObjectiveSegment>( reg(), new_lo_hitbox ) and
-             not any_intersects<Cmp::Grave::ExitSegment>( reg(), new_lo_hitbox ) and
-             not is_area_taken( new_lo_hitbox.getBounds() ) and not any_intersects<Cmp::SpawnArea>( reg(), new_lo_hitbox ) and
-             not any_intersects<Cmp::Player::Character>( reg(), new_lo_hitbox );
-    };
-
-    if ( is_valid() )
+    if ( not has_structure_collision( new_lo_hitbox ) and not is_area_taken( new_lo_hitbox.getBounds() ) )
     {
       if ( current_seed != seed and seed > 0 )
       {
@@ -830,6 +858,17 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants( const Scene::SceneD
   const auto below_quota = [&]( const auto &kv ) { return kv.second.placed < kv.second.quota; };
   const auto quota_reached = [&] { return std::ranges::none_of( plant_tracker, below_quota ); };
 
+  // Plants only grow in the grave clusters' internal padding (see gen_graveyard_exterior_multiblocks())
+  std::unordered_set<std::int64_t> padding_cells;
+  for ( const auto &quadrant_padding : m_grave_cluster_padding )
+  {
+    for ( const auto &pos : quadrant_padding )
+    {
+      padding_cells.insert( cell_key( pos ) );
+    }
+  }
+  if ( padding_cells.empty() ) { SPDLOG_WARN( "gen_random_plants: no grave cluster padding cells, no plants generated" ); }
+
   // Snapshot every candidate position once, bucketed by map quadrant, and visit each quadrant's candidates in
   // random order, instead of re-scanning the registry for a random position on every attempt. Each tile is tried at most once.
   using Candidate = std::pair<entt::entity, Cmp::Position>;
@@ -837,6 +876,7 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants( const Scene::SceneD
   auto candidate_view = reg().view<Cmp::Position>( entt::exclude<Cmp::Player::Character, Cmp::Obstacle> );
   for ( auto [tile_entt, pos_cmp] : candidate_view.each() )
   {
+    if ( not padding_cells.contains( cell_key( pos_cmp.position ) ) ) continue;
     candidates_by_quadrant.at( scene_data.quadrant_of( pos_cmp.position ) ).emplace_back( tile_entt, pos_cmp );
   }
   Cmp::RandomInt shuffle_rng( 0, 1 );
@@ -918,6 +958,10 @@ void LevelGenerator::init( const PathFinding::SpatialHashGridSharedPtr &reserved
   m_claims_sm.clear();
   m_item_sm = item_sm;
   m_world_tile_sm.reset();
+  for ( auto &padding : m_grave_cluster_padding )
+  {
+    padding.clear();
+  }
 }
 
 } // namespace Game::Sys::ProcGen

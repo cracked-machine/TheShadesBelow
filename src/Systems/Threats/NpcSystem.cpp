@@ -497,10 +497,13 @@ void NpcSystem::on_destroy_npc_event( const Events::DestroyNpcEvent &event )
   auto *pos_cmp = reg().try_get<Cmp::Position>( npc_entity );
   if ( not pos_cmp ) return;
 
+  using Cause = Events::DestroyNpcEvent::Cause;
+  // crows can't be killed (hazards, explosions, fire, ...): they are only removed once they fly off screen
+  if ( reg().all_of<Cmp::Npc::Crow>( npc_entity ) and event.m_cause != Cause::DESPAWN ) return;
+
   // only the shovel (melee) or an arrow kills the Burryman, and he drops everything he stole
   if ( reg().all_of<Cmp::Npc::Burryman>( npc_entity ) )
   {
-    using Cause = Events::DestroyNpcEvent::Cause;
     if ( event.m_cause != Cause::MELEE and event.m_cause != Cause::ARROW ) return;
     drop_burryman_items( npc_entity, *pos_cmp );
   }
@@ -1007,7 +1010,7 @@ void NpcSystem::update_crows( sf::Time dt )
   // already off the navmesh, so the event's navmesh removal is a no-op
   for ( auto crow_entt : kill_list )
   {
-    on_destroy_npc_event( Events::DestroyNpcEvent( crow_entt ) );
+    on_destroy_npc_event( Events::DestroyNpcEvent( crow_entt, std::nullopt, std::nullopt, Events::DestroyNpcEvent::Cause::DESPAWN ) );
   }
 }
 
@@ -1467,6 +1470,8 @@ void NpcSystem::check_plant_kill_npc( sf::Time dt )
     {
       if ( npcs.size() >= kills_left ) break;
       if ( not kill_npc->targets( npc_cmp.npc_type ) ) continue;
+      // crows can't be killed, see on_destroy_npc_event
+      if ( reg().any_of<Cmp::Npc::Crow>( npc_entt ) ) continue;
       // a plant doesn't kill its own spawns, e.g. red campion adders
       if ( const auto *spawned_by_cmp = reg().try_get<Cmp::Npc::SpawnedBy>( npc_entt ); spawned_by_cmp and spawned_by_cmp->m_source == plant_uuid )
         continue;
@@ -1511,7 +1516,7 @@ void NpcSystem::check_burning_particle_collision()
 
   // destroying an NPC modifies the registry, so take a snapshot of the hit NPCs rather than destroying them mid-iteration
   std::vector<entt::entity> burnt_npcs;
-  for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position>( entt::exclude<Cmp::Npc::Ghost> ).each() )
+  for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position>( entt::exclude<Cmp::Npc::Ghost, Cmp::Npc::Crow> ).each() )
   {
     bool hit = false;
     for ( auto *burning_sprite : burning_sprites )

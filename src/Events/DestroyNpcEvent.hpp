@@ -26,7 +26,9 @@ public:
     //! @brief The player's melee attack with the shovel.
     MELEE,
     //! @brief An arrow fired by the player.
-    ARROW
+    ARROW,
+    //! @brief Removed without dying, e.g. a crow flying off screen. The only way a crow is removed: crows can't be killed.
+    DESPAWN
   };
 
   //! @param npc_entity The NPC to kill.

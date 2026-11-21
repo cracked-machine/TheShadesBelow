@@ -10,6 +10,7 @@
 #include <Components/Loot.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/Container.hpp>
+#include <Components/Npc/Crow.hpp>
 #include <Components/Npc/ElderMother.hpp>
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
@@ -539,7 +540,8 @@ void HazardFieldSystem<HazardType>::check_npc_hazard_field_collision()
   {
     // optimization
     if ( not Utils::is_visible_in_view( view_bounds, npc_pos_cmp ) ) continue;
-    if ( reg().template any_of<Cmp::Npc::ElderMother, Cmp::Npc::Ghost>( npc_entt ) ) continue;
+    // crows can't be killed (see NpcSystem::on_destroy_npc_event); skipped here too, as the first kill ends this check
+    if ( reg().template any_of<Cmp::Npc::ElderMother, Cmp::Npc::Ghost, Cmp::Npc::Crow>( npc_entt ) ) continue;
 
     for ( auto [hazard_entt, hazard_cmp, hazard_pos_cmp] : hazard_view.each() )
     {
