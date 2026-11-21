@@ -39,8 +39,8 @@ namespace Game::Sys
 //! A tooltip with "pause": true pauses gameplay while it is shown (Cmp::SceneSettings::Paused::Reason::TOOLTIP). It keeps
 //! counting down in real time, so gameplay resumes when it expires or is dismissed with Enter. Without "duration_s" it
 //! stays until dismissed with Enter, and "Press <Enter> to dismiss." is appended to its text. It never starts while the
-//! pause menu is open. Pausing would cut off the sound effects playing when it triggered (e.g. the pickup sound), so it
-//! is held back until they finish, see PendingTooltip.
+//! pause menu is open. Sound effects keep playing during a tooltip pause (e.g. the pickup sound that triggered it), but
+//! looping effects stop looping until gameplay resumes.
 class TooltipOverlaySystem : public BaseOverlaySystem
 {
 public:
@@ -179,16 +179,6 @@ private:
     bool pause{ false };
   };
 
-  //! @brief A pausing tooltip waiting for the sound effects that were playing when it triggered to finish. Effects
-  //! started afterwards don't extend the wait, so continuously replayed effects (e.g. footsteps) can't hold it back.
-  struct PendingTooltip
-  {
-    //! @brief the tooltip to show once the delay has passed
-    ActiveTooltip tooltip;
-    //! @brief time left before the tooltip is shown
-    sf::Time delay;
-  };
-
   //! @brief Panel style from res/json/tooltips.json
   struct PanelStyle
   {
@@ -260,9 +250,6 @@ private:
 
   //! @brief the tooltip being displayed, if any
   std::optional<ActiveTooltip> m_active;
-
-  //! @brief a pausing tooltip waiting for the current sound effects to finish, if any
-  std::optional<PendingTooltip> m_pending;
 
   //! @brief seen tooltip ids for the whole session, see sync_seen()
   std::set<std::string> m_seen;

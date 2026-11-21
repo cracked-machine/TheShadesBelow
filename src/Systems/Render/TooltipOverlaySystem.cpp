@@ -43,10 +43,6 @@ sf::Color get_colour( const nlohmann::json &json_data, const sf::Color &fallback
            json_data.value( "a", fallback.a ) };
 }
 
-//! @brief The longest a pausing tooltip waits for the sound effects playing when it triggered, so an unusually long
-//! effect can't hold a tutorial back.
-constexpr sf::Time kMaxSfxDeferral = sf::seconds( 3.f );
-
 } // namespace
 
 TooltipOverlaySystem::TooltipOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
@@ -217,11 +213,7 @@ void TooltipOverlaySystem::update( sf::Time dt )
       const auto *def = find_match( candidate );
       if ( not def ) { continue; }
 
-      ActiveTooltip tooltip{ format_text( *def, candidate ), def->duration, def->frequency, def->position, candidate.source_bounds, def->pause };
-      // pausing now would cut off the effects already playing (e.g. the pickup sound), so wait for them to finish
-      const sf::Time sfx_remaining = def->pause ? m_sound_bank.effects_remaining_time() : sf::Time::Zero;
-      if ( sfx_remaining > sf::Time::Zero ) { m_pending = PendingTooltip{ std::move( tooltip ), std::min( sfx_remaining, kMaxSfxDeferral ) }; }
-      else { activate( std::move( tooltip ) ); }
+      activate( { format_text( *def, candidate ), def->duration, def->frequency, def->position, candidate.source_bounds, def->pause } );
       if ( def->frequency == Frequency::ONCE )
       {
         m_seen.insert( def->id );
@@ -232,16 +224,6 @@ void TooltipOverlaySystem::update( sf::Time dt )
     if ( seen_changed ) { PersistSystem::save_component<Cmp::Persist::TooltipsSeen>( reg() ); }
   }
   m_candidates.clear();
-
-  if ( m_pending )
-  {
-    m_pending->delay -= dt;
-    if ( m_pending->delay <= sf::Time::Zero )
-    {
-      activate( std::move( m_pending->tooltip ) );
-      m_pending.reset();
-    }
-  }
 
   if ( m_active and m_active->remaining )
   {
@@ -279,12 +261,14 @@ void TooltipOverlaySystem::sync_pause_setting()
   if ( want_pause and reason == Reason::NONE )
   {
     reason = Reason::TOOLTIP;
-    on_modal_open();
+    // sound effects keep playing in the background, but looping ones must not play on for the whole pause
+    cancel_bow_draw();
+    m_sound_bank.suspend_effect_loops();
   }
   else if ( not want_pause and reason == Reason::TOOLTIP )
   {
     reason = Reason::NONE;
-    on_modal_close();
+    m_sound_bank.resume_effect_loops();
   }
 }
 
@@ -297,7 +281,6 @@ void TooltipOverlaySystem::check_reset()
   // m_seen must be cleared too, otherwise sync_seen() would merge the old ids straight back
   m_seen.clear();
   m_active.reset();
-  m_pending.reset();
   PersistSystem::get<Cmp::Persist::TooltipsSeen>( reg() ).get_value().clear();
   reset.get_value() = false;
   PersistSystem::save_component<Cmp::Persist::TooltipsSeen>( reg() );

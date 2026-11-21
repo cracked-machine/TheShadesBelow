@@ -43,10 +43,13 @@ public:
   //! @note Blocks for kFadeDuration when anything is paused.
   void resume_effects();
 
-  //! @brief The longest remaining playback time of the sound effects playing now, allowing for their pitch. Looping
-  //! effects are ignored, as they never finish.
-  //! @return sf::Time Zero if no (non-looping) effect is playing
-  [[nodiscard]] sf::Time effects_remaining_time() const;
+  //! @brief Turns off looping for every looping sound effect, so it finishes its current pass and stops instead of
+  //! playing on indefinitely (e.g. while a tooltip pauses gameplay). Undo with resume_effect_loops().
+  void suspend_effect_loops();
+
+  //! @brief Turns looping back on for every effect suspended by suspend_effect_loops(), restarting any that finished
+  //! their pass in the meantime.
+  void resume_effect_loops();
 
   //! @brief Returns a reference to the pooled sf::Sound instance for `name`.
   //! Bind with `auto &`/`const auto &` - copying into a local (`auto`) creates a

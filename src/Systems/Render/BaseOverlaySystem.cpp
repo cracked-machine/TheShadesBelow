@@ -164,11 +164,15 @@ std::size_t BaseOverlaySystem::step_selection( std::size_t selected, std::size_t
   return selected > 0 ? selected - 1 : selected;
 }
 
+void BaseOverlaySystem::cancel_bow_draw()
+{
+  get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::CANCEL_BOW ) );
+}
+
 void BaseOverlaySystem::on_modal_open()
 {
-  // the mouse release is swallowed while a modal overlay is open, so abandon any draw now rather than leave it pending.
-  // Cancel before pausing the effects so the draw sfx is stopped, not paused and later resumed.
-  get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::CANCEL_BOW ) );
+  // cancel before pausing the effects so the draw sfx is stopped, not paused and later resumed
+  cancel_bow_draw();
   m_sound_bank.pause_effects();
 }
 

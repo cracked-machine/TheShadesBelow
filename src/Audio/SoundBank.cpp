@@ -88,19 +88,26 @@ void SoundBank::pause_effects()
   }
 }
 
-sf::Time SoundBank::effects_remaining_time() const
+void SoundBank::suspend_effect_loops()
 {
-  sf::Time longest = sf::Time::Zero;
-  for ( const auto &[name, effects_data] : sounds )
+  for ( auto &[name, effects_data] : sounds )
   {
-    const auto &control = effects_data.control;
-    if ( control.getStatus() != sf::Sound::Status::Playing or control.isLooping() ) { continue; }
-    const sf::Time remaining = effects_data.buffer->getDuration() - control.getPlayingOffset();
-    // a higher pitch plays faster
-    const float pitch = control.getPitch() > 0.f ? control.getPitch() : 1.f;
-    longest = std::max( longest, remaining / pitch );
+    if ( not effects_data.control.isLooping() ) { continue; }
+    effects_data.loop_suspended = true;
+    effects_data.control.setLooping( false );
   }
-  return longest;
+}
+
+void SoundBank::resume_effect_loops()
+{
+  for ( auto &[name, effects_data] : sounds )
+  {
+    if ( not effects_data.loop_suspended ) { continue; }
+    effects_data.loop_suspended = false;
+    effects_data.control.setLooping( true );
+    // the loop finished its last pass while suspended, so carry it on
+    if ( effects_data.control.getStatus() == sf::Sound::Status::Stopped ) { effects_data.control.play(); }
+  }
 }
 
 void SoundBank::resume_effects()

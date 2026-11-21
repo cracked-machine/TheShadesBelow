@@ -21,6 +21,10 @@ struct EffectsData
   //! @brief The effect's own volume, captured around a pause/resume fade so it can be restored afterwards.
   float paused_volume = 100.f;
 
+  //! @brief true while the effect's looping is turned off by SoundBank::suspend_effect_loops(), so
+  //! SoundBank::resume_effect_loops() knows to turn it back on.
+  bool loop_suspended = false;
+
   //! @brief Construct a new Effects Data object, loading its buffer from `filepath`.
   //! @param filepath Path to the sound effect audio file.
   EffectsData( const std::filesystem::path &filepath );

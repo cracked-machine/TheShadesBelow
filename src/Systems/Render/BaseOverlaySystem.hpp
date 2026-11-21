@@ -116,6 +116,9 @@ protected:
   //! @return std::size_t the new selection
   [[nodiscard]] static std::size_t step_selection( std::size_t selected, std::size_t row_count, bool next );
 
+  //! @brief Abandon any bow draw: the mouse release is swallowed while gameplay is paused, so it would stay pending.
+  void cancel_bow_draw();
+
   //! @brief Side effects of opening a modal overlay (pause, grimoire): cancel any bow draw, then pause the sound effects.
   void on_modal_open();
 
