@@ -10,7 +10,6 @@
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
-#include <Components/Persistent/AutoPickupDrops.hpp>
 #include <Components/Position.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
@@ -92,10 +91,10 @@ void ItemSystem::on_create_item_event( Game::Events::CreateItemEvent ev )
   if ( is_curse_tablet ) { Factory::Item::add_curse_tablet( reg(), item_entt, ev.m_item, sprite_idx ); }
   if ( ev.m_on_created ) { ev.m_on_created( item_entt ); }
 
-  // 5. a reward for the player goes straight into an empty slot, if the setting allows. Done last so on_created's
+  // 5. a reward for the player goes straight into an empty slot, if the item allows it (items.json "auto_pickup"). Done last so on_created's
   // bindings (e.g. a torch's flame, a summoning offering) are on the item to be carried over. Enqueued, as the caller
   // may still be iterating registry views; InventorySystem picks the slot then, or leaves the item on the ground
-  if ( ev.m_auto_pickup and Sys::PersistSystem::get<Cmp::Persist::AutoPickupDrops>( reg() ).get_value() and
+  if ( ev.m_player_reward and reg().get<Cmp::WorldItem>( item_entt ).is_auto_pickup() and
        not reg().all_of<Cmp::PlantMultiBlock>( item_entt ) )
   {
     get_systems_event_queue().enqueue( Events::PickupWorldItemEvent{ item_entt, /*to_empty_slot=*/true } );

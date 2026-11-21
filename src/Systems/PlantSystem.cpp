@@ -265,13 +265,13 @@ void PlantSystem::on_plant_killed_event( const Events::PlantKilledEvent &event )
   const Cmp::Position plant_pos_cmp( plant_mb_cmp.position, Constants::kGridSizePxF );
 
   // drop one random item of the destroy_action reward (drop, forage or the plant itself, see items.json) beside the
-  // plant. It is a reward for the player, so it may be picked up straight into an empty slot (Cmp::Persist::AutoPickupDrops).
+  // plant. It is a reward for the player, so it may be picked up straight into an empty slot (items.json "auto_pickup").
   // Plants without a destroy_action.reward.item drop nothing.
   if ( destroy_reward and destroy_reward->target == Cmp::ActionReward::Target::DEFAULT )
   {
     get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( find_drop_pos( plant_mb_cmp ), Constants::kGridSizePxF ),
                                                                 Sys::ItemStore::instance().pick_reward_item( *destroy_reward ), "drop_loot", 0.f,
-                                                                false, 0, entt::null, {}, /*sting=*/true, /*auto_pickup=*/true ) );
+                                                                false, 0, entt::null, {}, /*sting=*/true, /*player_reward=*/true ) );
   }
   // the weapon occupies the inventory, so an inventory reward is dropped nearby
   else if ( destroy_reward ) { grant_item_reward( *destroy_reward, plant_bounds, plant_entt ); }

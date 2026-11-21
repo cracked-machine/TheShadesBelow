@@ -3,6 +3,7 @@
     "sprite": { "name": "ERROR_SPRITE" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -20,6 +21,7 @@
     "sprite": { "name": "sprite.item.axe" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -38,6 +40,7 @@
     "sprite": { "name": "sprite.item.bomb" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -54,6 +57,7 @@
     "sprite": { "name": "sprite.item.boots" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -70,6 +74,7 @@
     "sprite": { "name": "sprite.item.longbow" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 40 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -88,6 +93,7 @@
     "sprite": { "name": "sprite.item.torch" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -105,6 +111,7 @@
     "sprite": { "name": "sprite.item.cryptkey" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -121,6 +128,7 @@
     "sprite": { "name": "sprite.item.cursetablet.ghost", "random": true },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -139,6 +147,7 @@
     "sprite": { "name": "sprite.item.cursetablet.skeleton", "random": true },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -157,6 +166,7 @@
     "sprite": { "name": "sprite.item.cursetablet.adder", "random": true },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -175,6 +185,7 @@
     "sprite": { "name": "sprite.item.dowsingrod" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 20 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -192,6 +203,7 @@
     "sprite": { "name": "sprite.item.elderflute" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 30 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -209,6 +221,7 @@
     "sprite": { "name": "sprite.item.elderwine" },
     "consumable": "drinkable",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -227,6 +240,7 @@
     "sprite": { "name": "sprite.item.exitkey" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -244,6 +258,7 @@
     "sprite": { "name": "sprite.item.gloves" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 20 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -262,6 +277,7 @@
     "sprite": { "name": "sprite.item.hawthorntea" },
     "consumable": "drinkable",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -279,6 +295,7 @@
     "sprite": { "name": "sprite.item.jewelry_amephyst_gemstone" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -296,6 +313,7 @@
     "sprite": { "name": "sprite.item.jewelry_amephyst_ring" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -313,6 +331,7 @@
     "sprite": { "name": "sprite.item.jewelry_diamond_gemstone" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -330,6 +349,7 @@
     "sprite": { "name": "sprite.item.jewelry_emerald_gemstone" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -347,6 +367,7 @@
     "sprite": { "name": "sprite.item.jewelry_emerald_necklace" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -364,6 +385,7 @@
     "sprite": { "name": "sprite.item.jewelry_ruby_ring" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -381,6 +403,7 @@
     "sprite": { "name": "sprite.item.jewelry_sapphire_gemstone" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -398,6 +421,7 @@
     "sprite": { "name": "sprite.item.jewelry_sapphire_necklace" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -415,6 +439,7 @@
     "sprite": { "name": "sprite.item.lightningrod" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 20 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -433,6 +458,7 @@
     "sprite": { "name": "sprite.item.lightningrod.broken" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -449,6 +475,7 @@
     "sprite": { "name": "sprite.item.pickaxe" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
@@ -467,6 +494,7 @@
     "sprite": { "name": "sprite.item.plant.burdock" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
@@ -494,6 +522,7 @@
     "sprite": { "name": "sprite.burdockroot" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -511,6 +540,7 @@
     "sprite": { "name": "sprite.burr" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -529,6 +559,7 @@
     "sprite": { "name": "sprite.item.plant.elder" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
@@ -558,6 +589,7 @@
     "sprite": { "name": "sprite.elderstick" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -575,6 +607,7 @@
     "sprite": { "name": "sprite.elderberries" },
     "consumable": "edible",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -595,6 +628,7 @@
     "sprite": { "name": "sprite.item.plant.foxglove" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
@@ -623,6 +657,7 @@
     "sprite": { "name": "sprite.foxgloveflower" },
     "consumable": "edible",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -643,6 +678,7 @@
     "sprite": { "name": "sprite.item.plant.hawthorn" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 25, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
@@ -672,6 +708,7 @@
     "sprite": { "name": "sprite.hawthornstick" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -689,6 +726,7 @@
     "sprite": { "name": "sprite.hawthornflower" },
     "consumable": "edible",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -709,6 +747,7 @@
     "sprite": { "name": "sprite.item.plant.henbane" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
@@ -736,6 +775,7 @@
     "sprite": { "name": "sprite.henbanestick" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -753,6 +793,7 @@
     "sprite": { "name": "sprite.henbaneseed" },
     "consumable": "edible",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -773,6 +814,7 @@
     "sprite": { "name": "sprite.item.plant.hogweed" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
@@ -802,6 +844,7 @@
     "sprite": { "name": "sprite.hogweedseed" },
     "consumable": "edible",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -821,6 +864,7 @@
     "sprite": { "name": "sprite.item.plant.nettle" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
@@ -848,6 +892,7 @@
     "sprite": { "name": "sprite.nettlefiber" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -865,6 +910,7 @@
     "sprite": { "name": "sprite.nettleleaf" },
     "consumable": "edible",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -884,6 +930,7 @@
     "sprite": { "name": "sprite.item.plant.nightshade" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
@@ -911,6 +958,7 @@
     "sprite": { "name": "sprite.nightshadeflower" },
     "consumable": "edible",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -932,6 +980,7 @@
     "sprite": { "name": "sprite.item.plant.redcampion" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 34, "bow": 0 },
@@ -959,6 +1008,7 @@
     "sprite": { "name": "sprite.antivenom" },
     "consumable": "drinkable",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -976,6 +1026,7 @@
     "sprite": { "name": "sprite.digitalis" },
     "consumable": "drinkable",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -993,6 +1044,7 @@
     "sprite": { "name": "sprite.item.plant.rowan" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
@@ -1020,6 +1072,7 @@
     "sprite": { "name": "sprite.rowanstick" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1037,6 +1090,7 @@
     "sprite": { "name": "sprite.rowanberries" },
     "consumable": "edible",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1057,6 +1111,7 @@
     "sprite": { "name": "sprite.item.plant.stjohnswort" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
@@ -1084,6 +1139,7 @@
     "sprite": { "name": "sprite.bloodoil" },
     "consumable": "drinkable",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1102,6 +1158,7 @@
     "sprite": { "name": "sprite.stjohnswortflower" },
     "consumable": "edible",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1121,6 +1178,7 @@
     "sprite": { "name": "sprite.item.plant.yew" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5 },
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
@@ -1148,6 +1206,7 @@
     "sprite": { "name": "sprite.yewstick" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1165,6 +1224,7 @@
     "sprite": { "name": "sprite.yewberry" },
     "consumable": "edible",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1184,6 +1244,7 @@
     "sprite": { "name": "sprite.item.preservedcat" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1200,6 +1261,7 @@
     "sprite": { "name": "sprite.grave.blood.small", "index": 0 },
     "consumable": "drinkable",
     "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1216,6 +1278,7 @@
     "sprite": { "name": "sprite.grave.blood.large", "index": 0 },
     "consumable": "drinkable",
     "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1232,6 +1295,7 @@
     "sprite": { "name": "sprite.item.talisman", "index": 0 },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1247,6 +1311,7 @@
     "sprite": { "name": "sprite.item.talisman", "index": 1 },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1262,6 +1327,7 @@
     "sprite": { "name": "sprite.item.talisman", "index": 2 },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1277,6 +1343,7 @@
     "sprite": { "name": "sprite.item.talisman", "index": 3 },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1292,6 +1359,7 @@
     "sprite": { "name": "sprite.item.talisman", "index": 4 },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1307,6 +1375,7 @@
     "sprite": { "name": "sprite.item.talisman", "index": 5 },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1322,6 +1391,7 @@
     "sprite": { "name": "sprite.item.talisman", "index": 6 },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1337,6 +1407,7 @@
     "sprite": { "name": "sprite.item.talisman", "index": 7 },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1352,6 +1423,7 @@
     "sprite": { "name": "sprite.item.talisman", "index": 8 },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1367,6 +1439,7 @@
     "sprite": { "name": "sprite.item.talisman", "index": 9 },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1382,6 +1455,7 @@
     "sprite": { "name": "sprite.item.rottenfood" },
     "consumable": "edible",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1399,6 +1473,7 @@
     "sprite": { "name": "sprite.item.rowanwine" },
     "consumable": "drinkable",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1416,6 +1491,7 @@
     "sprite": { "name": "sprite.item.shovel" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1434,6 +1510,7 @@
     "sprite": { "name": "sprite.item.witchesbroom" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 40 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1451,6 +1528,7 @@
     "sprite": { "name": "sprite.item.witchesjar" },
     "consumable": "none",
     "stackable": false,
+    "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 20 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [

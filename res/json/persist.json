@@ -284,11 +284,6 @@
     "value": false,
     "detail": "Inventory slot selection wraps around"
   },
-  "AutoPickupDrops": {
-    "type": "bool",
-    "value": true,
-    "detail": "Auto pick up reward drops into an empty inventory slot"
-  },
   "ShowHealthBar": {
     "type": "bool",
     "value": true,

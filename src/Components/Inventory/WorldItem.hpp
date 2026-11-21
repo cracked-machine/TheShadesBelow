@@ -225,6 +225,11 @@ public:
   bool is_stackable() const { return m_stackable; }
   void set_stackable( bool stackable ) { m_stackable = stackable; }
 
+  //! @brief Whether this item, dropped as a reward for the player (Events::CreateItemEvent::m_player_reward), is picked
+  //! up straight into an empty inventory slot, see "auto_pickup" in items.json.
+  bool is_auto_pickup() const { return m_auto_pickup; }
+  void set_auto_pickup( bool auto_pickup ) { m_auto_pickup = auto_pickup; }
+
   //! @brief Shop base price, see "shop.base_price" in items.json. The shop price fluctuates +/-20% from this, biased by player luck.
   int get_shop_base_price() const { return m_shop_base_price; }
   void set_shop_base_price( int base_price ) { m_shop_base_price = base_price; }
@@ -291,6 +296,9 @@ private:
 
   //! @brief Whether several of this item stack in one inventory slot. Imported from items.json.
   bool m_stackable{ false };
+
+  //! @brief Whether a reward drop of this item is picked up straight into an empty slot. Imported from items.json.
+  bool m_auto_pickup{ false };
 
   //! @brief Shop base price, fluctuated +/-20% by luck to get the shop price. Imported from items.json.
   int m_shop_base_price{ 0 };

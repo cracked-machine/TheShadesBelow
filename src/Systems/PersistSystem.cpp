@@ -8,7 +8,6 @@
 #include <Components/Persistent/ArmedBlockColourFill.hpp>
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
-#include <Components/Persistent/AutoPickupDrops.hpp>
 #include <Components/Persistent/MeleeHitCooldown.hpp>
 #include <Components/Persistent/ShowDamageText.hpp>
 #include <Components/Persistent/ShowHealthBar.hpp>
@@ -341,7 +340,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::InventoryStackSize>();
   add_component<Cmp::Persist::StowedTorchLit>();
   add_component<Cmp::Persist::InventorySlotRollover>();
-  add_component<Cmp::Persist::AutoPickupDrops>();
   add_component<Cmp::Persist::ShowHealthBar>();
   add_component<Cmp::Persist::ShowDamageText>();
   add_component<Cmp::Persist::FlyingOscillationAmplitude>();

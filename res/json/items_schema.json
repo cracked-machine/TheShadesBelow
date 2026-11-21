@@ -5,7 +5,7 @@
   "patternProperties": {
     "^(item\\..+|ERROR_SPRITE)$": {
       "type": "object",
-      "required": ["sprite", "stackable", "damage_to_weapon", "actions"],
+      "required": ["sprite", "stackable", "auto_pickup", "damage_to_weapon", "actions"],
       "additionalProperties": false,
       "properties": {
         "sprite": {
@@ -28,6 +28,10 @@
         "stackable": {
           "type": "boolean",
           "description": "Whether multiple items of this type stack in one inventory slot, up to Cmp::Persist::InventoryStackSize."
+        },
+        "auto_pickup": {
+          "type": "boolean",
+          "description": "Whether this item, when dropped as a reward for the player (Events::CreateItemEvent::m_player_reward), is picked up straight into an empty inventory slot. Left on the ground if every slot is full."
         },
         "shop": {
           "type": "object",

@@ -125,13 +125,13 @@ void BaseSystem::grant_item_reward( const Cmp::ActionReward &reward, const Cmp::
     }
   }
   // an inventory reward the player has no free hand for is dropped once nearby instead. Every drop here is a reward for
-  // the player, so it may be picked up straight into an empty slot (Cmp::Persist::AutoPickupDrops)
+  // the player, so it may be picked up straight into an empty slot (items.json "auto_pickup")
   const int quantity = reward.target == Cmp::ActionReward::Target::NEARBY ? reward.quantity : 1;
   for ( int i = 0; i < quantity; ++i )
   {
     get_systems_event_queue().trigger( Events::CreateItemEvent( source, item_store.pick_item( reward.item ), "drop_loot", 0.f, /*spawn_nearby=*/true,
                                                                 reward.max_instances, source_entt, on_created, /*sting=*/true,
-                                                                /*auto_pickup=*/true ) );
+                                                                /*player_reward=*/true ) );
   }
 }
 

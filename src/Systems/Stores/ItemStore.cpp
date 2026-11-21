@@ -78,6 +78,7 @@ void ItemStore::init_store()
                               sprite_random ? Sys::SpriteStore::instance().get( sprite_mtype ).sheet_size() : 0, damage_to_weapon.pickaxe,
                               damage_to_weapon.axe, damage_to_weapon.shovel, damage_to_weapon.bow, consumable );
     worlditem.set_stackable( item_value.at( "stackable" ).get<bool>() );
+    worlditem.set_auto_pickup( item_value.at( "auto_pickup" ).get<bool>() );
     if ( item_value.contains( "shop" ) )
     {
       const auto &shop_json = item_value.at( "shop" );
