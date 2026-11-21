@@ -503,11 +503,10 @@ void ActionSystem::check_player_melee_npc_kill()
                                               npc_pos_cmp.getCenter(), npc_pos_cmp.position.y );
       }
 
-      // intermediate hits play the destroy_action "loop" sfx, the final hit its "final" sfx (played by the DestroyNpcEvent handler)
+      // intermediate hits play the destroy_action "oneshot" sfx, the final hit its "final" sfx (played by the DestroyNpcEvent handler)
       if ( not killed )
       {
-        const auto &destroy_sfx = npc_cmp.at<Cmp::DestroyAction>().action.sfx();
-        if ( not destroy_sfx.loop.empty() ) { m_sound_bank.get_effect( destroy_sfx.loop ).play(); }
+        play_action_oneshot_sfx( npc_cmp.at<Cmp::DestroyAction>().action.sfx() );
         return;
       }
       SPDLOG_DEBUG( "Killed NPC at position ({}, {})!", npc_pos_cmp.position.x, npc_pos_cmp.position.y );

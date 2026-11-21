@@ -238,17 +238,13 @@ void ArrowSystem::check_npc_arrow_collision()
       arrow_cmp.m_destination = arrow_pos_cmp.getCenter();
       m_sound_bank.get_effect( std::string( "arrow_hit" + std::to_string( Cmp::RandomInt( 1, 4 ).gen() ) ) ).play();
 
-      // intermediate hits play the destroy_action "loop" sfx (see npc.json), the killing hit its "final" sfx, played by
+      // intermediate hits play the destroy_action "oneshot" sfx (see npc.json), the killing hit its "final" sfx, played by
       // the DestroyNpcEvent handler
       if ( Utils::Player::apply_weapon_hit( reg(), npc_entt, "item.longbow" ) )
       {
         get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, std::nullopt, std::nullopt, Events::DestroyNpcEvent::Cause::ARROW ) );
       }
-      else
-      {
-        const auto &destroy_sfx = npc_cmp.at<Cmp::DestroyAction>().action.sfx();
-        if ( not destroy_sfx.loop.empty() ) { m_sound_bank.get_effect( destroy_sfx.loop ).play(); }
-      }
+      else { play_action_oneshot_sfx( npc_cmp.at<Cmp::DestroyAction>().action.sfx() ); }
     }
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::Container, Cmp::Position>().each() )
     {

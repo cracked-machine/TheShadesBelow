@@ -80,7 +80,7 @@
     { "name": "snake_hiss6", "path": "res/audio/snake_hiss6.mp3" },
     { "name": "snake_hiss7", "path": "res/audio/snake_hiss7.mp3" },
     { "name": "tool_break", "path": "res/audio/tool_break.mp3" },
-    { "name": "tick_loop", "path": "res/audio/tick_loop.mp3" },
+    { "name": "tick_hit", "path": "res/audio/tick_loop.mp3" },
     { "name": "tick_final", "path": "res/audio/tick_final.mp3" },
     { "name": "witch_scream", "path": "res/audio/witch_scream.mp3" },
     { "name": "witches_jar_offering", "path": "res/audio/witches_jar_offering.mp3" },

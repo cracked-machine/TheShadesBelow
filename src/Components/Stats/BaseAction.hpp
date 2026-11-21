@@ -37,11 +37,13 @@ struct ActionWear
 };
 
 //! @brief Sound effects played for an action. See the optional "sfx" object of an action in res/json/items.json and
-//! res/json/npc.json. An empty name plays nothing.
+//! res/json/npc.json. An empty name plays nothing. loop and oneshot are mutually exclusive.
 struct ActionSfx
 {
-  //! @brief Plays while the action is in progress, e.g. eating/drinking, an intermediate shovel hit on a plant, a plant burning.
+  //! @brief Repeats while the action is in progress, e.g. eating/drinking, a plant burning.
   std::string loop;
+  //! @brief Plays once per step of an action that takes several, e.g. each intermediate weapon hit on a plant or NPC.
+  std::string oneshot;
   //! @brief Plays when the action completes or is applied.
   std::string final;
 };
@@ -127,7 +129,7 @@ public:
   //! @param wear The wear settings.
   void set_wear( ActionWear wear ) { m_wear = wear; }
   //! @brief Get the sound effects of this action ("sfx" in items.json/npc.json).
-  //! @return const ActionSfx& The loop and final sound names, empty if unused.
+  //! @return const ActionSfx& The loop, oneshot and final sound names, empty if unused.
   [[nodiscard]] const ActionSfx &sfx() const { return m_sfx; }
   //! @brief Set the sound effects of this action, see sfx().
   //! @param sfx The sound effect names.

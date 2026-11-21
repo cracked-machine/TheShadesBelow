@@ -120,9 +120,11 @@
           "type": "object",
           "description": "Optional. Sound effects (names from res/json/audio.json) for this action. The final sound plays each time the action is applied, e.g. destroy_action's on every removal of the NPC (axe, arrow, bomb, banish, burning...). An empty or missing name plays nothing.",
           "required": ["final"],
+          "not": { "required": ["loop", "oneshot"] },
           "additionalProperties": false,
           "properties": {
-            "loop": { "type": "string", "description": "Plays while the action is in progress. Optional, unused for NPC actions." },
+            "loop": { "type": "string", "description": "Repeats while the action is in progress. Optional, unused for NPC actions. Mutually exclusive with oneshot." },
+            "oneshot": { "type": "string", "description": "destroy_action: plays on each weapon hit that doesn't kill the NPC. Optional. Mutually exclusive with loop." },
             "final": { "type": "string", "description": "Plays when the action is applied. Empty string for none." }
           }
         },

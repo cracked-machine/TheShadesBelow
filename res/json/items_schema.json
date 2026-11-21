@@ -199,11 +199,13 @@
         },
         "sfx": {
           "type": "object",
-          "description": "Optional. Sound effects (names from res/json/audio.json) for this action. An empty or missing name plays nothing. consume_action: loop while consuming, final once consumed. destroy_action: loop on each intermediate axe hit, final when felled. burn_action: loop while burning, final when burnt out. forage_action, spawn_action, offering_action: final when applied. proximity_action: final when its side effects or reward trigger, and on each kill_npc kill.",
+          "description": "Optional. Sound effects (names from res/json/audio.json) for this action. An empty or missing name plays nothing. consume_action: loop while consuming, final once consumed. destroy_action: oneshot on each intermediate hit, final when felled. burn_action: loop while burning, final when burnt out. forage_action, spawn_action, offering_action: final when applied. proximity_action: final when its side effects or reward trigger, and on each kill_npc kill.",
           "required": ["final"],
+          "not": { "required": ["loop", "oneshot"] },
           "additionalProperties": false,
           "properties": {
-            "loop": { "type": "string", "description": "Plays while the action is in progress. Optional." },
+            "loop": { "type": "string", "description": "Repeats while the action is in progress. Optional. Mutually exclusive with oneshot." },
+            "oneshot": { "type": "string", "description": "Plays once per intermediate step of the action, e.g. each hit that doesn't fell the plant. Optional. Mutually exclusive with loop." },
             "final": { "type": "string", "description": "Plays when the action completes or is applied. Empty string for none." }
           }
         },

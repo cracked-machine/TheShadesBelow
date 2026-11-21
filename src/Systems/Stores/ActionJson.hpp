@@ -272,11 +272,17 @@ template <typename Action>
     action.set_wear( Cmp::ActionWear{ .expiry_seconds = JsonDeserializer::get_float( wear, "expiryseconds" ),
                                       .active_only = wear.at( "active_only" ).get<bool>() } );
   }
-  // sfx is optional, but when present "final" is required ("loop" is optional)
+  // sfx is optional, but when present "final" is required. "loop" and "oneshot" are optional and mutually exclusive
   if ( j.contains( "sfx" ) )
   {
     const auto &sfx = j.at( "sfx" );
-    action.set_sfx( Cmp::ActionSfx{ sfx.value( "loop", std::string{} ), sfx.at( "final" ).get<std::string>() } );
+    if ( sfx.contains( "loop" ) and sfx.contains( "oneshot" ) )
+    {
+      throw std::runtime_error( "sfx can't have both \"loop\" and \"oneshot\": " + sfx.dump() );
+    }
+    action.set_sfx( Cmp::ActionSfx{ .loop = sfx.value( "loop", std::string{} ),
+                                    .oneshot = sfx.value( "oneshot", std::string{} ),
+                                    .final = sfx.at( "final" ).get<std::string>() } );
   }
   return action;
 }

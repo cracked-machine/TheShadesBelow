@@ -252,9 +252,8 @@ void PlantSystem::player_plant_interact()
         on_plant_killed_event( Events::PlantKilledEvent( plant_entt ) );
         return;
       }
-      // intermediate hits play the destroy_action "loop" sfx, the final hit its "final" sfx
-      const auto destroy_sfx = reg().get<Cmp::WorldItem>( plant_entt ).get_action<Cmp::DestroyAction>().sfx();
-      if ( not destroy_sfx.loop.empty() ) { m_sound_bank.get_effect( destroy_sfx.loop ).play(); }
+      // intermediate hits play the destroy_action "oneshot" sfx, the final hit its "final" sfx
+      play_action_oneshot_sfx( reg().get<Cmp::WorldItem>( plant_entt ).get_action<Cmp::DestroyAction>().sfx() );
       return;
     }
   }

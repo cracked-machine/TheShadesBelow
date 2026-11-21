@@ -48,6 +48,11 @@ void BaseSystem::play_action_sfx( const Cmp::ActionSfx &sfx )
   if ( not sfx.final.empty() ) { m_sound_bank.get_effect( sfx.final ).play(); }
 }
 
+void BaseSystem::play_action_oneshot_sfx( const Cmp::ActionSfx &sfx )
+{
+  if ( not sfx.oneshot.empty() ) { m_sound_bank.get_effect( sfx.oneshot ).play(); }
+}
+
 void BaseSystem::play_action_loop_sfx( const Cmp::ActionSfx &sfx )
 {
   if ( sfx.loop.empty() ) return;

@@ -85,6 +85,11 @@ protected:
   //! @param action The applied action.
   void play_action_sfx( const Cmp::BaseAction &action );
 
+  //! @brief Play an action's "oneshot" sound effect (see Cmp::ActionSfx), if it has one. Call once per intermediate step
+  //! of the action, e.g. each weapon hit that doesn't destroy the target.
+  //! @param sfx The in-progress action's sound effects.
+  void play_action_oneshot_sfx( const Cmp::ActionSfx &sfx );
+
   //! @brief Play an action's "loop" sound effect (see Cmp::ActionSfx), if it has one and it isn't already playing.
   //! Call every frame while the action is in progress; the sound is replayed each time it finishes.
   //! @param sfx The in-progress action's sound effects.
