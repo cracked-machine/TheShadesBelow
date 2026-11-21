@@ -1,5 +1,6 @@
 
 #include <Audio/SoundBank.hpp>
+#include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Crypt/Chest.hpp>
 #include <Components/Crypt/ObjectiveMultiBlock.hpp>
@@ -273,6 +274,14 @@ void InventorySystem::swap_inventory()
   for ( auto [objective_entt, objective_mb_cmp] : reg().view<Cmp::Crypt::ObjectiveMultiBlock>().each() )
   {
     if ( not Utils::Player::is_player_near( reg(), objective_mb_cmp ) ) continue;
+    return;
+  }
+
+  // if player is facing a Cmp::Altar::MultiBlock let them make an offering (blood or item) without dropping the inventory item
+  for ( auto [altar_entt, altar_cmp] : reg().view<Cmp::Altar::MultiBlock>().each() )
+  {
+    if ( not Utils::Player::is_player_near( reg(), altar_cmp ) ) continue;
+    if ( not Utils::Player::get_projected_position( reg() ).findIntersection( altar_cmp ) ) continue;
     return;
   }
 

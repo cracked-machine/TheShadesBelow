@@ -286,7 +286,7 @@
   },
   "AutoPickupDrops": {
     "type": "bool",
-    "value": false,
+    "value": true,
     "detail": "Auto pick up reward drops into an empty inventory slot"
   },
   "ShowHealthBar": {
