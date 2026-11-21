@@ -121,7 +121,7 @@ void Grimoire::prefill_none_actions( SubPage &sub_page )
   sub_page.sprite_key = "sprite.item.none";
   sub_page.sprite_index = 0;
   for_each_action_type( [&]<typename ActionT>()
-  { sub_page.action_map.emplace( std::string( ActionT::kKey ), BaseAction( {}, {}, {}, {}, {}, {}, {} ) ); } );
+  { sub_page.action_map.emplace( std::string( ActionT::kKey ), BaseAction( {}, {}, {}, {}, {}, {} ) ); } );
 }
 
 } // namespace Game::Cmp

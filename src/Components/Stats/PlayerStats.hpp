@@ -25,19 +25,16 @@ public:
   //! @param despair Initial despair value, clamped to [0, 100].
   //! @param infamy Initial infamy value, clamped to [0, 100].
   //! @param luck Initial luck value, clamped to [0, 100].
-  //! @param anima Initial anima value, clamped to [0, 100].
-  PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck,
-               Stats::Anima anima );
+  PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck );
   //! @brief Construct a new Player Stats object.
   //! @param health Initial health value, clamped to [0, 100].
   //! @param fear Initial fear value, clamped to [0, 100].
   //! @param despair Initial despair value, clamped to [0, 100].
   //! @param infamy Initial infamy value, clamped to [0, 100].
   //! @param luck Initial luck value, clamped to [0, 100].
-  //! @param anima Initial anima value, clamped to [0, 100].
   //! @param toxidrome Initial toxidrome affliction.
   PlayerStats( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck,
-               Stats::Anima anima, Cmp::Toxicity::Toxidrome toxidrome );
+               Cmp::Toxicity::Toxidrome toxidrome );
   //! @brief Destroy the Player Stats object.
   ~PlayerStats();
 
@@ -63,14 +60,11 @@ public:
   //! @brief Get the player's current toxicity.
   //! @return int Toxicity value, in [0, 100].
   [[nodiscard]] int luck() const { return m_luck; }
-  //! @brief Get the player's current anima, earned from plants and spent at the healing spring.
-  //! @return int Anima value, in [0, 100].
-  [[nodiscard]] int anima() const { return m_anima; }
   //! @brief Get the player's current toxidrome affliction.
   //! @return Stats::toxidrome The toxidrome type and its tick interval.
   [[nodiscard]] const Cmp::Toxicity::Toxidrome &toxidrome() const;
 
-  //! @brief Cures the player's toxidromes over time (e.g. while resting at a healing spring). Reduces
+  //! @brief Cures the player's toxidromes over time (e.g. between levels). Reduces
   //! every active toxidrome's own toxicity contribution by up to `amount`, removing any that reach
   //! zero, and reduces the toxicity stat by the total actually removed.
   //! @param amount Maximum reduction applied to each active toxidrome's own toxicity value.
@@ -84,7 +78,7 @@ public:
   [[nodiscard]] bool is_toxic_immune() const { return m_toxic_immune; }
 
   //! @brief Update the player stats with the BaseAction object.
-  //! @note BaseAction: health, fear, despair, infamy, luck, anima, toxidrome. Each toxidrome carried by the
+  //! @note BaseAction: health, fear, despair, infamy, luck, toxidrome. Each toxidrome carried by the
   //! action is merged into the player's existing set individually (an excluded one instead fights the
   //! opposing toxidrome down and takes over once it's gone, per Cmp::Toxicity::Toxidrome::apply), rather
   //! than replacing the player's whole set outright. A negative toxidrome delta reduces (cures) the
@@ -103,8 +97,6 @@ private:
   int m_infamy{ 0 };
   //! @brief The player's current luck, in [0, 100].
   int m_luck{ 50 };
-  //! @brief The player's current anima, in [0, 100].
-  int m_anima{ 0 };
   //! @brief The player's current toxidrome affliction. Never null; held behind a pointer only so this
   //! header need not include Toxidrome.hpp. Copy/move are hand-written in the .cpp (deep-copy for
   //! copy, pointer-steal for move) to keep PlayerStats copy-constructible (RegistryTransfer relies on

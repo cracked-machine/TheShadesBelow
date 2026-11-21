@@ -907,71 +907,6 @@
                  "y":195
                 }, 
                 {
-                 "height":20,
-                 "id":69,
-                 "name":"anima_meter",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"ui_meter",
-                 "visible":true,
-                 "width":150,
-                 "x":120,
-                 "y":240
-                }, 
-                {
-                 "height":0,
-                 "id":70,
-                 "name":"anima_txt",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"anima"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":40,
-                 "y":235
-                }, 
-                {
-                 "height":0,
-                 "id":112,
-                 "name":"anima_delta_lbl",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"align",
-                         "type":"string",
-                         "value":"left"
-                        }, 
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":30
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":""
-                        }],
-                 "rotation":0,
-                 "type":"ui_label",
-                 "visible":true,
-                 "width":0,
-                 "x":300,
-                 "y":230
-                }, 
-                {
                  "height":0,
                  "id":113,
                  "name":"luck_delta_lbl",
@@ -1331,7 +1266,7 @@
          "name":"outlines",
          "objects":[
                 {
-                 "height":260,
+                 "height":220,
                  "id":58,
                  "name":"status_outline",
                  "opacity":1,

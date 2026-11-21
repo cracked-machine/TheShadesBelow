@@ -127,9 +127,9 @@ void ShopScene::on_enter()
         Events::UpdatePlayerPositionEvent( sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::PlayerStartPosition>( m_reg ) ) ) );
     SPDLOG_DEBUG( "player_start_pos_px: {},{}", Utils::Player::get_position( m_reg ).position.x, Utils::Player::get_position( m_reg ).position.y );
 
-    // restore the player between levels; infamy and anima carry over to the next level
+    // restore the player between levels; infamy carries over to the next level
     auto &stats = Utils::Player::get_stats( m_reg );
-    stats.apply( { Cmp::Stats::Health{ +100 }, Cmp::Stats::Fear{ -100 }, Cmp::Stats::Despair{ -100 }, {}, {}, {}, {} } );
+    stats.apply( { Cmp::Stats::Health{ +100 }, Cmp::Stats::Fear{ -100 }, Cmp::Stats::Despair{ -100 }, {}, {}, {} } );
     stats.decay_all_toxidrome( 100 );
 
     m_just_spawned = false;

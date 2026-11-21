@@ -1,9 +1,6 @@
 #include <Audio/SoundBank.hpp>
-#include <Components/Persistent/RetainAnimaBetweenLevels.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Wealth.hpp>
-#include <Components/Stats/BaseAction.hpp>
-#include <Components/Stats/PlayerStats.hpp>
 #include <SceneControl/Events/ProcessLevelCompleteSceneInputEvent.hpp>
 #include <SceneControl/Scenes/LevelCompleteScene.hpp>
 #include <Systems/FootstepSystem.hpp>
@@ -59,24 +56,9 @@ void LevelCompleteScene::do_update( sf::Time dt )
     m_scorecheck_accumulator = sf::Time::Zero;
   }
 
-  // unspent anima either carries over to the next level, or is sold for wealth (1 anima = 1 wealth)
-  const bool retain_anima = Sys::PersistSystem::get<Cmp::Persist::RetainAnimaBetweenLevels>( m_reg ).get_value();
-  auto &stats = Utils::Player::get_stats( m_reg );
-  if ( not retain_anima ) { m_anima_accumulator += dt; }
-  while ( not retain_anima and m_anima_accumulator.asSeconds() >= kAnimaTickSeconds and stats.anima() > 0 )
-  {
-    stats.apply( { {}, {}, {}, {}, {}, Cmp::Stats::Anima{ -1 }, {} } );
-    wealth.wealth += 1;
-    m_anima_wealth += 1;
-    m_anima_accumulator -= sf::seconds( kAnimaTickSeconds );
-    // a loot sound every 10 anima rather than every tick
-    if ( m_anima_wealth % 10 == 0 ) { m_sound_bank.get_effect( "get_loot" ).play(); }
-  }
-  if ( retain_anima or stats.anima() == 0 ) { m_anima_accumulator = sf::Time::Zero; }
-
-  const bool allow_continue = cadaver_cmp.count() == 0 and ( retain_anima or stats.anima() == 0 );
+  const bool allow_continue = cadaver_cmp.count() == 0;
   auto &render_menu_sys = m_sys.find<Sys::Store::Type::RenderMenuSystem>();
-  render_menu_sys.render_victory_screen( allow_continue, m_cadaver_wealth, m_anima_wealth, retain_anima );
+  render_menu_sys.render_victory_screen( allow_continue, m_cadaver_wealth );
 }
 
 entt::registry &LevelCompleteScene::registry() { return m_reg; }

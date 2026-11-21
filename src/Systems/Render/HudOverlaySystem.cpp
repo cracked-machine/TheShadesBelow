@@ -10,7 +10,6 @@
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Hazard/FieldCell.hpp>
 #include <Components/Health.hpp>
-#include <Components/Inventory/FlashUIAnima.hpp>
 #include <Components/Inventory/FlashUICadaver.hpp>
 #include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
@@ -436,15 +435,6 @@ void HudOverlaySystem::render_ui_meters( sf::Time dt )
       meter_inner_color = sf::Color::Cyan;
       should_render = true;
     }
-    else if ( meter.name == "anima_meter" )
-    {
-      meter_value = static_cast<float>( Utils::Player::get_stats( reg() ).anima() );
-      meter_inner_color = sf::Color( 255, 165, 0 ); // orange
-      should_render = true;
-
-      // flash when something is refused for lack of anima
-      if ( update_flash_toggle<Cmp::FlashUIAnima>( dt ) ) { meter_outer_color = sf::Color::Cyan; }
-    }
     else if ( meter.name == "tachycardia_meter" )
     {
       auto opt_meter = Utils::Player::get_stats( reg() ).toxidrome().at<Cmp::Toxicity::Tachycardia>();
@@ -676,7 +666,6 @@ std::optional<int> HudOverlaySystem::get_change_label_stat( const std::string &l
   if ( label_name == "infamy_delta_lbl" ) { return stats.infamy(); }
   if ( label_name == "despair_delta_lbl" ) { return stats.despair(); }
   if ( label_name == "luck_delta_lbl" ) { return stats.luck(); }
-  if ( label_name == "anima_delta_lbl" ) { return stats.anima(); }
   if ( label_name == "tachycardia_delta_lbl" ) { return toxidrome.at<Cmp::Toxicity::Tachycardia>().value_or( 0 ); }
   if ( label_name == "bradycardia_delta_lbl" ) { return toxidrome.at<Cmp::Toxicity::Bradycardia>().value_or( 0 ); }
   if ( label_name == "hallucinogen_delta_lbl" ) { return toxidrome.at<Cmp::Toxicity::Hallucinogen>().value_or( 0 ); }

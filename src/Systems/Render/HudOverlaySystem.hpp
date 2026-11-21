@@ -93,7 +93,7 @@ private:
   //! @param text the text to draw
   void place_imgui_text( const Render::UiLayout::Label &label, sf::Vector2f slot_origin, const std::string &text );
 
-  //! @brief Render the HUD's meters (health, fear, infamy, despair, luck, anima, toxicity) as ImGui::ProgressBars and
+  //! @brief Render the HUD's meters (health, fear, infamy, despair, luck, toxicity) as ImGui::ProgressBars and
   //! flash their outline colour on recent changes. Must be called inside the "##hud_meters" window (begin_overlay_window).
   //! @param dt
   void render_ui_meters( sf::Time dt );

@@ -63,18 +63,17 @@ public:
   //! @param despair Change applied to the despair stat.
   //! @param infamy Change applied to the infamy stat.
   //! @param luck Change applied to the luck stat.
-  //! @param anima Change applied to the anima stat.
   //! @param tick How often (seconds) the action re-applies, or 0 for a one-shot.
-  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima,
+  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck,
               Stats::Tick tick );
   //! @brief Construct a new Base Action object with no side effects or rewards.
   //! @param toxidrome toxidrome affliction applied alongside the stat changes, if any.
-  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima,
+  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck,
               Stats::Tick tick, Cmp::Toxicity::Toxidrome toxidrome );
   //! @brief Construct a new Base Action object with no rewards.
   //! @param toxidrome toxidrome affliction applied alongside the stat changes, if any.
   //! @param side_effects Optional side effects (NPC spawn, lightning, movement), each with its own probability.
-  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima,
+  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck,
               Stats::Tick tick, Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects );
   //! @brief Construct a new Base Action object.
   //! @note Overloads are used instead of default arguments so that this header doesn't need the complete
@@ -84,13 +83,12 @@ public:
   //! @param despair Change applied to the despair stat.
   //! @param infamy Change applied to the infamy stat.
   //! @param luck Change applied to the luck stat.
-  //! @param anima Change applied to the anima stat.
   //! @param tick How often (seconds) the action re-applies, or 0 for a one-shot.
   //! @param toxidrome toxidrome affliction applied alongside the stat changes, if any. Each active
   //! toxidrome carries its own toxicity contribution (see Cmp::Toxicity::Toxidrome).
   //! @param side_effects Optional side effects (NPC spawn, lightning, movement), each with its own probability.
   //! @param rewards Optional rewards granted when the action is applied (e.g. forage/chop/offering output).
-  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck, Stats::Anima anima,
+  BaseAction( Stats::Health health, Stats::Fear fear, Stats::Despair despair, Stats::Infamy infamy, Stats::Luck luck,
               Stats::Tick tick, Cmp::Toxicity::Toxidrome toxidrome, SideEffects side_effects, ActionRewards rewards );
   //! @brief Destroy the Base Action object.
   ~BaseAction();
@@ -118,9 +116,6 @@ public:
   //! @brief Get the luck delta.
   //! @return int The change applied to the toxicity stat.
   [[nodiscard]] int luck() const { return m_luck; }
-  //! @brief Get the anima delta.
-  //! @return int The change applied to the anima stat.
-  [[nodiscard]] int anima() const { return m_anima; }
   //! @brief Get the re-apply interval.
   //! @return float How often (seconds) the action re-applies, or 0 for a one-shot.
   [[nodiscard]] float interval() const { return m_tick; }
@@ -169,7 +164,6 @@ public:
     m_despair += rhs.m_despair;
     m_infamy += rhs.m_infamy;
     m_luck += rhs.m_luck;
-    m_anima += rhs.m_anima;
     m_tick += rhs.m_tick;
     return *this;
   }
@@ -185,8 +179,6 @@ private:
   int m_infamy{ 0 };
   //! @brief The change applied to the luck stat.
   int m_luck{ 0 };
-  //! @brief The change applied to the anima stat.
-  int m_anima{ 0 };
   // The toxidrome, side effects and rewards are set once at construction and never modified, so copies share them.
   // They are held behind pointers so this header needs only forward declarations of their types. Never null, except
   // in a moved-from object.
@@ -207,7 +199,7 @@ private:
 
 //! @brief An action with no effect: zero stat deltas, one-shot tick, and no toxidrome, side effects, rewards, wear
 //! or sfx. Returned for any action an item or NPC omits from res/json/items.json or res/json/npc.json.
-[[nodiscard]] inline BaseAction no_action() { return BaseAction( { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0.f } ); }
+[[nodiscard]] inline BaseAction no_action() { return BaseAction( { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0.f } ); }
 
 //! @brief Pairs a stat-modifier action with the timestamp/duration used to schedule its re-application.
 struct ActionTimePair

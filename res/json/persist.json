@@ -637,20 +637,12 @@
     "detail": "Lightning Rod Debris Damage",
     "format": "%d"
   },
-  "HealingBuildingOverride": {
-    "type": "int",
-    "value": -1,
-    "min_value": -1,
-    "max_value": 1,
-    "detail": "Healing Building (-1 = random, 0 = Healing Spring, 1 = Barber Surgeon)",
-    "format": "%d"
-  },
   "PaidHealAmount": {
     "type": "int",
     "value": 25,
     "min_value": 1,
     "max_value": 100,
-    "detail": "Paid heal amount (spring/barber)",
+    "detail": "Paid heal amount (barber)",
     "format": "%d"
   },
   "MusicVolume": {
@@ -949,11 +941,6 @@
       "a": 255
     }
   },
-  "RetainAnimaBetweenLevels": {
-    "type": "bool",
-    "value": true,
-    "detail": "Retain Anima Between Levels (off = sell for wealth)"
-  },
   "RuinMaxCobwebs": {
     "type": "int",
     "value": 25,
@@ -1104,14 +1091,6 @@
     "min_value": 0,
     "max_value": 100,
     "detail": "Luck",
-    "format": "%d"
-  },
-  "StartingAnima": {
-    "type": "int",
-    "value": 0,
-    "min_value": 0,
-    "max_value": 100,
-    "detail": "Anima",
     "format": "%d"
   },
   "LuckDropRate": {

@@ -17,7 +17,6 @@
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Persistent/RetainAnimaBetweenLevels.hpp>
 #include <Components/Persistent/RuinProcGenMaxIterations.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
@@ -151,9 +150,8 @@ void GraveyardScene::on_init()
   else
   {
     Utils::Player::get_level_depth( m_reg ).increment_count( 1 );
-    // every level starts with the Cmp::Persist::Starting* stats; anima is kept if it is retained between levels
-    // (otherwise LevelCompleteScene has normally converted it all to wealth already)
-    Utils::Player::reset_stats_to_starting( m_reg, Sys::PersistSystem::get<Cmp::Persist::RetainAnimaBetweenLevels>( m_reg ).get_value() );
+    // every level starts with the Cmp::Persist::Starting* stats
+    Utils::Player::reset_stats_to_starting( m_reg );
     // every level starts with no cadaver parts collected
     Utils::Player::get_cadaver( m_reg ).reset();
   }

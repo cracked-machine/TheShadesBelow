@@ -10,8 +10,6 @@ enum class SceneId {
   GRAVEYARD,
   //! @brief The shop scene
   SHOP,
-  //! @brief The healing spring scene
-  HEALING_SPRING,
   //! @brief The barber surgeon scene
   BARBER_SURGEON,
   //! @brief The upper floor of the ruin scene

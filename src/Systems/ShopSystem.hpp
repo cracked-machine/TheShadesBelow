@@ -68,7 +68,7 @@ public:
 
   // const Cmp::Shop::Inventory::Config &get_inventory_config() { return m_shop_inventory_config; }
 
-  //! @brief The stats the healing spring and barber surgeon can heal, in the order they are listed in the heal menu.
+  //! @brief The stats the barber surgeon can heal, in the order they are listed in the heal menu.
   enum class HealStat {
     //! @brief Restore health
     HEALTH,
@@ -83,42 +83,22 @@ public:
   //! @brief Heal menu row labels, indexed by HealStat
   static constexpr std::array<std::string_view, 4> kHealStatLabels{ "Health", "Fear", "Despair", "Infamy" };
 
-  //! @brief What a heal is paid with: anima at the healing spring, gold at the barber surgeon.
-  enum class HealCurrency {
-    //! @brief Paid with the player's anima stat
-    ANIMA,
-    //! @brief Paid with the player's wealth
-    GOLD
-  };
-
-  //! @brief Anima cost of one heal at the healing spring
-  static constexpr int kHealAnimaCost = 10;
-
   //! @brief Gold cost of one heal at the barber surgeon
   static constexpr int kHealGoldCost = 10;
 
-  //! @brief The cost of one heal in `currency`.
-  //! @param currency
-  [[nodiscard]] static constexpr int heal_cost( HealCurrency currency )
-  {
-    return currency == HealCurrency::ANIMA ? kHealAnimaCost : kHealGoldCost;
-  }
-
-  //! @brief True if the heal menu should show: the current scene is the healing spring or barber surgeon, and the player
-  //! is near the spring/fountain (Cmp::HealingSpringMultiBlock).
+  //! @brief True if the heal menu should show: the current scene is the barber surgeon, and the player
+  //! is near the fountain (Cmp::HealingSpringMultiBlock).
   //! @param reg
   [[nodiscard]] static bool is_heal_menu_open( entt::registry &reg );
 
-  //! @brief True if the player has enough `currency` for one heal.
-  //! @param currency
-  [[nodiscard]] bool can_afford_heal( HealCurrency currency );
+  //! @brief True if the player has enough gold for one heal.
+  [[nodiscard]] bool can_afford_heal();
 
-  //! @brief Pay for one heal in `currency` and apply it (Cmp::Persist::PaidHealAmount) to `stat`: health goes up,
+  //! @brief Pay gold for one heal and apply it (Cmp::Persist::PaidHealAmount) to `stat`: health goes up,
   //! fear/despair/infamy go down. Plays a denied sound instead if the player can't afford it.
   //! @param stat the stat to heal
-  //! @param currency what the heal is paid with
   //! @return true if the heal was bought
-  bool buy_heal( HealStat stat, HealCurrency currency );
+  bool buy_heal( HealStat stat );
 
 private:
   //! @brief Apply one paid heal (Cmp::Persist::PaidHealAmount) to `stat`.

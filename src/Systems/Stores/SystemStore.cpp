@@ -31,7 +31,6 @@
 #include <Systems/Render/HudOverlaySystem.hpp>
 #include <Systems/Render/OverlayArbitrationSystem.hpp>
 #include <Systems/Render/ShopOverlaySystem.hpp>
-#include <Systems/Render/SpringOverlaySystem.hpp>
 #include <Systems/Render/BarberOverlaySystem.hpp>
 #include <Systems/Render/TooltipOverlaySystem.hpp>
 #include <Systems/RuinSystem.hpp>
@@ -97,7 +96,6 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
   emplace<Type::RenderMenuSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::HudOverlaySystem>( m_initial_reg, window, sound_bank );
   emplace<Type::ShopOverlaySystem>( m_initial_reg, window, sound_bank );
-  emplace<Type::SpringOverlaySystem>( m_initial_reg, window, sound_bank, *this );
   emplace<Type::BarberOverlaySystem>( m_initial_reg, window, sound_bank, *this );
   emplace<Type::OverlayArbitrationSystem>( m_initial_reg, window, sound_bank, *this );
   emplace<Type::ShaderSystem>( m_initial_reg, window, sound_bank );

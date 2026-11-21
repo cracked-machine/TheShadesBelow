@@ -11,7 +11,6 @@
 #include <SceneControl/Scenes/GameOverScene.hpp>
 #include <SceneControl/Scenes/GraveyardScene.hpp>
 #include <SceneControl/Scenes/BarberSurgeonScene.hpp>
-#include <SceneControl/Scenes/HealingSpringScene.hpp>
 #include <SceneControl/Scenes/LevelCompleteScene.hpp>
 #include <SceneControl/Scenes/RuinSceneLowerFloor.hpp>
 #include <SceneControl/Scenes/RuinSceneUpperFloor.hpp>
@@ -220,17 +219,6 @@ void SceneManager::handle_events( const Events::SceneManagerEvent &event )
     }
     case Events::SceneManagerEvent::Type::EXIT_CRYPT: {
       SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::EXIT_CRYPT requested" );
-      pop( RegCopyMode::ALL );
-      break;
-    }
-    case Events::SceneManagerEvent::Type::ENTER_SACREDSPRING: {
-      SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::ENTER_SACREDSPRING requested" );
-      auto healing_spring_scene = std::make_unique<HealingSpringScene>( m_sound_bank, m_system_store, m_nav_event_dispatcher );
-      push_no_exit( std::move( healing_spring_scene ), RegCopyMode::ALL );
-      break;
-    }
-    case Events::SceneManagerEvent::Type::EXIT_SACREDSPRING: {
-      SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::EXIT_SACREDSPRING requested" );
       pop( RegCopyMode::ALL );
       break;
     }

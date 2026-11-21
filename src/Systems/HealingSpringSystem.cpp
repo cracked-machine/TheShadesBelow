@@ -8,7 +8,6 @@
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
-#include <Components/Spring/BarberSurgeonEntrance.hpp>
 #include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
 #include <Components/Spring/HealingSpringBuildingSegment.hpp>
 #include <Components/Spring/HealingSpringEntrance.hpp>
@@ -60,9 +59,7 @@ void HealingSpringSystem::check_entrance_collision()
     auto decreased_entrance_bounds = Cmp::RectBounds::scaled( door_pos_cmp.position, door_pos_cmp.size, 0.1f, Cmp::RectBounds::ScaleAxis::XY );
 
     if ( not player_pos.findIntersection( decreased_entrance_bounds.getBounds() ) ) continue;
-    const auto enter_type = reg().all_of<Cmp::BarberSurgeonEntrance>( door_entity ) ? Events::SceneManagerEvent::Type::ENTER_BARBERSURGEON
-                                                                                    : Events::SceneManagerEvent::Type::ENTER_SACREDSPRING;
-    m_scenemanager_event_dispatcher.enqueue<Events::SceneManagerEvent>( enter_type );
+    m_scenemanager_event_dispatcher.enqueue<Events::SceneManagerEvent>( Events::SceneManagerEvent::Type::ENTER_BARBERSURGEON );
 
     Factory::Player::remove_player_last_graveyard_pos( reg() );
     Cmp::Position last_known_pos(

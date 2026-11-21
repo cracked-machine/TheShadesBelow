@@ -5,7 +5,7 @@
 namespace Game::Cmp::Persist
 {
 
-//! @brief How much one paid heal at the healing spring or barber surgeon restores of the chosen stat
+//! @brief How much one paid heal at the barber surgeon restores of the chosen stat
 //! (added to health, or removed from fear/despair/infamy).
 class PaidHealAmount : public BasePersistent<int>
 {

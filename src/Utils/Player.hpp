@@ -302,11 +302,10 @@ Cmp::PlayerStats &get_stats( entt::registry &reg );
 //! @return Cmp::PlayerStats New stats object holding the starting values.
 Cmp::PlayerStats make_starting_stats( entt::registry &reg );
 
-//! @brief Reset the player's health, fear, despair, infamy, luck and anima to the Cmp::Persist::Starting* settings.
+//! @brief Reset the player's health, fear, despair, infamy and luck to the Cmp::Persist::Starting* settings.
 //! The toxidrome is left untouched.
 //! @param reg reference to the entt registry
-//! @param keep_anima true to leave the player's anima as it is (see Cmp::Persist::RetainAnimaBetweenLevels)
-void reset_stats_to_starting( entt::registry &reg, bool keep_anima );
+void reset_stats_to_starting( entt::registry &reg );
 
 Cmp::Player::Footstep &get_footstep_type( entt::registry &reg );
 

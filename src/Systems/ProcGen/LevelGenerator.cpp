@@ -35,7 +35,6 @@
 #include <Components/Persistent/GraveOddsNpcTrap.hpp>
 #include <Components/Persistent/GraveOddsTalisman.hpp>
 #include <Components/Persistent/GraveOddsTorch.hpp>
-#include <Components/Persistent/HealingBuildingOverride.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/LevelDepth.hpp>
@@ -56,7 +55,6 @@
 #include <Components/Ruin/StairsUpperMultiBlock.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/SpawnArea.hpp>
-#include <Components/Spring/BarberSurgeonEntrance.hpp>
 #include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
 #include <Components/Spring/HealingSpringBuildingSegment.hpp>
 #include <Components/Spring/HealingSpringEntrance.hpp>
@@ -543,26 +541,9 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData 
   const auto &crypt_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.crypt.closed" );
   spawn_multiblock_at<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( crypt_pos, crypt_spritesheet );
 
-  // HEALING BUILDING - the healing spring and the barber surgeon share the exterior building, only the entrance differs
+  // HEALING BUILDING - its entrance leads to the barber surgeon
   const auto &healingspring_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.building.healingspring" );
-  const auto healing_mb_entt = spawn_multiblock_at<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>(
-      healing_pos, healingspring_spritesheet );
-  {
-    // 0 = healing spring, 1 = barber surgeon; anything else is a 50/50 roll
-    int building_kind = Sys::PersistSystem::get<Cmp::Persist::HealingBuildingOverride>( reg() ).get_value();
-    if ( building_kind != 0 and building_kind != 1 ) { building_kind = Cmp::RandomInt( 0, 1 ).gen(); }
-    const bool is_barber = building_kind == 1;
-    SPDLOG_INFO( "Healing building is a {}", is_barber ? "Barber Surgeon" : "Healing Spring" );
-    const auto *mb_uuid = reg().try_get<Cmp::UUID>( healing_mb_entt );
-    if ( is_barber and mb_uuid != nullptr )
-    {
-      for ( auto [door_entt, door_cmp, door_uuid] : reg().view<Cmp::HealingSpringEntrance, Cmp::UUID>().each() )
-      {
-        if ( door_uuid != *mb_uuid ) continue;
-        reg().emplace_or_replace<Cmp::BarberSurgeonEntrance>( door_entt );
-      }
-    }
-  }
+  spawn_multiblock_at<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>( healing_pos, healingspring_spritesheet );
 
   // RUIN
   const auto &ruin_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.ruin" );

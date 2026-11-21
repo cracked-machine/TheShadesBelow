@@ -57,7 +57,6 @@ struct SpawnNpcEffect
       DESPAIR,
       INFAMY,
       LUCK,
-      ANIMA,
       //! @brief One toxidrome's toxicity, 0 if inactive (see toxidrome_id).
       TOXIDROME,
       //! @brief The summed toxicity of every active toxidrome.

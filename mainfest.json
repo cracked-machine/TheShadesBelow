@@ -13,7 +13,6 @@
     "res/scenes/graveyard.json",
     "res/scenes/ruinlower.json",
     "res/scenes/ruinupper.json",
-    "res/scenes/shop.json",
-    "res/scenes/well.json"
+    "res/scenes/shop.json"
   ]
 }

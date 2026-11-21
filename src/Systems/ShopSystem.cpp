@@ -168,11 +168,7 @@ void ShopSystem::buy_shop_item( uint8_t item_idx )
 
 bool ShopSystem::is_heal_menu_open( entt::registry &reg )
 {
-  if ( not Utils::is_current_scene( reg, Cmp::SceneSettings::SceneId::HEALING_SPRING ) and
-       not Utils::is_current_scene( reg, Cmp::SceneSettings::SceneId::BARBER_SURGEON ) )
-  {
-    return false;
-  }
+  if ( not Utils::is_current_scene( reg, Cmp::SceneSettings::SceneId::BARBER_SURGEON ) ) return false;
   for ( auto [spring_entt, spring_mb_cmp] : reg.view<Cmp::HealingSpringMultiBlock>().each() )
   {
     if ( Utils::Player::is_player_near( reg, spring_mb_cmp ) ) return true;
@@ -180,39 +176,25 @@ bool ShopSystem::is_heal_menu_open( entt::registry &reg )
   return false;
 }
 
-bool ShopSystem::can_afford_heal( HealCurrency currency )
-{
-  const int cost = heal_cost( currency );
-  if ( currency == HealCurrency::ANIMA ) { return Utils::Player::get_stats( reg() ).anima() >= cost; }
-  return Utils::Player::get_wealth( reg() ).wealth >= cost;
-}
+bool ShopSystem::can_afford_heal() { return Utils::Player::get_wealth( reg() ).wealth >= kHealGoldCost; }
 
-bool ShopSystem::buy_heal( HealStat stat, HealCurrency currency )
+bool ShopSystem::buy_heal( HealStat stat )
 {
-  const int cost = heal_cost( currency );
-  const std::string_view currency_name = currency == HealCurrency::ANIMA ? "anima" : "gold";
-  if ( not can_afford_heal( currency ) )
+  const int cost = kHealGoldCost;
+  if ( not can_afford_heal() )
   {
-    SPDLOG_INFO( "Not enough {} to buy a heal (need {})", currency_name, cost );
+    SPDLOG_INFO( "Not enough gold to buy a heal (need {})", cost );
     m_sound_bank.get_effect( "crypt_locked" ).play();
     return false;
   }
 
-  if ( currency == HealCurrency::ANIMA )
-  {
-    Utils::Player::get_stats( reg() ).apply( Cmp::BaseAction( {}, {}, {}, {}, {}, Cmp::Stats::Anima{ -cost }, {} ) );
-    m_sound_bank.get_effect( "drinking" ).play();
-  }
-  else
-  {
-    Utils::Player::get_wealth( reg() ).wealth -= cost;
-    // signal UI to flash
-    reg().emplace_or_replace<Cmp::FlashUIWealth>( reg().create() );
-    m_sound_bank.get_effect( "get_key" ).play();
-  }
+  Utils::Player::get_wealth( reg() ).wealth -= cost;
+  // signal UI to flash
+  reg().emplace_or_replace<Cmp::FlashUIWealth>( reg().create() );
+  m_sound_bank.get_effect( "get_key" ).play();
 
   apply_heal( stat );
-  SPDLOG_INFO( "Bought a {} heal for {} {}", kHealStatLabels.at( static_cast<std::size_t>( stat ) ), cost, currency_name );
+  SPDLOG_INFO( "Bought a {} heal for {} gold", kHealStatLabels.at( static_cast<std::size_t>( stat ) ), cost );
   return true;
 }
 
@@ -238,7 +220,7 @@ void ShopSystem::apply_heal( HealStat stat )
       infamy.value = -amount;
       break;
   }
-  Utils::Player::get_stats( reg() ).apply( Cmp::BaseAction( health, fear, despair, infamy, {}, {}, {} ) );
+  Utils::Player::get_stats( reg() ).apply( Cmp::BaseAction( health, fear, despair, infamy, {}, {} ) );
 }
 
 } // namespace Game::Sys

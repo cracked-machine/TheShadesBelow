@@ -46,13 +46,6 @@ struct Luck
   int value{ 0 };
 };
 
-//! @brief Strongly-typed anima delta, used to disambiguate BaseAction/derived-action constructor arguments.
-struct Anima
-{
-  //! @brief The change applied to the anima stat.
-  int value{ 0 };
-};
-
 //! @brief Strongly-typed tick interval, used to disambiguate BaseAction/derived-action constructor arguments.
 struct Tick
 {

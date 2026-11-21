@@ -59,8 +59,8 @@ public:
   void graveyard_scene_state_handler();
   //! @brief Process input while the crypt scene is active.
   void crypt_scene_state_handler();
-  //! @brief Process input while the healing spring scene is active.
-  void healing_spring_scene_state_handler();
+  //! @brief Process input while the barber surgeon scene is active.
+  void barber_surgeon_scene_state_handler();
   //! @brief Process input while the shop scene is active.
   void shop_scene_state_handler();
   //! @brief Process input while a ruin scene (upper or lower floor) is active.

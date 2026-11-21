@@ -93,9 +93,6 @@ private:
   //! @brief True if the current scene has the shop overlay.
   [[nodiscard]] bool has_shop();
 
-  //! @brief True if the current scene has the healing spring heal menu.
-  [[nodiscard]] bool has_spring();
-
   //! @brief True if the current scene has the barber surgeon heal menu.
   [[nodiscard]] bool has_barber();
 

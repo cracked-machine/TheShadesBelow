@@ -40,7 +40,6 @@
 #include <SceneControl/Events/ProcessGameoverSceneInputEvent.hpp>
 #include <SceneControl/Events/ProcessGraveyardSceneInputEvent.hpp>
 #include <SceneControl/Events/ProcessBarberSurgeonSceneInputEvent.hpp>
-#include <SceneControl/Events/ProcessHealingSpringSceneInputEvent.hpp>
 #include <SceneControl/Events/ProcessLevelCompleteSceneInputEvent.hpp>
 #include <SceneControl/Events/ProcessRuinSceneLowerInputEvent.hpp>
 #include <SceneControl/Events/ProcessRuinSceneUpperInputEvent.hpp>
@@ -78,8 +77,7 @@ SceneInputRouter::SceneInputRouter( entt::registry &reg, sf::RenderWindow &m_win
   m_nav_event_dispatcher.sink<Events::ProcessGameoverSceneInputEvent>().connect<&SceneInputRouter::game_over_scene_state_handler>(this );
   m_nav_event_dispatcher.sink<Events::ProcessLevelCompleteSceneInputEvent>().connect<&SceneInputRouter::level_complete_scene_state_handler>( this );
   m_nav_event_dispatcher.sink<Events::ProcessCryptSceneInputEvent>().connect<&SceneInputRouter::crypt_scene_state_handler>( this );
-  m_nav_event_dispatcher.sink<Events::ProcessHealingSpringSceneInputEvent>().connect<&SceneInputRouter::healing_spring_scene_state_handler>( this );
-  m_nav_event_dispatcher.sink<Events::ProcessBarberSurgeonSceneInputEvent>().connect<&SceneInputRouter::healing_spring_scene_state_handler>( this );
+  m_nav_event_dispatcher.sink<Events::ProcessBarberSurgeonSceneInputEvent>().connect<&SceneInputRouter::barber_surgeon_scene_state_handler>( this );
   m_nav_event_dispatcher.sink<Events::ProcessRuinSceneLowerInputEvent>().connect<&SceneInputRouter::ruin_scene_state_handler>( this );
   m_nav_event_dispatcher.sink<Events::ProcessRuinSceneUpperInputEvent>().connect<&SceneInputRouter::ruin_scene_state_handler>( this );
   m_nav_event_dispatcher.sink<Events::ProcessShopSceneInputEvent>().connect<&SceneInputRouter::shop_scene_state_handler>( this );
@@ -262,7 +260,7 @@ void SceneInputRouter::crypt_scene_state_handler()
   }
 }
 
-void SceneInputRouter::healing_spring_scene_state_handler()
+void SceneInputRouter::barber_surgeon_scene_state_handler()
 {
   if ( is_paused() )
   {
@@ -653,24 +651,24 @@ void SceneInputRouter::try_handle_debug_key( [[maybe_unused]] sf::Keyboard::Scan
   else if ( scancode == Scancode::F9 ) { toggle_setting<Cmp::SceneSettings::Shaders>( "Shaders are" ); }
   else if ( scancode == Scancode::F10 ) { toggle_setting<Cmp::SceneSettings::Footsteps>( "Footsteps are" ); }
   else if ( scancode == Scancode::F11 ) { queue_suicide_event(); }
-  else if ( scancode == Scancode::Numpad3 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, Cmp::Stats::Infamy{ 10 }, {}, {}, {} } ); }
-  else if ( scancode == Scancode::Numpad2 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, Cmp::Stats::Despair{ 10 }, {}, {}, {}, {} } ); }
-  else if ( scancode == Scancode::NumpadEnter ) { Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 10 }, {}, {}, {}, {}, {}, {} } ); }
+  else if ( scancode == Scancode::Numpad3 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, Cmp::Stats::Infamy{ 10 }, {}, {} } ); }
+  else if ( scancode == Scancode::Numpad2 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, Cmp::Stats::Despair{ 10 }, {}, {}, {} } ); }
+  else if ( scancode == Scancode::NumpadEnter ) { Utils::Player::get_stats( reg() ).apply( { Cmp::Stats::Health{ 10 }, {}, {}, {}, {}, {} } ); }
   else if ( scancode == Scancode::NumpadMinus ) { Utils::Player::get_stats( reg() ).decay_all_toxidrome( 10 ); }
   else if ( scancode == Scancode::NumpadPlus )
   {
     auto brady = Factory::Toxicity::create_toxidrome( "bradycardia", 10 );
-    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, {}, brady } );
+    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, brady } );
     auto venom = Factory::Toxicity::create_toxidrome( "venom", 10 );
-    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, {}, venom } );
+    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, venom } );
     auto photo = Factory::Toxicity::create_toxidrome( "phototoxia", 10 );
-    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, {}, photo } );
+    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, photo } );
     auto hallucin = Factory::Toxicity::create_toxidrome( "halucinogen", 10 );
-    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, {}, hallucin } );
+    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, hallucin } );
     auto hypoxia = Factory::Toxicity::create_toxidrome( "hypoxia", 10 );
-    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, {}, hypoxia } );
+    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, hypoxia } );
     auto vertigo = Factory::Toxicity::create_toxidrome( "vertigo", 10 );
-    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, {}, vertigo } );
+    Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, {}, vertigo } );
   }
   else if ( scancode == Scancode::NumpadMultiply ) { Utils::Player::get_wealth( reg() ).wealth += 1; }
   else if ( scancode == Scancode::NumpadDivide )
@@ -680,12 +678,10 @@ void SceneInputRouter::try_handle_debug_key( [[maybe_unused]] sf::Keyboard::Scan
     auto pick = pool.at( Cmp::RandomInt( 0, pool.size() - 1 ).gen() );
     cadaver_cmp.set( pick );
   }
-  else if ( scancode == Scancode::Numpad7 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Luck{ 10 }, {}, {} } ); }
-  else if ( scancode == Scancode::Numpad4 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Luck{ -10 }, {}, {} } ); }
-  else if ( scancode == Scancode::Numpad9 ) { Utils::Player::get_stats( reg() ).apply( { {}, Cmp::Stats::Fear{ 10 }, {}, {}, {}, {}, {} } ); }
-  else if ( scancode == Scancode::Numpad6 ) { Utils::Player::get_stats( reg() ).apply( { {}, Cmp::Stats::Fear{ -10 }, {}, {}, {}, {}, {} } ); }
-  else if ( scancode == Scancode::Numpad8 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, Cmp::Stats::Anima{ 10 }, {} } ); }
-  else if ( scancode == Scancode::Numpad5 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, {}, Cmp::Stats::Anima{ -10 }, {} } ); }
+  else if ( scancode == Scancode::Numpad7 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Luck{ 10 }, {} } ); }
+  else if ( scancode == Scancode::Numpad4 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Luck{ -10 }, {} } ); }
+  else if ( scancode == Scancode::Numpad9 ) { Utils::Player::get_stats( reg() ).apply( { {}, Cmp::Stats::Fear{ 10 }, {}, {}, {}, {} } ); }
+  else if ( scancode == Scancode::Numpad6 ) { Utils::Player::get_stats( reg() ).apply( { {}, Cmp::Stats::Fear{ -10 }, {}, {}, {}, {} } ); }
   else if ( scancode == Scancode::F5 )
   {
     Factory::Player::add_player_last_graveyard_pos( reg(), Utils::Player::get_position( reg() ), { 0.f, 0.f } );
@@ -694,7 +690,7 @@ void SceneInputRouter::try_handle_debug_key( [[maybe_unused]] sf::Keyboard::Scan
   else if ( scancode == Scancode::F6 )
   {
     Factory::Player::add_player_last_graveyard_pos( reg(), Utils::Player::get_position( reg() ), { 0.f, 0.f } );
-    enqueue( Events::SceneManagerEvent::Type::ENTER_SACREDSPRING );
+    enqueue( Events::SceneManagerEvent::Type::ENTER_BARBERSURGEON );
   }
   else if ( scancode == Scancode::F7 )
   {

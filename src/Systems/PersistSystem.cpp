@@ -64,7 +64,6 @@
 #include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
 #include <Components/Persistent/HazardBalanceOverlap.hpp>
 #include <Components/Persistent/HazardBalanceTimeout.hpp>
-#include <Components/Persistent/HealingBuildingOverride.hpp>
 #include <Components/Persistent/HeldItemOffset.hpp>
 #include <Components/Persistent/HeldItemRotation.hpp>
 #include <Components/Persistent/HeldItemRotationSouth.hpp>
@@ -126,7 +125,6 @@
 #include <Components/Persistent/ReservedArmedBlockColourBorder.hpp>
 #include <Components/Persistent/ReservedArmedBlockColourFill.hpp>
 #include <Components/Persistent/ResetTutorial.hpp>
-#include <Components/Persistent/RetainAnimaBetweenLevels.hpp>
 #include <Components/Persistent/RuinMaxCobwebs.hpp>
 #include <Components/Persistent/RuinMaxSpiders.hpp>
 #include <Components/Persistent/RuinProcGenBirthThreshold.hpp>
@@ -141,7 +139,6 @@
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Persistent/SinkholeSpreadPeriod.hpp>
-#include <Components/Persistent/StartingAnima.hpp>
 #include <Components/Persistent/StartingDespair.hpp>
 #include <Components/Persistent/StartingFear.hpp>
 #include <Components/Persistent/StartingHealth.hpp>
@@ -261,7 +258,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::AltarOfferingCooldown>();
   add_component<Cmp::Persist::AltarSummonOfferingCooldown>();
   add_component<Cmp::Persist::LightningDamage>();
-  add_component<Cmp::Persist::HealingBuildingOverride>();
   add_component<Cmp::Persist::PaidHealAmount>();
   add_component<Cmp::Persist::MusicVolume>();
   add_component<Cmp::Persist::NpcActivateScale>();
@@ -302,7 +298,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::PlayerStartPosition>();
   add_component<Cmp::Persist::PostPullMovementDelay>();
   add_component<Cmp::Persist::RepelNpcPlayerTint>();
-  add_component<Cmp::Persist::RetainAnimaBetweenLevels>();
   add_component<Cmp::Persist::RuinMaxCobwebs>();
   add_component<Cmp::Persist::RuinMaxSpiders>();
   add_component<Cmp::Persist::RuinProcGenInitChance>();
@@ -326,7 +321,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::StartingDespair>();
   add_component<Cmp::Persist::StartingInfamy>();
   add_component<Cmp::Persist::StartingLuck>();
-  add_component<Cmp::Persist::StartingAnima>();
   add_component<Cmp::Persist::LuckDropRate>();
   add_component<Cmp::Persist::BradycardiaHealthDmgPerSec>();
   add_component<Cmp::Persist::VenomHealthDmgPerSec>();

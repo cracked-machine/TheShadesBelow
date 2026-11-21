@@ -12,12 +12,6 @@
 namespace Game::Sys
 {
 
-namespace
-{
-//! @brief The barber surgeon is paid for with gold
-constexpr auto kCurrency = ShopSystem::HealCurrency::GOLD;
-} // namespace
-
 BarberOverlaySystem::BarberOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank, Store &sys )
     : BaseOverlaySystem( reg, window, sound_bank ),
       m_sys( sys )
@@ -41,8 +35,8 @@ void BarberOverlaySystem::update( [[maybe_unused]] sf::Time dt )
     if ( not ShopSystem::is_heal_menu_open( reg() ) ) { m_selected = 0; }
     return;
   }
-  const bool affordable = m_sys.find<Store::Type::ShopSystem>().can_afford_heal( kCurrency );
-  render_selection_menu( "Barber Surgeon", std::format( "Cost: {} gold", ShopSystem::heal_cost( kCurrency ) ), affordable,
+  const bool affordable = m_sys.find<Store::Type::ShopSystem>().can_afford_heal();
+  render_selection_menu( "Barber Surgeon", std::format( "Cost: {} gold", ShopSystem::kHealGoldCost ), affordable,
                          ShopSystem::kHealStatLabels, m_selected, "Scroll to choose, E to buy" );
 }
 
@@ -58,7 +52,7 @@ void BarberOverlaySystem::on_overlay_event( const Events::OverlayEvent &ev )
     return;
   }
   const auto stat = static_cast<ShopSystem::HealStat>( m_selected );
-  if ( not m_sys.find<Store::Type::ShopSystem>().buy_heal( stat, kCurrency ) ) return;
+  if ( not m_sys.find<Store::Type::ShopSystem>().buy_heal( stat ) ) return;
   m_sys.find<Store::Type::HealingSpringSystem>().request_delayed_exit( Events::SceneManagerEvent::Type::EXIT_BARBERSURGEON );
 }
 

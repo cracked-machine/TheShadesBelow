@@ -27,10 +27,6 @@ struct SceneManagerEvent
     ENTER_CRYPT,
     //! @brief Exit the crypt scene, returning to the graveyard scene.
     EXIT_CRYPT,
-    //! @brief Enter the healing spring scene.
-    ENTER_SACREDSPRING,
-    //! @brief Exit the healing spring scene, returning to the graveyard scene.
-    EXIT_SACREDSPRING,
     //! @brief Enter the barber surgeon scene.
     ENTER_BARBERSURGEON,
     //! @brief Exit the barber surgeon scene, returning to the graveyard scene.

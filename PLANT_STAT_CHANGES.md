@@ -16,7 +16,7 @@ The plant ecosystem is the player's counter to this pressure. Plants and plant-d
 - **Toxidromes** stay. They reflect real plant toxicology, e.g. taxine in yew and atropine in nightshade.
 - **Physical stings and thorns** stay (nettle, hawthorn, burr). They drive the gloves mechanic through `WorldItem::stings()`.
 
-Stat polarity: higher health, luck and anima are good; higher fear, despair and infamy are bad.
+Stat polarity: higher health and luck are good; higher fear, despair and infamy are bad.
 
 ## Specialty stat per plant
 
@@ -41,7 +41,7 @@ Each plant counters one pressure, chosen from its folklore or medicinal history.
 
 | Source | Specialty change | Notes |
 |---|---|---|
-| Plant `offering_action` | ±20 | One-off; keeps anima +10 |
+| Plant `offering_action` | ±20 | One-off |
 | Plant `forage_action` | ±5 | A lesser dose; repeats until the plant withers (about 10 forages) |
 | Rowan, elder and hawthorn `proximity_action` | ±1 every 3s | |
 | Edible product `consume_action` | ±10 | Berries, flowers, leaf, seeds |

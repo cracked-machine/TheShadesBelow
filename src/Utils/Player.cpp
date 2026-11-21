@@ -32,7 +32,6 @@
 #include <Components/Persistent/ShowDamageText.hpp>
 #include <Components/Persistent/PlayerMovementSpeed.hpp>
 #include <Components/Persistent/TachycardiaMovementSpeed.hpp>
-#include <Components/Persistent/StartingAnima.hpp>
 #include <Components/Persistent/StartingDespair.hpp>
 #include <Components/Persistent/StartingFear.hpp>
 #include <Components/Persistent/StartingHealth.hpp>
@@ -518,19 +517,17 @@ Cmp::PlayerStats make_starting_stats( entt::registry &reg )
                            Cmp::Stats::Fear{ Sys::PersistSystem::get<Cmp::Persist::StartingFear>( reg ).get_value() },
                            Cmp::Stats::Despair{ Sys::PersistSystem::get<Cmp::Persist::StartingDespair>( reg ).get_value() },
                            Cmp::Stats::Infamy{ Sys::PersistSystem::get<Cmp::Persist::StartingInfamy>( reg ).get_value() },
-                           Cmp::Stats::Luck{ Sys::PersistSystem::get<Cmp::Persist::StartingLuck>( reg ).get_value() },
-                           Cmp::Stats::Anima{ Sys::PersistSystem::get<Cmp::Persist::StartingAnima>( reg ).get_value() } );
+                           Cmp::Stats::Luck{ Sys::PersistSystem::get<Cmp::Persist::StartingLuck>( reg ).get_value() } );
 }
 
-void reset_stats_to_starting( entt::registry &reg, bool keep_anima )
+void reset_stats_to_starting( entt::registry &reg )
 {
   auto &stats = get_stats( reg );
   const auto target = make_starting_stats( reg );
   // PlayerStats only takes deltas, so move each stat by the difference to its starting value
   stats.apply( Cmp::BaseAction( Cmp::Stats::Health{ target.health() - stats.health() }, Cmp::Stats::Fear{ target.fear() - stats.fear() },
                                 Cmp::Stats::Despair{ target.despair() - stats.despair() },
-                                Cmp::Stats::Infamy{ target.infamy() - stats.infamy() }, Cmp::Stats::Luck{ target.luck() - stats.luck() },
-                                Cmp::Stats::Anima{ keep_anima ? 0 : target.anima() - stats.anima() }, {} ) );
+                                Cmp::Stats::Infamy{ target.infamy() - stats.infamy() }, Cmp::Stats::Luck{ target.luck() - stats.luck() }, {} ) );
 }
 
 Cmp::Player::Footstep &get_footstep_type( entt::registry &reg )
@@ -612,7 +609,7 @@ template Cmp::BaseAction apply_action_from_world_item<Cmp::SpawnAction>( entt::r
 template <typename ActionT>
 Cmp::BaseAction apply_action_from_inventory_item( entt::registry &reg )
 {
-  Cmp::BaseAction applied_action( {}, {}, {}, {}, {}, {}, {} );
+  Cmp::BaseAction applied_action( {}, {}, {}, {}, {}, {} );
   const auto inventory_entt = get_inventory_entt( reg );
   if ( inventory_entt == entt::null )
   {

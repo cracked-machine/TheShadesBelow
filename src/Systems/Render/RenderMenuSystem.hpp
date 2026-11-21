@@ -68,13 +68,11 @@ public:
   //! @brief Render the defeat (game over) screen.
   void render_defeat_screen();
 
-  //! @brief Render the victory (level complete) screen: remaining cadavers and anima, the wealth each has added so far,
+  //! @brief Render the victory (level complete) screen: remaining cadavers, the wealth they have added so far,
   //! and the player's total wealth.
   //! @param allow_continue Whether to show the "press to continue" prompt.
   //! @param cadaver_wealth Wealth added so far from converting cadavers.
-  //! @param anima_wealth Wealth added so far from converting anima.
-  //! @param retain_anima Whether unspent anima carries over to the next level instead of being sold for wealth.
-  void render_victory_screen( bool allow_continue, int cadaver_wealth, int anima_wealth, bool retain_anima );
+  void render_victory_screen( bool allow_continue, int cadaver_wealth );
 
 private:
   //! @brief Render a row of int settings as vertical sliders, each labelled underneath with its detail string.

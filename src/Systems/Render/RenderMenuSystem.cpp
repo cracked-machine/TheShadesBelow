@@ -64,7 +64,6 @@
 #include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
 #include <Components/Persistent/HazardBalanceOverlap.hpp>
 #include <Components/Persistent/HazardBalanceTimeout.hpp>
-#include <Components/Persistent/HealingBuildingOverride.hpp>
 #include <Components/Persistent/HeldItemOffset.hpp>
 #include <Components/Persistent/HeldItemRotation.hpp>
 #include <Components/Persistent/HeldItemRotationSouth.hpp>
@@ -125,7 +124,6 @@
 #include <Components/Persistent/ReservedArmedBlockColourBorder.hpp>
 #include <Components/Persistent/ReservedArmedBlockColourFill.hpp>
 #include <Components/Persistent/ResetTutorial.hpp>
-#include <Components/Persistent/RetainAnimaBetweenLevels.hpp>
 #include <Components/Persistent/RuinMaxCobwebs.hpp>
 #include <Components/Persistent/RuinMaxSpiders.hpp>
 #include <Components/Persistent/RuinProcGenBirthThreshold.hpp>
@@ -137,7 +135,6 @@
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Persistent/SinkholeSpreadPeriod.hpp>
-#include <Components/Persistent/StartingAnima.hpp>
 #include <Components/Persistent/StartingDespair.hpp>
 #include <Components/Persistent/StartingFear.hpp>
 #include <Components/Persistent/StartingHealth.hpp>
@@ -310,16 +307,15 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::PlayerDiagonalGapCatch>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PlayerLerpInterruptThreshold>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PostPullMovementDelay>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::RetainAnimaBetweenLevels>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::LuckDropRate>( reg() ).render_widget();
 
     ImGui::TextUnformatted( "Starting Stats" );
     ImGui::TextDisabled( "applied at the start of every level" );
     {
-      const std::array<Cmp::Persist::BasePersistent<int> *, 6> starting_stats{
+      const std::array<Cmp::Persist::BasePersistent<int> *, 5> starting_stats{
           &Sys::PersistSystem::get<Cmp::Persist::StartingHealth>( reg() ),  &Sys::PersistSystem::get<Cmp::Persist::StartingFear>( reg() ),
           &Sys::PersistSystem::get<Cmp::Persist::StartingDespair>( reg() ), &Sys::PersistSystem::get<Cmp::Persist::StartingInfamy>( reg() ),
-          &Sys::PersistSystem::get<Cmp::Persist::StartingLuck>( reg() ),    &Sys::PersistSystem::get<Cmp::Persist::StartingAnima>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::StartingLuck>( reg() ),
       };
       render_vslider_row( starting_stats );
     }
@@ -488,7 +484,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::GraveClusterGridSize>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveClusterExternalPadding>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::ExitKeyRequirement>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::HealingBuildingOverride>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PaidHealAmount>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RuinProcGenInitChance>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RuinProcGenMaxIterations>( reg() ).render_widget();
@@ -584,7 +579,7 @@ void RenderMenuSystem::render_defeat_screen()
   }
 }
 
-void RenderMenuSystem::render_victory_screen( bool allow_continue, int cadaver_wealth, int anima_wealth, bool retain_anima )
+void RenderMenuSystem::render_victory_screen( bool allow_continue, int cadaver_wealth )
 {
   sf::Vector2u display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
 
@@ -608,24 +603,14 @@ void RenderMenuSystem::render_victory_screen( bool allow_continue, int cadaver_w
   const auto &wealth = Utils::Player::get_wealth( m_reg );
   const auto &cadaver_cmp = Utils::Player::get_cadaver( m_reg );
 
-  const int anima = Utils::Player::get_stats( m_reg ).anima();
-
   sf::Text cadaver_txt( m_font, std::format( "Cadaver count: {}   (+{} wealth)", cadaver_cmp.count(), cadaver_wealth ), 24 );
   cadaver_txt.setFillColor( sf::Color::White );
   cadaver_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, 500.f } );
   m_window.draw( cadaver_txt );
 
-  sf::Text anima_txt( m_font,
-                      retain_anima ? std::format( "Anima: {}   (carried to next level)", anima )
-                                   : std::format( "Anima: {}   (+{} wealth)", anima, anima_wealth ),
-                      24 );
-  anima_txt.setFillColor( sf::Color( 255, 165, 0 ) ); // orange, matching the anima meter
-  anima_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, 550.f } );
-  m_window.draw( anima_txt );
-
   sf::Text wealth_txt( m_font, "Player wealth: " + std::to_string( wealth.wealth ), 24 );
   wealth_txt.setFillColor( sf::Color::White );
-  wealth_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, 600.f } );
+  wealth_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, 550.f } );
   m_window.draw( wealth_txt );
 }
 

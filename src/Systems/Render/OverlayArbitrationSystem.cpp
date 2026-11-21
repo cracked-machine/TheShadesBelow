@@ -9,7 +9,6 @@
 #include <Systems/Render/OverlayArbitrationSystem.hpp>
 #include <Systems/Render/PauseOverlaySystem.hpp>
 #include <Systems/Render/ShopOverlaySystem.hpp>
-#include <Systems/Render/SpringOverlaySystem.hpp>
 #include <Systems/Render/TooltipOverlaySystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 #include <Utils/Profiling.hpp>
@@ -69,8 +68,7 @@ void OverlayArbitrationSystem::update( sf::Time dt, sf::Time world_dt )
 
   PROFILED( m_sys.find<Store::Type::HudOverlaySystem>().update( world_dt ) );
   if ( has_shop() ) { PROFILED( m_sys.find<Store::Type::ShopOverlaySystem>().update( dt ) ); }
-  // the heal menus hide themselves while a modal overlay is open
-  if ( has_spring() ) { PROFILED( m_sys.find<Store::Type::SpringOverlaySystem>().update( dt ) ); }
+  // the heal menu hides itself while a modal overlay is open
   if ( has_barber() ) { PROFILED( m_sys.find<Store::Type::BarberOverlaySystem>().update( dt ) ); }
   if ( has_level_depth() ) { PROFILED( m_sys.find<Store::Type::HudOverlaySystem>().render_level_depth() ); }
   // the tooltip countdown stops while the pause menu or grimoire is open, but not during its own (tooltip) pause
@@ -132,7 +130,7 @@ void OverlayArbitrationSystem::on_overlay_event( const Events::OverlayEvent &ev 
     case Action::HEAL_PREV:
     case Action::HEAL_NEXT:
     case Action::HEAL_PURCHASE:
-      // the heal menu is handled by SpringOverlaySystem and BarberOverlaySystem
+      // the heal menu is handled by BarberOverlaySystem
       break;
   }
 }
@@ -178,7 +176,6 @@ bool OverlayArbitrationSystem::is_paused() { return pause_reason( reg() ) == Cmp
 
 bool OverlayArbitrationSystem::has_shop() { return Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::SHOP ); }
 
-bool OverlayArbitrationSystem::has_spring() { return Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::HEALING_SPRING ); }
 
 bool OverlayArbitrationSystem::has_barber() { return Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::BARBER_SURGEON ); }
 

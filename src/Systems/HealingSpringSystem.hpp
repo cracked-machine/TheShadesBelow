@@ -12,8 +12,8 @@
 namespace Game::Sys
 {
 
-//! @brief Handles the healing spring building: entrance/exit transitions, z-order, and depositing the
-//! curse tablet for wealth.
+//! @brief Handles the graveyard healing building (the barber surgeon): entrance/exit transitions, z-order, and
+//! depositing the curse tablet for wealth.
 class HealingSpringSystem : public BaseSystem
 {
 public:
@@ -35,15 +35,14 @@ public:
   //! @param ev
   void on_player_action( Events::PlayerActionEvent ev );
 
-  //! @brief Check for collisions with the entrance. Enters the barber surgeon scene if the entrance has a
-  //! Cmp::BarberSurgeonEntrance, otherwise the healing spring scene.
+  //! @brief Check for collisions with the entrance. Enters the barber surgeon scene.
   void check_entrance_collision();
 
   //! @brief Check for collisions with the exit
   //! @param exit_type The scene manager event to enqueue when the player reaches the exit
-  void check_exit_collision( Events::SceneManagerEvent::Type exit_type = Events::SceneManagerEvent::Type::EXIT_SACREDSPRING );
+  void check_exit_collision( Events::SceneManagerEvent::Type exit_type = Events::SceneManagerEvent::Type::EXIT_BARBERSURGEON );
 
-  //! @brief Leave the current (healing spring or barber surgeon) scene after a short delay, e.g. after a paid heal.
+  //! @brief Leave the barber surgeon scene after a short delay, e.g. after a paid heal.
   //! No-op if an exit is already pending.
   //! @param exit_type The scene manager event to enqueue when the delay ends
   void request_delayed_exit( Events::SceneManagerEvent::Type exit_type );
@@ -62,7 +61,7 @@ public:
   //! @brief True while a delayed exit is counting down.
   [[nodiscard]] bool is_exit_pending() const { return m_pending_exit.has_value(); }
 
-  //! @brief Deposit the player's curse tablet at the spring for wealth, if they are carrying one and standing near it.
+  //! @brief Deposit the player's curse tablet at the barber surgeon's fountain for wealth, if they are carrying one and standing near it.
   void check_inventory_deposit();
 
 private:
