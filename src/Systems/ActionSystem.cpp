@@ -176,7 +176,7 @@ void ActionSystem::check_player_dig_obstacle_collision()
       reg().emplace_or_replace<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) );
 
       // calculate new alpha value and apply to the current obstacle and any obstacle with matching UUID (cap sprite obstacles)
-      const auto damage_per_hit = Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).get_value() / 2;
+      const auto damage_per_hit = Sys::PersistSystem::get<Cmp::Persist::DiggingDamagePerHit>( reg() ).get_value();
       obstacle_cmp.damage += damage_per_hit;
 
       apply_tool_wear<Cmp::Persist::ShovelObstacleDigWear>();
