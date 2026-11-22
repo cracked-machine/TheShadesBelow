@@ -5,6 +5,7 @@
 #include <Components/NoRender.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Persistent/GrimoireHover.hpp>
+#include <Components/Persistent/PrepopulateGrimoire.hpp>
 #include <Components/Position.hpp>
 #include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/CarryAction.hpp>
@@ -108,8 +109,7 @@ void GrimoireOverlaySystem::for_each_subpage( const Sys::ItemKey &item_key, cons
   for ( std::size_t page_idx = 0; page_idx < grimoire_cmp->plant_pages.size(); ++page_idx )
   {
     Cmp::Grimoire::PlantPage &page = grimoire_cmp->plant_pages[page_idx];
-    for ( Cmp::Grimoire::SubPage *sub_page : { &page.plant_subpage, &page.forage_subpage, &page.drop_subpage, &page.plant_offering_subpage,
-                                               &page.forage_offering_subpage, &page.drop_offering_subpage } )
+    for ( Cmp::Grimoire::SubPage *sub_page : { &page.plant_subpage, &page.forage_subpage } )
     {
       if ( sub_page->item_key == item_key ) { fn( page_idx, *sub_page ); }
     }
@@ -118,7 +118,7 @@ void GrimoireOverlaySystem::for_each_subpage( const Sys::ItemKey &item_key, cons
 
 void GrimoireOverlaySystem::show_page_when_closed( Cmp::Grimoire::Tab tab, std::size_t page_idx )
 {
-  if ( is_open() ) { return; }
+  if ( is_open() or PersistSystem::get<Cmp::Persist::PrepopulateGrimoire>( reg() ).get_value() ) { return; }
   m_tab = tab;
   m_page_idx[tab_index( tab )] = page_idx;
 }
@@ -425,7 +425,7 @@ void GrimoireOverlaySystem::render_tab_bar( const Render::UiLayout &ui_layout )
   }
   if ( ( tab_it == ui_layout.m_tabs.end() or in_child ) and ImGui::BeginTabBar( "##grimoire_tabs" ) )
   {
-    for ( const auto tab : { Cmp::Grimoire::Tab::NPCS, Cmp::Grimoire::Tab::PLANTS } )
+    for ( const auto tab : { Cmp::Grimoire::Tab::PLANTS, Cmp::Grimoire::Tab::NPCS } )
     {
       const ImGuiTabItemFlags flags = m_select_tab and tab == m_tab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
       if ( ImGui::BeginTabItem( kTabLabels[tab_index( tab )], nullptr, flags ) )

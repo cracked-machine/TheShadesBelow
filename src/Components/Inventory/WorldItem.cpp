@@ -53,20 +53,6 @@ Sys::ItemKey WorldItem::get_forage_output() const
   return reward ? reward->item : Sys::ItemKey();
 }
 
-Sys::ItemKey WorldItem::get_drop_output() const
-{
-  const auto reward = get_reward<DestroyAction>();
-  if ( not reward ) return Sys::ItemKey();
-  if ( reward->item_pool.empty() ) return reward->item;
-  // a random pool also holds the forage item and the plant itself, so the drop is the remaining entry
-  const auto forage_output = get_forage_output();
-  for ( const auto &pool_item : reward->item_pool )
-  {
-    if ( pool_item != forage_output and pool_item != item_type ) return pool_item;
-  }
-  return Sys::ItemKey();
-}
-
 bool WorldItem::stings() const
 {
   return ( has_action<SpawnAction>() and at<SpawnAction>().action.health() < 0 ) or

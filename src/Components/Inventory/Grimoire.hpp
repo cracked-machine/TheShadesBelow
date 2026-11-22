@@ -12,7 +12,7 @@
 namespace Game::Cmp
 {
 
-//! @brief The player's grimoire: one page per NPC (first) and per plant (after the NPCs), with the actions that have
+//! @brief The player's grimoire: one page per plant and one per NPC (each in its own tab), with the actions that have
 //! been discovered on each, and whether the grimoire overlay itself is currently shown.
 class Grimoire
 {
@@ -31,18 +31,11 @@ public:
     std::set<std::string> discovered_actions;
   };
 
-  //! @brief A plant page: the plant, its forage and chop (drop) outputs, and the rewards for offering each of them.
+  //! @brief A plant page: the plant and its forage output.
   struct PlantPage
   {
     SubPage plant_subpage;
     SubPage forage_subpage;
-    SubPage drop_subpage;
-    //! @brief Reward for offering the plant item.
-    SubPage plant_offering_subpage;
-    //! @brief Reward for offering the forage item.
-    SubPage forage_offering_subpage;
-    //! @brief Reward for offering the drop item.
-    SubPage drop_offering_subpage;
   };
 
   //! @brief An NPC page: the NPC's actions on the player stats, e.g. spawn, proximity or collision.
@@ -54,7 +47,7 @@ public:
   };
 
   //! @brief The grimoire's tab groups. Each tab pages through its own page list.
-  enum class Tab { NPCS, PLANTS };
+  enum class Tab { PLANTS, NPCS };
 
   //! @brief The NPC pages, one per NPC in Sys::NpcStore order.
   std::vector<NpcPage> npc_pages;
@@ -62,7 +55,7 @@ public:
   //! @brief The plant pages, one per plant item in Sys::ItemStore plant order.
   std::vector<PlantPage> plant_pages;
 
-  //! @brief Construct a new Grimoire object, populating one page per NPC in Sys::NpcStore, then one page per plant
+  //! @brief Construct a new Grimoire object, populating one page per NPC in Sys::NpcStore and one page per plant
   //! item in Sys::ItemStore.
   Grimoire();
 

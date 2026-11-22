@@ -77,7 +77,7 @@
       {
        "name": "rows",
        "type": "string",
-       "value": "burn_action=Burn, carry_action=Carry, destroy_action=Chop, proximity_action=Proximity, forage_action=Forage, offering_action=Offering"
+       "value": "burn_action=Burn, destroy_action=Destroy, proximity_action=Proximity, forage_action=Forage"
       }
      ],
      "rotation": 0,

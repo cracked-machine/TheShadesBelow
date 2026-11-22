@@ -22,7 +22,7 @@ namespace Game::Sys
 {
 
 //! @brief Draws and drives the player's grimoire (spellbook) overlay. OverlayArbitrationSystem opens and closes it on
-//! Events::OverlayEvent GRIMOIRE_TOGGLE. The NPC and plant pages are in separate tabs
+//! Events::OverlayEvent GRIMOIRE_TOGGLE. The plant and NPC pages are in separate tabs
 //! (an ImGui tab bar), and each subpage's actions are listed in an ImGui table. Gameplay is paused while the overlay is open.
 //! While it is closed, hovering the mouse over a plant or NPC in the game area shows its grimoire subpage (its name and
 //! actions table) in a compact overlay, see res/ui/grimoire_plant_hover.json, res/ui/grimoire_npc_hover.json and
@@ -58,7 +58,7 @@ private:
   //! @param ev
   void on_overlay_event( const Events::OverlayEvent &ev );
 
-  //! @brief Discover the grimoire page for a picked-up plant: reveal its sprite, name and carry action.
+  //! @brief Discover the grimoire subpages of a picked-up item: reveal its sprite, name and carry action.
   //! @param ev
   void on_item_pickup_event( const Events::ItemPickedUpEvent &ev );
 
@@ -82,7 +82,8 @@ private:
   void on_grimoire_npc_update_event( const Events::GrimoireNpcUpdateEvent &ev );
 
   //! @brief Show `page_idx` of `tab` the next time the grimoire opens. No-op while it is open, so a discovery never
-  //! turns the page under the player.
+  //! turns the page under the player, and when Cmp::Persist::PrepopulateGrimoire is set, so the grimoire reopens on the
+  //! page last viewed.
   //! @param tab
   //! @param page_idx
   void show_page_when_closed( Cmp::Grimoire::Tab tab, std::size_t page_idx );
@@ -141,7 +142,7 @@ private:
   //! @return The result of ImGui::Begin.
   static bool begin_layout_window( const Render::UiLayout &ui_layout, const char *id, int extra_flags );
 
-  //! @brief Draw the NPCs/Plants tab bar at the layout's "tab_bar" ui_tab, and update m_tab from the open tab.
+  //! @brief Draw the Plants/NPCs tab bar at the layout's "tab_bar" ui_tab, and update m_tab from the open tab.
   //! @param ui_layout The layout of the current tab.
   void render_tab_bar( const Render::UiLayout &ui_layout );
 
@@ -213,16 +214,10 @@ private:
   //! @brief Map a grimoire_plants.json object name (e.g. "forage_actions") to the page's subpage for its
   //! prefix and the remainder of the name (e.g. "actions").
   //! @return The subpage, or nullptr if the name has no subpage prefix.
-  std::pair<const Cmp::Grimoire::SubPage *, std::string_view> resolve_subpage( const Cmp::Grimoire::PlantPage &page, std::string_view name )
+  static std::pair<const Cmp::Grimoire::SubPage *, std::string_view> resolve_subpage( const Cmp::Grimoire::PlantPage &page, std::string_view name )
   {
-    // the *_special_ prefixes must come before plant_/forage_/drop_ as the first matching prefix wins
-    const std::array<std::pair<std::string_view, const Cmp::Grimoire::SubPage *>, 6> prefixes = {
-        { { "plant_special_", &page.plant_offering_subpage },
-          { "forage_special_", &page.forage_offering_subpage },
-          { "drop_special_", &page.drop_offering_subpage },
-          { "plant_", &page.plant_subpage },
-          { "forage_", &page.forage_subpage },
-          { "drop_", &page.drop_subpage } } };
+    const std::array<std::pair<std::string_view, const Cmp::Grimoire::SubPage *>, 2> prefixes = {
+        { { "plant_", &page.plant_subpage }, { "forage_", &page.forage_subpage } } };
     for ( const auto &[prefix, sub_page] : prefixes )
     {
       if ( name.starts_with( prefix ) ) { return { sub_page, name.substr( prefix.size() ) }; }
@@ -240,7 +235,7 @@ private:
     return { nullptr, name };
   }
   //! @brief Tab bar captions, indexed by Cmp::Grimoire::Tab.
-  static constexpr std::array<const char *, 2> kTabLabels = { "NPCs", "Plants" };
+  static constexpr std::array<const char *, 2> kTabLabels = { "Plants", "NPCs" };
 
   //! @brief Number of pages in a tab.
   //! @param grimoire_cmp
@@ -260,7 +255,7 @@ private:
   std::unique_ptr<Render::UiLayout> m_npc_hover_ui_layout;
 
   //! @brief The tab currently shown.
-  Cmp::Grimoire::Tab m_tab{ Cmp::Grimoire::Tab::NPCS };
+  Cmp::Grimoire::Tab m_tab{ Cmp::Grimoire::Tab::PLANTS };
   //! @brief Index of the page shown in each tab, indexed by Cmp::Grimoire::Tab.
   std::array<std::size_t, 2> m_page_idx{};
   //! @brief Select m_tab in the ImGui tab bar on the next frame: ImGui otherwise keeps the tab last clicked.

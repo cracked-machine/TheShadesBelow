@@ -98,7 +98,7 @@ public:
     sf::FloatRect rect;
     //! @brief Identifying name of this table, as given in the UI layout file.
     std::string name;
-    //! @brief The table's rows, in order, as (key, caption) pairs, e.g. ("destroy_action", "Chop"). Parsed from the
+    //! @brief The table's rows, in order, as (key, caption) pairs, e.g. ("destroy_action", "Destroy"). Parsed from the
     //! "rows" property, a comma separated list of "key=Caption" entries.
     std::vector<std::pair<std::string, std::string>> rows;
     //! @brief Font size, in pixels, for the table text.
@@ -209,7 +209,7 @@ private:
   std::vector<Table> m_design_tables;
   std::vector<Tab> m_design_tabs;
 
-  //! @brief Parse a ui_table "rows" property, e.g. "burn_action=Burn, destroy_action=Chop".
+  //! @brief Parse a ui_table "rows" property, e.g. "burn_action=Burn, destroy_action=Destroy".
   //! @param rows The property value.
   //! @return The (key, caption) pairs, in order. An entry without '=' uses the key as its caption.
   static std::vector<std::pair<std::string, std::string>> parse_table_rows( const std::string &rows );

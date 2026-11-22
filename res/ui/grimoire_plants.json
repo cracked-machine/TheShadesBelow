@@ -9,7 +9,7 @@
          "name":"MainOverlay",
          "objects":[
                 {
-                 "height":850,
+                 "height":390,
                  "id":64,
                  "name":"main_outline",
                  "opacity":1,
@@ -32,9 +32,9 @@
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
-                 "width":1450,
-                 "x":350,
-                 "y":100
+                 "width":1010,
+                 "x":420,
+                 "y":410
                 }, 
                 {
                  "height":40,
@@ -44,9 +44,9 @@
                  "rotation":0,
                  "type":"ui_tab",
                  "visible":true,
-                 "width":1410,
-                 "x":370,
-                 "y":165
+                 "width":830,
+                 "x":440,
+                 "y":475
                 }, 
                 {
                  "height":0,
@@ -69,8 +69,8 @@
                  "type":"ui_label",
                  "visible":true,
                  "width":0,
-                 "x":430,
-                 "y":910
+                 "x":1320,
+                 "y":510
                 }, 
                 {
                  "height":0,
@@ -87,564 +87,14 @@
                         {
                          "name":"value",
                          "type":"string",
-                         "value":"Plant:"
+                         "value":"Grimoire"
                         }],
                  "rotation":0,
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":370,
-                 "y":150
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "draworder":"topdown",
-         "id":6,
-         "name":"SpecialOverlay",
-         "objects":[
-                {
-                 "height":220,
-                 "id":95,
-                 "name":"special_effects_outline",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ffaaaa7f"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff555500"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":420,
-                 "x":1350,
-                 "y":480
-                }, 
-                {
-                 "height":180,
-                 "id":206,
-                 "name":"drop_special_actions",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"rows",
-                         "type":"string",
-                         "value":"carry_action=Carry, spawn_action=Spawn"
-                        }],
-                 "rotation":0,
-                 "type":"ui_table",
-                 "visible":true,
-                 "width":290,
-                 "x":1360,
-                 "y":510
-                }, 
-                {
-                 "height":0,
-                 "id":124,
-                 "name":"drop_special_icon",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"sprite_index",
-                         "type":"int",
-                         "value":0
-                        }, 
-                        {
-                         "name":"sprite_scale",
-                         "type":"int",
-                         "value":5
-                        }, 
-                        {
-                         "name":"sprite_type",
-                         "type":"string",
-                         "value":""
-                        }],
-                 "rotation":0,
-                 "type":"ui_icon",
-                 "visible":true,
-                 "width":0,
-                 "x":1670,
-                 "y":500
-                }, 
-                {
-                 "height":0,
-                 "id":125,
-                 "name":"drop_special_name",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":25
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"?????"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":1360,
-                 "y":500
-                }, 
-                {
-                 "height":220,
-                 "id":126,
-                 "name":"special_effects_outline",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ffaaaa7f"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff555500"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":420,
-                 "x":1350,
-                 "y":230
-                }, 
-                {
-                 "height":180,
-                 "id":205,
-                 "name":"forage_special_actions",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"rows",
-                         "type":"string",
-                         "value":"consume_action=Consume, carry_action=Carry, spawn_action=Spawn"
-                        }],
-                 "rotation":0,
-                 "type":"ui_table",
-                 "visible":true,
-                 "width":290,
-                 "x":1360,
-                 "y":260
-                }, 
-                {
-                 "height":0,
-                 "id":131,
-                 "name":"forage_special_icon",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"sprite_index",
-                         "type":"int",
-                         "value":0
-                        }, 
-                        {
-                         "name":"sprite_scale",
-                         "type":"int",
-                         "value":5
-                        }, 
-                        {
-                         "name":"sprite_type",
-                         "type":"string",
-                         "value":""
-                        }],
-                 "rotation":0,
-                 "type":"ui_icon",
-                 "visible":true,
-                 "width":0,
-                 "x":1670,
-                 "y":270
-                }, 
-                {
-                 "height":0,
-                 "id":132,
-                 "name":"forage_special_name",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":25
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"?????"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":1360,
-                 "y":250
-                }, 
-                {
-                 "height":100,
-                 "id":141,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ffaaaa7f"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff555500"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":100,
-                 "x":1660,
-                 "y":260
-                }, 
-                {
-                 "height":100,
-                 "id":142,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ffaaaa7f"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff555500"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":100,
-                 "x":1660,
-                 "y":490
-                }, 
-                {
-                 "height":180,
-                 "id":212,
-                 "name":"special_plant_outline",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ffaaaa7f"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff555500"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":420,
-                 "x":820,
-                 "y":730
-                }, 
-                {
-                 "height":130,
-                 "id":213,
-                 "name":"plant_special_actions",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"rows",
-                         "type":"string",
-                         "value":"carry_action=Carry, spawn_action=Spawn"
-                        }],
-                 "rotation":0,
-                 "type":"ui_table",
-                 "visible":true,
-                 "width":290,
-                 "x":830,
-                 "y":770
-                }, 
-                {
-                 "height":0,
-                 "id":214,
-                 "name":"plant_special_icon",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"sprite_index",
-                         "type":"int",
-                         "value":0
-                        }, 
-                        {
-                         "name":"sprite_scale",
-                         "type":"int",
-                         "value":5
-                        }, 
-                        {
-                         "name":"sprite_type",
-                         "type":"string",
-                         "value":""
-                        }],
-                 "rotation":0,
-                 "type":"ui_icon",
-                 "visible":true,
-                 "width":0,
-                 "x":1140,
-                 "y":780
-                }, 
-                {
-                 "height":0,
-                 "id":215,
-                 "name":"plant_special_name",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":25
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"?????"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":830,
-                 "y":750
-                }, 
-                {
-                 "height":100,
-                 "id":216,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ffaaaa7f"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff555500"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":100,
-                 "x":1130,
-                 "y":770
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "draworder":"topdown",
-         "id":2,
-         "name":"DropOverlay",
-         "objects":[
-                {
-                 "height":220,
-                 "id":34,
-                 "name":"drop_effects_outline",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ffaaaa7f"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff555500"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":420,
-                 "x":820,
-                 "y":480
-                }, 
-                {
-                 "height":0,
-                 "id":120,
-                 "name":"drop_icon",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"sprite_index",
-                         "type":"int",
-                         "value":0
-                        }, 
-                        {
-                         "name":"sprite_scale",
-                         "type":"int",
-                         "value":5
-                        }, 
-                        {
-                         "name":"sprite_type",
-                         "type":"string",
-                         "value":""
-                        }],
-                 "rotation":0,
-                 "type":"ui_icon",
-                 "visible":true,
-                 "width":0,
-                 "x":1140,
-                 "y":520
-                }, 
-                {
-                 "height":0,
-                 "id":121,
-                 "name":"drop_name",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":25
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"?????"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":830,
-                 "y":500
-                }, 
-                {
-                 "height":100,
-                 "id":139,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ffaaaa7f"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff555500"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":100,
-                 "x":1130,
-                 "y":510
-                }, 
-                {
-                 "height":180,
-                 "id":204,
-                 "name":"drop_actions",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"rows",
-                         "type":"string",
-                         "value":"carry_action=Carry, consume_action=Consume, spawn_action=Spawn, offering_action=Offering"
-                        }],
-                 "rotation":0,
-                 "type":"ui_table",
-                 "visible":true,
-                 "width":290,
-                 "x":830,
-                 "y":510
+                 "x":440,
+                 "y":460
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -655,6 +105,7 @@
         {
          "draworder":"topdown",
          "id":5,
+         "locked":true,
          "name":"ForageOverlay",
          "objects":[
                 {
@@ -681,9 +132,9 @@
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
-                 "width":420,
-                 "x":820,
-                 "y":230
+                 "width":370,
+                 "x":1030,
+                 "y":550
                 }, 
                 {
                  "height":180,
@@ -699,14 +150,14 @@
                         {
                          "name":"rows",
                          "type":"string",
-                         "value":"carry_action=Carry, consume_action=Consume, spawn_action=Spawn, offering_action=Offering"
+                         "value":"carry_action=Carry, consume_action=Consume, spawn_action=Spawn"
                         }],
                  "rotation":0,
                  "type":"ui_table",
                  "visible":true,
-                 "width":290,
-                 "x":830,
-                 "y":260
+                 "width":220,
+                 "x":1040,
+                 "y":570
                 }, 
                 {
                  "height":0,
@@ -734,8 +185,8 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":1140,
-                 "y":270
+                 "x":1290,
+                 "y":590
                 }, 
                 {
                  "height":0,
@@ -758,8 +209,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":830,
-                 "y":250
+                 "x":1020,
+                 "y":540
                 }, 
                 {
                  "height":100,
@@ -786,8 +237,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":100,
-                 "x":1130,
-                 "y":260
+                 "x":1280,
+                 "y":580
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -827,11 +278,11 @@
                  "type":"ui_icon",
                  "visible":true,
                  "width":0,
-                 "x":610,
-                 "y":250
+                 "x":810,
+                 "y":580
                 }, 
                 {
-                 "height":490,
+                 "height":220,
                  "id":68,
                  "name":"plant_effects_outline",
                  "opacity":1,
@@ -854,9 +305,9 @@
                  "rotation":0,
                  "type":"ui_outline",
                  "visible":true,
-                 "width":350,
-                 "x":370,
-                 "y":220
+                 "width":470,
+                 "x":450,
+                 "y":550
                 }, 
                 {
                  "height":0,
@@ -879,8 +330,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":390,
-                 "y":250
+                 "x":440,
+                 "y":540
                 }, 
                 {
                  "height":180,
@@ -907,11 +358,11 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":100,
-                 "x":600,
-                 "y":240
+                 "x":800,
+                 "y":570
                 }, 
                 {
-                 "height":240,
+                 "height":150,
                  "id":202,
                  "name":"plant_actions",
                  "opacity":1,
@@ -924,14 +375,14 @@
                         {
                          "name":"rows",
                          "type":"string",
-                         "value":"burn_action=Burn, carry_action=Carry, destroy_action=Chop, proximity_action=Proximity, forage_action=Forage, offering_action=Offering"
+                         "value":"burn_action=Burn, destroy_action=Destroy, proximity_action=Proximity, forage_action=Forage"
                         }],
                  "rotation":0,
                  "type":"ui_table",
                  "visible":true,
-                 "width":320,
-                 "x":390,
-                 "y":460
+                 "width":310,
+                 "x":470,
+                 "y":570
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -969,8 +420,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":81.0810810810811,
-                 "x":725,
-                 "y":305.943117721595
+                 "x":935,
+                 "y":665.943117721595
                 }, 
                 {
                  "height":8.10810810810811,
@@ -997,8 +448,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":24.3243243243243,
-                 "x":789.702702702703,
-                 "y":284.663838442316
+                 "x":999.702702702703,
+                 "y":644.663838442316
                 }, 
                 {
                  "height":8.10810810810811,
@@ -1025,8 +476,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":24.3243243243243,
-                 "x":783.967097532315,
-                 "y":329.572964960138
+                 "x":993.967097532315,
+                 "y":689.572964960138
                 }, 
                 {
                  "height":11.4665964516737,
@@ -1053,344 +504,8 @@
                  "type":"ui_outline",
                  "visible":true,
                  "width":11.4665964516737,
-                 "x":798.783783783784,
-                 "y":309.997171775649
-                }, 
-                {
-                 "height":8.10811178813632,
-                 "id":172,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":81.0811178813632,
-                 "x":725,
-                 "y":565.943112688238
-                }, 
-                {
-                 "height":8.10811178813632,
-                 "id":173,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":45,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":24.324335364409,
-                 "x":789.702732069328,
-                 "y":544.664184111452
-                }, 
-                {
-                 "height":8.10811178813632,
-                 "id":174,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":315,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":24.324335364409,
-                 "x":783.9670537904,
-                 "y":589.572582872403
-                }, 
-                {
-                 "height":11.4665727719003,
-                 "id":175,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":315,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":11.4665727719003,
-                 "x":798.78381727204,
-                 "y":569.997168582306
-                }, 
-                {
-                 "height":9.00898896558408,
-                 "id":184,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":90.0898896558408,
-                 "x":1250,
-                 "y":565.829883286713
-                }, 
-                {
-                 "height":9.00898896558408,
-                 "id":185,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":45,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":27.0269335635009,
-                 "x":1321.89204550015,
-                 "y":542.186608072309
-                }, 
-                {
-                 "height":9.00898896558408,
-                 "id":186,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":315,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":27.0269335635009,
-                 "x":1315.51872783344,
-                 "y":592.085374302098
-                }, 
-                {
-                 "height":12.7406353481596,
-                 "id":187,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":315,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":12.7406353481596,
-                 "x":1331.98202069738,
-                 "y":570.334316658544
-                }, 
-                {
-                 "height":9.00898896558408,
-                 "id":188,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":90.0898896558408,
-                 "x":1250,
-                 "y":314.829883286713
-                }, 
-                {
-                 "height":9.00898896558408,
-                 "id":189,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":45,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":27.0269335635009,
-                 "x":1321.89204550015,
-                 "y":291.186608072309
-                }, 
-                {
-                 "height":9.00898896558408,
-                 "id":190,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":315,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":27.0269335635009,
-                 "x":1315.51872783344,
-                 "y":341.085374302098
-                }, 
-                {
-                 "height":12.7406353481596,
-                 "id":191,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":315,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":12.7406353481596,
-                 "x":1331.98202069738,
-                 "y":319.334316658544
+                 "x":1008.78378378378,
+                 "y":669.997171775649
                 }, 
                 {
                  "height":0,
@@ -1413,272 +528,8 @@
                  "type":"ui_text",
                  "visible":true,
                  "width":0,
-                 "x":730,
-                 "y":316
-                }, 
-                {
-                 "height":0,
-                 "id":209,
-                 "name":"",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"CHOP"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":730,
-                 "y":576
-                }, 
-                {
-                 "height":0,
-                 "id":210,
-                 "name":"",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"OFFERING"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":1250,
-                 "y":577
-                }, 
-                {
-                 "height":0,
-                 "id":211,
-                 "name":"",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"OFFERING"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":1250,
-                 "y":326
-                }, 
-                {
-                 "height":8.10811,
-                 "id":217,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":81.0811,
-                 "x":730,
-                 "y":775.279
-                }, 
-                {
-                 "height":8.10811,
-                 "id":218,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":45,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":24.3243,
-                 "x":794.703,
-                 "y":754
-                }, 
-                {
-                 "height":8.10811,
-                 "id":219,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":315,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":24.3243,
-                 "x":788.967,
-                 "y":798.909
-                }, 
-                {
-                 "height":11.4666,
-                 "id":220,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":315,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":11.4666,
-                 "x":803.784,
-                 "y":779.333
-                }, 
-                {
-                 "height":0,
-                 "id":221,
-                 "name":"",
-                 "opacity":1,
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"font_size",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"value",
-                         "type":"string",
-                         "value":"OFFERING"
-                        }],
-                 "rotation":0,
-                 "type":"ui_text",
-                 "visible":true,
-                 "width":0,
-                 "x":650,
-                 "y":786
-                }, 
-                {
-                 "height":8.10811,
-                 "id":222,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":161.0811,
-                 "x":650,
-                 "y":775.279
-                }, 
-                {
-                 "height":63.4375,
-                 "id":223,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"fill_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_color",
-                         "type":"color",
-                         "value":"#ff3a4783"
-                        }, 
-                        {
-                         "name":"line_thickness",
-                         "type":"int",
-                         "value":5
-                        }],
-                 "rotation":0,
-                 "type":"ui_outline",
-                 "visible":true,
-                 "width":10,
-                 "x":640,
-                 "y":720
+                 "x":950,
+                 "y":620
                 }],
          "opacity":1,
          "type":"objectgroup",

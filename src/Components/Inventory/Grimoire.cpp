@@ -1,7 +1,6 @@
 #include <Components/Inventory/Grimoire.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Npc/Npc.hpp>
-#include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BurnAction.hpp>
 #include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/CollisionAction.hpp>
@@ -46,50 +45,19 @@ Grimoire::Grimoire()
   }
 
   const auto &item_store = Sys::ItemStore::instance();
-  const auto offering_reward = [&]( const Sys::ItemKey &key )
-  {
-    // a wildcard output has no single item to look up
-    if ( key.empty() or key.str().ends_with( '*' ) ) return Sys::ItemKey( "" );
-    // plants are offered at the graveyard altars
-    const auto reward = item_store.get( key ).get_offering_reward( Cmp::Altar::Kind::GRAVEYARD );
-    return reward ? reward->item : Sys::ItemKey( "" );
-  };
-  // a wildcard reward (e.g. Nightshade's "item.jewelry*") is not a plant item, so it is never added to the grimoire
-  const auto is_wildcard_reward = [&]( const Sys::ItemKey &key ) { return offering_reward( key ).str().ends_with( '*' ); };
-  const auto offering_subpage_key = [&]( const Sys::ItemKey &key )
-  { return is_wildcard_reward( key ) ? Sys::ItemKey( "" ) : offering_reward( key ); };
   for ( const Sys::ItemKey &item_key : item_store.get_pattern( "^item\\.plant\\." ) )
   {
     const auto &item = item_store.get( item_key );
     auto &page = plant_pages.emplace_back( PlantPage{
         .plant_subpage = { .item_key = item_key, .sprite_key = "sprite.plant.unknown", .action_map = {}, .discovered_actions = {} },
-        .forage_subpage = { .item_key = item.get_forage_output(), .sprite_key = "sprite.item.unknown", .action_map = {}, .discovered_actions = {} },
-        .drop_subpage = { .item_key = item.get_drop_output(), .sprite_key = "sprite.item.unknown", .action_map = {}, .discovered_actions = {} },
-        .plant_offering_subpage =
-            { .item_key = offering_subpage_key( item_key ), .sprite_key = "sprite.item.unknown", .action_map = {}, .discovered_actions = {} },
-        .forage_offering_subpage = { .item_key = offering_subpage_key( item.get_forage_output() ),
-                                     .sprite_key = "sprite.item.unknown",
-                                     .action_map = {},
-                                     .discovered_actions = {} },
-        .drop_offering_subpage = { .item_key = offering_subpage_key( item.get_drop_output() ),
-                                   .sprite_key = "sprite.item.unknown",
-                                   .action_map = {},
-                                   .discovered_actions = {} } } );
-    for ( SubPage *sub_page : { &page.plant_subpage, &page.forage_subpage, &page.drop_subpage, &page.plant_offering_subpage,
-                                &page.forage_offering_subpage, &page.drop_offering_subpage } )
+        .forage_subpage = { .item_key = item.get_forage_output(), .sprite_key = "sprite.item.unknown", .action_map = {}, .discovered_actions = {} } } );
+    for ( SubPage *sub_page : { &page.plant_subpage, &page.forage_subpage } )
     {
       prefill_empty_actions( *sub_page );
     }
-    // an item whose offering rewards no item (it does nothing, only changes stats, triggers an altar effect such as
-    // Nightshade's extra life, or rewards a wildcard item) has no offering reward subpage, so every action of its
-    // offering subpage is "none". The offering's own effects are shown on the item's offering_action instead.
-    // Likewise a plant with no forage or drop output (e.g. grass) has no item for that subpage, so it is "none" too:
-    // an empty-key subpage can never be discovered, so it would otherwise show "?" forever.
-    for ( SubPage *empty_subpage : { &page.forage_subpage, &page.drop_subpage, &page.plant_offering_subpage, &page.forage_offering_subpage,
-                                     &page.drop_offering_subpage } )
-    {
-      if ( empty_subpage->item_key.empty() ) { prefill_none_actions( *empty_subpage ); }
-    }
+    // a plant with no forage output (e.g. grass) has no item for its forage subpage, so it is "none": an empty-key
+    // subpage can never be discovered, so it would otherwise show "?" forever
+    if ( page.forage_subpage.item_key.empty() ) { prefill_none_actions( page.forage_subpage ); }
   }
 }
 
@@ -116,8 +84,7 @@ void Grimoire::reveal_all()
   const auto &item_store = Sys::ItemStore::instance();
   for ( PlantPage &page : plant_pages )
   {
-    for ( SubPage *sub_page : { &page.plant_subpage, &page.forage_subpage, &page.drop_subpage, &page.plant_offering_subpage,
-                                &page.forage_offering_subpage, &page.drop_offering_subpage } )
+    for ( SubPage *sub_page : { &page.plant_subpage, &page.forage_subpage } )
     {
       // an empty key is a "none" subpage; a wildcard key matches no single item and is never revealed in play
       if ( sub_page->item_key.empty() or sub_page->item_key.str().ends_with( '*' ) ) continue;
