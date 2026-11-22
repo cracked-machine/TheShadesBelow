@@ -16,6 +16,7 @@
 #include <Systems/Stores/NpcStore.hpp>
 
 #include <algorithm>
+#include <string_view>
 
 namespace Game::Cmp
 {
@@ -82,9 +83,51 @@ Grimoire::Grimoire()
     // an item whose offering rewards no item (it does nothing, only changes stats, triggers an altar effect such as
     // Nightshade's extra life, or rewards a wildcard item) has no offering reward subpage, so every action of its
     // offering subpage is "none". The offering's own effects are shown on the item's offering_action instead.
-    for ( SubPage *offering_subpage : { &page.plant_offering_subpage, &page.forage_offering_subpage, &page.drop_offering_subpage } )
+    // Likewise a plant with no forage or drop output (e.g. grass) has no item for that subpage, so it is "none" too:
+    // an empty-key subpage can never be discovered, so it would otherwise show "?" forever.
+    for ( SubPage *empty_subpage : { &page.forage_subpage, &page.drop_subpage, &page.plant_offering_subpage, &page.forage_offering_subpage,
+                                     &page.drop_offering_subpage } )
     {
-      if ( offering_subpage->item_key.empty() ) { prefill_none_actions( *offering_subpage ); }
+      if ( empty_subpage->item_key.empty() ) { prefill_none_actions( *empty_subpage ); }
+    }
+  }
+}
+
+void Grimoire::reveal_all()
+{
+  const auto reveal_action = [&]( SubPage &sub_page, std::string_view action_key, const BaseAction &action )
+  {
+    if ( action.is_zero() ) return;
+    sub_page.action_map.insert_or_assign( std::string( action_key ), action );
+    sub_page.discovered_actions.insert( std::string( action_key ) );
+  };
+
+  for ( NpcPage &npc_page : npc_pages )
+  {
+    const auto &npc = Sys::NpcStore::instance().get( npc_page.npc_key );
+    if ( not npc.sprite_type_list.empty() ) { npc_page.npc_subpage.sprite_key = npc.sprite_type_list.front(); }
+    npc_page.npc_subpage.sprite_index = 0;
+    for_each_action_type( [&]<typename ActionT>()
+    {
+      if ( npc.has_action<ActionT>() ) { reveal_action( npc_page.npc_subpage, ActionT::kKey, npc.at<ActionT>().action ); }
+    } );
+  }
+
+  const auto &item_store = Sys::ItemStore::instance();
+  for ( PlantPage &page : plant_pages )
+  {
+    for ( SubPage *sub_page : { &page.plant_subpage, &page.forage_subpage, &page.drop_subpage, &page.plant_offering_subpage,
+                                &page.forage_offering_subpage, &page.drop_offering_subpage } )
+    {
+      // an empty key is a "none" subpage; a wildcard key matches no single item and is never revealed in play
+      if ( sub_page->item_key.empty() or sub_page->item_key.str().ends_with( '*' ) ) continue;
+      const auto &item = item_store.get( sub_page->item_key );
+      sub_page->sprite_key = item.sprite_type;
+      sub_page->sprite_index = item.icon_sprite_index();
+      for_each_action_type( [&]<typename ActionT>()
+      {
+        if ( item.has_action<ActionT>() ) { reveal_action( *sub_page, ActionT::kKey, item.get_action<ActionT>() ); }
+      } );
     }
   }
 }

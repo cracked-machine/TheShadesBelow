@@ -11,6 +11,7 @@
 #include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/Grimoire.hpp>
+#include <Components/Persistent/PrepopulateGrimoire.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/StackCount.hpp>
 #include <Components/Inventory/StingDamage.hpp>
@@ -113,7 +114,8 @@ void create_player( entt::registry &reg )
       entity, sf::Vector2f{ 0.f, Sys::PersistSystem::get<Cmp::Persist::PlayerRenderOffset>( reg ).get_value() } );
   reg.emplace_or_replace<Cmp::Player::HeartBeat>( entity );
   reg.emplace_or_replace<Cmp::Player::Doglegs>( entity );
-  reg.emplace_or_replace<Cmp::Grimoire>( entity );
+  auto &grimoire = reg.emplace_or_replace<Cmp::Grimoire>( entity );
+  if ( Sys::PersistSystem::get<Cmp::Persist::PrepopulateGrimoire>( reg ).get_value() ) { grimoire.reveal_all(); }
   reg.emplace_or_replace<Cmp::Player::SelectedInventorySlot>( entity );
   ensure_inventory_slots( reg );
 }

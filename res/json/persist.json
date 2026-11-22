@@ -1220,6 +1220,11 @@
     "value": false,
     "detail": "Grimoire hover info follows mouse"
   },
+  "PrepopulateGrimoire": {
+    "type": "bool",
+    "value": true,
+    "detail": "Pre-populate the grimoire with every NPC and plant (applies to new games)"
+  },
   "TooltipsSeen": {
     "type": "std::set<std::string>",
     "value": []

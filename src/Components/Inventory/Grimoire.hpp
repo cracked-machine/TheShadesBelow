@@ -66,6 +66,11 @@ public:
   //! item in Sys::ItemStore.
   Grimoire();
 
+  //! @brief Reveal every page: the real sprite and every action with an effect of each NPC and plant subpage, as if
+  //! all of them had been discovered. Wildcard subpages (e.g. "item.jewelry*") stay unknown, as in normal play.
+  //! @note Called on player creation when Cmp::Persist::PrepopulateGrimoire is set.
+  void reveal_all();
+
   //! @brief Whether the grimoire overlay is currently enabled/shown.
   bool is_enabled{ false };
 
