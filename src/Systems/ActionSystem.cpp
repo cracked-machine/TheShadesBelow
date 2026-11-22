@@ -490,13 +490,14 @@ void ActionSystem::check_player_melee_npc_kill()
       const bool killed = Utils::Player::apply_weapon_hit( reg(), npc_entity, "item.shovel" );
 
       m_sound_bank.get_effect( "axe_whip" ).play();
-      if ( is_skeleton )
+      // the bones/twigs burst is the death effect, so only the killing hit spawns it
+      if ( killed and is_skeleton )
       {
         auto skelebones_particle_uuid = Cmp::UUID::generate();
         Factory::Particle::add_skelebones_ps( reg(), "graveyard.skele.particle.bones", 50, 2.f, 50.f, 14.f, skelebones_particle_uuid,
                                               npc_pos_cmp.getCenter(), npc_pos_cmp.position.y );
       }
-      else if ( is_burryman )
+      else if ( killed and is_burryman )
       {
         auto burryman_twigs_particle_uuid = Cmp::UUID::generate();
         Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, burryman_twigs_particle_uuid,

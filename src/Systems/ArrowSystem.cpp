@@ -229,8 +229,6 @@ void ArrowSystem::check_npc_arrow_collision()
       // arrows pass through NPCs the bow can't hurt (damage_from_weapon.bow of 0 in npc.json, e.g. ghosts and wisps)
       if ( npc_cmp.damage_from_weapon.bow <= 0 ) continue;
       if ( not npc_pos_cmp.findIntersection( arrow_pos_cmp ) ) continue;
-      cached_npc_pos_cmp = npc_pos_cmp;
-      cached_npc_type = npc_cmp.npc_type;
 
       // the arrow stops in the NPC it hits, so it only damages it once. It lands where it is: the trajectory update
       // sees it at its destination and lets it rest, then cleans it up
@@ -242,6 +240,9 @@ void ArrowSystem::check_npc_arrow_collision()
       // the DestroyNpcEvent handler
       if ( Utils::Player::apply_weapon_hit( reg(), npc_entt, "item.longbow" ) )
       {
+        // the bones/twigs burst is the death effect, so only the killing hit spawns it. Copy before the NPC is destroyed
+        cached_npc_pos_cmp = npc_pos_cmp;
+        cached_npc_type = npc_cmp.npc_type;
         get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, std::nullopt, std::nullopt, Events::DestroyNpcEvent::Cause::ARROW ) );
       }
       else { play_action_oneshot_sfx( npc_cmp.at<Cmp::DestroyAction>().action.sfx() ); }
