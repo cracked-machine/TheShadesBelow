@@ -17,7 +17,6 @@
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/OverlayEvent.hpp>
 #include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
@@ -444,11 +443,13 @@ void GrimoireOverlaySystem::render_tab_bar( const Render::UiLayout &ui_layout )
 template <typename PageT>
 void GrimoireOverlaySystem::render_page( const Render::UiLayout &ui_layout, const PageT &page, std::size_t page_count )
 {
-  render_outlines( ui_layout );
+  // all ImGui, so the page draws in front of other ImGui overlays (e.g. the HUD's health bars and meters). SFML would
+  // draw under all of them
+  render_outlines_imgui( ui_layout );
   for ( const auto &icon : ui_layout.m_icons )
   {
     const auto [sub_page, suffix] = resolve_subpage( page, icon.name );
-    if ( sub_page and suffix == "icon" ) { render_icon( icon, *sub_page ); }
+    if ( sub_page and suffix == "icon" ) { render_subpage_icon( icon, *sub_page ); }
   }
   render_page_label( ui_layout, page_count );
   for ( const auto &text : ui_layout.m_texts )
@@ -463,11 +464,9 @@ void GrimoireOverlaySystem::render_page( const Render::UiLayout &ui_layout, cons
   }
 }
 
-void GrimoireOverlaySystem::render_icon( const Render::UiLayout::Icon &icon, const Cmp::Grimoire::SubPage &sub_page )
+void GrimoireOverlaySystem::render_subpage_icon( const Render::UiLayout::Icon &icon, const Cmp::Grimoire::SubPage &sub_page )
 {
-  Sys::SpriteKey sprite_key = sub_page.sprite_key;
-  RenderSystem::safe_render_sprite_screen( sprite_key, { icon.rect.position, Constants::kGridSizePxF }, sub_page.sprite_index,
-                                           { icon.scale, icon.scale } );
+  render_icon( sub_page.sprite_key, sub_page.sprite_index, icon.rect.position, icon.scale );
 }
 
 void GrimoireOverlaySystem::render_page_label( const Render::UiLayout &ui_layout, std::size_t page_count )

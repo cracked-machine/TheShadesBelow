@@ -43,6 +43,24 @@ protected:
   //! @param ui_layout
   void render_outlines( const Render::UiLayout &ui_layout );
 
+  //! @brief Draw a layout's outline rectangles (panel borders) into the current ImGui window's draw list, unclipped by
+  //! the window. Unlike render_outlines() (SFML, so under every ImGui window), these layer with the overlay's ImGui
+  //! windows: use it for an overlay that must draw in front of other ImGui, e.g. the grimoire over the HUD meters.
+  //! Rotated outlines turn about their top-left corner, and the border is drawn outside the rectangle, as SFML does.
+  //! Must be called inside an ImGui window.
+  //! @param ui_layout
+  static void render_outlines_imgui( const Render::UiLayout &ui_layout );
+
+  //! @brief Draw a sprite sheet frame as an ImGui image at `screen_pos`. It layers with the overlay's ImGui windows,
+  //! unlike an SFML sprite draw, which is under every ImGui window. A missing sprite or frame draws a fallback square
+  //! (magenta for an unknown sprite, cyan for a bad frame index), as RenderSystem does. Must be called inside an ImGui
+  //! window: it moves that window's cursor.
+  //! @param sprite_key The sprite sheet.
+  //! @param sprite_index The frame within the sheet.
+  //! @param screen_pos The image's top-left, in window pixels.
+  //! @param scale The image's scale: its size is the sheet's sprite size times this.
+  static void render_icon( const Sys::SpriteKey &sprite_key, std::size_t sprite_index, sf::Vector2f screen_pos, float scale );
+
   //! @brief The layout's current design-to-screen scale, for hard-coded pixel values (outline widths, font sizes).
   //! @param ui_layout The layout, or nullptr.
   //! @return The scale, or 1 if `ui_layout` is nullptr.

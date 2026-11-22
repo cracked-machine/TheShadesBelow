@@ -74,6 +74,7 @@
 #include <format>
 #include <imgui-SFML.h>
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -99,6 +100,9 @@ void HudOverlaySystem::update( sf::Time dt )
   // the meters (with their frost) and the texts share one ImGui window, texts submitted last so they draw over the
   // meters. ImGui renders after every SFML draw, so nothing SFML can be drawn over these.
   begin_overlay_window( "##hud_meters" );
+  // the HUD is the base ImGui layer: every other overlay's ImGui window (grimoire, tooltips, pause menu) draws over it,
+  // whatever order the windows were created in
+  ImGui::BringWindowToDisplayBack( ImGui::GetCurrentWindow() );
   // first, so the HUD draws over the altar meters
   PROFILED( render_altar_blood_meters() );
   PROFILED( render_world_health_bars() );
@@ -721,6 +725,8 @@ void HudOverlaySystem::render_level_depth()
   const auto display_res = sf::Vector2f( m_window.getSize() );
   // its own window: this is drawn after update(), outside the HUD's other windows
   begin_overlay_window( "##hud_level_depth" );
+  // behind every other overlay, like the HUD's meters
+  ImGui::BringWindowToDisplayBack( ImGui::GetCurrentWindow() );
   draw_text( "Nekropolis " + std::to_string( max_level_depth - level_depth_cmp.get_count() ),
              static_cast<float>( scaled_char_size( 100, m_main_ui_layout.get() ) ), { display_res.x / 2.f, 100.f * hud_scale() }, sf::Color::White,
              TextAlign::CENTER );

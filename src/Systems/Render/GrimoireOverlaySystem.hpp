@@ -155,10 +155,10 @@ private:
   template <typename PageT>
   void render_page( const Render::UiLayout &ui_layout, const PageT &page, std::size_t page_count );
 
-  //! @brief Draw a subpage's sprite icon.
+  //! @brief Draw a subpage's sprite icon in the current ImGui window, see BaseOverlaySystem::render_icon().
   //! @param icon The layout's icon.
   //! @param sub_page The subpage the icon belongs to.
-  void render_icon( const Render::UiLayout::Icon &icon, const Cmp::Grimoire::SubPage &sub_page );
+  static void render_subpage_icon( const Render::UiLayout::Icon &icon, const Cmp::Grimoire::SubPage &sub_page );
 
   //! @brief Draw the "N of M" page label.
   //! @param ui_layout The layout of the page currently shown.

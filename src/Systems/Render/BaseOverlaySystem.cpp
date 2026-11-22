@@ -3,14 +3,20 @@
 #include <Systems/Render/BaseOverlaySystem.hpp>
 
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <Systems/Stores/SpriteStore.hpp>
+#include <Utils/Constants.hpp>
 #include <Utils/ImGuiTheme.hpp>
 
+#include <imgui-SFML.h>
 #include <imgui.h>
+#include <spdlog/spdlog.h>
 
 #include <algorithm>
 #include <array>
 #include <cfloat>
 #include <cmath>
+#include <stdexcept>
 #include <string>
 #include <tuple>
 
@@ -103,6 +109,78 @@ void BaseOverlaySystem::render_outlines( const Render::UiLayout &ui_layout )
     rect.setRotation( outline.rotation );
     draw_screen( rect );
   }
+}
+
+void BaseOverlaySystem::render_outlines_imgui( const Render::UiLayout &ui_layout )
+{
+  ImDrawList *draw_list = ImGui::GetWindowDrawList();
+  // the layout places outlines anywhere on screen, not just inside this window
+  draw_list->PushClipRectFullScreen();
+  for ( const auto &outline : ui_layout.m_outlines )
+  {
+    // the corners of the rectangle grown by `grow` on each side, turned about its top-left corner like sf::RectangleShape
+    const float cos_a = std::cos( outline.rotation.asRadians() );
+    const float sin_a = std::sin( outline.rotation.asRadians() );
+    auto corners = [&]( float grow )
+    {
+      const sf::Vector2f size = outline.rect.size;
+      const std::array<sf::Vector2f, 4> local{ sf::Vector2f( -grow, -grow ), sf::Vector2f( size.x + grow, -grow ),
+                                               sf::Vector2f( size.x + grow, size.y + grow ), sf::Vector2f( -grow, size.y + grow ) };
+      std::array<ImVec2, 4> screen{};
+      for ( std::size_t i = 0; i < local.size(); ++i )
+      {
+        const sf::Vector2f &p = local.at( i );
+        screen.at( i ) = ImVec2( outline.rect.position.x + ( p.x * cos_a ) - ( p.y * sin_a ), outline.rect.position.y + ( p.x * sin_a ) + ( p.y * cos_a ) );
+      }
+      return screen;
+    };
+
+    const auto fill = corners( 0.f );
+    draw_list->AddQuadFilled( fill.at( 0 ), fill.at( 1 ), fill.at( 2 ), fill.at( 3 ), to_imu32( outline.fill_color ) );
+    if ( outline.line_thickness != 0 )
+    {
+      // ImGui centres a line on its path; SFML draws a positive thickness outside the rectangle, a negative one inside
+      const auto thickness = static_cast<float>( outline.line_thickness );
+      const auto line = corners( thickness / 2.f );
+      draw_list->AddQuad( line.at( 0 ), line.at( 1 ), line.at( 2 ), line.at( 3 ), to_imu32( outline.line_color ), std::abs( thickness ) );
+    }
+  }
+  draw_list->PopClipRect();
+}
+
+void BaseOverlaySystem::render_icon( const Sys::SpriteKey &sprite_key, std::size_t sprite_index, sf::Vector2f screen_pos, float scale )
+{
+  auto fallback_square = [&]( sf::Color colour )
+  {
+    const sf::Vector2f size = Constants::kGridSizePxF * scale;
+    ImGui::GetWindowDrawList()->AddRectFilled( ImVec2( screen_pos.x, screen_pos.y ), ImVec2( screen_pos.x + size.x, screen_pos.y + size.y ),
+                                               to_imu32( colour ) );
+  };
+
+  const Sprites::SpriteSheet *sheet = nullptr;
+  try
+  {
+    sheet = &Sys::SpriteStore::instance().get( sprite_key );
+  } catch ( const std::out_of_range & )
+  {
+    fallback_square( sf::Color::Magenta );
+    return;
+  }
+  if ( sprite_index >= sheet->sheet_size() )
+  {
+    SPDLOG_WARN( "Unable to get idx: {}. {} has sprite count = {}", sprite_index, sprite_key, sheet->sheet_size() );
+    fallback_square( sf::Color::Cyan );
+    return;
+  }
+
+  // each frame is one rectangle of the sheet's texture: vertex 0 is its top-left, vertex 5 its bottom-right
+  const sf::VertexArray &frame = sheet->get_vertex_array( sprite_index );
+  const sf::Vector2i tex_top_left( frame[0].texCoords );
+  const sf::Vector2i tex_bottom_right( frame[5].texCoords );
+  const sf::Sprite sprite( sheet->texture(), sf::IntRect( tex_top_left, tex_bottom_right - tex_top_left ) );
+
+  ImGui::SetCursorScreenPos( ImVec2( screen_pos.x, screen_pos.y ) );
+  ImGui::Image( sprite, sheet->sprite_size() * scale );
 }
 
 unsigned int BaseOverlaySystem::scaled_char_size( unsigned int design_size, const Render::UiLayout *ui_layout )
