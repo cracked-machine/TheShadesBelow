@@ -35,6 +35,7 @@
 #include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/DestroyitemEvent.hpp>
+#include <Events/NpcKnockbackEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/BombFactory.hpp>
@@ -514,6 +515,9 @@ void ActionSystem::check_player_melee_npc_kill()
       if ( not killed )
       {
         play_action_oneshot_sfx( npc_cmp.at<Cmp::DestroyAction>().action.sfx() );
+        // a hit that doesn't kill knocks the NPC back, away from the player
+        get_systems_event_queue().trigger(
+            Events::NpcKnockbackEvent( npc_entity, npc_pos_cmp.getCenter() - Utils::Player::get_position( reg() ).getCenter() ) );
         return;
       }
       SPDLOG_DEBUG( "Killed NPC at position ({}, {})!", npc_pos_cmp.position.x, npc_pos_cmp.position.y );

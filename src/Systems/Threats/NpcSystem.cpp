@@ -101,10 +101,12 @@
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/TeleportEntityEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
+#include <Events/NpcKnockbackEvent.hpp>
 #include <Events/UpdateNpcPositionEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
+#include <PathFinding/AStar.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/FlyingSystem.hpp>
@@ -142,6 +144,7 @@ NpcSystem::NpcSystem( entt::registry &reg, sf::RenderWindow &window, Audio::Soun
 {
   SPDLOG_DEBUG( "NpcSystem initialized" );
   std::ignore = get_systems_event_queue().sink<Events::UpdateNpcPositionEvent>().connect<&NpcSystem::on_update_npc_position_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::NpcKnockbackEvent>().connect<&NpcSystem::on_npc_knockback_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::DestroyNpcEvent>().connect<&NpcSystem::on_destroy_npc_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::CreateNpcEvent>().connect<&NpcSystem::on_create_npc_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::CrowDeliveryEvent>().connect<&NpcSystem::on_crow_delivery_event>( this );
@@ -711,6 +714,51 @@ void NpcSystem::check_npc_container_collision()
       Factory::Npc::destroy_npc_container( reg(), npccontainer_entt, m_reserved_sm.lock() );
     }
   }
+}
+void NpcSystem::on_npc_knockback_event( const Events::NpcKnockbackEvent &event )
+{
+  const entt::entity npc_entity = event.m_npc_entity;
+  if ( not reg().valid( npc_entity ) ) return;
+  const auto *pos_cmp = reg().try_get<Cmp::Position>( npc_entity );
+  const auto *footprint_cmp = reg().try_get<Cmp::Npc::Footprint>( npc_entity );
+  if ( not pos_cmp or not footprint_cmp ) return;
+  // a wormhole is about to move it
+  if ( reg().all_of<Cmp::PendingTeleport>( npc_entity ) ) return;
+  auto navmesh = navmesh_for( npc_entity );
+  if ( not navmesh ) return;
+
+  const sf::Vector2f hit = event.m_direction;
+  if ( hit == sf::Vector2f( 0.f, 0.f ) ) return;
+
+  // the cardinal nearest the hit, then the two perpendicular to it: never back towards the attacker
+  const sf::Vector2f primary = std::abs( hit.x ) >= std::abs( hit.y ) ? sf::Vector2f( hit.x > 0.f ? 1.f : -1.f, 0.f )
+                                                                       : sf::Vector2f( 0.f, hit.y > 0.f ? 1.f : -1.f );
+  const sf::Vector2f perpendicular( primary.y, primary.x );
+  const std::array<sf::Vector2f, 3> candidate_directions{ primary, perpendicular, -perpendicular };
+
+  // a mid-step NPC is between cells; the step is abandoned by the move anyway
+  const sf::Vector2f start = Utils::snap_to_grid( pos_cmp->position );
+  const auto &player_pos = Utils::Player::get_position( reg() );
+  const Cmp::Npc::Footprint &footprint = *footprint_cmp;
+
+  for ( const auto &direction : candidate_directions )
+  {
+    const sf::Vector2f target = start + direction.componentWiseMul( Constants::kGridSizePxF );
+    const bool cells_free = std::ranges::all_of( footprint.world_cells( target ),
+                                                 [&]( const Cmp::Position &cell )
+                                                 {
+                                                   return PathFinding::is_walkable( reg(), *navmesh, cell ) and
+                                                          not Utils::Player::is_in_spawn( reg(), cell ) and
+                                                          not player_pos.findIntersection( cell );
+                                                 } );
+    if ( not cells_free ) continue;
+    if ( Utils::Npc::next_cells_occupied( reg(), npc_entity, footprint, target ) ) continue;
+
+    SPDLOG_DEBUG( "NPC {} knocked back to {},{}", static_cast<uint32_t>( npc_entity ), target.x, target.y );
+    on_update_npc_position_event( Events::UpdateNpcPositionEvent( npc_entity, target ) );
+    return;
+  }
+  SPDLOG_DEBUG( "NPC {} knockback blocked in all directions", static_cast<uint32_t>( npc_entity ) );
 }
 
 void NpcSystem::update_animation()

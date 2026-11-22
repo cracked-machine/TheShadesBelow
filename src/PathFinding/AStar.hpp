@@ -79,6 +79,15 @@ struct PathNode
   };
 };
 
+//! @brief Whether a cell is walkable on the navmesh: it still has a static entry, as blocked cells have their whole
+//! bucket removed. Movers (NPCs and the player) don't count: a flying player re-creates the bucket of the obstacle
+//! cell below them.
+//! @param reg The registry used to look up components on the cell's entities.
+//! @param grid The navmesh.
+//! @param cell The grid cell to test.
+//! @return bool true if an NPC using this navmesh can stand on the cell.
+bool is_walkable( entt::registry &reg, const PathFinding::SpatialHashGrid &grid, const Cmp::Position &cell );
+
 //! @brief Find a path from `start` to `goal` over the spatial hash grid using the A* algorithm, treating occupied
 //! grid cells (excluding other NPCs) as obstacles. Bails out once a fixed node-expansion limit is reached if the
 //! goal is unreachable.

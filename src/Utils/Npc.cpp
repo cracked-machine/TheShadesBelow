@@ -30,12 +30,6 @@
 namespace Game::Utils::Npc
 {
 
-namespace
-{
-
-//! @brief Whether any cell `npc_entity` would stand on at `next_position` is taken by another NPC.
-//! A mid-lerp NPC takes the cells it is heading to, not the ones it is leaving. NPCs whose footprint
-//! doesn't collide never take a cell.
 bool next_cells_occupied( entt::registry &reg, entt::entity npc_entity, const Cmp::Npc::Footprint &footprint, sf::Vector2f next_position )
 {
   const auto snap = []( const Cmp::Position &cell ) { return Utils::snap_to_grid( cell.position, Utils::Rounding::TOWARDS_ZERO ); };
@@ -61,8 +55,6 @@ bool next_cells_occupied( entt::registry &reg, entt::entity npc_entity, const Cm
   }
   return false;
 }
-
-} // namespace
 
 int count_spawned_by( entt::registry &reg, const Cmp::UUID &source_uuid )
 {

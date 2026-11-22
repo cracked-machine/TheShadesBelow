@@ -46,6 +46,16 @@ Sys::SpriteKey get_sprite_type( entt::registry &reg, entt::entity npc_entt, std:
 //! @return The collision rect, or std::nullopt if the NPC's footprint does not collide (an all-false collision mask).
 std::optional<sf::FloatRect> collision_bounds( entt::registry &reg, entt::entity npc_entt );
 
+//! @brief Whether any cell `npc_entity` would stand on at `next_position` is taken by another NPC.
+//! A mid-lerp NPC takes the cells it is heading to, not the ones it is leaving. NPCs whose footprint
+//! doesn't collide never take a cell.
+//! @param reg reference to the entt registry
+//! @param npc_entity The NPC that would move.
+//! @param footprint The moving NPC's footprint.
+//! @param next_position The moving NPC's top-left world position after the move.
+//! @return bool true if another NPC holds any of those cells.
+bool next_cells_occupied( entt::registry &reg, entt::entity npc_entity, const Cmp::Npc::Footprint &footprint, sf::Vector2f next_position );
+
 //! @brief Outcome of a single pathfind_toward() step
 enum class PathfindResult {
   //! @brief A path was found and the NPC's Cmp::Direction/Cmp::LerpPosition were updated.

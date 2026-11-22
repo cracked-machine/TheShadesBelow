@@ -17,7 +17,7 @@
 // clang-format off
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
-namespace Game::Events { class UpdateNpcPositionEvent; class DestroyNpcEvent; struct CreateNpcEvent; struct CrowDeliveryEvent; struct CrowGuideEvent; struct NpcProximityEvent; struct NpcCollisionEvent; struct NpcProjectileEvent; }
+namespace Game::Events { class UpdateNpcPositionEvent; class NpcKnockbackEvent; class DestroyNpcEvent; struct CreateNpcEvent; struct CrowDeliveryEvent; struct CrowGuideEvent; struct NpcProximityEvent; struct NpcCollisionEvent; struct NpcProjectileEvent; }
 namespace Game::Cmp { class Position; class BaseAction; class AnimData; }
 namespace Game::Cmp { class Direction; class LerpPosition; } 
 namespace Game::Cmp::Player { class Mortality; } 
@@ -68,6 +68,13 @@ private:
   //! Cmp::Position outside of its own lerp movement. Everything else must trigger an Events::UpdateNpcPositionEvent.
   //! @param event
   void on_update_npc_position_event( const Game::Events::UpdateNpcPositionEvent &event );
+
+  //! @brief Knock an NPC the player hit (melee or arrow) back one cell. Tries the cardinal direction nearest the hit,
+  //! then the two perpendicular to it, never back towards the attacker. A cell is only taken if every cell of the NPC's
+  //! footprint is walkable on its navmesh, outside the spawn area, free of other NPCs and clear of the player;
+  //! otherwise the NPC stays put. The move is made with an Events::UpdateNpcPositionEvent.
+  //! @param event
+  void on_npc_knockback_event( const Game::Events::NpcKnockbackEvent &event );
 
   //! @brief Kill an NPC and keep its navmesh in sync, optionally playing a death animation where it stood. This is
   //! the only place allowed to call Factory::Npc::destroy_npc. Everything else must trigger an Events::DestroyNpcEvent.

@@ -2,7 +2,7 @@
   "npc.adder": {
     "sprites": [ "sprite.adder"],
     "lerpspeed": 1.0,
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 100 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -15,7 +15,7 @@
   "npc.azazel": {
     "sprites": [ "sprite.azazel"],
     "lerpspeed": 1.5,
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 100 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -28,7 +28,7 @@
   "npc.burryman": {
     "sprites": [ "sprite.burryman"],
     "lerpspeed": 1.5,
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 100, "bow": 100 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 3, "bow": 0 },
     "actions": [
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
@@ -55,7 +55,7 @@
   "npc.drknox": {
     "sprites": ["sprite.drknox"],
     "lerpspeed": 0.0,
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 100 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -68,7 +68,7 @@
   "npc.eldermother": {
     "sprites": ["sprite.eldermother"],
     "lerpspeed": 1.5,
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 100 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -94,7 +94,7 @@
   "npc.mimic": {
     "sprites": [ "sprite.player.walk.south", "sprite.player.walk.north", "sprite.player.walk.east", "sprite.player.walk.west"],
     "lerpspeed": 1.5,
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 100 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -107,7 +107,7 @@
   "npc.nightwatchman": {
     "sprites": ["sprite.nightwatchman.walk.south", "sprite.nightwatchman.walk.north", "sprite.nightwatchman.walk.east", "sprite.nightwatchman.walk.west"],
     "lerpspeed": 1.5,
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 100 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -120,7 +120,7 @@
   "npc.priest": {
     "sprites": ["sprite.priest"],
     "lerpspeed": 1.0,
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 100 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -133,7 +133,7 @@
   "npc.shadowhand": {
     "sprites": ["sprite.shadowhand"],
     "lerpspeed": 0.0,
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 100 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -146,7 +146,7 @@
   "npc.skeleton": {
     "sprites": ["sprite.skeleton.walk.south", "sprite.skeleton.walk.north", "sprite.skeleton.walk.east", "sprite.skeleton.walk.west"],
     "lerpspeed": 0.8,
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 34, "bow": 100 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 34, "bow": 50 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 3, "bow": 0 },
     "actions": [
       { "destroy_action":     { "health": 0, "fear": -10, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
@@ -160,7 +160,7 @@
   "npc.spider": {
     "sprites": [ "sprite.spider"],
     "lerpspeed": 1.5,
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 100 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -173,7 +173,7 @@
   "npc.tick": {
     "sprites": [ "sprite.tick"],
     "lerpspeed": 1.0,
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 100 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 1, "bow": 0 },
     "actions": [
       { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,

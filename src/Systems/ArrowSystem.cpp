@@ -15,6 +15,7 @@
 #include <Components/Weapons/InFlight.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
+#include <Events/NpcKnockbackEvent.hpp>
 #include <Events/PlantKilledEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/NpcFactory.hpp>
@@ -230,6 +231,9 @@ void ArrowSystem::check_npc_arrow_collision()
       if ( npc_cmp.damage_from_weapon.bow <= 0 ) continue;
       if ( not npc_pos_cmp.findIntersection( arrow_pos_cmp ) ) continue;
 
+      // the arrow's direction of flight, before it is stopped below
+      const sf::Vector2f arrow_direction = arrow_pos_cmp.getCenter() - arrow_cmp.m_origin;
+
       // the arrow stops in the NPC it hits, so it only damages it once. It lands where it is: the trajectory update
       // sees it at its destination and lets it rest, then cleans it up
       reg().remove<Cmp::Weapons::Projectiles::InFlight>( arrow_entt );
@@ -245,7 +249,13 @@ void ArrowSystem::check_npc_arrow_collision()
         cached_npc_type = npc_cmp.npc_type;
         get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, std::nullopt, std::nullopt, Events::DestroyNpcEvent::Cause::ARROW ) );
       }
-      else { play_action_oneshot_sfx( npc_cmp.at<Cmp::DestroyAction>().action.sfx() ); }
+      else
+      {
+        play_action_oneshot_sfx( npc_cmp.at<Cmp::DestroyAction>().action.sfx() );
+        // a hit that doesn't kill knocks the NPC back along the arrow's flight. Enqueued, as the move would change the
+        // NPC positions this loop is iterating
+        get_systems_event_queue().enqueue( Events::NpcKnockbackEvent( npc_entt, arrow_direction ) );
+      }
     }
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::Container, Cmp::Position>().each() )
     {
