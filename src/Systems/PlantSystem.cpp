@@ -13,7 +13,9 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/SpawnedBy.hpp>
 #include <Components/Particle/EmberParticleSprite.hpp>
+#include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/PlantBurnTime.hpp>
+#include <Components/Persistent/PlantWearPerForage.hpp>
 #include <Components/Plant/BurningTimer.hpp>
 #include <Components/Plant/Grass.hpp>
 #include <Components/Player/DiggingTimer.hpp>
@@ -22,6 +24,7 @@
 #include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/BurnAction.hpp>
 #include <Components/Stats/DestroyAction.hpp>
+#include <Components/Stats/ForageAction.hpp>
 #include <Components/Stats/SideEffects.hpp>
 #include <Components/UUID.hpp>
 #include <Components/WorldTile.hpp>
@@ -232,6 +235,12 @@ void PlantSystem::player_plant_interact()
       if ( not reg().all_of<Cmp::WorldItem>( plant_entt ) ) continue;
 
       auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
+      // an empty hand or gloves forage the plant instead of hitting it
+      if ( inventory_type.str().empty() or inventory_type == "item.gloves" )
+      {
+        forage_plant( plant_entt, plant_mb_cmp, inventory_type == "item.gloves" );
+        return;
+      }
       if ( inventory_type != "item.shovel" ) continue;
 
       if ( Utils::Player::get_inventory_wear_level( reg() ) <= 0 ) { return; }
@@ -256,6 +265,67 @@ void PlantSystem::player_plant_interact()
       play_action_oneshot_sfx( reg().get<Cmp::WorldItem>( plant_entt ).get_action<Cmp::DestroyAction>().sfx() );
       return;
     }
+  }
+}
+
+void PlantSystem::forage_plant( entt::entity plant_entt, const Cmp::PlantMultiBlock &plant_mb_cmp, bool wearing_gloves )
+{
+  // Prevent foraging a plant on fire
+  if ( reg().any_of<Cmp::Plant::BurningTimer>( plant_entt ) ) return;
+
+  // copy the reward and sfx: creating items or removing the plant below can invalidate the component references.
+  // Plants without a forage_action.reward.item (see items.json) can't be foraged.
+  const auto &plant_item = reg().get<Cmp::WorldItem>( plant_entt );
+  const auto forage_reward = plant_item.get_reward<Cmp::ForageAction>();
+  if ( not forage_reward ) return;
+  const auto forage_sfx = plant_item.get_action<Cmp::ForageAction>().sfx();
+  const auto plant_type = plant_item.item_type;
+  const auto plant_mb_copy = plant_mb_cmp;
+  const Cmp::Position plant_bounds( plant_mb_copy.position, plant_mb_copy.size );
+  const Cmp::Position plant_pos_cmp( plant_mb_copy.position, Constants::kGridSizePxF );
+
+  auto plantleaves_particle_uuid = Cmp::UUID::generate();
+  Factory::Particle::add_plantleaves_ps( reg(), "graveyard.plant.particle.leaves", 50, 2.f, 50.f, 14.f, plantleaves_particle_uuid,
+                                         plant_mb_copy.getCenter(), plant_mb_copy.position.y );
+
+  // the forage is dropped beside the plant: the inventory may be occupied. It is a reward for the player, so it may be
+  // picked up straight into an empty slot (items.json "auto_pickup"). Gloves stop the drop stinging.
+  if ( forage_reward->target == Cmp::ActionReward::Target::DEFAULT )
+  {
+    get_systems_event_queue().trigger( Events::CreateItemEvent( Cmp::Position( find_drop_pos( plant_mb_copy ), Constants::kGridSizePxF ),
+                                                                Sys::ItemStore::instance().pick_item( forage_reward->item ), "drop_loot", 0.f,
+                                                                false, 0, entt::null, {}, /*sting=*/not wearing_gloves, /*player_reward=*/true ) );
+  }
+  else { grant_item_reward( *forage_reward, plant_bounds, plant_entt ); }
+  play_action_sfx( forage_sfx );
+
+  // each forage drains the plant's health
+  const auto plant_wear = Sys::PersistSystem::get<Cmp::Persist::PlantWearPerForage>( reg() ).get_value();
+  get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, plant_wear ) );
+
+  if ( wearing_gloves )
+  {
+    const auto gloves_wear = Sys::PersistSystem::get<Cmp::Persist::GlovesWearPerForage>( reg() ).get_value();
+    get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), gloves_wear ) );
+  }
+
+  // Gloves block the forage_action's sting (its health damage) but not its benefits or side effects
+  const auto apply_forage_action = [&]() -> Cmp::BaseAction
+  {
+    if ( not wearing_gloves ) { return Utils::Player::apply_action_from_world_item<Cmp::ForageAction>( reg(), plant_entt ); }
+    Cmp::BaseAction action = reg().get<Cmp::WorldItem>( plant_entt ).get_action<Cmp::ForageAction>();
+    action.remove_damage();
+    Utils::Player::get_stats( reg() ).apply( action );
+    get_systems_event_queue().trigger( Events::GrimoireItemUpdateEvent( plant_type, Cmp::ForageAction::kKey, action ) );
+    return action;
+  };
+  const auto forage_action = apply_forage_action();
+  trigger_side_effects( forage_action, plant_pos_cmp, plant_entt );
+
+  // a fully foraged plant withers away - no drops
+  if ( reg().valid( plant_entt ) and Utils::is_plant_depleted( reg(), plant_entt ) )
+  {
+    get_systems_event_queue().trigger( Events::DestroyPlantEvent( plant_entt ) );
   }
 }
 

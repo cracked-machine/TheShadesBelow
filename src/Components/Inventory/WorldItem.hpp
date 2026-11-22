@@ -183,8 +183,8 @@ public:
   //! delta, a toxidrome, a side effect or a reward.
   bool is_offerable() const;
 
-  //! @brief The plant's forage item, see "forage_action.reward.item" in items.json. Plants are no longer foraged:
-  //! it identifies the forage item among the destroy_action drop pool (e.g. for the grimoire). Empty string if none.
+  //! @brief The item gained when this plant is foraged (empty hand or gloves, see Sys::PlantSystem::forage_plant()), see
+  //! "forage_action.reward.item" in items.json. It is also part of the destroy_action drop pool. Empty string if none.
   Sys::ItemKey get_forage_output() const;
 
   //! @brief The plant's own drop item, see "destroy_action.reward.item" in items.json. For a random drop pool this is

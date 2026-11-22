@@ -561,8 +561,8 @@
   "item.burr": {
     "sprite": { "name": "sprite.burr" },
     "consumable": "none",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -628,8 +628,8 @@
   "item.elderberries": {
     "sprite": { "name": "sprite.elderberries" },
     "consumable": "edible",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -678,8 +678,8 @@
   "item.foxgloveflower": {
     "sprite": { "name": "sprite.foxgloveflower" },
     "consumable": "edible",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -747,8 +747,8 @@
   "item.hawthornflower": {
     "sprite": { "name": "sprite.hawthornflower" },
     "consumable": "edible",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -814,8 +814,8 @@
   "item.henbaneseed": {
     "sprite": { "name": "sprite.henbaneseed" },
     "consumable": "edible",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -931,8 +931,8 @@
   "item.nettleleaf": {
     "sprite": { "name": "sprite.nettleleaf" },
     "consumable": "edible",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -979,8 +979,8 @@
   "item.nightshadeflower": {
     "sprite": { "name": "sprite.nightshadeflower" },
     "consumable": "edible",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1029,8 +1029,8 @@
   "item.antivenom": {
     "sprite": { "name": "sprite.antivenom" },
     "consumable": "drinkable",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1111,8 +1111,8 @@
   "item.rowanberries": {
     "sprite": { "name": "sprite.rowanberries" },
     "consumable": "edible",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1179,8 +1179,8 @@
   "item.stjohnswortflower": {
     "sprite": { "name": "sprite.stjohnswortflower" },
     "consumable": "edible",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
@@ -1245,8 +1245,8 @@
   "item.yewberry": {
     "sprite": { "name": "sprite.yewberry" },
     "consumable": "edible",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [

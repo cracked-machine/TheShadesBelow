@@ -87,8 +87,17 @@ private:
 
   //! @brief Uses Cmp::SelectedPosition to mark the mouse-selected Cmp::PlantMultiBlock the player is facing. With the shovel
   //! equipped, each hit takes its damage_from_weapon.shovel (items.json) from its health. At zero health the plant is
-  //! killed, see on_plant_killed_event().
+  //! killed, see on_plant_killed_event(). With an empty hand or gloves the plant is foraged instead, see forage_plant().
   void player_plant_interact();
+
+  //! @brief Forage the plant: drop its forage_action reward beside it, apply its forage_action and side effects, and
+  //! drain its health by Cmp::Persist::PlantWearPerForage. A fully foraged plant withers away with no drop.
+  //! Gloves stop the forage's health damage (not its benefits) and the drop's sting, and wear by
+  //! Cmp::Persist::GlovesWearPerForage. Burning plants and plants without a forage_action reward can't be foraged.
+  //! @param plant_entt The Cmp::PlantMultiBlock entity, which must have a Cmp::WorldItem.
+  //! @param plant_mb_cmp The plant's multiblock.
+  //! @param wearing_gloves true if the player has gloves in hand.
+  void forage_plant( entt::entity plant_entt, const Cmp::PlantMultiBlock &plant_mb_cmp, bool wearing_gloves );
 
   //! @brief Attempt to burn a plant
   void try_burn_plant();

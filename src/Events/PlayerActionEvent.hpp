@@ -36,9 +36,7 @@ struct PlayerActionEvent
     //! @brief Attempt to burn the nearest/facing plant object.
     BURN,
     //! @brief Fly key is held this frame (witchesbroom). See Sys::FlyingSystem.
-    FLY,
-    //! @brief Forage a plant. Currently unused: plants are no longer foraged, the shovel destroys them instead (see Sys::PlantSystem).
-    FORAGE
+    FLY
   };
 
   //! @brief Construct a new PlayerActionEvent object
