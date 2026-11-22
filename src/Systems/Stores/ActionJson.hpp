@@ -66,13 +66,24 @@ inline Cmp::MovementEffect::Player::Type make_player_movement_type( const std::s
   throw std::runtime_error( "Unknown player movement type: '" + type + "'" );
 }
 
-//! @brief Convert the "side_effects.*.probability" string of a JSON action entry.
-//! @throws std::runtime_error on an unknown value.
-inline Cmp::Probability make_probability( const std::string &probability )
+//! @brief Convert the "side_effects.*.probability" value of a JSON action entry: "always", "player_luck", or an integer
+//! base chance in [1, 100] (see Cmp::Probability).
+//! @throws std::runtime_error on an unknown string, a non-integer or an integer out of range.
+inline Cmp::Probability make_probability( const nlohmann::json &probability )
 {
-  if ( probability == "always" ) return Cmp::Probability::ALWAYS;
-  if ( probability == "player_luck" ) return Cmp::Probability::PLAYER_LUCK;
-  throw std::runtime_error( "Unknown side effect probability: '" + probability + "'" );
+  using Kind = Cmp::Probability::Kind;
+  if ( probability.is_string() )
+  {
+    const auto &value = probability.get_ref<const std::string &>();
+    if ( value == "always" ) return Cmp::Probability{ .kind = Kind::ALWAYS };
+    if ( value == "player_luck" ) return Cmp::Probability{ .kind = Kind::PLAYER_LUCK };
+  }
+  else if ( probability.is_number_integer() )
+  {
+    const int percent = probability.get<int>();
+    if ( percent >= 1 and percent <= 100 ) return Cmp::Probability{ .kind = Kind::PERCENT, .percent = percent };
+  }
+  throw std::runtime_error( "Unknown side effect probability: " + probability.dump() + " (expected \"always\", \"player_luck\" or 1-100)" );
 }
 
 //! @brief Convert the "side_effects.spawn_npc.location" string of a JSON action entry.
@@ -191,7 +202,7 @@ inline Cmp::SideEffects make_side_effects( const nlohmann::json &j )
   const auto &fx = j.at( "side_effects" );
 
   const auto get_probability = []( const nlohmann::json &effect )
-  { return make_probability( JsonDeserializer::get_string( effect, "probability" ) ); };
+  { return make_probability( effect.at( "probability" ) ); };
   if ( fx.contains( "spawn_npc" ) )
   {
     const auto &spawn_npc = fx.at( "spawn_npc" );

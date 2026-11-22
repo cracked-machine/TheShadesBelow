@@ -13,12 +13,18 @@ namespace Game::Cmp
 
 namespace
 {
-//! @brief Chance [0, 1] of an effect firing: luck raises the odds of good effects and lowers the odds of bad ones.
-float luck_chance( Probability probability, int player_luck, bool good_for_player )
+//! @brief Chance [0, 1] of an effect firing: luck raises the odds of good effects and lowers the odds of bad ones, see
+//! Cmp::Probability for the curve.
+float luck_chance( const Probability &probability, int player_luck, bool good_for_player )
 {
-  if ( probability == Probability::ALWAYS ) return 1.f;
-  const float luck = static_cast<float>( player_luck ) / 100.f;
-  return good_for_player ? luck : 1.f - luck;
+  using Kind = Probability::Kind;
+  if ( probability.kind == Kind::ALWAYS ) return 1.f;
+  const float base = probability.kind == Kind::PERCENT ? static_cast<float>( probability.percent ) / 100.f : 0.5f;
+  // a bad effect follows the same curve with the luck reversed
+  const float luck = static_cast<float>( std::clamp( good_for_player ? player_luck : 100 - player_luck, 0, 100 ) );
+  constexpr float kNeutralLuck = 50.f;
+  if ( luck <= kNeutralLuck ) return base * luck / kNeutralLuck;
+  return base + ( ( 1.f - base ) * ( luck - kNeutralLuck ) / kNeutralLuck );
 }
 } // namespace
 

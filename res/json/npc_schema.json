@@ -199,9 +199,11 @@
       }
     },
     "probability": {
-      "type": "string",
-      "enum": ["always", "player_luck"],
-      "description": "always: fires every time. player_luck: rolled against player luck; luck makes good effects likelier and bad effects (spawn_npc, lightning, player movement) rarer."
+      "oneOf": [
+        { "type": "string", "enum": ["always", "player_luck"] },
+        { "type": "integer", "minimum": 1, "maximum": 100 }
+      ],
+      "description": "always: fires every time. player_luck: rolled against player luck; luck makes good effects likelier and bad effects (spawn_npc, lightning, player movement) rarer. An integer 1-100: the chance in percent at neutral luck (50), adjusted by luck the same way: for a good effect luck 0 gives 0%, 50 the value and 100 gives 100%; a bad effect is the reverse. player_luck is the same as 50."
     }
   }
 }

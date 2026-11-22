@@ -16,11 +16,25 @@ namespace Game::Cmp
 class PlayerStats;
 
 //! @brief How likely a side effect is to fire each time its action is applied.
-enum class Probability {
-  //! @brief Always fires.
-  ALWAYS,
-  //! @brief Rolled against the player's luck: high luck makes good effects likelier and bad effects rarer.
-  PLAYER_LUCK
+//! @brief How likely a side effect is to fire, see "side_effects.*.probability" in res/json/items.json and npc.json.
+//!
+//! PLAYER_LUCK and PERCENT are luck-adjusted from a base chance p (percent / 100), along a curve through luck 0 -> 0,
+//! luck 50 (neutral, the starting luck) -> p and luck 100 -> 1 for a good effect. A bad effect uses the same curve with
+//! the luck reversed (100 - luck), so high luck makes it rarer. PLAYER_LUCK is a base of 50.
+struct Probability
+{
+  enum class Kind {
+    //! @brief Always fires.
+    ALWAYS,
+    //! @brief Rolled against the player's luck from a base of 50%: the chance is luck/100 for a good effect.
+    PLAYER_LUCK,
+    //! @brief Rolled against the player's luck from a base of `percent`.
+    PERCENT
+  };
+  //! @brief How the chance is worked out.
+  Kind kind{ Kind::ALWAYS };
+  //! @brief The base chance at neutral luck, in [1, 100]. Only used by Kind::PERCENT.
+  int percent{ 50 };
 };
 
 //! @brief Optional side effect of an action: spawn an NPC at the action's source position.
@@ -39,7 +53,7 @@ struct SpawnNpcEffect
   //! @brief Where the NPC spawns relative to the action's source.
   Location location{ Location::NEARBY };
   //! @brief How likely the effect is to fire each time the action is applied.
-  Probability probability{ Probability::ALWAYS };
+  Probability probability{};
   //! @brief Max live NPCs spawned by each world item instance, across all of its actions. 0 = unlimited.
   int max_instances{ 0 };
   //! @brief Distance in blocks from the item that the player must be within before the NPC spawn is triggered.
@@ -92,7 +106,7 @@ struct SpawnNpcEffect
 struct LightningEffect
 {
   //! @brief How likely the effect is to fire each time the action is applied.
-  Probability probability{ Probability::ALWAYS };
+  Probability probability{};
   //! @brief This effect's chance of firing at the given player luck.
   //! @param player_luck Player's luck stat, range [0, 100].
   //! @return Chance in [0, 1].
@@ -145,7 +159,7 @@ struct MovementEffect
   //! @brief Effect on NPC pathfinding, if any.
   std::optional<Npc> npc;
   //! @brief How likely the effect is to fire each time the action is applied.
-  Probability probability{ Probability::ALWAYS };
+  Probability probability{};
   //! @brief This effect's chance of firing at the given player luck.
   //! @param player_luck Player's luck stat, range [0, 100].
   //! @return Chance in [0, 1].
@@ -162,7 +176,7 @@ struct ToxicImmunityEffect
   //! @brief How long (seconds) the immunity lasts.
   int tick{ 0 };
   //! @brief How likely the effect is to fire each time the action is applied.
-  Probability probability{ Probability::ALWAYS };
+  Probability probability{};
   //! @brief This effect's chance of firing at the given player luck.
   //! @param player_luck Player's luck stat, range [0, 100].
   //! @return Chance in [0, 1].
@@ -184,7 +198,7 @@ struct KillNpcEffect
   //! @brief Sprite played where the NPC dies, or std::nullopt for no animation.
   std::optional<Sys::SpriteKey> death_anim;
   //! @brief How likely the effect is to fire, rolled per NPC in range each time the action is applied.
-  Probability probability{ Probability::ALWAYS };
+  Probability probability{};
   //! @brief Wear (out of 100) the source takes per kill. A fully worn source is destroyed.
   float wear_per_kill{ 0.f };
   //! @brief Whether this effect can kill the given NPC type.
