@@ -172,7 +172,7 @@
   },
   "npc.tick": {
     "sprites": [ "sprite.tick"],
-    "lerpspeed": 1.5,
+    "lerpspeed": 1.0,
     "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 1, "bow": 0 },
     "actions": [
