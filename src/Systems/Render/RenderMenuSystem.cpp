@@ -63,7 +63,7 @@
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
-#include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
+#include <Components/Persistent/GrimoireHover.hpp>
 #include <Components/Persistent/PrepopulateGrimoire.hpp>
 #include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
 #include <Components/Persistent/HazardBalanceOverlap.hpp>
@@ -463,7 +463,7 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
 
     ImGui::SeparatorText( "Interface" );
 
-    Sys::PersistSystem::get<Cmp::Persist::GrimoireHoverFollowsMouse>( reg() ).render_widget();
+    Sys::PersistSystem::get<Cmp::Persist::GrimoireHover>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PrepopulateGrimoire>( reg() ).render_widget();
 
     ImGui::SeparatorText( "Tutorial" );

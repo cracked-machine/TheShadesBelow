@@ -26,7 +26,7 @@ namespace Game::Sys
 //! (an ImGui tab bar), and each subpage's actions are listed in an ImGui table. Gameplay is paused while the overlay is open.
 //! While it is closed, hovering the mouse over a plant or NPC in the game area shows its grimoire subpage (its name and
 //! actions table) in a compact overlay, see res/ui/grimoire_plant_hover.json, res/ui/grimoire_npc_hover.json and
-//! Cmp::Persist::GrimoireHoverFollowsMouse.
+//! Cmp::Persist::GrimoireHover (which can also disable it).
 class GrimoireOverlaySystem : public BaseOverlaySystem
 {
 public:
@@ -103,7 +103,7 @@ private:
   void render_grimoire( const Cmp::Grimoire &grimoire_cmp );
 
   //! @brief Draw the hover overlay: the subpage of `page` laid out by `ui_layout`, at its fixed position or beside the mouse
-  //! cursor (Cmp::Persist::GrimoireHoverFollowsMouse).
+  //! cursor (Cmp::Persist::GrimoireHover).
   //! @tparam PageT Cmp::Grimoire::NpcPage or Cmp::Grimoire::PlantPage.
   //! @param ui_layout The hover layout, res/ui/grimoire_npc_hover.json or res/ui/grimoire_plant_hover.json.
   //! @param window_id The ImGui window id.

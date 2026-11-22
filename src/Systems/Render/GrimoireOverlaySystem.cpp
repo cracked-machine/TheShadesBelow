@@ -4,7 +4,7 @@
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/NoRender.hpp>
 #include <Components/Npc/Npc.hpp>
-#include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
+#include <Components/Persistent/GrimoireHover.hpp>
 #include <Components/Position.hpp>
 #include <Components/Stats/ActionReward.hpp>
 #include <Components/Stats/CarryAction.hpp>
@@ -259,7 +259,9 @@ void GrimoireOverlaySystem::update( sf::Time dt )
   // NPCs move and are drawn over plants, so an NPC in front of a plant wins
   const Cmp::Grimoire::NpcPage *hover_npc_page = nullptr;
   const Cmp::Grimoire::PlantPage *hover_plant_page = nullptr;
-  if ( not grimoire_open and OverlayArbitrationSystem::hover_allowed( reg() ) )
+  const bool hover_disabled = PersistSystem::get<Cmp::Persist::GrimoireHover>( reg() ).get_value() ==
+                              Cmp::Persist::GrimoireHover::Mode::DISABLED;
+  if ( not grimoire_open and not hover_disabled and OverlayArbitrationSystem::hover_allowed( reg() ) )
   {
     hover_npc_page = find_hovered_npc_page( *grimoire_cmp );
     if ( not hover_npc_page ) { hover_plant_page = find_hovered_plant_page( *grimoire_cmp ); }
@@ -323,7 +325,8 @@ void GrimoireOverlaySystem::render_hover( Render::UiLayout &ui_layout, const cha
 {
   // the page is read from the live grimoire every frame, so a discovery made while hovering shows straight away
   const sf::Vector2u window_size = m_window.getSize();
-  const bool follow_mouse = PersistSystem::get<Cmp::Persist::GrimoireHoverFollowsMouse>( reg() ).get_value();
+  const bool follow_mouse = PersistSystem::get<Cmp::Persist::GrimoireHover>( reg() ).get_value() ==
+                            Cmp::Persist::GrimoireHover::Mode::FOLLOW_MOUSE;
   ui_layout.sync_to( window_size, follow_mouse ? hover_anchor( ui_layout, window_size ) : sf::Vector2f{ 0.f, 0.f } );
 
   // display only: the overlay must never take the mouse from the game

@@ -1215,10 +1215,10 @@
     "value": false,
     "detail": "Reset Tutorial (show all tips again)"
   },
-  "GrimoireHoverFollowsMouse": {
-    "type": "bool",
-    "value": false,
-    "detail": "Grimoire hover info follows mouse"
+  "GrimoireHover": {
+    "type": "string",
+    "value": "Disabled",
+    "detail": "Grimoire hover info: Anchored (fixed position), FollowMouse (follows cursor) or Disabled"
   },
   "PrepopulateGrimoire": {
     "type": "bool",

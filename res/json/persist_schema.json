@@ -2,6 +2,19 @@
   "title": "Persistent Components Configuration",
   "description": "Schema for procedural maze persistent component configurations",
   "type": "object",
+  "properties": {
+    "GrimoireHover": {
+      "description": "How the grimoire hover overlay is shown, see Cmp::Persist::GrimoireHover",
+      "properties": {
+        "type": {"const": "string"},
+        "value": {
+          "enum": ["Anchored", "FollowMouse", "Disabled"],
+          "description": "Anchored: fixed layout position. FollowMouse: beside the cursor. Disabled: no hover overlay"
+        }
+      },
+      "required": ["type", "value", "detail"]
+    }
+  },
   "patternProperties": {
     "^[A-Z][a-zA-Z0-9]*$": {
       "type": "object",

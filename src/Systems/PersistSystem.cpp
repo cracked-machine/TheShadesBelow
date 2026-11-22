@@ -63,7 +63,7 @@
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
-#include <Components/Persistent/GrimoireHoverFollowsMouse.hpp>
+#include <Components/Persistent/GrimoireHover.hpp>
 #include <Components/Persistent/PrepopulateGrimoire.hpp>
 #include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
 #include <Components/Persistent/HazardBalanceOverlap.hpp>
@@ -359,7 +359,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::ShovelPotSmashWear>();
   add_component<Cmp::Persist::TooltipsSeen>();
   add_component<Cmp::Persist::ResetTutorial>();
-  add_component<Cmp::Persist::GrimoireHoverFollowsMouse>();
+  add_component<Cmp::Persist::GrimoireHover>();
   add_component<Cmp::Persist::PrepopulateGrimoire>();
 
   // Add serdes functions to each component
