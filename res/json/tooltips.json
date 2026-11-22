@@ -14,8 +14,8 @@
       "condition": { "item": "item.shovel" },
       "text": "You carry a shovel. Use it to dig obstacles and graves, uproot plants and fight.",
       "position": "above_player",
-      "frequency": "once",
-      "duration_s": 6.0,
+      "frequency": "disabled",
+      "duration_s": 3.0,
       "pause": false
     },
     {
