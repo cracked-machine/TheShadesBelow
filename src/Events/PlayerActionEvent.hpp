@@ -19,8 +19,11 @@ struct PlayerActionEvent
     DIG,
     //! @brief Perform a melee (shovel) attack.
     ATTACK,
-    //! @brief Swap the inventory with the nearest world item (excludes plants)
+    //! @brief Drop one item from the selected slot's stack (onto a matching ground stack if there is one); once the slot
+    //! is empty, pick up the nearest world item (excludes plants)
     SWAP_INVENTORY,
+    //! @brief As SWAP_INVENTORY, but drop the selected slot's whole stack
+    SWAP_INVENTORY_ALL,
     //! @brief Select a moveable obstacle.
     SELECT_POSITION,
     //! @brief Deselect the currently selected moveable obstacle.

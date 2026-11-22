@@ -1,4 +1,5 @@
 #include <Components/Inventory/PlayerInventorySlot.hpp>
+#include <Components/Inventory/WorldItem.hpp>
 #include <Components/Particle/AshPileParticleSprite.hpp>
 #include <Components/Particle/CryptAltarParticleSprite.hpp>
 #include <Components/Particle/CurseTabletParticleSprite.hpp>
@@ -27,6 +28,7 @@
 #include <Components/Random.hpp>
 #include <Components/Shop/Inventory.hpp>
 #include <Components/UUID.hpp>
+#include <Components/ZOrderValue.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <SFML/System/Angle.hpp>
 #include <SFML/System/Time.hpp>
@@ -35,6 +37,7 @@
 #include <Utils/Player.hpp>
 
 #include <algorithm>
+#include <vector>
 #include <entt/entity/fwd.hpp>
 
 namespace Game::Factory::Particle
@@ -430,17 +433,30 @@ void add_flame_for_player_inventory_slot( entt::registry &reg )
 
 void add_flame_for_world_items( entt::registry &reg, const std::string &ps_tag )
 {
-  // add flame particle sprites for any torch items in the new game world. Use the Torch item UUID to initialise the ParticleSprite.
-  // Take the flame zorder from the torch (not the player) so the flame always draws just above its own torch.
-  for ( auto [worlditem_entt, worlditem_cmp, worlditem_pos_cmp, worlditem_uuid_cmp, worlditem_zorder_cmp] :
-        reg.view<Cmp::WorldItem, Cmp::Position, Cmp::UUID, Cmp::ZOrderValue>().each() )
+  // add flame particle sprites for any torch items in the new game world. Collected first, as adding a flame modifies
+  // the registry while the view is iterated
+  std::vector<entt::entity> torch_entts;
+  for ( auto [worlditem_entt, worlditem_cmp] : reg.view<Cmp::WorldItem>().each() )
   {
-    if ( worlditem_cmp.item_type != "item.torch" ) continue;
-    Factory::Particle::add_flame(
-        reg, ps_tag, worlditem_uuid_cmp,
-        { worlditem_pos_cmp.getCenter().x, worlditem_pos_cmp.getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset },
-        worlditem_zorder_cmp.get() + 1.f, Cmp::Particle::kWorldScalePreset );
+    if ( worlditem_cmp.item_type == "item.torch" ) torch_entts.push_back( worlditem_entt );
   }
+  for ( auto torch_entt : torch_entts )
+  {
+    add_flame_for_world_item( reg, torch_entt, ps_tag );
+  }
+}
+
+void add_flame_for_world_item( entt::registry &reg, entt::entity item_entt, const std::string &ps_tag )
+{
+  const auto *world_item_cmp = reg.try_get<Cmp::WorldItem>( item_entt );
+  if ( not world_item_cmp or world_item_cmp->item_type != "item.torch" ) return;
+  auto *uuid_cmp = reg.try_get<Cmp::UUID>( item_entt );
+  const auto *pos_cmp = reg.try_get<Cmp::Position>( item_entt );
+  const auto *zorder_cmp = reg.try_get<Cmp::ZOrderValue>( item_entt );
+  if ( not uuid_cmp or not pos_cmp or not zorder_cmp ) return;
+  // take the flame zorder from the torch (not the player) so the flame always draws just above its own torch
+  add_flame( reg, ps_tag, *uuid_cmp, { pos_cmp->getCenter().x, pos_cmp->getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset },
+             zorder_cmp->get() + 1.f, Cmp::Particle::kWorldScalePreset );
 }
 
 void destroy_bound_particles( entt::registry &reg, entt::entity entt )

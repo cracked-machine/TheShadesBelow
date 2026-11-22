@@ -192,6 +192,14 @@ int get_stack_count( entt::registry &reg, entt::entity entt );
 //! @return bool true if at least one item of the world item can join the slot's stack.
 bool can_stack( entt::registry &reg, entt::entity slot_entt, entt::entity world_item_entt );
 
+//! @brief Check whether a world item matches an inventory slot's stack: the same rules as can_stack(), ignoring
+//! Cmp::Persist::InventoryStackSize. True for a full stack too.
+//! @param reg The registry.
+//! @param slot_entt The inventory slot entity.
+//! @param world_item_entt The world item entity.
+//! @return bool true if the world item would join the slot's stack were it not full.
+bool is_stack_match( entt::registry &reg, entt::entity slot_entt, entt::entity world_item_entt );
+
 //! @brief Find an inventory slot whose stack the world item can join (see can_stack()), the selected slot first, then
 //! in slot order.
 //! @param reg The registry.

@@ -297,16 +297,7 @@ void GraveSystem::spawn_blood_loot( entt::entity grave_entity, ExhumedBy by )
 
 void GraveSystem::light_torch_loot( entt::entity item_entt )
 {
-  const auto *world_item_cmp = reg().try_get<Cmp::WorldItem>( item_entt );
-  if ( not world_item_cmp or world_item_cmp->item_type != "item.torch" ) return;
-  auto *uuid_cmp = reg().try_get<Cmp::UUID>( item_entt );
-  const auto *pos_cmp = reg().try_get<Cmp::Position>( item_entt );
-  const auto *zorder_cmp = reg().try_get<Cmp::ZOrderValue>( item_entt );
-  if ( not uuid_cmp or not pos_cmp or not zorder_cmp ) return;
-  // shares the torch's UUID so ParticleSystem keeps the flame on it and pickup/drop moves the flame with it
-  Factory::Particle::add_flame( reg(), kTorchFlameTag, *uuid_cmp,
-                                { pos_cmp->getCenter().x, pos_cmp->getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset },
-                                zorder_cmp->get() + 1.f, Cmp::Particle::kWorldScalePreset );
+  Factory::Particle::add_flame_for_world_item( reg(), item_entt, kTorchFlameTag );
 }
 
 void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, entt::entity grave_entity, ExhumedBy exhumedby )

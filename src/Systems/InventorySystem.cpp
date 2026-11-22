@@ -98,7 +98,8 @@ void InventorySystem::update( sf::Time dt )
 
 void InventorySystem::on_player_action( const Events::PlayerActionEvent &event )
 {
-  if ( event.action == Events::PlayerActionEvent::GameActions::SWAP_INVENTORY ) { swap_inventory(); }
+  if ( event.action == Events::PlayerActionEvent::GameActions::SWAP_INVENTORY ) { swap_inventory( /*whole_stack=*/false ); }
+  else if ( event.action == Events::PlayerActionEvent::GameActions::SWAP_INVENTORY_ALL ) { swap_inventory( /*whole_stack=*/true ); }
   else if ( event.action == Events::PlayerActionEvent::GameActions::CONSUME ) { try_consume_item(); }
 }
 
@@ -276,7 +277,7 @@ void InventorySystem::add_inventory_item( const Sys::ItemKey &item, std::optiona
   // clang-format on
 }
 
-void InventorySystem::swap_inventory()
+void InventorySystem::swap_inventory( bool whole_stack )
 {
   // if player is standing next to a Cmp::Crypt::Chest let them open it without dropping the inventory item
   for ( auto [chest_entt, chest_cmp, chest_pos_cmp] : reg().view<Cmp::Crypt::Chest, Cmp::Position>().each() )
@@ -312,14 +313,15 @@ void InventorySystem::swap_inventory()
 
   auto player_pos = Cmp::RectBounds::scaled( Utils::Player::get_position( reg() ), 0.5 );
 
-  // a stackable item on the ground joins the held stack, rather than swapping places with it
+  // standing on the held stack's item: it joins the stack as far as it fits (see merge_into_stack()), the rest stays
+  // on the ground. Nothing is dropped, even when the stack is already full
   if ( const auto selected_entt = Utils::Player::get_selected_slot_entt( reg() ); selected_entt != entt::null )
   {
     auto world_item_view = reg().view<Cmp::WorldItem, Cmp::Position>( entt::exclude<Cmp::PlantMultiBlock> );
     for ( auto [world_item_entt, world_item_cmp, world_item_pos_cmp] : world_item_view.each() )
     {
       if ( not player_pos.findIntersection( world_item_pos_cmp ) ) continue;
-      if ( not Utils::Player::can_stack( reg(), selected_entt, world_item_entt ) ) continue;
+      if ( not Utils::Player::is_stack_match( reg(), selected_entt, world_item_entt ) ) continue;
       merge_into_stack( selected_entt, world_item_entt );
       m_swap_item_cooldown_timer = sf::Time::Zero;
       return;
@@ -328,11 +330,12 @@ void InventorySystem::swap_inventory()
 
   Sys::SpriteKey existing_player_inventory_type;
 
-  // drop the selected slot's item if it has one
+  // drop one of the selected slot's stack, or all of it, if it has an item
   if ( auto [inventory_entt, _, inventory_sprite_type] = Utils::Player::get_inventory( reg() ); inventory_entt != entt::null )
   {
     existing_player_inventory_type = inventory_sprite_type;
-    drop_inventory_item( Utils::Player::get_position( reg() ).position, inventory_entt );
+    const int count = whole_stack ? Utils::Player::get_stack_count( reg(), inventory_entt ) : 1;
+    drop_from_slot( Utils::Player::get_position( reg() ).position, inventory_entt, count );
   }
 
   // pickup inventory into the selected slot if it is now empty and there is something at this position
@@ -351,6 +354,60 @@ void InventorySystem::swap_inventory()
     }
   }
   m_swap_item_cooldown_timer = sf::Time::Zero;
+}
+
+entt::entity InventorySystem::create_world_item_from_slot( sf::Vector2f pos, entt::entity inventory_slot_entt )
+{
+  const auto &inventory_slot_cmp = reg().get<Cmp::PlayerInventorySlot>( inventory_slot_entt );
+  auto world_item_entt = reg().create();
+  reg().emplace_or_replace<Cmp::Position>( world_item_entt, pos, Constants::kGridSizePxF );
+
+  // Copy the animdata over to avoid losing ref data
+  auto *existing_anim_data = reg().try_get<Cmp::AnimData>( inventory_slot_entt );
+  if ( existing_anim_data ) { reg().emplace_or_replace<Cmp::AnimData>( world_item_entt, *existing_anim_data ); }
+  else { SPDLOG_WARN( "Dropped item {} has no AnimData", inventory_slot_cmp.m_item->item_type.str() ); }
+
+  reg().emplace_or_replace<Cmp::ZOrderValue>( world_item_entt, pos.y - 1.f );
+  reg().emplace_or_replace<Cmp::WorldItem>( world_item_entt, *inventory_slot_cmp.m_item );
+  reg().emplace_or_replace<Cmp::Npc::NoPathFinding>( world_item_entt );
+  if ( auto item_sm = m_item_sm.lock() ) item_sm->insert( world_item_entt, reg().get<Cmp::Position>( world_item_entt ) );
+
+  // try to copy any relevant components over to the new world carryitem entt
+  auto *inventory_slot_level_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inventory_slot_entt );
+  if ( inventory_slot_level_cmp ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( world_item_entt, inventory_slot_level_cmp->m_level ); }
+  if ( reg().all_of<Cmp::Inventory::StingDamage>( inventory_slot_entt ) )
+  {
+    reg().emplace_or_replace<Cmp::Inventory::StingDamage>( world_item_entt );
+  }
+  return world_item_entt;
+}
+
+void InventorySystem::drop_from_slot( sf::Vector2f pos, entt::entity inventory_slot_entt, int count )
+{
+  const auto *inventory_slot_cmp = reg().try_get<Cmp::PlayerInventorySlot>( inventory_slot_entt );
+  if ( not inventory_slot_cmp or inventory_slot_cmp->empty() or count <= 0 ) return;
+  // the whole slot drops as it is, part of its stack is split off
+  if ( count >= Utils::Player::get_stack_count( reg(), inventory_slot_entt ) ) { drop_inventory_item( pos, inventory_slot_entt ); }
+  else { split_from_slot( pos, inventory_slot_entt, count ); }
+}
+
+void InventorySystem::split_from_slot( sf::Vector2f pos, entt::entity inventory_slot_entt, int count )
+{
+  const int slot_count = Utils::Player::get_stack_count( reg(), inventory_slot_entt );
+  if ( count <= 0 or count >= slot_count ) return;
+
+  // stackable items carry no per-instance state (see Utils::Player::can_stack()), so only the shared components are copied
+  const auto world_item_entt = create_world_item_from_slot( pos, inventory_slot_entt );
+  if ( count > 1 ) { reg().emplace_or_replace<Cmp::Inventory::StackCount>( world_item_entt, count ); }
+  reg().emplace_or_replace<Cmp::Inventory::StackCount>( inventory_slot_entt, slot_count - count );
+
+  // the slot keeps its own UUID (and a torch's flame), so the split off item gets a new one, and a torch its own flame
+  reg().emplace_or_replace<Cmp::UUID>( world_item_entt, Cmp::UUID::generate() );
+  Factory::Particle::add_flame_for_world_item( reg(), world_item_entt, Factory::Particle::kWorldTorchFlameTag );
+
+  SPDLOG_DEBUG( "Dropped {} x{} from inventory stack (now {})", reg().get<Cmp::WorldItem>( world_item_entt ).item_type.str(), count,
+                slot_count - count );
+  m_sound_bank.get_effect( "drop_inventory" ).play();
 }
 
 void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity inventory_slot_entt )
@@ -426,26 +483,7 @@ void InventorySystem::drop_inventory_item( sf::Vector2f pos, entt::entity invent
   }
 
   // otherwise just drop it as a world item
-  auto world_item_entt = reg().create();
-  reg().emplace_or_replace<Cmp::Position>( world_item_entt, pos, Constants::kGridSizePxF );
-
-  // Copy the animdata over to avoid losing ref data
-  auto *existing_anim_data = reg().try_get<Cmp::AnimData>( inventory_slot_entt );
-  if ( existing_anim_data ) { reg().emplace_or_replace<Cmp::AnimData>( world_item_entt, *existing_anim_data ); }
-  else { SPDLOG_WARN( "Dropped item {} has no AnimData", inventory_slot_cmp->m_item->item_type.str() ); }
-
-  reg().emplace_or_replace<Cmp::ZOrderValue>( world_item_entt, pos.y - 1.f );
-  reg().emplace_or_replace<Cmp::WorldItem>( world_item_entt, *inventory_slot_cmp->m_item );
-  reg().emplace_or_replace<Cmp::Npc::NoPathFinding>( world_item_entt );
-  if ( auto item_sm = m_item_sm.lock() ) item_sm->insert( world_item_entt, reg().get<Cmp::Position>( world_item_entt ) );
-
-  // try to copy any relevant components over to the new world carryitem entt
-  auto *inventory_slot_level_cmp = reg().try_get<Cmp::Inventory::WearLevel>( inventory_slot_entt );
-  if ( inventory_slot_level_cmp ) { reg().emplace_or_replace<Cmp::Inventory::WearLevel>( world_item_entt, inventory_slot_level_cmp->m_level ); }
-  if ( reg().all_of<Cmp::Inventory::StingDamage>( inventory_slot_entt ) )
-  {
-    reg().emplace_or_replace<Cmp::Inventory::StingDamage>( world_item_entt );
-  }
+  const auto world_item_entt = create_world_item_from_slot( pos, inventory_slot_entt );
   // the whole stack drops as one world item
   if ( const auto *stack_cmp = reg().try_get<Cmp::Inventory::StackCount>( inventory_slot_entt ) )
   {

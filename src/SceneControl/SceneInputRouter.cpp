@@ -187,7 +187,7 @@ void SceneInputRouter::graveyard_scene_state_handler()
   if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::E ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
-    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::SWAP_INVENTORY ) );
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( swap_inventory_action() ) );
   }
   if ( not imgui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
@@ -252,7 +252,7 @@ void SceneInputRouter::crypt_scene_state_handler()
   if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::E ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
-    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::SWAP_INVENTORY ) );
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( swap_inventory_action() ) );
   }
   if ( not imgui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
@@ -355,7 +355,7 @@ void SceneInputRouter::shop_scene_state_handler()
   if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::E ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
-    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::SWAP_INVENTORY ) );
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( swap_inventory_action() ) );
   }
   if ( not imgui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
@@ -404,7 +404,7 @@ void SceneInputRouter::ruin_scene_state_handler()
   if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::E ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
-    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::SWAP_INVENTORY ) );
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( swap_inventory_action() ) );
   }
   if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::Space ) )
   {
@@ -578,6 +578,13 @@ void SceneInputRouter::process_inventory_slot_input( const sf::Event &event, boo
     const auto idx = static_cast<uint8_t>( std::distance( kSlotKeys.begin(), it ) );
     get_systems_event_queue().trigger( Events::SelectInventorySlotEvent( Mode::INDEX, idx ) );
   }
+}
+
+Events::PlayerActionEvent::GameActions SceneInputRouter::swap_inventory_action()
+{
+  using GameActions = Events::PlayerActionEvent::GameActions;
+  const bool shift = sf::Keyboard::isKeyPressed( sf::Keyboard::Key::LShift ) or sf::Keyboard::isKeyPressed( sf::Keyboard::Key::RShift );
+  return shift ? GameActions::SWAP_INVENTORY_ALL : GameActions::SWAP_INVENTORY;
 }
 
 void SceneInputRouter::process_move_keys()

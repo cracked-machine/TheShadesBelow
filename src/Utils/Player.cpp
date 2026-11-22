@@ -325,7 +325,7 @@ int get_stack_count( entt::registry &reg, entt::entity entt )
   return stack_cmp ? stack_cmp->m_count : 1;
 }
 
-bool can_stack( entt::registry &reg, entt::entity slot_entt, entt::entity world_item_entt )
+bool is_stack_match( entt::registry &reg, entt::entity slot_entt, entt::entity world_item_entt )
 {
   if ( not reg.valid( slot_entt ) or not reg.valid( world_item_entt ) ) return false;
   const auto *slot_cmp = reg.try_get<Cmp::PlayerInventorySlot>( slot_entt );
@@ -337,7 +337,7 @@ bool can_stack( entt::registry &reg, entt::entity slot_entt, entt::entity world_
   // a stack is one set of item state, so items carrying their own state never merge. Wear is the exception: a stack
   // shares one wear level, averaged on merge (see Sys::InventorySystem::merge_into_stack()). Every world item has a UUID
   // (see Sys::ItemSystem::create_world_item()), but it is only state when a particle is bound to it. A torch's flame is
-  // the exception: a stack of torches shares the slot's flame, and a merged torch's own flame is destroyed (see
+  // the exception: a stack of torches shares one flame, and a merged torch's own flame is destroyed (see
   // Sys::InventorySystem::merge_into_stack())
   const bool shares_particle = world_item_cmp->item_type == "item.torch";
   auto has_bound_particle = [&reg, shares_particle]( entt::entity entt )
@@ -356,8 +356,12 @@ bool can_stack( entt::registry &reg, entt::entity slot_entt, entt::entity world_
     return reg.any_of<Cmp::Inventory::DowsingTarget, Cmp::Npc::SummonOffering, Cmp::Grave::CurseTablet>( entt ) or
            has_bound_particle( entt );
   };
-  if ( has_instance_state( slot_entt ) or has_instance_state( world_item_entt ) ) return false;
+  return not has_instance_state( slot_entt ) and not has_instance_state( world_item_entt );
+}
 
+bool can_stack( entt::registry &reg, entt::entity slot_entt, entt::entity world_item_entt )
+{
+  if ( not is_stack_match( reg, slot_entt, world_item_entt ) ) return false;
   const int max_stack = Sys::PersistSystem::get<Cmp::Persist::InventoryStackSize>( reg ).get_value();
   return get_stack_count( reg, slot_entt ) < max_stack;
 }

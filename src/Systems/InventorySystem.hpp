@@ -93,8 +93,32 @@ private:
   //! @param idx The slot index, or std::nullopt for the selected slot.
   void add_inventory_item( const Sys::ItemKey &item, std::optional<uint8_t> idx = std::nullopt );
 
-  //! @brief Drop the selected slot's item (if any) and pickup the nearest world item into the selected slot
-  void swap_inventory();
+  //! @brief Standing on the held stack's item, pick it up into the stack as far as it fits (see merge_into_stack()).
+  //! Otherwise drop one item from the selected slot's stack, or the whole stack (see drop_from_slot()), and once the
+  //! slot is empty pick up the nearest world item (not one of the type just dropped) into it.
+  //! @param whole_stack true to drop the whole stack (Shift+E), false to drop one item (E)
+  void swap_inventory( bool whole_stack );
+
+  //! @brief Drop count items from an inventory slot's stack at pos as a world item: drop_inventory_item() for the whole
+  //! slot, split_from_slot() for part of its stack.
+  //! @param pos the position to place a new world item
+  //! @param inventory_slot_entt the player inventory slot entt
+  //! @param count how many items to drop, capped at the slot's stack count
+  void drop_from_slot( sf::Vector2f pos, entt::entity inventory_slot_entt, int count );
+
+  //! @brief Split count items off an inventory slot's stack into a new world item at pos. The slot keeps the rest, and
+  //! its UUID: the new item gets a UUID of its own, and a torch its own flame.
+  //! @param pos the position to place the item
+  //! @param inventory_slot_entt the player inventory slot entt
+  //! @param count how many items to split off, less than the slot's stack count
+  void split_from_slot( sf::Vector2f pos, entt::entity inventory_slot_entt, int count );
+
+  //! @brief Create a world item at pos from an inventory slot's item, copying the components every dropped item keeps
+  //! (anim, wear level, sting damage). The caller copies anything else and updates the slot.
+  //! @param pos the position to place the item
+  //! @param inventory_slot_entt the player inventory slot entt, which must hold an item
+  //! @return entt::entity the new world item
+  entt::entity create_world_item_from_slot( sf::Vector2f pos, entt::entity inventory_slot_entt );
 
   //! @brief Move an inventory slot's item into the world and empty the slot
   //! @param pos the postion to place the item

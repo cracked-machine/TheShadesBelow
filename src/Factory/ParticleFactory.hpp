@@ -250,6 +250,16 @@ void add_flame_for_player_inventory_slot( entt::registry &reg );
 //! @param reg
 void add_flame_for_world_items( entt::registry &reg, const std::string &ps_tag );
 
+//! @brief Light a torch world item: add a flame bound to its UUID, so ParticleSystem keeps the flame on it and
+//! pickup/drop moves the flame with it. Does nothing for any other item, or one missing its UUID, Position or ZOrderValue.
+//! @param reg The registry.
+//! @param item_entt The world item entity.
+//! @param ps_tag The flame's tag, e.g. kWorldTorchFlameTag. Must contain "torch".
+void add_flame_for_world_item( entt::registry &reg, entt::entity item_entt, const std::string &ps_tag );
+
+//! @brief Tag of the flame on a torch put into the world during play, e.g. one dropped from a stack in the inventory.
+inline const std::string kWorldTorchFlameTag{ "world.torch.particle.flame" };
+
 //! @brief Destroy every particle sprite bound to the entity's UUID (e.g. a torch's flame). Call before destroying a world
 //! item, so its particles aren't left orphaned where it was. Does nothing if the entity has no UUID.
 //! @param reg The registry.

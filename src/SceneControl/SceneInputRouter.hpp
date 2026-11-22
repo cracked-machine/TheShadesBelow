@@ -9,6 +9,7 @@
 
 #include <string_view>
 
+#include <Events/PlayerActionEvent.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>
 #include <Systems/BaseSystem.hpp>
 
@@ -78,6 +79,10 @@ public:
 private:
   //! @brief reset and process new user direction input
   void process_move_keys();
+
+  //! @brief The inventory swap action for the E key: SWAP_INVENTORY_ALL while Shift is held (drop the whole stack),
+  //! otherwise SWAP_INVENTORY (drop one).
+  [[nodiscard]] static Events::PlayerActionEvent::GameActions swap_inventory_action();
 
   //! @brief Process input while the pause overlay is shown. Gameplay is paused, so only P (resume), the volume sliders
   //!        (via ImGui) and the common window events are handled.
