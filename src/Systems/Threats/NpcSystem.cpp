@@ -36,6 +36,7 @@
 #include <Components/Npc/Shockwave.hpp>
 #include <Components/Npc/ShockwaveTimer.hpp>
 #include <Components/Npc/Skeleton.hpp>
+#include <Components/Npc/SpawnMeleeGrace.hpp>
 #include <Components/Npc/SpawnedBy.hpp>
 #include <Components/Npc/Spider.hpp>
 #include <Components/Npc/SummonOffering.hpp>
@@ -233,6 +234,8 @@ void NpcSystem::on_create_npc_event( const Events::CreateNpcEvent &event )
 
   auto npc_entt = Factory::Npc::create_npc( reg(), spawn_pos, event.m_npc_type );
   if ( npc_entt == entt::null ) return;
+  // a centred NPC lands under the mouse: keep the held attack that spawned it from hitting it (see ActionSystem)
+  if ( event.m_placement == Events::CreateNpcEvent::Placement::CENTER ) { reg().emplace<Cmp::Npc::SpawnMeleeGrace>( npc_entt ); }
   apply_npc_spawn_action( npc_entt );
   // insert now rather than on its first move, so spawn searches see it straight away
   if ( auto navmesh = navmesh_for( npc_entt ) ) { navmesh->insert( npc_entt, reg().get<Cmp::Position>( npc_entt ) ); }

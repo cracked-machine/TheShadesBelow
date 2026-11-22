@@ -17,6 +17,7 @@
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/Skeleton.hpp>
+#include <Components/Npc/SpawnMeleeGrace.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
@@ -41,6 +42,7 @@
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/ActionSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
@@ -82,6 +84,10 @@ void ActionSystem::update( [[maybe_unused]] sf::Time dt )
 {
   // destroy particle sprite entities once all their particles have expired
   Factory::Particle::delete_expired_particle_sprites( reg(), "graveyard.obstacle.particle.dig" );
+
+  // the attack that spawned a centred NPC is over once the button is released, so melee may hit it again. Polled rather
+  // than event driven so it works in every scene, and a spawn made without the button held is cleared straight away
+  if ( not sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) ) { reg().clear<Cmp::Npc::SpawnMeleeGrace>(); }
 
   // abort if still in cooldown
   if ( auto *digging_timer = reg().try_get<Cmp::Player::DiggingTimer>( Utils::Player::get_entity( reg() ) ) ) *digging_timer += dt;
@@ -452,7 +458,7 @@ void ActionSystem::check_player_melee_npc_kill()
   }
 
   // Iterate through all entities with Position and Obstacle components
-  auto position_view = reg().view<Cmp::Position, Cmp::Npc::NPC, Cmp::AnimData>( entt::exclude<Cmp::SelectedPosition> );
+  auto position_view = reg().view<Cmp::Position, Cmp::Npc::NPC, Cmp::AnimData>( entt::exclude<Cmp::SelectedPosition, Cmp::Npc::SpawnMeleeGrace> );
   SPDLOG_DEBUG( "position_view size: {}", position_view.size_hint() );
   for ( auto [npc_entity, npc_pos_cmp, npc_cmp, anim_cmp] : position_view.each() )
   {

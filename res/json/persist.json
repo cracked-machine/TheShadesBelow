@@ -527,7 +527,7 @@
   },
   "GraveOddsTorch": {
     "type": "int",
-    "value": 10,
+    "value": 5,
     "min_value": 0,
     "max_value": 100,
     "detail": "Torch",
@@ -543,7 +543,7 @@
   },
   "GraveOddsBlood": {
     "type": "int",
-    "value": 50,
+    "value": 40,
     "min_value": 0,
     "max_value": 100,
     "detail": "Blood",
@@ -583,7 +583,7 @@
   },
   "GraveyardProcGenBirthThreshold": {
     "type": "int",
-    "value": 6,
+    "value": 5,
     "min_value": 0,
     "max_value": 10,
     "detail": "GraveyardProcGenBirthThreshold",
