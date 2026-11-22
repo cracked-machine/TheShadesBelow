@@ -715,29 +715,21 @@ Cmp::Player::Doglegs &get_doglegs( entt::registry &reg )
 
 bool apply_weapon_hit( entt::registry &reg, entt::entity target_entt, const Sys::ItemKey &weapon )
 {
-  auto *health_cmp = reg.try_get<Cmp::Health>( target_entt );
-  if ( not health_cmp ) return false;
+  if ( not reg.all_of<Cmp::Health>( target_entt ) ) return false;
 
-  // a plant's weapon damage is in its items.json entry, an NPC's in its npc.json entry. The popup rises from the top-centre
+  // a plant's weapon damage is in its items.json entry, an NPC's in its npc.json entry
   Cmp::WeaponDamage damage_from;
   Cmp::WeaponDamage damage_to;
-  sf::Vector2f popup_pos;
-  if ( const auto *plant_mb_cmp = reg.try_get<Cmp::PlantMultiBlock>( target_entt ) )
+  if ( reg.all_of<Cmp::PlantMultiBlock>( target_entt ) )
   {
     const auto &plant_item = reg.get<Cmp::WorldItem>( target_entt );
     damage_from = plant_item.damage_from_weapon();
     damage_to = plant_item.damage_to_weapon();
-    popup_pos = { plant_mb_cmp->position.x + ( plant_mb_cmp->size.x / 2.f ), plant_mb_cmp->position.y };
   }
   else if ( const auto *npc_cmp = reg.try_get<Cmp::Npc::NPC>( target_entt ) )
   {
     damage_from = npc_cmp->damage_from_weapon;
     damage_to = npc_cmp->damage_to_weapon;
-    const auto &pos_cmp = reg.get<Cmp::Position>( target_entt );
-    // positive offset moves the number down over the sprite, negative moves it up above the sprite
-    const float text_offset = Sys::PersistSystem::get<Cmp::Persist::NpcDamageTextOffset>( reg ).get_value();
-    popup_pos = { pos_cmp.position.x + ( pos_cmp.size.x / 2.f ), pos_cmp.position.y + text_offset };
-    if ( const auto *render_offset_cmp = reg.try_get<Cmp::AbsoluteRenderOffset>( target_entt ) ) popup_pos += render_offset_cmp->getOffset();
   }
   else { return false; }
 
@@ -750,9 +742,31 @@ bool apply_weapon_hit( entt::registry &reg, entt::entity target_entt, const Sys:
 
   const auto damage = static_cast<float>( damage_from.get( weapon ) );
   if ( damage <= 0.f ) return false;
+  return apply_damage( reg, target_entt, damage );
+}
+
+bool apply_damage( entt::registry &reg, entt::entity target_entt, float damage )
+{
+  const auto *health_cmp = reg.try_get<Cmp::Health>( target_entt );
+  if ( not health_cmp or damage <= 0.f ) return false;
+
+  // the popup rises from the top-centre of the target
+  sf::Vector2f popup_pos;
+  if ( const auto *plant_mb_cmp = reg.try_get<Cmp::PlantMultiBlock>( target_entt ) )
+  {
+    popup_pos = { plant_mb_cmp->position.x + ( plant_mb_cmp->size.x / 2.f ), plant_mb_cmp->position.y };
+  }
+  else if ( const auto *pos_cmp = reg.try_get<Cmp::Position>( target_entt ) )
+  {
+    // positive offset moves the number down over the sprite, negative moves it up above the sprite
+    const float text_offset = Sys::PersistSystem::get<Cmp::Persist::NpcDamageTextOffset>( reg ).get_value();
+    popup_pos = { pos_cmp->position.x + ( pos_cmp->size.x / 2.f ), pos_cmp->position.y + text_offset };
+    if ( const auto *render_offset_cmp = reg.try_get<Cmp::AbsoluteRenderOffset>( target_entt ) ) popup_pos += render_offset_cmp->getOffset();
+  }
+
   // the popup shows the health actually lost, so overkill on a weak target reads as its remaining health
   const float health_lost = std::min( damage, health_cmp->m_level );
-  event_queue.trigger( Events::UpdateDmgEvent( target_entt, damage ) );
+  Sys::BaseSystem::get_systems_event_queue().trigger( Events::UpdateDmgEvent( target_entt, damage ) );
 
   if ( Sys::PersistSystem::get<Cmp::Persist::ShowDamageText>( reg ).get_value() and health_lost > 0.f )
   {

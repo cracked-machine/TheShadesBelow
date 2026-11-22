@@ -199,7 +199,7 @@
         },
         "sfx": {
           "type": "object",
-          "description": "Optional. Sound effects (names from res/json/audio.json) for this action. An empty or missing name plays nothing. consume_action: loop while consuming, final once consumed. destroy_action: oneshot on each intermediate hit, final when felled. burn_action: loop while burning, final when burnt out. forage_action, spawn_action, offering_action: final when applied. proximity_action: final when its side effects or reward trigger, and on each kill_npc kill.",
+          "description": "Optional. Sound effects (names from res/json/audio.json) for this action. An empty or missing name plays nothing. consume_action: loop while consuming, final once consumed. destroy_action: oneshot on each intermediate hit, final when felled. burn_action: loop while burning, final when burnt out. forage_action, spawn_action, offering_action: final when applied. proximity_action: final when its side effects or reward trigger, and on each kill_npc or damage_npc kill.",
           "required": ["final"],
           "not": { "required": ["loop", "oneshot"] },
           "additionalProperties": false,
@@ -260,6 +260,23 @@
                 "wear_per_kill": { "type": "number", "minimum": 0, "maximum": 100, "description": "Wear (out of 100) the item takes per kill. A fully worn item is destroyed. Defaults to 0." },
                 "npc_types": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^npc\\." }, "description": "The NPC types that can be killed. Omit for any NPC." },
                 "death_anim": { "type": "string", "pattern": "^sprite\\.death\\.anim\\.", "description": "Sprite played where the NPC dies. Omit for no animation." }
+              }
+            },
+            "damage_npc": {
+              "type": "object",
+              "description": "proximity_action only. Damage NPCs near the item, keyed by NPC type, whether or not the player is near. Every tick seconds, each NPC of that type within range loses amount health and the item loses the same amount per NPC damaged. An NPC at zero health dies; a drained item is destroyed. Always applies (no probability). NPCs spawned by the item itself are spared.",
+              "minProperties": 1,
+              "propertyNames": { "pattern": "^npc\\." },
+              "additionalProperties": {
+                "type": "object",
+                "required": ["range", "amount", "tick"],
+                "additionalProperties": false,
+                "properties": {
+                  "range": { "type": "integer", "minimum": 1, "description": "Distance in blocks from the item that an NPC must be within to be damaged." },
+                  "amount": { "type": "number", "exclusiveMinimum": 0, "maximum": 100, "description": "Health (out of 100) taken from each NPC in range, and from the item per NPC damaged." },
+                  "tick": { "type": "number", "exclusiveMinimum": 0, "description": "Seconds between each round of damage." },
+                  "death_anim": { "type": "string", "pattern": "^sprite\\.death\\.anim\\.", "description": "Sprite played where the NPC dies. Omit for no animation." }
+                }
               }
             },
             "toxic_immunity": {

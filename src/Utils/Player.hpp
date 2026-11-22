@@ -388,6 +388,14 @@ Cmp::Player::Doglegs &get_doglegs( entt::registry &reg );
 //! @return bool True if the hit took the target's health to zero.
 bool apply_weapon_hit( entt::registry &reg, entt::entity target_entt, const Sys::ItemKey &weapon );
 
+//! @brief Take damage from a plant's or NPC's Cmp::Health, spawning a Cmp::DamagePopup if Cmp::Persist::ShowDamageText is on.
+//! @details Killing the target is left to the caller.
+//! @param reg reference to the entt registry
+//! @param target_entt The plant multiblock or NPC entity to damage.
+//! @param damage Health (out of 100) to take.
+//! @return bool True if the damage took the target's health to zero.
+bool apply_damage( entt::registry &reg, entt::entity target_entt, float damage );
+
 } // namespace Game::Utils::Player
 
 #endif // SRC_UTILS_PLAYER_HPP__

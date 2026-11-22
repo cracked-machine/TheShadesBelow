@@ -201,6 +201,29 @@ struct KillNpcEffect
   [[nodiscard]] bool roll( int player_luck ) const;
 };
 
+//! @brief Optional side effect of an action: damage NPCs that come near the action's source (proximity_action only).
+//! @details Every entry's tick, each NPC of that type in range loses amount health, and the source loses the same amount.
+//! An NPC whose health reaches zero dies. Always applies (no probability). NPCs spawned by the source itself are spared.
+struct DamageNpcEffect
+{
+  //! @brief The damage dealt to one NPC type.
+  struct Entry
+  {
+    //! @brief The NPC type damaged, see res/json/npc.json.
+    Sys::NpcKey npc_type;
+    //! @brief Distance in blocks from the source that an NPC must be within to be damaged.
+    int range{ 1 };
+    //! @brief Health (out of 100) taken from each NPC in range, and from the source, per NPC damaged.
+    float amount{ 0.f };
+    //! @brief Seconds between each round of damage.
+    float tick{ 0.f };
+    //! @brief Sprite played where the NPC dies, or std::nullopt for no animation.
+    std::optional<Sys::SpriteKey> death_anim;
+  };
+  //! @brief One entry per NPC type, in JSON order.
+  std::vector<Entry> entries;
+};
+
 //! @brief The optional side effects of an action, each rolled independently. See the "side_effects" object in
 //! res/json/items.json and res/json/npc.json.
 struct SideEffects
@@ -215,9 +238,11 @@ struct SideEffects
   std::optional<ToxicImmunityEffect> toxic_immunity;
   //! @brief Kill nearby NPCs.
   std::optional<KillNpcEffect> kill_npc;
+  //! @brief Damage nearby NPCs.
+  std::optional<DamageNpcEffect> damage_npc;
   //! @brief Whether there are no effects at all.
   //! @return true if no effect is set.
-  [[nodiscard]] bool empty() const { return not spawn_npc and not lightning and not movement and not toxic_immunity and not kill_npc; }
+  [[nodiscard]] bool empty() const { return not spawn_npc and not lightning and not movement and not toxic_immunity and not kill_npc and not damage_npc; }
 };
 
 } // namespace Game::Cmp

@@ -63,6 +63,7 @@
 #include <Components/Persistent/NpcRenderOffset.hpp>
 #include <Components/Persistent/NpcShockwaveMaxRadius.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>
+#include <Components/Plant/DamageNpcTimers.hpp>
 #include <Components/Plant/KillNpcTimer.hpp>
 #include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/Character.hpp>
@@ -591,6 +592,7 @@ void NpcSystem::update( sf::Time dt )
   // before the collision checks, so the ElderMother can't hurt the player on the frame she is banished
   check_elderflute_banish();
   check_plant_kill_npc( dt );
+  check_plant_damage_npc( dt );
   check_npc_proximity( dt );
 
   if ( Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled )
@@ -1499,6 +1501,75 @@ void NpcSystem::check_plant_kill_npc( sf::Time dt )
     if ( Utils::is_plant_depleted( reg(), plant_entt ) ) worn_out_plants.push_back( plant_entt );
   }
   for ( auto plant_entt : worn_out_plants )
+  {
+    get_systems_event_queue().trigger( Events::DestroyPlantEvent( plant_entt ) );
+  }
+}
+
+void NpcSystem::check_plant_damage_npc( sf::Time dt )
+{
+  // destroyed after the loop: the event handler modifies this storage
+  std::vector<entt::entity> drained_plants;
+  for ( auto [plant_entt, plant_mb_cmp, plant_worlditem_cmp, plant_uuid] : reg().view<Cmp::PlantMultiBlock, Cmp::WorldItem, Cmp::UUID>().each() )
+  {
+    const auto &proximity_action = plant_worlditem_cmp.get_action<Cmp::ProximityAction>();
+    const auto &damage_npc = proximity_action.side_effects().damage_npc;
+    if ( not damage_npc ) continue;
+
+    auto &timers = reg().get_or_emplace<Cmp::Plant::DamageNpcTimers>( plant_entt ).timers;
+    timers.resize( damage_npc->entries.size() );
+
+    bool dealt_damage = false;
+    for ( std::size_t idx = 0; idx < damage_npc->entries.size(); ++idx )
+    {
+      const auto &entry = damage_npc->entries[idx];
+      timers[idx] += dt;
+      if ( timers[idx].asSeconds() < entry.tick ) continue;
+      timers[idx] = sf::Time::Zero;
+
+      // the plant takes the same damage it deals, so it can't damage more NPCs than its remaining health allows
+      const auto *plant_health_cmp = reg().try_get<Cmp::Health>( plant_entt );
+      if ( plant_health_cmp and plant_health_cmp->m_level <= 0.f ) break;
+      std::size_t hits_left = std::numeric_limits<std::size_t>::max();
+      if ( plant_health_cmp ) { hits_left = static_cast<std::size_t>( std::ceil( plant_health_cmp->m_level / entry.amount ) ); }
+
+      // collect first: the event handlers modify these storages
+      const auto damage_bounds = Cmp::RectBounds::expanded( plant_mb_cmp, entry.range );
+      std::vector<entt::entity> npcs;
+      for ( auto [npc_entt, npc_cmp, npc_pos_cmp, npc_health_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::Health>().each() )
+      {
+        if ( npcs.size() >= hits_left ) break;
+        if ( npc_cmp.npc_type != entry.npc_type ) continue;
+        // crows can't be killed, see on_destroy_npc_event
+        if ( reg().any_of<Cmp::Npc::Crow>( npc_entt ) ) continue;
+        // a plant doesn't damage its own spawns, e.g. red campion adders
+        if ( const auto *spawned_by_cmp = reg().try_get<Cmp::Npc::SpawnedBy>( npc_entt ); spawned_by_cmp and spawned_by_cmp->m_source == plant_uuid )
+          continue;
+        if ( not damage_bounds.findIntersection( npc_pos_cmp ).has_value() ) continue;
+        npcs.push_back( npc_entt );
+      }
+
+      // each kill plays the plant's proximity_action "final" sfx (see items.json)
+      const auto &kill_sfx = proximity_action.sfx().final;
+      for ( auto npc_entt : npcs )
+      {
+        dealt_damage = true;
+        get_systems_event_queue().trigger( Events::UpdateDmgEvent( plant_entt, entry.amount ) );
+        if ( Utils::Player::apply_damage( reg(), npc_entt, entry.amount ) )
+        {
+          get_systems_event_queue().trigger(
+              Events::DestroyNpcEvent( npc_entt, entry.death_anim, kill_sfx.empty() ? std::nullopt : std::optional<std::string>( kill_sfx ) ) );
+        }
+      }
+    }
+    if ( not dealt_damage ) continue;
+
+    get_systems_event_queue().trigger(
+        Events::GrimoireItemUpdateEvent( plant_worlditem_cmp.item_type, Cmp::ProximityAction::kKey, proximity_action ) );
+    // a plant drained by the damage it deals withers away, like a fully foraged one
+    if ( Utils::is_plant_depleted( reg(), plant_entt ) ) drained_plants.push_back( plant_entt );
+  }
+  for ( auto plant_entt : drained_plants )
   {
     get_systems_event_queue().trigger( Events::DestroyPlantEvent( plant_entt ) );
   }

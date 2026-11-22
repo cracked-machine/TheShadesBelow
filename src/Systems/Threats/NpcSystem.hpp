@@ -225,6 +225,13 @@ private:
   //! @param dt Frame time, advancing each plant's Cmp::Plant::KillNpcTimer.
   void check_plant_kill_npc( sf::Time dt );
 
+  //! @brief Damage NPCs within range of a plant whose proximity_action has a damage_npc side effect. Each entry's tick,
+  //! every NPC of its type in range loses the entry's amount of health, and the plant loses the same amount per NPC
+  //! damaged. NPCs taken to zero health die; the plant's own spawns are spared. A plant drained by the damage it deals
+  //! is destroyed via Events::DestroyPlantEvent.
+  //! @param dt Frame time, advancing each plant's Cmp::Plant::DamageNpcTimers.
+  void check_plant_damage_npc( sf::Time dt );
+
   //! @brief Find a suitable knockback position for the player
   //! @param npc_direction
   //! @param npc_bounds The NPC's collision bounds; the player is pushed clear of all of it.

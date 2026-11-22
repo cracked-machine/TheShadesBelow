@@ -250,6 +250,26 @@ inline Cmp::SideEffects make_side_effects( const nlohmann::json &j )
     }
     effects.kill_npc = kill_npc_effect;
   }
+  if ( fx.contains( "damage_npc" ) )
+  {
+    const auto &damage_npc = fx.at( "damage_npc" );
+    if ( not damage_npc.is_object() or damage_npc.empty() ) throw std::runtime_error( "damage_npc must be a non-empty object of NPC types" );
+    Cmp::DamageNpcEffect damage_npc_effect;
+    for ( const auto &[npc_type, entry] : damage_npc.items() )
+    {
+      Cmp::DamageNpcEffect::Entry damage_entry{ .npc_type = Sys::NpcKey( npc_type ),
+                                                .range = JsonDeserializer::get_int( entry, "range" ),
+                                                .amount = JsonDeserializer::get_float( entry, "amount" ),
+                                                .tick = JsonDeserializer::get_float( entry, "tick" ) };
+      if ( damage_entry.range < 1 or damage_entry.amount <= 0.f or damage_entry.tick <= 0.f )
+      {
+        throw std::runtime_error( "damage_npc " + npc_type + " needs range >= 1 and amount, tick > 0" );
+      }
+      if ( entry.contains( "death_anim" ) ) { damage_entry.death_anim = Sys::SpriteKey( JsonDeserializer::get_string( entry, "death_anim" ) ); }
+      damage_npc_effect.entries.push_back( std::move( damage_entry ) );
+    }
+    effects.damage_npc = std::move( damage_npc_effect );
+  }
   return effects;
 }
 

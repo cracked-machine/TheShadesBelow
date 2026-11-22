@@ -630,6 +630,14 @@ bool GrimoireOverlaySystem::append_side_effect_lines( std::vector<std::string> &
     }
     draw_effect( std::format( "kills {}", names.empty() ? "npcs" : names ), effects.kill_npc->chance( player_luck ) );
   }
+  if ( effects.damage_npc )
+  {
+    // always applies, so there's no chance to show
+    for ( const auto &entry : effects.damage_npc->entries )
+    {
+      lines.push_back( std::format( "damages {}: -{:g}/{:g}s", npc_display_name( entry.npc_type.str() ), entry.amount, entry.tick ) );
+    }
+  }
   return not effects.empty();
 }
 } // namespace Game::Sys
