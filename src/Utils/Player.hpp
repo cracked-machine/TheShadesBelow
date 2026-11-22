@@ -182,8 +182,9 @@ int get_stack_count( entt::registry &reg, entt::entity entt );
 
 //! @brief Check whether a world item can be added to an inventory slot's stack: both hold the same stackable item
 //! (items.json "stackable"), the slot is below Cmp::Persist::InventoryStackSize, and neither carries per-instance item
-//! state (wear, a particle bound to its UUID, dowsing target, summoning offering, curse tablet) that a stack would lose.
-//! Plants never stack. A merged item's own UUID is dropped; the slot keeps its own.
+//! state (a particle bound to its UUID, dowsing target, summoning offering, curse tablet) that a stack would lose.
+//! Wear doesn't block a stack: the stack shares one wear level, averaged on merge. Plants never stack. A merged item's
+//! own UUID is dropped; the slot keeps its own.
 //! @param reg The registry.
 //! @param slot_entt The inventory slot entity.
 //! @param world_item_entt The world item entity.

@@ -1434,7 +1434,7 @@
   "item.rottenfood": {
     "sprite": { "name": "sprite.item.rottenfood" },
     "consumable": "edible",
-    "stackable": false,
+    "stackable": true,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },

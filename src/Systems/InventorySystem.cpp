@@ -227,9 +227,15 @@ void InventorySystem::update_dmg( entt::entity entt, float amount, Events::Updat
       auto item = Sys::ItemStore::instance().get( inventory_type );
       if ( item.consumable_type() == Cmp::WorldItem::Consumable::EDIBLE )
       {
-        // rotten food takes the place of the food, in the same slot
+        // rotten food takes the place of the food, in the same slot. A stack rots together into a stack of the same size.
+        const int stack_count = Utils::Player::get_stack_count( reg(), entt );
         Factory::Player::clear_inventory_slot( reg(), entt );
         add_inventory_item( "item.rottenfood", slot_idx );
+        const auto rotten_slot_entt = Utils::Player::get_inventory_slot_entt( reg(), slot_idx );
+        if ( stack_count > 1 and rotten_slot_entt != entt::null )
+        {
+          reg().emplace_or_replace<Cmp::Inventory::StackCount>( rotten_slot_entt, stack_count );
+        }
       }
       else if ( inventory_type == "item.gloves" )
       {
@@ -654,6 +660,19 @@ bool InventorySystem::merge_into_stack( entt::entity slot_entt, entt::entity wor
   if ( const auto *world_item_pos_cmp = reg().try_get<Cmp::Position>( world_item_entt ) )
   {
     trigger_side_effects( spawn_action, *world_item_pos_cmp, world_item_entt );
+  }
+
+  // a stack shares one wear level: the count-weighted average of the slot's and the merged items' wear.
+  // A side without a wear level counts as unworn. Any leftover on the ground keeps its own wear.
+  const auto *slot_wear_cmp = reg().try_get<Cmp::Inventory::WearLevel>( slot_entt );
+  const auto *ground_wear_cmp = reg().valid( world_item_entt ) ? reg().try_get<Cmp::Inventory::WearLevel>( world_item_entt ) : nullptr;
+  if ( slot_wear_cmp or ground_wear_cmp )
+  {
+    const float slot_wear = slot_wear_cmp ? slot_wear_cmp->m_level : 100.f;
+    const float ground_wear = ground_wear_cmp ? ground_wear_cmp->m_level : 100.f;
+    const float avg_wear = ( slot_wear * static_cast<float>( slot_count ) + ground_wear * static_cast<float>( taken ) ) /
+                           static_cast<float>( slot_count + taken );
+    reg().emplace_or_replace<Cmp::Inventory::WearLevel>( slot_entt, avg_wear );
   }
 
   reg().emplace_or_replace<Cmp::Inventory::StackCount>( slot_entt, slot_count + taken );

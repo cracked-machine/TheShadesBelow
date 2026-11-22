@@ -334,7 +334,8 @@ bool can_stack( entt::registry &reg, entt::entity slot_entt, entt::entity world_
   if ( not world_item_cmp->is_stackable() or slot_cmp->m_item->item_type != world_item_cmp->item_type ) return false;
   if ( reg.all_of<Cmp::PlantMultiBlock>( world_item_entt ) ) return false;
 
-  // a stack is one set of item state, so items carrying their own state never merge. Every world item has a UUID
+  // a stack is one set of item state, so items carrying their own state never merge. Wear is the exception: a stack
+  // shares one wear level, averaged on merge (see Sys::InventorySystem::merge_into_stack()). Every world item has a UUID
   // (see Sys::ItemSystem::create_world_item()), but it is only state when a particle (e.g. a torch's flame) is bound to it
   auto has_bound_particle = [&reg]( entt::entity entt )
   {
@@ -348,7 +349,7 @@ bool can_stack( entt::registry &reg, entt::entity slot_entt, entt::entity world_
   };
   auto has_instance_state = [&reg, &has_bound_particle]( entt::entity entt )
   {
-    return reg.any_of<Cmp::Inventory::WearLevel, Cmp::Inventory::DowsingTarget, Cmp::Npc::SummonOffering, Cmp::Grave::CurseTablet>( entt ) or
+    return reg.any_of<Cmp::Inventory::DowsingTarget, Cmp::Npc::SummonOffering, Cmp::Grave::CurseTablet>( entt ) or
            has_bound_particle( entt );
   };
   if ( has_instance_state( slot_entt ) or has_instance_state( world_item_entt ) ) return false;
