@@ -109,6 +109,8 @@ void ItemSystem::on_destroy_item_event( Game::Events::DestroyItemEvent ev )
   {
     if ( const auto *pos_cmp = reg().try_get<Cmp::Position>( ev.m_item_entity ) ) item_sm->remove( ev.m_item_entity, *pos_cmp );
   }
+  // e.g. a dropped torch's flame, which would otherwise keep burning where the torch was
+  Factory::Particle::destroy_bound_particles( reg(), ev.m_item_entity );
   reg().destroy( ev.m_item_entity );
 }
 

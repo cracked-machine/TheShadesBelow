@@ -18,6 +18,7 @@
 #include <Components/Particle/ShockWave.hpp>
 #include <Components/Particle/SkeleBonesParticleSprite.hpp>
 #include <Components/Particle/Smoke.hpp>
+#include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Particle/SpriteTest.hpp>
 #include <Components/Particle/WatchmanGunfireParticleSprite.hpp>
 #include <Components/Particle/WormholeParticleSprite.hpp>
@@ -25,6 +26,7 @@
 #include <Components/Position.hpp>
 #include <Components/Random.hpp>
 #include <Components/Shop/Inventory.hpp>
+#include <Components/UUID.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <SFML/System/Angle.hpp>
 #include <SFML/System/Time.hpp>
@@ -439,6 +441,19 @@ void add_flame_for_world_items( entt::registry &reg, const std::string &ps_tag )
         { worlditem_pos_cmp.getCenter().x, worlditem_pos_cmp.getCenter().y - Cmp::Particle::FlameParticleSprite::kVerticalOffset },
         worlditem_zorder_cmp.get() + 1.f, Cmp::Particle::kWorldScalePreset );
   }
+}
+
+void destroy_bound_particles( entt::registry &reg, entt::entity entt )
+{
+  const auto *uuid_cmp = reg.try_get<Cmp::UUID>( entt );
+  if ( not uuid_cmp ) return;
+  // collected first, so the particle view is not modified while it is iterated
+  std::vector<entt::entity> particle_entts;
+  for ( auto [ps_entt, ps_owner, ps_uuid_cmp] : reg.view<Cmp::Particle::SpriteOwner, Cmp::UUID>().each() )
+  {
+    if ( ps_entt != entt and ps_uuid_cmp == *uuid_cmp ) particle_entts.push_back( ps_entt );
+  }
+  reg.destroy( particle_entts.begin(), particle_entts.end() );
 }
 
 void sync_flames_for_shop_inventory( entt::registry &reg )

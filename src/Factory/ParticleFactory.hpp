@@ -250,6 +250,12 @@ void add_flame_for_player_inventory_slot( entt::registry &reg );
 //! @param reg
 void add_flame_for_world_items( entt::registry &reg, const std::string &ps_tag );
 
+//! @brief Destroy every particle sprite bound to the entity's UUID (e.g. a torch's flame). Call before destroying a world
+//! item, so its particles aren't left orphaned where it was. Does nothing if the entity has no UUID.
+//! @param reg The registry.
+//! @param entt The entity about to be destroyed.
+void destroy_bound_particles( entt::registry &reg, entt::entity entt );
+
 //! @brief Tag of the screen-space flames created by sync_flames_for_shop_inventory().
 //! @note Deliberately does not contain "torch": HudOverlaySystem::render_ui_particles() pins
 //! any screen-space "torch" sprite to the player inventory icon.

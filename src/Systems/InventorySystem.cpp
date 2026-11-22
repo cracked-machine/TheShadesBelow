@@ -685,6 +685,9 @@ bool InventorySystem::merge_into_stack( entt::entity slot_entt, entt::entity wor
       {
         if ( auto *pos_cmp = reg().try_get<Cmp::Position>( world_item_entt ) ) item_sm->remove( world_item_entt, *pos_cmp );
       }
+      // the stack keeps the slot's particles (e.g. a torch's flame), so put out the merged item's own, or it would be
+      // left burning on the ground where the item was
+      Factory::Particle::destroy_bound_particles( reg(), world_item_entt );
       reg().destroy( world_item_entt );
     }
   }

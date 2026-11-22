@@ -8,6 +8,7 @@
 #include <Components/Grave/ExitSegment.hpp>
 #include <Components/Grave/Segment.hpp>
 #include <Components/Hazard/FieldCell.hpp>
+#include <Components/Inventory/WorldItem.hpp>
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/Container.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
@@ -293,6 +294,8 @@ void WormholeSystem::clear_footprint( const sf::FloatRect &bounds )
     if ( not reg().valid( entity ) ) continue;
     Factory::Obstacle::remove_obstacle( reg(), entity, Factory::Obstacle::DeleteExtras::Yes, reserved_sm );
     if ( world_tile_sm ) world_tile_sm->remove( entity, Cmp::Position( pos, Constants::kGridSizePxF ) );
+    // e.g. a dropped torch's flame, which would otherwise keep burning in the wormhole
+    if ( reg().all_of<Cmp::WorldItem>( entity ) ) Factory::Particle::destroy_bound_particles( reg(), entity );
     reg().destroy( entity );
   }
 
