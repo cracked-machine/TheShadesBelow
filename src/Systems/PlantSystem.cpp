@@ -235,8 +235,10 @@ void PlantSystem::player_plant_interact()
       if ( not reg().all_of<Cmp::WorldItem>( plant_entt ) ) continue;
 
       auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
-      // an empty hand or gloves forage the plant instead of hitting it
-      if ( inventory_type.str().empty() or inventory_type == "item.gloves" )
+      // an empty hand, gloves, or the plant's own forage item (the forage joins the held stack) forage the plant instead of hitting it
+      const auto forage_output = reg().get<Cmp::WorldItem>( plant_entt ).get_forage_output();
+      const bool holding_forage_output = not forage_output.str().empty() and inventory_type == forage_output;
+      if ( inventory_type.str().empty() or inventory_type == "item.gloves" or holding_forage_output )
       {
         forage_plant( plant_entt, plant_mb_cmp, inventory_type == "item.gloves" );
         return;

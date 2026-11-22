@@ -87,7 +87,8 @@ private:
 
   //! @brief Uses Cmp::SelectedPosition to mark the mouse-selected Cmp::PlantMultiBlock the player is facing. With the shovel
   //! equipped, each hit takes its damage_from_weapon.shovel (items.json) from its health. At zero health the plant is
-  //! killed, see on_plant_killed_event(). With an empty hand or gloves the plant is foraged instead, see forage_plant().
+  //! killed, see on_plant_killed_event(). With an empty hand, gloves or the
+  //! plant's own forage item (e.g. elderberries for an elder) the plant is foraged instead, see forage_plant().
   void player_plant_interact();
 
   //! @brief Forage the plant: drop its forage_action reward beside it, apply its forage_action and side effects, and

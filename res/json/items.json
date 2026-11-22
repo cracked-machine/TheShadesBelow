@@ -843,8 +843,8 @@
   "item.hogweedseed": {
     "sprite": { "name": "sprite.hogweedseed" },
     "consumable": "edible",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
     "actions": [
