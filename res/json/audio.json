@@ -44,6 +44,7 @@
     { "name": "footstep_mud", "path": "res/audio/footstep_mud.mp3" },
     { "name": "footstep_stone", "path": "res/audio/footstep_stone.mp3" },
     { "name": "footstep_woodfloor", "path": "res/audio/footstep_woodfloor.mp3" },
+    { "name": "forage_rustle", "path": "res/audio/forage_rustle.mp3" },
     { "name": "get_key", "path": "res/audio/get_key.wav" },
     { "name": "get_loot", "path": "res/audio/get_loot.wav" },
     { "name": "heartbeat", "path": "res/audio/heartbeat.mp3" },
