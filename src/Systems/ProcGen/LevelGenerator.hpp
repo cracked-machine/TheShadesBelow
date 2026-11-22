@@ -5,6 +5,7 @@
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
+#include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Window.hpp>
 
@@ -116,12 +117,12 @@ public:
   //! @return The entities that were assigned loot containers.
   std::vector<entt::entity> gen_loot_containers( sf::Vector2u map_grid_size );
 
-  //! @brief Scatter NPC spawn containers across the map at random unreserved positions.
-  //! @param reg
-  //! @param map_grid_size Map size in grid cells; determines how many containers to place.
-  //! @param reserved_sm Positions already reserved are skipped.
+  //! @brief Place NPC spawn containers at random free open-ground cells inside or on the edge of the grave clusters
+  //!        (m_grave_cluster_bounds expanded by one cell). If those cells run out, moves out one ring at a time around
+  //!        every cluster until all containers are placed. Call after gen_graveyard_exterior_multiblocks().
+  //! @param scene_data Scene data used for the map size, which determines how many containers to place, and the open tiles
   //! @return The entities that were assigned NPC containers.
-  std::vector<entt::entity> gen_npc_containers( sf::Vector2u map_grid_size );
+  std::vector<entt::entity> gen_npc_containers( const Scene::SceneData &scene_data );
 
   //! @brief Get the obstacle sm object
   //! @return PathFinding::SpatialHashGrid&
@@ -217,6 +218,10 @@ private:
   //! @brief Pixel positions of every grave cluster's internal padding cells, by map quadrant (see SceneData::quadrant_of()).
   //!        Filled by gen_graveyard_exterior_multiblocks(), used as the plant candidates by gen_random_plants().
   std::array<std::vector<sf::Vector2f>, 4> m_grave_cluster_padding;
+
+  //! @brief Bounding box of the graves actually placed in each grave cluster, in grid cells. Clusters with no graves are
+  //!        left out. Filled by gen_graveyard_exterior_multiblocks(), used by gen_npc_containers().
+  std::vector<sf::IntRect> m_grave_cluster_bounds;
 };
 
 } // namespace Game::Sys::ProcGen

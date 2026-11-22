@@ -105,6 +105,7 @@
 #include <spdlog/spdlog.h>
 #include <tuple>
 #include <unordered_map>
+#include <limits>
 #include <unordered_set>
 
 namespace Game::Sys::ProcGen
@@ -556,6 +557,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData 
   {
     padding.clear();
   }
+  m_grave_cluster_bounds.clear();
   auto grave_meta_types = Sys::SpriteStore::instance().get_pattern( R"(graves\.\w+\.closed$)" );
   if ( grave_meta_types.size() < 2 ) { SPDLOG_WARN( "No GRAVE spritesheets found in SpriteStore" ); }
   else
@@ -637,6 +639,12 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData 
             }
           }
 
+          // extent of the graves placed in this cluster, in grid cells (end values are exclusive)
+          int placed_first_col = std::numeric_limits<int>::max();
+          int placed_first_row = std::numeric_limits<int>::max();
+          int placed_end_col = std::numeric_limits<int>::min();
+          int placed_end_row = std::numeric_limits<int>::min();
+
           for ( int sy = 0; sy < slots_per_side; ++sy )
           {
             for ( int sx = 0; sx < slots_per_side; ++sx )
@@ -672,7 +680,18 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData 
               // simulate the rolls now to get an idea of the distribution with game start player luck
               grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck() )]++;
               quadrant_graves++;
+
+              placed_first_col = std::min( placed_first_col, slot_col );
+              placed_first_row = std::min( placed_first_row, slot_row );
+              placed_end_col = std::max( placed_end_col, slot_col + static_cast<int>( grave_grid_size.x ) );
+              placed_end_row = std::max( placed_end_row, slot_row + static_cast<int>( grave_grid_size.y ) );
             }
+          }
+
+          if ( placed_end_col > placed_first_col )
+          {
+            m_grave_cluster_bounds.emplace_back( sf::Vector2i( placed_first_col, placed_first_row ),
+                                                 sf::Vector2i( placed_end_col - placed_first_col, placed_end_row - placed_first_row ) );
           }
         }
       }
@@ -770,9 +789,10 @@ std::vector<entt::entity> LevelGenerator::gen_loot_containers( sf::Vector2u map_
   return assigned_entts;
 }
 
-std::vector<entt::entity> LevelGenerator::gen_npc_containers( sf::Vector2u map_grid_size )
+std::vector<entt::entity> LevelGenerator::gen_npc_containers( const Scene::SceneData &scene_data )
 {
   std::vector<entt::entity> assigned_entts;
+  const auto [map_grid_size, _] = scene_data.map_size();
 
   // full density (one NPC container per N grid squares) is only reached at the final level depth;
   // shallower levels get a logarithmic fraction of it: log(1 + depth) / log(1 + max_depth),
@@ -787,29 +807,76 @@ std::vector<entt::entity> LevelGenerator::gen_npc_containers( sf::Vector2u map_g
   const std::size_t num_npc_containers = std::max<std::size_t>(
       1, static_cast<std::size_t>( std::lround( static_cast<double>( max_npc_containers ) * depth_ratio ) ) );
 
-  // keep sampling until the target is met - candidates that land on reserved cells are rejected
-  const std::size_t max_attempts = num_npc_containers * 20;
-  for ( std::size_t attempts = 0; assigned_entts.size() < num_npc_containers and attempts < max_attempts; ++attempts )
+  const auto world_tile_sm = m_world_tile_sm.lock();
+  if ( not world_tile_sm )
   {
-    auto [random_entity,
-          random_origin_position] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 0 );
+    SPDLOG_ERROR( "gen_npc_containers: no world tile grid, no NPC containers generated" );
+    return assigned_entts;
+  }
+  if ( m_grave_cluster_bounds.empty() ) { SPDLOG_WARN( "gen_npc_containers: no grave clusters to place NPC containers around" ); }
 
-    if ( not is_cell_taken( random_origin_position ) )
+  const auto cell_px = []( int col, int row )
+  { return sf::Vector2f( static_cast<float>( col ) * Constants::kGridSizePxF.x, static_cast<float>( row ) * Constants::kGridSizePxF.y ); };
+
+  // Ring 1 is each cluster's whole bounding box plus its edge. While containers are still to place, move out one ring at a
+  // time: each later ring is only the new perimeter, and neighbouring clusters' rings overlap, so cells are only visited once.
+  const Sys::SpriteKey npc_type = "sprite.graveyard.bones";
+  const int max_ring = m_grave_cluster_bounds.empty() ? 0 : static_cast<int>( std::max( map_grid_size.x, map_grid_size.y ) );
+  std::unordered_set<std::int64_t> visited_cells;
+  std::vector<sf::Vector2f> ring_cells;
+  Cmp::RandomInt shuffle_rng( 0, 1 );
+  int outermost_ring = 0;
+  for ( int ring = 1; ring <= max_ring and assigned_entts.size() < num_npc_containers; ++ring )
+  {
+    ring_cells.clear();
+    for ( const auto &bounds : m_grave_cluster_bounds )
     {
+      const int first_col = bounds.position.x - ring;
+      const int first_row = bounds.position.y - ring;
+      const int last_col = bounds.position.x + bounds.size.x - 1 + ring;
+      const int last_row = bounds.position.y + bounds.size.y - 1 + ring;
+      for ( int row = first_row; row <= last_row; ++row )
+      {
+        // past ring 1, the rows between the top and bottom of the ring only have their two end cells
+        const bool ends_only = ring > 1 and row > first_row and row < last_row;
+        for ( int col = first_col; col <= last_col; col += ( ends_only ? last_col - first_col : 1 ) )
+        {
+          const sf::Vector2f pos = cell_px( col, row );
+          if ( not scene_data.is_open_footprint( pos, sf::Vector2u( 1, 1 ) ) ) continue;
+          if ( visited_cells.insert( cell_key( pos ) ).second ) ring_cells.push_back( pos );
+        }
+      }
+    }
+    std::ranges::shuffle( ring_cells, shuffle_rng );
+
+    for ( const auto &pos : ring_cells )
+    {
+      if ( assigned_entts.size() >= num_npc_containers ) break;
+
+      const Cmp::Position cell_pos( pos, Constants::kGridSizePxF );
+      if ( is_cell_taken( cell_pos ) ) continue;
+
+      const auto tiles = world_tile_sm->at( cell_pos );
+      const auto tile_it = std::ranges::find_if( tiles, [&]( entt::entity tile ) { return not reg().all_of<Cmp::Obstacle>( tile ); } );
+      if ( tile_it == tiles.end() ) continue;
+      const entt::entity tile_entity = *tile_it;
+
       // pick a random texture index for the npc container
-      const Sys::SpriteKey npc_type = "sprite.graveyard.bones";
       auto rand_npc_tex_idx = Sys::SpriteStore::instance().get( npc_type ).get_random_texture_index();
 
-      Factory::Npc::create_npc_container( reg(), random_entity, random_origin_position, npc_type, rand_npc_tex_idx, 0.f );
-      assigned_entts.push_back( random_entity );
-      m_reserved_sm->insert( random_entity, random_origin_position );
+      const auto &tile_pos = reg().get<Cmp::Position>( tile_entity );
+      Factory::Npc::create_npc_container( reg(), tile_entity, tile_pos, npc_type, rand_npc_tex_idx, 0.f );
+      assigned_entts.push_back( tile_entity );
+      m_reserved_sm->insert( tile_entity, tile_pos );
+      outermost_ring = ring;
     }
   }
   if ( assigned_entts.size() < num_npc_containers )
   {
-    SPDLOG_WARN( "Only placed {} of {} NPC containers after {} attempts.", assigned_entts.size(), num_npc_containers, max_attempts );
+    SPDLOG_WARN( "Only placed {} of {} NPC containers: no free cells left.", assigned_entts.size(), num_npc_containers );
   }
-  SPDLOG_INFO( "Added {} NPC containers (level depth {} of {}).", assigned_entts.size(), level_depth, max_level_depth );
+  SPDLOG_INFO( "Added {} NPC containers (level depth {} of {}), outermost ring {}.", assigned_entts.size(), level_depth, max_level_depth,
+               outermost_ring );
   return assigned_entts;
 }
 
@@ -971,6 +1038,7 @@ void LevelGenerator::init( const PathFinding::SpatialHashGridSharedPtr &reserved
   {
     padding.clear();
   }
+  m_grave_cluster_bounds.clear();
 }
 
 } // namespace Game::Sys::ProcGen
