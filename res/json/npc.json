@@ -150,7 +150,7 @@
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 3, "bow": 0 },
     "actions": [
       { "destroy_action":     { "health": 0, "fear": -10, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "sfx": { "final": "rattling_bones" } }},
+                                "sfx": { "oneshot": "tick_hit", "final": "rattling_bones" } }},
       { "spawn_action":       { "health": 0, "fear": 1, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "proximity_action":   { "health": 0, "fear": 1, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 5 }},
       { "projectile_action":  { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},

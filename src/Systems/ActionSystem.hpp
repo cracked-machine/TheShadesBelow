@@ -81,6 +81,8 @@ private:
   //! @brief Uses Cmp::SelectedPosition to mark the targetted Cmp::Obstacle/Cmp::Moveable entity.
   void select_moveable_obstacle();
 
+  void play_melee_sound();
+
   //! @brief all grid positions that block NPC pathfinding
   PathFinding::SpatialHashGridWeakPtr m_npc_navmesh;
 

@@ -21,9 +21,9 @@
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
 #include <Components/Persistent/DiggingDamagePerHit.hpp>
+#include <Components/Persistent/MeleeHitCooldown.hpp>
 #include <Components/Persistent/ShovelObstacleDigWear.hpp>
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
-#include <Components/Persistent/MeleeHitCooldown.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/DiggingTimer.hpp>
 #include <Components/Position.hpp>
@@ -97,6 +97,7 @@ void ActionSystem::update( [[maybe_unused]] sf::Time dt )
 
 void ActionSystem::on_player_action( const Events::PlayerActionEvent &event )
 {
+
   if ( event.action == Events::PlayerActionEvent::GameActions::DIG )
   {
     check_player_dig_obstacle_collision();
@@ -293,6 +294,8 @@ void ActionSystem::check_player_dig_obstacle_collision()
       }
     }
   }
+
+  play_melee_sound();
 }
 
 void ActionSystem::check_player_smash_pot()
@@ -334,6 +337,8 @@ void ActionSystem::check_player_smash_pot()
   }
 
   if ( smashed_loot_entity != entt::null ) get_systems_event_queue().trigger( Events::DestroyLootContainerEvent( smashed_loot_entity ) );
+
+  play_melee_sound();
 }
 
 template <typename NpcType>
@@ -433,6 +438,8 @@ void ActionSystem::check_player_smash_tablet()
       break;
     }
   }
+
+  play_melee_sound();
 }
 
 void ActionSystem::check_player_melee_npc_kill()
@@ -496,7 +503,6 @@ void ActionSystem::check_player_melee_npc_kill()
       m_melee_hit_clock.restart();
       const bool killed = Utils::Player::apply_weapon_hit( reg(), npc_entity, "item.shovel" );
 
-      m_sound_bank.get_effect( "axe_whip" ).play();
       // the bones/twigs burst is the death effect, so only the killing hit spawns it
       if ( killed and is_skeleton )
       {
@@ -543,6 +549,15 @@ void ActionSystem::select_moveable_obstacle()
       SPDLOG_INFO( "Found moveable entity at position: [{}, {}]!", obst_pos_cmp.position.x, obst_pos_cmp.position.y );
       reg().emplace_or_replace<Cmp::SelectedPosition>( obst_entity, obst_pos_cmp.position );
     }
+  }
+}
+
+void ActionSystem::play_melee_sound()
+{
+  // play melee sound if no target
+  if ( reg().view<Cmp::SelectedPosition>()->empty() and m_sound_bank.get_effect( "axe_whip" ).getStatus() != sf::Sound::Status::Playing )
+  {
+    m_sound_bank.get_effect( "axe_whip" ).play();
   }
 }
 
