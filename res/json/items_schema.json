@@ -209,6 +209,11 @@
             "final": { "type": "string", "description": "Plays when the action completes or is applied. Empty string for none." }
           }
         },
+        "anim": {
+          "type": "string",
+          "pattern": "^sprite\\.",
+          "description": "Optional. offering_action only: the animation sprite played above the altar when the offering is accepted. Omit for no animation (the offering cooldown still starts). Not played for an ExtraLife reward, which lights the altar instead."
+        },
         "reward": {
           "description": "Optional reward. Its shape is set by each action (no_altar_reward, item_only_reward, proximity_reward or offering_reward_entry)."
         },

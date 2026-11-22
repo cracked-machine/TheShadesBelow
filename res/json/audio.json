@@ -6,6 +6,7 @@
     { "name": "arrow_hit4", "path": "res/audio/arrow_hit4.mp3" },
     { "name": "axe_whip", "path": "res/audio/axe_whip.wav" },
     { "name": "banging_smashing_sounds", "path": "res/audio/BangingSmashingSounds.mp3" },
+    { "name": "blood_altar", "path": "res/audio/blood_altar.mp3" },
     { "name": "bomb_detonate", "path": "res/audio/detonate.wav" },
     { "name": "bomb_fuse", "path": "res/audio/fuse.wav" },
     { "name": "break_pot", "path": "res/audio/break_pot.mp3" },

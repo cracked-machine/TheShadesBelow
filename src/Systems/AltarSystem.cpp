@@ -186,7 +186,8 @@ bool AltarSystem::try_offer_held_item( entt::entity altar_entity, Cmp::Altar::Mu
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_type == "" ) return false;
   const auto &item = Sys::ItemStore::instance().get( inventory_type );
-  if ( not item.is_offerable() ) return false;
+  // blood vials are only ever poured into a graveyard altar's blood meter, see offering_blood_vial()
+  if ( item.is_blood() or not item.is_offerable() ) return false;
 
   auto is_carrying_tool = [&]() { return item.item_type.contains( "item.shovel" ) or item.item_type.contains( "item.dowsingrod" ); };
 
@@ -205,7 +206,7 @@ bool AltarSystem::try_offer_held_item( entt::entity altar_entity, Cmp::Altar::Mu
   if ( not reward and not item.get_rewards<Cmp::OfferingAction>().empty() ) return false;
 
   // the altar may refuse the offering (e.g. a relic once the exitkey has dropped), so only consume the item once it has accepted
-  if ( not grant_offering_reward( altar_entity, altar_cmp, altar_uuid, reward ) ) return false;
+  if ( not grant_offering_reward( altar_entity, altar_cmp, altar_uuid, reward, item.get_action<Cmp::OfferingAction>().anim() ) ) return false;
 
   SPDLOG_INFO( "Player made an offering: {}", item.item_type );
   const auto offering_action = Utils::Player::apply_action_from_item_store<Cmp::OfferingAction>( reg(), item.item_type );
@@ -230,40 +231,37 @@ bool AltarSystem::try_offer_held_item( entt::entity altar_entity, Cmp::Altar::Mu
 }
 
 bool AltarSystem::grant_offering_reward( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid,
-                                         const std::optional<Cmp::ActionReward> &reward )
+                                         const std::optional<Cmp::ActionReward> &reward, const Sys::SpriteKey &anim )
 {
-  if ( not reward )
+  using AltarEffect = Cmp::ActionReward::AltarEffect;
+  // an extra life lights the altar instead, and may still be refused
+  if ( reward and reward->item.empty() and reward->wealth <= 0 and reward->altar == AltarEffect::EXTRA_LIFE )
   {
-    play_offering_anim( altar_cmp, OfferingAnimType::DEFAULT );
-    return true;
+    return offering_for_extra_life( altar_entity, altar_cmp, altar_uuid );
   }
-  if ( not reward->item.empty() )
-  {
-    play_offering_anim( altar_cmp, OfferingAnimType::DEFAULT );
-    return true;
-  }
+
+  play_offering_anim( altar_cmp, anim );
+  // no reward, or an item reward: offering_for_item() is called once the offering has left the inventory
+  if ( not reward or not reward->item.empty() ) return true;
   if ( reward->wealth > 0 )
   {
-    offering_for_wealth( altar_cmp, reward->wealth );
+    offering_for_wealth( reward->wealth );
     return true;
   }
 
-  using AltarEffect = Cmp::ActionReward::AltarEffect;
   switch ( reward->altar )
   {
     case AltarEffect::BANISH:
-      offering_for_banish( altar_cmp );
+      offering_for_banish();
       return true;
-    case AltarEffect::EXTRA_LIFE:
-      return offering_for_extra_life( altar_entity, altar_cmp, altar_uuid );
     case AltarEffect::CRYPT_KEY:
-      offering_cryptkey( altar_cmp );
+      offering_cryptkey();
       return true;
     case AltarEffect::TOXIC_IMMUNITY:
-      offering_for_toxic_immunity( altar_cmp, reward->tick );
+      offering_for_toxic_immunity( reward->tick );
       return true;
+    case AltarEffect::EXTRA_LIFE: // handled above
     case AltarEffect::NONE:
-      play_offering_anim( altar_cmp, OfferingAnimType::DEFAULT );
       return true;
   }
   return false;
@@ -282,28 +280,25 @@ void AltarSystem::offering_for_item( const Cmp::Altar::MultiBlock &altar_cmp, co
   grant_item_reward( reward, Cmp::Position( altar_cmp.position, altar_cmp.size ), entt::null, on_created );
 }
 
-void AltarSystem::offering_for_wealth( const Cmp::Altar::MultiBlock &altar_cmp, int wealth )
+void AltarSystem::offering_for_wealth( int wealth )
 {
-  play_offering_anim( altar_cmp, OfferingAnimType::DEFAULT );
   Utils::Player::get_wealth( reg() ).wealth += wealth;
   m_sound_bank.get_effect( "get_loot" ).play();
   // signal UI to flash
   reg().emplace_or_replace<Cmp::FlashUIWealth>( reg().create() );
 }
 
-void AltarSystem::offering_for_toxic_immunity( const Cmp::Altar::MultiBlock &altar_cmp, int tick )
+void AltarSystem::offering_for_toxic_immunity( int tick )
 {
-  play_offering_anim( altar_cmp, OfferingAnimType::DEFAULT );
   // offering again restarts the timer. PlayerSystem keeps the PlayerStats flag in sync, but set it now so
   // immunity applies from this frame
   reg().emplace_or_replace<Cmp::Player::ToxicImmunity>( Utils::Player::get_entity( reg() ), sf::seconds( static_cast<float>( tick ) ) );
   Utils::Player::get_stats( reg() ).set_toxic_immune( true );
 }
 
-void AltarSystem::offering_for_banish( const Cmp::Altar::MultiBlock &altar_cmp )
+void AltarSystem::offering_for_banish()
 {
   // player kills all spawned ghosts in the game
-  play_offering_anim( altar_cmp, OfferingAnimType::DEFAULT );
   for ( auto [npc_entt, npc_cmp, npc_pos_cmp, npc_anim_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position, Cmp::AnimData>().each() )
   {
     if ( not npc_anim_cmp.m_sprite_type.contains( "ghost" ) ) continue;
@@ -368,11 +363,13 @@ bool AltarSystem::offering_blood_vial( entt::entity altar_entity, Cmp::Altar::Mu
   Factory::Player::take_one_from_slot( reg(), slot_entt );
   // signal UI to flash
   reg().emplace_or_replace<Cmp::FlashUIInventory>( reg().create() );
-  m_sound_bank.get_effect( "shrine_lighting" ).play();
 
   blood_cmp->add( blood, quota );
   SPDLOG_INFO( "Player poured {} ({} blood) into altar (blood {} of {})", vial_type.str(), blood, blood_cmp->value(), quota );
-  play_offering_anim( altar_cmp, OfferingAnimType::DEFAULT );
+  // pouring the vial applies its offering_action to the player, e.g. its despair, and plays its sfx (see items.json)
+  const auto offering_action = Utils::Player::apply_action_from_item_store<Cmp::OfferingAction>( reg(), vial_type );
+  play_action_sfx( offering_action );
+  play_offering_anim( altar_cmp, offering_action.anim() );
   get_systems_event_queue().trigger( Events::AltarBloodOfferedEvent{ altar_bounds } );
 
   if ( blood_cmp->is_full( quota ) ) activate_graveyard_altar( altar_entity, altar_cmp, altar_uuid );
@@ -389,9 +386,8 @@ void AltarSystem::activate_graveyard_altar( entt::entity altar_entity, const Cmp
   get_systems_event_queue().trigger( Events::AltarActivatedEvent{ Cmp::Position( altar_cmp.position, altar_cmp.size ) } );
 }
 
-void AltarSystem::offering_cryptkey( const Cmp::Altar::MultiBlock &altar_cmp )
+void AltarSystem::offering_cryptkey()
 {
-  play_offering_anim( altar_cmp, OfferingAnimType::KEY );
   m_sound_bank.get_effect( "crypt_altar_activate" ).play();
 }
 
@@ -409,15 +405,16 @@ void AltarSystem::activate_altar( entt::entity altar_entity, const Cmp::Altar::M
   m_sound_bank.get_effect( "crypt_altar_activate" ).play();
 }
 
-void AltarSystem::play_offering_anim( const Cmp::Altar::MultiBlock &altar_cmp, OfferingAnimType offering_anim_type )
+void AltarSystem::play_offering_anim( const Cmp::Altar::MultiBlock &altar_cmp, const Sys::SpriteKey &anim )
 {
-  Sys::SpriteKey sprite_type = ( offering_anim_type == OfferingAnimType::KEY ) ? "sprite.graveyard.altar.key.anim"
-                                                                               : "sprite.graveyard.altar.relic.anim";
-
-  float altar_offering_anim_height = Sys::SpriteStore::instance().get( sprite_type ).sprite_size().y;
-  // get the center (topleft coord), then adjust to center the altar_offering_anim, then adjust for altar_offering_anim height
-  Cmp::Position new_pos( altar_cmp.getCenter() - sf::Vector2{ 7.f, 28.f } - sf::Vector2{ 0.f, altar_offering_anim_height }, Constants::kGridSizePxF );
-  Factory::Altar::create_altar_offering_anim( reg(), new_pos, sprite_type );
+  if ( not anim.empty() )
+  {
+    float altar_offering_anim_height = Sys::SpriteStore::instance().get( anim ).sprite_size().y;
+    // get the center (topleft coord), then adjust to center the altar_offering_anim, then adjust for altar_offering_anim height
+    Cmp::Position new_pos( altar_cmp.getCenter() - sf::Vector2{ 7.f, 28.f } - sf::Vector2{ 0.f, altar_offering_anim_height },
+                           Constants::kGridSizePxF );
+    Factory::Altar::create_altar_offering_anim( reg(), new_pos, anim );
+  }
 
   reg().emplace_or_replace<Cmp::Altar::ActivationTimer>( Utils::Player::get_entity( reg() ) );
 }

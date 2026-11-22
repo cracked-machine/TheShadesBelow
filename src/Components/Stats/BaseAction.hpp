@@ -5,6 +5,7 @@
 #include <Components/Stats/BaseActionFwd.hpp>
 #include <Components/Stats/StatDeltas.hpp>
 #include <SFML/System/Time.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 #include <algorithm>
 #include <memory>
@@ -95,7 +96,7 @@ public:
   //! @brief Destroy the Base Action object.
   ~BaseAction();
 
-  //! @brief Copies share the immutable toxidrome, side effects and rewards; only the stat deltas, wear and sfx are copied.
+  //! @brief Copies share the immutable toxidrome, side effects and rewards; only the stat deltas, wear, sfx and anim are copied.
   BaseAction( const BaseAction &other );
   BaseAction &operator=( const BaseAction &other );
   BaseAction( BaseAction &&other ) noexcept;
@@ -134,6 +135,12 @@ public:
   //! @brief Set the sound effects of this action, see sfx().
   //! @param sfx The sound effect names.
   void set_sfx( ActionSfx sfx ) { m_sfx = std::move( sfx ); }
+  //! @brief Get the animation played for this action ("anim" in items.json), e.g. above the altar for an offering_action.
+  //! @return const Sys::SpriteKey& The animation's sprite, empty if the action has none.
+  [[nodiscard]] const Sys::SpriteKey &anim() const { return m_anim; }
+  //! @brief Set the animation played for this action, see anim().
+  //! @param anim The animation's sprite.
+  void set_anim( Sys::SpriteKey anim ) { m_anim = std::move( anim ); }
   //! @brief Get the toxidrome affliction associated with this action.
   //! @return Stats::toxidrome The toxidrome type and its own tick interval.
   [[nodiscard]] const Cmp::Toxicity::Toxidrome &toxidrome() const;
@@ -197,6 +204,8 @@ private:
   std::optional<ActionWear> m_wear;
   //! @brief Sound effects played for the action, see sfx().
   ActionSfx m_sfx;
+  //! @brief Animation played for the action, see anim().
+  Sys::SpriteKey m_anim;
 };
 
 //! @brief An action with no effect: zero stat deltas, one-shot tick, and no toxidrome, side effects, rewards, wear

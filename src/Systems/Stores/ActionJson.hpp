@@ -304,6 +304,8 @@ template <typename Action>
                                     .oneshot = sfx.value( "oneshot", std::string{} ),
                                     .final = sfx.at( "final" ).get<std::string>() } );
   }
+  // anim is optional, e.g. the offering_action animation played above the altar
+  if ( j.contains( "anim" ) ) { action.set_anim( Sys::SpriteKey( JsonDeserializer::get_string( j, "anim" ) ) ); }
   return action;
 }
 

@@ -58,14 +58,12 @@ private:
   //! Cmp::Altar::Activated and sends Events::AltarActivatedEvent so GraveSystem chooses the key grave.
   void activate_graveyard_altar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
 
-  //! @brief Grant the item's "offering_action.reward" for this altar's location (see items.json). An item with no reward
-  //! (e.g. one that only spawns an NPC) just plays the default offering animation.
+  //! @brief Grant the item's "offering_action.reward" for this altar's location (see items.json), playing its
+  //! "offering_action.anim" above the altar. An item with no reward (e.g. one that only spawns an NPC) just plays the anim.
+  //! An extra life lights the altar instead of playing the anim.
   //! @return false if this altar won't accept the offering in its current state, so the item must not be consumed
   bool grant_offering_reward( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid,
-                              const std::optional<Cmp::ActionReward> &reward );
-
-  //! @brief The animation played above the altar following an offering
-  enum class OfferingAnimType { DEFAULT, KEY };
+                              const std::optional<Cmp::ActionReward> &reward, const Sys::SpriteKey &anim );
 
   //! @brief Swap the item for its "offering_action.reward.item" (see items.json), at the player by default, else at the
   //! reward's target. Call once the offering has left the inventory.
@@ -73,11 +71,11 @@ private:
   void offering_for_item( const Cmp::Altar::MultiBlock &altar_cmp, const Cmp::ActionReward &reward,
                           const std::function<void( entt::entity )> &on_created = {} );
   //! @brief Swap the item for its "offering_action.reward.wealth" (see items.json), e.g. jewelry or worn out tools
-  void offering_for_wealth( const Cmp::Altar::MultiBlock &altar_cmp, int wealth );
+  void offering_for_wealth( int wealth );
   //! @brief Grant the player Cmp::Player::ToxicImmunity for "offering_action.reward.tick" seconds (see items.json), e.g. St John's Wort
-  void offering_for_toxic_immunity( const Cmp::Altar::MultiBlock &altar_cmp, int tick );
+  void offering_for_toxic_immunity( int tick );
   //! @brief Banish all ghosts, e.g. witches jar at a graveyard altar
-  void offering_for_banish( const Cmp::Altar::MultiBlock &altar_cmp );
+  void offering_for_banish();
   //! @brief Grant the player a Cmp::Player::ExtraLife at the crypt altar: lights the altar, respawn at the crypt start.
   //! @return false if the altar refused the offering, e.g. the player already has an extra life, or it is not the crypt altar
   bool offering_for_extra_life( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
@@ -89,7 +87,7 @@ private:
   bool offering_blood_vial( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
   //! @brief Accept the exit key in exchange for the crypt key, at any graveyard altar whether activated or not.
   //! check_player_altar_offering() puts the crypt key in the player's hand once the exit key has been destroyed.
-  void offering_cryptkey( const Cmp::Altar::MultiBlock &altar_cmp );
+  void offering_cryptkey();
   //! @brief Put an altar reward key (e.g. the crypt key) straight into the player's (empty) hand and flash the inventory UI
   void give_reward_key( const Sys::ItemKey &item_key );
 
@@ -99,8 +97,9 @@ private:
   //! by on_key_grave_exhumed()).
   //! @note Does nothing if the altar is already active.
   void activate_altar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid, const char *particle_tag );
-  //! @brief Play the offering animation/sound above the altar and start the activation cooldown
-  void play_offering_anim( const Cmp::Altar::MultiBlock &altar_cmp, OfferingAnimType offering_anim_type );
+  //! @brief Play the offering's "offering_action.anim" (see items.json) above the altar and start the activation cooldown
+  //! @param anim The animation's sprite. If empty no animation plays, but the cooldown still starts.
+  void play_offering_anim( const Cmp::Altar::MultiBlock &altar_cmp, const Sys::SpriteKey &anim );
 
   //! @brief Whether the player was near a graveyard altar waiting for blood last frame, see check_player_approached_altar()
   bool m_player_near_altar{ false };
