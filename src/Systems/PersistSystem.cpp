@@ -8,10 +8,6 @@
 #include <Components/Persistent/ArmedBlockColourFill.hpp>
 #include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/ArmedOnDelay.hpp>
-#include <Components/Persistent/MeleeHitCooldown.hpp>
-#include <Components/Persistent/NpcDamageTextOffset.hpp>
-#include <Components/Persistent/ShowDamageText.hpp>
-#include <Components/Persistent/ShowHealthBar.hpp>
 #include <Components/Persistent/AzazelFireballArc.hpp>
 #include <Components/Persistent/AzazelFireballColour.hpp>
 #include <Components/Persistent/AzazelFireballCooldown.hpp>
@@ -29,8 +25,8 @@
 #include <Components/Persistent/BurrThrowCooldown.hpp>
 #include <Components/Persistent/CameraSmoothSpeed.hpp>
 #include <Components/Persistent/CorruptionDamage.hpp>
-#include <Components/Persistent/CorruptionSpreadPeriod.hpp>
 #include <Components/Persistent/CorruptionSeed.hpp>
+#include <Components/Persistent/CorruptionSpreadPeriod.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
 #include <Components/Persistent/CryptShuffleTimeout.hpp>
 #include <Components/Persistent/CryptVariantOverride.hpp>
@@ -48,13 +44,14 @@
 #include <Components/Persistent/FlyingTransitionTime.hpp>
 #include <Components/Persistent/FuseDelay.hpp>
 #include <Components/Persistent/GlovesWearPerForage.hpp>
-#include <Components/Persistent/GraveClusterExternalPadding.hpp>
 #include <Components/Persistent/GrassSlowFactor.hpp>
 #include <Components/Persistent/GrassSpawnChance.hpp>
+#include <Components/Persistent/GraveClusterExternalPadding.hpp>
 #include <Components/Persistent/GraveClusterGridSize.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveOddsBlood.hpp>
 #include <Components/Persistent/GraveOddsBombTrap.hpp>
+#include <Components/Persistent/GraveOddsCadaver.hpp>
 #include <Components/Persistent/GraveOddsCurseTablet.hpp>
 #include <Components/Persistent/GraveOddsNpcTrap.hpp>
 #include <Components/Persistent/GraveOddsTalisman.hpp>
@@ -64,7 +61,6 @@
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
 #include <Components/Persistent/GrimoireHover.hpp>
-#include <Components/Persistent/PrepopulateGrimoire.hpp>
 #include <Components/Persistent/HallucinogenHealthDmgPerSec.hpp>
 #include <Components/Persistent/HazardBalanceOverlap.hpp>
 #include <Components/Persistent/HazardBalanceTimeout.hpp>
@@ -76,14 +72,15 @@
 #include <Components/Persistent/HeldItemSideOffsetX.hpp>
 #include <Components/Persistent/HypoxiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/InventorySlotCount.hpp>
-#include <Components/Persistent/InventoryStackSize.hpp>
 #include <Components/Persistent/InventorySlotRollover.hpp>
+#include <Components/Persistent/InventoryStackSize.hpp>
 #include <Components/Persistent/InventorySwapCooldown.hpp>
 #include <Components/Persistent/LavaFireballDamage.hpp>
 #include <Components/Persistent/LightningDamage.hpp>
 #include <Components/Persistent/LightningRodDebrisDamage.hpp>
 #include <Components/Persistent/LuckDropRate.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
+#include <Components/Persistent/MeleeHitCooldown.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
 #include <Components/Persistent/NpcActivateScale.hpp>
 #include <Components/Persistent/NpcCrowFlightSpeed.hpp>
@@ -91,6 +88,7 @@
 #include <Components/Persistent/NpcCrowMaxPerchWait.hpp>
 #include <Components/Persistent/NpcCrowPerchRange.hpp>
 #include <Components/Persistent/NpcCrowPerchSpeed.hpp>
+#include <Components/Persistent/NpcDamageTextOffset.hpp>
 #include <Components/Persistent/NpcMimicTint.hpp>
 #include <Components/Persistent/NpcPushBack.hpp>
 #include <Components/Persistent/NpcRenderOffset.hpp>
@@ -125,6 +123,7 @@
 #include <Components/Persistent/PlayerShortcutLerpSpeedModifier.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Persistent/PostPullMovementDelay.hpp>
+#include <Components/Persistent/PrepopulateGrimoire.hpp>
 #include <Components/Persistent/RepelNpcPlayerTint.hpp>
 #include <Components/Persistent/ReservedArmedBlockColourBorder.hpp>
 #include <Components/Persistent/ReservedArmedBlockColourFill.hpp>
@@ -141,6 +140,8 @@
 #include <Components/Persistent/ShovelGraveDigWear.hpp>
 #include <Components/Persistent/ShovelObstacleDigWear.hpp>
 #include <Components/Persistent/ShovelPotSmashWear.hpp>
+#include <Components/Persistent/ShowDamageText.hpp>
+#include <Components/Persistent/ShowHealthBar.hpp>
 #include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Persistent/SinkholeSpreadPeriod.hpp>
 #include <Components/Persistent/StartingDespair.hpp>
@@ -243,6 +244,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::GraveOddsTorch>();
   add_component<Cmp::Persist::GraveOddsNpcTrap>();
   add_component<Cmp::Persist::GraveOddsBlood>();
+  add_component<Cmp::Persist::GraveOddsCadaver>();
   add_component<Cmp::Persist::GraveOddsTalisman>();
   add_component<Cmp::Persist::GraveClusterGridSize>();
   add_component<Cmp::Persist::GraveClusterExternalPadding>();

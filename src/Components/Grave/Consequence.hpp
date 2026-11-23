@@ -24,6 +24,8 @@ public:
     CURSE_TABLET,
     //! @brief Drops a talisman.
     TALISMAN,
+    //! @brief Drops a cadaver item.
+    CADAVER,
     //! @brief Drops a torch item.
     TORCH
   };
@@ -36,7 +38,7 @@ public:
   };
 
   //! @brief Number of consequence types, and so the number of slots on the line
-  static constexpr std::size_t kNumTypes = 6;
+  static constexpr std::size_t kNumTypes = 7;
 
   //! @brief The odds line, sorted by value. A roll lands on the slot whose value is nearest, so each slot owns the
   //! range halfway to its neighbours. Slots with equal values form a group that shares one band; the grave's fixed
@@ -50,7 +52,7 @@ public:
   {
     for ( auto &slot : slots )
       slot.value = std::clamp( slot.value, 0, 100 );
-    std::stable_sort( slots.begin(), slots.end(), []( const Slot &a, const Slot &b ) { return a.value < b.value; } );
+    std::ranges::stable_sort( slots, []( const Slot &a, const Slot &b ) { return a.value < b.value; } );
     return slots;
   }
 
@@ -137,8 +139,8 @@ private:
         --first;
       const std::size_t last = group_last( line, first );
       const int cur = line[i].value;
-      const int low = ( first == 0 ) ? 0 : ( line[first - 1].value + cur ) / 2 + 1;
-      const int high = ( last + 1 == line.size() ) ? 100 : ( cur + line[last + 1].value + 1 ) / 2 - 1;
+      const int low = ( first == 0 ) ? 0 : ( ( line[first - 1].value + cur ) / 2 ) + 1;
+      const int high = ( last + 1 == line.size() ) ? 100 : ( ( cur + line[last + 1].value + 1 ) / 2 ) - 1;
       return { low, high };
     }
     return { 0, -1 };

@@ -543,10 +543,18 @@
   },
   "GraveOddsBlood": {
     "type": "int",
-    "value": 40,
+    "value": 0,
     "min_value": 0,
     "max_value": 100,
     "detail": "Blood",
+    "format": "%d"
+  },
+  "GraveOddsCadaver": {
+    "type": "int",
+    "value": 40,
+    "min_value": 0,
+    "max_value": 100,
+    "detail": "Cadaver",
     "format": "%d"
   },
   "GraveOddsTalisman": {

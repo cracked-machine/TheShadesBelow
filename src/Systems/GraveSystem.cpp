@@ -4,9 +4,9 @@
 #include <Components/AnimData.hpp>
 #include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/Exhumed.hpp>
+#include <Components/Grave/KeyGrave.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/Segment.hpp>
-#include <Components/Grave/KeyGrave.hpp>
 #include <Components/Inventory/BlastProof.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Npc/Crow.hpp>
@@ -273,6 +273,18 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
     case Cmp::Grave::Consequence::Type::TORCH:
       spawn_grave_loot( { "item.torch" }, grave_entity, by );
       break;
+    case Cmp::Grave::Consequence::Type::CADAVER:
+      spawn_grave_loot(
+          {
+              "item.cadaver.skull",
+              "item.cadaver.torso",
+              "item.cadaver.leftarm",
+              "item.cadaver.rightarm",
+              "item.cadaver.leftleg",
+              "item.cadaver.rightleg",
+          },
+          grave_entity, by );
+      break;
     case Cmp::Grave::Consequence::Type::TALISMAN:
       spawn_grave_loot( Sys::ItemStore::instance().get_item_matches( "item.talisman*" ), grave_entity, by );
       break;
@@ -295,10 +307,7 @@ void GraveSystem::spawn_blood_loot( entt::entity grave_entity, ExhumedBy by )
   spawn_grave_loot( loot_pool, grave_entity, by );
 }
 
-void GraveSystem::light_torch_loot( entt::entity item_entt )
-{
-  Factory::Particle::add_flame_for_world_item( reg(), item_entt, kTorchFlameTag );
-}
+void GraveSystem::light_torch_loot( entt::entity item_entt ) { Factory::Particle::add_flame_for_world_item( reg(), item_entt, kTorchFlameTag ); }
 
 void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, entt::entity grave_entity, ExhumedBy exhumedby )
 {
@@ -378,8 +387,8 @@ void GraveSystem::on_altar_activated( const Events::AltarActivatedEvent &event )
   Cmp::RandomInt grave_picker( 0, static_cast<int>( pool.size() ) - 1 );
   const entt::entity key_grave = pool.at( static_cast<std::size_t>( grave_picker.gen() ) );
   reg().emplace_or_replace<Cmp::Grave::KeyGrave>( key_grave );
-  SPDLOG_INFO( "Altar activated: grave {} holds the exit key ({} hidden / {} visible candidates)", static_cast<uint32_t>( key_grave ),
-               hidden.size(), visible.size() );
+  SPDLOG_INFO( "Altar activated: grave {} holds the exit key ({} hidden / {} visible candidates)", static_cast<uint32_t>( key_grave ), hidden.size(),
+               visible.size() );
   // NpcSystem sends the guide crow from the altar
   get_systems_event_queue().enqueue( Events::CrowGuideEvent{ .key_grave = key_grave, .altar_position = event.altar_position } );
 }

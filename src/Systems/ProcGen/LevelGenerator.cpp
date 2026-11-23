@@ -36,6 +36,7 @@
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveOddsBlood.hpp>
 #include <Components/Persistent/GraveOddsBombTrap.hpp>
+#include <Components/Persistent/GraveOddsCadaver.hpp>
 #include <Components/Persistent/GraveOddsCurseTablet.hpp>
 #include <Components/Persistent/GraveOddsNpcTrap.hpp>
 #include <Components/Persistent/GraveOddsTalisman.hpp>
@@ -578,6 +579,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData 
         Slot{ .type = ConsequenceType::TORCH, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsTorch>( reg() ).get_value() },
         Slot{ .type = ConsequenceType::NPC_TRAP, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsNpcTrap>( reg() ).get_value() },
         Slot{ .type = ConsequenceType::BLOOD, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsBlood>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::CADAVER, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsCadaver>( reg() ).get_value() },
         Slot{ .type = ConsequenceType::TALISMAN, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsTalisman>( reg() ).get_value() },
     } );
     // Consequence caps the floor at the blood band width

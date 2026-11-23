@@ -1292,8 +1292,8 @@
   "item.cadaver.skull": {
     "sprite": { "name": "sprite.grave.cadaver.skull", "index": 0 },
     "consumable": "none",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
@@ -1308,8 +1308,8 @@
   "item.cadaver.torso": {
     "sprite": { "name": "sprite.grave.cadaver.torso", "index": 0 },
     "consumable": "none",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
@@ -1324,8 +1324,8 @@
   "item.cadaver.leftarm": {
     "sprite": { "name": "sprite.grave.cadaver.leftarm", "index": 0 },
     "consumable": "none",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
@@ -1340,8 +1340,8 @@
   "item.cadaver.rightarm": {
     "sprite": { "name": "sprite.grave.cadaver.rightarm", "index": 0 },
     "consumable": "none",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
@@ -1356,8 +1356,8 @@
   "item.cadaver.leftleg": {
     "sprite": { "name": "sprite.grave.cadaver.leftleg", "index": 0 },
     "consumable": "none",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
@@ -1372,8 +1372,8 @@
   "item.cadaver.rightleg": {
     "sprite": { "name": "sprite.grave.cadaver.rightleg", "index": 0 },
     "consumable": "none",
-    "stackable": false,
-    "auto_pickup": false,
+    "stackable": true,
+    "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
     "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
     "actions": [
