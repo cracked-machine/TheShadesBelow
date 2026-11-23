@@ -403,6 +403,7 @@ void GraveyardScene::do_update( sf::Time dt )
     PROFILED( m_sys.find<Sys::Store::Type::ArrowSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::BurrSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::InventorySystem>().update( dt ) );
+    PROFILED( m_sys.find<Sys::Store::Type::CartHorseSystem>().update( dt ) );
 
     // embers arc over obstacles rather than colliding with them
     auto excludes = { std::string( "graveyard.plant.particle.flame" ), std::string( Cmp::Particle::NoteParticleSprite::kPlayerNotesTag ),

@@ -139,23 +139,6 @@ void ExitSystem::unlock_exit()
   }
 }
 
-void ExitSystem::update_exit_zorder()
-{
-  auto player_pos = Utils::Player::get_position( reg() );
-
-  for ( auto [mb_entt, mb_cmp, mb_z_cmp] : reg().view<Cmp::Grave::ExitMultiBlock, Cmp::ZOrderValue>().each() )
-  {
-    if ( not player_pos.findIntersection( mb_cmp ) ) continue;
-    auto segment_view = reg().view<Cmp::Grave::ExitSegment, Cmp::Position, Cmp::ZOrderValue>();
-    for ( auto [segment_entt, segment_cmp, segment_pos_cmp, segment_z_cmp] : segment_view.each() )
-    {
-      if ( not player_pos.findIntersection( segment_pos_cmp ) ) continue;
-      mb_z_cmp.set( segment_z_cmp.get() );
-      SPDLOG_DEBUG( "Updated zorder to {}", segment_z_cmp.get() );
-    }
-  }
-}
-
 void ExitSystem::check_exit_collision()
 {
   // no scene transitions mid-flight - the player must land and walk in

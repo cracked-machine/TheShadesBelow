@@ -49,9 +49,6 @@ public:
   //! @brief Check for player collision with open exit to complete level
   void check_exit_collision();
 
-  //! @brief Update exit multiblock z-order using the segment zorder.
-  void update_exit_zorder();
-
 private:
   //! @brief Special requirement to signal Events::SceneManagerEvent::Type::LEVEL_COMPLETE to the Scene Manager
   entt::dispatcher &m_scenemanager_event_dispatcher;

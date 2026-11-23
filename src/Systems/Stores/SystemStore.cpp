@@ -6,6 +6,7 @@
 #include <Systems/ArrowSystem.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/BurrSystem.hpp>
+#include <Systems/CartHorseSystem.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/ExitSystem.hpp>
 #include <Systems/FlyingSystem.hpp>
@@ -23,15 +24,15 @@
 #include <Systems/ProcGen/DowsingGuideSystem.hpp>
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/ProcGen/PassageSystem.hpp>
-#include <Systems/Render/GrimoireOverlaySystem.hpp>
-#include <Systems/Render/PauseOverlaySystem.hpp>
+#include <Systems/Render/BarberOverlaySystem.hpp>
 #include <Systems/Render/DebugOverlaySystem.hpp>
-#include <Systems/Render/RenderGameSystem.hpp>
-#include <Systems/Render/RenderMenuSystem.hpp>
+#include <Systems/Render/GrimoireOverlaySystem.hpp>
 #include <Systems/Render/HudOverlaySystem.hpp>
 #include <Systems/Render/OverlayArbitrationSystem.hpp>
+#include <Systems/Render/PauseOverlaySystem.hpp>
+#include <Systems/Render/RenderGameSystem.hpp>
+#include <Systems/Render/RenderMenuSystem.hpp>
 #include <Systems/Render/ShopOverlaySystem.hpp>
-#include <Systems/Render/BarberOverlaySystem.hpp>
 #include <Systems/Render/TooltipOverlaySystem.hpp>
 #include <Systems/RuinSystem.hpp>
 #include <Systems/ShaderSystem.hpp>
@@ -68,6 +69,7 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
   emplace<Type::AnimSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::BombSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::BurrSystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::CartHorseSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );
   emplace<Type::CellAutomataSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::DiffusionLtdAggrSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::DowsingGuideSystem>( m_initial_reg, window, sound_bank );

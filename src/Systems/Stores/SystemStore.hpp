@@ -1,6 +1,7 @@
 #ifndef SRC_SYSTEMS_STORES_SYSTEMSTORE_HPP__
 #define SRC_SYSTEMS_STORES_SYSTEMSTORE_HPP__
 
+#include <Systems/CartHorseSystem.hpp>
 #include <entt/fwd.hpp>
 #include <map>
 #include <memory>
@@ -25,6 +26,7 @@ class AltarSystem;
 class BaseSystem;
 class BombSystem;
 class BurrSystem;
+class CartHorseSystem;
 class CorruptionHazardSystem;
 class CryptSystem;
 class ExitSystem;
@@ -83,6 +85,8 @@ public:
     BombSystem,
     //! @brief Key for BurrSystem.
     BurrSystem,
+    //! @brief Key for ProcGen::CartHorseSystem.
+    CartHorseSystem,
     //! @brief Key for ProcGen::CellAutomataSystem.
     CellAutomataSystem,
     //! @brief Key for CorruptionHazardSystem.
@@ -245,11 +249,12 @@ template<> struct Store::SystemTraits<Store::Type::AnimSystem>               { u
 template<> struct Store::SystemTraits<Store::Type::ArrowSystem>              { using type = ArrowSystem; };
 template<> struct Store::SystemTraits<Store::Type::BombSystem>               { using type = BombSystem; };
 template<> struct Store::SystemTraits<Store::Type::BurrSystem>               { using type = BurrSystem; };
-template<> struct Store::SystemTraits<Store::Type::CellAutomataSystem>     { using type = ProcGen::CellAutomataSystem; };
+template<> struct Store::SystemTraits<Store::Type::CartHorseSystem>          { using type = CartHorseSystem; };
+template<> struct Store::SystemTraits<Store::Type::CellAutomataSystem>       { using type = ProcGen::CellAutomataSystem; };
 template<> struct Store::SystemTraits<Store::Type::CorruptionHazardSystem>   { using type = CorruptionHazardSystem; };
-template<> struct Store::SystemTraits<Store::Type::CryptSystem>            { using type = Game::Sys::CryptSystem; };
-template<> struct Store::SystemTraits<Store::Type::DiffusionLtdAggrSystem> { using type = ProcGen::DLASystem; };
-template<> struct Store::SystemTraits<Store::Type::DowsingGuideSystem>     { using type = ProcGen::DowsingGuideSystem; };
+template<> struct Store::SystemTraits<Store::Type::CryptSystem>              { using type = Game::Sys::CryptSystem; };
+template<> struct Store::SystemTraits<Store::Type::DiffusionLtdAggrSystem>   { using type = ProcGen::DLASystem; };
+template<> struct Store::SystemTraits<Store::Type::DowsingGuideSystem>       { using type = ProcGen::DowsingGuideSystem; };
 template<> struct Store::SystemTraits<Store::Type::ExitSystem>               { using type = ExitSystem; };
 template<> struct Store::SystemTraits<Store::Type::FootstepSystem>           { using type = FootstepSystem; };
 template<> struct Store::SystemTraits<Store::Type::GraveSystem>              { using type = GraveSystem; };
