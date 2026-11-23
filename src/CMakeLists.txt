@@ -140,6 +140,8 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Factory/MultiblockFactoryRuinBuildings.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/MultiblockFactorySpring.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/MultiblockFactoryPlant.cpp
+    ${CMAKE_SOURCE_DIR}/src/Factory/MultiblockFactoryCart.cpp
+    ${CMAKE_SOURCE_DIR}/src/Factory/MultiblockFactoryHorse.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/ShaderFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/ToxicityFactory.cpp
     ${CMAKE_SOURCE_DIR}/src/Factory/ParticleFactory.cpp

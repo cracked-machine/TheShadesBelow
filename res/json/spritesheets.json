@@ -1,5 +1,32 @@
 {
   "sprites": {
+    "sprite.graveyard.cart": {
+      "spritesheet": {
+        "displayname": "Cart",
+        "texture_path": "res/textures/carthorse.png",
+        "sprite_indices": [0,1,2,3,6,7,8,9],
+        "indices_per_sequence": 1,
+        "framerate": 10,
+        "grid_size": {
+          "x": 4,
+          "y": 2
+        }
+      }
+    },
+    "sprite.graveyard.horse": {
+      "spritesheet": {
+        "displayname": "Horse",
+        "texture_path": "res/textures/carthorse.png",
+        "sprite_indices": [4,5,10,11],
+        "RelativeZOrder": [-4,-4,-4,-4],
+        "indices_per_sequence": 1,
+        "framerate": 10,
+        "grid_size": {
+          "x": 2,
+          "y": 2
+        }
+      }
+    },
     "sprite.adder": {
       "spritesheet": {
         "displayname": "Adder",

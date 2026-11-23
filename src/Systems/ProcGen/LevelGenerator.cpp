@@ -1,6 +1,8 @@
 #include <Components/Altar/BloodCount.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Altar/Segment.hpp>
+#include <Components/Cart/MultiBlock.hpp>
+#include <Components/Cart/Segment.hpp>
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/BuildingSegment.hpp>
 #include <Components/Crypt/InteriorMultiBlock.hpp>
@@ -17,8 +19,9 @@
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
-#include <Components/Plant/Grass.hpp>
 #include <Components/Grave/Segment.hpp>
+#include <Components/Horse/MultiBlock.hpp>
+#include <Components/Horse/Segment.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LootContainer.hpp>
@@ -27,8 +30,8 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/ObstacleCap.hpp>
 #include <Components/Persistent/BloodMinChance.hpp>
-#include <Components/Persistent/GraveClusterExternalPadding.hpp>
 #include <Components/Persistent/GrassSpawnChance.hpp>
+#include <Components/Persistent/GraveClusterExternalPadding.hpp>
 #include <Components/Persistent/GraveClusterGridSize.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
 #include <Components/Persistent/GraveOddsBlood.hpp>
@@ -38,6 +41,7 @@
 #include <Components/Persistent/GraveOddsTalisman.hpp>
 #include <Components/Persistent/GraveOddsTorch.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
+#include <Components/Plant/Grass.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Position.hpp>
@@ -99,13 +103,13 @@
 #include <cmath>
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <ranges>
-#include <string_view>
 #include <spdlog/fmt/ranges.h>
 #include <spdlog/spdlog.h>
+#include <string_view>
 #include <tuple>
 #include <unordered_map>
-#include <limits>
 #include <unordered_set>
 
 namespace Game::Sys::ProcGen
@@ -281,8 +285,11 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
   const std::unordered_map<std::string, MultiblockFactoryFn> kMultiblockFactories{
       { "sprite.graveyard.healingspring", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
         { return Factory::Multiblock::add_multiblock_with_segments<Cmp::HealingSpringMultiBlock, Cmp::HealingSpringSegment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
-      { "sprite.graveyard.altar.inactive", add_altar },
-      { "sprite.crypt.objective.closed",[this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
+      { "sprite.graveyard.cart", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
+        { return Factory::Multiblock::add_multiblock_with_segments<Cmp::Cart::MultiBlock, Cmp::Cart::Segment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
+      { "sprite.graveyard.horse", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
+        { return Factory::Multiblock::add_multiblock_with_segments<Cmp::Horse::MultiBlock, Cmp::Horse::Segment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
+        { "sprite.crypt.objective.closed",[this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
         { return Factory::Multiblock::add_multiblock_with_segments<Cmp::Crypt::ObjectiveMultiBlock, Cmp::Crypt::ObjectiveSegment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
       { "sprite.crypt.altar.inactive", add_altar },
       { "sprite.ruin.stairs.up", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
@@ -675,8 +682,8 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData 
                   reg(), slot_pos, spritesheet, index, 0, m_reserved_sm.get(), m_world_tile_sm.lock().get() );
               m_reserved_sm->insert( mb_entt, grave_pos );
               // fix the roll at creation; the consequence is resolved against the player's current luck when needed
-              auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 100 ).gen(),
-                                                                                     min_blood_chance_pct, consequence_line );
+              auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 100 ).gen(), min_blood_chance_pct,
+                                                                                     consequence_line );
               // simulate the rolls now to get an idea of the distribution with game start player luck
               grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck() )]++;
               quadrant_graves++;
@@ -695,8 +702,8 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData 
           }
         }
       }
-      SPDLOG_INFO( "Grave clusters: quadrant {} has {}x{} clusters of {}x{} slots, {} graves placed", quadrant, clusters_x, clusters_y, slots_per_side,
-                   slots_per_side, quadrant_graves );
+      SPDLOG_INFO( "Grave clusters: quadrant {} has {}x{} clusters of {}x{} slots, {} graves placed", quadrant, clusters_x, clusters_y,
+                   slots_per_side, slots_per_side, quadrant_graves );
       placed_num_graves += quadrant_graves;
     }
     SPDLOG_INFO( "Added {} graves", placed_num_graves );
@@ -708,7 +715,7 @@ template <typename MULTIBLOCK, typename MBSEGMENT>
 entt::entity LevelGenerator::spawn_multiblock_at( sf::Vector2f pos, const Sprites::SpriteSheet &ss )
 {
   auto [mb_entt, _] = Factory::Multiblock::add_multiblock_with_segments<MULTIBLOCK, MBSEGMENT>( reg(), pos, ss, 0, 0, m_reserved_sm.get(),
-                                                                                               m_world_tile_sm.lock().get() );
+                                                                                                m_world_tile_sm.lock().get() );
   m_reserved_sm->insert( mb_entt, Cmp::Position( pos, Constants::kGridSizePxF ) );
   SPDLOG_INFO( "Added {} to {},{}", ss.type(), pos.x, pos.y );
   return mb_entt;
@@ -975,8 +982,8 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants( const Scene::SceneD
 
       // Create the plant in the game area and increment the tracker counter
       bool created = false;
-      get_systems_event_queue().trigger(
-          Events::CreatePlantEvent( chosen_plant_item_type, random_pos, [&created]( [[maybe_unused]] entt::entity plant_entt ) { created = true; } ) );
+      get_systems_event_queue().trigger( Events::CreatePlantEvent( chosen_plant_item_type, random_pos,
+                                                                   [&created]( [[maybe_unused]] entt::entity plant_entt ) { created = true; } ) );
       if ( created )
       {
         assigned_entts.push_back( random_entity );
@@ -986,8 +993,9 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants( const Scene::SceneD
 
     if ( not quota_reached() )
     {
-      SPDLOG_WARN( "gen_random_plants: quadrant {} ran out of free positions ({} candidates) before every plant type reached its spawn_count_per_quadrant",
-                   quadrant, candidates.size() );
+      SPDLOG_WARN(
+          "gen_random_plants: quadrant {} ran out of free positions ({} candidates) before every plant type reached its spawn_count_per_quadrant",
+          quadrant, candidates.size() );
     }
     for ( const auto &[plant_type, tracked] : plant_tracker )
     {
@@ -1000,7 +1008,7 @@ std::vector<entt::entity> LevelGenerator::gen_random_plants( const Scene::SceneD
 void LevelGenerator::gen_grass( const Scene::SceneData &scene_data )
 {
   const int spawn_chance = Sys::PersistSystem::get<Cmp::Persist::GrassSpawnChance>( reg() ).get_value();
-  const Sys::ItemKey grass_item( std::string( Cmp::Plant::kGrassItem ) );
+  const Sys::ItemKey grass_item( ( std::string( Cmp::Plant::kGrassItem ) ) );
   Cmp::RandomInt chance_rng( 0, 99 );
 
   std::array<std::size_t, 4> placed_by_quadrant{};
