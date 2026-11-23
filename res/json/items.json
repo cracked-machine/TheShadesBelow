@@ -1289,6 +1289,102 @@
       { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
     ]
   },
+  "item.cadaver.skull": {
+    "sprite": { "name": "sprite.grave.cadaver.skull", "index": 0 },
+    "consumable": "none",
+    "stackable": false,
+    "auto_pickup": false,
+    "shop": { "enabled": false, "base_price": 10 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
+    "actions": [
+      { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+    ]
+  },
+  "item.cadaver.torso": {
+    "sprite": { "name": "sprite.grave.cadaver.torso", "index": 0 },
+    "consumable": "none",
+    "stackable": false,
+    "auto_pickup": false,
+    "shop": { "enabled": false, "base_price": 10 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
+    "actions": [
+      { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+    ]
+  },
+  "item.cadaver.leftarm": {
+    "sprite": { "name": "sprite.grave.cadaver.leftarm", "index": 0 },
+    "consumable": "none",
+    "stackable": false,
+    "auto_pickup": false,
+    "shop": { "enabled": false, "base_price": 10 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
+    "actions": [
+      { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+    ]
+  },
+  "item.cadaver.rightarm": {
+    "sprite": { "name": "sprite.grave.cadaver.rightarm", "index": 0 },
+    "consumable": "none",
+    "stackable": false,
+    "auto_pickup": false,
+    "shop": { "enabled": false, "base_price": 10 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
+    "actions": [
+      { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+    ]
+  },
+  "item.cadaver.leftleg": {
+    "sprite": { "name": "sprite.grave.cadaver.leftleg", "index": 0 },
+    "consumable": "none",
+    "stackable": false,
+    "auto_pickup": false,
+    "shop": { "enabled": false, "base_price": 10 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
+    "actions": [
+      { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+    ]
+  },
+  "item.cadaver.rightleg": {
+    "sprite": { "name": "sprite.grave.cadaver.rightleg", "index": 0 },
+    "consumable": "none",
+    "stackable": false,
+    "auto_pickup": false,
+    "shop": { "enabled": false, "base_price": 10 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
+    "actions": [
+      { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
+      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 2, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
+      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }}
+    ]
+  },
   "item.talisman0": {
     "sprite": { "name": "sprite.item.talisman", "index": 0 },
     "consumable": "none",

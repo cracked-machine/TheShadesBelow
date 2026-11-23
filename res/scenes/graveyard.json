@@ -104,6 +104,7 @@
             6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
          "height":99,
          "id":4,
+         "locked":true,
          "name":"levelgen",
          "opacity":1,
          "type":"tilelayer",
@@ -2317,7 +2318,6 @@
         {
          "draworder":"topdown",
          "id":11,
-         "locked":true,
          "name":"developer",
          "objects":[
                 {
@@ -2479,54 +2479,80 @@
                 {
                  "height":0,
                  "id":352,
-                 "name":"item.grave.blood.small",
+                 "name":"item.cadaver.skull",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":848,
-                 "y":752
+                 "x":752,
+                 "y":720
                 }, 
                 {
                  "height":0,
-                 "id":353,
-                 "name":"item.grave.blood.small",
+                 "id":357,
+                 "name":"item.cadaver.torso",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":848,
-                 "y":768
+                 "x":768,
+                 "y":720
                 }, 
                 {
                  "height":0,
-                 "id":354,
-                 "name":"item.grave.blood.small",
+                 "id":358,
+                 "name":"item.cadaver.leftarm",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":848,
-                 "y":784
+                 "x":784,
+                 "y":720
                 }, 
                 {
                  "height":0,
-                 "id":355,
-                 "name":"item.grave.blood.small",
+                 "id":359,
+                 "name":"item.cadaver.rightarm",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":848,
-                 "y":800
+                 "x":800,
+                 "y":720
+                }, 
+                {
+                 "height":0,
+                 "id":360,
+                 "name":"item.cadaver.leftleg",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":816,
+                 "y":720
+                }, 
+                {
+                 "height":0,
+                 "id":361,
+                 "name":"item.cadaver.rightleg",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":832,
+                 "y":720
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -2599,7 +2625,7 @@
          "y":0
         }],
  "nextlayerid":16,
- "nextobjectid":357,
+ "nextobjectid":362,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

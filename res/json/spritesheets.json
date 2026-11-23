@@ -27,6 +27,84 @@
         }
       }
     },
+    "sprite.grave.cadaver.skull": {
+      "spritesheet": {
+        "displayname": "Cadaver Skull",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [2],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.grave.cadaver.torso": {
+      "spritesheet": {
+        "displayname": "Cadaver Torso",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [3],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.grave.cadaver.leftarm": {
+      "spritesheet": {
+        "displayname": "Cadaver Left Arm",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [4],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.grave.cadaver.rightarm": {
+      "spritesheet": {
+        "displayname": "Cadaver Arm",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [5],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.grave.cadaver.leftleg": {
+      "spritesheet": {
+        "displayname": "Cadaver Left Leg",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [6],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
+    "sprite.grave.cadaver.rightleg": {
+      "spritesheet": {
+        "displayname": "Cadaver Right Leg",
+        "texture_path": "res/textures/graveyard.png",
+        "sprite_indices": [7],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 1,
+          "y": 1
+        }
+      }
+    },
     "sprite.adder": {
       "spritesheet": {
         "displayname": "Adder",
