@@ -20,7 +20,6 @@
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Persistent/RuinProcGenMaxIterations.hpp>
-#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/LastGraveyardPosition.hpp>
 #include <Components/Player/LevelDepth.hpp>
@@ -153,8 +152,6 @@ void GraveyardScene::on_init()
     Utils::Player::get_level_depth( m_reg ).increment_count( 1 );
     // every level starts with the Cmp::Persist::Starting* stats
     Utils::Player::reset_stats_to_starting( m_reg );
-    // every level starts with no cadaver parts collected
-    Utils::Player::get_cadaver( m_reg ).reset();
   }
 
   // add the number of cart barrels for this level

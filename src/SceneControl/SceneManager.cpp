@@ -150,7 +150,7 @@ void SceneManager::pop_no_enter( RegCopyMode mode )
   m_system_store.find<Sys::Store::Type::PersistSystem>().load_state();
 }
 
-void SceneManager::replace( std::unique_ptr<IScene> new_scene, RegCopyMode mode )
+void SceneManager::replace( std::unique_ptr<IScene> new_scene, RegCopyMode mode, bool xfer_cart_barrels )
 {
   RegistryTransfer::RegCopy reg_copy = m_reg_xfer.copy_reg( m_scene_stack.current(), mode );
 
@@ -171,6 +171,7 @@ void SceneManager::replace( std::unique_ptr<IScene> new_scene, RegCopyMode mode 
     m_reg_xfer.xfer_player_entt( *reg_copy, m_scene_stack.current().registry() );
     m_reg_xfer.xfer_inventory_slots( *reg_copy, m_scene_stack.current().registry() );
     m_reg_xfer.xfer_component_entt<Cmp::Ruin::ObjectiveType>( *reg_copy, m_scene_stack.current().registry() );
+    if ( xfer_cart_barrels ) { m_reg_xfer.xfer_cart_barrels( *reg_copy, m_scene_stack.current().registry() ); }
   }
 
   loading_screen( [&]() { m_scene_stack.current().on_init(); }, m_splash_texture );
@@ -304,7 +305,7 @@ void SceneManager::handle_events( const Events::SceneManagerEvent &event )
     case Events::SceneManagerEvent::Type::LEVEL_COMPLETE: {
       SPDLOG_DEBUG( "SceneManager: Events::SceneManagerEvent::Type::LEVEL_COMPLETE requested" );
       auto level_complete_scene = std::make_unique<LevelCompleteScene>( m_sound_bank, m_system_store, m_nav_event_dispatcher );
-      replace( std::move( level_complete_scene ), RegCopyMode::ALL );
+      replace( std::move( level_complete_scene ), RegCopyMode::ALL, /*xfer_cart_barrels=*/true );
       break;
     }
     case Events::SceneManagerEvent::Type::RETURN_TO_TITLE: {

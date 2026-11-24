@@ -45,7 +45,6 @@
 #include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/ArrowCompass.hpp>
-#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/CameraHold.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Curse.hpp>

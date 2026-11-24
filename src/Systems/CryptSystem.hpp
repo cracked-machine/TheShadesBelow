@@ -2,6 +2,7 @@
 #define SRC_SYSTEMS_CRYPTSYSTEM_HPP__
 
 #include <Events/CryptRoomEvent.hpp>
+#include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Utils/Crypt.hpp>
 
@@ -49,6 +50,7 @@ public:
     // The entt::dispatcher is independent of the registry, so it is safe to bind event handlers in the constructor
     std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&CryptSystem::on_player_action>( this );
     std::ignore = get_systems_event_queue().sink<Events::CryptRoomEvent>().connect<&CryptSystem::on_room_event>( this );
+    std::ignore = get_systems_event_queue().sink<Events::ItemPickedUpEvent>().connect<&CryptSystem::on_item_picked_up_event>( this );
   }
 
   //! @brief init the weak pointer for the spatial grid
@@ -83,14 +85,17 @@ public:
   //! @param event
   void on_room_event( Events::CryptRoomEvent &event );
 
+  //! @brief Picking up the crypt objective's preserved cat opens every room so the player can get back to the exit.
+  //! @param event
+  void on_item_picked_up_event( const Events::ItemPickedUpEvent &event );
+
   //! @brief Check for collisions with the entrance
   void check_entrance_collision();
 
   //! @brief Check for collisions with the exit
   void check_exit_collision();
 
-  //! @brief Unlock the crypt door. Refused (key kept, Events::CryptEntryRefusedEvent sent) when the player has already
-  //! collected every cadaver part.
+  //! @brief Unlock the crypt door the player is facing with the crypt key.
   void unlock_crypt_door();
 
   //! @brief If the player is in front of a closed crypt door without the crypt key, send a crow to fetch it.

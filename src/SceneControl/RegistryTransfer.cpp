@@ -2,6 +2,7 @@
 #include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AbsoluteRotation.hpp>
 #include <Components/AnimData.hpp>
+#include <Components/Cart/Barrel.hpp>
 #include <Components/Armable.hpp>
 #include <Components/WorldTile.hpp>
 #include <Components/Crypt/EnteredDoor.hpp>
@@ -29,7 +30,6 @@
 #include <Components/Npc/SummonOffering.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/Player/ArrowCompass.hpp>
-#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/Curse.hpp>
@@ -299,6 +299,19 @@ void RegistryTransfer::xfer_inventory_slots( entt::registry &source_registry, en
   pretty_print( "No Storage Found", no_storage_cmps );
 }
 
+void RegistryTransfer::xfer_cart_barrels( entt::registry &source_registry, entt::registry &target_registry )
+{
+  auto target_barrel_view = target_registry.view<Cmp::Cart::Barrel>();
+  std::vector<entt::entity> stale_barrels( target_barrel_view.begin(), target_barrel_view.end() );
+  target_registry.destroy( stale_barrels.begin(), stale_barrels.end() );
+
+  for ( auto [source_entity, barrel_cmp] : source_registry.view<Cmp::Cart::Barrel>().each() )
+  {
+    target_registry.emplace<Cmp::Cart::Barrel>( target_registry.create(), barrel_cmp );
+  }
+  SPDLOG_DEBUG( "Transferred {} cart barrels", target_registry.view<Cmp::Cart::Barrel>().size() );
+}
+
 void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
 {
   // Force storage creation by accessing storage for each known component type
@@ -317,7 +330,7 @@ void RegistryTransfer::init_missing_cmp_storages( entt::registry &registry )
   registry.storage<Cmp::Player::Footstep>();
   registry.storage<Cmp::Player::Mortality>();
   registry.storage<Cmp::Player::HeartBeat>();
-  registry.storage<Cmp::Player::Cadaver>();
+  registry.storage<Cmp::Cart::Barrel>();
   registry.storage<Cmp::Crypt::EnteredDoor>();
   registry.storage<Cmp::AnimData>();
   registry.storage<Cmp::Inventory::DowsingTarget>();

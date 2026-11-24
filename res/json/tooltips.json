@@ -76,14 +76,6 @@
       "position": "above_source",
       "frequency": "always",
       "duration_s": 4.0
-    },
-    {
-      "id": "crypt_all_cadavers",
-      "trigger": "CryptEntryRefusedEvent",
-      "text": "You have already collected every cadaver part.\nThis crypt holds nothing more for you.",
-      "position": { "x": 0.5, "y": 0.85 },
-      "frequency": "always",
-      "duration_s": 4.0
     }
   ]
 }

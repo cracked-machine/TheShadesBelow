@@ -7,7 +7,7 @@ namespace Game::Sys::Crypt
 {
 
 //! @brief A sprawling, fully open crypt: more and smaller rooms, a dense passage network, no shuffle timer and no
-//! levers. Every room is open (with lava pits) from the start and skeletons roam it; collecting the cadaver
+//! levers. Every room is open (with lava pits) from the start and skeletons roam it; collecting the preserved cat
 //! summons priests and ghosts.
 class OpenCryptVariant : public CryptVariant
 {

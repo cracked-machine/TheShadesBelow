@@ -155,7 +155,6 @@
 #include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
 #include <Components/Persistent/WormholeAbortThreshold.hpp>
 #include <Components/Persistent/WormholeSeed.hpp>
-#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/KeysCount.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Player/Wealth.hpp>
@@ -587,7 +586,7 @@ void RenderMenuSystem::render_defeat_screen()
   }
 }
 
-void RenderMenuSystem::render_victory_screen( bool allow_continue, int cadaver_wealth )
+void RenderMenuSystem::render_victory_screen( bool allow_continue, const VictoryTally &tally )
 {
   sf::Vector2u display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
 
@@ -609,16 +608,19 @@ void RenderMenuSystem::render_victory_screen( bool allow_continue, int cadaver_w
   }
 
   const auto &wealth = Utils::Player::get_wealth( m_reg );
-  const auto &cadaver_cmp = Utils::Player::get_cadaver( m_reg );
 
-  sf::Text cadaver_txt( m_font, std::format( "Cadaver count: {}   (+{} wealth)", cadaver_cmp.count(), cadaver_wealth ), 24 );
-  cadaver_txt.setFillColor( sf::Color::White );
-  cadaver_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, 500.f } );
-  m_window.draw( cadaver_txt );
+  // below the barrel and cat rows (see Sys::CartOverlaySystem::render_level_tally())
+  sf::Text tally_txt( m_font,
+                      std::format( "Cadaver parts: {}   Full barrels: {}   Preserved cats: {}   (+{} wealth)", tally.parts, tally.full_barrels,
+                                   tally.cats, tally.score_wealth ),
+                      24 );
+  tally_txt.setFillColor( sf::Color::White );
+  tally_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, static_cast<float>( display_size.y ) - 200.f } );
+  m_window.draw( tally_txt );
 
   sf::Text wealth_txt( m_font, "Player wealth: " + std::to_string( wealth.wealth ), 24 );
   wealth_txt.setFillColor( sf::Color::White );
-  wealth_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, 550.f } );
+  wealth_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, static_cast<float>( display_size.y ) - 150.f } );
   m_window.draw( wealth_txt );
 }
 

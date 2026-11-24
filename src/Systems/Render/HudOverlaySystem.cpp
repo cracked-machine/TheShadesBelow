@@ -10,7 +10,6 @@
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Hazard/FieldCell.hpp>
 #include <Components/Health.hpp>
-#include <Components/Inventory/FlashUICadaver.hpp>
 #include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/FlashUIInventory.hpp>
@@ -29,7 +28,6 @@
 #include <Components/Persistent/ToxicImmunityMeterFill.hpp>
 #include <Components/Persistent/ToxicImmunityMeterShimmer.hpp>
 #include <Components/Persistent/ToxicImmunityMeterTint.hpp>
-#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/LevelDepth.hpp>
 #include <Components/Player/ToxicImmunity.hpp>
 #include <Components/Player/Wealth.hpp>
@@ -93,7 +91,6 @@ void HudOverlaySystem::update( sf::Time dt )
   PROFILED( fit_inventory_outline() );
   PROFILED( render_ui_outlines() );
   PROFILED( render_ui_icons() );
-  PROFILED( render_ui_cadaver_icons() );
   PROFILED( render_ui_inventory_table( dt ) );
   // after the inventory table, so the torch flames flicker over their slot icons
   PROFILED( render_ui_particles() );
@@ -166,28 +163,7 @@ void HudOverlaySystem::render_ui_icons()
   }
   for ( const auto &icon : m_main_ui_layout->m_icons )
   {
-    // we handle the cadaver icons seperately
-    if ( icon.name.contains( "sprite.crypt.loot.cadaver" ) ) { continue; }
     RenderSystem::safe_render_sprite_screen( icon.type, icon.rect, icon.index, { icon.scale, icon.scale } );
-  }
-}
-
-void HudOverlaySystem::render_ui_cadaver_icons()
-{
-  if ( not m_main_ui_layout )
-  {
-    SPDLOG_CRITICAL( "UiLayout object is not initialised. Cannot draw icon overlay" );
-    return;
-  }
-  for ( const auto &icon : m_main_ui_layout->m_icons )
-  {
-    if ( icon.name.contains( "sprite.crypt.loot.cadaver" ) )
-    {
-      const Sys::SpriteKey part_key( icon.name );
-      const sf::Vector2f scale{ icon.scale, icon.scale };
-      const Cmp::Player::Cadaver &cadaver_cmp = Utils::Player::get_cadaver( reg() );
-      if ( cadaver_cmp.is_set( part_key ) ) { RenderSystem::safe_render_sprite_screen( part_key, icon.rect, 0, scale ); }
-    }
   }
 }
 
@@ -651,8 +627,6 @@ void HudOverlaySystem::render_ui_labels( sf::Time dt )
     }
 
     sf::Color outline = sf::Color::Black;
-    // flash the text if we just picked up a cadaver
-    if ( ui_label.name == "cadaver_label" and update_flash_toggle<Cmp::FlashUICadaver>( dt ) ) { outline = sf::Color::White; }
     // flash the text if we just deposited something in a well
     if ( ui_label.name == "wealth_label" and update_flash_toggle<Cmp::FlashUIWealth>( dt ) ) { outline = sf::Color::White; }
 

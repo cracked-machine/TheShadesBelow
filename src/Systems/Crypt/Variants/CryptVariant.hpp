@@ -71,7 +71,7 @@ public:
   //! Default: close every other open room, remove levers/hazards, and carve the end room passage.
   virtual void unlock_objective();
 
-  //! @brief The cadaver was collected: open every room so the player can get back to the exit.
+  //! @brief The preserved cat was collected: open every room so the player can get back to the exit.
   //! Default: open and connect all rooms, clear chests/levers/lava, then spawn_exit_npcs().
   virtual void unlock_exit();
 

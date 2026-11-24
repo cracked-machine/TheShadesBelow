@@ -32,7 +32,6 @@ class Wealth;
 class Mortality;
 class LastGraveyardPosition;
 class Curse;
-class Cadaver;
 class LevelDepth;
 class HeartBeat;
 } // namespace Game::Cmp::Player
@@ -288,12 +287,6 @@ bool is_digging_on_cooldown( entt::registry &reg );
 //! @param reg reference to the entt registry
 //! @return Cmp::Position A 1x1 position one grid cell ahead of the player's current center.
 Cmp::Position get_projected_position( entt::registry &reg );
-
-//! @brief Get the player's cadaver count object.
-//! @param reg reference to the entt registry
-//! @return Cmp::Player::CadaverCount& Reference to the player's cadaver count.
-//! @throws std::runtime_error if the player has no Cmp::Player::CadaverCount.
-Cmp::Player::Cadaver &get_cadaver( entt::registry &reg );
 
 //! @brief Get the player's torch radius object.
 //! @param reg reference to the entt registry

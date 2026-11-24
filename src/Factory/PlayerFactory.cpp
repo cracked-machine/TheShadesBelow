@@ -22,7 +22,6 @@
 #include <Components/Particle/SpriteBase.hpp>
 #include <Components/Persistent/PlayerRenderOffset.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Curse.hpp>
 #include <Components/Player/Doglegs.hpp>
@@ -96,11 +95,6 @@ void create_player( entt::registry &reg )
   });
   // clang-format on
 
-  std::vector<Sys::SpriteKey> list = {
-      "sprite.crypt.loot.cadaver.skull",    "sprite.crypt.loot.cadaver.torso",   "sprite.crypt.loot.cadaver.leftarm",
-      "sprite.crypt.loot.cadaver.rightarm", "sprite.crypt.loot.cadaver.leftleg", "sprite.crypt.loot.cadaver.rightleg",
-  };
-  reg.emplace_or_replace<Cmp::Player::Cadaver>( entity, list );
   reg.emplace_or_replace<Cmp::Player::Wealth>( entity, 0 );
   reg.emplace_or_replace<Cmp::Player::Mortality>( entity, Cmp::Player::Mortality::State::ALIVE );
   reg.emplace_or_replace<Cmp::Player::Curse>( entity, false );

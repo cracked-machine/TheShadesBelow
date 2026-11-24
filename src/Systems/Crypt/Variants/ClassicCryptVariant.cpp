@@ -93,7 +93,7 @@ void ClassicCryptVariant::on_lever_activated()
 
 void ClassicCryptVariant::unlock_exit()
 {
-  // if we unlocked the maze by picking up the cadaver, then cancel the timer
+  // if we unlocked the maze by picking up the preserved cat, then cancel the timer
   m_maze_unlocked = true;
   CryptVariant::unlock_exit();
 }

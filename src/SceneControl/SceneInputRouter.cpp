@@ -1,10 +1,10 @@
 
 #include <Audio/SoundBank.hpp>
+#include <Components/Cart/Barrel.hpp>
 #include <Components/Direction.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -57,6 +57,7 @@
 
 #include <algorithm>
 #include <array>
+#include <vector>
 #include <imgui-SFML.h>
 #include <imgui.h>
 
@@ -725,10 +726,18 @@ void SceneInputRouter::try_handle_debug_key( [[maybe_unused]] sf::Keyboard::Scan
   else if ( scancode == Scancode::NumpadMultiply ) { Utils::Player::get_wealth( reg() ).wealth += 1; }
   else if ( scancode == Scancode::NumpadDivide )
   {
-    auto &cadaver_cmp = Utils::Player::get_cadaver( reg() );
-    auto pool = cadaver_cmp.keys( /*remaining_only=*/true );
-    auto pick = pool.at( Cmp::RandomInt( 0, pool.size() - 1 ).gen() );
-    cadaver_cmp.set( pick );
+    // fill one random empty part slot in the first barrel that isn't full
+    for ( auto [barrel_entt, barrel_cmp] : reg().view<Cmp::Cart::Barrel>().each() )
+    {
+      if ( barrel_cmp.is_full() ) continue;
+      std::vector<bool Cmp::Cart::Barrel::*> empty_parts;
+      for ( const auto &[name, member] : Cmp::Cart::Barrel::kParts )
+      {
+        if ( not( barrel_cmp.*member ) ) empty_parts.push_back( member );
+      }
+      barrel_cmp.*empty_parts.at( Cmp::RandomInt( 0, static_cast<int>( empty_parts.size() ) - 1 ).gen() ) = true;
+      break;
+    }
   }
   else if ( scancode == Scancode::Numpad7 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Luck{ 10 }, {} } ); }
   else if ( scancode == Scancode::Numpad4 ) { Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, {}, Cmp::Stats::Luck{ -10 }, {} } ); }

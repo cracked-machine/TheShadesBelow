@@ -3,7 +3,6 @@
 #include <Components/DropCount.hpp>
 #include <Components/DroppedBy.hpp>
 #include <Components/FootStepTimer.hpp>
-#include <Components/Inventory/FlashUICadaver.hpp>
 #include <Components/Inventory/FlashUIInventory.hpp>
 #include <Components/Inventory/FlashUIWealth.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
@@ -12,7 +11,6 @@
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Obstacle.hpp>
-#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
@@ -251,21 +249,6 @@ void LootSystem::check_loot_collision( sf::Time dt )
           }
         }
       }
-    }
-    else if ( effect.type.contains( "sprite.crypt.loot.cadaver" ) )
-    {
-      Cmp::Player::Cadaver &cadaver_cmp = Utils::Player::get_cadaver( reg() );
-      cadaver_cmp.set( effect.type );
-      collect_loot( effect.loot_entity );
-      m_sound_bank.get_effect( "secret" ).play();
-
-      // signal UI to flash
-      auto flash_entt = reg().create();
-      reg().emplace_or_replace<Cmp::FlashUICadaver>( flash_entt );
-
-      Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, Cmp::Stats::Infamy{ 30 }, {}, {} } );
-
-      get_systems_event_queue().trigger( Events::CryptRoomEvent( Events::CryptRoomEvent::Type::EXIT_ALL_PASSAGES ) );
     }
     else if ( effect.type == "sprite.crypt.loot.gold" )
     {

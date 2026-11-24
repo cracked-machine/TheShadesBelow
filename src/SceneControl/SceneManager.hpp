@@ -68,7 +68,8 @@ public:
   //! @brief Replace the current scene with a new one
   //! @param scene The scene to replace the current scene with
   //! @param mode Which components (if any) to copy from the outgoing scene's registry into the new scene's registry
-  void replace( std::unique_ptr<IScene> scene, RegCopyMode mode = RegCopyMode::NONE );
+  //! @param xfer_cart_barrels true: also carry the cart barrels across (see RegistryTransfer::xfer_cart_barrels)
+  void replace( std::unique_ptr<IScene> scene, RegCopyMode mode = RegCopyMode::NONE, bool xfer_cart_barrels = false );
   //! @brief Replace the current scene with a new one - do not call on_exit() for the replaced scene
   //! @param scene The scene to replace the current scene with
   //! @param mode Which components (if any) to copy from the outgoing scene's registry into the new scene's registry

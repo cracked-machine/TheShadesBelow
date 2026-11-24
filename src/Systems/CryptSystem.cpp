@@ -27,7 +27,6 @@
 #include <Components/Particle/LavaFireballParticleSprite.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/HazardBalance.hpp>
 #include <Components/Player/KeysCount.hpp>
@@ -37,14 +36,15 @@
 #include <Components/RectBounds.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
+#include <Components/Stats/PlayerStats.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
+#include <Events/CreateItemEvent.hpp>
 #include <Events/CreateLootEvent.hpp>
 #include <Events/CreateNpcEvent.hpp>
 #include <Events/CrowDeliveryEvent.hpp>
-#include <Events/CryptEntryRefusedEvent.hpp>
 #include <Events/CryptRoomEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/CryptFactory.hpp>
@@ -130,8 +130,6 @@ void CryptSystem::request_cryptkey_delivery()
 {
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
   if ( inventory_type == "item.cryptkey" ) return;
-  // the door would refuse entry anyway (see unlock_crypt_door), so don't fetch the key
-  if ( Utils::Player::get_cadaver( reg() ).keys( /*remaining_only=*/true ).empty() ) return;
 
   // Player can't intersect with a closed crypt door so expand their hitbox to facilitate collision detection
   auto player_hitbox = Cmp::RectBounds::scaled( Utils::Player::get_position( reg() ), 5.f );
@@ -153,6 +151,17 @@ void CryptSystem::on_room_event( Events::CryptRoomEvent &event )
   if ( event.type == Events::CryptRoomEvent::Type::SHUFFLE_PASSAGES ) { m_variant->shuffle(); }
   else if ( event.type == Events::CryptRoomEvent::Type::FINAL_PASSAGE ) { m_variant->unlock_objective(); }
   else if ( event.type == Events::CryptRoomEvent::Type::EXIT_ALL_PASSAGES ) { m_variant->unlock_exit(); }
+}
+
+void CryptSystem::on_item_picked_up_event( const Events::ItemPickedUpEvent &event )
+{
+  // only the crypt objective's cat unlocks the exit; a cat carried into the graveyard does nothing
+  if ( not m_variant or event.m_item != "item.preservedcat" ) return;
+  if ( not Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::CRYPT ) ) return;
+
+  m_sound_bank.get_effect( "secret" ).play();
+  Utils::Player::get_stats( reg() ).apply( { {}, {}, {}, Cmp::Stats::Infamy{ 30 }, {}, {} } );
+  get_systems_event_queue().trigger( Events::CryptRoomEvent( Events::CryptRoomEvent::Type::EXIT_ALL_PASSAGES ) );
 }
 
 void CryptSystem::check_entrance_collision()
@@ -257,13 +266,6 @@ void CryptSystem::unlock_crypt_door()
       }
     }
 
-    // every cadaver part is already collected, so the crypt has nothing left to give; keep the key
-    if ( Utils::Player::get_cadaver( reg() ).keys( /*remaining_only=*/true ).empty() )
-    {
-      get_systems_event_queue().trigger( Events::CryptEntryRefusedEvent{} );
-      continue;
-    }
-
     if ( auto shudder = Sys::ShaderSystem::find<Sprites::ScreenShudderShader>( reg(), "ScreenShudder" ) )
       shudder->get().trigger( /*duration=*/sf::seconds( 1.5f ), /*amplitude=*/3.f, /*frequency=*/16.f );
 
@@ -336,35 +338,20 @@ void CryptSystem::check_objective_activation( Events::PlayerActionEvent::GameAct
 
   for ( auto [objective_entity, objective_cmp] : reg().view<Cmp::Crypt::ObjectiveMultiBlock>().each() )
   {
-    // did we already get the cadaver from this objective?
+    // did we already get the cat from this objective?
     if ( objective_cmp.get_activation_count() >= objective_cmp.get_activation_threshold() ) continue;
 
     if ( player_hitbox.findIntersection( objective_cmp ) )
     {
-      sf::FloatRect expanded_search( sf::Vector2f{ objective_cmp.position.x, objective_cmp.position.y + objective_cmp.size.y },
-                                     sf::Vector2f{ objective_cmp.size.x, Constants::kGridSizePxF.y * 2.f } );
-      const auto &cadaver_cmp = Utils::Player::get_cadaver( reg() );
-      const std::vector<Sys::SpriteKey> cadaver_pool = cadaver_cmp.keys( /*remaining_only=*/true );
-      if ( cadaver_pool.empty() ) return; // no more cadaver parts
-      Cmp::RandomInt cadaver_picker( 0, cadaver_pool.size() - 1 );
-      auto obst_entity = Factory::Loot::create_loot_drop(
-          reg(), Cmp::AnimData( Cmp::AnimData::Config{ .sprite_type = cadaver_pool.at( cadaver_picker.gen() ), .enabled = true } ), expanded_search,
-          Factory::IncludePack<>{}, Factory::ExcludePack<Cmp::Player::Character, Cmp::Crypt::ObjectiveSegment>{}, Factory::ExcludePack<>{},
-          /*zorder_offset=*/-8.f, /*reserved_sm=*/nullptr, m_loot_sm.lock().get() );
-      if ( obst_entity != entt::null )
-      {
-        m_sound_bank.get_effect( "drop_loot" ).play();
-        objective_cmp.increment_activation_count();
-        SPDLOG_DEBUG( "Player activated crypt objective." );
+      // drop the cat on a free cell beside the objective, at most once per objective
+      const Cmp::Position objective_bounds( objective_cmp.position, objective_cmp.size );
+      get_systems_event_queue().trigger( Events::CreateItemEvent( objective_bounds, "item.preservedcat", "drop_loot", 0.f, /*spawn_nearby=*/true,
+                                                                  /*max_instances=*/1, objective_entity, {}, /*sting=*/false ) );
+      objective_cmp.increment_activation_count();
+      SPDLOG_DEBUG( "Player activated crypt objective." );
 
-        const auto &ms = Sys::SpriteStore::instance().get( "sprite.crypt.objective.opened" );
-        // clang-format off
-          reg().emplace_or_replace<Cmp::AnimData>( objective_entity, Cmp::AnimData::Config{ 
-                .sprite_type = ms.type(),
-                .enabled = true
-          });
-        // clang-format on
-      }
+      const auto &ms = Sys::SpriteStore::instance().get( "sprite.crypt.objective.opened" );
+      reg().emplace_or_replace<Cmp::AnimData>( objective_entity, Cmp::AnimData::Config{ .sprite_type = ms.type(), .enabled = true } );
     }
   }
 }

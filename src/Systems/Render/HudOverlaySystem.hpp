@@ -55,11 +55,8 @@ private:
   //! @brief Render the HUD's outline rectangles (e.g. panel borders).
   void render_ui_outlines();
 
-  //! @brief Render the HUD's icons, excluding the cadaver icons which are handled by render_ui_cadaver_icons.
+  //! @brief Render the HUD's icons.
   void render_ui_icons();
-
-  //! @brief Render the cadaver part icons that the player has collected.
-  void render_ui_cadaver_icons();
 
   //! @brief Find the "inventory_items" ui_table in the HUD layout.
   //! @return The table, or nullptr if the layout has none.
@@ -115,7 +112,7 @@ private:
   //! window so texts over a meter (the toxidrome names) draw on top of it.
   void render_ui_texts();
 
-  //! @brief Render the HUD's dynamic labels (cadaver count, wealth, stat changes) as ImGui text and flash their colour on
+  //! @brief Render the HUD's dynamic labels (wealth, stat changes) as ImGui text and flash their colour on
   //! recent changes.
   //! @param dt
   void render_ui_labels( sf::Time dt );

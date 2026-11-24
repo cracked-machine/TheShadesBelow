@@ -52,6 +52,12 @@ public:
   //! @param target_registry Copy to
   void xfer_inventory_slots( entt::registry &source_registry, entt::registry &target_registry );
 
+  //! @brief Replace every Cmp::Cart::Barrel entity in the target registry with a copy of each barrel in the source
+  //!        registry. Only for the level complete scene, which scores the barrels: every other scene keeps its own.
+  //! @param source_registry Copy from
+  //! @param target_registry Copy to
+  void xfer_cart_barrels( entt::registry &source_registry, entt::registry &target_registry );
+
   //! @brief Sync two registries for a specific component only.
   //! @details Use this to transfer components between scenes.
   //!          Note the component must be registered via `init_missing_cmp_storages()` in order for this to work

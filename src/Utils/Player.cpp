@@ -39,7 +39,6 @@
 #include <Components/Persistent/StartingInfamy.hpp>
 #include <Components/Persistent/StartingLuck.hpp>
 #include <Components/Plant/BurningTimer.hpp>
-#include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/Curse.hpp>
@@ -495,15 +494,6 @@ Cmp::Position get_projected_position( entt::registry &reg )
   return { { player_pos.getCenter().x + ( player_last_direction.x * Constants::kGridSizePxF.x ),
              player_pos.getCenter().y + ( player_last_direction.y * Constants::kGridSizePxF.y ) },
            { 1.f, 1.f } };
-}
-
-Cmp::Player::Cadaver &get_cadaver( entt::registry &reg )
-{
-
-  auto *cadaver = reg.try_get<Cmp::Player::Cadaver>( get_entity( reg ) );
-  if ( not cadaver ) throw std::runtime_error( "Player entt has no component: Cmp::Player::CadaverCount" );
-  SPDLOG_DEBUG( "Cmp::Player::CadaverCount == {}", curse->active );
-  return *cadaver;
 }
 
 Cmp::TorchRadius &get_torch_radius( entt::registry &reg )

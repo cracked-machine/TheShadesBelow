@@ -288,9 +288,11 @@ void InventorySystem::swap_inventory( bool whole_stack )
     return;
   }
 
-  // if player is standing next to a Cmp::Crypt::ObjectiveMultiblock let them activate it without dropping the inventory item
+  // if player is standing next to a Cmp::Crypt::ObjectiveMultiblock let them activate it without dropping the inventory item.
+  // Once activated it has nothing left to give, so E picks up the preserved cat it dropped beside it
   for ( auto [objective_entt, objective_mb_cmp] : reg().view<Cmp::Crypt::ObjectiveMultiBlock>().each() )
   {
+    if ( objective_mb_cmp.get_activation_count() >= objective_mb_cmp.get_activation_threshold() ) continue;
     if ( not Utils::Player::is_player_near( reg(), objective_mb_cmp ) ) continue;
     return;
   }

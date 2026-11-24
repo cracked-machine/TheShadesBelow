@@ -6,7 +6,6 @@
 #include <Events/AltarBloodOfferedEvent.hpp>
 #include <Events/BloodRefusedEvent.hpp>
 #include <Events/ConsumeRefusedEvent.hpp>
-#include <Events/CryptEntryRefusedEvent.hpp>
 #include <Events/DismissTooltipEvent.hpp>
 #include <Events/GrimoireDiscoveryEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
@@ -84,10 +83,6 @@ public:
   //! @param event
   void on_consume_refused_event( const Events::ConsumeRefusedEvent &event );
 
-  //! @brief Record a candidate for tooltips triggered by "CryptEntryRefusedEvent".
-  //! @param event
-  void on_crypt_entry_refused_event( [[maybe_unused]] const Events::CryptEntryRefusedEvent &event );
-
   //! @brief Hide the active tooltip before its timer expires, resuming gameplay if it paused it.
   //! @param event
   void on_dismiss_tooltip_event( [[maybe_unused]] const Events::DismissTooltipEvent &event );
@@ -132,8 +127,8 @@ private:
     //! @brief unique id, stored in Cmp::Persist::TooltipsSeen
     std::string id;
     //! @brief name of the event that triggers this tooltip, e.g. "AddInventoryEvent", "ItemPickedUpEvent",
-    //! "GrimoireDiscoveryEvent", "BloodRefusedEvent", "AltarApproachedEvent", "AltarBloodOfferedEvent",
-    //! "ConsumeRefusedEvent" or "CryptEntryRefusedEvent"
+    //! "GrimoireDiscoveryEvent", "BloodRefusedEvent", "AltarApproachedEvent", "AltarBloodOfferedEvent"
+    //! or "ConsumeRefusedEvent"
     std::string trigger;
     //! @brief optional item key condition, empty matches any item. A trailing '*' matches any item key with that
     //! prefix, e.g. "item.grave.blood*"
