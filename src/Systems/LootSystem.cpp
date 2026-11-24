@@ -19,11 +19,13 @@
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/Stats/BaseAction.hpp>
+#include <Components/Stats/PlayerStats.hpp>
 #include <Components/UUID.hpp>
 #include <Events/CryptRoomEvent.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
+#include <Sprites/SpriteSheet.hpp>
 #include <Systems/LootSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
@@ -125,27 +127,25 @@ void LootSystem::on_destroy_loot_container_event( const Events::DestroyLootConta
   Factory::Particle::add_pot_ps( reg(), "graveyard.pot.particle.dig", 20, 2.f, 50.f, 10.f, pot_particle_uuid, destroyed_pos_cmp.position,
                                  destroyed_pos_cmp.position.y );
 
-  // drop repair loot - 50% chance. Pots don't drop health: the player heals by drinking grave blood vials
-  const auto &loot_ss = Sys::SpriteStore::instance().get( "sprite.graveyard.loot.repair" );
-  Cmp::RandomInt do_drop( 0, 1 );
-  if ( do_drop.gen() == 0 )
+  //! @brief helper
+  auto gen_loot = [&]( const Sprites::SpriteSheet &loot_ss )
   {
     // clang-format off
     auto dropped_loot_entt = Factory::Loot::create_loot_drop(
-        reg(),
-        Cmp::AnimData(Cmp::AnimData::Config{ 
-          .sprite_type = loot_ss.type(), 
-          .frame_index_offset = loot_ss.get_random_texture_index(), 
-          .enabled = false 
-        } ),
-        sf::FloatRect( Utils::snap_to_grid( destroyed_pos_cmp.position ), Constants::kGridSizePxF ), 
-        Factory::IncludePack<>{},
-        Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 
-        // no spatial exclude for the player: they may be adjacent to the container's tile when it breaks
-        Factory::ExcludePack<Cmp::Obstacle>{},
-        /*zorder_offset=*/-8.f, 
-        m_reserved_sm.lock().get(),
-        m_loot_sm.lock().get()
+      reg(),
+      Cmp::AnimData(Cmp::AnimData::Config{ 
+        .sprite_type = loot_ss.type(), 
+        .frame_index_offset = loot_ss.get_random_texture_index(), 
+        .enabled = false 
+      } ),
+      sf::FloatRect( Utils::snap_to_grid( destroyed_pos_cmp.position ), Constants::kGridSizePxF ), 
+      Factory::IncludePack<>{},
+      Factory::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 
+      // no spatial exclude for the player: they may be adjacent to the container's tile when it breaks
+      Factory::ExcludePack<Cmp::Obstacle>{},
+      /*zorder_offset=*/-8.f, 
+      m_reserved_sm.lock().get(),
+      m_loot_sm.lock().get()
     );
     // clang-format on
     if ( dropped_loot_entt != entt::null )
@@ -153,7 +153,27 @@ void LootSystem::on_destroy_loot_container_event( const Events::DestroyLootConta
       SPDLOG_DEBUG( "Loot was dropped at {},{}", destroyed_pos_cmp.position.x, destroyed_pos_cmp.position.y );
       m_sound_bank.get_effect( "drop_loot" ).play();
     }
-  }
+  };
+
+  Cmp::RandomInt do_drop( 0, 2 );
+  auto pick = do_drop.gen();
+  switch ( pick )
+  {
+    case 0: {
+      const auto &loot_ss = Sys::SpriteStore::instance().get( "sprite.graveyard.loot.repair" );
+      gen_loot( loot_ss );
+      break;
+    }
+    case 1: {
+      const auto &loot_ss = Sys::SpriteStore::instance().get( "sprite.graveyard.loot.health" );
+      gen_loot( loot_ss );
+      break;
+    }
+    default: {
+      // nothing
+      break;
+    }
+  };
 }
 
 void LootSystem::check_loot_collision( sf::Time dt )
@@ -260,6 +280,21 @@ void LootSystem::check_loot_collision( sf::Time dt )
       reg().emplace_or_replace<Cmp::FlashUIWealth>( flash_entt );
 
       wealth_cmp->wealth += 1;
+      collect_loot( effect.loot_entity );
+    }
+    else if ( effect.type == "sprite.graveyard.loot.health" )
+    {
+      auto *player_stats = reg().try_get<Cmp::PlayerStats>( effect.player_entity );
+      if ( not player_stats )
+      {
+        SPDLOG_WARN( "Player entt has no component: Cmp::PlayerStats" );
+        continue;
+      }
+      // signal UI to flash
+      auto flash_entt = reg().create();
+      reg().emplace_or_replace<Cmp::FlashUIWealth>( flash_entt );
+
+      player_stats->apply( Cmp::BaseAction( Cmp::Stats::Health{ 10 }, {}, {}, {}, {}, {} ) );
       collect_loot( effect.loot_entity );
     }
     else { SPDLOG_WARN( "Unknown loot type encountered during pickup: {}", effect.type ); }
