@@ -3,6 +3,7 @@
 #include <Components/SceneSettings/Paused.hpp>
 #include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Systems/Render/BarberOverlaySystem.hpp>
+#include <Systems/Render/CartOverlaySystem.hpp>
 #include <Systems/Render/DebugOverlaySystem.hpp>
 #include <Systems/Render/GrimoireOverlaySystem.hpp>
 #include <Systems/Render/HudOverlaySystem.hpp>
@@ -71,6 +72,7 @@ void OverlayArbitrationSystem::update( sf::Time dt, sf::Time world_dt )
   // the heal menu hides itself while a modal overlay is open
   if ( has_barber() ) { PROFILED( m_sys.find<Store::Type::BarberOverlaySystem>().update( dt ) ); }
   if ( has_level_depth() ) { PROFILED( m_sys.find<Store::Type::HudOverlaySystem>().render_level_depth() ); }
+  if ( has_cart_overlay() ) { PROFILED( m_sys.find<Store::Type::CartOverlaySystem>().update( dt ) ); }
   // the tooltip countdown stops while the pause menu or grimoire is open, but not during its own (tooltip) pause
   if ( const Modal modal = active_modal( reg() ); modal == Modal::NONE or modal == Modal::TOOLTIP )
   {
@@ -182,5 +184,7 @@ bool OverlayArbitrationSystem::has_barber() { return Utils::is_current_scene( re
 bool OverlayArbitrationSystem::has_grimoire() { return Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::GRAVEYARD ); }
 
 bool OverlayArbitrationSystem::has_level_depth() { return Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::GRAVEYARD ); }
+
+bool OverlayArbitrationSystem::has_cart_overlay() { return Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::GRAVEYARD ); }
 
 } // namespace Game::Sys

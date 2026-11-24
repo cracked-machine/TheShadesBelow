@@ -44,7 +44,7 @@ public:
   OverlayArbitrationSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank, Store &sys );
 
   //! @brief Run the current scene's overlays in draw order inside one shared ImGui frame: HUD, shop, heal menus, level depth,
-  //! tooltip, grimoire, pause and debug. Call from each gameplay scene's do_update() after RenderGameSystem::render_game().
+  //! cart barrels, tooltip, grimoire, pause and debug. Call from each gameplay scene's do_update() after RenderGameSystem::render_game().
   //! @param dt Real frame time, for ImGui and the overlays that run while paused.
   //! @param world_dt World frame time (zero while paused), for the HUD.
   void update( sf::Time dt, sf::Time world_dt );
@@ -101,6 +101,9 @@ private:
 
   //! @brief True if the current scene shows the level depth banner. Only GraveyardScene advances its display timer.
   [[nodiscard]] bool has_level_depth();
+
+  //! @brief True if the current scene has the cart barrel overlay.
+  [[nodiscard]] bool has_cart_overlay();
 
   //! @brief The system store, to look up the overlay systems. They all exist once the store is constructed.
   Store &m_sys;

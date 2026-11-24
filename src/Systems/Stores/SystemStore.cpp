@@ -25,6 +25,7 @@
 #include <Systems/ProcGen/LevelGenerator.hpp>
 #include <Systems/ProcGen/PassageSystem.hpp>
 #include <Systems/Render/BarberOverlaySystem.hpp>
+#include <Systems/Render/CartOverlaySystem.hpp>
 #include <Systems/Render/DebugOverlaySystem.hpp>
 #include <Systems/Render/GrimoireOverlaySystem.hpp>
 #include <Systems/Render/HudOverlaySystem.hpp>
@@ -89,6 +90,7 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
   emplace<Type::NpcSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::ParticleSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::PassageSystem>( m_initial_reg, window, sound_bank );
+  emplace<Type::CartOverlaySystem>( m_initial_reg, window, sound_bank );
   emplace<Type::PauseOverlaySystem>( m_initial_reg, window, sound_bank );
   emplace<Type::PlayerSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );
   emplace<Type::PersistSystem>( m_initial_reg, window, sound_bank );

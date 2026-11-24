@@ -2,6 +2,7 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
+#include <Components/Cart/MultiBlock.hpp>
 #include <Components/Crypt/Chest.hpp>
 #include <Components/Crypt/ObjectiveMultiBlock.hpp>
 #include <Components/Grave/CurseTablet.hpp>
@@ -298,6 +299,14 @@ void InventorySystem::swap_inventory( bool whole_stack )
   {
     if ( not Utils::Player::is_player_near( reg(), altar_cmp ) ) continue;
     if ( not Utils::Player::get_projected_position( reg() ).findIntersection( altar_cmp ) ) continue;
+    return;
+  }
+
+  // if player is facing a Cmp::Cart::MultiBlock, E transfers to its barrels (see CartHorseSystem) without dropping the inventory item
+  for ( auto [cart_entt, cart_cmp] : reg().view<Cmp::Cart::MultiBlock>().each() )
+  {
+    if ( not Utils::Player::is_player_near( reg(), cart_cmp ) ) continue;
+    if ( not Utils::Player::get_projected_position( reg() ).findIntersection( cart_cmp ) ) continue;
     return;
   }
 

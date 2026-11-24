@@ -40,7 +40,6 @@
         {
          "draworder":"topdown",
          "id":2,
-         "locked":true,
          "name":"cadaver",
          "objects":[
                 {
@@ -1263,6 +1262,7 @@
         {
          "draworder":"topdown",
          "id":3,
+         "locked":true,
          "name":"outlines",
          "objects":[
                 {

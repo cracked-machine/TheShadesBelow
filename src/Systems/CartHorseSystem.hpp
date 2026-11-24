@@ -25,6 +25,14 @@ public:
   void on_player_action( Events::PlayerActionEvent ev );
 
 private:
+  //! @brief True if the player is next to `bounds` and facing it.
+  //! @param bounds The world bounds to test.
+  [[nodiscard]] bool is_player_facing( const sf::FloatRect &bounds );
+
+  //! @brief Move one of the selected inventory item into the first barrel whose matching cadaver part slot is empty.
+  //! @return true if an item was transferred.
+  bool transfer_selected_item();
+
   //! @brief Special requirement to signal Events::SceneManagerEvent::Type::LEVEL_COMPLETE to the Scene Manager
   entt::dispatcher &m_scenemanager_event_dispatcher;
 

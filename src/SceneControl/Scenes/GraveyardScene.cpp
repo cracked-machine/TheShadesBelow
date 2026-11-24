@@ -1,5 +1,6 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Altar/MultiBlock.hpp>
+#include <Components/Cart/Barrel.hpp>
 #include <Components/Direction.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Inventory/WorldItem.hpp>
@@ -16,6 +17,7 @@
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
 #include <Components/Persistent/GraveyardProcGenSurvivalThreshold.hpp>
+#include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Persistent/RuinProcGenMaxIterations.hpp>
 #include <Components/Player/Cadaver.hpp>
@@ -154,6 +156,14 @@ void GraveyardScene::on_init()
     Utils::Player::reset_stats_to_starting( m_reg );
     // every level starts with no cadaver parts collected
     Utils::Player::get_cadaver( m_reg ).reset();
+  }
+
+  // add the number of cart barrels for this level
+  int barrels = static_cast<int>( Utils::Player::get_level_depth( m_reg ).get_count() );
+  for ( int _ : std::views::iota( 0, barrels ) )
+  {
+    auto barrel_entt = m_reg.create();
+    m_reg.emplace<Cmp::Cart::Barrel>( barrel_entt );
   }
 
   auto [map_size_grid, map_size_pixel] = m_scene_data->map_size();

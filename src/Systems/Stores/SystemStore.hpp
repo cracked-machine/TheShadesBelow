@@ -27,6 +27,7 @@ class BaseSystem;
 class BombSystem;
 class BurrSystem;
 class CartHorseSystem;
+class CartOverlaySystem;
 class CorruptionHazardSystem;
 class CryptSystem;
 class ExitSystem;
@@ -87,6 +88,8 @@ public:
     BurrSystem,
     //! @brief Key for ProcGen::CartHorseSystem.
     CartHorseSystem,
+    //! @brief Key for CartOverlaySystem.
+    CartOverlaySystem,
     //! @brief Key for ProcGen::CellAutomataSystem.
     CellAutomataSystem,
     //! @brief Key for CorruptionHazardSystem.
@@ -250,6 +253,7 @@ template<> struct Store::SystemTraits<Store::Type::ArrowSystem>              { u
 template<> struct Store::SystemTraits<Store::Type::BombSystem>               { using type = BombSystem; };
 template<> struct Store::SystemTraits<Store::Type::BurrSystem>               { using type = BurrSystem; };
 template<> struct Store::SystemTraits<Store::Type::CartHorseSystem>          { using type = CartHorseSystem; };
+template<> struct Store::SystemTraits<Store::Type::CartOverlaySystem>        { using type = CartOverlaySystem; };
 template<> struct Store::SystemTraits<Store::Type::CellAutomataSystem>       { using type = ProcGen::CellAutomataSystem; };
 template<> struct Store::SystemTraits<Store::Type::CorruptionHazardSystem>   { using type = CorruptionHazardSystem; };
 template<> struct Store::SystemTraits<Store::Type::CryptSystem>              { using type = Game::Sys::CryptSystem; };
