@@ -67,6 +67,7 @@ add_executable(${TARGET}
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/OverlayArbitrationSystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/PauseOverlaySystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/CartOverlaySystem.cpp
+    ${CMAKE_SOURCE_DIR}/src/Systems/Render/LeaveGraveyardOverlaySystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/ShopOverlaySystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/BarberOverlaySystem.cpp
     ${CMAKE_SOURCE_DIR}/src/Systems/Render/TooltipOverlaySystem.cpp

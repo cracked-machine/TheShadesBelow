@@ -15,7 +15,9 @@ struct Paused
     //! @brief The pause menu is open (P key), see Sys::PauseOverlaySystem
     PAUSEMENU,
     //! @brief A tooltip with "pause": true is shown, see Sys::TooltipOverlaySystem
-    TOOLTIP
+    TOOLTIP,
+    //! @brief The "leave the graveyard?" prompt is open (activating the horse), see Sys::LeaveGraveyardOverlaySystem
+    LEAVE_PROMPT
   };
 
   //! @brief Why the scene is paused, NONE if it is not.

@@ -102,6 +102,13 @@ private:
   //! @brief Process input while a pausing tooltip is shown. Gameplay is paused, so only Enter (dismiss the tooltip) and
   //!        the common window events are handled.
   void tooltip_pause_input_handler();
+  //! @brief Process input while the "leave the graveyard?" prompt is open. Gameplay is paused, so only the prompt's own
+  //!        controls (Up/Down/W/S/wheel to choose, Enter to confirm, Y/N/Escape to answer) and the common window events
+  //!        are handled.
+  void leave_prompt_input_handler();
+  //! @brief Check whether the "leave the graveyard?" prompt is open (see OverlayArbitrationSystem::active_modal()).
+  //! @return true if the prompt is open
+  bool is_leave_prompt_open();
   //! @brief Check whether a pausing tooltip is shown (see OverlayArbitrationSystem::active_modal()).
   //! @return true if gameplay is paused by a tooltip
   bool is_tooltip_paused();

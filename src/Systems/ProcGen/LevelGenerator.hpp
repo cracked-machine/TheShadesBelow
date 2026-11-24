@@ -2,6 +2,7 @@
 #define SRC_SYSTEMS_PROCGEN_LEVELGENERATOR_HPP__
 
 #include <PathFinding/SmartPointers.hpp>
+#include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
@@ -159,7 +160,6 @@ public:
   //! @brief End of level generation: the claimed obstacles/caps/containers/NPC spawn cells don't need protecting any more,
   //!        so drop every claim.
   void discard_claims();
-
 
 private:
   //! @brief Grid cells per side of a grave cluster slot: fits both the 2x2 large and the 1x2 small graves.

@@ -7,11 +7,13 @@
 namespace Game::Sys
 {
 
-//! @brief Graveyard exit only
+//! @brief The graveyard's cart and horse. Facing the cart opens its barrel overlay, and E moves cadaver parts into its
+//! barrels. Activating the horse opens the "leave the graveyard?" prompt (LeaveGraveyardOverlaySystem), whose Yes calls
+//! leave_level().
 class CartHorseSystem : public BaseSystem
 {
 public:
-  //! @brief Construct a new Exit System object
+  //! @brief Construct a new Cart Horse System object
   //! @param reg
   //! @param window
   //! @param sound_bank
@@ -20,9 +22,12 @@ public:
 
   void update( sf::Time dt );
 
-  //! @brief Event handler for unlocking the exit
+  //! @brief Event handler for ACTIVATE: the horse opens the leave prompt, the cart takes the selected cadaver part.
   //! @param ev
   void on_player_action( Events::PlayerActionEvent ev );
+
+  //! @brief Complete the level: drop any unused exit key and signal Events::SceneManagerEvent::Type::LEVEL_COMPLETE.
+  void leave_level();
 
 private:
   //! @brief True if the player is next to `bounds` and facing it.

@@ -130,6 +130,11 @@ void SceneInputRouter::graveyard_scene_state_handler()
     grimoire_overlay_input_handler();
     return;
   }
+  if ( is_leave_prompt_open() )
+  {
+    leave_prompt_input_handler();
+    return;
+  }
   if ( is_tooltip_paused() )
   {
     tooltip_pause_input_handler();
@@ -504,6 +509,47 @@ void SceneInputRouter::tooltip_pause_input_handler()
       if ( keyReleased->scancode == sf::Keyboard::Scancode::Enter ) { get_systems_event_queue().trigger( Events::DismissTooltipEvent() ); }
     }
   }
+}
+
+void SceneInputRouter::leave_prompt_input_handler()
+{
+  // gameplay is paused while the prompt is open, so only its own controls get through. P (pause), the grimoire and the
+  // F3 debug keys are blocked (see OverlayArbitrationSystem).
+  using Action = Events::OverlayEvent::OverlayActions;
+  auto trigger = [this]( Action action ) { get_systems_event_queue().trigger( Events::OverlayEvent( action ) ); };
+  while ( const std::optional event = m_window.pollEvent() )
+  {
+    forward_to_imgui( *event );
+    if ( dispatch_common_window_event( *event ) ) continue;
+    if ( const auto *keyPressed = event->getIf<sf::Event::KeyPressed>() )
+    {
+      const auto scancode = keyPressed->scancode;
+      if ( scancode == sf::Keyboard::Scancode::Up or scancode == sf::Keyboard::Scancode::W ) { trigger( Action::LEAVE_PREV ); }
+      else if ( scancode == sf::Keyboard::Scancode::Down or scancode == sf::Keyboard::Scancode::S ) { trigger( Action::LEAVE_NEXT ); }
+    }
+    // answer on release: the gameplay handler must never see a stray Escape release (it quits the game), and a held E
+    // (which opened the prompt, and key-repeats) is never an answer
+    else if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
+    {
+      const auto scancode = keyReleased->scancode;
+      if ( scancode == sf::Keyboard::Scancode::Enter ) { trigger( Action::LEAVE_CONFIRM ); }
+      else if ( scancode == sf::Keyboard::Scancode::Y ) { trigger( Action::LEAVE_YES ); }
+      else if ( scancode == sf::Keyboard::Scancode::N or scancode == sf::Keyboard::Scancode::Escape ) { trigger( Action::LEAVE_NO ); }
+    }
+    else if ( const auto *wheelScrolled = event->getIf<sf::Event::MouseWheelScrolled>() )
+    {
+      // scroll up/away for the previous row, down/towards for the next, like the inventory slots
+      if ( wheelScrolled->wheel == sf::Mouse::Wheel::Vertical and wheelScrolled->delta != 0.f )
+      {
+        trigger( wheelScrolled->delta > 0.f ? Action::LEAVE_PREV : Action::LEAVE_NEXT );
+      }
+    }
+  }
+}
+
+bool SceneInputRouter::is_leave_prompt_open()
+{
+  return Sys::OverlayArbitrationSystem::active_modal( reg() ) == Sys::OverlayArbitrationSystem::Modal::LEAVE_PROMPT;
 }
 
 bool SceneInputRouter::is_tooltip_paused()

@@ -29,6 +29,7 @@
 #include <Systems/Render/DebugOverlaySystem.hpp>
 #include <Systems/Render/GrimoireOverlaySystem.hpp>
 #include <Systems/Render/HudOverlaySystem.hpp>
+#include <Systems/Render/LeaveGraveyardOverlaySystem.hpp>
 #include <Systems/Render/OverlayArbitrationSystem.hpp>
 #include <Systems/Render/PauseOverlaySystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
@@ -101,6 +102,7 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
   emplace<Type::HudOverlaySystem>( m_initial_reg, window, sound_bank );
   emplace<Type::ShopOverlaySystem>( m_initial_reg, window, sound_bank );
   emplace<Type::BarberOverlaySystem>( m_initial_reg, window, sound_bank, *this );
+  emplace<Type::LeaveGraveyardOverlaySystem>( m_initial_reg, window, sound_bank, *this );
   emplace<Type::OverlayArbitrationSystem>( m_initial_reg, window, sound_bank, *this );
   emplace<Type::ShaderSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::SceneInputRouter>( m_initial_reg, window, sound_bank, nav_event_dispatcher, scenemanager_event_dispatcher );

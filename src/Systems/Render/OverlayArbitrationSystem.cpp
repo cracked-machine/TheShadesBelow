@@ -7,6 +7,7 @@
 #include <Systems/Render/DebugOverlaySystem.hpp>
 #include <Systems/Render/GrimoireOverlaySystem.hpp>
 #include <Systems/Render/HudOverlaySystem.hpp>
+#include <Systems/Render/LeaveGraveyardOverlaySystem.hpp>
 #include <Systems/Render/OverlayArbitrationSystem.hpp>
 #include <Systems/Render/PauseOverlaySystem.hpp>
 #include <Systems/Render/ShopOverlaySystem.hpp>
@@ -73,6 +74,7 @@ void OverlayArbitrationSystem::update( sf::Time dt, sf::Time world_dt )
   if ( has_barber() ) { PROFILED( m_sys.find<Store::Type::BarberOverlaySystem>().update( dt ) ); }
   if ( has_level_depth() ) { PROFILED( m_sys.find<Store::Type::HudOverlaySystem>().render_level_depth() ); }
   if ( has_cart_overlay() ) { PROFILED( m_sys.find<Store::Type::CartOverlaySystem>().update( dt ) ); }
+  if ( has_leave_prompt() ) { PROFILED( m_sys.find<Store::Type::LeaveGraveyardOverlaySystem>().update( dt ) ); }
   // the tooltip countdown stops while the pause menu or grimoire is open, but not during its own (tooltip) pause
   if ( const Modal modal = active_modal( reg() ); modal == Modal::NONE or modal == Modal::TOOLTIP )
   {
@@ -92,6 +94,7 @@ OverlayArbitrationSystem::Modal OverlayArbitrationSystem::active_modal( entt::re
   const auto reason = pause_reason( reg );
   if ( reason == Cmp::SceneSettings::Paused::Reason::PAUSEMENU ) { return Modal::PAUSEMENU; }
   if ( grimoire_open( reg ) ) { return Modal::GRIMOIRE; }
+  if ( reason == Cmp::SceneSettings::Paused::Reason::LEAVE_PROMPT ) { return Modal::LEAVE_PROMPT; }
   if ( reason == Cmp::SceneSettings::Paused::Reason::TOOLTIP ) { return Modal::TOOLTIP; }
   return Modal::NONE;
 }
@@ -134,6 +137,16 @@ void OverlayArbitrationSystem::on_overlay_event( const Events::OverlayEvent &ev 
     case Action::HEAL_PURCHASE:
       // the heal menu is handled by BarberOverlaySystem
       break;
+    case Action::LEAVE_PROMPT_OPEN:
+      open_leave_prompt();
+      break;
+    case Action::LEAVE_PREV:
+    case Action::LEAVE_NEXT:
+    case Action::LEAVE_CONFIRM:
+    case Action::LEAVE_YES:
+    case Action::LEAVE_NO:
+      // the prompt's own controls are handled by LeaveGraveyardOverlaySystem
+      break;
   }
 }
 
@@ -154,6 +167,12 @@ void OverlayArbitrationSystem::toggle_grimoire()
   else if ( can_open_modal( reg() ) and has_grimoire() ) { grimoire.open(); }
   else { return; }
   m_grimoire_toggle_debounce = sf::Time::Zero;
+}
+
+void OverlayArbitrationSystem::open_leave_prompt()
+{
+  if ( not can_open_modal( reg() ) or not has_leave_prompt() ) { return; }
+  m_sys.find<Store::Type::LeaveGraveyardOverlaySystem>().open();
 }
 
 void OverlayArbitrationSystem::toggle_debug()
@@ -186,5 +205,7 @@ bool OverlayArbitrationSystem::has_grimoire() { return Utils::is_current_scene( 
 bool OverlayArbitrationSystem::has_level_depth() { return Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::GRAVEYARD ); }
 
 bool OverlayArbitrationSystem::has_cart_overlay() { return Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::GRAVEYARD ); }
+
+bool OverlayArbitrationSystem::has_leave_prompt() { return Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::GRAVEYARD ); }
 
 } // namespace Game::Sys

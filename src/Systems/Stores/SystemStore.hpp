@@ -39,6 +39,7 @@ class HealingSpringSystem;
 class InventorySystem;
 class ItemStore;
 class ItemSystem;
+class LeaveGraveyardOverlaySystem;
 class LightningSystem;
 class LootSystem;
 class PauseOverlaySystem;
@@ -120,6 +121,8 @@ public:
     ItemSystem,
     //! @brief Key for RuinSystem.
     RuinSystem,
+    //! @brief Key for LeaveGraveyardOverlaySystem.
+    LeaveGraveyardOverlaySystem,
     //! @brief Key for LightningSystem.
     LightningSystem,
     //! @brief Key for LootSystem.
@@ -268,6 +271,7 @@ template<> struct Store::SystemTraits<Store::Type::HealingSpringSystem>      { u
 template<> struct Store::SystemTraits<Store::Type::InventorySystem>          { using type = InventorySystem; };
 template<> struct Store::SystemTraits<Store::Type::ItemSystem>               { using type = ItemSystem; };
 template<> struct Store::SystemTraits<Store::Type::RuinSystem>               { using type = RuinSystem; };
+template<> struct Store::SystemTraits<Store::Type::LeaveGraveyardOverlaySystem> { using type = LeaveGraveyardOverlaySystem; };
 template<> struct Store::SystemTraits<Store::Type::LootSystem>               { using type = LootSystem; };
 template<> struct Store::SystemTraits<Store::Type::LightningSystem>          { using type = LightningSystem; };
 template<> struct Store::SystemTraits<Store::Type::NpcSystem>                { using type = NpcSystem; };

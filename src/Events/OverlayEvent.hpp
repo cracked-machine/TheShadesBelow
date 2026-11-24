@@ -28,7 +28,20 @@ struct OverlayEvent
     //! @brief Move the heal menu selection down a row. Handled by Sys::BarberOverlaySystem.
     HEAL_NEXT,
     //! @brief Pay for and apply the selected heal. Handled by Sys::BarberOverlaySystem.
-    HEAL_PURCHASE
+    HEAL_PURCHASE,
+    //! @brief Open the "leave the graveyard?" prompt. Ignored while another modal overlay or the debug panels are open,
+    //! see Sys::OverlayArbitrationSystem::can_open_modal().
+    LEAVE_PROMPT_OPEN,
+    //! @brief Move the leave prompt selection up a row. Handled by Sys::LeaveGraveyardOverlaySystem.
+    LEAVE_PREV,
+    //! @brief Move the leave prompt selection down a row. Handled by Sys::LeaveGraveyardOverlaySystem.
+    LEAVE_NEXT,
+    //! @brief Accept the selected leave prompt row. Handled by Sys::LeaveGraveyardOverlaySystem.
+    LEAVE_CONFIRM,
+    //! @brief Answer Yes to the leave prompt: leave the level. Handled by Sys::LeaveGraveyardOverlaySystem.
+    LEAVE_YES,
+    //! @brief Answer No to the leave prompt: close it. Handled by Sys::LeaveGraveyardOverlaySystem.
+    LEAVE_NO
   };
 
   //! @brief Construct a new OverlayEvent object

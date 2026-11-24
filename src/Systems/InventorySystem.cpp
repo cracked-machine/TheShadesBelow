@@ -9,6 +9,7 @@
 #include <Components/Health.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
+#include <Components/Horse/MultiBlock.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
@@ -307,6 +308,14 @@ void InventorySystem::swap_inventory( bool whole_stack )
   {
     if ( not Utils::Player::is_player_near( reg(), cart_cmp ) ) continue;
     if ( not Utils::Player::get_projected_position( reg() ).findIntersection( cart_cmp ) ) continue;
+    return;
+  }
+
+  // if player is facing a Cmp::Horse::MultiBlock, E opens the leave prompt (see CartHorseSystem) without dropping the inventory item
+  for ( auto [horse_entt, horse_cmp] : reg().view<Cmp::Horse::MultiBlock>().each() )
+  {
+    if ( not Utils::Player::is_player_near( reg(), horse_cmp ) ) continue;
+    if ( not Utils::Player::get_projected_position( reg() ).findIntersection( horse_cmp ) ) continue;
     return;
   }
 

@@ -15,7 +15,7 @@ class Store;
 //! @brief Decides which overlays (see BaseOverlaySystem) are open and which run each frame, and gives them one shared ImGui
 //! frame.
 //!
-//! - Opens and closes the modal overlays (pause, grimoire) and toggles the F3 debug panels on Events::OverlayEvent,
+//! - Opens and closes the modal overlays (pause, grimoire, leave prompt) and toggles the F3 debug panels on Events::OverlayEvent,
 //!   applying the modal policy (see can_open_modal()).
 //! - Each gameplay frame, update() begins the ImGui frame, runs every overlay the current scene has, in draw order, and
 //!   renders the ImGui frame. Running an ImGui frame every frame keeps ImGui's input queue from piling up, so overlays
@@ -33,7 +33,9 @@ public:
     GRIMOIRE,
     //! @brief A pausing tooltip (Cmp::SceneSettings::Paused::Reason::TOOLTIP) is shown. Only Enter, which dismisses it,
     //! gets through; it resumes by itself when the tooltip expires.
-    TOOLTIP
+    TOOLTIP,
+    //! @brief The "leave the graveyard?" prompt (Cmp::SceneSettings::Paused::Reason::LEAVE_PROMPT) is open.
+    LEAVE_PROMPT
   };
 
   //! @brief Construct a new Overlay Arbitration System object
@@ -44,12 +46,13 @@ public:
   OverlayArbitrationSystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank, Store &sys );
 
   //! @brief Run the current scene's overlays in draw order inside one shared ImGui frame: HUD, shop, heal menus, level depth,
-  //! cart barrels, tooltip, grimoire, pause and debug. Call from each gameplay scene's do_update() after RenderGameSystem::render_game().
+  //! cart barrels, leave prompt, tooltip, grimoire, pause and debug. Call from each gameplay scene's do_update() after RenderGameSystem::render_game().
   //! @param dt Real frame time, for ImGui and the overlays that run while paused.
   //! @param world_dt World frame time (zero while paused), for the HUD.
   void update( sf::Time dt, sf::Time world_dt );
 
-  //! @brief The open modal overlay. The pause menu wins over the grimoire, which wins over a pausing tooltip.
+  //! @brief The open modal overlay. The pause menu wins over the grimoire, which wins over the leave prompt and a
+  //! pausing tooltip (these two share the pause reason, so they are never open together).
   //! @param reg
   [[nodiscard]] static Modal active_modal( entt::registry &reg );
 
@@ -104,6 +107,12 @@ private:
 
   //! @brief True if the current scene has the cart barrel overlay.
   [[nodiscard]] bool has_cart_overlay();
+
+  //! @brief True if the current scene has the "leave the graveyard?" prompt.
+  [[nodiscard]] bool has_leave_prompt();
+
+  //! @brief Open the "leave the graveyard?" prompt. Refused unless can_open_modal() and the scene has the prompt.
+  void open_leave_prompt();
 
   //! @brief The system store, to look up the overlay systems. They all exist once the store is constructed.
   Store &m_sys;
