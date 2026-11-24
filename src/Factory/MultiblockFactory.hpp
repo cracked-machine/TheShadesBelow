@@ -47,8 +47,6 @@ namespace Game::Cmp::Grave
 {
 class MultiBlock;
 class Segment;
-class ExitMultiBlock;
-class ExitSegment;
 } // namespace Game::Cmp::Grave
 
 namespace Game::Cmp::Ruin

@@ -335,32 +335,6 @@ void GraveSystem::spawn_grave_loot( const std::vector<Sys::ItemKey> &loot_pool, 
   trigger_side_effects( spawn_action, Utils::Player::get_position( reg() ) );
 }
 
-void GraveSystem::drop_exit_key( entt::entity grave_entity )
-{
-  const Sys::ItemKey kExitKey{ "item.exitkey" };
-
-  // the key is left beside the grave (keys survive blasts anyway) for the player to pick up and carry to the exit or an
-  // altar. Events::ItemPickedUpEvent is sent when they pick it up.
-  const Cmp::Position bounds = grave_bounds( grave_entity );
-  get_systems_event_queue().trigger( Events::CreateItemEvent( bounds, kExitKey, "drop_loot", 0.f, true, 0, entt::null,
-                                                              [this]( entt::entity item_entt )
-  { reg().emplace_or_replace<Cmp::Inventory::BlastProof>( item_entt ); }, /*sting=*/true, /*player_reward=*/true ) );
-  const auto spawn_action = Utils::Player::apply_action_from_item_store<Cmp::SpawnAction>( reg(), kExitKey );
-  play_action_sfx( spawn_action );
-  trigger_side_effects( spawn_action, bounds );
-  SPDLOG_INFO( "Key grave {} exhumed, exit key dropped", static_cast<uint32_t>( grave_entity ) );
-
-  // its job done, the guide crow flies away for good
-  for ( auto [crow_entt, crow_cmp] : reg().view<Cmp::Npc::Crow>().each() )
-  {
-    if ( crow_cmp.guide_grave == grave_entity ) crow_cmp.flee = true;
-  }
-
-  // let AltarSystem release the activated altar so the player can activate another. Enqueued as the caller may be
-  // iterating registry views
-  get_systems_event_queue().enqueue( Events::KeyGraveExhumedEvent{} );
-}
-
 void GraveSystem::on_player_action( const Events::PlayerActionEvent &event )
 {
   if ( event.action == Events::PlayerActionEvent::GameActions::DIG ) { player_digging = true; }

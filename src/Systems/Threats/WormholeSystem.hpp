@@ -86,7 +86,7 @@ private:
 
   //! @brief Search for a valid, unoccupied position to spawn the wormhole, retrying with an
   //! incrementing seed until one is found that doesn't collide with walls, graves, altars, crypts,
-  //! the graveyard exit, or hazard cells.
+  //! or hazard cells.
   //! @param initial_rng_seed Starting seed to search from; 0 means unseeded/random
   //! @return The chosen entity and its position, or {entt::null, {}} if no valid location was found
   //!         after the maximum number of attempts

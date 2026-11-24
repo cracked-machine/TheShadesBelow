@@ -4,8 +4,6 @@
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/BuildingSegment.hpp>
-#include <Components/Grave/ExitMultiBlock.hpp>
-#include <Components/Grave/ExitSegment.hpp>
 #include <Components/Ruin/BuildingMultiBlock.hpp>
 #include <Components/Ruin/BuildingSegment.hpp>
 #include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
@@ -26,7 +24,6 @@ namespace Game::PathFinding{ class SpatialHashGrid; }
 namespace Game::Cmp { class BaseAction; class Position; struct ActionReward; struct ActionSfx; }
 namespace Game::Cmp::Altar { class MultiBlock; class Segment; }
 namespace Game::Cmp::Crypt { class BuildingMultiBlock; class BuildingSegment; }
-namespace Game::Cmp::Grave { class ExitMultiBlock; class ExitSegment; }
 namespace Game::Cmp::Ruin { class BuildingMultiBlock; class BuildingSegment; }
 namespace Game::Cmp { class HealingSpringBuildingMultiBlock; class HealingSpringBuildingSegment; }
 
@@ -135,7 +132,6 @@ private:
 };
 
 extern template void BaseSystem::update_mb_zorder<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>();
-extern template void BaseSystem::update_mb_zorder<Cmp::Grave::ExitMultiBlock, Cmp::Grave::ExitSegment>();
 extern template void BaseSystem::update_mb_zorder<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>();
 extern template void BaseSystem::update_mb_zorder<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>();
 extern template void BaseSystem::update_mb_zorder<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>();

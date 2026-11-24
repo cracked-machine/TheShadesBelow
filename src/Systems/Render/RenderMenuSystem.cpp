@@ -36,7 +36,6 @@
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/EffectsVolume.hpp>
 #include <Components/Persistent/EmberDamage.hpp>
-#include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/FearHealthDmgPerSec.hpp>
 #include <Components/Persistent/FlyingLandingOverlap.hpp>
 #include <Components/Persistent/FlyingLiftOffset.hpp>
@@ -493,7 +492,6 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::GraveClusterGridSize>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GrassSpawnChance>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GraveClusterExternalPadding>( reg() ).render_widget();
-    Sys::PersistSystem::get<Cmp::Persist::ExitKeyRequirement>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::PaidHealAmount>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RuinProcGenInitChance>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::RuinProcGenMaxIterations>( reg() ).render_widget();

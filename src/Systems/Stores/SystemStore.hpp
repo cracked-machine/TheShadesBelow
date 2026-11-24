@@ -30,7 +30,6 @@ class CartHorseSystem;
 class CartOverlaySystem;
 class CorruptionHazardSystem;
 class CryptSystem;
-class ExitSystem;
 class FootstepSystem;
 class GraveSystem;
 class FlyingSystem;
@@ -103,8 +102,6 @@ public:
     DowsingGuideSystem,
     //! @brief Key for ActionSystem.
     ActionSystem,
-    //! @brief Key for ExitSystem.
-    ExitSystem,
     //! @brief Key for FootstepSystem.
     FootstepSystem,
     //! @brief Key for GraveSystem.
@@ -262,7 +259,6 @@ template<> struct Store::SystemTraits<Store::Type::CorruptionHazardSystem>   { u
 template<> struct Store::SystemTraits<Store::Type::CryptSystem>              { using type = Game::Sys::CryptSystem; };
 template<> struct Store::SystemTraits<Store::Type::DiffusionLtdAggrSystem>   { using type = ProcGen::DLASystem; };
 template<> struct Store::SystemTraits<Store::Type::DowsingGuideSystem>       { using type = ProcGen::DowsingGuideSystem; };
-template<> struct Store::SystemTraits<Store::Type::ExitSystem>               { using type = ExitSystem; };
 template<> struct Store::SystemTraits<Store::Type::FootstepSystem>           { using type = FootstepSystem; };
 template<> struct Store::SystemTraits<Store::Type::GraveSystem>              { using type = GraveSystem; };
 template<> struct Store::SystemTraits<Store::Type::FlyingSystem>             { using type = FlyingSystem; };

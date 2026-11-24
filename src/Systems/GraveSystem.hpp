@@ -75,12 +75,6 @@ private:
   //! @param by what opened the grave
   void open_grave( entt::entity grave_entity, Cmp::AnimData &grave_anim_cmp, ExhumedBy by );
 
-  //! @brief Drop the exit key beside the key grave (blast proof) for the player to pick up, send its guide crow away
-  //! and send Events::KeyGraveExhumedEvent so AltarSystem releases the activated altar.
-  //! The player can carry the exit key to the exit, or offer it at an altar for the crypt key.
-  //! @param grave_entity the key grave
-  void drop_exit_key( entt::entity grave_entity );
-
   //! @brief Pick a random item from the pool, drop it as loot, and apply its Cmp::SpawnAction modifiers to the player.
   //! ExhumedBy::PLAYER drops it at the player; ExhumedBy::BOMB drops it beside the grave, spared by the blast.
   //! @param loot_pool

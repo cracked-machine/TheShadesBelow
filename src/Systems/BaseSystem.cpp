@@ -4,8 +4,6 @@
 #include <Components/Altar/Segment.hpp>
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/BuildingSegment.hpp>
-#include <Components/Grave/ExitMultiBlock.hpp>
-#include <Components/Grave/ExitSegment.hpp>
 #include <Components/Player/RepelNpc.hpp>
 #include <Components/Player/ToxicImmunity.hpp>
 #include <Components/Position.hpp>
@@ -159,7 +157,6 @@ void BaseSystem::update_mb_zorder()
 }
 
 template void BaseSystem::update_mb_zorder<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>();
-template void BaseSystem::update_mb_zorder<Cmp::Grave::ExitMultiBlock, Cmp::Grave::ExitSegment>();
 template void BaseSystem::update_mb_zorder<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>();
 template void BaseSystem::update_mb_zorder<Cmp::Altar::MultiBlock, Cmp::Altar::Segment>();
 template void BaseSystem::update_mb_zorder<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>();

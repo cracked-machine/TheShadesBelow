@@ -11,7 +11,6 @@
 #include <Components/Armable.hpp>
 #include <Components/WorldTile.hpp>
 #include <Components/Crypt/Entrance.hpp>
-#include <Components/Exit.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
@@ -257,10 +256,6 @@ std::vector<entt::entity> create_multiblock_segments( entt::registry &reg, entt:
     else if constexpr ( std::is_same_v<MULTIBLOCK, Cmp::Ruin::BuildingMultiBlock> )
     {
       if ( calculated_grid_index == door_grid_index ) { reg.emplace_or_replace<Cmp::Ruin::Entrance>( new_segment_entt ); }
-    }
-    else if constexpr ( std::is_same_v<MULTIBLOCK, Cmp::Grave::ExitMultiBlock> )
-    {
-      if ( calculated_grid_index == door_grid_index ) { reg.emplace_or_replace<Cmp::Exit>( new_segment_entt ); }
     }
 
     created_entts.push_back( new_segment_entt );

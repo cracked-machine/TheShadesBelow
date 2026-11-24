@@ -461,14 +461,6 @@
     "detail": "Ember Damage",
     "format": "%d"
   },
-  "ExitKeyRequirement": {
-    "type": "int",
-    "value": 3,
-    "min_value": 1,
-    "max_value": 10,
-    "detail": "Exit Key Requirement",
-    "format": "%d"
-  },
   "FearHealthDmgPerSec": {
     "type": "int",
     "value": 1,

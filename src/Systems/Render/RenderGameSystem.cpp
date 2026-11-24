@@ -18,7 +18,6 @@
 #include <Components/Crypt/RoomLavaPit.hpp>
 #include <Components/Exit.hpp>
 #include <Components/FractalCurve.hpp>
-#include <Components/Grave/ExitMultiBlock.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Greyscale.hpp>
 #include <Components/Hazard/SinkholeCorners.hpp>
@@ -507,7 +506,7 @@ void RenderGameSystem::render_crow_delivery_indicators()
 
     const sf::Vector2f drop_centre = crow_cmp.drop_position + Constants::kGridSizePxF / 2.f;
     const int tiles_left = static_cast<int>( std::ceil( ( drop_centre - crow_pos_cmp.getCenter() ).length() / Constants::kGridSizePxF.x ) );
-    const std::string_view key_name = item_cmp->item_type.contains( "exitkey" ) ? "exit key" : item_cmp->item_type.contains( "cryptkey" ) ? "crypt key" : "item";
+    const std::string_view key_name = item_cmp->item_type.contains( "cryptkey" ) ? "crypt key" : "item";
     const std::string str = std::format( "{} {}", key_name, tiles_left );
 
     auto it = m_crow_delivery_texts.find( item_cmp->item_type.str() );

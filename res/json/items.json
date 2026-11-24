@@ -327,25 +327,6 @@
                                 "sfx": { "final": "shrine_lighting" } }}
     ]
   },
-  "item.exitkey": {
-    "sprite": { "name": "sprite.item.exitkey" },
-    "consumable": "none",
-    "stackable": false,
-    "auto_pickup": true,
-    "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
-    "actions": [
-      { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "destroy_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "spawn_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "proximity_action":   { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
-      { "offering_action":    { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
-                                "reward": { "altar": "CryptKey", "location": "Graveyard" },
-                                "anim": "sprite.graveyard.altar.key.anim",
-                                "sfx": { "final": "shrine_lighting" } }}
-    ]
-  },
   "item.foxgloveflower": {
     "sprite": { "name": "sprite.foxgloveflower" },
     "consumable": "edible",

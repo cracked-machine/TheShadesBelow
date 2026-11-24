@@ -61,7 +61,6 @@
 #include <Systems/BaseSystem.hpp>
 #include <Systems/BurrSystem.hpp>
 #include <Systems/CryptSystem.hpp>
-#include <Systems/ExitSystem.hpp>
 #include <Systems/FlyingSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/GraveSystem.hpp>
@@ -104,6 +103,7 @@
 #include <cmath>
 #include <string_view>
 #include <utility>
+#include <optional>
 #include <vector>
 
 namespace Game::Scene
@@ -133,14 +133,13 @@ void GraveyardScene::on_init()
   Sys::PersistSystem::add<Cmp::Persist::PlayerStartPosition>( m_reg, player_start_pos_px );
 
   // Positions reserved from procgen/algorithmic changes. Must exist before anything below that
-  // creates or queries reserved entities (ItemSystem/ExitSystem are wired up now since their
+  // creates or queries reserved entities (ItemSystem is wired up now since its
   // events/calls can fire mid-generation, before reinit_system_spatial_maps() runs).
   m_reserved_sm = std::make_shared<PathFinding::SpatialHashGrid>();
   // ground items are indexed as they're created (level-gen item markers included); hazard cells as the fields spread
   m_item_sm = std::make_shared<PathFinding::SpatialHashGrid>();
   m_hazard_sm = std::make_shared<PathFinding::SpatialHashGrid>();
   m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_item_sm );
-  m_sys.find<Sys::Store::Type::ExitSystem>().init( m_reserved_sm );
   m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, nullptr, m_item_sm, m_hazard_sm );
 
   // create the player, or increment the level counter for the new level
@@ -188,22 +187,35 @@ void GraveyardScene::on_init()
   m_world_tile_sm = Factory::Pathfinding::create_world_tile_grid( m_reg );
   level_gen.set_world_tile_sm( m_world_tile_sm );
   m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, m_world_tile_sm, m_item_sm, m_hazard_sm );
-  m_sys.find<Sys::Store::Type::ExitSystem>().init( m_reserved_sm, m_world_tile_sm );
-  // one point of interest per map quadrant: shuffle which POI goes on which 'poi' marker
-  auto poi_positions = m_scene_data->poi_positions_by_quadrant();
-  Cmp::RandomInt poi_rng( 0, 1 );
-  std::ranges::shuffle( poi_positions, poi_rng );
-  const auto &exit_pos = poi_positions[0];
-  const auto &crypt_pos = poi_positions[1];
-  const auto &healing_pos = poi_positions[2];
-  const auto &ruin_pos = poi_positions[3];
+  // one point of interest per map quadrant: every quadrant gets a crypt, except that once per level a 1-in-4 roll
+  // swaps one random quadrant's crypt for either the barber surgeon or the ruin - never more than one of them
+  const auto poi_positions = m_scene_data->poi_positions_by_quadrant();
+  std::vector<sf::Vector2f> crypt_positions;
+  std::optional<sf::Vector2f> healing_pos;
+  std::optional<sf::Vector2f> ruin_pos;
+  std::optional<std::size_t> special_quadrant;
+  if ( Cmp::RandomInt( 0, 3 ).gen() == 0 ) { special_quadrant = static_cast<std::size_t>( Cmp::RandomInt( 0, 3 ).gen() ); }
+  for ( std::size_t quadrant = 0; quadrant < poi_positions.size(); ++quadrant )
+  {
+    const auto &pos = poi_positions.at( quadrant );
+    if ( special_quadrant and *special_quadrant == quadrant )
+    {
+      if ( Cmp::RandomInt( 0, 1 ).gen() == 0 ) { healing_pos = pos; }
+      else { ruin_pos = pos; }
+    }
+    else { crypt_positions.push_back( pos ); }
+  }
+  SPDLOG_INFO( "Graveyard POIs: {} crypts, barber surgeon: {}, ruin: {}", crypt_positions.size(), healing_pos.has_value(), ruin_pos.has_value() );
+
   // the round map leaves less room near the edge: warn if a marker has been moved where its building no longer fits
-  for ( const auto &[pos, sprite_type] : std::array<std::pair<sf::Vector2f, std::string_view>, 4>{ {
-            { exit_pos, "sprite.graveyard.exit.locked" },
-            { crypt_pos, "sprite.graveyard.crypt.closed" },
-            { healing_pos, "sprite.graveyard.building.healingspring" },
-            { ruin_pos, "sprite.graveyard.ruin" },
-        } } )
+  std::vector<std::pair<sf::Vector2f, std::string_view>> poi_footprints;
+  for ( const auto &pos : crypt_positions )
+  {
+    poi_footprints.emplace_back( pos, "sprite.graveyard.crypt.closed" );
+  }
+  if ( healing_pos ) { poi_footprints.emplace_back( *healing_pos, "sprite.graveyard.building.healingspring" ); }
+  if ( ruin_pos ) { poi_footprints.emplace_back( *ruin_pos, "sprite.graveyard.ruin" ); }
+  for ( const auto &[pos, sprite_type] : poi_footprints )
   {
     const auto &ss = Sys::SpriteStore::instance().get( Sys::SpriteKey( std::string( sprite_type ) ) );
     if ( not m_scene_data->is_open_footprint( pos, sf::Vector2u( ss.get_grid_size() ) ) )
@@ -211,8 +223,7 @@ void GraveyardScene::on_init()
       SPDLOG_ERROR( "{} at 'poi' marker ({}, {}) overlaps non-open levelgen tiles", sprite_type, pos.x, pos.y );
     }
   }
-  m_sys.find<Sys::Store::Type::ExitSystem>().create_exit( exit_pos );
-  level_gen.gen_graveyard_exterior_multiblocks( *m_scene_data, crypt_pos, healing_pos, ruin_pos );
+  level_gen.gen_graveyard_exterior_multiblocks( *m_scene_data, crypt_positions, healing_pos, ruin_pos );
   level_gen.gen_loot_containers( map_size_grid );
   level_gen.gen_npc_containers( *m_scene_data );
   level_gen.gen_random_plants( *m_scene_data );
@@ -409,7 +420,6 @@ void GraveyardScene::do_update( sf::Time dt )
     PROFILED( m_sys.find<Sys::Store::Type::PlayerSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::ShaderSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::LightningSystem>().update( dt ) );
-    PROFILED( m_sys.find<Sys::Store::Type::ExitSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::ArrowSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::BurrSystem>().update( dt ) );
     PROFILED( m_sys.find<Sys::Store::Type::InventorySystem>().update( dt ) );

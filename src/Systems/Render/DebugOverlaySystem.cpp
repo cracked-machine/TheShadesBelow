@@ -18,7 +18,6 @@
 #include <Components/Exit.hpp>
 #include <Components/FootStepTimer.hpp>
 #include <Components/Grave/Consequence.hpp>
-#include <Components/Grave/ExitSegment.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
@@ -493,7 +492,6 @@ void DebugOverlaySystem::render_ui_entity_inspect()
     if ( reg().all_of<Cmp::Crypt::RoomLavaPit>( entity ) ) text_line( " RoomLavaPit", sf::Color{ 255, 165, 0 } );
     if ( reg().all_of<Cmp::Armable>( entity ) ) text_line( " Armable", sf::Color::Green );
     if ( reg().all_of<Cmp::Armed>( entity ) ) text_line( " Armed", sf::Color::Red );
-    if ( reg().all_of<Cmp::Grave::ExitSegment>( entity ) ) text_line( " ExitSegment", sf::Color::Cyan );
     if ( reg().all_of<Cmp::Grave::Segment>( entity ) ) text_line( " Segment", sf::Color::Cyan );
     if ( reg().all_of<Cmp::Grave::MultiBlock>( entity ) ) text_line( " MultiBlock", sf::Color::Cyan );
     if ( reg().all_of<Cmp::Altar::Segment>( entity ) ) text_line( " Segment", sf::Color::Cyan );

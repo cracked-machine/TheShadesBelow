@@ -41,8 +41,6 @@ struct ActionReward
     BANISH,
     //! @brief Gain an extra life, respawning the player when they die (witches jar at the crypt altar).
     EXTRA_LIFE,
-    //! @brief Exchange the offered exit key for the crypt key (any graveyard altar).
-    CRYPT_KEY,
     //! @brief Temporary immunity to toxidrome increases (St John's Wort).
     TOXIC_IMMUNITY
   };

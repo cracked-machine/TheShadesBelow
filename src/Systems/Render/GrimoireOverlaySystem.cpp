@@ -237,8 +237,6 @@ std::string GrimoireOverlaySystem::reward_display_name( const Cmp::ActionReward 
       return "banishes ghosts";
     case Cmp::ActionReward::AltarEffect::EXTRA_LIFE:
       return "extra life";
-    case Cmp::ActionReward::AltarEffect::CRYPT_KEY:
-      return "unlocks crypt";
     case Cmp::ActionReward::AltarEffect::TOXIC_IMMUNITY:
       return std::format( "toxic immunity {}s", reward.tick );
     case Cmp::ActionReward::AltarEffect::NONE:

@@ -26,7 +26,7 @@ public:
   //! @param ev
   void on_player_action( Events::PlayerActionEvent ev );
 
-  //! @brief Complete the level: drop any unused exit key and signal Events::SceneManagerEvent::Type::LEVEL_COMPLETE.
+  //! @brief Complete the level: signal Events::SceneManagerEvent::Type::LEVEL_COMPLETE.
   void leave_level();
 
 private:

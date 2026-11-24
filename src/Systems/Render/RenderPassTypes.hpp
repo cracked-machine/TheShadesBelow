@@ -4,7 +4,6 @@
 #include <Components/Altar/MultiBlock.hpp>
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/InteriorMultiBlock.hpp>
-#include <Components/Grave/ExitMultiBlock.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Moveable.hpp>
 #include <Components/NoRender.hpp>
@@ -28,7 +27,7 @@ namespace Game::Sys::RenderPass
 //! or the root is queued, and drawn, twice.
 using MultiBlockRoots = entt::type_list<Cmp::Altar::MultiBlock, Cmp::Crypt::BuildingMultiBlock, Cmp::Grave::MultiBlock,
                                         Cmp::HealingSpringBuildingMultiBlock, Cmp::Crypt::InteriorMultiBlock,
-                                        Cmp::Ruin::BuildingMultiBlock, Cmp::Grave::ExitMultiBlock, Cmp::Wormhole::MultiBlock>;
+                                        Cmp::Ruin::BuildingMultiBlock, Cmp::Wormhole::MultiBlock>;
 
 //! @brief Renderable entities that move after creation, so they are never indexed in the static render position
 //! grid and must be scanned every frame instead.

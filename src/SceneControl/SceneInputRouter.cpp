@@ -3,7 +3,6 @@
 #include <Components/Direction.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
-#include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Player/Cadaver.hpp>
 #include <Components/Player/Character.hpp>
@@ -752,9 +751,6 @@ void SceneInputRouter::try_handle_debug_key( [[maybe_unused]] sf::Keyboard::Scan
   }
   else if ( scancode == Scancode::F8 )
   {
-    // skipping the exit means the exit key is never consumed by unlocking it (see ExitSystem); drop it here so it
-    // doesn't follow the player into the next scene and keep the compass's exit needle alive
-    Factory::Player::destroy_inventory( reg(), "item.exitkey" );
     enqueue( Events::SceneManagerEvent::Type::LEVEL_COMPLETE );
     Factory::Player::remove_player_last_graveyard_pos( reg() );
   }

@@ -197,7 +197,7 @@ void CryptSystem::check_exit_collision()
   auto door_view = reg().view<Cmp::Exit, Cmp::Position>();
   const auto view_bounds = Utils::calculate_view_bounds( RenderSystem::get_world_view() );
 
-  for ( auto [door_entity, door_cmp, door_pos_cmp] : door_view.each() )
+  for ( auto [door_entity, door_pos_cmp] : door_view.each() )
   {
     // optimize: skip if not visible
     if ( !Utils::is_visible_in_view( view_bounds, door_pos_cmp ) ) continue;

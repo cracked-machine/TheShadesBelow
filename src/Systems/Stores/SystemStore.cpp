@@ -8,7 +8,6 @@
 #include <Systems/BurrSystem.hpp>
 #include <Systems/CartHorseSystem.hpp>
 #include <Systems/CryptSystem.hpp>
-#include <Systems/ExitSystem.hpp>
 #include <Systems/FlyingSystem.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/GraveSystem.hpp>
@@ -77,7 +76,6 @@ Store::Store( sf::RenderWindow &window, Audio::SoundBank &sound_bank, entt::disp
   emplace<Type::DowsingGuideSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::CorruptionHazardSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::CryptSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );
-  emplace<Type::ExitSystem>( m_initial_reg, window, sound_bank, scenemanager_event_dispatcher );
   emplace<Type::FootstepSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::GraveSystem>( m_initial_reg, window, sound_bank );
   emplace<Type::FlyingSystem>( m_initial_reg, window, sound_bank );

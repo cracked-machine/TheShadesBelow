@@ -11,7 +11,6 @@
 #include <Components/Direction.hpp>
 #include <Components/FootStepTimer.hpp>
 #include <Components/Grave/KeyGrave.hpp>
-#include <Components/Grave/ExitSegment.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Grave/Segment.hpp>
@@ -1690,7 +1689,6 @@ void NpcSystem::find_pushback_position( const Cmp::Direction &npc_direction, con
     if ( Utils::Collision::any_intersects<Cmp::Wall>( reg(), rect ) ) return "Wall";
     if ( Utils::Collision::any_intersects<Cmp::Altar::Segment>( reg(), rect ) ) return "Segment";
     if ( Utils::Collision::any_intersects<Cmp::Grave::Segment>( reg(), rect ) ) return "Segment";
-    if ( Utils::Collision::any_intersects<Cmp::Grave::ExitSegment>( reg(), rect ) ) return "ExitSegment";
     if ( Utils::Collision::any_intersects<Cmp::Crypt::BuildingSegment>( reg(), rect ) ) return "BuildingSegment";
     if ( Utils::Collision::any_intersects<Cmp::Ruin::BuildingSegment>( reg(), rect ) ) return "BuildingSegment";
     if ( Utils::Collision::any_intersects<Cmp::Crypt::ObjectiveSegment>( reg(), rect ) ) return "ObjectiveSegment";

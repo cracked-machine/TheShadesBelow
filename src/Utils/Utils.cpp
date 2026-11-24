@@ -167,16 +167,6 @@ std::optional<sf::Vector2f> get_pixel_position( entt::registry &registry, entt::
   return std::nullopt;
 }
 
-bool is_graveyard_exit_locked( entt::registry &reg )
-{
-  auto exit_view = reg.view<Cmp::Exit>();
-  for ( auto [exit_entt, exit_cmp] : exit_view.each() )
-  {
-    return exit_cmp.m_locked;
-  }
-  throw std::runtime_error( "No exit was found in the game!" );
-}
-
 sf::FloatRect get_mouse_bounds_in_gameview( const sf::RenderWindow &window, const sf::View &gameview )
 {
   sf::Vector2i mouse_pixel_pos = sf::Mouse::getPosition( window );

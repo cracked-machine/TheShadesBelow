@@ -62,9 +62,6 @@ void CartHorseSystem::on_player_action( Events::PlayerActionEvent ev )
 void CartHorseSystem::leave_level()
 {
   SPDLOG_INFO( "Player left the graveyard by the horse" );
-  // the exit key is only consumed by unlocking the exit; drop it so it doesn't follow the player into the next scene
-  // and keep the compass's exit needle alive
-  Factory::Player::destroy_inventory( reg(), "item.exitkey" );
   m_scenemanager_event_dispatcher.enqueue<Events::SceneManagerEvent>( Events::SceneManagerEvent::Type::LEVEL_COMPLETE );
   Factory::Player::remove_player_last_graveyard_pos( reg() );
 }

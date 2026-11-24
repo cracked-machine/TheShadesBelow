@@ -5,7 +5,6 @@
 #include <Components/Crypt/BuildingSegment.hpp>
 #include <Components/Direction.hpp>
 #include <Components/Exit.hpp>
-#include <Components/Grave/ExitSegment.hpp>
 #include <Components/Grave/Segment.hpp>
 #include <Components/Hazard/FieldCell.hpp>
 #include <Components/Inventory/WorldItem.hpp>
@@ -367,7 +366,6 @@ std::pair<entt::entity, Cmp::Position> WormholeSystem::find_spawn_location( unsi
     bool is_valid = not covers_item && not any_intersects<Cmp::Wall>( reg(), wormhole_bounds ) && not any_intersects<Cmp::Grave::Segment>( reg(), wormhole_bounds ) &&
                     not any_intersects<Cmp::Altar::Segment>( reg(), wormhole_bounds ) &&
                     not any_intersects<Cmp::Crypt::BuildingSegment>( reg(), wormhole_bounds ) &&
-                    not any_intersects<Cmp::Grave::ExitSegment>( reg(), wormhole_bounds ) &&
                     not any_intersects<Cmp::Hazard::FieldCell>( reg(), wormhole_bounds ) &&
                     ( not reserved_sm || reserved_sm->at( random_pos ).empty() );
 

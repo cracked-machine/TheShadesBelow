@@ -85,11 +85,6 @@ private:
   //! @return false if the altar refused the offering, e.g. it is not a graveyard altar, the player isn't facing it or
   //! holding a blood vial, it is full or an altar is already activated
   bool offering_blood_vial( entt::entity altar_entity, Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid );
-  //! @brief Accept the exit key in exchange for the crypt key, at any graveyard altar whether activated or not.
-  //! check_player_altar_offering() puts the crypt key in the player's hand once the exit key has been destroyed.
-  void offering_cryptkey();
-  //! @brief Put an altar reward key (e.g. the crypt key) straight into the player's (empty) hand and flash the inventory UI
-  void give_reward_key( const Sys::ItemKey &item_key );
 
   //! @brief Light the altar: swap to its active sprite, add its centre particles and play the activate sound.
   //! @param particle_tag Factory::Altar::kExtraLifeParticleTag for an extra life (undone by

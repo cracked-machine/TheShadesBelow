@@ -5,7 +5,6 @@
 #include <Components/WorldTile.hpp>
 #include <Components/Crypt/BuildingMultiBlock.hpp>
 #include <Components/Crypt/ObjectiveMultiBlock.hpp>
-#include <Components/Grave/ExitMultiBlock.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Npc/Npc.hpp>
@@ -300,7 +299,7 @@ bool FlyingSystem::blocks_flight( entt::registry &reg, entt::entity entity )
   // multiblock segment: use the root's flying_collision_mask for this cell, else block if larger than 1x1.
   // Inset so a multiblock merely sharing an edge with this cell doesn't count.
   const sf::FloatRect cell = Cmp::RectBounds::scaled( *pos_cmp, 0.9f ).getBounds();
-  const auto root = find_multiblock_root<Cmp::Altar::MultiBlock, Cmp::Grave::MultiBlock, Cmp::Grave::ExitMultiBlock, Cmp::PlantMultiBlock,
+  const auto root = find_multiblock_root<Cmp::Altar::MultiBlock, Cmp::Grave::MultiBlock, Cmp::PlantMultiBlock,
                                          Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::ObjectiveMultiBlock, Cmp::Ruin::BuildingMultiBlock,
                                          Cmp::Ruin::HexagramMultiBlock, Cmp::Ruin::StairsLowerMultiBlock, Cmp::Ruin::StairsUpperMultiBlock,
                                          Cmp::Ruin::StairsGateMultiBlock, Cmp::Ruin::StairsBalustradeMultiBlock, Cmp::HealingSpringMultiBlock,

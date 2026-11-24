@@ -348,8 +348,8 @@
         },
         "altar": {
           "type": "string",
-          "enum": ["None", "Banish", "ExtraLife", "CryptKey", "ToxicImmunity"],
-          "description": "The altar effect (offering_action only). Banish: banish all ghosts. ExtraLife: respawn at the crypt start when the player dies (crypt altar only). CryptKey: unlock the crypt key (exit key). ToxicImmunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
+          "enum": ["None", "Banish", "ExtraLife", "ToxicImmunity"],
+          "description": "The altar effect (offering_action only). Banish: banish all ghosts. ExtraLife: respawn at the crypt start when the player dies (crypt altar only). ToxicImmunity: toxidromes can't increase for reward.tick seconds (St John's Wort)."
         },
         "location": {
           "type": "string",

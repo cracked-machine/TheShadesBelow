@@ -30,7 +30,6 @@ inline Cmp::ActionReward::AltarEffect make_reward_altar( const std::string &alta
   if ( altar == "None" ) return AltarEffect::NONE;
   if ( altar == "Banish" ) return AltarEffect::BANISH;
   if ( altar == "ExtraLife" ) return AltarEffect::EXTRA_LIFE;
-  if ( altar == "CryptKey" ) return AltarEffect::CRYPT_KEY;
   if ( altar == "ToxicImmunity" ) return AltarEffect::TOXIC_IMMUNITY;
   throw std::runtime_error( "Unknown reward altar: '" + altar + "'" );
 }

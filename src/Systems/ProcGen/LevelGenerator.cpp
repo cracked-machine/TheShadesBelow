@@ -15,7 +15,6 @@
 #include <Components/Crypt/RoomStart.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Grave/Consequence.hpp>
-#include <Components/Grave/ExitSegment.hpp>
 #include <Components/Grave/KeyGrave.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
@@ -544,20 +543,29 @@ void LevelGenerator::add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scen
   }
 }
 
-void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData &scene_data, sf::Vector2f crypt_pos, sf::Vector2f healing_pos,
-                                                         sf::Vector2f ruin_pos )
+void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData &scene_data, std::span<const sf::Vector2f> crypt_positions,
+                                                         std::optional<sf::Vector2f> healing_pos, std::optional<sf::Vector2f> ruin_pos )
 {
-  // CRYPT - one crypt serves every key grave's crypt key, whichever altar started it
+  // CRYPTS - any crypt takes any key grave's crypt key
   const auto &crypt_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.crypt.closed" );
-  spawn_multiblock_at<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( crypt_pos, crypt_spritesheet );
+  for ( const auto &crypt_pos : crypt_positions )
+  {
+    spawn_multiblock_at<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( crypt_pos, crypt_spritesheet );
+  }
 
   // HEALING BUILDING - its entrance leads to the barber surgeon
-  const auto &healingspring_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.building.healingspring" );
-  spawn_multiblock_at<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>( healing_pos, healingspring_spritesheet );
+  if ( healing_pos )
+  {
+    const auto &healingspring_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.building.healingspring" );
+    spawn_multiblock_at<Cmp::HealingSpringBuildingMultiBlock, Cmp::HealingSpringBuildingSegment>( *healing_pos, healingspring_spritesheet );
+  }
 
   // RUIN
-  const auto &ruin_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.ruin" );
-  spawn_multiblock_at<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>( ruin_pos, ruin_spritesheet );
+  if ( ruin_pos )
+  {
+    const auto &ruin_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.ruin" );
+    spawn_multiblock_at<Cmp::Ruin::BuildingMultiBlock, Cmp::Ruin::BuildingSegment>( *ruin_pos, ruin_spritesheet );
+  }
 
   // GRAVES - placed last, so the larger buildings above get first pick of the space
   for ( auto &padding : m_grave_cluster_padding )
@@ -739,7 +747,7 @@ bool LevelGenerator::has_structure_collision( const Cmp::RectBounds &hitbox )
   return any_intersects<Cmp::Wall>( reg(), hitbox ) or any_intersects<Cmp::Grave::Segment>( reg(), hitbox ) or
          any_intersects<Cmp::Altar::Segment>( reg(), hitbox ) or any_intersects<Cmp::Crypt::BuildingSegment>( reg(), hitbox ) or
          any_intersects<Cmp::HealingSpringBuildingSegment>( reg(), hitbox ) or any_intersects<Cmp::Ruin::BuildingSegment>( reg(), hitbox ) or
-         any_intersects<Cmp::Crypt::ObjectiveSegment>( reg(), hitbox ) or any_intersects<Cmp::Grave::ExitSegment>( reg(), hitbox ) or
+         any_intersects<Cmp::Crypt::ObjectiveSegment>( reg(), hitbox ) or
          any_intersects<Cmp::SpawnArea>( reg(), hitbox ) or any_intersects<Cmp::Player::Character>( reg(), hitbox );
 }
 

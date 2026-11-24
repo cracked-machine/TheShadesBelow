@@ -13,6 +13,8 @@
 #include <array>
 #include <cstddef>
 #include <functional>
+#include <optional>
+#include <span>
 #include <vector>
 
 // clang-format off
@@ -78,7 +80,8 @@ public:
   void add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scene_dimensions );
 
   //! @brief create multiblock sprites (crypt, healing building, ruin and graves) for the graveyard scene.
-  //!        The crypt, healing building and ruin are placed at the given positions (the scene's 'poi' markers).
+  //!        The crypts, and the healing building / ruin if present, are placed at the given positions (the scene's
+  //!        'poi' markers).
   //!        Graves are then laid out in clusters, as many as fit in each map quadrant: each cluster is an N x N grid
   //!        (Cmp::Persist::GraveClusterGridSize) of 2x2-cell grave slots with kGraveClusterInternalPadding cells between
   //!        slots, and Cmp::Persist::GraveClusterExternalPadding cells between clusters. A grave is omitted when its
@@ -86,11 +89,11 @@ public:
   //!        internal padding cells are kept for gen_random_plants(). One random grave per quadrant is tagged
   //!        Cmp::Grave::KeyGrave, so it drops a crypt key.
   //! @param scene_data Scene data used to split the map into quadrants and find open levelgen tiles
-  //! @param crypt_pos Top-left pixel position of the crypt.
-  //! @param healing_pos Top-left pixel position of the healing spring / barber surgeon building.
-  //! @param ruin_pos Top-left pixel position of the ruin.
-  void gen_graveyard_exterior_multiblocks( const Scene::SceneData &scene_data, sf::Vector2f crypt_pos, sf::Vector2f healing_pos,
-                                           sf::Vector2f ruin_pos );
+  //! @param crypt_positions Top-left pixel positions of the crypts.
+  //! @param healing_pos Top-left pixel position of the healing spring / barber surgeon building, or nullopt for none.
+  //! @param ruin_pos Top-left pixel position of the ruin, or nullopt for none.
+  void gen_graveyard_exterior_multiblocks( const Scene::SceneData &scene_data, std::span<const sf::Vector2f> crypt_positions,
+                                           std::optional<sf::Vector2f> healing_pos, std::optional<sf::Vector2f> ruin_pos );
 
   //! @brief Find a valid spawn location for a large obstacle given a seed.
   //! @param ms Sprite sheet of the object being placed, used to size its collision hitbox

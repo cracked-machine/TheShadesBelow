@@ -197,7 +197,7 @@ void BombSystem::update( sf::Time dt )
         auto dmg = Sys::PersistSystem::get<Cmp::Persist::BombDamage>( reg() ).get_value();
         get_systems_event_queue().trigger( Events::UpdateDmgEvent( Utils::Player::get_inventory_entt( reg() ), dmg ) );
       }
-      else if ( item_cmp.item_type == "item.exitkey" or item_cmp.item_type == "item.cryptkey" ) { return; }
+      else if ( item_cmp.item_type == "item.cryptkey" ) { return; }
       else if ( item_cmp.item_type == "item.bomb" )
       {
         // process other bombs lying around - chain reaction!

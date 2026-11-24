@@ -159,12 +159,6 @@ std::string wrap_text_to_width( const std::string &text, std::size_t max_chars_p
 //! @return std::optional<sf::Vector2f> The entity's position, or std::nullopt if it has no Cmp::Position.
 std::optional<sf::Vector2f> get_pixel_position( entt::registry &registry, entt::entity entity );
 
-//! @brief Check whether the graveyard exit is currently locked.
-//! @param reg reference to the entt registry
-//! @return bool The Cmp::Exit component's locked state.
-//! @throws std::runtime_error if no entity has a Cmp::Exit component.
-bool is_graveyard_exit_locked( entt::registry &reg );
-
 //! @brief Get the scene setting cmp object
 //! @tparam SCENESETTING The scene setting component type to retrieve.
 //! @param reg reference to the entt registry

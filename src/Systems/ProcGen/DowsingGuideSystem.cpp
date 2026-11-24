@@ -159,17 +159,9 @@ void DowsingGuideSystem::update_target( const Cmp::Inventory::DowsingTarget &dow
     case Target::GREEN: {
       switch ( m_location )
       {
-        case Cmp::SceneSettings::SceneId::GRAVEYARD: {
-          auto graveyard_exit_view = reg().view<Cmp::Exit, Cmp::Position>();
-          for ( auto [exit_entt, exit_cmp, exit_pos_cmp] : graveyard_exit_view.each() )
-          {
-            add_dogleg( Utils::Player::get_doglegs( reg() ), pos_cmp.getCenter(), exit_pos_cmp.getCenter(), kExitColour );
-          }
-          break;
-        }
         case Cmp::SceneSettings::SceneId::CRYPT: {
           auto crypt_exit_view = reg().view<Cmp::Exit, Cmp::Position>();
-          for ( auto [exit_entt, exit_cmp, exit_pos_cmp] : crypt_exit_view.each() )
+          for ( auto [exit_entt, exit_pos_cmp] : crypt_exit_view.each() )
           {
             add_route( pos_cmp.getCenter(), exit_pos_cmp.getCenter(), kExitColour );
           }

@@ -44,7 +44,6 @@
 #include <Components/Toxicity/Vertigo.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
-#include <Events/AddInventoryEvent.hpp>
 #include <Events/AltarActivatedEvent.hpp>
 #include <Events/AltarApproachedEvent.hpp>
 #include <Events/AltarBloodOfferedEvent.hpp>
@@ -52,7 +51,6 @@
 #include <Events/CreateItemEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/KeyGraveExhumedEvent.hpp>
-#include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Factory/AltarFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
@@ -205,7 +203,7 @@ bool AltarSystem::try_offer_held_item( entt::entity altar_entity, Cmp::Altar::Mu
   const auto reward = item.get_offering_reward( altar_cmp.get_kind() );
   if ( not reward and not item.get_rewards<Cmp::OfferingAction>().empty() ) return false;
 
-  // the altar may refuse the offering (e.g. a relic once the exitkey has dropped), so only consume the item once it has accepted
+  // the altar may refuse the offering (e.g. an offering whose NPC is already summoned), so only consume the item once it has accepted
   if ( not grant_offering_reward( altar_entity, altar_cmp, altar_uuid, reward, item.get_action<Cmp::OfferingAction>().anim() ) ) return false;
 
   SPDLOG_INFO( "Player made an offering: {}", item.item_type );
@@ -213,8 +211,6 @@ bool AltarSystem::try_offer_held_item( entt::entity altar_entity, Cmp::Altar::Mu
   play_action_sfx( offering_action );
   trigger_side_effects( offering_action, Cmp::Position( altar_cmp.position, altar_cmp.size ), altar_entity );
   Factory::Player::destroy_inventory( reg(), item.item_type );
-  // the exit key has left the inventory, so the crypt key can take its place
-  if ( reward and reward->altar == Cmp::ActionReward::AltarEffect::CRYPT_KEY ) give_reward_key( "item.cryptkey" );
   // the offering has left the inventory, so an inventory reward item can take its place
   if ( reward and not reward->item.empty() )
   {
@@ -253,9 +249,6 @@ bool AltarSystem::grant_offering_reward( entt::entity altar_entity, Cmp::Altar::
   {
     case AltarEffect::BANISH:
       offering_for_banish();
-      return true;
-    case AltarEffect::CRYPT_KEY:
-      offering_cryptkey();
       return true;
     case AltarEffect::TOXIC_IMMUNITY:
       offering_for_toxic_immunity( reward->tick );
@@ -386,11 +379,6 @@ void AltarSystem::activate_graveyard_altar( entt::entity altar_entity, const Cmp
   get_systems_event_queue().trigger( Events::AltarActivatedEvent{ Cmp::Position( altar_cmp.position, altar_cmp.size ) } );
 }
 
-void AltarSystem::offering_cryptkey()
-{
-  m_sound_bank.get_effect( "crypt_altar_activate" ).play();
-}
-
 void AltarSystem::activate_altar( entt::entity altar_entity, const Cmp::Altar::MultiBlock &altar_cmp, Cmp::UUID &altar_uuid,
                                   const char *particle_tag )
 {
@@ -417,17 +405,6 @@ void AltarSystem::play_offering_anim( const Cmp::Altar::MultiBlock &altar_cmp, c
   }
 
   reg().emplace_or_replace<Cmp::Altar::ActivationTimer>( Utils::Player::get_entity( reg() ) );
-}
-
-void AltarSystem::give_reward_key( const Sys::ItemKey &item_key )
-{
-  get_systems_event_queue().trigger( Events::AddInventoryEvent( item_key ) );
-  m_sound_bank.get_effect( "equip_inventory" ).play();
-  // signal UI to flash
-  reg().emplace_or_replace<Cmp::FlashUIInventory>( reg().create() );
-  // enqueued rather than triggered, as the caller may still be iterating registry views
-  get_systems_event_queue().enqueue( Events::ItemPickedUpEvent( item_key ) );
-  SPDLOG_INFO( "Altar granted {}", item_key.str() );
 }
 
 } // namespace Game::Sys

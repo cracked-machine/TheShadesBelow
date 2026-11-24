@@ -36,7 +36,6 @@
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/EffectsVolume.hpp>
 #include <Components/Persistent/EmberDamage.hpp>
-#include <Components/Persistent/ExitKeyRequirement.hpp>
 #include <Components/Persistent/FearHealthDmgPerSec.hpp>
 #include <Components/Persistent/FlyingLandingOverlap.hpp>
 #include <Components/Persistent/FlyingLiftOffset.hpp>
@@ -234,7 +233,6 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::EmberDamage>();
   add_component<Cmp::Persist::LightningRodDebrisDamage>();
   add_component<Cmp::Persist::EffectsVolume>();
-  add_component<Cmp::Persist::ExitKeyRequirement>();
   add_component<Cmp::Persist::FuseDelay>();
   add_component<Cmp::Persist::GraveNumMultiplier>();
   add_component<Cmp::Persist::MaxLevelDepth>();

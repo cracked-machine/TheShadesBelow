@@ -4,10 +4,6 @@
 #include <Components/Altar/Activated.hpp>
 #include <Components/Altar/BloodCount.hpp>
 #include <Components/Altar/MultiBlock.hpp>
-#include <Components/Crypt/Entrance.hpp>
-#include <Components/Exit.hpp>
-#include <Components/Inventory/PlayerInventorySlot.hpp>
-#include <Components/Inventory/WorldItem.hpp>
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
 #include <Systems/Stores/ItemStore.hpp>
@@ -38,18 +34,14 @@ namespace Game::Cmp::Player
 {
 
 //! @brief Caches the player's compass arrow state. The compass has several needles, each pointing at its own target:
-//!        - an "exit" needle, active while an exit key exists anywhere in the scene (world item or inventory)
-//!        - a "crypt" needle, active while a crypt key exists anywhere in the scene (world item or inventory)
-//!        - a "held" needle, driven by the item in the player's inventory slot (altar / blood targets). Holding the
-//!          exit key also shows this needle, as it can be offered at an altar for the crypt key
-//!        Key needles are therefore shown whether or not the player holds the key, and turn off once the key is used
-//!        (destroyed). Target resolution is throttled via `m_retarget_timer`, which PlayerSystem advances each frame.
+//!        - a "held" needle, driven by the item in the player's inventory slot (altar / blood targets)
+//!        Target resolution is throttled via `m_retarget_timer`, which PlayerSystem advances each frame.
 //!        Not transferred between scenes (see RegistryTransfer) so a stale target never carries over.
 struct ArrowCompass
 {
   //! @brief What a needle is pointing at.
   //!        BLOOD points only at a graveyard altar still taking blood (fullest first, then nearest).
-  enum class Mode { NONE, EXIT, CRYPT, ALTAR, BLOOD };
+  enum class Mode { NONE, ALTAR, BLOOD };
 
   //! @brief One compass arrow: its target type, label, colour and resolved target.
   struct Needle
@@ -79,10 +71,6 @@ struct ArrowCompass
 
   //! @brief Colour of the altar/blood needle's label (matches sprite.graveyard.arrowcompass.altar)
   static constexpr sf::Color kAltarColor{ 200, 30, 30 };
-  //! @brief Colour of the exit key needle's label (matches sprite.graveyard.arrowcompass.exit)
-  static constexpr sf::Color kExitColor{ 0, 200, 0 };
-  //! @brief Colour of the crypt key needle's label (matches sprite.graveyard.arrowcompass.crypt)
-  static constexpr sf::Color kCryptColor{ 20, 40, 140 };
 
   //! @brief Inset from the view edge at which the arrow is placed
   static constexpr float kEdgeMargin{ 32.f };
@@ -91,8 +79,7 @@ struct ArrowCompass
   static constexpr float kTargetRegionScale{ 0.5f };
 
   //! @brief Recompute the held needle's mode if the inventory item type or its offering eligibility has changed since the last call.
-  //!        The crypt key is ignored here: its needle is driven by the key's existence (see refresh_targets()). The exit
-  //!        key also has its own needle, but is offerable, so it shows the altar needle too.
+  //!        Holding the crypt key shows no needle, even though it is offerable.
   //! @param item_type The item type currently in the player's inventory slot (empty if none)
   //! @param is_offerable Whether the inventory item can currently be offered at the altar (tools only once spent)
   //! @return true if the mode was recomputed (forces a retarget on the next refresh_targets())
@@ -104,8 +91,7 @@ struct ArrowCompass
 
     m_cached_is_blood = not item_type.empty() and Sys::ItemStore::instance().get( item_type ).is_blood();
 
-    // the crypt key has its own needle; the (offerable) exit key falls through to point at the altar as well as the exit
-    if ( item_type.contains( "cryptkey" ) )
+    if ( item_type == kCryptKey )
       m_held.mode = Mode::NONE;
     else if ( m_cached_is_blood )
       m_held.mode = Mode::BLOOD;
@@ -120,8 +106,7 @@ struct ArrowCompass
     return true;
   }
 
-  //! @brief Re-resolve which key needles are active and every active needle's target, if a retarget is pending or the
-  //!        retarget interval has elapsed.
+  //! @brief Re-resolve every active needle's target, if a retarget is pending or the retarget interval has elapsed.
   //! @param reg The current scene registry
   //! @param player_center The player's center position, used for nearest-target searches
   void refresh_targets( entt::registry &reg, sf::Vector2f player_center )
@@ -129,9 +114,6 @@ struct ArrowCompass
     if ( not m_retarget_pending and m_retarget_timer < m_retarget_interval ) return;
     m_retarget_pending = false;
     m_retarget_timer = sf::Time::Zero;
-
-    m_exit.active = key_exists( reg, kExitKey );
-    m_crypt.active = key_exists( reg, kCryptKey );
 
     for ( Needle *needle : needles() )
     {
@@ -224,57 +206,23 @@ struct ArrowCompass
   //! @brief Accumulated time since the last retarget. Advanced by PlayerSystem::update().
   sf::Time m_retarget_timer{ sf::Time::Zero };
 
-  //! @brief How often the targets (and key needle activity) are re-resolved
+  //! @brief How often the targets are re-resolved
   sf::Time m_retarget_interval{ sf::milliseconds( 250 ) };
 
   //! @brief Time component of the sine wave for the arrow's pulsing scale
   sf::Time m_osc_timer;
 
 private:
-  inline static const Sys::ItemKey kExitKey{ "item.exitkey" };
   inline static const Sys::ItemKey kCryptKey{ "item.cryptkey" };
 
-  [[nodiscard]] std::array<Needle *, 3> needles() { return { &m_exit, &m_crypt, &m_held }; }
-  [[nodiscard]] std::array<const Needle *, 3> needles() const { return { &m_exit, &m_crypt, &m_held }; }
-
-  //! @brief Whether the given key exists in the scene, either as a world item or in the player's inventory.
-  //!        Keys are blast proof and only destroyed when used, so this is "the key has spawned and not been used".
-  static bool key_exists( entt::registry &reg, const Sys::ItemKey &key )
-  {
-    for ( auto [item_entt, item_cmp] : reg.view<Cmp::WorldItem>().each() )
-    {
-      if ( item_cmp.item_type == key ) return true;
-    }
-    for ( auto [slot_entt, slot_cmp] : reg.view<Cmp::PlayerInventorySlot>().each() )
-    {
-      if ( not slot_cmp.empty() and slot_cmp.m_item->item_type == key ) return true;
-    }
-    return false;
-  }
+  [[nodiscard]] std::array<Needle *, 1> needles() { return { &m_held }; }
+  [[nodiscard]] std::array<const Needle *, 1> needles() const { return { &m_held }; }
 
   //! @brief Resolve the needle's target for its mode.
   void resolve( Needle &needle, entt::registry &reg, sf::Vector2f player_center ) const
   {
     switch ( needle.mode )
     {
-      case Mode::EXIT: {
-        needle.target.reset();
-        for ( auto [exit_entt, exit_cmp, exit_pos_cmp] : reg.view<Cmp::Exit, Cmp::Position>().each() )
-        {
-          needle.target = exit_pos_cmp;
-        }
-        break;
-      }
-      case Mode::CRYPT: {
-        needle.target = nearest(
-            reg.view<Cmp::Crypt::Entrance, Cmp::Position>(), player_center,
-            []( entt::entity, const Cmp::Crypt::Entrance &crypt_cmp, const Cmp::Position &crypt_pos_cmp ) -> std::optional<Cmp::Position>
-        {
-          if ( crypt_cmp.is_open() ) return std::nullopt;
-          return crypt_pos_cmp;
-        } );
-        break;
-      }
       case Mode::ALTAR: {
         needle.target = nearest( reg.view<Cmp::Altar::MultiBlock>(), player_center,
                                  []( entt::entity, const Cmp::Altar::MultiBlock &altar_cmp ) -> std::optional<Cmp::Position>
@@ -332,8 +280,6 @@ private:
     return best;
   }
 
-  Needle m_exit{ .mode = Mode::EXIT, .label = "exit", .sprite = "sprite.graveyard.arrowcompass.exit", .color = kExitColor };
-  Needle m_crypt{ .mode = Mode::CRYPT, .label = "crypt", .sprite = "sprite.graveyard.arrowcompass.crypt", .color = kCryptColor };
   //! @brief Altar and blood targets share the altar arrow
   Needle m_held{ .label = "altar", .sprite = "sprite.graveyard.arrowcompass.altar", .color = kAltarColor };
 

@@ -294,7 +294,7 @@ bool HazardFieldSystem<HazardType>::holds_key_item( const Cmp::Position &pos )
                               {
                                 if ( not reg().valid( item_entt ) ) return false;
                                 const auto *item_cmp = reg().template try_get<Cmp::WorldItem>( item_entt );
-                                return item_cmp and ( item_cmp->item_type == "item.exitkey" or item_cmp->item_type == "item.cryptkey" );
+                                return item_cmp and item_cmp->item_type == "item.cryptkey";
                               } );
 }
 

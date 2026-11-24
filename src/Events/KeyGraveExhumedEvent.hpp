@@ -4,7 +4,7 @@
 namespace Game::Events
 {
 
-//! @brief Notification that the key grave (Cmp::Grave::KeyGrave) has been exhumed and the exit key dropped.
+//! @brief Notification that the key grave (Cmp::Grave::KeyGrave) has been exhumed.
 //! @note Sent by Sys::GraveSystem. Sys::AltarSystem responds by resetting the activated altar (lights out, blood
 //! emptied, Cmp::Altar::Activated removed), so any altar, including that one, takes blood again.
 struct KeyGraveExhumedEvent
