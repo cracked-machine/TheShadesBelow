@@ -4,9 +4,8 @@
 namespace Game::Cmp::Grave
 {
 
-//! @brief Tags the un-exhumed grave that holds the exit key. Given to one random grave by GraveSystem when an altar is
-//! activated; a guide crow (Cmp::Npc::Crow::guide_grave) leads the player to it. Exhuming it drops the exit key instead
-//! of the grave's own consequence, and the tag is removed.
+//! @brief Tags an un-exhumed grave that holds a crypt key. LevelGenerator gives it to one random grave in each map
+//! quadrant. Exhuming it drops a crypt key instead of the grave's own consequence, and the tag is removed.
 struct KeyGrave
 {
 };

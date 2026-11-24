@@ -27,7 +27,7 @@ public:
     //! @brief Drops a cadaver item.
     CADAVER,
     //! @brief Drops a torch item.
-    TORCH
+    TORCH,
   };
 
   //! @brief A consequence's place on the line, 0 = worst and 100 = best. Below 50 is bad, above 50 is good.

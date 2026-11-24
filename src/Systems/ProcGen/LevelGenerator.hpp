@@ -82,7 +82,8 @@ public:
   //!        (Cmp::Persist::GraveClusterGridSize) of 2x2-cell grave slots with kGraveClusterInternalPadding cells between
   //!        slots, and Cmp::Persist::GraveClusterExternalPadding cells between clusters. A grave is omitted when its
   //!        footprint is not open levelgen ground or is already taken (walls, paths, buildings, ...). The clusters'
-  //!        internal padding cells are kept for gen_random_plants().
+  //!        internal padding cells are kept for gen_random_plants(). One random grave per quadrant is tagged
+  //!        Cmp::Grave::KeyGrave, so it drops a crypt key.
   //! @param scene_data Scene data used to split the map into quadrants and find open levelgen tiles
   //! @param crypt_pos Top-left pixel position of the crypt.
   //! @param healing_pos Top-left pixel position of the healing spring / barber surgeon building.

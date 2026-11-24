@@ -16,6 +16,7 @@
 #include <Components/Exit.hpp>
 #include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/ExitSegment.hpp>
+#include <Components/Grave/KeyGrave.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
@@ -546,8 +547,6 @@ void LevelGenerator::add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scen
 void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData &scene_data, sf::Vector2f crypt_pos, sf::Vector2f healing_pos,
                                                          sf::Vector2f ruin_pos )
 {
-  // the altar is not spawned here: graveyard.json places it, see build_scene_from_data()
-
   // CRYPT - one crypt serves every key grave's crypt key, whichever altar started it
   const auto &crypt_spritesheet = Sys::SpriteStore::instance().get( "sprite.graveyard.crypt.closed" );
   spawn_multiblock_at<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>( crypt_pos, crypt_spritesheet );
@@ -631,6 +630,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData 
       const int offset_y = ( q_rows - ( ( clusters_y * cluster_stride ) - external_padding ) ) / 2;
 
       std::size_t quadrant_graves = 0;
+      std::vector<entt::entity> quadrant_grave_entts;
       for ( int cy = 0; cy < clusters_y; ++cy )
       {
         for ( int cx = 0; cx < clusters_x; ++cx )
@@ -689,6 +689,7 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData 
               // simulate the rolls now to get an idea of the distribution with game start player luck
               grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck() )]++;
               quadrant_graves++;
+              quadrant_grave_entts.push_back( mb_entt );
 
               placed_first_col = std::min( placed_first_col, slot_col );
               placed_first_row = std::min( placed_first_row, slot_row );
@@ -704,8 +705,17 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData 
           }
         }
       }
-      SPDLOG_INFO( "Grave clusters: quadrant {} has {}x{} clusters of {}x{} slots, {} graves placed", quadrant, clusters_x, clusters_y,
-                   slots_per_side, slots_per_side, quadrant_graves );
+      // one grave per quadrant holds a crypt key
+      entt::entity key_grave = entt::null;
+      if ( quadrant_grave_entts.empty() ) { SPDLOG_WARN( "Grave clusters: quadrant {} has no graves, so no key grave", quadrant ); }
+      else
+      {
+        Cmp::RandomInt grave_picker( 0, static_cast<int>( quadrant_grave_entts.size() ) - 1 );
+        key_grave = quadrant_grave_entts.at( static_cast<std::size_t>( grave_picker.gen() ) );
+        reg().emplace_or_replace<Cmp::Grave::KeyGrave>( key_grave );
+      }
+      SPDLOG_INFO( "Grave clusters: quadrant {} has {}x{} clusters of {}x{} slots, {} graves placed, key grave {}", quadrant, clusters_x, clusters_y,
+                   slots_per_side, slots_per_side, quadrant_graves, static_cast<uint32_t>( key_grave ) );
       placed_num_graves += quadrant_graves;
     }
     SPDLOG_INFO( "Added {} graves", placed_num_graves );

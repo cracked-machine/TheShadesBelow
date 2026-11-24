@@ -314,7 +314,7 @@ void DebugOverlaySystem::render_ui_highlight_options()
 
     ImGui::SeparatorText( "Graveyard" );
     row( "Grave NPC traps", m_highlights.grave_npc_traps, kGraveNpcTrapColour );
-    row( "Key grave", m_highlights.key_grave, kKeyGraveColour );
+    row( "Key graves", m_highlights.key_grave, kKeyGraveColour );
 
     ImGui::SeparatorText( "General" );
     row( "Selected positions", m_highlights.selected_positions, kSelectedPositionColour );

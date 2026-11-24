@@ -26,10 +26,8 @@
 #include <Components/Stats/SpawnAction.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
-#include <Events/AltarActivatedEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/CreateNpcEvent.hpp>
-#include <Events/CrowGuideEvent.hpp>
 #include <Events/ExhumeGraveEvent.hpp>
 #include <Events/KeyGraveExhumedEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
@@ -60,7 +58,6 @@ GraveSystem::GraveSystem( entt::registry &reg, sf::RenderWindow &window, Audio::
     : BaseSystem( reg, window, sound_bank )
 {
   std::ignore = get_systems_event_queue().sink<Events::PlayerActionEvent>().connect<&GraveSystem::on_player_action>( this );
-  std::ignore = get_systems_event_queue().sink<Events::AltarActivatedEvent>().connect<&GraveSystem::on_altar_activated>( this );
   std::ignore = get_systems_event_queue().sink<Events::ExhumeGraveEvent>().connect<&GraveSystem::on_exhume_grave>( this );
 }
 
@@ -235,11 +232,11 @@ void GraveSystem::open_grave( entt::entity grave_entity, Cmp::AnimData &grave_an
 
   reg().emplace_or_replace<Cmp::Grave::Exhumed>( grave_entity );
 
-  // the key grave skips its own consequence: it holds the exit key
+  // the key grave skips its own consequence: it holds a crypt key
   if ( reg().all_of<Cmp::Grave::KeyGrave>( grave_entity ) )
   {
     reg().remove<Cmp::Grave::KeyGrave>( grave_entity );
-    drop_exit_key( grave_entity );
+    spawn_grave_loot( { "item.cryptkey" }, grave_entity, by );
     return;
   }
 
@@ -362,35 +359,6 @@ void GraveSystem::drop_exit_key( entt::entity grave_entity )
   // let AltarSystem release the activated altar so the player can activate another. Enqueued as the caller may be
   // iterating registry views
   get_systems_event_queue().enqueue( Events::KeyGraveExhumedEvent{} );
-}
-
-void GraveSystem::on_altar_activated( const Events::AltarActivatedEvent &event )
-{
-  // any un-exhumed grave can hold the key, but one out of view makes the crow's guidance worth following
-  const sf::FloatRect view_bounds = Utils::calculate_view_bounds( RenderSystem::get_world_view() );
-  std::vector<entt::entity> hidden;
-  std::vector<entt::entity> visible;
-  for ( auto [grave_entt, grave_pos, grave_mb] : reg().view<Cmp::Position, Cmp::Grave::MultiBlock>( entt::exclude<Cmp::Grave::Exhumed> ).each() )
-  {
-    ( Utils::is_visible_in_view( view_bounds, grave_pos ) ? visible : hidden ).push_back( grave_entt );
-  }
-  const auto &pool = hidden.empty() ? visible : hidden;
-  if ( pool.empty() )
-  {
-    // nowhere to hide the key: hand it over now so the level can still be exited
-    SPDLOG_WARN( "No un-exhumed graves left to hold the exit key" );
-    spawn_grave_loot( { "item.exitkey" }, entt::null, ExhumedBy::PLAYER );
-    get_systems_event_queue().enqueue( Events::KeyGraveExhumedEvent{} );
-    return;
-  }
-
-  Cmp::RandomInt grave_picker( 0, static_cast<int>( pool.size() ) - 1 );
-  const entt::entity key_grave = pool.at( static_cast<std::size_t>( grave_picker.gen() ) );
-  reg().emplace_or_replace<Cmp::Grave::KeyGrave>( key_grave );
-  SPDLOG_INFO( "Altar activated: grave {} holds the exit key ({} hidden / {} visible candidates)", static_cast<uint32_t>( key_grave ), hidden.size(),
-               visible.size() );
-  // NpcSystem sends the guide crow from the altar
-  get_systems_event_queue().enqueue( Events::CrowGuideEvent{ .key_grave = key_grave, .altar_position = event.altar_position } );
 }
 
 void GraveSystem::on_player_action( const Events::PlayerActionEvent &event )

@@ -14,7 +14,6 @@
 namespace Game::Cmp { class AnimData; }
 namespace Game::Cmp::Player { class Character; }
 namespace Game::Cmp::Grave { class Consequence; }
-namespace Game::Events { struct AltarActivatedEvent; }
 namespace Game::Events { struct ExhumeGraveEvent; }
 // clang-format on
 
@@ -38,11 +37,6 @@ private:
   //! @brief handler for Events::PlayerActionEvent::GameActions::DIG
   //! @param event
   void on_player_action( const Events::PlayerActionEvent &event );
-
-  //! @brief Handler for Events::AltarActivatedEvent. Tags one random un-exhumed grave, out of view if possible, with
-  //! Cmp::Grave::KeyGrave and sends Events::CrowGuideEvent so a crow leads the player to it.
-  //! @param event
-  void on_altar_activated( const Events::AltarActivatedEvent &event );
 
   //! @brief True if the player has a digging tool equipped with remaining wear
   bool has_digging_tool_equipped();
