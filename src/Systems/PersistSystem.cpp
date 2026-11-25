@@ -17,6 +17,7 @@
 #include <Components/Persistent/BombBonus.hpp>
 #include <Components/Persistent/BombDamage.hpp>
 #include <Components/Persistent/BombsExhumeGraves.hpp>
+#include <Components/Persistent/BombsIgnitePlants.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
 #include <Components/Persistent/BradycardiaHealthDmgPerSec.hpp>
 #include <Components/Persistent/BradycardiaMovementSpeed.hpp>
@@ -215,6 +216,7 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::BombBonus>();
   add_component<Cmp::Persist::BombDamage>();
   add_component<Cmp::Persist::BombsExhumeGraves>();
+  add_component<Cmp::Persist::BombsIgnitePlants>();
   add_component<Cmp::Persist::CameraSmoothSpeed>();
   add_component<Cmp::Persist::HeldItemOffset>();
   add_component<Cmp::Persist::HeldItemRotation>();

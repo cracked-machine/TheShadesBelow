@@ -56,7 +56,7 @@ public:
     m_hazard_sm = hazard_sm;
   }
 
-  //! @brief Detonate any armed bombs whose fuse has expired: destroys obstacles, loot containers, npc containers and nearby items, damages the
+  //! @brief Detonate any armed bombs whose fuse has expired: destroys obstacles, loot containers, npc containers and nearby items, sets plants on fire, damages the
   //! player and npcs caught in the blast, triggers chain reactions with other explosives, and replaces the bomb with a detonated sprite.
   //! @param dt Frame delta, accumulated into each Cmp::Armed fuse/warning timer
   void update( sf::Time dt );

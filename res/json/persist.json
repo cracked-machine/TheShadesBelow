@@ -135,6 +135,11 @@
     "value": true,
     "detail": "Bombs Exhume Graves"
   },
+  "BombsIgnitePlants": {
+    "type": "bool",
+    "value": true,
+    "detail": "Bombs Ignite Plants"
+  },
   "BowReleaseWear": {
     "type": "float",
     "value": 1.0,

@@ -7,6 +7,7 @@
 #include <Components/Exit.hpp>
 #include <Components/Grave/Exhumed.hpp>
 #include <Components/Grave/MultiBlock.hpp>
+#include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Inventory/BlastProof.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
@@ -18,6 +19,8 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Persistent/BombDamage.hpp>
 #include <Components/Persistent/BombsExhumeGraves.hpp>
+#include <Components/Persistent/BombsIgnitePlants.hpp>
+#include <Components/Plant/BurningTimer.hpp>
 #include <Components/Persistent/ReservedArmedBlockColourBorder.hpp>
 #include <Components/Persistent/ReservedArmedBlockColourFill.hpp>
 #include <Components/Player/Character.hpp>
@@ -118,6 +121,21 @@ void BombSystem::update( sf::Time dt )
     auto *armed_pos_cmp_ptr = reg().try_get<Cmp::Position>( armed_entt );
     if ( not armed_cmp_ptr or not armed_pos_cmp_ptr ) continue; // removed/changed already this tick (e.g. a chain reaction)
     if ( armed_cmp_ptr->getElapsedFuseTime() < armed_cmp_ptr->m_fuse_delay ) continue;
+
+    // set plants caught in this cell on fire, as a torch would (see PlantSystem::update_burning_plants()). Done before
+    // the Cmp::BlastMarker check: plants (except grass) reserve their cells, so those cells only get a visual marker.
+    if ( Sys::PersistSystem::get<Cmp::Persist::BombsIgnitePlants>( reg() ).get_value() )
+    {
+      std::vector<entt::entity> ignited_plants;
+      for ( auto [plant_entt, plant_mb_cmp] : reg().view<Cmp::PlantMultiBlock>( exclude<Cmp::Plant::BurningTimer> ).each() )
+      {
+        if ( armed_pos_cmp_ptr->findIntersection( plant_mb_cmp ) ) ignited_plants.push_back( plant_entt );
+      }
+      for ( entt::entity plant_entt : ignited_plants )
+      {
+        reg().emplace<Cmp::Plant::BurningTimer>( plant_entt );
+      }
+    }
 
     // visual-only tile over a reserved position: its flashing is done, nothing to detonate
     if ( reg().all_of<Cmp::BlastMarker>( armed_entt ) )
