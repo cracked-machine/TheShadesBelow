@@ -55,7 +55,7 @@
       "id": "first_blood_vial",
       "trigger": "ItemPickedUpEvent",
       "condition": { "item": "item.grave.blood*" },
-      "text": "The blood of the dead. Vials stack in one slot.\nPour them into the altar, or drink one to restore your health.",
+      "text": "The blood of the dead. Drink one to restore your health.",
       "position": "above_player",
       "frequency": "once",
       "pause": true
