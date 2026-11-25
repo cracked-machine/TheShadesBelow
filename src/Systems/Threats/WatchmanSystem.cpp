@@ -38,8 +38,11 @@
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
+#include <algorithm>
 #include <cmath>
+#include <limits>
 #include <optional>
+#include <ranges>
 #include <vector>
 
 #include <spdlog/spdlog.h>
@@ -230,17 +233,57 @@ void WatchmanSystem::spawn_watchman()
     }
     // Watchmen patrol the paths, so only spawn on a levelgen 'path' cell. Path cells are always in the reserved grid
     // (LevelGenerator reserves the path tiles), so the reserved grid can't veto the spawn cell here.
-    Cmp::RandomInt path_picker( 0, static_cast<int>( m_path_positions.size() ) - 1 );
-    const Cmp::Position rnd_pos_cmp( m_path_positions.at( static_cast<std::size_t>( path_picker.gen() ) ), Constants::kGridSizePxF );
-    // don't spawn on top of the player
     auto player_view = reg().view<Cmp::Player::Character, Cmp::Position>();
-    for ( auto player_entt : player_view )
+    auto item_sm = m_item_sm.lock();
+    auto hazard_sm = m_hazard_sm.lock();
+    auto is_free_spawn_cell = [&]( const Cmp::Position &cell ) -> bool
     {
-      if ( player_view.get<Cmp::Position>( player_entt ).findIntersection( rnd_pos_cmp ) ) return;
+      // not on top of the player
+      for ( auto player_entt : player_view )
+      {
+        if ( player_view.get<Cmp::Position>( player_entt ).findIntersection( cell ) ) return false;
+      }
+      // not on a dropped item or into a sinkhole/corruption cell
+      if ( item_sm and not item_sm->at( cell ).empty() ) return false;
+      if ( hazard_sm and not hazard_sm->at( cell ).empty() ) return false;
+      return true;
+    };
+
+    std::vector<sf::Vector2f> watchman_centres;
+    auto watchman_view = reg().view<Cmp::Npc::Watchman, Cmp::Position>();
+    for ( auto npc_entt : watchman_view )
+    {
+      watchman_centres.push_back( watchman_view.get<Cmp::Position>( npc_entt ).getCenter() );
     }
-    // don't spawn on a dropped item or into a sinkhole/corruption cell
-    if ( auto item_sm = m_item_sm.lock(); item_sm and not item_sm->at( rnd_pos_cmp ).empty() ) return;
-    if ( auto hazard_sm = m_hazard_sm.lock(); hazard_sm and not hazard_sm->at( rnd_pos_cmp ).empty() ) return;
+
+    // best-candidate sampling: of a few random free path cells, take the one furthest from its nearest Watchman so
+    // Watchmen spread out along the paths. More candidates spread them further; fewer keep spawns more random.
+    constexpr int kSpawnCandidates = 12;
+    Cmp::RandomInt path_picker( 0, static_cast<int>( m_path_positions.size() ) - 1 );
+    std::optional<Cmp::Position> best_cell;
+    float best_score = -1.f;
+    for ( int _ : std::views::iota( 0, kSpawnCandidates ) )
+    {
+      const Cmp::Position cell( m_path_positions.at( static_cast<std::size_t>( path_picker.gen() ) ), Constants::kGridSizePxF );
+      if ( not is_free_spawn_cell( cell ) ) continue;
+      // with no Watchmen yet every free cell scores 0, so the first free candidate wins (a uniform random pick)
+      float score = 0.f;
+      if ( not watchman_centres.empty() )
+      {
+        score = std::numeric_limits<float>::max();
+        for ( const auto &centre : watchman_centres )
+        {
+          score = std::min( score, ( cell.getCenter() - centre ).lengthSquared() );
+        }
+      }
+      if ( score > best_score )
+      {
+        best_score = score;
+        best_cell = cell;
+      }
+    }
+    if ( not best_cell ) return;
+    const Cmp::Position &rnd_pos_cmp = *best_cell;
     get_systems_event_queue().trigger( Events::CreateNpcEvent( "npc.nightwatchman", rnd_pos_cmp ) );
     SPDLOG_INFO( "Spawned Watchman at {},{}", rnd_pos_cmp.x(), rnd_pos_cmp.y() );
   }
