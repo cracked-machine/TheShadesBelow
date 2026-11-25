@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <vector>
 
 namespace Game::Cmp::Grave
 {
@@ -30,30 +31,38 @@ public:
     TORCH,
   };
 
-  //! @brief A consequence's place on the line, 0 = worst and 100 = best. Below 50 is bad, above 50 is good.
+  //! @brief A consequence's rank on the line, 0 = worst and 100 = best. Below 50 is bad, above 50 is good. A negative
+  //! value disables the consequence: make_line() leaves it off the line.
   struct Slot
   {
     Type type;
     int value;
   };
 
-  //! @brief Number of consequence types, and so the number of slots on the line
+  //! @brief Number of consequence types, and so the number of slots given to make_line()
   static constexpr std::size_t kNumTypes = 7;
 
-  //! @brief The odds line, sorted by value. A roll lands on the slot whose value is nearest, so each slot owns the
-  //! range halfway to its neighbours. Slots with equal values form a group that shares one band; the grave's fixed
-  //! roll picks which of the group it gets.
-  using Line = std::array<Slot, kNumTypes>;
+  //! @brief One slot per consequence type, in any order, as given to make_line()
+  using Slots = std::array<Slot, kNumTypes>;
 
-  //! @brief Build a valid line: clamps each value to [0, 100] and sorts by value. The sort is stable, so equal values
-  //! keep the order they were given in.
+  //! @brief The drop line, sorted by value, holding only the enabled slots. A roll lands on the slot whose value is
+  //! nearest, so each slot owns the range halfway to its neighbours. Slots with equal values form a group that shares
+  //! one band; the grave's fixed roll picks which of the group it gets.
+  using Line = std::vector<Slot>;
+
+  //! @brief Build a valid line: drops disabled (negative) slots, caps the rest at 100 and sorts by value. The sort is
+  //! stable, so equal values keep the order they were given in. Empty when every slot is disabled.
   //! @param slots one slot per consequence type, in any order
-  [[nodiscard]] static Line make_line( Line slots )
+  [[nodiscard]] static Line make_line( const Slots &slots )
   {
-    for ( auto &slot : slots )
-      slot.value = std::clamp( slot.value, 0, 100 );
-    std::ranges::stable_sort( slots, []( const Slot &a, const Slot &b ) { return a.value < b.value; } );
-    return slots;
+    Line line;
+    for ( const auto &slot : slots )
+    {
+      if ( slot.value < 0 ) continue;
+      line.push_back( Slot{ .type = slot.type, .value = std::min( slot.value, 100 ) } );
+    }
+    std::ranges::stable_sort( line, []( const Slot &a, const Slot &b ) { return a.value < b.value; } );
+    return line;
   }
 
   //! @brief Lowest and highest skewed values that always resolve to the blood slot's group, whatever the luck tie-break
@@ -67,7 +76,8 @@ public:
   //! @param roll Fixed roll in the range [0, 100], decided once at level gen
   //! @param min_blood_chance_pct Lowest chance (percent) of blood however bad the player's luck, from
   //! Cmp::Persist::BloodMinChance at level gen. Capped at max_blood_floor_pct().
-  //! @param line The odds line at level gen, see make_line(). Kept so later setting changes only affect new levels.
+  //! @param line The drop line at level gen, see make_line(). Must not be empty. Kept so later setting changes only
+  //! affect new levels.
   Consequence( int roll, int min_blood_chance_pct, const Line &line )
       : m_line( line ),
         m_roll( roll ),

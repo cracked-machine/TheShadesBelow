@@ -48,13 +48,13 @@
 #include <Components/Persistent/GraveClusterExternalPadding.hpp>
 #include <Components/Persistent/GraveClusterGridSize.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
-#include <Components/Persistent/GraveOddsBlood.hpp>
-#include <Components/Persistent/GraveOddsBombTrap.hpp>
-#include <Components/Persistent/GraveOddsCadaver.hpp>
-#include <Components/Persistent/GraveOddsCurseTablet.hpp>
-#include <Components/Persistent/GraveOddsNpcTrap.hpp>
-#include <Components/Persistent/GraveOddsTalisman.hpp>
-#include <Components/Persistent/GraveOddsTorch.hpp>
+#include <Components/Persistent/GraveDropBloodRank.hpp>
+#include <Components/Persistent/GraveDropBombTrapRank.hpp>
+#include <Components/Persistent/GraveDropCadaverRank.hpp>
+#include <Components/Persistent/GraveDropCurseTabletRank.hpp>
+#include <Components/Persistent/GraveDropNpcTrapRank.hpp>
+#include <Components/Persistent/GraveDropTalismanRank.hpp>
+#include <Components/Persistent/GraveDropTorchRank.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
@@ -237,13 +237,13 @@ void PersistSystem::initialize_component_registry()
   add_component<Cmp::Persist::GraveNumMultiplier>();
   add_component<Cmp::Persist::MaxLevelDepth>();
   add_component<Cmp::Persist::BloodMinChance>();
-  add_component<Cmp::Persist::GraveOddsCurseTablet>();
-  add_component<Cmp::Persist::GraveOddsBombTrap>();
-  add_component<Cmp::Persist::GraveOddsTorch>();
-  add_component<Cmp::Persist::GraveOddsNpcTrap>();
-  add_component<Cmp::Persist::GraveOddsBlood>();
-  add_component<Cmp::Persist::GraveOddsCadaver>();
-  add_component<Cmp::Persist::GraveOddsTalisman>();
+  add_component<Cmp::Persist::GraveDropCurseTabletRank>();
+  add_component<Cmp::Persist::GraveDropBombTrapRank>();
+  add_component<Cmp::Persist::GraveDropTorchRank>();
+  add_component<Cmp::Persist::GraveDropNpcTrapRank>();
+  add_component<Cmp::Persist::GraveDropBloodRank>();
+  add_component<Cmp::Persist::GraveDropCadaverRank>();
+  add_component<Cmp::Persist::GraveDropTalismanRank>();
   add_component<Cmp::Persist::GraveClusterGridSize>();
   add_component<Cmp::Persist::GraveClusterExternalPadding>();
   add_component<Cmp::Persist::GraveyardProcGenInitChance>();

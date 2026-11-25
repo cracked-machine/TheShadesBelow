@@ -34,13 +34,13 @@
 #include <Components/Persistent/GraveClusterExternalPadding.hpp>
 #include <Components/Persistent/GraveClusterGridSize.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
-#include <Components/Persistent/GraveOddsBlood.hpp>
-#include <Components/Persistent/GraveOddsBombTrap.hpp>
-#include <Components/Persistent/GraveOddsCadaver.hpp>
-#include <Components/Persistent/GraveOddsCurseTablet.hpp>
-#include <Components/Persistent/GraveOddsNpcTrap.hpp>
-#include <Components/Persistent/GraveOddsTalisman.hpp>
-#include <Components/Persistent/GraveOddsTorch.hpp>
+#include <Components/Persistent/GraveDropBloodRank.hpp>
+#include <Components/Persistent/GraveDropBombTrapRank.hpp>
+#include <Components/Persistent/GraveDropCadaverRank.hpp>
+#include <Components/Persistent/GraveDropCurseTabletRank.hpp>
+#include <Components/Persistent/GraveDropNpcTrapRank.hpp>
+#include <Components/Persistent/GraveDropTalismanRank.hpp>
+#include <Components/Persistent/GraveDropTorchRank.hpp>
 #include <Components/Persistent/MaxLevelDepth.hpp>
 #include <Components/Plant/Grass.hpp>
 #include <Components/Player/Character.hpp>
@@ -577,23 +577,25 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData 
   if ( grave_meta_types.size() < 2 ) { SPDLOG_WARN( "No GRAVE spritesheets found in SpriteStore" ); }
   else
   {
-    // the odds line is fixed per level, so settings changes take effect from the next level
+    // the drop line is fixed per level, so settings changes take effect from the next level
     using Slot = Cmp::Grave::Consequence::Slot;
     using ConsequenceType = Cmp::Grave::Consequence::Type;
     const auto consequence_line = Cmp::Grave::Consequence::make_line( {
-        Slot{ .type = ConsequenceType::CURSE_TABLET, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsCurseTablet>( reg() ).get_value() },
-        Slot{ .type = ConsequenceType::BOMB_TRAP, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsBombTrap>( reg() ).get_value() },
-        Slot{ .type = ConsequenceType::TORCH, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsTorch>( reg() ).get_value() },
-        Slot{ .type = ConsequenceType::NPC_TRAP, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsNpcTrap>( reg() ).get_value() },
-        Slot{ .type = ConsequenceType::BLOOD, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsBlood>( reg() ).get_value() },
-        Slot{ .type = ConsequenceType::CADAVER, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsCadaver>( reg() ).get_value() },
-        Slot{ .type = ConsequenceType::TALISMAN, .value = Sys::PersistSystem::get<Cmp::Persist::GraveOddsTalisman>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::CURSE_TABLET, .value = Sys::PersistSystem::get<Cmp::Persist::GraveDropCurseTabletRank>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::BOMB_TRAP, .value = Sys::PersistSystem::get<Cmp::Persist::GraveDropBombTrapRank>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::TORCH, .value = Sys::PersistSystem::get<Cmp::Persist::GraveDropTorchRank>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::NPC_TRAP, .value = Sys::PersistSystem::get<Cmp::Persist::GraveDropNpcTrapRank>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::BLOOD, .value = Sys::PersistSystem::get<Cmp::Persist::GraveDropBloodRank>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::CADAVER, .value = Sys::PersistSystem::get<Cmp::Persist::GraveDropCadaverRank>( reg() ).get_value() },
+        Slot{ .type = ConsequenceType::TALISMAN, .value = Sys::PersistSystem::get<Cmp::Persist::GraveDropTalismanRank>( reg() ).get_value() },
     } );
+    // a grave with no Consequence component is a plain grave: digging it open does nothing
+    if ( consequence_line.empty() ) { SPDLOG_WARN( "Every grave drop rank is disabled (-1): graves will drop nothing" ); }
     // Consequence caps the floor at the blood band width
     int max_blood_floor_pct = Cmp::Grave::Consequence::max_blood_floor_pct( consequence_line );
     if ( max_blood_floor_pct < 1 )
     {
-      SPDLOG_WARN( "Grave odds leave no band for blood (width {}): the blood min chance cannot be guaranteed", max_blood_floor_pct );
+      SPDLOG_WARN( "Grave drop ranks leave no band for blood (width {}): the blood min chance cannot be guaranteed", max_blood_floor_pct );
       max_blood_floor_pct = 1;
     }
     const int min_blood_chance_pct = std::clamp( Sys::PersistSystem::get<Cmp::Persist::BloodMinChance>( reg() ).get_value(), 1, max_blood_floor_pct );
@@ -692,10 +694,13 @@ void LevelGenerator::gen_graveyard_exterior_multiblocks( const Scene::SceneData 
                   reg(), slot_pos, spritesheet, index, 0, m_reserved_sm.get(), m_world_tile_sm.lock().get() );
               m_reserved_sm->insert( mb_entt, grave_pos );
               // fix the roll at creation; the consequence is resolved against the player's current luck when needed
-              auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 100 ).gen(), min_blood_chance_pct,
-                                                                                     consequence_line );
-              // simulate the rolls now to get an idea of the distribution with game start player luck
-              grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck() )]++;
+              if ( not consequence_line.empty() )
+              {
+                auto &consequence = reg().emplace_or_replace<Cmp::Grave::Consequence>( mb_entt, Cmp::RandomInt( 0, 100 ).gen(),
+                                                                                       min_blood_chance_pct, consequence_line );
+                // simulate the rolls now to get an idea of the distribution with game start player luck
+                grave_consequences_distribution[consequence.roll( Utils::Player::get_stats( reg() ).luck() )]++;
+              }
               quadrant_graves++;
               quadrant_grave_entts.push_back( mb_entt );
 

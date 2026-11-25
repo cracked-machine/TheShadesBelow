@@ -501,58 +501,58 @@
     "detail": "Blood Min Chance",
     "format": "%d%%"
   },
-  "GraveOddsCurseTablet": {
+  "GraveDropCurseTabletRank": {
     "type": "int",
     "value": 5,
-    "min_value": 0,
+    "min_value": -1,
     "max_value": 100,
     "detail": "Curse",
     "format": "%d"
   },
-  "GraveOddsBombTrap": {
+  "GraveDropBombTrapRank": {
     "type": "int",
     "value": 40,
-    "min_value": 0,
+    "min_value": -1,
     "max_value": 100,
     "detail": "Bomb",
     "format": "%d"
   },
-  "GraveOddsTorch": {
+  "GraveDropTorchRank": {
     "type": "int",
     "value": 5,
-    "min_value": 0,
+    "min_value": -1,
     "max_value": 100,
     "detail": "Torch",
     "format": "%d"
   },
-  "GraveOddsNpcTrap": {
+  "GraveDropNpcTrapRank": {
     "type": "int",
     "value": 40,
-    "min_value": 0,
+    "min_value": -1,
     "max_value": 100,
     "detail": "NPC",
     "format": "%d"
   },
-  "GraveOddsBlood": {
+  "GraveDropBloodRank": {
     "type": "int",
     "value": 5,
-    "min_value": 0,
+    "min_value": -1,
     "max_value": 100,
     "detail": "Blood",
     "format": "%d"
   },
-  "GraveOddsCadaver": {
+  "GraveDropCadaverRank": {
     "type": "int",
     "value": 40,
-    "min_value": 0,
+    "min_value": -1,
     "max_value": 100,
     "detail": "Cadaver",
     "format": "%d"
   },
-  "GraveOddsTalisman": {
+  "GraveDropTalismanRank": {
     "type": "int",
-    "value": 0,
-    "min_value": 0,
+    "value": -1,
+    "min_value": -1,
     "max_value": 100,
     "detail": "Talisman",
     "format": "%d"

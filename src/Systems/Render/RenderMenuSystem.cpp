@@ -48,13 +48,13 @@
 #include <Components/Persistent/GraveClusterExternalPadding.hpp>
 #include <Components/Persistent/GraveClusterGridSize.hpp>
 #include <Components/Persistent/GraveNumMultiplier.hpp>
-#include <Components/Persistent/GraveOddsBlood.hpp>
-#include <Components/Persistent/GraveOddsBombTrap.hpp>
-#include <Components/Persistent/GraveOddsCadaver.hpp>
-#include <Components/Persistent/GraveOddsCurseTablet.hpp>
-#include <Components/Persistent/GraveOddsNpcTrap.hpp>
-#include <Components/Persistent/GraveOddsTalisman.hpp>
-#include <Components/Persistent/GraveOddsTorch.hpp>
+#include <Components/Persistent/GraveDropBloodRank.hpp>
+#include <Components/Persistent/GraveDropBombTrapRank.hpp>
+#include <Components/Persistent/GraveDropCadaverRank.hpp>
+#include <Components/Persistent/GraveDropCurseTabletRank.hpp>
+#include <Components/Persistent/GraveDropNpcTrapRank.hpp>
+#include <Components/Persistent/GraveDropTalismanRank.hpp>
+#include <Components/Persistent/GraveDropTorchRank.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenInitChance.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
@@ -476,17 +476,17 @@ void RenderMenuSystem::render_settings_widgets( sf::Time dt, sf::FloatRect title
     Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::BloodMinChance>( reg() ).render_widget();
 
-    // Grave consequence odds line, one vertical slider per consequence, worst (0) to best (100)
-    ImGui::TextUnformatted( "Grave Consequence Odds" );
-    ImGui::TextDisabled( "0 = worst, 100 = best; equal values share a band; applies next level" );
+    // Grave drop line, one vertical slider per consequence rank, off (-1), worst (0) to best (100)
+    ImGui::TextUnformatted( "Grave Drop Ranks" );
+    ImGui::TextDisabled( "-1 = off, 0 = worst, 100 = best; equal values share a band; applies next level" );
     {
-      const std::array<Cmp::Persist::BasePersistent<int> *, 7> odds_settings{
-          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsCurseTablet>( reg() ), &Sys::PersistSystem::get<Cmp::Persist::GraveOddsBombTrap>( reg() ),
-          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsTorch>( reg() ),       &Sys::PersistSystem::get<Cmp::Persist::GraveOddsNpcTrap>( reg() ),
-          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsBlood>( reg() ),       &Sys::PersistSystem::get<Cmp::Persist::GraveOddsTalisman>( reg() ),
-          &Sys::PersistSystem::get<Cmp::Persist::GraveOddsCadaver>( reg() ),
+      const std::array<Cmp::Persist::BasePersistent<int> *, 7> rank_settings{
+          &Sys::PersistSystem::get<Cmp::Persist::GraveDropCurseTabletRank>( reg() ), &Sys::PersistSystem::get<Cmp::Persist::GraveDropBombTrapRank>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::GraveDropTorchRank>( reg() ),       &Sys::PersistSystem::get<Cmp::Persist::GraveDropNpcTrapRank>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::GraveDropBloodRank>( reg() ),       &Sys::PersistSystem::get<Cmp::Persist::GraveDropTalismanRank>( reg() ),
+          &Sys::PersistSystem::get<Cmp::Persist::GraveDropCadaverRank>( reg() ),
       };
-      render_vslider_row( odds_settings );
+      render_vslider_row( rank_settings );
     }
     Sys::PersistSystem::get<Cmp::Persist::GraveClusterGridSize>( reg() ).render_widget();
     Sys::PersistSystem::get<Cmp::Persist::GrassSpawnChance>( reg() ).render_widget();
