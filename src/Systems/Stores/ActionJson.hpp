@@ -319,13 +319,14 @@ template <typename Action>
   return action;
 }
 
-//! @brief Convert a "damage_to_weapon" or "damage_from_weapon" object: { "pickaxe", "axe", "shovel", "bow" }, all required.
+//! @brief Convert a "damage_to_weapon" or "damage_from_weapon" object: { "pickaxe", "axe", "shovel", "bow", "gun" }, all required.
 inline Cmp::WeaponDamage make_weapon_damage( const nlohmann::json &j )
 {
   return Cmp::WeaponDamage{ .pickaxe = j.at( "pickaxe" ).get<int>(),
                             .axe = j.at( "axe" ).get<int>(),
                             .shovel = j.at( "shovel" ).get<int>(),
-                            .bow = j.at( "bow" ).get<int>() };
+                            .bow = j.at( "bow" ).get<int>(),
+                            .gun = j.at( "gun" ).get<int>() };
 }
 
 } // namespace Game::Sys::Detail

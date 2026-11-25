@@ -79,6 +79,7 @@
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/GrimoireItemUpdateEvent.hpp>
+#include <Components/WeaponDamage.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/PersistSystem.hpp>
@@ -711,36 +712,13 @@ Cmp::Player::Doglegs &get_doglegs( entt::registry &reg )
   return reg.get_or_emplace<Cmp::Player::Doglegs>( player_entt );
 }
 
-bool apply_weapon_hit( entt::registry &reg, entt::entity target_entt, const Sys::ItemKey &weapon )
+void wear_held_weapon( entt::registry &reg, const Sys::ItemKey &weapon, const Cmp::WeaponDamage &damage_to_weapon )
 {
-  if ( not reg.all_of<Cmp::Health>( target_entt ) ) return false;
-
-  // a plant's weapon damage is in its items.json entry, an NPC's in its npc.json entry
-  Cmp::WeaponDamage damage_from;
-  Cmp::WeaponDamage damage_to;
-  if ( reg.all_of<Cmp::PlantMultiBlock>( target_entt ) )
-  {
-    const auto &plant_item = reg.get<Cmp::WorldItem>( target_entt );
-    damage_from = plant_item.damage_from_weapon();
-    damage_to = plant_item.damage_to_weapon();
-  }
-  else if ( const auto *npc_cmp = reg.try_get<Cmp::Npc::NPC>( target_entt ) )
-  {
-    damage_from = npc_cmp->damage_from_weapon;
-    damage_to = npc_cmp->damage_to_weapon;
-  }
-  else { return false; }
-
-  auto &event_queue = Sys::BaseSystem::get_systems_event_queue();
   auto [held_entt, held_type, _] = get_inventory( reg );
-  if ( const int wear = damage_to.get( weapon ); wear > 0 and held_type == weapon )
+  if ( const int wear = damage_to_weapon.get( weapon ); wear > 0 and held_type == weapon )
   {
-    event_queue.trigger( Events::UpdateDmgEvent( held_entt, static_cast<float>( wear ) ) );
+    Sys::BaseSystem::get_systems_event_queue().trigger( Events::UpdateDmgEvent( held_entt, static_cast<float>( wear ) ) );
   }
-
-  const auto damage = static_cast<float>( damage_from.get( weapon ) );
-  if ( damage <= 0.f ) return false;
-  return apply_damage( reg, target_entt, damage );
 }
 
 bool apply_damage( entt::registry &reg, entt::entity target_entt, float damage )

@@ -24,6 +24,7 @@ class Direction;
 class LastDirection;
 struct PlayerInventorySlot;
 class TorchRadius;
+struct WeaponDamage;
 } // namespace Game::Cmp
 
 namespace Game::Cmp::Player
@@ -380,15 +381,12 @@ Cmp::Player::ConsumeTimer *is_player_eating( entt::registry &reg );
 //! @return Cmp::Player::Doglegs& modifiable component
 Cmp::Player::Doglegs &get_doglegs( entt::registry &reg );
 
-//! @brief Apply a player weapon hit to a plant (Cmp::PlantMultiBlock + Cmp::WorldItem) or NPC (Cmp::Npc::NPC).
-//! @details The target loses its "damage_from_weapon" for this weapon from its Cmp::Health, and spawns a Cmp::DamagePopup
-//! if Cmp::Persist::ShowDamageText is on. The weapon wears by the target's "damage_to_weapon", but only while it is still
-//! the player's held item (an arrow may land after the bow is swapped out). Killing the target is left to the caller.
+//! @brief Wear the player's held weapon by the "damage_to_weapon" of the target it hit, but only while it is still the
+//! player's held item (an arrow may land after the bow is swapped out). See Events::WeaponHitEvent.
 //! @param reg reference to the entt registry
-//! @param target_entt The plant multiblock or NPC entity that was hit.
 //! @param weapon The weapon's item key, e.g. "item.shovel" or "item.longbow".
-//! @return bool True if the hit took the target's health to zero.
-bool apply_weapon_hit( entt::registry &reg, entt::entity target_entt, const Sys::ItemKey &weapon );
+//! @param damage_to_weapon The hit target's "damage_to_weapon" (items.json/npc.json).
+void wear_held_weapon( entt::registry &reg, const Sys::ItemKey &weapon, const Cmp::WeaponDamage &damage_to_weapon );
 
 //! @brief Take damage from a plant's or NPC's Cmp::Health, spawning a Cmp::DamagePopup if Cmp::Persist::ShowDamageText is on.
 //! @details Killing the target is left to the caller.

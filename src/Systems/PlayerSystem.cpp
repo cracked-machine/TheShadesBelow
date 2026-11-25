@@ -109,10 +109,12 @@
 #include <Events/CreateLootEvent.hpp>
 #include <Events/DestroyPlantEvent.hpp>
 #include <Events/GrimoireItemUpdateEvent.hpp>
+#include <Events/NpcProjectileEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
+#include <Events/WeaponHitEvent.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
@@ -156,6 +158,32 @@ PlayerSystem::PlayerSystem( entt::registry &reg, sf::RenderWindow &window, Audio
   SPDLOG_DEBUG( "PlayerSystem initialized" );
   std::ignore = get_systems_event_queue().sink<Events::PlayerMortalityEvent>().connect<&PlayerSystem::on_player_mortality_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::UpdatePlayerPositionEvent>().connect<&PlayerSystem::on_update_player_position_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::WeaponHitEvent>().connect<&PlayerSystem::on_weapon_hit_event>( this );
+}
+
+void PlayerSystem::on_weapon_hit_event( const Events::WeaponHitEvent &event )
+{
+  if ( not reg().valid( event.m_target ) or not reg().all_of<Cmp::Player::Character>( event.m_target ) ) return;
+  if ( event.m_source_npc.empty() ) return;
+
+  // don't spam death events if the player is already dying/dead
+  if ( Utils::Player::get_mortality( reg() ).state != Cmp::Player::Mortality::State::ALIVE ) return;
+  auto &player_cmp = reg().get<Cmp::Player::Character>( event.m_target );
+  if ( not player_cmp.skip_damage_cooldown_once and player_cmp.m_damage_cooldown_timer < player_cmp.damage_cooldown_timeout() ) return;
+
+  // NpcSystem applies the attacker's projectile action
+  const Cmp::Position player_pos_cmp = Utils::Player::get_position( reg() );
+  get_systems_event_queue().trigger( Events::NpcProjectileEvent( event.m_source_npc, player_pos_cmp ) );
+  player_cmp.skip_damage_cooldown_once = false;
+  player_cmp.m_damage_cooldown_timer = sf::Time::Zero;
+  m_sound_bank.get_effect( "damage_player" ).play();
+  SPDLOG_INFO( "Player (health:{}) hit by {} ({})", Utils::Player::get_stats( reg() ).health(), event.m_source_npc.str(), event.m_weapon.str() );
+
+  // spends any extra life once the death animation has played
+  if ( Utils::Player::get_stats( reg() ).health() <= 0 )
+  {
+    get_systems_event_queue().enqueue( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::HAUNTED, player_pos_cmp ) );
+  }
 }
 
 void PlayerSystem::on_update_player_position_event( const Events::UpdatePlayerPositionEvent &event )

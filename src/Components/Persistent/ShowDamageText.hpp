@@ -7,7 +7,7 @@ namespace Game::Cmp::Persist
 {
 
 //! @brief Whether a weapon hit on a plant or NPC spawns a floating damage number (Cmp::DamagePopup). See
-//! Utils::apply_weapon_hit() and HudOverlaySystem::render_damage_popups().
+//! Utils::Player::apply_damage() and HudOverlaySystem::render_damage_popups().
 class ShowDamageText : public BasePersistent<bool>
 {
 public:

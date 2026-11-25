@@ -13,7 +13,7 @@
 #include <optional>
 
 // clang-format off
-namespace Game::Events { class DropInventoryEvent; class PlayerActionEvent; class PlayerMortalityEvent; class UpdatePlayerPositionEvent; }
+namespace Game::Events { class DropInventoryEvent; class PlayerActionEvent; class PlayerMortalityEvent; class UpdatePlayerPositionEvent; class WeaponHitEvent; }
 namespace Game::Sprites { class SpriteSheet; }
 namespace Game::Cmp { class LerpPosition; class Position; class AnimData; class RectBounds; class BaseAction; struct ActionReward; }
 namespace Game::Cmp::Npc { class Shockwave; }
@@ -194,6 +194,12 @@ private:
   //! @brief Various ways in which the player can die. Starts the death animation loop.
   //! @param ev
   void on_player_mortality_event( Game::Events::PlayerMortalityEvent ev );
+
+  //! @brief An NPC's weapon (e.g. the Watchman's gun) hit the player: unless the player is dead/dying or in their damage
+  //! cooldown, apply the attacking NPC's projectile_action (npc.json, via Events::NpcProjectileEvent), restart the damage
+  //! cooldown and play the hurt sfx. At zero health the player is HAUNTED. Ignores targets other than the player.
+  //! @param event
+  void on_weapon_hit_event( const Game::Events::WeaponHitEvent &event );
 
   //! @brief Move the player. This is the only place that writes the player's Cmp::Position, so that the NPC and
   //! open navmeshes are always updated along with it: a navmesh entry left behind in the old cell breaks NPC

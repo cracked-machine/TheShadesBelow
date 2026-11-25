@@ -13,7 +13,6 @@
 #include <Components/LootContainer.hpp>
 #include <Components/Moveable.hpp>
 #include <Components/Npc/Adder.hpp>
-#include <Components/Npc/Burryman.hpp>
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/Skeleton.hpp>
@@ -35,9 +34,9 @@
 #include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/DestroyitemEvent.hpp>
-#include <Events/NpcKnockbackEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
+#include <Events/WeaponHitEvent.hpp>
 #include <Factory/BombFactory.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
@@ -472,8 +471,6 @@ void ActionSystem::check_player_melee_npc_kill()
   {
     // only NPCs the shovel can hurt (damage_from_weapon.shovel above 0 in npc.json) can be hit in melee
     if ( npc_cmp.damage_from_weapon.shovel <= 0 ) continue;
-    const bool is_skeleton = anim_cmp.m_sprite_type.contains( "sprite.skeleton" );
-    const bool is_burryman = reg().all_of<Cmp::Npc::Burryman>( npc_entity );
     auto mouse_position_bounds = Utils::get_mouse_bounds_in_gameview( m_window, RenderSystem::get_world_view() );
     if ( mouse_position_bounds.findIntersection( npc_pos_cmp ) )
     {
@@ -499,36 +496,10 @@ void ActionSystem::check_player_melee_npc_kill()
       // Add a new SelectedPosition component to the entity
       reg().emplace_or_replace<Cmp::SelectedPosition>( npc_entity, npc_pos_cmp.position );
 
-      // the hit takes the NPC's damage_from_weapon.shovel from its health and wears the shovel by its damage_to_weapon.shovel
+      // NpcSystem applies the hit: damage, shovel wear, knockback or death
       m_melee_hit_clock.restart();
-      const bool killed = Utils::Player::apply_weapon_hit( reg(), npc_entity, "item.shovel" );
-
-      // the bones/twigs burst is the death effect, so only the killing hit spawns it
-      if ( killed and is_skeleton )
-      {
-        auto skelebones_particle_uuid = Cmp::UUID::generate();
-        Factory::Particle::add_skelebones_ps( reg(), "graveyard.skele.particle.bones", 50, 2.f, 50.f, 14.f, skelebones_particle_uuid,
-                                              npc_pos_cmp.getCenter(), npc_pos_cmp.position.y );
-      }
-      else if ( killed and is_burryman )
-      {
-        auto burryman_twigs_particle_uuid = Cmp::UUID::generate();
-        Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, burryman_twigs_particle_uuid,
-                                              npc_pos_cmp.getCenter(), npc_pos_cmp.position.y );
-      }
-
-      // intermediate hits play the destroy_action "oneshot" sfx, the final hit its "final" sfx (played by the DestroyNpcEvent handler)
-      if ( not killed )
-      {
-        play_action_oneshot_sfx( npc_cmp.at<Cmp::DestroyAction>().action.sfx() );
-        // a hit that doesn't kill knocks the NPC back, away from the player
-        get_systems_event_queue().trigger(
-            Events::NpcKnockbackEvent( npc_entity, npc_pos_cmp.getCenter() - Utils::Player::get_position( reg() ).getCenter() ) );
-        return;
-      }
-      SPDLOG_DEBUG( "Killed NPC at position ({}, {})!", npc_pos_cmp.position.x, npc_pos_cmp.position.y );
-      // now destroy the NPC
-      get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entity, std::nullopt, std::nullopt, Events::DestroyNpcEvent::Cause::MELEE ) );
+      get_systems_event_queue().trigger(
+          Events::WeaponHitEvent( npc_entity, "item.shovel", npc_pos_cmp.getCenter() - Utils::Player::get_position( reg() ).getCenter() ) );
       return;
     }
   }

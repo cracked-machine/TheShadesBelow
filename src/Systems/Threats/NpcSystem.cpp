@@ -35,6 +35,7 @@
 #include <Components/Npc/Shockwave.hpp>
 #include <Components/Npc/ShockwaveTimer.hpp>
 #include <Components/Npc/Skeleton.hpp>
+#include <Components/WeaponDamage.hpp>
 #include <Components/Npc/SpawnMeleeGrace.hpp>
 #include <Components/Npc/SpawnedBy.hpp>
 #include <Components/Npc/Spider.hpp>
@@ -103,6 +104,7 @@
 #include <Events/NpcKnockbackEvent.hpp>
 #include <Events/UpdateNpcPositionEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
+#include <Events/WeaponHitEvent.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/AStar.hpp>
@@ -144,6 +146,7 @@ NpcSystem::NpcSystem( entt::registry &reg, sf::RenderWindow &window, Audio::Soun
   SPDLOG_DEBUG( "NpcSystem initialized" );
   std::ignore = get_systems_event_queue().sink<Events::UpdateNpcPositionEvent>().connect<&NpcSystem::on_update_npc_position_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::NpcKnockbackEvent>().connect<&NpcSystem::on_npc_knockback_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::WeaponHitEvent>().connect<&NpcSystem::on_weapon_hit_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::DestroyNpcEvent>().connect<&NpcSystem::on_destroy_npc_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::CreateNpcEvent>().connect<&NpcSystem::on_create_npc_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::CrowDeliveryEvent>().connect<&NpcSystem::on_crow_delivery_event>( this );
@@ -494,6 +497,52 @@ void NpcSystem::on_update_npc_position_event( const Events::UpdateNpcPositionEve
     const float zorder = Sys::SpriteStore::instance().get( Utils::Npc::get_sprite_type( reg(), npc_entity ) ).zorder( 0, pos_cmp->position.y );
     reg().patch<Cmp::ZOrderValue>( npc_entity, [&]( auto &zorder_cmp ) { zorder_cmp.set( zorder ); } );
   }
+}
+
+void NpcSystem::on_weapon_hit_event( const Events::WeaponHitEvent &event )
+{
+  const entt::entity npc_entt = event.m_target;
+  if ( not reg().valid( npc_entt ) or not reg().all_of<Cmp::Npc::NPC, Cmp::Position, Cmp::Health>( npc_entt ) ) return;
+
+  // copy what's needed afterwards: the hit's event handlers may touch the storage
+  const auto &npc_cmp = reg().get<Cmp::Npc::NPC>( npc_entt );
+  const auto destroy_sfx = npc_cmp.at<Cmp::DestroyAction>().action.sfx();
+  const auto damage = static_cast<float>( npc_cmp.damage_from_weapon.get( event.m_weapon ) );
+  Utils::Player::wear_held_weapon( reg(), event.m_weapon, npc_cmp.damage_to_weapon );
+  if ( damage <= 0.f ) return;
+
+  if ( not Utils::Player::apply_damage( reg(), npc_entt, damage ) )
+  {
+    // intermediate hits play the destroy_action "oneshot" sfx (see npc.json), the killing hit its "final" sfx, played by
+    // on_destroy_npc_event(). Knockback is enqueued, as the caller may be iterating NPC positions
+    play_action_oneshot_sfx( destroy_sfx );
+    get_systems_event_queue().enqueue( Events::NpcKnockbackEvent( npc_entt, event.m_direction ) );
+    return;
+  }
+
+  using Cause = Events::DestroyNpcEvent::Cause;
+  if ( event.m_weapon == Cmp::WeaponDamage::kGunKey )
+  {
+    SPDLOG_INFO( "NPC entity {} killed by gunfire", static_cast<int>( npc_entt ) );
+    get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, Sys::SpriteKey( "sprite.death.anim.bloodsplat" ) ) );
+    return;
+  }
+
+  // the bones/twigs burst is the death effect of the player's weapons. Copy the position before the NPC is destroyed
+  const Cmp::Position npc_pos_cmp = reg().get<Cmp::Position>( npc_entt );
+  auto burst_uuid = Cmp::UUID::generate();
+  if ( reg().all_of<Cmp::Npc::Skeleton>( npc_entt ) )
+  {
+    Factory::Particle::add_skelebones_ps( reg(), "graveyard.skele.particle.bones", 50, 2.f, 50.f, 14.f, burst_uuid, npc_pos_cmp.getCenter(),
+                                          npc_pos_cmp.position.y );
+  }
+  else if ( reg().all_of<Cmp::Npc::Burryman>( npc_entt ) )
+  {
+    Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, burst_uuid, npc_pos_cmp.getCenter(),
+                                          npc_pos_cmp.position.y );
+  }
+  const Cause cause = event.m_weapon == "item.longbow" ? Cause::ARROW : event.m_weapon == "item.shovel" ? Cause::MELEE : Cause::OTHER;
+  get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, std::nullopt, std::nullopt, cause ) );
 }
 
 void NpcSystem::on_destroy_npc_event( const Events::DestroyNpcEvent &event )

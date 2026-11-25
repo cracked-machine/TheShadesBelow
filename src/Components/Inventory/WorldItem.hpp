@@ -43,21 +43,15 @@ public:
   //! @param sprite_index The frame of sprite_type to draw (items.json sprite.index).
   //! @param sprite_random_count If non-zero, each new sprite of this item is a random frame in [0, sprite_random_count) instead
   //! of sprite_index (items.json sprite.random; the frame count of sprite_type).
-  //! @param pickaxe_dmg Damage done to a pickaxe by this item.
-  //! @param axe_dmg Damage done to an axe by this item.
-  //! @param shovel_dmg Damage done to a shovel by this item.
-  //! @param bow_dmg Damage done to a bow by this item.
+  //! @param damage_to_weapon Damage done to each weapon by this item ("damage_to_weapon" in items.json).
   //! @param consumable Whether the item can be eaten, drunk or neither.
-  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, std::size_t sprite_index, std::size_t sprite_random_count, int pickaxe_dmg,
-             int axe_dmg, int shovel_dmg, int bow_dmg, Consumable consumable = Consumable::NONE )
+  WorldItem( Sys::ItemKey item_type, Sys::SpriteKey sprite_type, std::size_t sprite_index, std::size_t sprite_random_count,
+             const WeaponDamage &damage_to_weapon, Consumable consumable = Consumable::NONE )
       : item_type( std::move( item_type ) ),
         sprite_type( std::move( sprite_type ) ),
         m_sprite_index( sprite_index ),
         m_sprite_random_count( sprite_random_count ),
-        m_pickaxe_damage( pickaxe_dmg ),
-        m_axe_damage( axe_dmg ),
-        m_shovel_damage( shovel_dmg ),
-        m_bow_damage( bow_dmg ),
+        m_damage_to_weapon( damage_to_weapon ),
         m_consumable( consumable )
   {
   }
@@ -187,17 +181,11 @@ public:
   //! "forage_action.reward.item" in items.json. Empty string if none.
   Sys::ItemKey get_forage_output() const;
 
-  //! @brief Damage done to the corresponding tool by this item.
-  int get_pickaxe_damage() const { return m_pickaxe_damage; }
-  int get_axe_damage() const { return m_axe_damage; }
-  int get_shovel_damage() const { return m_shovel_damage; }
-  int get_bow_damage() const { return m_bow_damage; }
+  //! @brief Damage done to the bow by this item.
+  int get_bow_damage() const { return m_damage_to_weapon.bow; }
 
   //! @brief Damage done to each weapon by this item, see "damage_to_weapon" in items.json.
-  WeaponDamage damage_to_weapon() const
-  {
-    return WeaponDamage{ .pickaxe = m_pickaxe_damage, .axe = m_axe_damage, .shovel = m_shovel_damage, .bow = m_bow_damage };
-  }
+  const WeaponDamage &damage_to_weapon() const { return m_damage_to_weapon; }
 
   //! @brief Health points this plant loses to a hit from each weapon, see "damage_from_weapon" in items.json (plants only,
   //! zero for every other item). A weapon doing zero damage can't hurt the plant.
@@ -266,17 +254,8 @@ private:
   //! @brief The actions and their effects that can be applied to the player. Imported from items.json.
   ActionSet m_actions;
 
-  //! @brief Damage done to a pickaxe by this item.
-  int m_pickaxe_damage{ 0 };
-
-  //! @brief Damage done to an axe by this item.
-  int m_axe_damage{ 0 };
-
-  //! @brief Damage done to a shovel by this item.
-  int m_shovel_damage{ 0 };
-
-  //! @brief Damage done to a bow by this item.
-  int m_bow_damage{ 0 };
+  //! @brief Damage done to each weapon by this item. Imported from items.json.
+  WeaponDamage m_damage_to_weapon;
 
   //! @brief Health points this plant loses to each weapon. Imported from items.json.
   WeaponDamage m_damage_from_weapon;

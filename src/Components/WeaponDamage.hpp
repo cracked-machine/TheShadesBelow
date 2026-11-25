@@ -7,13 +7,17 @@ namespace Game::Cmp
 {
 
 //! @brief Damage per weapon hit, as read from a "damage_to_weapon" or "damage_from_weapon" object in items.json/npc.json:
-//! { "pickaxe": int, "axe": int, "shovel": int, "bow": int }.
+//! { "pickaxe": int, "axe": int, "shovel": int, "bow": int, "gun": int }.
 struct WeaponDamage
 {
+  //! @brief Weapon key for the Watchman's gunfire. Not an inventory item: no held weapon is ever worn by it.
+  static inline const Sys::ItemKey kGunKey{ "weapon.gun" };
+
   int pickaxe{ 0 };
   int axe{ 0 };
   int shovel{ 0 };
   int bow{ 0 };
+  int gun{ 0 };
 
   //! @brief The damage for the weapon item, e.g. "item.shovel". Zero for an item that isn't a weapon.
   //! @param weapon The weapon's item key.
@@ -23,6 +27,7 @@ struct WeaponDamage
     if ( weapon == "item.axe" ) return axe;
     if ( weapon == "item.shovel" ) return shovel;
     if ( weapon == "item.longbow" ) return bow;
+    if ( weapon == kGunKey ) return gun;
     return 0;
   }
 };

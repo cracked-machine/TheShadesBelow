@@ -4,6 +4,7 @@
 #include <Events/CreatePlantEvent.hpp>
 #include <Events/DestroyPlantEvent.hpp>
 #include <Events/PlantKilledEvent.hpp>
+#include <Events/WeaponHitEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -74,7 +75,13 @@ private:
   //! @param event
   void on_destroy_plant_event( const Events::DestroyPlantEvent &event );
 
-  //! @brief A player weapon hit (shovel or arrow, see Utils::Player::apply_weapon_hit) took the plant's health to zero:
+  //! @brief A weapon hit a plant: take its damage_from_weapon (items.json) from its health and wear the held weapon by its
+  //! damage_to_weapon. At zero health the plant is killed, see on_plant_killed_event(); otherwise its destroy_action
+  //! "oneshot" sfx plays. Ignores targets that aren't plants.
+  //! @param event
+  void on_weapon_hit_event( const Events::WeaponHitEvent &event );
+
+  //! @brief A weapon hit (see on_weapon_hit_event()) took the plant's health to zero:
   //! drop one random item of its destroy_action reward, apply its destroy_action and side effects, then remove it.
   //! @param event
   void on_plant_killed_event( const Events::PlantKilledEvent &event );

@@ -12,7 +12,7 @@ namespace Game::Sys
 {
 
 //! @brief Drives the Watchman NPC: rate-limited spawning, searchlight sweep/lock-on behaviour,
-//! gunfire cocking/firing timing, and gunfire collision against the player and Skeleton NPCs.
+//! gunfire cocking/firing timing, and gunfire collision against the player and other NPCs (applied via Events::WeaponHitEvent).
 class WatchmanSystem : public BaseSystem
 {
 public:
@@ -68,10 +68,10 @@ private:
   //! @param npc_pos_cmp
   void cock_gun( Cmp::Position &npc_pos_cmp );
 
-  //! @brief Damage the player if any active gunfire particle is touching them
+  //! @brief Hit the player (Events::WeaponHitEvent) if any active gunfire particle is touching them
   void check_gunfire_player_collision();
 
-  //! @brief Kill any Skeleton NPC touched by an active gunfire particle
+  //! @brief Hit (Events::WeaponHitEvent) any NPC the gun can hurt (damage_from_weapon.gun in npc.json) touched by an active gunfire particle
   void check_gunfire_npc_collision();
 
   //! @brief Positions occupied by entities that procgen/algorithmic code must not modify.

@@ -17,7 +17,7 @@
 // clang-format off
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
-namespace Game::Events { class UpdateNpcPositionEvent; class NpcKnockbackEvent; class DestroyNpcEvent; struct CreateNpcEvent; struct CrowDeliveryEvent; struct CrowGuideEvent; struct NpcProximityEvent; struct NpcCollisionEvent; struct NpcProjectileEvent; }
+namespace Game::Events { class UpdateNpcPositionEvent; class NpcKnockbackEvent; class DestroyNpcEvent; class WeaponHitEvent; struct CreateNpcEvent; struct CrowDeliveryEvent; struct CrowGuideEvent; struct NpcProximityEvent; struct NpcCollisionEvent; struct NpcProjectileEvent; }
 namespace Game::Cmp { class Position; class BaseAction; class AnimData; }
 namespace Game::Cmp { class Direction; class LerpPosition; } 
 namespace Game::Cmp::Player { class Mortality; } 
@@ -75,6 +75,13 @@ private:
   //! otherwise the NPC stays put. The move is made with an Events::UpdateNpcPositionEvent.
   //! @param event
   void on_npc_knockback_event( const Game::Events::NpcKnockbackEvent &event );
+
+  //! @brief A weapon hit an NPC: take its damage_from_weapon (npc.json) from its health and wear the held weapon by its
+  //! damage_to_weapon. At zero health the NPC dies (Events::DestroyNpcEvent) with its death effect: a bloodsplat for
+  //! gunfire, a bones/twigs burst for the skeleton/Burryman. A hit that doesn't kill plays its destroy_action "oneshot"
+  //! sfx and knocks it back along the blow. Ignores targets that aren't NPCs.
+  //! @param event
+  void on_weapon_hit_event( const Game::Events::WeaponHitEvent &event );
 
   //! @brief Kill an NPC and keep its navmesh in sync, optionally playing a death animation where it stood. This is
   //! the only place allowed to call Factory::Npc::destroy_npc. Everything else must trigger an Events::DestroyNpcEvent.

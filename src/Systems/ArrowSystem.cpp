@@ -10,16 +10,12 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Persistent/BowReleaseWear.hpp>
 #include <Components/Random.hpp>
-#include <Components/Stats/DestroyAction.hpp>
 #include <Components/Weapons/Arrow.hpp>
 #include <Components/Weapons/InFlight.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
-#include <Events/DestroyNpcEvent.hpp>
-#include <Events/NpcKnockbackEvent.hpp>
-#include <Events/PlantKilledEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
+#include <Events/WeaponHitEvent.hpp>
 #include <Factory/NpcFactory.hpp>
-#include <Factory/ParticleFactory.hpp>
 #include <SFML/System/Angle.hpp>
 #include <Systems/ArrowSystem.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -179,15 +175,11 @@ void ArrowSystem::update_arrow_trajectory( sf::Time dt )
     else { arrow_cmp.m_fixed_time_step_accumulator += dt; }
   }
 
-  // after the view loop: killing a plant drops its reward, which creates entities with a Cmp::Position. The hit wears the
-  // bow by the plant's damage_to_weapon.bow
+  // after the view loop: killing a plant drops its reward, which creates entities with a Cmp::Position. PlantSystem applies
+  // the hit, wearing the bow by the plant's damage_to_weapon.bow
   for ( auto plant_entt : hit_plants )
   {
-    if ( not reg().valid( plant_entt ) ) continue;
-    if ( Utils::Player::apply_weapon_hit( reg(), plant_entt, "item.longbow" ) )
-    {
-      get_systems_event_queue().trigger( Events::PlantKilledEvent( plant_entt ) );
-    }
+    get_systems_event_queue().trigger( Events::WeaponHitEvent( plant_entt, "item.longbow", {} ) );
   }
 
   auto [_, inventory_type, _] = Utils::Player::get_inventory( reg() );
@@ -219,8 +211,8 @@ int ArrowSystem::get_bow_damage_at( const Cmp::Position &arrow_pos_cmp )
 
 void ArrowSystem::check_npc_arrow_collision()
 {
-  Cmp::Position cached_npc_pos_cmp( { -100.f, -100.f }, Constants::kGridSizePxF );
-  Sys::NpcKey cached_npc_type;
+  // (npc, arrow flight direction) pairs; the hits are applied after the view loops, as killing an NPC destroys it
+  std::vector<std::pair<entt::entity, sf::Vector2f>> hit_npcs;
   std::vector<entt::entity> hit_loot_containers;
   for ( auto [arrow_entt, arrow_cmp, arrow_pos_cmp] : reg().view<Cmp::Weapons::Projectiles::Arrow, Cmp::Position>().each() )
   {
@@ -239,29 +231,12 @@ void ArrowSystem::check_npc_arrow_collision()
       reg().remove<Cmp::Weapons::Projectiles::InFlight>( arrow_entt );
       arrow_cmp.m_destination = arrow_pos_cmp.getCenter();
       m_sound_bank.get_effect( std::string( "arrow_hit" + std::to_string( Cmp::RandomInt( 1, 4 ).gen() ) ) ).play();
-
-      // intermediate hits play the destroy_action "oneshot" sfx (see npc.json), the killing hit its "final" sfx, played by
-      // the DestroyNpcEvent handler
-      if ( Utils::Player::apply_weapon_hit( reg(), npc_entt, "item.longbow" ) )
-      {
-        // the bones/twigs burst is the death effect, so only the killing hit spawns it. Copy before the NPC is destroyed
-        cached_npc_pos_cmp = npc_pos_cmp;
-        cached_npc_type = npc_cmp.npc_type;
-        get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, std::nullopt, std::nullopt, Events::DestroyNpcEvent::Cause::ARROW ) );
-      }
-      else
-      {
-        play_action_oneshot_sfx( npc_cmp.at<Cmp::DestroyAction>().action.sfx() );
-        // a hit that doesn't kill knocks the NPC back along the arrow's flight. Enqueued, as the move would change the
-        // NPC positions this loop is iterating
-        get_systems_event_queue().enqueue( Events::NpcKnockbackEvent( npc_entt, arrow_direction ) );
-      }
+      hit_npcs.emplace_back( npc_entt, arrow_direction );
     }
     for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::Container, Cmp::Position>().each() )
     {
       if ( not npc_pos_cmp.findIntersection( arrow_pos_cmp ) ) continue;
       Factory::Npc::destroy_npc_container( reg(), npc_entt );
-      cached_npc_pos_cmp = npc_pos_cmp;
     }
     for ( auto [loot_entt, loot_pos_cmp] : reg().view<Cmp::LootContainer, Cmp::Position>().each() )
     {
@@ -271,26 +246,16 @@ void ArrowSystem::check_npc_arrow_collision()
     }
   }
 
+  // NpcSystem applies the hits: damage, bow wear, knockback or death
+  for ( auto [npc_entt, arrow_direction] : hit_npcs )
+  {
+    get_systems_event_queue().trigger( Events::WeaponHitEvent( npc_entt, "item.longbow", arrow_direction ) );
+  }
+
   // break outside of the view loops: LootSystem spawns loot with a Cmp::Position
   for ( auto loot_entt : hit_loot_containers )
   {
     get_systems_event_queue().trigger( Events::DestroyLootContainerEvent( loot_entt ) );
-  }
-
-  if ( cached_npc_pos_cmp.position != sf::Vector2f{ -100.f, -100.f } )
-  {
-    if ( cached_npc_type == "npc.skeleton" )
-    {
-      auto skelebones_particle_uuid = Cmp::UUID::generate();
-      Factory::Particle::add_skelebones_ps( reg(), "graveyard.skele.particle.bones", 50, 2.f, 50.f, 14.f, skelebones_particle_uuid,
-                                            cached_npc_pos_cmp.getCenter(), cached_npc_pos_cmp.position.y );
-    }
-    else if ( cached_npc_type == "npc.burryman" )
-    {
-      auto burryman_twigs_particle_uuid = Cmp::UUID::generate();
-      Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, burryman_twigs_particle_uuid,
-                                            cached_npc_pos_cmp.getCenter(), cached_npc_pos_cmp.position.y );
-    }
   }
 }
 

@@ -5,7 +5,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -23,7 +23,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 15, "toxidrome": { "type": "venom", "toxicity": -50 }, "tick": 0, 
@@ -40,7 +40,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
@@ -60,7 +60,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 20 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "phototoxia", "toxicity": 20 }, "tick": 0,
@@ -78,7 +78,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -96,7 +96,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -114,7 +114,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -130,7 +130,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": -3, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3, 
                                 "wear": { "expiryseconds": 60, "active_only": false } }},
@@ -148,7 +148,7 @@
     "stackable": false,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -166,7 +166,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -185,7 +185,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -204,7 +204,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -223,7 +223,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 15, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "tachycardia", "toxicity": -25 }, "tick": 0, 
@@ -240,7 +240,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 20 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 1, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3, 
                                 "wear": { "expiryseconds": 60, "active_only": false } }},
@@ -259,7 +259,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
@@ -278,7 +278,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 30 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": -1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 10, 
                                 "wear": { "expiryseconds": 60, "active_only": true } }},
@@ -297,7 +297,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -313,7 +313,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": -15, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
@@ -333,7 +333,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 1, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
@@ -352,7 +352,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 20 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
@@ -372,7 +372,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 25, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
@@ -390,7 +390,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 10, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
@@ -408,7 +408,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3, 
                                 "wear": { "expiryseconds": 60, "active_only": false } }},
@@ -427,7 +427,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -443,7 +443,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": -20, "despair": -15, "infamy": 0, "luck": 0, "toxidrome": { "type": ["bradycardia", "tachycardia"], "toxicity": -20 }, "tick": 0, 
@@ -462,7 +462,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 180, "active_only": false } }},
@@ -481,7 +481,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -497,7 +497,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3, 
                                 "wear": { "expiryseconds": 180, "active_only": false } }},
@@ -516,7 +516,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -535,7 +535,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -554,7 +554,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -573,7 +573,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -592,7 +592,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -611,7 +611,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -630,7 +630,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -649,7 +649,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -668,7 +668,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 20 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
@@ -688,7 +688,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -706,7 +706,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 40 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
@@ -726,7 +726,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -742,7 +742,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3, 
                                 "wear": { "expiryseconds": 60, "active_only": false } }},
@@ -761,7 +761,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 1, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
@@ -784,7 +784,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
@@ -804,8 +804,8 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5, "gun": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0, "gun": 0 },
     "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
@@ -830,8 +830,8 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5 },
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5, "gun": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0, "gun": 0 },
     "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
@@ -856,8 +856,8 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5, "gun": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0, "gun": 0 },
     "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": ["halucinogen", "bradycardia"], "toxicity": 5 }, "tick": 1, 
@@ -882,8 +882,8 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 1, "shovel": 1, "bow": 0 },
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 100, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 1, "shovel": 1, "bow": 0, "gun": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 100, "bow": 0, "gun": 0 },
     "spawn_count_per_quadrant": 0,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -904,8 +904,8 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 25, "shovel": 1, "bow": 5 },
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 25, "shovel": 1, "bow": 5, "gun": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0, "gun": 0 },
     "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0,
@@ -933,8 +933,8 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5 },
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5, "gun": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0, "gun": 0 },
     "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": ["halucinogen", "tachycardia"], "toxicity": 5 }, "tick": 1, 
@@ -959,8 +959,8 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5, "gun": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0, "gun": 0 },
     "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "phototoxia", "toxicity": 5 }, "tick": 3, 
@@ -989,8 +989,8 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5, "gun": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0, "gun": 0 },
     "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
@@ -1015,8 +1015,8 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5, "gun": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0, "gun": 0 },
     "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "tachycardia", "toxicity": 10 }, "tick": 1, 
@@ -1041,8 +1041,8 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 34, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5, "gun": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 34, "bow": 0, "gun": 0 },
     "spawn_count_per_quadrant": 2,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
@@ -1068,8 +1068,8 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5 },
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5, "gun": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0, "gun": 0 },
     "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
@@ -1094,8 +1094,8 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5 },
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 5, "shovel": 1, "bow": 5, "gun": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0, "gun": 0 },
     "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
@@ -1120,8 +1120,8 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5 },
-    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 10, "shovel": 1, "bow": 5, "gun": 0 },
+    "damage_from_weapon": { "pickaxe": 0, "axe": 0, "shovel": 50, "bow": 0, "gun": 0 },
     "spawn_count_per_quadrant": 10,
     "actions": [
       { "burn_action":        { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "bradycardia", "toxicity": 10 }, "tick": 2, 
@@ -1146,7 +1146,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1164,7 +1164,7 @@
     "stackable": true,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": -10, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
@@ -1183,7 +1183,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
@@ -1202,7 +1202,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1218,7 +1218,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 15, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
@@ -1237,7 +1237,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 0, "active_only": false } }},
@@ -1257,7 +1257,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
@@ -1276,7 +1276,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1292,7 +1292,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1308,7 +1308,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1324,7 +1324,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1340,7 +1340,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1356,7 +1356,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 0, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1372,7 +1372,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1388,7 +1388,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1404,7 +1404,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1420,7 +1420,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1436,7 +1436,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1452,7 +1452,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1468,7 +1468,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1484,7 +1484,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1500,7 +1500,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1516,7 +1516,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 1, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1532,7 +1532,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": true, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1551,7 +1551,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 40 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "halucinogen", "toxicity": 1 }, "tick": 3, 
                                 "wear": { "expiryseconds": 120, "active_only": true } }},
@@ -1570,7 +1570,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": true, "base_price": 20 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},
@@ -1590,7 +1590,7 @@
     "stackable": true,
     "auto_pickup": true,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0, 
                                 "wear": { "expiryseconds": 30, "active_only": false } }},
@@ -1609,7 +1609,7 @@
     "stackable": false,
     "auto_pickup": false,
     "shop": { "enabled": false, "base_price": 10 },
-    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5 },
+    "damage_to_weapon": { "pickaxe": 0, "axe": 0, "shovel": 0, "bow": 5, "gun": 0 },
     "actions": [
       { "carry_action":       { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "bradycardia", "toxicity": 1 }, "tick": 3 }},
       { "consume_action":     { "health": 0, "fear": 0, "despair": 0, "infamy": 0, "luck": 0, "toxidrome": { "type": "none", "toxicity": 0 }, "tick": 0 }},

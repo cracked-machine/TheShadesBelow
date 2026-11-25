@@ -55,7 +55,7 @@ void WatchmanGunfireParticleSprite::draw( sf::RenderTarget &target, sf::RenderSt
   verts.reserve( m_particles_list.size() * 2 );
   SPDLOG_DEBUG( "Drawing {} particles", m_particles.size() );
 
-  constexpr float kSize = 6.f;
+  constexpr float kSize = kShotRadius;
   constexpr float kOutlineThickness = 2.f;
   constexpr int kSides = 8;
 

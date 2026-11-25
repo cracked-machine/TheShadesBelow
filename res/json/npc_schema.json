@@ -20,25 +20,27 @@
         "damage_from_weapon": {
           "type": "object",
           "description": "Health points (out of 100) the NPC loses to each hit from each weapon. A weapon doing 0 damage can't hurt the NPC (arrows pass through, melee ignores it).",
-          "required": ["pickaxe", "axe", "shovel", "bow"],
+          "required": ["pickaxe", "axe", "shovel", "bow", "gun"],
           "additionalProperties": false,
           "properties": {
             "pickaxe": { "type": "integer", "minimum": 0 },
             "axe":     { "type": "integer", "minimum": 0 },
             "shovel":  { "type": "integer", "minimum": 0 },
-            "bow":     { "type": "integer", "minimum": 0 }
+            "bow":     { "type": "integer", "minimum": 0 },
+            "gun":     { "type": "integer", "minimum": 0 }
           }
         },
         "damage_to_weapon": {
           "type": "object",
           "description": "Wear done to each weapon each time it hits the NPC.",
-          "required": ["pickaxe", "axe", "shovel", "bow"],
+          "required": ["pickaxe", "axe", "shovel", "bow", "gun"],
           "additionalProperties": false,
           "properties": {
             "pickaxe": { "type": "integer", "minimum": 0 },
             "axe":     { "type": "integer", "minimum": 0 },
             "shovel":  { "type": "integer", "minimum": 0 },
-            "bow":     { "type": "integer", "minimum": 0 }
+            "bow":     { "type": "integer", "minimum": 0 },
+            "gun":     { "type": "integer", "minimum": 0 }
           }
         },
         "actions": {

@@ -75,8 +75,7 @@ void ItemStore::init_store()
     const auto damage_to_weapon = Detail::make_weapon_damage( item_value.at( "damage_to_weapon" ) );
     auto consumable = make_consumable_property( item_value.at( "consumable" ).get<std::string>() );
     Cmp::WorldItem worlditem( key_type( item_key ), sprite_mtype, static_cast<std::size_t>( sprite_index ),
-                              sprite_random ? Sys::SpriteStore::instance().get( sprite_mtype ).sheet_size() : 0, damage_to_weapon.pickaxe,
-                              damage_to_weapon.axe, damage_to_weapon.shovel, damage_to_weapon.bow, consumable );
+                              sprite_random ? Sys::SpriteStore::instance().get( sprite_mtype ).sheet_size() : 0, damage_to_weapon, consumable );
     worlditem.set_stackable( item_value.at( "stackable" ).get<bool>() );
     worlditem.set_auto_pickup( item_value.at( "auto_pickup" ).get<bool>() );
     if ( item_value.contains( "shop" ) )

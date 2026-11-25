@@ -7,7 +7,7 @@ namespace Game::Cmp::Persist
 {
 
 //! @brief Vertical offset (px) of an NPC's floating damage number (Cmp::DamagePopup) from the top of its sprite.
-//! Positive moves the number down over the sprite, negative moves it up above the sprite. See Utils::apply_weapon_hit().
+//! Positive moves the number down over the sprite, negative moves it up above the sprite. See Utils::Player::apply_damage().
 struct NpcDamageTextOffset : public BasePersistent<float>
 {
   //! @brief Construct with an initial offset and optional min/max bounds.

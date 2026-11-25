@@ -35,6 +35,7 @@
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/DestroyPlantEvent.hpp>
 #include <Events/PlantKilledEvent.hpp>
+#include <Events/WeaponHitEvent.hpp>
 #include <Events/GrimoireItemUpdateEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
@@ -75,6 +76,7 @@ PlantSystem::PlantSystem( entt::registry &reg, sf::RenderWindow &window, Audio::
   std::ignore = get_systems_event_queue().sink<Events::CreatePlantEvent>().connect<&PlantSystem::on_create_plant_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::DestroyPlantEvent>().connect<&PlantSystem::on_destroy_plant_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::PlantKilledEvent>().connect<&PlantSystem::on_plant_killed_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::WeaponHitEvent>().connect<&PlantSystem::on_weapon_hit_event>( this );
   SPDLOG_DEBUG( "PlantSystem initialized" );
 }
 
@@ -257,14 +259,7 @@ void PlantSystem::player_plant_interact()
       Factory::Particle::add_planttwigs_ps( reg(), "graveyard.plant.particle.twigs", 10, 2.f, 50.f, 14.f, planttwigs_particle_uuid,
                                             plant_mb_cmp.getCenter(), plant_mb_cmp.position.y );
 
-      // the hit takes the plant's damage_from_weapon.shovel from its health and wears the shovel by its damage_to_weapon.shovel
-      if ( Utils::Player::apply_weapon_hit( reg(), plant_entt, "item.shovel" ) )
-      {
-        on_plant_killed_event( Events::PlantKilledEvent( plant_entt ) );
-        return;
-      }
-      // intermediate hits play the destroy_action "oneshot" sfx, the final hit its "final" sfx
-      play_action_oneshot_sfx( reg().get<Cmp::WorldItem>( plant_entt ).get_action<Cmp::DestroyAction>().sfx() );
+      on_weapon_hit_event( Events::WeaponHitEvent( plant_entt, "item.shovel", plant_mb_cmp.getCenter() - Utils::Player::get_position( reg() ).getCenter() ) );
       return;
     }
   }
@@ -329,6 +324,27 @@ void PlantSystem::forage_plant( entt::entity plant_entt, const Cmp::PlantMultiBl
   {
     get_systems_event_queue().trigger( Events::DestroyPlantEvent( plant_entt ) );
   }
+}
+
+void PlantSystem::on_weapon_hit_event( const Events::WeaponHitEvent &event )
+{
+  const auto plant_entt = event.m_target;
+  if ( not reg().valid( plant_entt ) or not reg().all_of<Cmp::PlantMultiBlock, Cmp::WorldItem, Cmp::Health>( plant_entt ) ) return;
+
+  // the hit takes the plant's damage_from_weapon from its health and wears the weapon by its damage_to_weapon
+  const auto &plant_item = reg().get<Cmp::WorldItem>( plant_entt );
+  const auto destroy_sfx = plant_item.get_action<Cmp::DestroyAction>().sfx();
+  const auto damage = static_cast<float>( plant_item.damage_from_weapon().get( event.m_weapon ) );
+  Utils::Player::wear_held_weapon( reg(), event.m_weapon, plant_item.damage_to_weapon() );
+  if ( damage <= 0.f ) return;
+
+  if ( Utils::Player::apply_damage( reg(), plant_entt, damage ) )
+  {
+    on_plant_killed_event( Events::PlantKilledEvent( plant_entt ) );
+    return;
+  }
+  // intermediate hits play the destroy_action "oneshot" sfx, the final hit its "final" sfx
+  play_action_oneshot_sfx( destroy_sfx );
 }
 
 void PlantSystem::on_plant_killed_event( const Events::PlantKilledEvent &event )

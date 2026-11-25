@@ -25,6 +25,10 @@ private:
 class WatchmanGunfireParticleSprite : public SpriteBase<detail::WatchmanGunfireParticle>
 {
 public:
+  //! @brief Radius (world px) of the drawn shot, excluding its outline. Also pads NPC hitboxes so a shot that visibly
+  //! overlaps an NPC hits it.
+  static constexpr float kShotRadius = 6.f;
+
   //! @brief Construct a new Watchman Gunfire Particle Sprite object
   //! @param count Number of particles in this sprite
   WatchmanGunfireParticleSprite( size_t count );

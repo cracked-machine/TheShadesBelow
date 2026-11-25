@@ -1,10 +1,10 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Direction.hpp>
 #include <Components/Npc/Npc.hpp>
-#include <Components/Npc/Skeleton.hpp>
 #include <Components/Npc/Watchman.hpp>
 #include <Components/Npc/WatchmanSearchlight.hpp>
 #include <Components/Obstacle.hpp>
+#include <Components/Particle/WatchmanGunfireParticleSprite.hpp>
 #include <Components/Persistent/NpcWatchmanConeHalfAngle.hpp>
 #include <Components/Persistent/NpcWatchmanConeLength.hpp>
 #include <Components/Persistent/NpcWatchmanGunFireRate.hpp>
@@ -16,14 +16,14 @@
 #include <Components/Persistent/NpcWatchmanSweepAmplitude.hpp>
 #include <Components/Persistent/NpcWatchmanSweepSpeed.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/Mortality.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Position.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/UUID.hpp>
+#include <Components/WeaponDamage.hpp>
 #include <Events/CreateNpcEvent.hpp>
-#include <Events/DestroyNpcEvent.hpp>
-#include <Events/NpcProjectileEvent.hpp>
-#include <Events/PlayerMortalityEvent.hpp>
+#include <Events/WeaponHitEvent.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SFML/Audio/Sound.hpp>
@@ -39,6 +39,8 @@
 #include <Utils/Random.hpp>
 #include <Utils/Utils.hpp>
 #include <cmath>
+#include <optional>
+#include <vector>
 
 #include <spdlog/spdlog.h>
 
@@ -217,8 +219,9 @@ void WatchmanSystem::spawn_watchman()
     if ( reg().any_of<Cmp::Npc::Watchman>( npc_entt ) ) { watchman_npc_count++; }
   }
 
-  if ( watchman_npc_count < Sys::PersistSystem::get<Cmp::Persist::NpcWatchmanSpawnMax>( reg() ).get_value() and
-       Utils::Player::get_stats( reg() ).infamy() >= Sys::PersistSystem::get<Cmp::Persist::NpcWatchmanSpawnInfamy>( reg() ).get_value() )
+  auto max_spawn_limit = Sys::PersistSystem::get<Cmp::Persist::NpcWatchmanSpawnMax>( reg() ).get_value();
+  auto infamy_spawn_threshold = Sys::PersistSystem::get<Cmp::Persist::NpcWatchmanSpawnInfamy>( reg() ).get_value();
+  if ( watchman_npc_count < max_spawn_limit and Utils::Player::get_stats( reg() ).infamy() >= infamy_spawn_threshold )
   {
     auto reserved_sm = m_reserved_sm.lock();
     auto [_, rnd_pos_cmp] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 0 );
@@ -248,51 +251,65 @@ void WatchmanSystem::check_gunfire_player_collision()
 {
   if ( not Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled ) return;
 
-  auto player_view = reg().view<Cmp::Player::Character, const Cmp::Position, Cmp::PlayerStats, Cmp::Player::Mortality>();
-  for ( auto [player_entt, player_cmp, player_pos_cmp, player_stats_cmp, player_mort_cmp] : player_view.each() )
+  auto player_view = reg().view<Cmp::Player::Character, const Cmp::Position, Cmp::Player::Mortality>();
+  for ( auto [player_entt, player_cmp, player_pos_cmp, player_mort_cmp] : player_view.each() )
   {
-    // don't spam death events if the player is already dead
-    if ( player_mort_cmp.state == Cmp::Player::Mortality::State::DEAD ) continue;
-    if ( not player_cmp.skip_damage_cooldown_once && player_cmp.m_damage_cooldown_timer < player_cmp.damage_cooldown_timeout() ) continue;
+    // a dead or invulnerable player can't be hit, so leave the shot flying rather than spending it on them
+    if ( player_mort_cmp.state != Cmp::Player::Mortality::State::ALIVE ) continue;
+    if ( not player_cmp.skip_damage_cooldown_once and player_cmp.m_damage_cooldown_timer < player_cmp.damage_cooldown_timeout() ) continue;
 
-    bool hit = false;
-    for ( auto [entt, gunfire_ps] : Sys::ParticleSystem::find( reg(), "watchman.gun.particle.shot" ) )
+    // the collision check also kills the particle that hit the player
+    std::optional<sf::Vector2f> emitter_pos;
+    for ( auto [ps_entt, gunfire_ps] : Sys::ParticleSystem::find( reg(), "watchman.gun.particle.shot" ) )
     {
-      if ( gunfire_ps.get().check_particle_collision( player_pos_cmp ) ) hit = true;
+      if ( gunfire_ps.get().check_particle_collision( player_pos_cmp ) ) emitter_pos = gunfire_ps.get().get_emitter_position();
     }
-    if ( not hit ) continue;
+    if ( not emitter_pos ) continue;
 
-    // NpcSystem applies the watchman's projectile action
-    get_systems_event_queue().trigger( Events::NpcProjectileEvent( "npc.nightwatchman", player_pos_cmp ) );
-    player_cmp.skip_damage_cooldown_once = false;
-    m_sound_bank.get_effect( "damage_player" ).play();
-    player_cmp.m_damage_cooldown_timer = sf::Time::Zero;
-    SPDLOG_INFO( "Player (health:{}) hit by Watchman gunfire", player_stats_cmp.health() );
-
-    // PlayerSystem spends any extra life once the death animation has played
-    if ( player_stats_cmp.health() <= 0 )
-    {
-      get_systems_event_queue().enqueue( Events::PlayerMortalityEvent( Cmp::Player::Mortality::State::HAUNTED, player_pos_cmp ) );
-    }
+    // PlayerSystem applies the watchman's projectile action, the damage cooldown and death
+    get_systems_event_queue().trigger(
+        Events::WeaponHitEvent( player_entt, Cmp::WeaponDamage::kGunKey, player_pos_cmp.getCenter() - *emitter_pos, "npc.nightwatchman" ) );
   }
 }
 
 void WatchmanSystem::check_gunfire_npc_collision()
 {
   if ( not Utils::scene_setting<Cmp::SceneSettings::CollisionDetection>( reg() ).enabled ) return;
-  auto gunfire_entt_ps_pair = Sys::ParticleSystem::find( reg(), "watchman.gun.particle.shot" );
 
-  for ( auto [npc_entt, npc_cmp, skeleton_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Npc::Skeleton, Cmp::Position>().each() )
+  std::vector<Cmp::Particle::IParticleSprite *> gunfire_sprites;
+  for ( auto [ps_entt, gunfire_ps] : Sys::ParticleSystem::find( reg(), "watchman.gun.particle.shot" ) )
   {
-    bool hit = false;
-    for ( auto [entt, gunfire_ps] : gunfire_entt_ps_pair )
-    {
-      if ( gunfire_ps.get().check_particle_collision( npc_pos_cmp ) ) hit = true;
-    }
-    if ( not hit ) continue;
+    if ( gunfire_ps.get().is_active() ) gunfire_sprites.push_back( &gunfire_ps.get() );
+  }
+  if ( gunfire_sprites.empty() ) return;
 
-    SPDLOG_INFO( "Skeleton NPC entity {} killed by Watchman gunfire", static_cast<int>( npc_entt ) );
-    get_systems_event_queue().trigger( Events::DestroyNpcEvent( npc_entt, Sys::SpriteKey( "sprite.death.anim.bloodsplat" ) ) );
+  // (npc, shot direction) pairs; the hits are applied after the view loop, as killing an NPC destroys it
+  std::vector<std::pair<entt::entity, sf::Vector2f>> shot_npcs;
+  for ( auto [npc_entt, npc_cmp, npc_pos_cmp] : reg().view<Cmp::Npc::NPC, Cmp::Position>( entt::exclude<Cmp::Npc::Watchman> ).each() )
+  {
+    // shots pass through NPCs the gun can't hurt (damage_from_weapon.gun of 0 in npc.json)
+    if ( npc_cmp.damage_from_weapon.gun <= 0 ) continue;
+
+    // the shot is drawn as a disc, so pad the NPC's hitbox by its radius: a shot that visibly overlaps the NPC hits it
+    constexpr float kPad = Cmp::Particle::WatchmanGunfireParticleSprite::kShotRadius;
+    sf::FloatRect hitbox = npc_pos_cmp;
+    hitbox.position -= sf::Vector2f{ kPad, kPad };
+    hitbox.size += sf::Vector2f{ kPad * 2.f, kPad * 2.f };
+
+    // the collision check also kills the particle that hit the NPC
+    std::optional<sf::Vector2f> emitter_pos;
+    for ( auto *gunfire_sprite : gunfire_sprites )
+    {
+      if ( gunfire_sprite->check_particle_collision( hitbox ) ) emitter_pos = gunfire_sprite->get_emitter_position();
+    }
+    if ( emitter_pos ) shot_npcs.emplace_back( npc_entt, npc_pos_cmp.getCenter() - *emitter_pos );
+  }
+
+  // NpcSystem applies the hits: damage, knockback or death
+  for ( auto [npc_entt, shot_direction] : shot_npcs )
+  {
+    SPDLOG_INFO( "NPC entity {} hit by Watchman gunfire", static_cast<int>( npc_entt ) );
+    get_systems_event_queue().trigger( Events::WeaponHitEvent( npc_entt, Cmp::WeaponDamage::kGunKey, shot_direction, "npc.nightwatchman" ) );
   }
 }
 

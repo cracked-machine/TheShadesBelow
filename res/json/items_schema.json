@@ -46,25 +46,27 @@
         "damage_to_weapon": {
           "type": "object",
           "description": "Wear damage this item inflicts on each weapon when the weapon is used against it.",
-          "required": ["pickaxe", "axe", "shovel", "bow"],
+          "required": ["pickaxe", "axe", "shovel", "bow", "gun"],
           "additionalProperties": false,
           "properties": {
             "pickaxe": { "type": "integer" },
             "axe":     { "type": "integer" },
             "shovel":  { "type": "integer" },
-            "bow":     { "type": "integer" }
+            "bow":     { "type": "integer" },
+            "gun":     { "type": "integer" }
           }
         },
         "damage_from_weapon": {
           "type": "object",
           "description": "Required on plants (item.plant.*), not allowed on other items. Health points (out of 100) the plant loses to each hit from each weapon. A weapon doing 0 damage can't hurt the plant.",
-          "required": ["pickaxe", "axe", "shovel", "bow"],
+          "required": ["pickaxe", "axe", "shovel", "bow", "gun"],
           "additionalProperties": false,
           "properties": {
             "pickaxe": { "type": "integer", "minimum": 0 },
             "axe":     { "type": "integer", "minimum": 0 },
             "shovel":  { "type": "integer", "minimum": 0 },
-            "bow":     { "type": "integer", "minimum": 0 }
+            "bow":     { "type": "integer", "minimum": 0 },
+            "gun":     { "type": "integer", "minimum": 0 }
           }
         },
         "spawn_count_per_quadrant": {
