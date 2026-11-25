@@ -6,11 +6,13 @@
 #include <Systems/Render/UiLayout.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Time.hpp>
 
 #include <memory>
 #include <optional>
 #include <span>
+#include <string_view>
 
 namespace Game::Sys
 {
@@ -18,7 +20,8 @@ namespace Game::Sys
 //! @brief Draws a row, centred over the cart sprite, with one res/ui/barrel_slot.json slot per Cmp::Cart::Barrel while a
 //! cart has Cmp::Cart::BarrelOverlayOpen. Every slot draws its part outlines, and the part sprites of its filled flags. Display
 //! only: it takes no input and does not pause gameplay. The same row is drawn on the level complete screen by
-//! render_level_tally(), highlighting each part as it is scored.
+//! render_level_tally(), in a "Cart" section above an "Inventory" section of icon rows, highlighting each element as it is
+//! scored.
 class CartOverlaySystem : public BaseOverlaySystem
 {
 public:
@@ -41,6 +44,22 @@ public:
     std::size_t current{ 0 };
   };
 
+  //! @brief Highlight colour of the element being counted (barrels, preserved cats).
+  static constexpr sf::Color kTallyHighlight{ 255, 215, 80 };
+  //! @brief Highlight colour of a spare cadaver part being counted, setting it apart from the barrelled parts.
+  static constexpr sf::Color kSpareHighlight{ 255, 110, 60 };
+
+  //! @brief One row of icons in the level complete tally's inventory section.
+  struct IconRow
+  {
+    //! @brief The icon sprites, left to right.
+    std::span<const Sys::SpriteKey> sprites;
+    //! @brief Tally position in the row, or std::nullopt before counting reaches it.
+    std::optional<IconProgress> progress;
+    //! @brief Colour of the highlight on the icon being counted.
+    sf::Color highlight{ kTallyHighlight };
+  };
+
   //! @brief Construct a new Cart Overlay System object. Loads the slot and panel layouts from res/ui/barrel_slot.json
   //! and res/ui/barrel_panel.json.
   //! @param reg
@@ -52,18 +71,16 @@ public:
   //! @param dt
   void update( sf::Time dt ) override;
 
-  //! @brief Draw the level complete tally in its own ImGui frame: the barrel row, with a row of `icon_sprite` icons
-  //! beneath it. Call after the SFML parts of the screen are drawn, as the ImGui frame is rendered over them.
+  //! @brief Draw the level complete tally in its own ImGui frame: a "Cart" section with the barrel row, and beneath it
+  //! an "Inventory" section with `icon_rows`, one under the other. A section with nothing to show is left out. Call
+  //! after the SFML parts of the screen are drawn, as the ImGui frame is rendered over them.
   //! @param dt
   //! @param barrels The barrels, left to right.
   //! @param barrel_progress Tally position in the barrel row, or std::nullopt before counting starts.
-  //! @param icon_sprite Sprite for the icon row.
-  //! @param icon_count Number of icons in the row.
-  //! @param icon_progress Tally position in the icon row, or std::nullopt before counting reaches it.
-  //! @param top_center Window pixel position of the top centre of the barrel row.
+  //! @param icon_rows The inventory rows, top to bottom. Empty rows are skipped.
+  //! @param top_center Window pixel position of the top centre of the tally.
   void render_level_tally( sf::Time dt, std::span<const Cmp::Cart::Barrel> barrels, std::optional<BarrelProgress> barrel_progress,
-                           const Sys::SpriteKey &icon_sprite, std::size_t icon_count, std::optional<IconProgress> icon_progress,
-                           sf::Vector2f top_center );
+                           std::span<const IconRow> icon_rows, sf::Vector2f top_center );
 
 private:
   //! @brief Draw a row of barrel slots, with the filled part sprites. Must be called inside an ImGui window.
@@ -73,6 +90,25 @@ private:
   //! @return The panel's height in window pixels.
   float render_barrel_row( std::span<const Cmp::Cart::Barrel> barrels, sf::Vector2f row_center, std::optional<BarrelProgress> progress );
 
+  //! @brief Draw the inventory section's rows of icons inside a panel styled like the barrel row's. Must be called inside an
+  //! ImGui window.
+  //! @param icon_rows The rows, top to bottom. Empty rows are skipped.
+  //! @param top_center Window pixel position of the panel's top centre.
+  //! @return The panel's height in window pixels.
+  float render_icon_rows( std::span<const IconRow> icon_rows, sf::Vector2f top_center );
+
+  //! @brief Draw the res/ui/barrel_panel.json panel, moved and resized to `rect`. Must be called inside an ImGui window.
+  //! @param rect Window pixel rectangle of the panel.
+  //! @param scale UI scale, for the border thickness.
+  void render_panel( const sf::FloatRect &rect, float scale );
+
+  //! @brief Draw a section caption, centred above a section of the tally. Must be called inside an ImGui window.
+  //! @param caption The caption text.
+  //! @param top_center Window pixel position of the caption's top centre.
+  //! @param scale UI scale, for the font size.
+  //! @return The caption's height plus the gap beneath it, in window pixels.
+  static float render_caption( std::string_view caption, sf::Vector2f top_center, float scale );
+
   //! @brief Dim an already counted element of the tally.
   //! @param rect Window pixel rectangle to dim.
   static void dim_rect( const sf::FloatRect &rect );
@@ -80,7 +116,8 @@ private:
   //! @brief Highlight the element of the tally being counted.
   //! @param rect Window pixel rectangle to highlight.
   //! @param scale UI scale, for the border thickness.
-  static void highlight_rect( const sf::FloatRect &rect, float scale );
+  //! @param colour Highlight colour; its alpha is ignored.
+  static void highlight_rect( const sf::FloatRect &rect, float scale, sf::Color colour = kTallyHighlight );
 
   //! @brief The layout of one barrel slot, moved to each slot's position as it is drawn.
   std::unique_ptr<Render::UiLayout> m_slot_ui_layout;

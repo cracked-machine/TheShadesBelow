@@ -4,6 +4,7 @@
 #include <Components/Cart/Barrel.hpp>
 #include <SceneControl/Events/ProcessLevelCompleteSceneInputEvent.hpp>
 #include <SceneControl/Scene.hpp>
+#include <Systems/Stores/StoreKey.hpp>
 
 #include <cstddef>
 #include <vector>
@@ -17,8 +18,9 @@ namespace Game::Scene
 {
 
 //! @brief The victory screen shown when the player leaves the graveyard by the horse. It scores the cart barrels carried
-//! over from the graveyard (+1 per cadaver part, +2 per full barrel) and the preserved cats in the inventory (+5 each,
-//! consumed), one step per second, highlighting each part, barrel and cat on screen as it is counted.
+//! over from the graveyard (+1 per cadaver part, +2 per full barrel), then the inventory: preserved cats (+5 each) and spare
+//! cadaver parts not put in a barrel (+1 each), both consumed. One step per second, highlighting each part, barrel, cat
+//! and spare part on screen as it is counted.
 //! The player can only continue once everything has been counted. The barrels end with this scene.
 class LevelCompleteScene : public Scene<Events::ProcessLevelCompleteSceneInputEvent>
 {
@@ -74,7 +76,9 @@ private:
       //! @brief The bonus for a full barrel, after its last part.
       FULL_BARREL,
       //! @brief One preserved cat in the inventory.
-      CAT
+      CAT,
+      //! @brief One spare cadaver part in the inventory.
+      SPARE_PART
     };
     Type type;
     //! @brief PART/FULL_BARREL: index into m_barrels.
@@ -83,9 +87,12 @@ private:
     std::size_t part{ 0 };
     //! @brief CAT: index of the cat in the row.
     std::size_t cat{ 0 };
+    //! @brief SPARE_PART: index into m_spare_sprites / m_spare_items.
+    std::size_t spare{ 0 };
   };
 
-  //! @brief Build m_barrels, m_cat_count and m_steps from the transferred barrels and the inventory.
+  //! @brief Build m_barrels, m_cat_sprites, m_spare_sprites/m_spare_items and m_steps from the transferred barrels and the
+  //! inventory.
   void build_steps();
 
   //! @brief Run m_steps[m_next_step], adding its wealth to the player.
@@ -101,8 +108,15 @@ private:
   //! @brief The barrels carried over from the graveyard, left to right
   std::vector<Cmp::Cart::Barrel> m_barrels;
 
-  //! @brief Preserved cats in the inventory on arrival; they stay drawn after they are consumed
-  std::size_t m_cat_count{ 0 };
+  //! @brief One sprite per preserved cat in the inventory on arrival; they stay drawn after they are consumed
+  std::vector<Sys::SpriteKey> m_cat_sprites;
+
+  //! @brief One sprite per spare cadaver part in the inventory on arrival, grouped in Cmp::Cart::Barrel::kParts order;
+  //! they stay drawn after they are consumed
+  std::vector<Sys::SpriteKey> m_spare_sprites;
+
+  //! @brief The item of each m_spare_sprites entry, consumed from the inventory as it is counted
+  std::vector<Sys::ItemKey> m_spare_items;
 
   //! @brief Every scored element, in counting order
   std::vector<Step> m_steps;
@@ -121,6 +135,9 @@ private:
 
   //! @brief Preserved cats counted so far
   int m_cats_counted{ 0 };
+
+  //! @brief Spare cadaver parts counted so far
+  int m_spares_counted{ 0 };
 };
 
 } // namespace Game::Scene

@@ -76,6 +76,14 @@
       "position": "above_source",
       "frequency": "always",
       "duration_s": 4.0
+    },
+    {
+      "id": "leave_empty_cart",
+      "trigger": "LeaveRefusedEvent",
+      "text": "The cart is empty.\nPut at least one cadaver part in a barrel before you leave.",
+      "position": "above_source",
+      "frequency": "always",
+      "duration_s": 4.0
     }
   ]
 }

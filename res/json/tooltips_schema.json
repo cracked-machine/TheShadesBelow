@@ -38,7 +38,7 @@
         "type": "object",
         "properties": {
           "id": {"type": "string", "description": "Unique id, stored in persist.json TooltipsSeen"},
-          "trigger": {"type": "string", "enum": ["AddInventoryEvent", "ItemPickedUpEvent", "GrimoireDiscoveryEvent", "BloodRefusedEvent", "AltarApproachedEvent", "AltarBloodOfferedEvent", "ConsumeRefusedEvent"], "description": "Event that triggers the tooltip"},
+          "trigger": {"type": "string", "enum": ["AddInventoryEvent", "ItemPickedUpEvent", "GrimoireDiscoveryEvent", "BloodRefusedEvent", "AltarApproachedEvent", "AltarBloodOfferedEvent", "ConsumeRefusedEvent", "LeaveRefusedEvent"], "description": "Event that triggers the tooltip"},
           "condition": {
             "type": "object",
             "properties": {

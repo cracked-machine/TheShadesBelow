@@ -609,10 +609,10 @@ void RenderMenuSystem::render_victory_screen( bool allow_continue, const Victory
 
   const auto &wealth = Utils::Player::get_wealth( m_reg );
 
-  // below the barrel and cat rows (see Sys::CartOverlaySystem::render_level_tally())
+  // below the cart and inventory sections (see Sys::CartOverlaySystem::render_level_tally())
   sf::Text tally_txt( m_font,
-                      std::format( "Cadaver parts: {}   Full barrels: {}   Preserved cats: {}   (+{} wealth)", tally.parts, tally.full_barrels,
-                                   tally.cats, tally.score_wealth ),
+                      std::format( "Cadaver parts: {}   Full barrels: {}   Preserved cats: {}   Spare parts: {}   (+{} wealth)", tally.parts,
+                                   tally.full_barrels, tally.cats, tally.spare_parts, tally.score_wealth ),
                       24 );
   tally_txt.setFillColor( sf::Color::White );
   tally_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, static_cast<float>( display_size.y ) - 200.f } );

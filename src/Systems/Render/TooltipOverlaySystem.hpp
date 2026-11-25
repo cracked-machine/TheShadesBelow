@@ -5,6 +5,7 @@
 #include <Events/AltarApproachedEvent.hpp>
 #include <Events/AltarBloodOfferedEvent.hpp>
 #include <Events/BloodRefusedEvent.hpp>
+#include <Events/LeaveRefusedEvent.hpp>
 #include <Events/ConsumeRefusedEvent.hpp>
 #include <Events/DismissTooltipEvent.hpp>
 #include <Events/GrimoireDiscoveryEvent.hpp>
@@ -71,6 +72,10 @@ public:
   //! @param event
   void on_blood_refused_event( const Events::BloodRefusedEvent &event );
 
+  //! @brief Record a candidate for tooltips triggered by "LeaveRefusedEvent".
+  //! @param event
+  void on_leave_refused_event( const Events::LeaveRefusedEvent &event );
+
   //! @brief Record a candidate for tooltips triggered by "AltarApproachedEvent".
   //! @param event
   void on_altar_approached_event( [[maybe_unused]] const Events::AltarApproachedEvent &event );
@@ -127,8 +132,8 @@ private:
     //! @brief unique id, stored in Cmp::Persist::TooltipsSeen
     std::string id;
     //! @brief name of the event that triggers this tooltip, e.g. "AddInventoryEvent", "ItemPickedUpEvent",
-    //! "GrimoireDiscoveryEvent", "BloodRefusedEvent", "AltarApproachedEvent", "AltarBloodOfferedEvent"
-    //! or "ConsumeRefusedEvent"
+    //! "GrimoireDiscoveryEvent", "BloodRefusedEvent", "AltarApproachedEvent", "AltarBloodOfferedEvent",
+    //! "ConsumeRefusedEvent" or "LeaveRefusedEvent"
     std::string trigger;
     //! @brief optional item key condition, empty matches any item. A trailing '*' matches any item key with that
     //! prefix, e.g. "item.grave.blood*"

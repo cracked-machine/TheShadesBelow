@@ -53,6 +53,7 @@ TooltipOverlaySystem::TooltipOverlaySystem( entt::registry &reg, sf::RenderWindo
   std::ignore = get_systems_event_queue().sink<Events::ItemPickedUpEvent>().connect<&TooltipOverlaySystem::on_item_picked_up_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::GrimoireDiscoveryEvent>().connect<&TooltipOverlaySystem::on_grimoire_discovery_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::BloodRefusedEvent>().connect<&TooltipOverlaySystem::on_blood_refused_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::LeaveRefusedEvent>().connect<&TooltipOverlaySystem::on_leave_refused_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::AltarApproachedEvent>().connect<&TooltipOverlaySystem::on_altar_approached_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::AltarBloodOfferedEvent>().connect<&TooltipOverlaySystem::on_altar_blood_offered_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::ConsumeRefusedEvent>().connect<&TooltipOverlaySystem::on_consume_refused_event>( this );
@@ -167,6 +168,12 @@ void TooltipOverlaySystem::on_grimoire_discovery_event( const Events::GrimoireDi
 {
   if ( not m_enabled ) { return; }
   m_candidates.push_back( { "GrimoireDiscoveryEvent", event.m_key } );
+}
+
+void TooltipOverlaySystem::on_leave_refused_event( const Events::LeaveRefusedEvent &event )
+{
+  if ( not m_enabled ) { return; }
+  m_candidates.push_back( { "LeaveRefusedEvent", "", event.horse_bounds } );
 }
 
 void TooltipOverlaySystem::on_blood_refused_event( const Events::BloodRefusedEvent &event )

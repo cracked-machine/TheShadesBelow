@@ -5,6 +5,7 @@
 #include <Components/Horse/MultiBlock.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Position.hpp>
+#include <Events/LeaveRefusedEvent.hpp>
 #include <Events/OverlayEvent.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>
@@ -47,6 +48,12 @@ void CartHorseSystem::on_player_action( Events::PlayerActionEvent ev )
     if ( Utils::Player::is_flying( reg() ) ) continue;
     if ( m_sound_bank.get_effect( "horse_neigh" ).getStatus() != sf::Sound::Status::Playing ) m_sound_bank.get_effect( "horse_neigh" ).play();
     m_activate_timer = sf::Time::Zero;
+    // nothing to take away: the player must put at least one cadaver part in the cart first
+    if ( all_barrels_empty() )
+    {
+      get_systems_event_queue().trigger( Events::LeaveRefusedEvent{ horse_mb_cmp } );
+      return;
+    }
     // OverlayArbitrationSystem decides whether the prompt may open
     get_systems_event_queue().trigger( Events::OverlayEvent( Events::OverlayEvent::OverlayActions::LEAVE_PROMPT_OPEN ) );
     return;
@@ -57,6 +64,15 @@ void CartHorseSystem::on_player_action( Events::PlayerActionEvent ev )
     if ( transfer_selected_item() ) { m_activate_timer = sf::Time::Zero; }
     break;
   }
+}
+
+bool CartHorseSystem::all_barrels_empty()
+{
+  for ( auto [barrel_entt, barrel_cmp] : reg().view<Cmp::Cart::Barrel>().each() )
+  {
+    if ( barrel_cmp.filled_count() > 0 ) return false;
+  }
+  return true;
 }
 
 void CartHorseSystem::leave_level()

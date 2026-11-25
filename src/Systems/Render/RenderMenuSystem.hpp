@@ -79,10 +79,12 @@ public:
     int full_barrels{ 0 };
     //! @brief Preserved cats counted.
     int cats{ 0 };
+    //! @brief Spare cadaver parts (in the inventory, not a barrel) counted.
+    int spare_parts{ 0 };
   };
 
   //! @brief Render the victory (level complete) screen text: the title, the continue prompt, what the tally has counted
-  //! so far and the player's total wealth. The barrel and cat rows are drawn by Sys::CartOverlaySystem::render_level_tally().
+  //! so far and the player's total wealth. The barrel, cat and spare part rows are drawn by Sys::CartOverlaySystem::render_level_tally().
   //! @param allow_continue Whether to show the "press to continue" prompt.
   //! @param tally What the tally has counted so far.
   void render_victory_screen( bool allow_continue, const VictoryTally &tally );

@@ -18,6 +18,7 @@
 #include <SFML/System/Time.hpp>
 
 #include <algorithm>
+#include <array>
 #include <optional>
 
 namespace Game::Scene
@@ -29,6 +30,8 @@ namespace
 constexpr int kPartWealth = 1;
 //! @brief Bonus wealth for each full barrel.
 constexpr int kFullBarrelWealth = 2;
+//! @brief Wealth for each spare cadaver part in the inventory, as for a part in a barrel.
+constexpr int kSparePartWealth = kPartWealth;
 //! @brief Wealth for each preserved cat in the inventory.
 constexpr int kPreservedCatWealth = 5;
 //! @brief The item scored (and consumed) from the inventory.
@@ -83,16 +86,40 @@ void LevelCompleteScene::build_steps()
     if ( barrel.is_full() ) { m_steps.push_back( { .type = Step::Type::FULL_BARREL, .barrel = barrel_idx } ); }
   }
 
-  m_cat_count = 0;
+  // items held in a slot, counting a stack as its size
+  auto slot_item_count = [this]( entt::entity slot_entt )
+  {
+    const auto *stack_cmp = m_reg.try_get<Cmp::Inventory::StackCount>( slot_entt );
+    return stack_cmp ? static_cast<std::size_t>( std::max( stack_cmp->m_count, 1 ) ) : std::size_t{ 1 };
+  };
+
+  m_cat_sprites.clear();
   for ( auto [slot_entt, slot_cmp] : m_reg.view<Cmp::PlayerInventorySlot>().each() )
   {
     if ( slot_cmp.empty() or slot_cmp.m_item->item_type != kPreservedCat ) continue;
-    const auto *stack_cmp = m_reg.try_get<Cmp::Inventory::StackCount>( slot_entt );
-    m_cat_count += stack_cmp ? static_cast<std::size_t>( std::max( stack_cmp->m_count, 1 ) ) : 1;
+    m_cat_sprites.insert( m_cat_sprites.end(), slot_item_count( slot_entt ), Sys::SpriteKey( kPreservedCatSprite ) );
   }
-  for ( std::size_t cat_idx = 0; cat_idx < m_cat_count; ++cat_idx )
+  for ( std::size_t cat_idx = 0; cat_idx < m_cat_sprites.size(); ++cat_idx )
   {
     m_steps.push_back( { .type = Step::Type::CAT, .cat = cat_idx } );
+  }
+
+  // spare cadaver parts: any not put in a barrel. Grouped by part, in the barrel's scoring order.
+  m_spare_sprites.clear();
+  m_spare_items.clear();
+  for ( const auto &[part_sprite, part_member] : Cmp::Cart::Barrel::kParts )
+  {
+    for ( auto [slot_entt, slot_cmp] : m_reg.view<Cmp::PlayerInventorySlot>().each() )
+    {
+      if ( slot_cmp.empty() or slot_cmp.m_item->sprite_type.str() != part_sprite ) continue;
+      const std::size_t count = slot_item_count( slot_entt );
+      m_spare_sprites.insert( m_spare_sprites.end(), count, slot_cmp.m_item->sprite_type );
+      m_spare_items.insert( m_spare_items.end(), count, slot_cmp.m_item->item_type );
+    }
+  }
+  for ( std::size_t spare_idx = 0; spare_idx < m_spare_sprites.size(); ++spare_idx )
+  {
+    m_steps.push_back( { .type = Step::Type::SPARE_PART, .spare = spare_idx } );
   }
 
   m_next_step = 0;
@@ -101,6 +128,7 @@ void LevelCompleteScene::build_steps()
   m_parts_counted = 0;
   m_full_barrels_counted = 0;
   m_cats_counted = 0;
+  m_spares_counted = 0;
 }
 
 void LevelCompleteScene::run_next_step()
@@ -121,6 +149,11 @@ void LevelCompleteScene::run_next_step()
       added = kPreservedCatWealth;
       m_cats_counted++;
       Factory::Player::destroy_inventory( m_reg, kPreservedCat );
+      break;
+    case Step::Type::SPARE_PART:
+      added = kSparePartWealth;
+      m_spares_counted++;
+      Factory::Player::destroy_inventory( m_reg, m_spare_items.at( step.spare ) );
       break;
   }
   Utils::Player::get_wealth( m_reg ).wealth += added;
@@ -150,13 +183,15 @@ void LevelCompleteScene::render( sf::Time dt )
   render_menu_sys.render_victory_screen( allow_continue, { .score_wealth = m_score_wealth,
                                                            .parts = m_parts_counted,
                                                            .full_barrels = m_full_barrels_counted,
-                                                           .cats = m_cats_counted } );
+                                                           .cats = m_cats_counted,
+                                                           .spare_parts = m_spares_counted } );
 
   // highlight the step just run (m_next_step - 1); everything before it is counted
   using BarrelProgress = Sys::CartOverlaySystem::BarrelProgress;
   using IconProgress = Sys::CartOverlaySystem::IconProgress;
   std::optional<BarrelProgress> barrel_progress;
   std::optional<IconProgress> cat_progress;
+  std::optional<IconProgress> spare_progress;
   if ( m_next_step > 0 )
   {
     const Step &step = m_steps.at( m_next_step - 1 );
@@ -172,18 +207,30 @@ void LevelCompleteScene::render( sf::Time dt )
         barrel_progress = BarrelProgress{ .barrel = m_barrels.size() };
         cat_progress = IconProgress{ .current = step.cat };
         break;
+      case Step::Type::SPARE_PART:
+        barrel_progress = BarrelProgress{ .barrel = m_barrels.size() };
+        cat_progress = IconProgress{ .current = m_cat_sprites.size() };
+        spare_progress = IconProgress{ .current = step.spare };
+        break;
     }
     // once everything is counted, dim the lot rather than leave the last step highlighted
     if ( allow_continue and m_scorecheck_accumulator.asSeconds() >= 0.5f )
     {
       barrel_progress = BarrelProgress{ .barrel = m_barrels.size() };
-      cat_progress = IconProgress{ .current = m_cat_count };
+      cat_progress = IconProgress{ .current = m_cat_sprites.size() };
+      spare_progress = IconProgress{ .current = m_spare_sprites.size() };
     }
   }
 
+  using IconRow = Sys::CartOverlaySystem::IconRow;
+  const std::array<IconRow, 2> icon_rows{ {
+      { .sprites = m_cat_sprites, .progress = cat_progress },
+      { .sprites = m_spare_sprites, .progress = spare_progress, .highlight = Sys::CartOverlaySystem::kSpareHighlight },
+  } };
+
   const auto display_size = sf::Vector2f( Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( m_reg ) );
-  m_sys.find<Sys::Store::Type::CartOverlaySystem>().render_level_tally( dt, m_barrels, barrel_progress, kPreservedCatSprite, m_cat_count,
-                                                                        cat_progress, { display_size.x / 2.f, display_size.y * 0.3f } );
+  m_sys.find<Sys::Store::Type::CartOverlaySystem>().render_level_tally( dt, m_barrels, barrel_progress, icon_rows,
+                                                                        { display_size.x / 2.f, display_size.y * 0.3f } );
 }
 
 entt::registry &LevelCompleteScene::registry() { return m_reg; }

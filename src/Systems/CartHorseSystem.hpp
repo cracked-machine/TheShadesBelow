@@ -29,6 +29,9 @@ public:
   //! @brief Complete the level: signal Events::SceneManagerEvent::Type::LEVEL_COMPLETE.
   void leave_level();
 
+  //! @brief True when no cart barrel holds a cadaver part, so the horse refuses to leave.
+  [[nodiscard]] bool all_barrels_empty();
+
 private:
   //! @brief True if the player is next to `bounds` and facing it.
   //! @param bounds The world bounds to test.
