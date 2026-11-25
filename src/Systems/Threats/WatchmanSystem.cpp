@@ -3,7 +3,6 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/Watchman.hpp>
 #include <Components/Npc/WatchmanSearchlight.hpp>
-#include <Components/Obstacle.hpp>
 #include <Components/Particle/WatchmanGunfireParticleSprite.hpp>
 #include <Components/Persistent/NpcWatchmanConeHalfAngle.hpp>
 #include <Components/Persistent/NpcWatchmanConeLength.hpp>
@@ -19,6 +18,7 @@
 #include <Components/Player/Mortality.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Position.hpp>
+#include <Components/Random.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/UUID.hpp>
 #include <Components/WeaponDamage.hpp>
@@ -33,10 +33,10 @@
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Threats/WatchmanSystem.hpp>
 #include <Utils/Cardinal.hpp>
+#include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
-#include <Utils/Random.hpp>
 #include <Utils/Utils.hpp>
 #include <cmath>
 #include <optional>
@@ -223,9 +223,21 @@ void WatchmanSystem::spawn_watchman()
   auto infamy_spawn_threshold = Sys::PersistSystem::get<Cmp::Persist::NpcWatchmanSpawnInfamy>( reg() ).get_value();
   if ( watchman_npc_count < max_spawn_limit and Utils::Player::get_stats( reg() ).infamy() >= infamy_spawn_threshold )
   {
-    auto reserved_sm = m_reserved_sm.lock();
-    auto [_, rnd_pos_cmp] = Utils::Rnd::get_random_position( reg(), {}, Utils::Rnd::ExcludePack<Cmp::Player::Character, Cmp::Obstacle>{}, 0 );
-    if ( reserved_sm && not reserved_sm->at( rnd_pos_cmp ).empty() ) return;
+    if ( m_path_positions.empty() )
+    {
+      SPDLOG_WARN( "No levelgen 'path' cells to spawn a Watchman on" );
+      return;
+    }
+    // Watchmen patrol the paths, so only spawn on a levelgen 'path' cell. Path cells are always in the reserved grid
+    // (LevelGenerator reserves the path tiles), so the reserved grid can't veto the spawn cell here.
+    Cmp::RandomInt path_picker( 0, static_cast<int>( m_path_positions.size() ) - 1 );
+    const Cmp::Position rnd_pos_cmp( m_path_positions.at( static_cast<std::size_t>( path_picker.gen() ) ), Constants::kGridSizePxF );
+    // don't spawn on top of the player
+    auto player_view = reg().view<Cmp::Player::Character, Cmp::Position>();
+    for ( auto player_entt : player_view )
+    {
+      if ( player_view.get<Cmp::Position>( player_entt ).findIntersection( rnd_pos_cmp ) ) return;
+    }
     // don't spawn on a dropped item or into a sinkhole/corruption cell
     if ( auto item_sm = m_item_sm.lock(); item_sm and not item_sm->at( rnd_pos_cmp ).empty() ) return;
     if ( auto hazard_sm = m_hazard_sm.lock(); hazard_sm and not hazard_sm->at( rnd_pos_cmp ).empty() ) return;
