@@ -68,7 +68,7 @@
     },
     "sprite.grave.cadaver.rightarm": {
       "spritesheet": {
-        "displayname": "Cadaver Arm",
+        "displayname": "Cadaver Right Arm",
         "texture_path": "res/textures/graveyard.png",
         "sprite_indices": [5],
         "indices_per_sequence": 1,
