@@ -79,8 +79,8 @@ public:
   void add_lowerfloor_cobwebs( int num_cobwebs, sf::FloatRect scene_dimensions );
 
   //! @brief create multiblock sprites (crypt, healing building, ruin and graves) for the graveyard scene.
-  //!        The crypts, and the healing building / ruin if present, are placed at the given positions (the scene's
-  //!        'poi' markers).
+  //!        The crypts, healing building and ruin are placed at the given positions (the scene's 'poi' markers); the
+  //!        healing building / ruin are skipped when their position is empty.
   //!        Graves are then laid out in clusters, as many as fit in each map quadrant: each cluster is an N x N grid
   //!        (Cmp::Persist::GraveClusterGridSize) of 2x2-cell grave slots with kGraveClusterInternalPadding cells between
   //!        slots, and Cmp::Persist::GraveClusterExternalPadding cells between clusters. A grave is omitted when its

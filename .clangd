@@ -1,13 +1,13 @@
 CompileFlags:
-  CompilationDatabase: build-x86_64-w64-mingw32-Release
+  CompilationDatabase: build-x86_64-w64-mingw32-Debug
   Remove:
     - -m*
     - -f*
   Add:
-    - -isystem/workspaces/top-down-maze-procedural/build-x86_64-w64-mingw32-Release/_deps/spdlog-src/include
-    - -isystem/workspaces/top-down-maze-procedural/build-x86_64-w64-mingw32-Release/_deps/sfml-src/include
-    - -isystem/workspaces/top-down-maze-procedural/build-x86_64-w64-mingw32-Release/_deps/entt-src/src
-    - -isystem/workspaces/top-down-maze-procedural/build-x86_64-w64-mingw32-Release/_deps/json-nlohmann-src/include
+    - -isystem/workspaces/top-down-maze-procedural/build-x86_64-w64-mingw32-Debug/_deps/spdlog-src/include
+    - -isystem/workspaces/top-down-maze-procedural/build-x86_64-w64-mingw32-Debug/_deps/sfml-src/include
+    - -isystem/workspaces/top-down-maze-procedural/build-x86_64-w64-mingw32-Debug/_deps/entt-src/src
+    - -isystem/workspaces/top-down-maze-procedural/build-x86_64-w64-mingw32-Debug/_deps/json-nlohmann-src/include
     - -isystem/workspaces/top-down-maze-procedural/inc
     - -isystem/workspaces/top-down-maze-procedural/inc/Systems
     - -isystem/workspaces/top-down-maze-procedural/inc/Components

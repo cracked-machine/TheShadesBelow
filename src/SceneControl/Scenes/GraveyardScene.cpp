@@ -157,22 +157,20 @@ void GraveyardScene::on_init()
   m_world_tile_sm = Factory::Pathfinding::create_world_tile_grid( m_reg );
   level_gen.set_world_tile_sm( m_world_tile_sm );
   m_sys.find<Sys::Store::Type::PlantSystem>().init( m_reserved_sm, m_world_tile_sm, m_item_sm, m_hazard_sm );
-  // one point of interest per map quadrant: every quadrant gets a crypt, except that once per level a 1-in-4 roll
-  // swaps one random quadrant's crypt for either the barber surgeon or the ruin - never more than one of them
+  // one point of interest per map quadrant: one random quadrant is always the barber surgeon, a different random
+  // quadrant is always the ruin, and the remaining two are crypts
   const auto poi_positions = m_scene_data->poi_positions_by_quadrant();
+  const auto barber_quadrant = static_cast<std::size_t>( Cmp::RandomInt( 0, 3 ).gen() );
+  // offset of 1..3 guarantees a different quadrant, uniformly chosen among the other three
+  const auto ruin_quadrant = ( barber_quadrant + static_cast<std::size_t>( Cmp::RandomInt( 1, 3 ).gen() ) ) % poi_positions.size();
   std::vector<sf::Vector2f> crypt_positions;
   std::optional<sf::Vector2f> healing_pos;
   std::optional<sf::Vector2f> ruin_pos;
-  std::optional<std::size_t> special_quadrant;
-  if ( Cmp::RandomInt( 0, 3 ).gen() == 0 ) { special_quadrant = static_cast<std::size_t>( Cmp::RandomInt( 0, 3 ).gen() ); }
   for ( std::size_t quadrant = 0; quadrant < poi_positions.size(); ++quadrant )
   {
     const auto &pos = poi_positions.at( quadrant );
-    if ( special_quadrant and *special_quadrant == quadrant )
-    {
-      if ( Cmp::RandomInt( 0, 1 ).gen() == 0 ) { healing_pos = pos; }
-      else { ruin_pos = pos; }
-    }
+    if ( quadrant == barber_quadrant ) { healing_pos = pos; }
+    else if ( quadrant == ruin_quadrant ) { ruin_pos = pos; }
     else { crypt_positions.push_back( pos ); }
   }
   SPDLOG_INFO( "Graveyard POIs: {} crypts, barber surgeon: {}, ruin: {}", crypt_positions.size(), healing_pos.has_value(), ruin_pos.has_value() );
