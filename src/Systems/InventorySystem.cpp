@@ -43,6 +43,7 @@
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
+#include <Events/MoveInventorySlotEvent.hpp>
 #include <Events/SelectInventorySlotEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/ItemFactory.hpp>
@@ -81,6 +82,7 @@ InventorySystem::InventorySystem( entt::registry &reg, sf::RenderWindow &window,
   std::ignore = get_systems_event_queue().sink<Events::PickupWorldItemEvent>().connect<&InventorySystem::on_pickup_world_item_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::UpdateDmgEvent>().connect<&InventorySystem::on_update_dmg_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::SelectInventorySlotEvent>().connect<&InventorySystem::on_select_inventory_slot_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::MoveInventorySlotEvent>().connect<&InventorySystem::on_move_inventory_slot_event>( this );
   SPDLOG_DEBUG( "InventorySystem initialized" );
 }
 
@@ -177,6 +179,34 @@ void InventorySystem::on_select_inventory_slot_event( const Events::SelectInvent
   get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::CANCEL_BOW ) );
   selected_cmp->m_idx = next;
   SPDLOG_DEBUG( "Selected inventory slot {}", next );
+}
+
+void InventorySystem::on_move_inventory_slot_event( const Events::MoveInventorySlotEvent &ev )
+{
+  // same rules as changing the selected slot: the held item can't be moved mid-bite or mid-flight
+  if ( Utils::Player::is_player_eating( reg() ) ) return;
+  if ( Utils::Player::is_flying( reg() ) ) return;
+  if ( ev.m_from == ev.m_to ) return;
+
+  const uint8_t count = Utils::Player::get_inventory_slot_count( reg() );
+  if ( ev.m_from >= count or ev.m_to >= count ) return;
+  const auto from_entt = Utils::Player::get_inventory_slot_entt( reg(), ev.m_from );
+  const auto to_entt = Utils::Player::get_inventory_slot_entt( reg(), ev.m_to );
+  if ( from_entt == entt::null or to_entt == entt::null ) return;
+
+  auto player_entt = Utils::Player::get_entity( reg() );
+  auto *selected_cmp = reg().try_get<Cmp::Player::SelectedInventorySlot>( player_entt );
+  const uint8_t selected = Utils::Player::get_selected_slot_idx( reg() );
+  const bool moves_selected = selected == ev.m_from or selected == ev.m_to;
+  // a drawn bow (or charged burr) belongs to the item being moved
+  if ( moves_selected ) { get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::CANCEL_BOW ) ); }
+
+  // a slot's position is only its index, so exchanging indices moves each slot's item with all its per-item components
+  std::swap( reg().get<Cmp::PlayerInventorySlot>( from_entt ).m_slot_idx, reg().get<Cmp::PlayerInventorySlot>( to_entt ).m_slot_idx );
+
+  // the selection follows the item, so a moved held item stays in hand
+  if ( selected_cmp and moves_selected ) { selected_cmp->m_idx = selected == ev.m_from ? ev.m_to : ev.m_from; }
+  SPDLOG_DEBUG( "Moved inventory slot {} to {}", ev.m_from, ev.m_to );
 }
 
 entt::entity InventorySystem::prepare_empty_slot( std::optional<uint8_t> idx )

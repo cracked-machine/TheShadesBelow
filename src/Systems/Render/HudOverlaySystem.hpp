@@ -19,6 +19,10 @@
 #include <string>
 #include <unordered_map>
 
+// clang-format off
+namespace Game::Cmp { struct InventoryDrag; }
+// clang-format on
+
 namespace Game::Sys
 {
 
@@ -83,6 +87,11 @@ private:
   //! @param flash whether the selected slot's highlight is in the "on" phase of a Cmp::FlashUIInventory flash
   //! @param slot_origin screen position of the slot's top left corner
   void render_inventory_slot( uint8_t idx, bool selected, bool flash, sf::Vector2f slot_origin );
+
+  //! @brief While an inventory slot's item is being dragged (Cmp::InventoryDrag::m_from_slot), draw its icon, faded,
+  //! centred on the mouse cursor. Call after render_ui_inventory_table() has recorded the slot icons.
+  //! @param drag_ctx The registry's inventory drag state
+  void render_inventory_drag_icon( const Cmp::InventoryDrag &drag_ctx );
 
   //! @brief Draw ImGui text at a slot layout ui_label: its font_size, and its point aligned per its align property.
   //! @param label the slot layout label

@@ -2,6 +2,7 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Cart/Barrel.hpp>
 #include <Components/Direction.hpp>
+#include <Components/Inventory/InventoryDrag.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Player/Character.hpp>
@@ -20,6 +21,7 @@
 #include <Events/DismissTooltipEvent.hpp>
 #include <Events/LightningEvent.hpp>
 #include <Events/LoadSettingsEvent.hpp>
+#include <Events/MoveInventorySlotEvent.hpp>
 #include <Events/OverlayEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
@@ -138,6 +140,7 @@ void SceneInputRouter::graveyard_scene_state_handler()
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
     process_inventory_slot_input( *event, /*number_keys=*/true );
+    if ( process_inventory_drag( *event ) ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -184,7 +187,7 @@ void SceneInputRouter::graveyard_scene_state_handler()
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( swap_inventory_action() ) );
   }
-  if ( not imgui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not imgui_wants_mouse() and not mouse_on_inventory() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     // get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::DRAW_BOW ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::BURN ) );
@@ -213,6 +216,7 @@ void SceneInputRouter::crypt_scene_state_handler()
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
     process_inventory_slot_input( *event, /*number_keys=*/true );
+    if ( process_inventory_drag( *event ) ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -249,7 +253,7 @@ void SceneInputRouter::crypt_scene_state_handler()
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( swap_inventory_action() ) );
   }
-  if ( not imgui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not imgui_wants_mouse() and not mouse_on_inventory() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     // get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::DIG ) );
   }
@@ -278,6 +282,7 @@ void SceneInputRouter::barber_surgeon_scene_state_handler()
     if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
     if ( heal_menu_open and process_heal_menu_wheel( *event ) ) continue;
     process_inventory_slot_input( *event, /*number_keys=*/true );
+    if ( process_inventory_drag( *event ) ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -302,7 +307,7 @@ void SceneInputRouter::barber_surgeon_scene_state_handler()
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
     // get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::DROP_CARRYITEM ) );
   }
-  if ( not imgui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not imgui_wants_mouse() and not mouse_on_inventory() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ATTACK ) );
   }
@@ -328,6 +333,7 @@ void SceneInputRouter::shop_scene_state_handler()
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
     process_inventory_slot_input( *event, /*number_keys=*/false );
+    if ( process_inventory_drag( *event ) ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -352,7 +358,7 @@ void SceneInputRouter::shop_scene_state_handler()
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ACTIVATE ) );
     get_systems_event_queue().trigger( Events::PlayerActionEvent( swap_inventory_action() ) );
   }
-  if ( not imgui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not imgui_wants_mouse() and not mouse_on_inventory() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ATTACK ) );
   }
@@ -378,6 +384,7 @@ void SceneInputRouter::ruin_scene_state_handler()
     if ( dispatch_common_window_event( *event ) ) continue;
     if ( is_mouse_event( *event ) and imgui_wants_mouse() ) continue;
     process_inventory_slot_input( *event, /*number_keys=*/true );
+    if ( process_inventory_drag( *event ) ) continue;
     if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       try_handle_debug_key( keyReleased->scancode );
@@ -405,7 +412,7 @@ void SceneInputRouter::ruin_scene_state_handler()
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::SELECT_POSITION ) );
   }
-  if ( not imgui_wants_mouse() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
+  if ( not imgui_wants_mouse() and not mouse_on_inventory() and sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) )
   {
     get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::ATTACK ) );
   }
@@ -614,6 +621,46 @@ void SceneInputRouter::process_inventory_slot_input( const sf::Event &event, boo
     const auto idx = static_cast<uint8_t>( std::distance( kSlotKeys.begin(), it ) );
     get_systems_event_queue().trigger( Events::SelectInventorySlotEvent( Mode::INDEX, idx ) );
   }
+}
+
+bool SceneInputRouter::process_inventory_drag( const sf::Event &event )
+{
+  // the HUD records the slot rects when it first draws the inventory in this scene
+  auto *drag_ctx = reg().ctx().find<Cmp::InventoryDrag>();
+  if ( not drag_ctx ) return false;
+
+  if ( const auto *pressed = event.getIf<sf::Event::MouseButtonPressed>(); pressed and pressed->button == sf::Mouse::Button::Left )
+  {
+    // every press starts afresh, so a release missed while a menu was open can't leave a drag stuck on
+    drag_ctx->m_from_slot.reset();
+    const auto idx = drag_ctx->slot_at( sf::Vector2f( pressed->position ) );
+    if ( not idx ) return false;
+    const auto slot_entt = Utils::Player::get_inventory_slot_entt( reg(), *idx );
+    if ( slot_entt != entt::null and not reg().get<Cmp::PlayerInventorySlot>( slot_entt ).empty() ) { drag_ctx->m_from_slot = idx; }
+    // a click on the inventory is never a bow draw, even on an empty slot
+    return true;
+  }
+  if ( const auto *released = event.getIf<sf::Event::MouseButtonReleased>(); released and released->button == sf::Mouse::Button::Left )
+  {
+    const auto from = std::exchange( drag_ctx->m_from_slot, std::nullopt );
+    if ( not from ) return false; // not a drag, e.g. releasing a bow drawn in the world
+    // dropped anywhere but another slot, the drag is cancelled and the item stays put
+    if ( const auto to = drag_ctx->slot_at( sf::Vector2f( released->position ) ); to and *to != *from )
+    {
+      get_systems_event_queue().trigger( Events::MoveInventorySlotEvent( *from, *to ) );
+    }
+    return true;
+  }
+  if ( event.is<sf::Event::FocusLost>() ) { drag_ctx->m_from_slot.reset(); }
+  return false;
+}
+
+bool SceneInputRouter::mouse_on_inventory()
+{
+  const auto *drag_ctx = reg().ctx().find<Cmp::InventoryDrag>();
+  if ( not drag_ctx ) return false;
+  if ( drag_ctx->m_from_slot ) return true;
+  return drag_ctx->slot_at( sf::Vector2f( sf::Mouse::getPosition( m_window ) ) ).has_value();
 }
 
 Events::PlayerActionEvent::GameActions SceneInputRouter::swap_inventory_action()

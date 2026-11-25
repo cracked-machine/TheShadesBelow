@@ -131,6 +131,18 @@ private:
   //! @param number_keys false in scenes that use the number keys for something else (e.g. buying in the shop)
   void process_inventory_slot_input( const sf::Event &event, bool number_keys );
 
+  //! @brief Drag items between inventory slots with the left mouse button (see Cmp::InventoryDrag): pressing on an
+  //!        occupied slot picks its item up, releasing on another slot sends Events::MoveInventorySlotEvent.
+  //! @param event The polled window event
+  //! @return true if the event was a left button press on an inventory slot, or the release that ends a drag, so it
+  //!         must not also draw or release the bow
+  bool process_inventory_drag( const sf::Event &event );
+
+  //! @brief Check whether an inventory drag is in progress or the mouse is over an inventory slot, so the held left
+  //!        button must not dig, attack or burn.
+  //! @return true if the mouse belongs to the inventory
+  bool mouse_on_inventory();
+
   //! @brief Forward the event to ImGui. Safe in gameplay scenes: OverlayArbitrationSystem pumps an ImGui frame every frame.
   //! @param event The polled window event
   void forward_to_imgui( const sf::Event &event );

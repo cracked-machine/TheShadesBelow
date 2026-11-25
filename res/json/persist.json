@@ -527,7 +527,7 @@
   },
   "GraveDropNpcTrapRank": {
     "type": "int",
-    "value": 40,
+    "value": 30,
     "min_value": -1,
     "max_value": 100,
     "detail": "NPC",

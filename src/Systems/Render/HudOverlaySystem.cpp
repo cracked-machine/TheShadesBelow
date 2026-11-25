@@ -11,6 +11,7 @@
 #include <Components/Inventory/FlashUIHealth.hpp>
 #include <Components/Inventory/FlashUIInventory.hpp>
 #include <Components/Inventory/FlashUIWealth.hpp>
+#include <Components/Inventory/InventoryDrag.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/NoRender.hpp>
@@ -56,6 +57,7 @@
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <algorithm>
 #include <array>
@@ -226,6 +228,9 @@ void HudOverlaySystem::render_ui_inventory_table( sf::Time dt )
   const sf::Vector2f slot_size = inventory_slot_size();
   // flash the selected slot's highlight on a recent change (e.g. a repaired tool or an altar reward)
   const bool flash = update_flash_toggle<Cmp::FlashUIInventory>( dt );
+  // where each slot is drawn, for SceneInputRouter to hit-test inventory drags against
+  auto &drag_ctx = reg().ctx().emplace<Cmp::InventoryDrag>();
+  drag_ctx.m_slot_rects.fill( std::nullopt );
 
   // the ui_table only gives the position; each column is one slot of res/ui/inventory_slot.json
   ImGui::SetNextWindowPos( ImVec2( table->rect.position.x, table->rect.position.y ) );
@@ -251,6 +256,7 @@ void HudOverlaySystem::render_ui_inventory_table( sf::Time dt )
       {
         ImGui::TableSetColumnIndex( idx );
         const ImVec2 cell_min = ImGui::GetCursorScreenPos();
+        drag_ctx.m_slot_rects.at( idx ) = sf::FloatRect( { cell_min.x, cell_min.y }, slot_size );
         render_inventory_slot( idx, idx == selected_idx, flash, { cell_min.x, cell_min.y } );
       }
       ImGui::EndTable();
@@ -260,6 +266,26 @@ void HudOverlaySystem::render_ui_inventory_table( sf::Time dt )
   ImGui::End();
   ImGui::PopFont();
   ImGui::PopStyleVar( 2 );
+
+  render_inventory_drag_icon( drag_ctx );
+}
+
+void HudOverlaySystem::render_inventory_drag_icon( const Cmp::InventoryDrag &drag_ctx )
+{
+  // a release missed while a menu was open leaves m_from_slot set until the next press; never draw it then
+  if ( not drag_ctx.m_from_slot or not sf::Mouse::isButtonPressed( sf::Mouse::Button::Left ) ) return;
+  const auto &slot_icon = m_slot_icons.at( *drag_ctx.m_from_slot );
+  const auto slot_entt = Utils::Player::get_inventory_slot_entt( reg(), *drag_ctx.m_from_slot );
+  const auto *anim_cmp = slot_entt == entt::null ? nullptr : reg().try_get<Cmp::AnimData>( slot_entt );
+  if ( not slot_icon or not anim_cmp ) return;
+
+  // the dragged item follows the cursor, centred on it at the size its slot draws it, faded so the slot under it shows
+  static constexpr uint8_t kDragIconAlpha = 160;
+  const sf::Vector2f sprite_size = Sys::SpriteStore::instance().get( anim_cmp->m_sprite_type ).sprite_size();
+  const sf::Vector2f mouse_pos( sf::Mouse::getPosition( m_window ) );
+  const sf::Vector2f icon_pos = mouse_pos - ( sprite_size * slot_icon->scale / 2.f );
+  RenderSystem::safe_render_sprite_screen( anim_cmp->m_sprite_type, { icon_pos, sprite_size }, anim_cmp->getFrameIndexOffset(),
+                                           { slot_icon->scale, slot_icon->scale }, kDragIconAlpha );
 }
 
 void HudOverlaySystem::place_imgui_text( const Render::UiLayout::Label &label, sf::Vector2f slot_origin, const std::string &text )

@@ -15,7 +15,7 @@
 #include <optional>
 
 // clang-format off
-namespace Game::Events { struct PlayerActionEvent; struct SelectInventorySlotEvent; }
+namespace Game::Events { struct PlayerActionEvent; struct SelectInventorySlotEvent; struct MoveInventorySlotEvent; }
 // clang-format on
 
 namespace Game::Sys
@@ -23,7 +23,7 @@ namespace Game::Sys
 
 //! @brief Creates player inventory items, moves items between the player's inventory slots and the world, and changes
 //! the selected slot. Event-driven, responding to Events::AddInventoryEvent, Events::DropInventoryEvent,
-//! Events::PickupWorldItemEvent, Events::SelectInventorySlotEvent and the SWAP_INVENTORY/CONSUME actions of
+//! Events::PickupWorldItemEvent, Events::SelectInventorySlotEvent, Events::MoveInventorySlotEvent and the SWAP_INVENTORY/CONSUME actions of
 //! Events::PlayerActionEvent. Slots always exist and never move; items fill and empty them in place.
 class InventorySystem : public BaseSystem
 {
@@ -73,6 +73,12 @@ private:
   //! @brief Change the selected inventory slot. Ignored while eating or flying.
   //! @param ev
   void on_select_inventory_slot_event( const Events::SelectInventorySlotEvent &ev );
+
+  //! @brief Move a slot's item to another slot by exchanging the two slot entities' indices, so every per-item
+  //! component goes with its item: an empty destination takes the item, an occupied one swaps. The selection follows
+  //! the moved item. Ignored while eating or flying.
+  //! @param ev
+  void on_move_inventory_slot_event( const Events::MoveInventorySlotEvent &ev );
 
   //! @brief Get the slot entity at `idx` (default: the selected slot), emptying it first if it unexpectedly holds an item.
   //! @param idx The slot index, or std::nullopt for the selected slot.
