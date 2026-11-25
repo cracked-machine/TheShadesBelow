@@ -2,6 +2,7 @@
 #include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/SceneSettings/Paused.hpp>
 #include <Components/SceneSettings/ShowDebugStats.hpp>
+#include <Events/OverlayEvent.hpp>
 #include <Systems/Render/BarberOverlaySystem.hpp>
 #include <Systems/Render/CartOverlaySystem.hpp>
 #include <Systems/Render/DebugOverlaySystem.hpp>

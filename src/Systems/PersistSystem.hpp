@@ -1,9 +1,6 @@
 #ifndef SRC_SYSTEMS_PERSISTSYSTEM_HPP__
 #define SRC_SYSTEMS_PERSISTSYSTEM_HPP__
 
-#include <Components/Persistent/IBasePersistent.hpp>
-#include <Events/LoadSettingsEvent.hpp>
-#include <Events/SaveSettingsEvent.hpp>
 #include <Systems/BaseSystem.hpp>
 
 #include <entt/entity/fwd.hpp>
@@ -12,6 +9,10 @@
 #include <functional>
 #include <optional>
 #include <unordered_map>
+
+// clang-format off
+namespace Game::Events { struct LoadSettingsEvent; struct SaveSettingsEvent; }
+// clang-format on
 
 namespace Game::Sys
 {

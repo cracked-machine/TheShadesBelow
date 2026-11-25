@@ -8,11 +8,9 @@
 #include <Components/Grave/Segment.hpp>
 #include <Components/Hazard/FieldCell.hpp>
 #include <Components/Inventory/WorldItem.hpp>
-#include <Components/LootContainer.hpp>
-#include <Components/Npc/Container.hpp>
-#include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Obstacle.hpp>
+#include <Components/Particle/SpriteOwner.hpp>
 #include <Components/PendingTeleport.hpp>
 #include <Components/Persistent/WormholeAbortThreshold.hpp>
 #include <Components/Persistent/WormholeSeed.hpp>
@@ -28,7 +26,6 @@
 #include <Factory/ObstacleFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
-#include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>

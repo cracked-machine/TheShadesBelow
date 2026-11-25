@@ -1,10 +1,8 @@
 #ifndef SRC_FACTORY_PLANTFACTORY_HPP__
 #define SRC_FACTORY_PLANTFACTORY_HPP__
 
-#include <Components/Position.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <entt/entity/fwd.hpp>
-#include <Systems/Stores/StoreKey.hpp>
 
 namespace Game::Sprites
 {

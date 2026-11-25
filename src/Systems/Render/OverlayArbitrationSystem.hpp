@@ -1,11 +1,14 @@
 #ifndef SRC_SYSTEMS_RENDER_OVERLAYARBITRATIONSYSTEM_HPP__
 #define SRC_SYSTEMS_RENDER_OVERLAYARBITRATIONSYSTEM_HPP__
 
-#include <Events/OverlayEvent.hpp>
 #include <Systems/BaseSystem.hpp>
 
 #include <SFML/System/Time.hpp>
 #include <entt/entity/fwd.hpp>
+
+// clang-format off
+namespace Game::Events { struct OverlayEvent; }
+// clang-format on
 
 namespace Game::Sys
 {

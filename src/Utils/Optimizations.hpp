@@ -1,10 +1,10 @@
 #ifndef SRC_UTILS_OPTIMIZATIONS_HPP__
 #define SRC_UTILS_OPTIMIZATIONS_HPP__
 
-#include <Utils/Profiling.hpp>
 
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/View.hpp>
+#include <tracy/Tracy.hpp>
 
 namespace Game::Utils
 {

@@ -5,10 +5,10 @@
 #include <Components/Crypt/RoomEnd.hpp>
 #include <Components/Crypt/RoomOpen.hpp>
 #include <Components/Crypt/RoomStart.hpp>
+#include <Components/Direction.hpp>
 #include <Components/FootStepAlpha.hpp>
 #include <Components/FootStepTimer.hpp>
 #include <Components/Obstacle.hpp>
-#include <Components/Persistent/PlayerStartPosition.hpp>
 #include <Components/Random.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SpawnArea.hpp>
@@ -18,7 +18,6 @@
 #include <Factory/ObstacleFactory.hpp>
 #include <SceneControl/SceneData.hpp>
 #include <Systems/BaseSystem.hpp>
-#include <Systems/PersistSystem.hpp>
 #include <Systems/ProcGen/PassageSystem.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Constants.hpp>

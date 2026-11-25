@@ -1,5 +1,3 @@
-#include <Components/Moveable.hpp>
-#include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Obstacle.hpp>
 #include <Components/Persistent/GraveyardProcGenBirthThreshold.hpp>
 #include <Components/Persistent/GraveyardProcGenMaxIterations.hpp>
@@ -8,6 +6,7 @@
 #include <Factory/ObstacleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/PersistSystem.hpp>
+#include <Systems/PersistSystemImpl.hpp>
 #include <Systems/ProcGen/CellAutomataSystem.hpp>
 
 #include <ranges>

@@ -1,4 +1,5 @@
 #include <Components/SceneSettings/CurrentScene.hpp>
+#include <Events/OverlayEvent.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>
 #include <Systems/HealingSpringSystem.hpp>
 #include <Systems/Render/OverlayArbitrationSystem.hpp>

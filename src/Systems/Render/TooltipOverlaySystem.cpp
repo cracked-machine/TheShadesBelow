@@ -5,6 +5,15 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Position.hpp>
 #include <Components/SceneSettings/Paused.hpp>
+#include <Events/AddInventoryEvent.hpp>
+#include <Events/AltarApproachedEvent.hpp>
+#include <Events/AltarBloodOfferedEvent.hpp>
+#include <Events/BloodRefusedEvent.hpp>
+#include <Events/ConsumeRefusedEvent.hpp>
+#include <Events/DismissTooltipEvent.hpp>
+#include <Events/GrimoireDiscoveryEvent.hpp>
+#include <Events/ItemPickedUpEvent.hpp>
+#include <Events/LeaveRefusedEvent.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/TooltipOverlaySystem.hpp>

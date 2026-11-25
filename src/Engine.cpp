@@ -1,7 +1,3 @@
-#include <Components/Hazard/CorruptionCell.hpp>
-#include <Components/Hazard/SinkholeCell.hpp>
-#include <Components/Persistent/EffectsVolume.hpp>
-#include <Components/Persistent/MusicVolume.hpp>
 #include <Debug/AssertHandler.hpp>
 #include <Engine.hpp>
 #include <SFML/OpenGL.hpp>
@@ -12,7 +8,6 @@
 #include <SceneControl/Scenes/TitleScene.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
-#include <Systems/Threats/HazardFieldSystem.hpp>
 #include <Systems/Threats/HazardFieldSystemImpl.hpp>
 #include <Utils/ImGuiTheme.hpp>
 #include <Utils/Utils.hpp>

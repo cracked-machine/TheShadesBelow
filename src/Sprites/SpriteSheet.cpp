@@ -2,7 +2,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <Sprites/SpriteSheet.hpp>
-#include <Systems/BaseSystem.hpp>
 #include <Utils/Constants.hpp>
 #include <algorithm>
 #include <iterator>

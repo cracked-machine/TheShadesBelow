@@ -1,4 +1,6 @@
 #include <Audio/SoundBank.hpp>
+#include <Components/SceneSettings/Paused.hpp>
+#include <Events/OverlayEvent.hpp>
 #include <Systems/CartHorseSystem.hpp>
 #include <Systems/Render/LeaveGraveyardOverlaySystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>

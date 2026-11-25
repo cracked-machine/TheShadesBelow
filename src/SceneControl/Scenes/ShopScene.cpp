@@ -1,8 +1,6 @@
 #include <Audio/SoundBank.hpp>
-#include <Components/Npc/NoPathFinding.hpp>
-#include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Player/Character.hpp>
+#include <Components/Player/FootstepType.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/SceneSettings/Footsteps.hpp>
@@ -12,15 +10,11 @@
 #include <Components/SceneSettings/ShowNavmesh.hpp>
 #include <Components/SceneSettings/ShowPathFinding.hpp>
 #include <Components/Shop/Inventory.hpp>
-#include <Components/UUID.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/MultiblockFactory.hpp>
-#include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PathfindingFactory.hpp>
-#include <Factory/PlayerFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
-#include <SceneControl/Events/ProcessShopSceneInputEvent.hpp>
 #include <SceneControl/SceneData.hpp>
 #include <SceneControl/Scenes/ShopScene.hpp>
 #include <Systems/AltarSystem.hpp>
@@ -30,7 +24,6 @@
 #include <Components/Stats/BaseAction.hpp>
 #include <Systems/InventorySystem.hpp>
 #include <Systems/ItemSystem.hpp>
-#include <Systems/LootSystem.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>

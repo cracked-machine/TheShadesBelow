@@ -1,15 +1,9 @@
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Player/TookDamage.hpp>
 #include <Components/Stats/PlayerStats.hpp>
-#include <Components/Toxicity/Bradycadia.hpp>
-#include <Components/Toxicity/Halucinogen.hpp>
-#include <Components/Toxicity/Hypoxia.hpp>
-#include <Components/Toxicity/Tachycardia.hpp>
-#include <Components/Toxicity/Toxidrome.hpp>
 #include <SFML/System/Time.hpp>
 #include <Shaders/UniformBuilder.hpp>
 #include <Systems/PersistSystem.hpp>
-#include <Utils/Maths.hpp>
 #include <Utils/Player.hpp>
 
 #include <Shaders/RedVignetteShader.hpp>

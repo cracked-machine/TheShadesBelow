@@ -1,14 +1,14 @@
 #ifndef SRC_SYSTEMS_LOOTSYSTEM_HPP__
 #define SRC_SYSTEMS_LOOTSYSTEM_HPP__
 
-#include <Components/LootContainer.hpp>
-#include <Events/CreateLootEvent.hpp>
-#include <Events/DestroyLootContainerEvent.hpp>
-#include <Events/DestroyLootEvent.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
 #include <Systems/BaseSystem.hpp>
+
+// clang-format off
+namespace Game::Events { class DestroyLootContainerEvent; struct CreateLootEvent; struct DestroyLootEvent; }
+// clang-format on
 
 namespace Game::Sys
 {

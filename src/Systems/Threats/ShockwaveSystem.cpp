@@ -1,4 +1,5 @@
 #include <Audio/SoundBank.hpp>
+#include <Components/AnimData.hpp>
 #include <Components/Npc/Shockwave.hpp>
 #include <Components/Npc/ShockwaveTimer.hpp>
 #include <Components/Obstacle.hpp>
@@ -18,9 +19,7 @@
 #include <Sprites/Shockwave.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
-#include <Systems/Threats/WormholeSystem.hpp>
 #include <Utils/Collision.hpp>
-#include <Utils/Maths.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>

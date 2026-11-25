@@ -3,11 +3,12 @@
 
 #include <SFML/System/Time.hpp>
 
-#include <Components/AnimData.hpp>
-#include <Components/Direction.hpp>
-#include <Components/Position.hpp>
-#include <Sprites/SpriteSheet.hpp>
 #include <Systems/BaseSystem.hpp>
+
+// clang-format off
+namespace Game::Cmp { struct AnimData; }
+namespace Game::Sprites { class SpriteSheet; }
+// clang-format on
 
 namespace Game::Sys
 {

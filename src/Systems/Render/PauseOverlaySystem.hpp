@@ -1,10 +1,13 @@
 #ifndef SRC_SYSTEMS_RENDER_PAUSEOVERLAYSYSTEM_HPP__
 #define SRC_SYSTEMS_RENDER_PAUSEOVERLAYSYSTEM_HPP__
 
-#include <Components/SceneSettings/Paused.hpp>
 #include <Systems/Render/BaseOverlaySystem.hpp>
 
 #include <SFML/System/Time.hpp>
+
+// clang-format off
+namespace Game::Cmp::SceneSettings { struct Paused; }
+// clang-format on
 
 namespace Game::Sys
 {

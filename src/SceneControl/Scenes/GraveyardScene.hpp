@@ -3,7 +3,6 @@
 
 #include <SceneControl/Events/ProcessGraveyardSceneInputEvent.hpp>
 #include <SceneControl/Scene.hpp>
-#include <Sprites/VertexFloor.hpp>
 #include <Systems/BaseSystem.hpp>
 
 #include <SFML/System/Time.hpp>

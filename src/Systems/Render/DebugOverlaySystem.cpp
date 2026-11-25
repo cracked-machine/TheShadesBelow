@@ -34,6 +34,7 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/SpawnedBy.hpp>
 #include <Components/Obstacle.hpp>
+#include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Illuminated.hpp>
 #include <Components/Player/NoPath.hpp>
@@ -44,7 +45,6 @@
 #include <Components/Ruin/BuildingSegment.hpp>
 #include <Components/Ruin/Cobweb.hpp>
 #include <Components/Ruin/Entrance.hpp>
-#include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/SceneSettings/ShowNavmesh.hpp>
 #include <Components/SceneSettings/ShowPathFinding.hpp>
 #include <Components/SelectedPosition.hpp>
@@ -56,7 +56,6 @@
 #include <Components/ZOrderValue.hpp>
 #include <PathFinding/AStar.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
-#include <Systems/ParticleSystem.hpp>
 #include <Systems/Render/DebugOverlaySystem.hpp>
 #include <Systems/Render/OverlayArbitrationSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>

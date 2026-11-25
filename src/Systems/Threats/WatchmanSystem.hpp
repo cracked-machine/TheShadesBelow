@@ -1,7 +1,6 @@
 #ifndef SRC_SYSTEMS_THREATS_WATCHMANSYSTEM_HPP__
 #define SRC_SYSTEMS_THREATS_WATCHMANSYSTEM_HPP__
 
-#include <Components/Position.hpp>
 #include <Components/UUID.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <Systems/BaseSystem.hpp>
@@ -11,6 +10,10 @@
 
 #include <utility>
 #include <vector>
+
+// clang-format off
+namespace Game::Cmp { class Position; }
+// clang-format on
 
 namespace Game::Sys
 {

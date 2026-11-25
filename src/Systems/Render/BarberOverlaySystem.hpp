@@ -1,12 +1,15 @@
 #ifndef SRC_SYSTEMS_RENDER_BARBEROVERLAYSYSTEM_HPP__
 #define SRC_SYSTEMS_RENDER_BARBEROVERLAYSYSTEM_HPP__
 
-#include <Events/OverlayEvent.hpp>
 #include <Systems/Render/BaseOverlaySystem.hpp>
 
 #include <SFML/System/Time.hpp>
 
 #include <cstddef>
+
+// clang-format off
+namespace Game::Events { struct OverlayEvent; }
+// clang-format on
 
 namespace Game::Sys
 {

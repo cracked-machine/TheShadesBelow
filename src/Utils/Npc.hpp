@@ -1,10 +1,13 @@
 #ifndef SRC_UTILS_NPC_HPP__
 #define SRC_UTILS_NPC_HPP__
 
-#include <Components/Npc/Footprint.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <optional>
 #include <source_location>
+
+// clang-format off
+namespace Game::Cmp::Npc { class Footprint; }
+// clang-format on
 namespace Game::Cmp
 {
 class Position;

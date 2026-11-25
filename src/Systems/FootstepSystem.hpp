@@ -1,14 +1,15 @@
 #ifndef SRC_SYSTEMS_FOOTSTEPSYSTEM_HPP__
 #define SRC_SYSTEMS_FOOTSTEPSYSTEM_HPP__
 
-#include <Components/FootStepTimer.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
 
-#include <Components/Direction.hpp>
-#include <Components/Position.hpp>
 #include <Systems/BaseSystem.hpp>
+
+// clang-format off
+namespace Game::Cmp { class Direction; class Position; }
+// clang-format on
 
 namespace Game::Sys
 {

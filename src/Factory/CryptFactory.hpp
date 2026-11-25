@@ -1,14 +1,6 @@
 #ifndef SRC_FACTORY_CRYPTFACTORY_HPP__
 #define SRC_FACTORY_CRYPTFACTORY_HPP__
 
-#include <Components/Crypt/RoomClosed.hpp>
-#include <Components/Crypt/RoomEnd.hpp>
-#include <Components/Crypt/RoomOpen.hpp>
-#include <Components/Crypt/RoomStart.hpp>
-#include <Components/Position.hpp>
-#include <Components/Wall.hpp>
-#include <Factory/ObstacleFactory.hpp>
-#include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
 namespace Game::Sprites
@@ -17,6 +9,11 @@ class SpriteSheet;
 } // namespace Game::Sprites
 
 #include <entt/entity/fwd.hpp>
+
+// clang-format off
+namespace Game::Cmp::Crypt { class RoomOpen; }
+namespace Game::PathFinding { class SpatialHashGrid; }
+// clang-format on
 
 namespace Game::Factory::Crypt
 {

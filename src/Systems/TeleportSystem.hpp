@@ -1,7 +1,6 @@
 #ifndef SRC_SYSTEMS_TELEPORTSYSTEM_HPP__
 #define SRC_SYSTEMS_TELEPORTSYSTEM_HPP__
 
-#include <Components/Position.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
@@ -9,6 +8,7 @@
 
 // clang-format off
 namespace Game::Events { class TeleportEntityEvent; }
+namespace Game::Cmp { class Position; }
 // clang-format on
 
 namespace Game::Sys

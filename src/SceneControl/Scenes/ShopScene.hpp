@@ -1,10 +1,8 @@
 #ifndef SRC_SCENECONTROL_SCENES_SHOPSCENE_HPP__
 #define SRC_SCENECONTROL_SCENES_SHOPSCENE_HPP__
 
-#include <Components/Shop/Inventory.hpp>
 #include <SceneControl/Events/ProcessShopSceneInputEvent.hpp>
 #include <SceneControl/Scene.hpp>
-#include <Sprites/SpriteSheet.hpp>
 #include <Sprites/VertexFloor.hpp>
 
 #include <SFML/System/Vector2.hpp>

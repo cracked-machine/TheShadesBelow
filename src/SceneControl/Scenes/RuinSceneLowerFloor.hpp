@@ -1,13 +1,13 @@
 #ifndef SRC_SCENECONTROL_SCENES_RUINSCENELOWERFLOOR_HPP__
 #define SRC_SCENECONTROL_SCENES_RUINSCENELOWERFLOOR_HPP__
 
-#include <Audio/SoundBank.hpp>
 #include <SceneControl/Events/ProcessRuinSceneLowerInputEvent.hpp>
 #include <SceneControl/Scene.hpp>
-#include <Sprites/SpriteSheet.hpp>
-#include <Sprites/VertexFloor.hpp>
-#include <Systems/Stores/StoreKey.hpp>
 #include <Systems/Stores/SystemStore.hpp>
+
+// clang-format off
+namespace Game::Audio { class SoundBank; }
+// clang-format on
 
 namespace Game::Sprites
 {

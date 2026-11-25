@@ -1,7 +1,6 @@
 #ifndef SRC_EVENTS_DESTROYITEMEVENT_HPP__
 #define SRC_EVENTS_DESTROYITEMEVENT_HPP__
 
-#include <Components/Position.hpp>
 #include <entt/entity/entity.hpp>
 
 namespace Game::Events

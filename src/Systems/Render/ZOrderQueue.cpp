@@ -2,14 +2,14 @@
 #include <Components/Armed.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/NoRender.hpp>
+#include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Position.hpp>
+#include <Components/Shader/SpriteOwner.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Sprites/VertexFloor.hpp>
-#include <Systems/ParticleSystem.hpp>
 #include <Systems/Render/RenderPassTypes.hpp>
 #include <Systems/Render/ZOrderQueue.hpp>
-#include <Systems/ShaderSystem.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Profiling.hpp>
 

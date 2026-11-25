@@ -2,13 +2,10 @@
 #include <Components/LootContainer.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Particle/BlockParticle.hpp>
-#include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Position.hpp>
 #include <Factory/LootFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
-#include <Sprites/SpriteSheet.hpp>
-#include <Utils/Random.hpp>
 
 namespace Game::Factory::Loot
 {

@@ -16,16 +16,15 @@
 #include <Events/CreateItemEvent.hpp>
 #include <Events/DestroyitemEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
+#include <Events/SwapWorldItemEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/ItemFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SFML/Audio/Sound.hpp>
 #include <Systems/ItemSystem.hpp>
-#include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Stores/ItemStore.hpp>
-#include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>

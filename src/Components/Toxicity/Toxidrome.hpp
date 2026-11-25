@@ -1,14 +1,6 @@
 #ifndef SRC_CMPS_TOXIDROME_TOXIDROMES_HPP__
 #define SRC_CMPS_TOXIDROME_TOXIDROMES_HPP__
 
-#include <Components/Toxicity/Bradycadia.hpp>
-#include <Components/Toxicity/Halucinogen.hpp>
-#include <Components/Toxicity/Hypoxia.hpp>
-#include <Components/Toxicity/Phototoxia.hpp>
-#include <Components/Toxicity/Tachycardia.hpp>
-#include <Components/Toxicity/TraitsBase.hpp>
-#include <Components/Toxicity/Venom.hpp>
-#include <Components/Toxicity/Vertigo.hpp>
 #include <algorithm>
 #include <entt/core/type_info.hpp>
 #include <entt/fwd.hpp>

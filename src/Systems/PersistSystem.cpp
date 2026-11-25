@@ -161,10 +161,11 @@
 #include <Components/Persistent/WormholeAbortThreshold.hpp>
 #include <Components/Persistent/WormholeSeed.hpp>
 #include <Events/LoadSettingsEvent.hpp>
+#include <Events/SaveSettingsEvent.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/PersistSystem.hpp>
-#include <Systems/PersistSystemImpl.hpp>
 
+#include <Systems/PersistSystemImpl.hpp>
 #include <array>
 #include <fstream>
 #include <nlohmann/json.hpp>

@@ -6,10 +6,12 @@
 #include <optional>
 #include <string_view>
 
-#include <Components/Shop/Inventory.hpp>
 #include <Events/BuyShopItemEvent.hpp>
-#include <Events/PlayerActionEvent.hpp>
 #include <Systems/BaseSystem.hpp>
+
+// clang-format off
+namespace Game::Cmp::Shop { class Inventory; }
+// clang-format on
 
 namespace Game::Sys
 {

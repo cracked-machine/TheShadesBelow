@@ -2,9 +2,7 @@
 #define SRC_SYSTEMS_RENDER_RENDERMENUSYSTEM_HPP__
 
 #include <Components/Persistent/BasePersistent.hpp>
-#include <Shaders/TitleScreenShader.hpp>
 #include <Systems/Render/RenderSystem.hpp>
-#include <Utils/Constants.hpp>
 
 #include <SFML/System/Time.hpp>
 

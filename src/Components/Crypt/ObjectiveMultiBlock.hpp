@@ -3,7 +3,6 @@
 
 #include <SFML/Graphics/RectangleShape.hpp>
 
-#include <Components/Obstacle.hpp>
 
 namespace Game::Cmp::Crypt
 {

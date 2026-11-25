@@ -1,19 +1,11 @@
 #ifndef SRC_SYSTEMS_BASESYSTEM_HPP__
 #define SRC_SYSTEMS_BASESYSTEM_HPP__
 
-#include <Components/Altar/MultiBlock.hpp>
-#include <Components/Crypt/BuildingMultiBlock.hpp>
-#include <Components/Crypt/BuildingSegment.hpp>
-#include <Components/Ruin/BuildingMultiBlock.hpp>
-#include <Components/Ruin/BuildingSegment.hpp>
-#include <Components/Spring/HealingSpringBuildingMultiBlock.hpp>
-#include <Components/Spring/HealingSpringBuildingSegment.hpp>
 #include <entt/entity/entity.hpp>
 #include <entt/entity/fwd.hpp>
 #include <entt/signal/dispatcher.hpp>
 #include <functional>
 
-#include <PathFinding/SmartPointers.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <spdlog/fwd.h>
 

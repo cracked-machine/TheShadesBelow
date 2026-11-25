@@ -1,6 +1,5 @@
 #include <Systems/ProcGen/DoglegMarkerSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
-#include <Utils/Utils.hpp>
 
 #include <algorithm>
 #include <array>

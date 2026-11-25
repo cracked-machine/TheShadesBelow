@@ -6,7 +6,6 @@
 #include <Systems/ProcGen/DLASystem.hpp>
 #include <Utils/Cardinal.hpp>
 #include <Utils/Constants.hpp>
-#include <Utils/Maths.hpp>
 #include <Utils/Utils.hpp>
 
 namespace Game::Sys::ProcGen

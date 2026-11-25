@@ -3,7 +3,6 @@
 #include <entt/entity/fwd.hpp>
 
 #include <SFML/System/Vector2.hpp>
-#include <Systems/Stores/StoreKey.hpp>
 
 namespace Game::Sprites
 {

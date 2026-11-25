@@ -1,17 +1,16 @@
 #ifndef SRC_UTILS_PLAYER_HPP__
 #define SRC_UTILS_PLAYER_HPP__
 
-#include <Components/AbsoluteAlpha.hpp>
-#include <Components/AnimData.hpp>
-#include <Components/Player/ConsumeTimer.hpp>
-#include <Components/Player/Doglegs.hpp>
-#include <Components/Player/ExtraLife.hpp>
-#include <Components/Player/FootstepType.hpp>
 #include <Components/Stats/PlayerStats.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <optional>
 #include <source_location>
+
+// clang-format off
+namespace Game::Cmp { class AbsoluteAlpha; struct AnimData; }
+namespace Game::Cmp::Player { class ConsumeTimer; class Doglegs; struct Footstep; }
+// clang-format on
 
 namespace Game::Cmp
 {

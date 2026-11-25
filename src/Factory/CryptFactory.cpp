@@ -1,32 +1,24 @@
 #include <Components/AnimData.hpp>
 #include <Components/Crypt/Chest.hpp>
-#include <Components/Crypt/InteriorMultiBlock.hpp>
-#include <Components/Crypt/InteriorSegment.hpp>
 #include <Components/Crypt/Lever.hpp>
 #include <Components/Crypt/PassageBlock.hpp>
 #include <Components/Crypt/PassageSpikeTrap.hpp>
-#include <Components/Crypt/RoomEnd.hpp>
 #include <Components/Crypt/RoomLavaPit.hpp>
 #include <Components/Crypt/RoomLavaPitCell.hpp>
 #include <Components/Crypt/RoomOpen.hpp>
-#include <Components/Crypt/RoomStart.hpp>
 #include <Components/Crypt/ShuffleTimer.hpp>
 #include <Components/Exit.hpp>
-#include <Components/FootStepAlpha.hpp>
 #include <Components/FootStepTimer.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Particle/BlockParticle.hpp>
-#include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Position.hpp>
-#include <Components/RectBounds.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/CryptFactory.hpp>
 #include <Factory/MultiblockFactory.hpp>
-#include <Sprites/SpriteSheet.hpp>
+#include <PathFinding/SpatialHashGrid.hpp>
 #include <Utils/Constants.hpp>
 #include <Utils/Player.hpp>
-#include <Utils/Random.hpp>
 
 #include <stdexcept>
 

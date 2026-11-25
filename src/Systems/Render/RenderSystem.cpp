@@ -1,11 +1,5 @@
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/RectBounds.hpp>
-#include <Shaders/DarkModeShader.hpp>
-#include <Shaders/DrippingBloodShader.hpp>
-#include <Shaders/FloodWaterShader.hpp>
-#include <Shaders/MistShader.hpp>
-#include <Shaders/NightStaticShader.hpp>
-#include <Shaders/TitleScreenShader.hpp>
 #include <Sprites/VertexSprite.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>

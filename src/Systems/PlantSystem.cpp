@@ -6,13 +6,13 @@
 #include <Components/Grave/PlantSegment.hpp>
 #include <Components/Health.hpp>
 #include <Components/Inventory/StingDamage.hpp>
-#include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Loot.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/SpawnedBy.hpp>
 #include <Components/Particle/EmberParticleSprite.hpp>
+#include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Persistent/GlovesWearPerForage.hpp>
 #include <Components/Persistent/PlantBurnTime.hpp>
 #include <Components/Persistent/PlantWearPerForage.hpp>
@@ -28,7 +28,6 @@
 #include <Components/Stats/SideEffects.hpp>
 #include <Components/UUID.hpp>
 #include <Components/WorldTile.hpp>
-#include <Events/AddInventoryEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/CreatePlantEvent.hpp>
 #include <Events/DestroyLootEvent.hpp>
@@ -44,7 +43,6 @@
 #include <Factory/PlantFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Sprites/SpriteSheet.hpp>
-#include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/PlantSystem.hpp>

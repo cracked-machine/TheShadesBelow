@@ -3,6 +3,7 @@
 #include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AbsoluteRotation.hpp>
 #include <Components/AbsoluteScale.hpp>
+#include <Components/AnimData.hpp>
 #include <Components/BurrCount.hpp>
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/Npc.hpp>
@@ -13,6 +14,7 @@
 #include <Components/RectBounds.hpp>
 #include <Components/Weapons/Burr.hpp>
 #include <Components/Weapons/InFlight.hpp>
+#include <Components/ZOrderValue.hpp>
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/CreateItemEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
@@ -20,6 +22,7 @@
 #include <Systems/BaseSystem.hpp>
 #include <Systems/BurrSystem.hpp>
 #include <Systems/PersistSystem.hpp>
+#include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Utils/Cardinal.hpp>

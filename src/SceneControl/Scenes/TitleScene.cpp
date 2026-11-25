@@ -1,10 +1,10 @@
+#include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/EffectsVolume.hpp>
 #include <Factory/ShaderFactory.hpp>
 #include <SceneControl/Scenes/TitleScene.hpp>
 
 #include <Audio/SoundBank.hpp>
 #include <Components/Persistent/MusicVolume.hpp>
-#include <SceneControl/Events/ProcessTitleSceneInputEvent.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderMenuSystem.hpp>

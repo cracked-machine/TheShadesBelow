@@ -2,9 +2,8 @@
 #define SRC_SYSTEMS_THREATS_HAZARDFIELDSYSTEMIMPL_HPP__
 
 #include <Components/AnimData.hpp>
-#include <Components/Armable.hpp>
-#include <Components/Exit.hpp>
 #include <Components/Hazard/CorruptionCell.hpp>
+#include <Components/Hazard/SinkholeCell.hpp>
 #include <Components/Hazard/SinkholeCorners.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Loot.hpp>
@@ -15,10 +14,12 @@
 #include <Components/Npc/Ghost.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
+#include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
+#include <Components/Persistent/CorruptionDamage.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Player/FootstepType.hpp>
 #include <Components/Player/HazardBalance.hpp>
-#include <Components/RectBounds.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Wall.hpp>

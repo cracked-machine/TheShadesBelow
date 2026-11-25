@@ -5,11 +5,9 @@
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Factory/PlayerFactory.hpp>
-#include <SceneControl/Events/ProcessLevelCompleteSceneInputEvent.hpp>
 #include <SceneControl/Scenes/LevelCompleteScene.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
-#include <Systems/PlayerSystem.hpp>
 #include <Systems/Render/CartOverlaySystem.hpp>
 #include <Systems/Render/RenderMenuSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
@@ -70,7 +68,9 @@ void LevelCompleteScene::build_steps()
   }
   // barrels fill from the left (see Sys::CartHorseSystem::transfer_selected_item()), so a barrel always holds at least
   // the parts of the barrel to its right. Restore that order, whatever order the transfer left the entities in.
-  std::ranges::stable_sort( m_barrels, std::ranges::greater{}, &Cmp::Cart::Barrel::filled_count );
+  // Lambda projection, not &Barrel::filled_count: GCC -O3 flags the member-function-pointer call's virtual-dispatch
+  // check as reading past the 6-byte Barrel (-Warray-bounds false positive).
+  std::ranges::stable_sort( m_barrels, std::ranges::greater{}, []( const Cmp::Cart::Barrel &barrel ) { return barrel.filled_count(); } );
 
   m_steps.clear();
   for ( std::size_t barrel_idx = 0; barrel_idx < m_barrels.size(); ++barrel_idx )

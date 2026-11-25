@@ -1,7 +1,6 @@
 #ifndef SRC_COMPONENTS_PERSISTENT_NPCSHOCKWAVEFREQ_HPP__
 #define SRC_COMPONENTS_PERSISTENT_NPCSHOCKWAVEFREQ_HPP__
 
-#include <Components/Npc/Shockwave.hpp>
 #include <Components/Persistent/BasePersistent.hpp>
 #include <cstdint>
 

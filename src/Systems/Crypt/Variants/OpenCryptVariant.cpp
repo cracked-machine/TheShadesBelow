@@ -1,8 +1,6 @@
 #include <Systems/Crypt/Variants/OpenCryptVariant.hpp>
 
 #include <Audio/SoundBank.hpp>
-#include <Components/Crypt/RoomEnd.hpp>
-#include <Components/Crypt/RoomStart.hpp>
 #include <Components/Persistent/CryptNpcSpawnCount.hpp>
 #include <Systems/CryptSystem.hpp>
 #include <Systems/PersistSystem.hpp>

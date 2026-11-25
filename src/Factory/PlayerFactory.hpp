@@ -2,12 +2,14 @@
 #define SRC_FACTORY_PLAYERFACTORY_HPP__
 
 #include <Components/Position.hpp>
-#include <Components/RectBounds.hpp>
-#include <PathFinding/SmartPointers.hpp>
-#include <Sprites/SpriteSheet.hpp>
 #include <Systems/Stores/StoreKey.hpp>
+#include <Utils/Constants.hpp>
 #include <entt/entity/fwd.hpp>
 #include <entt/fwd.hpp>
+
+// clang-format off
+namespace Game::Sprites { class SpriteSheet; }
+// clang-format on
 
 namespace Game::Factory::Player
 {

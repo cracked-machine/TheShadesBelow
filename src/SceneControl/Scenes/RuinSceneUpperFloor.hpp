@@ -1,12 +1,14 @@
 #ifndef SRC_SCENECONTROL_SCENES_RUINSCENEUPPERFLOOR_HPP__
 #define SRC_SCENECONTROL_SCENES_RUINSCENEUPPERFLOOR_HPP__
 
-#include <Audio/SoundBank.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SceneControl/Events/ProcessRuinSceneUpperInputEvent.hpp>
 #include <SceneControl/Scene.hpp>
-#include <Sprites/VertexFloor.hpp>
 #include <Systems/Stores/SystemStore.hpp>
+
+// clang-format off
+namespace Game::Audio { class SoundBank; }
+// clang-format on
 
 namespace Game::Scene
 {

@@ -3,9 +3,7 @@
 
 #include <Components/Crypt/PassageBlock.hpp>
 #include <Components/Crypt/PassageDoor.hpp>
-#include <Components/Direction.hpp>
 
-#include <Systems/ProcGen/PassageCache.hpp>
 #include <optional>
 
 namespace Game::Sys::ProcGen

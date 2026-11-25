@@ -1,7 +1,6 @@
 #ifndef SRC_SYSTEMS_RENDER_DEBUGOVERLAYSYSTEM_HPP__
 #define SRC_SYSTEMS_RENDER_DEBUGOVERLAYSYSTEM_HPP__
 
-#include <Components/Position.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/Render/BaseOverlaySystem.hpp>
 #include <Systems/Render/UiLayout.hpp>
@@ -18,6 +17,7 @@
 
 // clang-format off
 namespace Game::PathFinding { enum class QueryCompass; }
+namespace Game::Cmp { class Position; }
 // clang-format on
 
 namespace Game::Sys

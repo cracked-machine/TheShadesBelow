@@ -1,7 +1,18 @@
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Factory/ShaderFactory.hpp>
+#include <Shaders/CircularDistortionShader.hpp>
+#include <Shaders/DarkModeShader.hpp>
+#include <Shaders/DizzyEchoShader.hpp>
+#include <Shaders/DollyZoomShader.hpp>
 #include <Shaders/DrippingBloodShader.hpp>
+#include <Shaders/FloodWaterShader.hpp>
+#include <Shaders/MistShader.hpp>
+#include <Shaders/NightStaticShader.hpp>
+#include <Shaders/RedVignetteShader.hpp>
+#include <Shaders/ScreenShudderShader.hpp>
 #include <Shaders/TitleScreenShader.hpp>
+#include <Shaders/TunnelVisionShader.hpp>
+#include <Systems/ShaderSystem.hpp>
 
 namespace Game::Factory::Shader
 {

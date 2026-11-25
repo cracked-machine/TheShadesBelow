@@ -1,12 +1,9 @@
-#include <Components/Altar/Offering.hpp>
-#include <Components/Altar/Segment.hpp>
 #include <Components/AnimData.hpp>
+#include <Components/Direction.hpp>
 #include <Components/Npc/Npc.hpp>
-#include <Components/Player/Character.hpp>
 #include <Components/Position.hpp>
-#include <Components/ZOrderValue.hpp>
+#include <Sprites/SpriteSheet.hpp>
 #include <Systems/AnimSystem.hpp>
-#include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/SpriteStore.hpp>

@@ -1,10 +1,14 @@
 #ifndef SRC_SYSTEMS_ACTIONSYSTEM_HPP__
 #define SRC_SYSTEMS_ACTIONSYSTEM_HPP__
 
-#include <Events/PlayerActionEvent.hpp>
+#include <PathFinding/SmartPointers.hpp>
 #include <Systems/BaseSystem.hpp>
 
 #include <SFML/System/Clock.hpp>
+
+// clang-format off
+namespace Game::Events { struct PlayerActionEvent; }
+// clang-format on
 
 namespace Game::PathFinding
 {

@@ -1,9 +1,7 @@
 #include <Audio/SoundBank.hpp>
-#include <SceneControl/Events/ProcessGameoverSceneInputEvent.hpp>
 #include <SceneControl/Scenes/GameOverScene.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
-#include <Systems/PlayerSystem.hpp>
 #include <Systems/Render/RenderMenuSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 

@@ -4,13 +4,11 @@
 #include <Components/Crypt/Lever.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
-#include <Components/Inventory/WearLevel.hpp>
 #include <Components/Player/Doglegs.hpp>
 #include <Components/Position.hpp>
 #include <PathFinding/BreadthFirst.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/ProcGen/DowsingGuideSystem.hpp>
-#include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 

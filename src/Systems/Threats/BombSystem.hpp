@@ -3,7 +3,6 @@
 
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Threats/NpcSystem.hpp>
-#include <Utils/Constants.hpp>
 
 #include <entt/entity/fwd.hpp>
 
@@ -13,12 +12,12 @@
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
 
-#include <Events/PlayerActionEvent.hpp>
 #include <spdlog/spdlog.h>
 
 // clang-format off
 namespace Game::Sys { class Store; }
 namespace Game::Audio { class SoundBank; }
+namespace Game::Events { struct PlayerActionEvent; }
 // clang-format on
 
 namespace Game::PathFinding

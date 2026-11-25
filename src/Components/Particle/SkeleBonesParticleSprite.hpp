@@ -3,7 +3,6 @@
 
 #include <Components/Particle/SpriteBase.hpp>
 #include <SFML/Graphics/BlendMode.hpp>
-#include <Systems/ParticleSystem.hpp>
 
 #include <array>
 

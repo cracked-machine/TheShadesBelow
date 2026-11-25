@@ -1,7 +1,6 @@
 #ifndef SRC_SYSTEMS_PROCGEN_DOWSINGGUIDESYSTEM_HPP__
 #define SRC_SYSTEMS_PROCGEN_DOWSINGGUIDESYSTEM_HPP__
 
-#include <Components/Player/Doglegs.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
 #include <PathFinding/BreadthFirst.hpp>
 #include <PathFinding/SmartPointers.hpp>

@@ -4,13 +4,12 @@
 #include <Components/Position.hpp>
 #include <Components/UUID.hpp>
 #include <PathFinding/SmartPointers.hpp>
-#include <PathFinding/SpatialHashGrid.hpp>
-#include <Systems/Stores/StoreKey.hpp>
 #include <entt/fwd.hpp>
 #include <unordered_map>
 
 // clang-format off
 namespace Game::Sprites { class SpriteSheet; }
+namespace Game::PathFinding { class SpatialHashGrid; }
 // clang-format on
 
 namespace Game::Factory::Obstacle

@@ -1,7 +1,6 @@
 #ifndef SRC_COMPONENTS_NPC_TARGET_HPP__
 #define SRC_COMPONENTS_NPC_TARGET_HPP__
 
-#include <Components/Position.hpp>
 
 namespace Game::Cmp::Npc
 {

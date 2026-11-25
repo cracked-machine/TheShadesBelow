@@ -2,6 +2,7 @@
 #include <Components/AbsoluteOffset.hpp>
 #include <Components/AbsoluteRotation.hpp>
 #include <Components/AnimData.hpp>
+#include <Components/Direction.hpp>
 #include <Components/FootStepAlpha.hpp>
 #include <Components/FootStepTimer.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
@@ -12,10 +13,10 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Player/FootstepType.hpp>
 #include <Components/Player/MovementDelta.hpp>
+#include <Components/Position.hpp>
 #include <Components/Random.hpp>
 #include <Components/SceneSettings/Footsteps.hpp>
 #include <Components/ZOrderValue.hpp>
-#include <Sprites/SpriteSheet.hpp>
 #include <Systems/FootstepSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>

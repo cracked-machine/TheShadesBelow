@@ -2,7 +2,6 @@
 #define SRC_SPRITES_SHOCKWAVE_HPP__
 
 #include <Sprites/CircleSegment.hpp>
-#include <Utils/Constants.hpp>
 
 namespace Game::Sprites
 {

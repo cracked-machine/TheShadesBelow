@@ -1,7 +1,6 @@
 #ifndef SRC_COMPONENTS_CART_MULTIBLOCK_HPP__
 #define SRC_COMPONENTS_CART_MULTIBLOCK_HPP__
 
-#include <Components/Obstacle.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 
 namespace Game::Cmp::Cart

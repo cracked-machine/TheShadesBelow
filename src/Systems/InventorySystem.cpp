@@ -17,10 +17,12 @@
 #include <Components/Inventory/StingDamage.hpp>
 #include <Components/Inventory/WearLevel.hpp>
 #include <Components/Inventory/WorldItem.hpp>
+#include <Components/LastDirection.hpp>
+#include <Components/Particle/SpriteBase.hpp>
+#include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Persistent/InventorySlotRollover.hpp>
 #include <Components/Persistent/InventoryStackSize.hpp>
 #include <Components/Persistent/InventorySwapCooldown.hpp>
-#include <Components/LastDirection.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/SummonOffering.hpp>
 #include <Components/Player/Character.hpp>
@@ -53,7 +55,6 @@
 #include <SFML/Audio/SoundChannel.hpp>
 #include <Systems/InventorySystem.hpp>
 #include <Systems/ItemSystem.hpp>
-#include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/SpriteStore.hpp>

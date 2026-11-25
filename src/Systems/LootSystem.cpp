@@ -19,13 +19,14 @@
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/Stats/PlayerStats.hpp>
 #include <Components/UUID.hpp>
-#include <Events/CryptRoomEvent.hpp>
+#include <Events/CreateLootEvent.hpp>
+#include <Events/DestroyLootContainerEvent.hpp>
+#include <Events/DestroyLootEvent.hpp>
 #include <Factory/LootFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/LootSystem.hpp>
-#include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/SpriteStore.hpp>

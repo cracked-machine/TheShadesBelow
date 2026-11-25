@@ -1,15 +1,6 @@
 #ifndef SRC_SYSTEMS_RENDER_TOOLTIPOVERLAYSYSTEM_HPP__
 #define SRC_SYSTEMS_RENDER_TOOLTIPOVERLAYSYSTEM_HPP__
 
-#include <Events/AddInventoryEvent.hpp>
-#include <Events/AltarApproachedEvent.hpp>
-#include <Events/AltarBloodOfferedEvent.hpp>
-#include <Events/BloodRefusedEvent.hpp>
-#include <Events/LeaveRefusedEvent.hpp>
-#include <Events/ConsumeRefusedEvent.hpp>
-#include <Events/DismissTooltipEvent.hpp>
-#include <Events/GrimoireDiscoveryEvent.hpp>
-#include <Events/ItemPickedUpEvent.hpp>
 #include <Systems/Render/BaseOverlaySystem.hpp>
 
 #include <SFML/Graphics/Color.hpp>
@@ -23,6 +14,10 @@
 #include <set>
 #include <string>
 #include <vector>
+
+// clang-format off
+namespace Game::Events { struct AddInventoryEvent; struct AltarApproachedEvent; struct AltarBloodOfferedEvent; struct BloodRefusedEvent; struct ConsumeRefusedEvent; struct DismissTooltipEvent; struct GrimoireDiscoveryEvent; struct ItemPickedUpEvent; struct LeaveRefusedEvent; }
+// clang-format on
 
 namespace Game::Sys
 {

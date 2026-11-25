@@ -6,7 +6,6 @@
 #include <Components/Stats/ForageAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/OfferingAction.hpp>
-#include <Components/Stats/SideEffects.hpp>
 #include <Components/Stats/SpawnAction.hpp>
 #include <SFML/System/Time.hpp>
 #include <Systems/Stores/ActionJson.hpp>

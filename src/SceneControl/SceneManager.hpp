@@ -4,9 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
-#include <Audio/SoundBank.hpp>
 #include <Components/Font.hpp>
-#include <Components/Player/KeysCount.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>
 #include <SceneControl/IScene.hpp>
 #include <SceneControl/RegistryTransfer.hpp>
@@ -14,10 +12,13 @@
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 
-#include <Utils/Constants.hpp>
 #include <Utils/LoadingScreen.hpp>
 #include <future>
 #include <memory>
+
+// clang-format off
+namespace Game::Audio { class SoundBank; }
+// clang-format on
 
 namespace Game::Scene
 {

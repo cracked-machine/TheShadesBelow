@@ -1,14 +1,13 @@
 #ifndef SRC_SYSTEMS_PLANTSYSTEM_HPP__
 #define SRC_SYSTEMS_PLANTSYSTEM_HPP__
 
-#include <Events/CreatePlantEvent.hpp>
-#include <Events/DestroyPlantEvent.hpp>
-#include <Events/PlantKilledEvent.hpp>
-#include <Events/WeaponHitEvent.hpp>
-#include <Events/PlayerActionEvent.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Stores/StoreKey.hpp>
+
+// clang-format off
+namespace Game::Events { class WeaponHitEvent; struct CreatePlantEvent; struct DestroyPlantEvent; struct PlantKilledEvent; struct PlayerActionEvent; }
+// clang-format on
 
 namespace Game::Cmp
 {

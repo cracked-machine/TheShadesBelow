@@ -1,7 +1,10 @@
 #ifndef SRC_UTILS_CRYPT_HPP__
 #define SRC_UTILS_CRYPT_HPP__
 
-#include <Components/Crypt/ShuffleTimer.hpp>
+// clang-format off
+namespace Game::Cmp::Crypt { class ShuffleTimer; }
+// clang-format on
+
 namespace Game::Utils::Crypt
 {
 

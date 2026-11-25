@@ -1,3 +1,4 @@
+#include <Components/Toxicity/Hypoxia.hpp>
 #include <algorithm>
 
 #include <Components/Persistent/DisplayResolution.hpp>

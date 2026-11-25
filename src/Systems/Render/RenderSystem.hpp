@@ -2,7 +2,6 @@
 #define SRC_SYSTEMS_RENDER_RENDERSYSTEM_HPP__
 
 #include <Components/Font.hpp>
-#include <Components/Persistent/DisplayResolution.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Render/ZOrderQueue.hpp>
 #include <Systems/Stores/StoreKey.hpp>

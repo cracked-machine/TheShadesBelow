@@ -6,7 +6,6 @@
 #include <Components/DeathPosition.hpp>
 #include <Components/Direction.hpp>
 #include <Components/Greyscale.hpp>
-#include <Components/LerpPosition.hpp>
 #include <Components/Npc/Adder.hpp>
 #include <Components/Npc/Azazel.hpp>
 #include <Components/Npc/Burryman.hpp>
@@ -29,14 +28,12 @@
 #include <Components/Npc/Watchman.hpp>
 #include <Components/Npc/WatchmanSearchlight.hpp>
 #include <Components/Npc/Wisp.hpp>
-#include <Components/Npc/Witch.hpp>
 #include <Components/Persistent/NpcRenderOffset.hpp>
 #include <Components/Persistent/NpcShockwaveFreq.hpp>
 #include <Components/Persistent/NpcShockwaveResolution.hpp>
-#include <Components/Player/Character.hpp>
+#include <Components/Random.hpp>
 #include <Components/UUID.hpp>
-#include <Factory/Factory.hpp>
-#include <Factory/LootFactory.hpp>
+#include <Components/ZOrderValue.hpp>
 #include <Factory/NpcFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
@@ -48,7 +45,6 @@
 #include <Utils/Cardinal.hpp>
 #include <Utils/Npc.hpp>
 #include <Utils/Player.hpp>
-#include <Utils/Random.hpp>
 
 #include <entt/entity/entity.hpp>
 #include <numbers>

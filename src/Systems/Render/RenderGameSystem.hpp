@@ -1,15 +1,8 @@
 #ifndef SRC_SYSTEMS_RENDER_RENDERGAMESYSTEM_HPP__
 #define SRC_SYSTEMS_RENDER_RENDERGAMESYSTEM_HPP__
 
-#include <Components/AnimData.hpp>
-#include <Components/NoRender.hpp>
 #include <Components/Player/ArrowCompass.hpp>
-#include <Components/Persistent/DisplayResolution.hpp>
-#include <PathFinding/SpatialHashGrid.hpp>
-#include <Systems/ParticleSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>
-#include <Utils/Maths.hpp>
-#include <Utils/Optimizations.hpp>
 
 #include <SFML/Graphics/Shader.hpp>
 #include <SFML/Graphics/Text.hpp>

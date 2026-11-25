@@ -1,10 +1,10 @@
 #include <Components/AnimData.hpp>
 #include <Components/Direction.hpp>
 #include <Components/LerpPosition.hpp>
+#include <Components/Npc/Footprint.hpp>
 #include <Components/Npc/LerpSpeed.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/SpawnedBy.hpp>
-#include <Components/Player/Character.hpp>
 #include <Components/Position.hpp>
 #include <Components/UUID.hpp>
 #include <PathFinding/AStar.hpp>

@@ -1,7 +1,6 @@
 #include <Components/AnimData.hpp>
 #include <Components/NoMoveDest.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
-#include <Components/Obstacle.hpp>
 #include <Components/Particle/BlockParticle.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>

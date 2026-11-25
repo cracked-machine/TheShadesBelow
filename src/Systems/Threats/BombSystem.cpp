@@ -1,17 +1,14 @@
 #include <Audio/SoundBank.hpp>
-#include <Components/Altar/Segment.hpp>
 #include <Components/AnimData.hpp>
 #include <Components/Armable.hpp>
 #include <Components/Armed.hpp>
 #include <Components/BlastMarker.hpp>
-#include <Components/Crypt/BuildingSegment.hpp>
-#include <Components/DeathPosition.hpp>
 #include <Components/DestroyedObstacle.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Grave/Exhumed.hpp>
 #include <Components/Grave/MultiBlock.hpp>
-#include <Components/Grave/Segment.hpp>
 #include <Components/Inventory/BlastProof.hpp>
+#include <Components/Obstacle.hpp>
 #include <Components/ObstacleCap.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LootContainer.hpp>
@@ -19,7 +16,6 @@
 #include <Components/Npc/Crow.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
-#include <Components/Persistent/ArmedOffDelay.hpp>
 #include <Components/Persistent/BombDamage.hpp>
 #include <Components/Persistent/BombsExhumeGraves.hpp>
 #include <Components/Persistent/ReservedArmedBlockColourBorder.hpp>
@@ -27,13 +23,13 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Player/Mortality.hpp>
 #include <Components/Position.hpp>
-#include <Components/RectBounds.hpp>
 #include <Components/Stats/BaseAction.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/DestroyitemEvent.hpp>
 #include <Events/DestroyNpcEvent.hpp>
 #include <Events/ExhumeGraveEvent.hpp>
+#include <Events/PlayerActionEvent.hpp>
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Factory/BombFactory.hpp>
@@ -48,7 +44,6 @@
 #include <Utils/Constants.hpp>
 #include <Utils/Maths.hpp>
 #include <Utils/Player.hpp>
-#include <Utils/Random.hpp>
 #include <Utils/Utils.hpp>
 
 #include <algorithm>

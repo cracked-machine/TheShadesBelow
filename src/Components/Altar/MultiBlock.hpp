@@ -4,7 +4,6 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 
 #include <Components/Altar/Kind.hpp>
-#include <Components/Obstacle.hpp>
 
 namespace Game::Cmp::Altar
 {

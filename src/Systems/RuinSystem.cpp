@@ -8,10 +8,8 @@
 #include <Components/ObstacleCap.hpp>
 #include <Components/Particle/BlockParticle.hpp>
 #include <Components/Persistent/RuinMaxSpiders.hpp>
-#include <Components/Player/Character.hpp>
 #include <Components/Player/Curse.hpp>
 #include <Components/Player/NoPath.hpp>
-#include <Components/Player/RuinLocation.hpp>
 #include <Components/Player/SpeedPenalty.hpp>
 #include <Components/Player/TookDamage.hpp>
 #include <Components/Random.hpp>
@@ -24,14 +22,12 @@
 #include <Components/Ruin/FloorAccess.hpp>
 #include <Components/Ruin/GateSegment.hpp>
 #include <Components/Ruin/RuneMarking.hpp>
-#include <Components/Ruin/StairsBalustradeMultiBlock.hpp>
 #include <Components/Ruin/StairsGateMultiBlock.hpp>
 #include <Components/Ruin/StairsLowerMultiBlock.hpp>
 #include <Components/Ruin/StairsSegment.hpp>
 #include <Components/Ruin/StairsUpperMultiBlock.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
-#include <Components/Stats/BaseAction.hpp>
 
 #include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
@@ -41,6 +37,7 @@
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <Factory/RuinFactory.hpp>
+#include <PathFinding/SpatialHashGrid.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>
 #include <Sprites/SpriteSheet.hpp>
 #include <Systems/PersistSystem.hpp>

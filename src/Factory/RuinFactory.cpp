@@ -3,11 +3,9 @@
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Npc/ShadowHand.hpp>
-#include <Components/Obstacle.hpp>
 #include <Components/Particle/BlockParticle.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Position.hpp>
-#include <Components/RectBounds.hpp>
 #include <Components/Ruin/Bookcase.hpp>
 #include <Components/Ruin/Cobweb.hpp>
 #include <Components/Ruin/RuneMarking.hpp>
@@ -16,11 +14,8 @@
 #include <Factory/NpcFactory.hpp>
 #include <Factory/RuinFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
+#include <Sprites/SpriteSheet.hpp>
 #include <Systems/Stores/NpcStore.hpp>
-#include <Systems/Stores/SpriteStore.hpp>
-#include <Utils/Collision.hpp>
-#include <Utils/Constants.hpp>
-#include <Utils/Random.hpp>
 
 #include <entt/entity/registry.hpp>
 

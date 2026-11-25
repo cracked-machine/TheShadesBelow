@@ -1,7 +1,6 @@
 #ifndef SRC_SCENECONTROL_SCENEDATA_HPP__
 #define SRC_SCENECONTROL_SCENEDATA_HPP__
 
-#include <Systems/Stores/StoreKey.hpp>
 #include <Utils/JsonDeserializer.hpp>
 #include <nlohmann/json_fwd.hpp>
 

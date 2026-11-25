@@ -4,8 +4,6 @@
 #include <SFML/System/Vector2.hpp>
 #include <SceneControl/Events/ProcessBarberSurgeonSceneInputEvent.hpp>
 #include <SceneControl/Scene.hpp>
-#include <Sprites/SpriteSheet.hpp>
-#include <Sprites/VertexFloor.hpp>
 
 // clang-format off
 namespace Game::Sys { class Store; }

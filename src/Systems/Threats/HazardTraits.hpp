@@ -8,7 +8,6 @@
 #include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Persistent/SinkholeSpreadPeriod.hpp>
 #include <Components/Player/Mortality.hpp>
-#include <Sprites/SpriteSheet.hpp>
 
 namespace Game::Sys
 {

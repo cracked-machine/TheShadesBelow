@@ -1,7 +1,6 @@
 #ifndef SRC_COMPONENTS_PERSISTENT_NPCSHOCKWAVEMAXRADIUS_HPP__
 #define SRC_COMPONENTS_PERSISTENT_NPCSHOCKWAVEMAXRADIUS_HPP__
 
-#include <Components/Npc/Shockwave.hpp>
 #include <Components/Persistent/BasePersistent.hpp>
 
 namespace Game::Cmp::Persist

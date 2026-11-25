@@ -11,8 +11,17 @@
 #include <Components/Stats/CarryAction.hpp>
 #include <Components/Stats/ProximityAction.hpp>
 #include <Components/Stats/SideEffects.hpp>
+#include <Components/Toxicity/Bradycadia.hpp>
+#include <Components/Toxicity/Halucinogen.hpp>
+#include <Components/Toxicity/Hypoxia.hpp>
+#include <Components/Toxicity/Phototoxia.hpp>
+#include <Components/Toxicity/Tachycardia.hpp>
 #include <Components/Toxicity/Toxidrome.hpp>
+#include <Components/Toxicity/Venom.hpp>
+#include <Components/Toxicity/Vertigo.hpp>
+#include <Events/AddInventoryEvent.hpp>
 #include <Events/GrimoireDiscoveryEvent.hpp>
+#include <Events/GrimoireItemUpdateEvent.hpp>
 #include <Events/GrimoireNpcUpdateEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/OverlayEvent.hpp>

@@ -5,7 +5,6 @@
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/AltarFactory.hpp>
-#include <Systems/Stores/SpriteStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <entt/entity/registry.hpp>
 

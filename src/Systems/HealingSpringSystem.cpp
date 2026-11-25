@@ -1,9 +1,6 @@
 #include <Audio/SoundBank.hpp>
 #include <Components/Exit.hpp>
 #include <Components/Inventory/FlashUIWealth.hpp>
-#include <Components/Npc/NoPathFinding.hpp>
-#include <Components/Player/Character.hpp>
-#include <Components/Player/LastGraveyardPosition.hpp>
 #include <Components/Player/Wealth.hpp>
 #include <Components/Position.hpp>
 #include <Components/RectBounds.hpp>
@@ -12,10 +9,8 @@
 #include <Components/Spring/HealingSpringBuildingSegment.hpp>
 #include <Components/Spring/HealingSpringEntrance.hpp>
 #include <Components/Spring/HealingSpringMultiBlock.hpp>
-#include <Components/Wall.hpp>
 #include <Factory/PlayerFactory.hpp>
 #include <SceneControl/Events/SceneManagerEvent.hpp>
-#include <Sprites/SpriteSheet.hpp>
 #include <Systems/HealingSpringSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Utils/Optimizations.hpp>

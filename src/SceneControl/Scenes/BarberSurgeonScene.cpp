@@ -1,7 +1,6 @@
 #include <Audio/SoundBank.hpp>
-#include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Player/Character.hpp>
+#include <Components/Player/FootstepType.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/SceneSettings/Footsteps.hpp>
@@ -14,10 +13,10 @@
 #include <Factory/MultiblockFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PathfindingFactory.hpp>
-#include <Factory/PlayerFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SceneControl/SceneData.hpp>
 #include <SceneControl/Scenes/BarberSurgeonScene.hpp>
+#include <Sprites/VertexFloor.hpp>
 #include <Systems/AnimSystem.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/FootstepSystem.hpp>

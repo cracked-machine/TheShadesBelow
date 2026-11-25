@@ -1,21 +1,21 @@
-#include <Components/Crypt/RoomLavaPit.hpp>
 #include <Components/Crypt/RoomLavaPitCell.hpp>
 #include <Components/Grave/Consequence.hpp>
 #include <Components/Grave/MultiBlock.hpp>
 #include <Components/Npc/Watchman.hpp>
 #include <Components/Npc/WatchmanSearchlight.hpp>
 #include <Components/Npc/Wisp.hpp>
+#include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/NpcWatchmanConeHalfAngle.hpp>
 #include <Components/Persistent/NpcWatchmanConeLength.hpp>
 #include <Components/Player/TorchRadius.hpp>
 #include <Components/Position.hpp>
+#include <Components/ZOrderValue.hpp>
 #include <Factory/AltarFactory.hpp>
 #include <Shaders/UniformBuilder.hpp>
-#include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
+#include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
-#include <Utils/Constants.hpp>
 #include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 

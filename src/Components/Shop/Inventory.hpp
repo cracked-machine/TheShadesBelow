@@ -2,7 +2,6 @@
 #define SRC_COMPONENTS_SHOP_INVENTORY_HPP__
 
 #include <Systems/Stores/StoreKey.hpp>
-#include <Utils/Constants.hpp>
 
 namespace Game::Cmp::Shop
 {

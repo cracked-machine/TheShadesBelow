@@ -5,7 +5,6 @@
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/UUID.hpp>
 #include <Components/ZOrderValue.hpp>
-#include <Events/ParticleEvents.hpp>
 #include <Systems/BaseSystem.hpp>
 
 #include <entt/entity/fwd.hpp>

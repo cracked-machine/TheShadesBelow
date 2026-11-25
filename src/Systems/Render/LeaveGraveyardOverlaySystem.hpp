@@ -1,8 +1,6 @@
 #ifndef SRC_SYSTEMS_RENDER_LEAVEGRAVEYARDOVERLAYSYSTEM_HPP__
 #define SRC_SYSTEMS_RENDER_LEAVEGRAVEYARDOVERLAYSYSTEM_HPP__
 
-#include <Components/SceneSettings/Paused.hpp>
-#include <Events/OverlayEvent.hpp>
 #include <Systems/Render/BaseOverlaySystem.hpp>
 
 #include <SFML/System/Time.hpp>
@@ -10,6 +8,11 @@
 #include <array>
 #include <cstddef>
 #include <string_view>
+
+// clang-format off
+namespace Game::Cmp::SceneSettings { struct Paused; }
+namespace Game::Events { struct OverlayEvent; }
+// clang-format on
 
 namespace Game::Sys
 {

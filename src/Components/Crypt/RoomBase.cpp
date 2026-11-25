@@ -1,4 +1,5 @@
 #include <Components/Crypt/RoomBase.hpp>
+#include <Utils/Constants.hpp>
 #include <Utils/Utils.hpp>
 
 namespace Game::Cmp::Crypt

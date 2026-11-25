@@ -20,7 +20,6 @@
 #include <Components/Particle/SkeleBonesParticleSprite.hpp>
 #include <Components/Particle/Smoke.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
-#include <Components/Particle/SpriteTest.hpp>
 #include <Components/Particle/WatchmanGunfireParticleSprite.hpp>
 #include <Components/Particle/WormholeParticleSprite.hpp>
 #include <Components/Persistent/NpcShockwaveSpeed.hpp>

@@ -3,7 +3,6 @@
 
 #include <Components/Ruin/FloorAccess.hpp>
 #include <Systems/BaseSystem.hpp>
-#include <Systems/Stores/StoreKey.hpp>
 
 #include <future>
 

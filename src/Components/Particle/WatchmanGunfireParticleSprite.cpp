@@ -1,6 +1,5 @@
 #include <Components/Particle/WatchmanGunfireParticleSprite.hpp>
 
-#include <Utils/Player.hpp>
 #include <random>
 
 namespace Game::Cmp::Particle

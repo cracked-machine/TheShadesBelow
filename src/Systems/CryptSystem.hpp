@@ -4,12 +4,10 @@
 #include <Events/CryptRoomEvent.hpp>
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
-#include <Utils/Crypt.hpp>
 
 #include <Factory/ObstacleFactory.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <Systems/BaseSystem.hpp>
-#include <Systems/Crypt/Variants/CryptLayoutParams.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 
 #include <set>
@@ -19,6 +17,7 @@
 namespace Game::Cmp { class Position; }
 namespace Game::Cmp::Crypt { class RoomEnd; class RoomStart; }
 namespace Game::Sys::Crypt { class CryptVariant; }
+namespace Game::Sys::Crypt { struct LayoutParams; }
 // clang-format on
 
 namespace Game::Sys

@@ -14,7 +14,6 @@
 #include <Events/PlayerMortalityEvent.hpp>
 #include <Events/SwapWorldItemEvent.hpp>
 #include <Factory/ParticleFactory.hpp>
-#include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>

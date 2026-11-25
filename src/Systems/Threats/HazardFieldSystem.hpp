@@ -1,18 +1,11 @@
 #ifndef SRC_SYSTEMS_THREATS_HAZARDFIELDSYSTEM_HPP__
 #define SRC_SYSTEMS_THREATS_HAZARDFIELDSYSTEM_HPP__
 
-#include <Components/Hazard/CorruptionCell.hpp>
-#include <Components/Hazard/FieldCell.hpp>
-#include <Components/Hazard/SinkholeCell.hpp>
-#include <Components/Persistent/CorruptionDamage.hpp>
-#include <Components/Persistent/CorruptionSeed.hpp>
-#include <Components/Persistent/SinkholeSeed.hpp>
 #include <Components/Player/Mortality.hpp>
 #include <Components/Position.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/BaseSystem.hpp>
-#include <Utils/Random.hpp>
 
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Time.hpp>

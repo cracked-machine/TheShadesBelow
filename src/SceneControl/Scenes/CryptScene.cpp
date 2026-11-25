@@ -1,16 +1,14 @@
 
 #include <Audio/SoundBank.hpp>
-#include <Components/AnimData.hpp>
-#include <Components/Inventory/FlashUIHealth.hpp>
-#include <Components/Inventory/PlayerInventorySlot.hpp>
+#include <Components/Crypt/RoomStart.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Particle/FlameParticleSprite.hpp>
 #include <Components/Particle/LavaFireballParticleSprite.hpp>
 #include <Components/Particle/NoteParticleSprite.hpp>
 #include <Components/Persistent/CryptVariantOverride.hpp>
+#include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Player/Character.hpp>
-#include <Components/Player/KeysCount.hpp>
+#include <Components/Player/FootstepType.hpp>
 #include <Components/SceneSettings/CollisionDetection.hpp>
 #include <Components/SceneSettings/CurrentScene.hpp>
 #include <Components/SceneSettings/Footsteps.hpp>
@@ -19,16 +17,15 @@
 #include <Components/SceneSettings/ShowDebugStats.hpp>
 #include <Components/SceneSettings/ShowNavmesh.hpp>
 #include <Components/SceneSettings/ShowPathFinding.hpp>
-#include <Events/CryptRoomEvent.hpp>
 #include <Events/UpdatePlayerPositionEvent.hpp>
 #include <Factory/CryptFactory.hpp>
 #include <Factory/ParticleFactory.hpp>
 #include <Factory/PathfindingFactory.hpp>
-#include <Factory/PlayerFactory.hpp>
 #include <Factory/ShaderFactory.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SceneControl/SceneData.hpp>
 #include <SceneControl/Scenes/CryptScene.hpp>
+#include <Sprites/VertexFloor.hpp>
 #include <Systems/AnimSystem.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Crypt/Variants/CryptVariant.hpp>

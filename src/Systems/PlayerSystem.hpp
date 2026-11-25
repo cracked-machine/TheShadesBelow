@@ -3,7 +3,7 @@
 
 #include <Components/Direction.hpp>
 #include <Components/Player/Mortality.hpp>
-#include <Sprites/SpriteSheet.hpp>
+#include <PathFinding/SmartPointers.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Utils/Cardinal.hpp>
 

@@ -4,8 +4,6 @@
 #include <Events/AddInventoryEvent.hpp>
 #include <Events/DropInventoryEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
-#include <Events/PlayerActionEvent.hpp>
-#include <Events/SelectInventorySlotEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <SFML/System/Time.hpp>
@@ -15,6 +13,10 @@
 #include <entt/entity/fwd.hpp>
 #include <cstdint>
 #include <optional>
+
+// clang-format off
+namespace Game::Events { struct PlayerActionEvent; struct SelectInventorySlotEvent; }
+// clang-format on
 
 namespace Game::Sys
 {

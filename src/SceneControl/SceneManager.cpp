@@ -1,11 +1,7 @@
-#include <Components/Inventory/PlayerInventorySlot.hpp>
-#include <Components/Persistent/PlayerStartPosition.hpp>
-#include <Components/Player/KeysCount.hpp>
+#include <Audio/SoundBank.hpp>
 #include <Components/Ruin/ObjectiveType.hpp>
-#include <Factory/CryptFactory.hpp>
 #include <SceneControl/IScene.hpp>
 #include <SceneControl/RegistryTransfer.hpp>
-#include <SceneControl/Scene.hpp>
 #include <SceneControl/SceneManager.hpp>
 #include <SceneControl/Scenes/CryptScene.hpp>
 #include <SceneControl/Scenes/GameOverScene.hpp>
@@ -18,7 +14,6 @@
 #include <SceneControl/Scenes/ShopScene.hpp>
 #include <SceneControl/Scenes/TitleScene.hpp>
 #include <Systems/PersistSystem.hpp>
-#include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Stores/SystemStore.hpp>
 
 namespace Game::Scene

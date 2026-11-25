@@ -3,9 +3,7 @@
 
 #include <Components/AbsoluteAlpha.hpp>
 #include <Components/AbsoluteRenderOffset.hpp>
-#include <Components/Altar/MultiBlock.hpp>
 #include <Components/AnimData.hpp>
-#include <Components/Crypt/RoomLavaPitCell.hpp>
 #include <Components/DamagePopup.hpp>
 #include <Components/Direction.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
@@ -19,9 +17,7 @@
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/LastDirection.hpp>
 #include <Components/LerpPosition.hpp>
-#include <Components/Npc/Npc.hpp>
 #include <Components/Npc/SummonOffering.hpp>
-#include <Components/Npc/Wisp.hpp>
 #include <Components/Particle/SpriteOwner.hpp>
 #include <Components/Persistent/DiggingCooldownThreshold.hpp>
 #include <Components/Persistent/InventorySlotCount.hpp>
@@ -38,7 +34,6 @@
 #include <Components/Persistent/StartingHealth.hpp>
 #include <Components/Persistent/StartingInfamy.hpp>
 #include <Components/Persistent/StartingLuck.hpp>
-#include <Components/Plant/BurningTimer.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
 #include <Components/Player/Curse.hpp>
@@ -87,8 +82,6 @@
 #include <Systems/Stores/ItemStore.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>
-#include <Utils/Maths.hpp>
-#include <Utils/Optimizations.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 

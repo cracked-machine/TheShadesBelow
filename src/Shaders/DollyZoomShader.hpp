@@ -5,7 +5,6 @@
 #include <SFML/System/Time.hpp>
 
 #include <Shaders/BaseShaderSprite.hpp>
-#include <Systems/BaseSystem.hpp>
 
 namespace Game::Sprites
 {

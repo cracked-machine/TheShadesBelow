@@ -1,7 +1,6 @@
 #include <Components/Npc/Npc.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Position.hpp>
-#include <Components/RectBounds.hpp>
 #include <PathFinding/AStar.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Utils/Constants.hpp>

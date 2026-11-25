@@ -3,11 +3,13 @@
 
 #include <Events/CreateItemEvent.hpp>
 #include <Events/DestroyitemEvent.hpp>
-#include <Events/SwapWorldItemEvent.hpp>
-#include <Events/UpdateDmgEvent.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Stores/StoreKey.hpp>
+
+// clang-format off
+namespace Game::Events { class UpdateDmgEvent; struct SwapWorldItemEvent; }
+// clang-format on
 
 namespace Game::Cmp
 {

@@ -1,15 +1,13 @@
 #ifndef SRC_SYSTEMS_PROCGEN_PASSAGESYSTEM_HPP__
 #define SRC_SYSTEMS_PROCGEN_PASSAGESYSTEM_HPP__
 
-#include <Components/Crypt/RoomClosed.hpp>
-#include <Components/Crypt/RoomOpen.hpp>
 #include <PathFinding/SmartPointers.hpp>
-#include <SceneControl/Scene.hpp>
 #include <SceneControl/SmartPointers.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/ProcGen/PassageAlgorithms.hpp>
 
+#include <Systems/ProcGen/PassageCache.hpp>
 #include <entt/fwd.hpp>
 
 // clang-format off

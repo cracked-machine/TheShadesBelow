@@ -1,8 +1,6 @@
 #ifndef SRC_UTILS_UTILS_HPP__
 #define SRC_UTILS_UTILS_HPP__
 
-#include <Systems/Stores/StoreKey.hpp>
-#include <Utils/Constants.hpp>
 
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Vector2.hpp>

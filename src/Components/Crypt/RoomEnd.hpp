@@ -1,7 +1,6 @@
 #ifndef SRC_COMPONENTS_CRYPT_ROOMEND_HPP__
 #define SRC_COMPONENTS_CRYPT_ROOMEND_HPP__
 
-#include <Components/Crypt/PassageDoor.hpp>
 #include <Components/Crypt/RoomBase.hpp>
 #include <SFML/Graphics/Rect.hpp>
 namespace Game::Cmp::Crypt

@@ -30,6 +30,7 @@
 #include <SFML/System/Angle.hpp>
 #include <Systems/ParticleSystem.hpp>
 #include <Systems/PersistSystem.hpp>
+#include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderSystem.hpp>
 #include <Systems/Threats/WatchmanSystem.hpp>
 #include <Utils/Cardinal.hpp>

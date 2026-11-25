@@ -1,19 +1,11 @@
 #ifndef SRC_FACTORY_SHADERFACTORY_HPP__
 #define SRC_FACTORY_SHADERFACTORY_HPP__
 
-#include <Components/Persistent/DisplayResolution.hpp>
-#include <Components/ZOrderValue.hpp>
-#include <Shaders/CircularDistortionShader.hpp>
-#include <Shaders/DarkModeShader.hpp>
-#include <Shaders/DizzyEchoShader.hpp>
-#include <Shaders/DollyZoomShader.hpp>
-#include <Shaders/FloodWaterShader.hpp>
-#include <Shaders/MistShader.hpp>
-#include <Shaders/NightStaticShader.hpp>
-#include <Shaders/RedVignetteShader.hpp>
-#include <Shaders/ScreenShudderShader.hpp>
-#include <Shaders/TunnelVisionShader.hpp>
-#include <Systems/ShaderSystem.hpp>
+// clang-format off
+namespace Game::Cmp::Persist { class DisplayResolution; }
+namespace Game::Sys { class ShaderSystem; }
+// clang-format on
+
 
 namespace Game::Factory::Shader
 {

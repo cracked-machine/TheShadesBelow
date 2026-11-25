@@ -2,6 +2,7 @@
 #include <Components/AbsoluteOffset.hpp>
 #include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AbsoluteRotation.hpp>
+#include <Components/AnimData.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Health.hpp>
 #include <Components/Inventory/WorldItem.hpp>
@@ -12,6 +13,7 @@
 #include <Components/Random.hpp>
 #include <Components/Weapons/Arrow.hpp>
 #include <Components/Weapons/InFlight.hpp>
+#include <Components/ZOrderValue.hpp>
 #include <Events/DestroyLootContainerEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
 #include <Events/WeaponHitEvent.hpp>
@@ -20,6 +22,7 @@
 #include <Systems/ArrowSystem.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/PersistSystem.hpp>
+#include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/RenderGameSystem.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <Utils/Constants.hpp>

@@ -4,7 +4,6 @@
 #include <Components/Particle/SpriteBase.hpp>
 #include <SFML/Graphics/BlendMode.hpp>
 #include <SFML/Graphics/Color.hpp>
-#include <Systems/ParticleSystem.hpp>
 
 #include <array>
 #include <string_view>

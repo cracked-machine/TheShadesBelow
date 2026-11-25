@@ -1,9 +1,6 @@
 #ifndef SRC_SYSTEMS_GRAVESYSTEM_HPP__
 #define SRC_SYSTEMS_GRAVESYSTEM_HPP__
 
-#include <Components/Grave/Consequence.hpp>
-#include <Components/Grave/MultiBlock.hpp>
-#include <Events/PlayerActionEvent.hpp>
 #include <Systems/BaseSystem.hpp>
 #include <Systems/Stores/StoreKey.hpp>
 #include <string>
@@ -15,6 +12,8 @@ namespace Game::Cmp { class AnimData; }
 namespace Game::Cmp::Player { class Character; }
 namespace Game::Cmp::Grave { class Consequence; }
 namespace Game::Events { struct ExhumeGraveEvent; }
+namespace Game::Cmp::Grave { class MultiBlock; }
+namespace Game::Events { struct PlayerActionEvent; }
 // clang-format on
 
 namespace Game::Sys

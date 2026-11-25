@@ -2,9 +2,12 @@
 #define SRC_FACTORY_BOMBFACTORY_HPP__
 
 #include <Components/Armed.hpp>
-#include <Components/Position.hpp>
 #include <SFML/System/Time.hpp>
 #include <entt/fwd.hpp>
+
+// clang-format off
+namespace Game::Cmp { class Position; }
+// clang-format on
 
 namespace Game::Factory::Bomb
 {

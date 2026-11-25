@@ -6,6 +6,7 @@
 #include <Components/PendingTeleport.hpp>
 #include <Components/Player/CameraHold.hpp>
 #include <Components/Player/Character.hpp>
+#include <Components/Position.hpp>
 #include <Components/TeleportAnim.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Events/TeleportEntityEvent.hpp>

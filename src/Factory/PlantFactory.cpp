@@ -1,21 +1,11 @@
-#include <Components/AbsoluteAlpha.hpp>
-#include <Components/AnimData.hpp>
-#include <Components/Armable.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Grave/PlantSegment.hpp>
-#include <Components/Inventory/WorldItem.hpp>
 #include <Components/Plant/Grass.hpp>
 // #include <Components/PlantObstacle.hpp>
-#include <Components/Player/Character.hpp>
-#include <Components/Player/NoPath.hpp>
-#include <Components/Position.hpp>
 #include <Components/UUID.hpp>
-#include <Components/ZOrderValue.hpp>
 #include <Events/DestroyPlantEvent.hpp>
 #include <Factory/PlantFactory.hpp>
 #include <Systems/BaseSystem.hpp>
-#include <Utils/Random.hpp>
-#include <Utils/Utils.hpp>
 #include <entt/entity/registry.hpp>
 #include <vector>
 

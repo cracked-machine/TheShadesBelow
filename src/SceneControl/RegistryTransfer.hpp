@@ -1,9 +1,12 @@
 #ifndef SRC_SCENECONTROL_REGISTRYTRANSFER_HPP__
 #define SRC_SCENECONTROL_REGISTRYTRANSFER_HPP__
 
-#include <SceneControl/SceneStack.hpp>
 #include <entt/entity/fwd.hpp>
 #include <memory>
+
+// clang-format off
+namespace Game::Scene { class IScene; }
+// clang-format on
 
 namespace Game::Scene
 {

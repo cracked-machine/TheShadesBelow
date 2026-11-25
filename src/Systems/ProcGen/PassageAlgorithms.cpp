@@ -1,15 +1,12 @@
 
-#include <Components/Crypt/RoomClosed.hpp>
-#include <Components/Crypt/RoomEnd.hpp>
 #include <Components/Crypt/RoomOpen.hpp>
+#include <Components/Direction.hpp>
 #include <Components/Random.hpp>
 #include <Components/RectBounds.hpp>
 #include <Components/Wall.hpp>
-#include <SceneControl/SceneData.hpp>
 #include <Systems/ProcGen/PassageAlgorithms.hpp>
 #include <Utils/Cardinal.hpp>
 #include <Utils/Constants.hpp>
-#include <Utils/Maths.hpp>
 #include <Utils/Player.hpp>
 #include <Utils/Utils.hpp>
 #include <array>

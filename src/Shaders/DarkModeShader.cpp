@@ -1,7 +1,6 @@
 
 #include <Components/Persistent/DisplayResolution.hpp>
 #include <Components/Position.hpp>
-#include <Shaders/NightStaticShader.hpp>
 #include <Shaders/UniformBuilder.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/Render/RenderSystem.hpp>

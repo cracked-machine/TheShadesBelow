@@ -2,11 +2,6 @@
 #define SRC_SYSTEMS_RENDER_GRIMOIREOVERLAYSYSTEM_HPP__
 
 #include <Components/Inventory/Grimoire.hpp>
-#include <Events/AddInventoryEvent.hpp>
-#include <Events/GrimoireItemUpdateEvent.hpp>
-#include <Events/GrimoireNpcUpdateEvent.hpp>
-#include <Events/ItemPickedUpEvent.hpp>
-#include <Events/OverlayEvent.hpp>
 #include <Systems/Render/BaseOverlaySystem.hpp>
 #include <Systems/Render/UiLayout.hpp>
 #include <Systems/Stores/StoreKey.hpp>
@@ -17,6 +12,10 @@
 #include <optional>
 #include <string>
 #include <vector>
+
+// clang-format off
+namespace Game::Events { struct AddInventoryEvent; struct GrimoireItemUpdateEvent; struct GrimoireNpcUpdateEvent; struct ItemPickedUpEvent; struct OverlayEvent; }
+// clang-format on
 
 namespace Game::Sys
 {
