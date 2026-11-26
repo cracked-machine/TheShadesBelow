@@ -286,6 +286,15 @@ void HudOverlaySystem::render_inventory_drag_icon( const Cmp::InventoryDrag &dra
   const sf::Vector2f icon_pos = mouse_pos - ( sprite_size * slot_icon->scale / 2.f );
   RenderSystem::safe_render_sprite_screen( anim_cmp->m_sprite_type, { icon_pos, sprite_size }, anim_cmp->getFrameIndexOffset(),
                                            { slot_icon->scale, slot_icon->scale }, kDragIconAlpha );
+
+  // off the inventory, releasing would drop it into the world: show a "no entry" sign over it if there is no room
+  if ( not drag_ctx.m_world_drop_blocked or drag_ctx.slot_at( mouse_pos ) ) return;
+  const Sys::SpriteKey blocked_sprite = "sprite.ui.icons";
+  static constexpr std::size_t kBlockedIconIndex = 2;
+  const sf::Vector2f blocked_size = Sys::SpriteStore::instance().get( blocked_sprite ).sprite_size();
+  const sf::Vector2f blocked_pos = mouse_pos - ( blocked_size * slot_icon->scale / 2.f );
+  RenderSystem::safe_render_sprite_screen( blocked_sprite, { blocked_pos, blocked_size }, kBlockedIconIndex,
+                                           { slot_icon->scale, slot_icon->scale } );
 }
 
 void HudOverlaySystem::place_imgui_text( const Render::UiLayout::Label &label, sf::Vector2f slot_origin, const std::string &text )

@@ -15,7 +15,8 @@ namespace Game::Cmp
 
 //! @brief Registry context variable (`reg.ctx()`) shared by Sys::HudOverlaySystem and Sys::SceneInputRouter for
 //! dragging items between inventory slots. The HUD records where it drew each slot; the input router hit-tests the
-//! mouse against them and records the slot being dragged, which the HUD draws under the cursor.
+//! mouse against them and records the slot being dragged, which the HUD draws under the cursor. Sys::InventorySystem
+//! records whether the dragged item could be dropped into the world.
 //! Living in the scene's registry, a drag never carries over to another scene.
 struct InventoryDrag
 {
@@ -24,6 +25,10 @@ struct InventoryDrag
 
   //! @brief The slot whose item is being dragged, or std::nullopt if no drag is in progress.
   std::optional<uint8_t> m_from_slot;
+
+  //! @brief Set by Sys::InventorySystem each frame while a drag is in progress: true if releasing it off the inventory
+  //! would drop nothing, as there is no free cell beside the player (or a plant can't be replanted here).
+  bool m_world_drop_blocked{ false };
 
   //! @brief The slot under a screen position, if any.
   //! @param pos Screen (window pixel) position, e.g. the mouse position.

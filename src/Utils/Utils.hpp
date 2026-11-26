@@ -118,6 +118,14 @@ bool is_plant_depleted( entt::registry &reg, entt::entity plant_entt );
 //! @return std::optional<sf::Vector2f> top-left of the cell, or nullopt if no ring has a free cell.
 std::optional<sf::Vector2f> find_random_cell_near( const sf::FloatRect &source, int max_rings, const std::function<bool( const sf::Vector2f & )> &is_free );
 
+//! @brief Find the cell nearest the centre of `source` in the nearest ring of grid cells around `source` that has a
+//! free cell, searching outwards one ring at a time. Within a ring, edge-adjacent cells come before diagonal ones.
+//! @param source The source's bounds, e.g. the player's position. Snapped to the grid for the rings.
+//! @param max_rings How many rings out from `source` to search.
+//! @param is_free Whether a cell (top-left position) is free.
+//! @return std::optional<sf::Vector2f> top-left of the cell, or nullopt if no ring has a free cell.
+std::optional<sf::Vector2f> find_nearest_cell_near( const sf::FloatRect &source, int max_rings, const std::function<bool( const sf::Vector2f & )> &is_free );
+
 //! @brief Spatial grids used by is_free_spawn_area() instead of scanning the registry.
 struct SpawnGrids
 {

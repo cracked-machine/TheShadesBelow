@@ -89,7 +89,8 @@ private:
   void render_inventory_slot( uint8_t idx, bool selected, bool flash, sf::Vector2f slot_origin );
 
   //! @brief While an inventory slot's item is being dragged (Cmp::InventoryDrag::m_from_slot), draw its icon, faded,
-  //! centred on the mouse cursor. Call after render_ui_inventory_table() has recorded the slot icons.
+  //! centred on the mouse cursor, with a "no entry" sign over it while it is off the inventory and can't be dropped into
+  //! the world (Cmp::InventoryDrag::m_world_drop_blocked). Call after render_ui_inventory_table() has recorded the slot icons.
   //! @param drag_ctx The registry's inventory drag state
   void render_inventory_drag_icon( const Cmp::InventoryDrag &drag_ctx );
 

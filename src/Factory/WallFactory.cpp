@@ -2,6 +2,7 @@
 #include <Components/NoMoveDest.hpp>
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Particle/BlockParticle.hpp>
+#include <Components/PathTile.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/Player/SolidBoundary.hpp>
@@ -52,6 +53,7 @@ entt::entity add_path_entity( entt::registry &reg, const sf::Vector2f &pos, cons
   // clang-format on
   // path tiles are flat ground: the sheet's AbsoluteZOrder keeps them above the floor and behind everything y-sorted
   reg.emplace_or_replace<Cmp::ZOrderValue>( entity, ms.zorder( sprite_index, pos.y ) );
+  reg.emplace_or_replace<Cmp::PathTile>( entity );
   return entity;
 }
 

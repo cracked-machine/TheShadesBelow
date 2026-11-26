@@ -12,6 +12,7 @@
 #include <Components/Horse/MultiBlock.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/FlashUIHealth.hpp>
+#include <Components/Inventory/InventoryDrag.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/StackCount.hpp>
 #include <Components/Inventory/StingDamage.hpp>
@@ -43,6 +44,7 @@
 #include <Events/ItemPickedUpEvent.hpp>
 #include <Events/PickupWorldItemEvent.hpp>
 #include <Events/PlayerActionEvent.hpp>
+#include <Events/DropInventorySlotEvent.hpp>
 #include <Events/MoveInventorySlotEvent.hpp>
 #include <Events/SelectInventorySlotEvent.hpp>
 #include <Events/UpdateDmgEvent.hpp>
@@ -83,6 +85,7 @@ InventorySystem::InventorySystem( entt::registry &reg, sf::RenderWindow &window,
   std::ignore = get_systems_event_queue().sink<Events::UpdateDmgEvent>().connect<&InventorySystem::on_update_dmg_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::SelectInventorySlotEvent>().connect<&InventorySystem::on_select_inventory_slot_event>( this );
   std::ignore = get_systems_event_queue().sink<Events::MoveInventorySlotEvent>().connect<&InventorySystem::on_move_inventory_slot_event>( this );
+  std::ignore = get_systems_event_queue().sink<Events::DropInventorySlotEvent>().connect<&InventorySystem::on_drop_inventory_slot_event>( this );
   SPDLOG_DEBUG( "InventorySystem initialized" );
 }
 
@@ -96,6 +99,7 @@ void InventorySystem::update( sf::Time dt )
   if ( reg().any_of<Cmp::Player::ConsumeTimer>( player_entt ) ) { consume_inventory( dt ); }
 
   update_item_expiry_damage( dt );
+  update_world_drop_blocked();
 
   if ( Utils::Player::is_elderflute_active( reg() ) ) { play_elder_flute_music(); }
   else { stop_elder_flute_music(); }
@@ -207,6 +211,68 @@ void InventorySystem::on_move_inventory_slot_event( const Events::MoveInventoryS
   // the selection follows the item, so a moved held item stays in hand
   if ( selected_cmp and moves_selected ) { selected_cmp->m_idx = selected == ev.m_from ? ev.m_to : ev.m_from; }
   SPDLOG_DEBUG( "Moved inventory slot {} to {}", ev.m_from, ev.m_to );
+}
+
+void InventorySystem::on_drop_inventory_slot_event( const Events::DropInventorySlotEvent &ev )
+{
+  // same rules as moving a slot: the held item can't be let go of mid-bite or mid-flight
+  if ( Utils::Player::is_player_eating( reg() ) ) return;
+  if ( Utils::Player::is_flying( reg() ) ) return;
+  if ( ev.m_slot >= Utils::Player::get_inventory_slot_count( reg() ) ) return;
+  const auto slot_entt = Utils::Player::get_inventory_slot_entt( reg(), ev.m_slot );
+  if ( slot_entt == entt::null or reg().get<Cmp::PlayerInventorySlot>( slot_entt ).empty() ) return;
+
+  const auto drop_pos = find_world_drop_cell( slot_entt );
+  if ( not drop_pos )
+  {
+    SPDLOG_DEBUG( "Nowhere to drop inventory slot {}", ev.m_slot );
+    return;
+  }
+
+  // a drawn bow (or charged burr) belongs to the item being dropped
+  if ( ev.m_slot == Utils::Player::get_selected_slot_idx( reg() ) )
+  {
+    get_systems_event_queue().trigger( Events::PlayerActionEvent( Events::PlayerActionEvent::GameActions::CANCEL_BOW ) );
+  }
+  drop_inventory_item( *drop_pos, slot_entt );
+}
+
+std::optional<sf::Vector2f> InventorySystem::find_world_drop_cell( entt::entity slot_entt )
+{
+  const auto &slot_cmp = reg().get<Cmp::PlayerInventorySlot>( slot_entt );
+  if ( slot_cmp.empty() ) return std::nullopt;
+  const Cmp::Position player_pos = Utils::Player::get_position( reg() );
+
+  // a plant replants at the player's feet, as drop_inventory_item() does for any drop, and never in the spawn area
+  if ( slot_cmp.m_item->sprite_type.contains( "plant" ) )
+  {
+    if ( Utils::Player::is_in_spawn( reg(), player_pos ) ) return std::nullopt;
+    return player_pos.position;
+  }
+
+  auto npc_navmesh = m_npc_navmesh.lock();
+  auto ghost_navmesh = m_ghost_navmesh.lock();
+  auto loot_sm = m_loot_sm.lock();
+  auto reserved_sm = m_reserved_sm.lock();
+  auto item_sm = m_item_sm.lock();
+  const Utils::SpawnGrids grids{ .navmesh = npc_navmesh.get(),
+                                 .ghost_navmesh = ghost_navmesh.get(),
+                                 .loot_sm = loot_sm.get(),
+                                 .reserved_sm = reserved_sm.get(),
+                                 .item_sm = item_sm.get() };
+  return Utils::find_nearest_cell_near( player_pos, /*max_rings=*/1, [&]( const sf::Vector2f &cell_pos )
+  { return Utils::is_free_spawn_area( reg(), sf::FloatRect( cell_pos, Constants::kGridSizePxF ), grids ); } );
+}
+
+void InventorySystem::update_world_drop_blocked()
+{
+  auto *drag_ctx = reg().ctx().find<Cmp::InventoryDrag>();
+  if ( not drag_ctx ) return;
+  drag_ctx->m_world_drop_blocked = false;
+  if ( not drag_ctx->m_from_slot ) return;
+  const auto slot_entt = Utils::Player::get_inventory_slot_entt( reg(), *drag_ctx->m_from_slot );
+  if ( slot_entt == entt::null ) return;
+  drag_ctx->m_world_drop_blocked = not find_world_drop_cell( slot_entt ).has_value();
 }
 
 entt::entity InventorySystem::prepare_empty_slot( std::optional<uint8_t> idx )

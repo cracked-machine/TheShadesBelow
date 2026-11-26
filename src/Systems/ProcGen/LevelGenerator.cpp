@@ -16,6 +16,7 @@
 #include <Components/Horse/Segment.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Moveable.hpp>
+#include <Components/PathTile.hpp>
 #include <Components/Npc/Footprint.hpp>
 #include <Components/Persistent/BloodMinChance.hpp>
 #include <Components/Persistent/GrassSpawnChance.hpp>
@@ -211,6 +212,20 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
     {
       auto entt = Factory::Wall::add_reservedposition( reg(), new_pos );
       m_reserved_sm->insert( entt, Cmp::Position( new_pos, Constants::kGridSizePxF ) );
+    }
+    else if ( tile == scene_data.path_tile_id() )
+    {
+      // a path cell is floor even where the path layer draws no tile over it (e.g. inside the graveyard spawn pen),
+      // so items can be dropped there. Reserved and tagged like a drawn path tile: procgen keeps off it, drops don't.
+      const Cmp::Position new_pos_cmp( new_pos, Constants::kGridSizePxF );
+      const auto has_path_tile = std::ranges::any_of( m_reserved_sm->at( new_pos_cmp ), [&]( entt::entity e )
+                                                      { return reg().valid( e ) and reg().all_of<Cmp::PathTile>( e ); } );
+      if ( not has_path_tile )
+      {
+        auto entt = Factory::Obstacle::create_world_pos( reg(), new_pos );
+        reg().emplace_or_replace<Cmp::PathTile>( entt );
+        m_reserved_sm->insert( entt, new_pos_cmp );
+      }
     }
   }
 

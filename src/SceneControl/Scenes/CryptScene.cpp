@@ -241,7 +241,7 @@ void CryptScene::reinit_navmesh()
 {
   m_sys.find<Sys::Store::Type::NpcSystem>().init( m_generic_npc_navmesh, m_open_navmesh, nullptr, nullptr, m_loot_sm, m_item_sm );
   m_sys.find<Sys::Store::Type::ItemSystem>().init( m_reserved_sm, m_item_sm, m_generic_npc_navmesh, nullptr, m_loot_sm );
-  m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm, m_item_sm );
+  m_sys.find<Sys::Store::Type::InventorySystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm, m_item_sm, m_loot_sm, m_ghost_navmesh );
   m_sys.find<Sys::Store::Type::PassageSystem>().init_nav_mesh( m_generic_npc_navmesh );
   m_sys.find<Sys::Store::Type::DowsingGuideSystem>().init( m_generic_npc_navmesh );
   m_sys.find<Sys::Store::Type::CryptSystem>().init( m_generic_npc_navmesh, m_player_navmesh, m_reserved_sm, m_loot_sm, m_item_sm );

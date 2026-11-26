@@ -19,6 +19,7 @@
 #include <Events/BuyShopItemEvent.hpp>
 #include <Events/CryptRoomEvent.hpp>
 #include <Events/DismissTooltipEvent.hpp>
+#include <Events/DropInventorySlotEvent.hpp>
 #include <Events/LightningEvent.hpp>
 #include <Events/LoadSettingsEvent.hpp>
 #include <Events/MoveInventorySlotEvent.hpp>
@@ -644,11 +645,11 @@ bool SceneInputRouter::process_inventory_drag( const sf::Event &event )
   {
     const auto from = std::exchange( drag_ctx->m_from_slot, std::nullopt );
     if ( not from ) return false; // not a drag, e.g. releasing a bow drawn in the world
-    // dropped anywhere but another slot, the drag is cancelled and the item stays put
-    if ( const auto to = drag_ctx->slot_at( sf::Vector2f( released->position ) ); to and *to != *from )
-    {
-      get_systems_event_queue().trigger( Events::MoveInventorySlotEvent( *from, *to ) );
-    }
+    // dropped on another slot it moves there, off the inventory it drops into the world (if there is room, see
+    // Cmp::InventoryDrag::m_world_drop_blocked), and back on its own slot the drag is cancelled
+    const auto to = drag_ctx->slot_at( sf::Vector2f( released->position ) );
+    if ( not to ) { get_systems_event_queue().trigger( Events::DropInventorySlotEvent( *from ) ); }
+    else if ( *to != *from ) { get_systems_event_queue().trigger( Events::MoveInventorySlotEvent( *from, *to ) ); }
     return true;
   }
   if ( event.is<sf::Event::FocusLost>() ) { drag_ctx->m_from_slot.reset(); }

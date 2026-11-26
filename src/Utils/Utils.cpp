@@ -2,6 +2,7 @@
 #include <Components/Health.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Loot.hpp>
+#include <Components/PathTile.hpp>
 #include <Components/Npc/Npc.hpp>
 #include <Components/Grave/PlantMultiBlock.hpp>
 #include <Components/Persistent/BurrSlowFactor.hpp>
@@ -29,6 +30,7 @@
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
 namespace Game::Utils
 {
@@ -304,31 +306,64 @@ bool is_current_scene( entt::registry &reg, Cmp::SceneSettings::SceneId scene_id
   return false;
 }
 
-std::optional<sf::Vector2f> find_random_cell_near( const sf::FloatRect &source, int max_rings, const std::function<bool( const sf::Vector2f & )> &is_free )
+namespace
+{
+
+//! @brief The grid cells (top-left positions) of one ring around `source_cells`.
+//! @param source_cells The source's bounds, already snapped to the grid.
+//! @param ring How many cells out from `source_cells` the ring is (1 = the cells touching it).
+//! @return std::vector<sf::Vector2f> The ring's cells, in row order.
+std::vector<sf::Vector2f> ring_cells( const sf::FloatRect &source_cells, int ring )
 {
   const auto grid = Constants::kGridSizePxF;
+  const sf::FloatRect outer = Cmp::RectBounds::expanded( source_cells, ring ).getBounds();
+  const sf::FloatRect inner = Cmp::RectBounds::expanded( source_cells, ring - 1 ).getBounds();
+
+  std::vector<sf::Vector2f> cells;
+  for ( float y = outer.position.y; y < outer.position.y + outer.size.y; y += grid.y )
+  {
+    for ( float x = outer.position.x; x < outer.position.x + outer.size.x; x += grid.x )
+    {
+      const sf::Vector2f cell( x, y );
+      if ( not inner.contains( cell + grid / 2.f ) ) cells.push_back( cell );
+    }
+  }
+  return cells;
+}
+
+} // namespace
+
+std::optional<sf::Vector2f> find_random_cell_near( const sf::FloatRect &source, int max_rings, const std::function<bool( const sf::Vector2f & )> &is_free )
+{
   const sf::FloatRect source_cells = snap_to_grid( source );
 
   for ( int ring = 1; ring <= max_rings; ++ring )
   {
-    const sf::FloatRect outer = Cmp::RectBounds::expanded( source_cells, ring ).getBounds();
-    const sf::FloatRect inner = Cmp::RectBounds::expanded( source_cells, ring - 1 ).getBounds();
-
     // shuffled so the first free cell found is a random pick from this ring's free cells
-    std::vector<sf::Vector2f> ring_cells;
-    for ( float y = outer.position.y; y < outer.position.y + outer.size.y; y += grid.y )
-    {
-      for ( float x = outer.position.x; x < outer.position.x + outer.size.x; x += grid.x )
-      {
-        const sf::Vector2f cell( x, y );
-        if ( not inner.contains( cell + grid / 2.f ) ) ring_cells.push_back( cell );
-      }
-    }
+    auto cells = ring_cells( source_cells, ring );
     Cmp::RandomInt rng( 0, 1 );
-    std::shuffle( ring_cells.begin(), ring_cells.end(), rng );
+    std::shuffle( cells.begin(), cells.end(), rng );
 
-    auto free_cell = std::ranges::find_if( ring_cells, is_free );
-    if ( free_cell != ring_cells.end() ) return *free_cell;
+    auto free_cell = std::ranges::find_if( cells, is_free );
+    if ( free_cell != cells.end() ) return *free_cell;
+  }
+  return std::nullopt;
+}
+
+std::optional<sf::Vector2f> find_nearest_cell_near( const sf::FloatRect &source, int max_rings, const std::function<bool( const sf::Vector2f & )> &is_free )
+{
+  const sf::FloatRect source_cells = snap_to_grid( source );
+  // measured from the unsnapped source, so a source part way across a cell prefers the cells it is moving towards
+  const sf::Vector2f source_centre = source.getCenter();
+  const sf::Vector2f half_grid = Constants::kGridSizePxF / 2.f;
+
+  for ( int ring = 1; ring <= max_rings; ++ring )
+  {
+    auto cells = ring_cells( source_cells, ring );
+    std::ranges::stable_sort( cells, {}, [&]( const sf::Vector2f &cell ) { return ( cell + half_grid - source_centre ).lengthSquared(); } );
+
+    auto free_cell = std::ranges::find_if( cells, is_free );
+    if ( free_cell != cells.end() ) return *free_cell;
   }
   return std::nullopt;
 }
@@ -352,7 +387,10 @@ bool is_free_spawn_area( entt::registry &reg, const sf::FloatRect &area, const S
       if ( bucket.empty() ) return false;
       if ( std::ranges::any_of( bucket, [&]( entt::entity e ) { return reg.valid( e ) and reg.any_of<Cmp::WorldItem, Cmp::Loot>( e ); } ) )
         return false;
-      if ( grids.reserved_sm and not grids.reserved_sm->at( cell_pos ).empty() ) return false;
+      // path tiles are reserved only to keep procgen off them; they are still open ground
+      if ( grids.reserved_sm and std::ranges::any_of( grids.reserved_sm->at( cell_pos ),
+                                                      [&]( entt::entity e ) { return not reg.valid( e ) or not reg.all_of<Cmp::PathTile>( e ); } ) )
+        return false;
       if ( grids.item_sm and std::ranges::any_of( grids.item_sm->at( cell_pos ), [&]( entt::entity e ) { return reg.valid( e ); } ) ) return false;
     }
   }

@@ -132,7 +132,8 @@ private:
   void process_inventory_slot_input( const sf::Event &event, bool number_keys );
 
   //! @brief Drag items between inventory slots with the left mouse button (see Cmp::InventoryDrag): pressing on an
-  //!        occupied slot picks its item up, releasing on another slot sends Events::MoveInventorySlotEvent.
+  //!        occupied slot picks its item up, releasing on another slot sends Events::MoveInventorySlotEvent and releasing
+  //!        off the inventory sends Events::DropInventorySlotEvent.
   //! @param event The polled window event
   //! @return true if the event was a left button press on an inventory slot, or the release that ends a drag, so it
   //!         must not also draw or release the bow

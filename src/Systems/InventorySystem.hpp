@@ -7,6 +7,7 @@
 #include <Events/UpdateDmgEvent.hpp>
 #include <PathFinding/SmartPointers.hpp>
 #include <SFML/System/Time.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <Systems/BaseSystem.hpp>
 
 #include <SFML/System/Clock.hpp>
@@ -15,7 +16,7 @@
 #include <optional>
 
 // clang-format off
-namespace Game::Events { struct PlayerActionEvent; struct SelectInventorySlotEvent; struct MoveInventorySlotEvent; }
+namespace Game::Events { struct PlayerActionEvent; struct SelectInventorySlotEvent; struct MoveInventorySlotEvent; struct DropInventorySlotEvent; }
 // clang-format on
 
 namespace Game::Sys
@@ -23,7 +24,7 @@ namespace Game::Sys
 
 //! @brief Creates player inventory items, moves items between the player's inventory slots and the world, and changes
 //! the selected slot. Event-driven, responding to Events::AddInventoryEvent, Events::DropInventoryEvent,
-//! Events::PickupWorldItemEvent, Events::SelectInventorySlotEvent, Events::MoveInventorySlotEvent and the SWAP_INVENTORY/CONSUME actions of
+//! Events::PickupWorldItemEvent, Events::SelectInventorySlotEvent, Events::MoveInventorySlotEvent, Events::DropInventorySlotEvent and the SWAP_INVENTORY/CONSUME actions of
 //! Events::PlayerActionEvent. Slots always exist and never move; items fill and empty them in place.
 class InventorySystem : public BaseSystem
 {
@@ -39,14 +40,18 @@ public:
   //! @param player_navmesh
   //! @param reserved_sm
   //! @param item_sm Ground world items (see Scene::m_item_sm).
+  //! @param loot_sm Loot drops (see Scene::m_loot_sm).
+  //! @param ghost_navmesh Ghost NPC navmesh (see Scene::m_ghost_navmesh).
   void init( const PathFinding::SpatialHashGridSharedPtr &npc_navmesh, const PathFinding::SpatialHashGridSharedPtr &player_navmesh,
-             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr,
-             const PathFinding::SpatialHashGridSharedPtr &item_sm = nullptr )
+             const PathFinding::SpatialHashGridSharedPtr &reserved_sm = nullptr, const PathFinding::SpatialHashGridSharedPtr &item_sm = nullptr,
+             const PathFinding::SpatialHashGridSharedPtr &loot_sm = nullptr, const PathFinding::SpatialHashGridSharedPtr &ghost_navmesh = nullptr )
   {
     m_npc_navmesh = npc_navmesh;
     m_player_navmesh = player_navmesh;
     m_reserved_sm = reserved_sm;
     m_item_sm = item_sm;
+    m_loot_sm = loot_sm;
+    m_ghost_navmesh = ghost_navmesh;
   }
 
   //! @brief Per-frame update function
@@ -79,6 +84,21 @@ private:
   //! the moved item. Ignored while eating or flying.
   //! @param ev
   void on_move_inventory_slot_event( const Events::MoveInventorySlotEvent &ev );
+
+  //! @brief Drop a slot's whole stack into the world at find_world_drop_cell(), or do nothing if there is nowhere to
+  //! put it. Ignored while eating or flying.
+  //! @param ev
+  void on_drop_inventory_slot_event( const Events::DropInventorySlotEvent &ev );
+
+  //! @brief Where a slot's item would be dropped into the world by Events::DropInventorySlotEvent: a plant at the
+  //! player's feet (as a normal drop replants it), anything else on the free cell beside the player nearest to them.
+  //! @param slot_entt The occupied inventory slot entity.
+  //! @return std::optional<sf::Vector2f> The drop position, or std::nullopt if it can't be dropped (no free cell, or a
+  //! plant in the spawn area).
+  std::optional<sf::Vector2f> find_world_drop_cell( entt::entity slot_entt );
+
+  //! @brief Record in Cmp::InventoryDrag whether the item being dragged could be dropped into the world, for the HUD.
+  void update_world_drop_blocked();
 
   //! @brief Get the slot entity at `idx` (default: the selected slot), emptying it first if it unexpectedly holds an item.
   //! @param idx The slot index, or std::nullopt for the selected slot.
@@ -174,6 +194,12 @@ private:
 
   //! @brief Ground world items (see Scene::m_item_sm).
   PathFinding::SpatialHashGridWeakPtr m_item_sm;
+
+  //! @brief Loot drops (see Scene::m_loot_sm).
+  PathFinding::SpatialHashGridWeakPtr m_loot_sm;
+
+  //! @brief Ghost NPC navmesh (see Scene::m_ghost_navmesh).
+  PathFinding::SpatialHashGridWeakPtr m_ghost_navmesh;
 
   //! @brief Time since the last pickup/drop; swaps are ignored until Cmp::Persist::InventorySwapCooldown has passed.
   sf::Time m_swap_item_cooldown_timer;
