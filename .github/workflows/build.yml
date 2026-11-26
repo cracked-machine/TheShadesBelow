@@ -2,15 +2,38 @@ name: Build
 
 on:
   push:
-    branches: [ '**' ]  # Run on all branches
-    tags: [ '*' ]        # Also run on any tag push (cuts a release)
-  pull_request:
-    branches: [ '**' ]  # Run on all branches
-  workflow_dispatch:
+    tags: [ '*' ]        # tag push cuts a release
+  schedule:
+    - cron: '0 3 * * *'  # nightly at 03:00 UTC, on the default branch (main)
+  workflow_dispatch:     # manual run from the Actions tab
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  # nightly runs skip the build when nothing was committed in the last 24h
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      recent: ${{ steps.check.outputs.recent }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Check for commits in the last 24h
+        id: check
+        run: |
+          LAST=$(git log -1 --format=%ct)
+          NOW=$(date +%s)
+          if [ $((NOW - LAST)) -lt 86400 ]; then RECENT=true; else RECENT=false; fi
+          echo "Last commit $(( (NOW - LAST) / 3600 ))h ago, recent=$RECENT"
+          echo "recent=$RECENT" >> "$GITHUB_OUTPUT"
+
   build:
     name: ${{ matrix.config.target }} (${{ matrix.config.image }}) ${{ matrix.build_type }}
+    needs: changes
+    if: github.event_name != 'schedule' || needs.changes.outputs.recent == 'true'
     runs-on: ubuntu-latest
 
     strategy:
