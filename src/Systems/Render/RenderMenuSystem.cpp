@@ -156,8 +156,6 @@
 #include <Components/Persistent/VertigoHealthDmgPerSec.hpp>
 #include <Components/Persistent/WormholeAbortThreshold.hpp>
 #include <Components/Persistent/WormholeSeed.hpp>
-#include <Components/Player/LevelDepth.hpp>
-#include <Components/Player/Wealth.hpp>
 #include <Components/Shader/SpriteOwner.hpp>
 #include <Systems/PersistSystem.hpp>
 #include <Systems/PersistSystemImpl.hpp>
@@ -583,44 +581,6 @@ void RenderMenuSystem::render_defeat_screen()
     start_text.setPosition( { static_cast<float>( display_size.x ) / 4.f, 200.f } );
     m_window.draw( start_text );
   }
-}
-
-void RenderMenuSystem::render_victory_screen( bool allow_continue, const VictoryTally &tally )
-{
-  sf::Vector2u display_size = Sys::PersistSystem::get<Cmp::Persist::DisplayResolution>( reg() );
-
-  const int max_level_depth = Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value();
-  const unsigned int depth = max_level_depth - Utils::Player::get_level_depth( m_reg ).get_count();
-  const bool final_depth = Utils::Player::is_final_level_depth( m_reg );
-
-  sf::Text title_text( m_font, final_depth ? std::format( "Final Level {} Complete!", depth ) : std::format( "Level {} Complete!", depth ), 96 );
-  title_text.setFillColor( sf::Color::White );
-  title_text.setPosition( { static_cast<float>( display_size.x ) / 4.f, 100.f } );
-  m_window.draw( title_text );
-
-  if ( allow_continue )
-  {
-    sf::Text start_text( m_font, final_depth ? "Press <R> key to return to the title" : "Press <R> key to continue", 48 );
-    start_text.setFillColor( sf::Color::White );
-    start_text.setPosition( { static_cast<float>( display_size.x ) / 4.f, 200.f } );
-    m_window.draw( start_text );
-  }
-
-  const auto &wealth = Utils::Player::get_wealth( m_reg );
-
-  // below the cart and inventory sections (see Sys::CartOverlaySystem::render_level_tally())
-  sf::Text tally_txt( m_font,
-                      std::format( "Cadaver parts: {}   Full barrels: {}   Preserved cats: {}   Spare parts: {}   (+{} wealth)", tally.parts,
-                                   tally.full_barrels, tally.cats, tally.spare_parts, tally.score_wealth ),
-                      24 );
-  tally_txt.setFillColor( sf::Color::White );
-  tally_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, static_cast<float>( display_size.y ) - 200.f } );
-  m_window.draw( tally_txt );
-
-  sf::Text wealth_txt( m_font, "Player wealth: " + std::to_string( wealth.wealth ), 24 );
-  wealth_txt.setFillColor( sf::Color::White );
-  wealth_txt.setPosition( { static_cast<float>( display_size.x ) / 4.f, static_cast<float>( display_size.y ) - 150.f } );
-  m_window.draw( wealth_txt );
 }
 
 } // namespace Game::Sys

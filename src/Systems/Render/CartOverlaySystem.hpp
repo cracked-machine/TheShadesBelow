@@ -19,9 +19,9 @@ namespace Game::Sys
 
 //! @brief Draws a row, centred over the cart sprite, with one res/ui/barrel_slot.json slot per Cmp::Cart::Barrel while a
 //! cart has Cmp::Cart::BarrelOverlayOpen. Every slot draws its part outlines, and the part sprites of its filled flags. Display
-//! only: it takes no input and does not pause gameplay. The same row is drawn on the level complete screen by
-//! render_level_tally(), in a "Cart" section above an "Inventory" section of icon rows, highlighting each element as it is
-//! scored.
+//! only: it takes no input and does not pause gameplay. It also draws the whole level complete screen
+//! (render_level_tally()), laid out by res/ui/levelcomplete.json: the same row in a "Cart" section, an "Inventory" section
+//! of icon rows, the item on the table, the tally table and the screen text, highlighting each element as it is scored.
 class CartOverlaySystem : public BaseOverlaySystem
 {
 public:
@@ -60,8 +60,26 @@ public:
     sf::Color highlight{ kTallyHighlight };
   };
 
+  //! @brief What the level complete tally has counted so far. The keys of the res/ui/levelcomplete.json "tally_table"
+  //! rows name these fields, see tally_value().
+  struct VictoryTally
+  {
+    //! @brief Wealth added so far by the tally.
+    int score_wealth{ 0 };
+    //! @brief Cadaver parts counted.
+    int parts{ 0 };
+    //! @brief Full barrels counted.
+    int full_barrels{ 0 };
+    //! @brief Preserved cats counted.
+    int cats{ 0 };
+    //! @brief Spare cadaver parts (in the inventory, not a barrel) counted.
+    int spare_parts{ 0 };
+  };
+
   //! @brief Construct a new Cart Overlay System object. Loads the slot and panel layouts from res/ui/barrel_slot.json
-  //! and res/ui/barrel_panel.json.
+  //! and res/ui/barrel_panel.json, and the level complete layout from res/ui/levelcomplete.json.
+  //! @throws std::runtime_error if the level complete layout is missing an element, or has a "tally_table" row key that
+  //! is not a VictoryTally field.
   //! @param reg
   //! @param window
   //! @param sound_bank
@@ -71,16 +89,21 @@ public:
   //! @param dt
   void update( sf::Time dt ) override;
 
-  //! @brief Draw the level complete tally in its own ImGui frame: a "Cart" section with the barrel row, and beneath it
-  //! an "Inventory" section with `icon_rows`, one under the other. A section with nothing to show is left out. Call
-  //! after the SFML parts of the screen are drawn, as the ImGui frame is rendered over them.
+  //! @brief Draw the level complete screen in its own ImGui frame, laid out by res/ui/levelcomplete.json: the title, the
+  //! continue prompt, the tally table, the player's wealth, the item on the table, a "Cart" section with the barrel row
+  //! and an "Inventory" section with `icon_rows`. A section with nothing to show is left out. Call after the SFML parts of
+  //! the screen are drawn, as the ImGui frame is rendered over them.
   //! @param dt
   //! @param barrels The barrels, left to right.
   //! @param barrel_progress Tally position in the barrel row, or std::nullopt before counting starts.
   //! @param icon_rows The inventory rows, top to bottom. Empty rows are skipped.
-  //! @param top_center Window pixel position of the top centre of the tally.
+  //! @param show_continue Whether to draw the continue prompt this frame (the caller flashes it once everything is counted).
+  //! @param tally What the tally has counted so far.
+  //! @param table_item The item on the table, or std::nullopt for an empty table.
+  //! @param table_highlight Highlight colour of `table_item`.
   void render_level_tally( sf::Time dt, std::span<const Cmp::Cart::Barrel> barrels, std::optional<BarrelProgress> barrel_progress,
-                           std::span<const IconRow> icon_rows, sf::Vector2f top_center );
+                           std::span<const IconRow> icon_rows, bool show_continue, const VictoryTally &tally,
+                           const std::optional<Sys::SpriteKey> &table_item, sf::Color table_highlight );
 
 private:
   //! @brief Draw a row of barrel slots, with the filled part sprites. Must be called inside an ImGui window.
@@ -89,6 +112,37 @@ private:
   //! @param progress Tally position to dim/highlight, or std::nullopt for neither.
   //! @return The panel's height in window pixels.
   float render_barrel_row( std::span<const Cmp::Cart::Barrel> barrels, sf::Vector2f row_center, std::optional<BarrelProgress> progress );
+
+  //! @brief Draw one barrel slot (res/ui/barrel_slot.json) with its filled part sprites. Must be called inside an ImGui
+  //! window.
+  //! @param barrel_cmp The barrel.
+  //! @param barrel_idx The barrel's index in the tally, compared with `progress`.
+  //! @param slot_origin Window pixel position of the slot's top-left.
+  //! @param scale Slot scale.
+  //! @param progress Tally position to dim/highlight, or std::nullopt for neither.
+  void render_barrel_slot( const Cmp::Cart::Barrel &barrel_cmp, std::size_t barrel_idx, sf::Vector2f slot_origin, float scale,
+                           std::optional<BarrelProgress> progress );
+
+  //! @brief Draw the level complete title, continue prompt and wealth labels. Must be called inside an ImGui window.
+  //! @param show_continue Whether to draw the continue prompt this frame.
+  void render_level_labels( bool show_continue );
+
+  //! @brief Draw the level complete "tally_table": one row per layout row, its caption then its VictoryTally value. Must
+  //! be called inside an ImGui window.
+  //! @param tally What the tally has counted so far.
+  void render_tally_table( const VictoryTally &tally );
+
+  //! @brief Draw the item on the table fitted and centred in the "table_icon" rect, highlighted. Must be called inside an
+  //! ImGui window.
+  //! @param item The item.
+  //! @param highlight Highlight colour.
+  void render_table_item( const Sys::SpriteKey &item, sf::Color highlight );
+
+  //! @brief The VictoryTally field named by a "tally_table" row key.
+  //! @param tally The tally.
+  //! @param key The row key, e.g. "parts".
+  //! @return The field's value, or std::nullopt if `key` names no field.
+  [[nodiscard]] static std::optional<int> tally_value( const VictoryTally &tally, std::string_view key );
 
   //! @brief Draw the inventory section's rows of icons inside a panel styled like the barrel row's. Must be called inside an
   //! ImGui window.
@@ -125,6 +179,9 @@ private:
   //! @brief The border and background behind the row (res/ui/barrel_panel.json), authored around one slot. The padding
   //! between its size and the slot's is kept around the whole row.
   std::unique_ptr<Render::UiLayout> m_panel_ui_layout;
+
+  //! @brief The level complete screen's layout (res/ui/levelcomplete.json), synced to the window each frame.
+  std::unique_ptr<Render::UiLayout> m_level_complete_ui_layout;
 
   //! @brief Name of the ui_outline in res/ui/barrel_panel.json that is resized to fit the row.
   static constexpr const char *kPanelOutlineName = "barrel_panel";

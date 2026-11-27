@@ -66,27 +66,6 @@ public:
   //! @brief Render the defeat (game over) screen.
   void render_defeat_screen();
 
-  //! @brief What the level complete tally has counted so far.
-  struct VictoryTally
-  {
-    //! @brief Wealth added so far by the tally.
-    int score_wealth{ 0 };
-    //! @brief Cadaver parts counted.
-    int parts{ 0 };
-    //! @brief Full barrels counted.
-    int full_barrels{ 0 };
-    //! @brief Preserved cats counted.
-    int cats{ 0 };
-    //! @brief Spare cadaver parts (in the inventory, not a barrel) counted.
-    int spare_parts{ 0 };
-  };
-
-  //! @brief Render the victory (level complete) screen text: the title, the continue prompt, what the tally has counted
-  //! so far and the player's total wealth. The barrel, cat and spare part rows are drawn by Sys::CartOverlaySystem::render_level_tally().
-  //! @param allow_continue Whether to show the "press to continue" prompt.
-  //! @param tally What the tally has counted so far.
-  void render_victory_screen( bool allow_continue, const VictoryTally &tally );
-
 private:
   //! @brief Render a row of int settings as vertical sliders, each labelled underneath with its detail string.
   //! Every column is as wide as the widest slider or label, so the sliders sit at equal x intervals.

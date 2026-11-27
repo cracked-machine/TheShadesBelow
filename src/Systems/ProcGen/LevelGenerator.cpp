@@ -14,6 +14,8 @@
 #include <Components/Grave/Segment.hpp>
 #include <Components/Horse/MultiBlock.hpp>
 #include <Components/Horse/Segment.hpp>
+#include <Components/LevelComplete/TableMultiBlock.hpp>
+#include <Components/LevelComplete/TableSegment.hpp>
 #include <Components/Inventory/WorldItem.hpp>
 #include <Components/Moveable.hpp>
 #include <Components/PathTile.hpp>
@@ -302,6 +304,8 @@ void LevelGenerator::build_scene_from_data( const Scene::SceneData &scene_data )
         { return Factory::Multiblock::add_multiblock_with_segments<Cmp::Ruin::StairsGateMultiBlock, Cmp::Ruin::GateSegment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
       { "sprite.ruin.hex", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
         { return Factory::Multiblock::add_multiblock_with_segments<Cmp::Ruin::HexagramMultiBlock, Cmp::Ruin::HexagramSegment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
+      { "sprite.levelcomplete.table", [this]( entt::registry &r, sf::Vector2f p, const Sprites::SpriteSheet &ss )
+        { return Factory::Multiblock::add_multiblock_with_segments<Cmp::LevelComplete::TableMultiBlock, Cmp::LevelComplete::TableSegment>( r, p, ss, 0, 0, m_reserved_sm.get() ).first; } },
   };
   // clang-format on
 

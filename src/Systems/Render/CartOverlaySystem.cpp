@@ -1,12 +1,21 @@
 #include <Components/Cart/Barrel.hpp>
 #include <Components/Cart/BarrelOverlayOpen.hpp>
 #include <Components/Cart/MultiBlock.hpp>
+#include <Components/Persistent/MaxLevelDepth.hpp>
+#include <Components/Player/LevelDepth.hpp>
+#include <Components/Player/Wealth.hpp>
 #include <Sprites/SpriteSheet.hpp>
+#include <Systems/PersistSystem.hpp>
+#include <Systems/PersistSystemImpl.hpp>
 #include <Systems/Render/CartOverlaySystem.hpp>
 #include <Systems/Stores/SpriteStore.hpp>
 #include <Utils/Constants.hpp>
+#include <Utils/ImGuiTheme.hpp>
+#include <Utils/Player.hpp>
 
 #include <algorithm>
+#include <format>
+#include <stdexcept>
 #include <imgui-SFML.h>
 #include <imgui.h>
 #include <string>
@@ -28,13 +37,51 @@ sf::Vector2f icon_size( const Sys::SpriteKey &sprite, float scale )
     return Constants::kGridSizePxF * scale;
   }
 }
+
+//! @brief The level complete layout file.
+constexpr const char *kLevelCompleteLayout = "res/ui/levelcomplete.json";
+
+//! @brief Find a level complete layout element by name.
+//! @throws std::runtime_error if there is none, naming it.
+template <typename Element>
+const Element &find_element( const std::vector<Element> &elements, std::string_view name )
+{
+  const auto it = std::ranges::find( elements, name, &Element::name );
+  if ( it == elements.end() ) { throw std::runtime_error( std::format( "Missing '{}' element in {}", name, kLevelCompleteLayout ) ); }
+  return *it;
+}
+
+//! @brief Top-left of label text drawn at a layout label's position. Tiled point y is the text baseline; the text's top
+//! is about a font size above it (see GrimoireOverlaySystem::render_page_label()).
+sf::Vector2f label_text_pos( const Render::UiLayout::Label &label )
+{
+  return label.rect.position - sf::Vector2f{ 0.f, static_cast<float>( label.font_size ) };
+}
 } // namespace
 
 CartOverlaySystem::CartOverlaySystem( entt::registry &reg, sf::RenderWindow &window, Audio::SoundBank &sound_bank )
     : BaseOverlaySystem( reg, window, sound_bank ),
       m_slot_ui_layout( std::make_unique<Render::UiLayout>( "res/ui/barrel_slot.json" ) ),
-      m_panel_ui_layout( std::make_unique<Render::UiLayout>( "res/ui/barrel_panel.json" ) )
+      m_panel_ui_layout( std::make_unique<Render::UiLayout>( "res/ui/barrel_panel.json" ) ),
+      m_level_complete_ui_layout( std::make_unique<Render::UiLayout>( kLevelCompleteLayout ) )
 {
+  // check up front, so a broken layout fails at startup rather than on reaching the level complete screen
+  const auto &layout = *m_level_complete_ui_layout;
+  for ( const char *name : { "title_lbl", "continue_txt", "wealth_txt" } )
+  {
+    std::ignore = find_element( layout.m_labels, name );
+  }
+  for ( const char *name : { "table_icon", "cart_icon", "inventory_icon" } )
+  {
+    std::ignore = find_element( layout.m_icons, name );
+  }
+  for ( const auto &[key, caption] : find_element( layout.m_tables, "tally_table" ).rows )
+  {
+    if ( not tally_value( VictoryTally{}, key ) )
+    {
+      throw std::runtime_error( std::format( "Unknown 'tally_table' row key '{}' in {}", key, kLevelCompleteLayout ) );
+    }
+  }
 }
 
 void CartOverlaySystem::update( [[maybe_unused]] sf::Time dt )
@@ -60,33 +107,112 @@ void CartOverlaySystem::update( [[maybe_unused]] sf::Time dt )
 }
 
 void CartOverlaySystem::render_level_tally( sf::Time dt, std::span<const Cmp::Cart::Barrel> barrels, std::optional<BarrelProgress> barrel_progress,
-                                            std::span<const IconRow> icon_rows, sf::Vector2f top_center )
+                                            std::span<const IconRow> icon_rows, bool show_continue, const VictoryTally &tally,
+                                            const std::optional<Sys::SpriteKey> &table_item, sf::Color table_highlight )
 {
   const float scale = Render::UiLayout::ui_scale( m_window.getSize() );
-  constexpr float kSectionGap = 40.f;
+  m_level_complete_ui_layout->sync_to( m_window.getSize() );
+  const auto &layout = *m_level_complete_ui_layout;
 
   // this scene has no OverlayArbitrationSystem frame, so pump our own
   ImGui::SFML::Update( m_window, std::max( dt, sf::microseconds( 1 ) ) );
   begin_overlay_window( "##level_tally" );
 
-  sf::Vector2f section_top = top_center;
+  render_level_labels( show_continue );
+  render_tally_table( tally );
+  if ( table_item ) { render_table_item( *table_item, table_highlight ); }
+
+  // each section hangs from the top centre of its layout rect
+  const auto top_center = []( const Render::UiLayout::Icon &icon ) { return sf::Vector2f( icon.rect.getCenter().x, icon.rect.position.y ); };
   if ( not barrels.empty() )
   {
+    sf::Vector2f section_top = top_center( find_element( layout.m_icons, "cart_icon" ) );
     section_top.y += render_caption( "Cart", section_top, scale );
     const float panel_height = m_panel_ui_layout->design_size().y * scale;
-    const float row_height = render_barrel_row( barrels, { section_top.x, section_top.y + ( panel_height / 2.f ) }, barrel_progress );
-    section_top.y += row_height + ( kSectionGap * scale );
+    std::ignore = render_barrel_row( barrels, { section_top.x, section_top.y + ( panel_height / 2.f ) }, barrel_progress );
   }
 
   const bool any_icons = std::ranges::any_of( icon_rows, []( const IconRow &row ) { return not row.sprites.empty(); } );
   if ( any_icons )
   {
+    sf::Vector2f section_top = top_center( find_element( layout.m_icons, "inventory_icon" ) );
     section_top.y += render_caption( "Inventory", section_top, scale );
     std::ignore = render_icon_rows( icon_rows, section_top );
   }
 
   end_overlay_window();
   ImGui::SFML::Render( m_window );
+}
+
+void CartOverlaySystem::render_level_labels( bool show_continue )
+{
+  const auto &layout = *m_level_complete_ui_layout;
+  const float outline = 2.f * layout.scale();
+  const auto draw_label = [outline]( const Render::UiLayout::Label &label, std::string_view text )
+  { draw_text( text, static_cast<float>( label.font_size ), label_text_pos( label ), sf::Color::White, to_text_align( label.align ), sf::Color::Black, outline ); };
+
+  const int max_level_depth = Sys::PersistSystem::get<Cmp::Persist::MaxLevelDepth>( reg() ).get_value();
+  const unsigned int depth = max_level_depth - Utils::Player::get_level_depth( reg() ).get_count();
+  const bool final_depth = Utils::Player::is_final_level_depth( reg() );
+
+  draw_label( find_element( layout.m_labels, "title_lbl" ),
+              final_depth ? std::format( "Final Level {} Complete!", depth ) : std::format( "Level {} Complete!", depth ) );
+  if ( show_continue )
+  {
+    draw_label( find_element( layout.m_labels, "continue_txt" ), final_depth ? "Press <R> key to return to the title" : "Press <R> key to continue" );
+  }
+  draw_label( find_element( layout.m_labels, "wealth_txt" ), std::format( "Player wealth: {}", Utils::Player::get_wealth( reg() ).wealth ) );
+}
+
+void CartOverlaySystem::render_tally_table( const VictoryTally &tally )
+{
+  const auto &table = find_element( m_level_complete_ui_layout->m_tables, "tally_table" );
+  ImGui::SetCursorScreenPos( ImVec2( table.rect.position.x, table.rect.position.y ) );
+  ImGui::PushID( table.name.c_str() );
+  // the font is rasterised at kImGuiGrimoireFontPx, so scale it to the layout's (already UI-scaled) font size
+  ImGui::SetWindowFontScale( static_cast<float>( table.font_size ) / Utils::kImGuiGrimoireFontPx );
+  ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.f, 1.f, 1.f, 1.f ) );
+  constexpr ImGuiTableFlags kTableFlags = ImGuiTableFlags_SizingFixedFit;
+  if ( ImGui::BeginTable( "##tally", 2, kTableFlags ) )
+  {
+    ImGui::TableSetupColumn( "Caption", ImGuiTableColumnFlags_WidthFixed );
+    ImGui::TableSetupColumn( "Value", ImGuiTableColumnFlags_WidthFixed );
+    for ( const auto &[key, caption] : table.rows )
+    {
+      ImGui::TableNextRow();
+      ImGui::TableSetColumnIndex( 0 );
+      ImGui::TextUnformatted( caption.c_str() );
+      ImGui::TableSetColumnIndex( 1 );
+      // row keys are checked in the constructor
+      ImGui::TextUnformatted( std::to_string( tally_value( tally, key ).value_or( 0 ) ).c_str() );
+    }
+    ImGui::EndTable();
+  }
+  ImGui::PopStyleColor();
+  ImGui::SetWindowFontScale( 1.f );
+  ImGui::PopID();
+}
+
+void CartOverlaySystem::render_table_item( const Sys::SpriteKey &item, sf::Color highlight )
+{
+  const auto &icon = find_element( m_level_complete_ui_layout->m_icons, "table_icon" );
+  // fit the sprite inside the rect, centred
+  const sf::Vector2f sprite_size = icon_size( item, 1.f );
+  const float scale = std::min( icon.rect.size.x / sprite_size.x, icon.rect.size.y / sprite_size.y );
+  const sf::Vector2f size = sprite_size * scale;
+  const sf::Vector2f pos = icon.rect.getCenter() - ( size / 2.f );
+  render_icon( item, 0, pos, scale );
+  highlight_rect( sf::FloatRect( pos, size ), m_level_complete_ui_layout->scale(), highlight );
+}
+
+std::optional<int> CartOverlaySystem::tally_value( const VictoryTally &tally, std::string_view key )
+{
+  if ( key == "score_wealth" ) { return tally.score_wealth; }
+  if ( key == "parts" ) { return tally.parts; }
+  if ( key == "full_barrels" ) { return tally.full_barrels; }
+  if ( key == "cats" ) { return tally.cats; }
+  if ( key == "spare_parts" ) { return tally.spare_parts; }
+  return std::nullopt;
 }
 
 float CartOverlaySystem::render_icon_rows( std::span<const IconRow> icon_rows, sf::Vector2f top_center )
@@ -189,31 +315,45 @@ float CartOverlaySystem::render_barrel_row( std::span<const Cmp::Cart::Barrel> b
   render_panel( sf::FloatRect( slot_origin - panel_pad, panel_size ), scale );
   for ( std::size_t barrel_idx = 0; barrel_idx < barrels.size(); ++barrel_idx )
   {
-    const Cmp::Cart::Barrel &barrel_cmp = barrels[barrel_idx];
-    m_slot_ui_layout->sync_to_scale( scale, slot_origin );
-    render_outlines_imgui( *m_slot_ui_layout );
-    for ( const auto &icon : m_slot_ui_layout->m_icons )
-    {
-      // the icon's name is its part's sprite; its sprite_type is only the placeholder shown in Tiled
-      const Sys::SpriteKey part_key( icon.name );
-      const bool *filled = barrel_cmp.part( part_key );
-      if ( not filled or not *filled ) { continue; }
-      render_icon( part_key, 0, icon.rect.position, icon.scale );
-
-      if ( not progress ) { continue; }
-      const auto part_it = std::ranges::find( Cmp::Cart::Barrel::kParts, std::string_view( icon.name ),
-                                              &std::pair<std::string_view, bool Cmp::Cart::Barrel::*>::first );
-      const auto part_idx = static_cast<std::size_t>( std::distance( Cmp::Cart::Barrel::kParts.begin(), part_it ) );
-      const sf::FloatRect rect( icon.rect.position, icon_size( part_key, icon.scale ) );
-      const bool counted = barrel_idx < progress->barrel or ( barrel_idx == progress->barrel and ( progress->whole_barrel or part_idx < progress->part ) );
-      if ( counted ) { dim_rect( rect ); }
-      else if ( barrel_idx == progress->barrel and part_idx == progress->part ) { highlight_rect( rect, scale ); }
-    }
-
-    if ( progress and progress->whole_barrel and barrel_idx == progress->barrel ) { highlight_rect( sf::FloatRect( slot_origin, slot_size ), scale ); }
+    render_barrel_slot( barrels[barrel_idx], barrel_idx, slot_origin, scale, progress );
     slot_origin.x += slot_size.x;
   }
   return panel_size.y;
+}
+
+void CartOverlaySystem::render_barrel_slot( const Cmp::Cart::Barrel &barrel_cmp, std::size_t barrel_idx, sf::Vector2f slot_origin,
+                                            float scale, std::optional<BarrelProgress> progress )
+{
+  m_slot_ui_layout->sync_to_scale( scale, slot_origin );
+  render_outlines_imgui( *m_slot_ui_layout );
+  for ( const auto &icon : m_slot_ui_layout->m_icons )
+  {
+    // the icon's name is its part's sprite; its sprite_type is only the placeholder shown in Tiled
+    const Sys::SpriteKey part_key( icon.name );
+    const bool *filled = barrel_cmp.part( part_key );
+    if ( not filled or not *filled ) { continue; }
+
+    bool counted = false;
+    bool current = false;
+    if ( progress )
+    {
+      const auto part_it = std::ranges::find( Cmp::Cart::Barrel::kParts, std::string_view( icon.name ),
+                                              &std::pair<std::string_view, bool Cmp::Cart::Barrel::*>::first );
+      const auto part_idx = static_cast<std::size_t>( std::distance( Cmp::Cart::Barrel::kParts.begin(), part_it ) );
+      counted = barrel_idx < progress->barrel or ( barrel_idx == progress->barrel and ( progress->whole_barrel or part_idx < progress->part ) );
+      current = not counted and barrel_idx == progress->barrel and part_idx == progress->part;
+    }
+
+    render_icon( part_key, 0, icon.rect.position, icon.scale );
+    const sf::FloatRect rect( icon.rect.position, icon_size( part_key, icon.scale ) );
+    if ( counted ) { dim_rect( rect ); }
+    else if ( current ) { highlight_rect( rect, scale ); }
+  }
+
+  if ( progress and progress->whole_barrel and barrel_idx == progress->barrel )
+  {
+    highlight_rect( sf::FloatRect( slot_origin, m_slot_ui_layout->design_size() * scale ), scale );
+  }
 }
 
 void CartOverlaySystem::dim_rect( const sf::FloatRect &rect )

@@ -63,6 +63,12 @@ class StairsSegment;
 class GateSegment;
 } // namespace Game::Cmp::Ruin
 
+namespace Game::Cmp::LevelComplete
+{
+class TableMultiBlock;
+class TableSegment;
+} // namespace Game::Cmp::LevelComplete
+
 namespace Game::Sprites
 {
 class SpriteSheet;

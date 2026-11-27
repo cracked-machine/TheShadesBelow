@@ -167,6 +167,11 @@ void RenderGameSystem::render_zorder_queue()
 
 void RenderGameSystem::update_camera( sf::Time dt )
 {
+  if ( m_camera_lock )
+  {
+    s_world_view.setCenter( *m_camera_lock );
+    return;
+  }
 
   // Use the player's current position as the target
   auto target_pos = Utils::Player::get_position( reg() );

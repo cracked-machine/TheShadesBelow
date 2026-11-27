@@ -3086,6 +3086,21 @@
         }
       }
     },
+    "sprite.levelcomplete.table": {
+      "spritesheet": {
+        "displayname": "Table",
+        "texture_path": "res/textures/levelcomplete.png",
+        "sprite_indices": [
+          0, 1, 10, 11, 20, 21
+        ],
+        "indices_per_sequence": 1,
+        "framerate": 0,
+        "grid_size": {
+          "x": 2,
+          "y": 3
+        }
+      }
+    },
 
     "sprite.skeleton.walk.east": {
       "spritesheet": {

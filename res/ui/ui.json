@@ -40,6 +40,7 @@
         {
          "draworder":"topdown",
          "id":2,
+         "locked":true,
          "name":"cadaver",
          "objects":[],
          "opacity":1,
@@ -51,7 +52,6 @@
         {
          "draworder":"topdown",
          "id":6,
-         "locked":true,
          "name":"gold",
          "objects":[
                 {

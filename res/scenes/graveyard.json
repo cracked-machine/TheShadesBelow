@@ -326,6 +326,7 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          "height":99,
          "id":10,
+         "locked":true,
          "name":"wall",
          "opacity":1,
          "type":"tilelayer",
@@ -2329,7 +2330,6 @@
         {
          "draworder":"topdown",
          "id":11,
-         "locked":true,
          "name":"developer",
          "objects":[
                 {
@@ -2342,8 +2342,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":768,
-                 "y":848
+                 "x":736,
+                 "y":816
                 }, 
                 {
                  "height":0,
@@ -2355,8 +2355,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":800,
-                 "y":848
+                 "x":736,
+                 "y":768
                 }, 
                 {
                  "height":0,
@@ -2381,8 +2381,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":816,
-                 "y":848
+                 "x":848,
+                 "y":832
                 }, 
                 {
                  "height":0,
@@ -2394,8 +2394,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":784,
-                 "y":848
+                 "x":736,
+                 "y":784
                 }, 
                 {
                  "height":0,
@@ -2446,21 +2446,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":752,
-                 "y":848
-                }, 
-                {
-                 "height":0,
-                 "id":296,
-                 "name":"item.cryptkey",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":832,
-                 "y":848
+                 "x":736,
+                 "y":832
                 }, 
                 {
                  "height":0,
@@ -2655,7 +2642,7 @@
                  "visible":true,
                  "width":0,
                  "x":864,
-                 "y":768
+                 "y":752
                 }, 
                 {
                  "height":0,
@@ -2669,6 +2656,19 @@
                  "width":0,
                  "x":864,
                  "y":784
+                }, 
+                {
+                 "height":0,
+                 "id":371,
+                 "name":"item.preservedcat",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":832,
+                 "y":832
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -2741,7 +2741,7 @@
          "y":0
         }],
  "nextlayerid":16,
- "nextobjectid":371,
+ "nextobjectid":372,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

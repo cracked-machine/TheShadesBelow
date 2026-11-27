@@ -4,7 +4,11 @@
 #include <Components/Cart/Barrel.hpp>
 #include <SceneControl/Events/ProcessLevelCompleteSceneInputEvent.hpp>
 #include <SceneControl/Scene.hpp>
+#include <Sprites/VertexFloor.hpp>
+#include <Systems/Render/CartOverlaySystem.hpp>
 #include <Systems/Stores/StoreKey.hpp>
+
+#include <SFML/Graphics/Color.hpp>
 
 #include <cstddef>
 #include <vector>
@@ -17,11 +21,13 @@ namespace Game::Audio { class SoundBank; }
 namespace Game::Scene
 {
 
-//! @brief The victory screen shown when the player leaves the graveyard by the horse. It scores the cart barrels carried
-//! over from the graveyard (+1 per cadaver part, +2 per full barrel), then the inventory: preserved cats (+5 each) and spare
-//! cadaver parts not put in a barrel (+1 each), both consumed. One step per second, highlighting each part, barrel, cat
-//! and spare part on screen as it is counted.
-//! The player can only continue once everything has been counted. The barrels end with this scene.
+//! @brief The victory screen shown when the player leaves the graveyard by the horse: the res/scenes/levelcomplete.json
+//! room, with the player on the left handing everything over the table to Dr Knox on the right. It scores the cart barrels
+//! carried over from the graveyard (+1 per cadaver part, +2 per full barrel), then the inventory: preserved cats (+5 each)
+//! and spare cadaver parts not put in a barrel (+1 each), both consumed. One step per second: each cadaver part, cat or
+//! spare part is put on the table on its own as it is counted, and highlighted in the cart/inventory panels.
+//! The player cannot move. They can only continue once everything has been counted. The barrels end with this scene.
+//! The screen text, tally table, table item and panels are laid out by res/ui/levelcomplete.json.
 class LevelCompleteScene : public Scene<Events::ProcessLevelCompleteSceneInputEvent>
 {
 public:
@@ -36,13 +42,15 @@ public:
   {
   }
 
-  //! @brief No-op: no world entities need to be created for this scene
+  //! @brief Builds the room from res/scenes/levelcomplete.json (walls, floor, table, Dr Knox, night static shader) and
+  //! reads its text markers
   void on_init() override;
 
-  //! @brief Reloads persistent state, stops all audio and builds the tally steps from the barrels and inventory
+  //! @brief Reloads persistent state, stops all audio, places the player facing the table, locks the camera on the room
+  //! and builds the tally steps from the barrels and inventory
   void on_enter() override;
 
-  //! @brief Destroys the cart barrels, clears the registry and stops footstep audio
+  //! @brief Destroys the cart barrels, clears the registry, unlocks the camera and stops footstep audio
   void on_exit() override;
 
   //! @brief Get the name of the scene
@@ -54,8 +62,8 @@ public:
   entt::registry &registry() override;
 
 protected:
-  //! @brief Every second, runs the next tally step (adding its wealth and playing a loot sound), then renders the
-  //! victory screen
+  //! @brief Every second, runs the next tally step (adding its wealth and playing a loot sound), then renders the room and
+  //! the victory screen. The player is held still.
   //! @param dt The time elapsed since the last update
   void do_update( [[maybe_unused]] sf::Time dt ) override;
 
@@ -101,6 +109,24 @@ private:
   //! @brief Render the victory screen text and the tally rows, highlighting the step that has just been run.
   //! @param dt The time elapsed since the last update
   void render( sf::Time dt );
+
+  //! @brief What is on the table: the item of the step that has just been run (a barrel's cadaver part, a cat or a spare
+  //! part), or nothing for a full-barrel bonus or once the last item has been handed over.
+  //! @param all_counted Whether every step has been run.
+  //! @return The item, or std::nullopt for an empty table, and its highlight colour.
+  [[nodiscard]] std::pair<std::optional<Sys::SpriteKey>, sf::Color> table_item( bool all_counted ) const;
+
+  //! @brief Re-wires the freshly (re)created navmeshes into the systems that depend on them
+  void reinit_navmesh();
+
+  //! @brief Hold the player still at the start position, facing the table.
+  void hold_player();
+
+  //! @brief Vertex-based floor tile mesh for the room
+  Sprites::Containers::VertexFloor m_floormap;
+
+  //! @brief The centre of the room, where the camera is held
+  sf::Vector2f m_room_centre;
 
   //! @brief Accumulates elapsed time between tally steps
   sf::Time m_scorecheck_accumulator;

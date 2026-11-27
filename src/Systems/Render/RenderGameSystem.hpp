@@ -82,6 +82,14 @@ public:
   //! @brief This should be called by scene "on enter" functions.
   void init_world_view();
 
+  //! @brief Hold the world view centred on a fixed world position instead of following the player, e.g. for a scene
+  //! whose whole room is shown at once.
+  //! @param centre World pixel position to centre the view on.
+  void lock_camera( sf::Vector2f centre ) { m_camera_lock = centre; }
+
+  //! @brief Return the world view to following the player.
+  void unlock_camera() { m_camera_lock.reset(); }
+
 private:
   //! @brief Draws every entity in `s_zorder_queue` (sprites, particles, shaders, floor tiles), lowest z-order first
   void render_zorder_queue();
@@ -211,6 +219,9 @@ private:
 
   //! @brief Whether `m_camera_position` has been seeded with the player's position yet, to avoid lerping from the origin on the first frame.
   bool m_camera_initialized{ false };
+
+  //! @brief While set, the world view stays centred here instead of following the player. See lock_camera().
+  std::optional<sf::Vector2f> m_camera_lock;
 
   //! @brief Copy of the window contents taken when the z-order loop reaches a post-process shader, which is then
   //! drawn into that shader's render texture. Reused across passes and frames.
