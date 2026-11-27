@@ -2918,7 +2918,17 @@
     "sprite.ruin.stairs.down": {
       "spritesheet": {
         "displayname": "sprite.ruin.stairs.down",
-        "RelativeZOrder": [-5],
+        "RelativeZOrder": [
+          -5,-5,-5,
+          -5,-5,-5,
+          -5,-5,-5,
+          -5,-5,-5,
+          -5,-5,-5,
+          -5,-5,-5,
+          -5,-5,-5,
+          -5,-5,-5,
+          -5,-5,-5
+        ],
         "texture_path": "res/textures/ruin.png",
         "sprite_indices": [53],
         "indices_per_sequence": 1,
@@ -2958,7 +2968,17 @@
     "sprite.ruin.stairs.up": {
       "spritesheet": {
         "displayname": "sprite.ruin.stairs.up",
-        "RelativeZOrder": [-5],
+        "RelativeZOrder": [
+          -5,-5,-5,
+          -5,-5,-5,
+          -5,-5,-5,
+          -5,-5,-5,
+          -5,-5,-5,
+          -5,-5,-5,
+          -5,-5,-5,
+          -5,-5,-5,
+          -5,-5,-5
+        ],
         "texture_path": "res/textures/ruin.png",
         "sprite_indices": [50],
         "indices_per_sequence": 1,
@@ -2983,18 +3003,14 @@
     "sprite.ruin.wall.ext": {
       "spritesheet": {
         "displayname": "sprite.ruin.wall.ext",
-        "AbsoluteZOrder": [
-          0, 0, 0, 
-          0, -10, 0, 
-          0, 0, 0, 
-          -10, 0, -10          
-        ],
         "texture_path": "res/textures/ruinwall.png",
+        "RelativeZOrder": [
+           0,  0,-24, 0,
+          -24, -160, -48,  0
+        ],
         "sprite_indices": [
-          0, 1, 2, 
-          3, 4, 5, 
-          6, 7, 8, 
-          9, 10, 11
+          0, 1, 2, 3, 
+          4, 5, 6, 7
         ],
         "indices_per_sequence": 1,
         "framerate": 0,
@@ -3053,18 +3069,14 @@
     "sprite.shop.wall.int": {
       "spritesheet": {
         "displayname": "sprite.shop.wall.int",
-        "AbsoluteZOrder": [
-          0, 0, 0, 
-          0, -10, 0, 
-          0, 0, 0, 
-          -10, 0, -10          
-        ],
         "texture_path": "res/textures/shopwall.png",
+        "RelativeZOrder": [
+           0,  0,-24, 0,
+          -24, 0, 0,  0  
+        ],
         "sprite_indices": [
-          0, 1, 2, 
-          3, 4, 5, 
-          6, 7, 8, 
-          9, 10, 11
+          0, 1, 2, 3, 
+          4, 5, 6, 7
         ],
         "indices_per_sequence": 1,
         "framerate": 0,
