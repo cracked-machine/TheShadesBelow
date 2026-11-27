@@ -407,11 +407,11 @@
     "sprite.crypt.wall.ext": {
       "spritesheet": {
         "displayname": "sprite.crypt.wall.ext",
+        "texture_path": "res/textures/cryptwall.png",
         "RelativeZOrder": [
            0, 0,-24, 0,
           -24, 0, 0, 0  
         ],
-        "texture_path": "res/textures/cryptwall.png",
         "sprite_indices": [
           0, 1, 2, 3, 
           4, 5, 6, 7
@@ -3176,18 +3176,15 @@
     "sprite.well.wall.int": {
       "spritesheet": {
         "displayname": "sprite.well.wall.int",
-        "AbsoluteZOrder": [
-          0, 0, 0, 
-          0, -10, 0, 
-          0, 0, 0, 
-          -10, 0, -10
-        ],
         "texture_path": "res/textures/wellwall.png",
+        "RelativeZOrder": [
+           0, 0,-24, 0,
+          -24, 0, 0, 0  
+        ],
         "sprite_indices": [
-          0, 1, 2, 
-          3, 4, 5, 
-          6, 7, 8, 
-          9, 10, 11],
+          0, 1, 2, 3, 
+          4, 5, 6, 7
+        ],
         "indices_per_sequence": 1,
         "framerate": 0,
         "grid_size": {
