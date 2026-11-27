@@ -68,6 +68,7 @@
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <entt/entity/fwd.hpp>
+#include <algorithm>
 #include <stdexcept>
 
 namespace Game::Sys
@@ -440,6 +441,8 @@ void CryptSystem::gen_crypt_initial_interior()
   // position for each wall's cap sprite (one tile above the wall), and checking the live grid
   // here would let one wall's cap phantom-reserve an unrelated, still-undecided tile - including
   // genuinely open room floor - leaving it permanently marked reserved despite never being walled.
+  // Wall sprites (Cmp::Wall) are deliberately ignored: they may be placed cosmetically over open levelgen cells,
+  // so only the levelgen layer decides the exterior wall area (levelgen wall cells have no world position entity).
   auto reserved_sm = m_reserved_sm.lock();
   PathFinding::SpatialHashGrid pre_existing_reserved;
   if ( reserved_sm ) pre_existing_reserved = *reserved_sm;
@@ -449,7 +452,12 @@ void CryptSystem::gen_crypt_initial_interior()
   auto position_view = reg().view<Cmp::Position>( entt::exclude<Cmp::Player::Character> );
   for ( auto [pos_entt, pos_cmp] : position_view.each() )
   {
-    if ( not pre_existing_reserved.at( pos_cmp ).empty() ) continue;
+    // cosmetic wall sprites never become obstacles
+    if ( reg().all_of<Cmp::Wall>( pos_entt ) ) continue;
+    const auto reserved = pre_existing_reserved.at( pos_cmp );
+    const bool reserved_by_non_wall = std::ranges::any_of( reserved, [&]( entt::entity e )
+                                                           { return not reg().valid( e ) or not reg().all_of<Cmp::Wall>( e ); } );
+    if ( reserved_by_non_wall ) continue;
     if ( item_sm and not item_sm->at( pos_cmp ).empty() ) continue;
     bool add_interior_wall = true;
     for ( auto [start_room_entity, start_room_cmp] : reg().view<Cmp::Crypt::RoomStart>().each() )
@@ -642,21 +650,17 @@ void CryptSystem::create_initial_closed_rooms( sf::Vector2u map_grid_size, const
   // Currently no special logic needed; placeholder for future use
 }
 
-void CryptSystem::create_end_room( sf::Vector2u map_grid_size )
+void CryptSystem::create_end_room()
 {
-  auto map_grid_sizef = sf::Vector2f( static_cast<float>( map_grid_size.x ) * Constants::kGridSizePxF.x,
-                                      static_cast<float>( map_grid_size.y ) * Constants::kGridSizePxF.y );
-  auto kGridSizePxF = Constants::kGridSizePxF;
-  // target position for the objective: always center top of the map
-  const auto &ms = Sys::SpriteStore::instance().get( "sprite.crypt.objective.closed" );
+  // the end room follows the objective wherever it was placed in the scene's multiblock layer
+  auto objective_view = reg().view<Cmp::Crypt::ObjectiveMultiBlock>();
+  if ( objective_view.front() == entt::null ) throw std::runtime_error( "CryptSystem::create_end_room - Unable to get Cmp::Crypt::ObjectiveMultiBlock" );
+  const sf::FloatRect objective_bounds = reg().get<Cmp::Crypt::ObjectiveMultiBlock>( objective_view.front() );
 
-  float centered_x = ( map_grid_sizef.x / 2.f ) - ( ms.sprite_size().x / 2.f );
-  Cmp::Position objective_position( { centered_x, kGridSizePxF.y * 2.f }, ms.sprite_size() );
-
+  // cover the objective plus a 2-tile approach area below it
   auto end_room_entity = reg().create();
-  reg().emplace_or_replace<Cmp::Crypt::RoomEnd>( end_room_entity,
-                                                 sf::Vector2f{ objective_position.position.x - kGridSizePxF.x, objective_position.position.y },
-                                                 sf::Vector2f{ objective_position.size.x, objective_position.size.y + ( kGridSizePxF.y * 2.f ) } );
+  reg().emplace_or_replace<Cmp::Crypt::RoomEnd>( end_room_entity, objective_bounds.position,
+                                                 sf::Vector2f{ objective_bounds.size.x, objective_bounds.size.y + ( Constants::kGridSizePxF.y * 2.f ) } );
 }
 
 /// PRIVATE FUNCTIONS
@@ -683,6 +687,7 @@ void CryptSystem::decorate_interior_wall( entt::entity main_entt, const Cmp::Pos
   const Sprites::SpriteSheet &ss_main = Sys::SpriteStore::instance().get( "sprite.crypt.wall.int.main" );
   const Sprites::SpriteSheet &ss_cap = Sys::SpriteStore::instance().get( "sprite.crypt.wall.int.cap" );
   auto uuid = Cmp::UUID::generate();
+  auto reserved_sm = m_reserved_sm.lock();
 
   int tile_idx = static_cast<int>( room_wall_type );
   Factory::Obstacle::add_obstacle( reg(), main_entt );
@@ -694,8 +699,11 @@ void CryptSystem::decorate_interior_wall( entt::entity main_entt, const Cmp::Pos
   auto cap_entt = reg().create();
   Cmp::Position cap_position( { main_pos_cmp.x(), main_pos_cmp.y() - main_pos_cmp.size.y }, main_pos_cmp.size );
   reg().emplace_or_replace<Cmp::Position>( cap_entt, cap_position );
-  Factory::Obstacle::decorate_obstacle( reg(), cap_entt, cap_position, ss_cap, tile_idx, ss_cap.zorder( tile_idx, main_pos_cmp.y() ), false );
-  if ( auto reserved_sm = m_reserved_sm.lock() ) reserved_sm->insert( cap_entt, cap_position );
+  // keep the cap visible over an exterior wall sprite in the row above
+  const float cap_zorder = Factory::Obstacle::cap_zorder_over_walls( reg(), reserved_sm.get(), main_pos_cmp, cap_position,
+                                                                     ss_cap.zorder( tile_idx, main_pos_cmp.y() ) );
+  Factory::Obstacle::decorate_obstacle( reg(), cap_entt, cap_position, ss_cap, tile_idx, cap_zorder, false );
+  if ( reserved_sm ) reserved_sm->insert( cap_entt, cap_position );
   reg().emplace_or_replace<Cmp::UUID>( cap_entt, uuid );
   Factory::Obstacle::add_obstacle_cap( reg(), cap_entt );
 }

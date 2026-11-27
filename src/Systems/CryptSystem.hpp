@@ -128,9 +128,9 @@ public:
   //! @param params Room count/size/spacing tunables
   void create_initial_closed_rooms( sf::Vector2u map_grid_size, const Crypt::LayoutParams &params );
 
-  //! @brief Generate the main objective for the Crypt
-  //! @param map_grid_size
-  void create_end_room( sf::Vector2u map_grid_size );
+  //! @brief Create the Cmp::Crypt::RoomEnd around the objective placed by the scene's multiblock layer.
+  //! @note Requires the Cmp::Crypt::ObjectiveMultiBlock to exist already (built by LevelGenerator::build_scene_from_data()).
+  void create_end_room();
 
   // ---- Room primitives, composed by Sys::Crypt::CryptVariant ----
 

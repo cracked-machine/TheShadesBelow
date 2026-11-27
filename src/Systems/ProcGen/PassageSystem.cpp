@@ -633,7 +633,9 @@ void PassageSystem::fill_all_passages()
     auto cap_entt = reg().create();
     Cmp::Position cap_position( { pos_cmp.x(), pos_cmp.y() - pos_cmp.size.y }, pos_cmp.size );
     reg().emplace_or_replace<Cmp::Position>( cap_entt, cap_position );
-    Factory::Obstacle::decorate_obstacle( reg(), cap_entt, cap_position, ss_cap, 0, ss_cap.zorder( 0, pos_cmp.y() ), false );
+    // keep the cap visible over an exterior wall sprite in the row above
+    const float cap_zorder = Factory::Obstacle::cap_zorder_over_walls( reg(), reserved_sm.get(), pos_cmp, cap_position, ss_cap.zorder( 0, pos_cmp.y() ) );
+    Factory::Obstacle::decorate_obstacle( reg(), cap_entt, cap_position, ss_cap, 0, cap_zorder, false );
     if ( reserved_sm ) reserved_sm->insert( cap_entt, cap_position );
     reg().emplace_or_replace<Cmp::UUID>( cap_entt, uuid );
     Factory::Obstacle::add_obstacle_cap( reg(), cap_entt );

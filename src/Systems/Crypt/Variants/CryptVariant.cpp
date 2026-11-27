@@ -14,7 +14,7 @@ namespace Game::Sys::Crypt
 
 void CryptVariant::generate( sf::Vector2u map_size_grid )
 {
-  m_crypt.create_end_room( map_size_grid );
+  m_crypt.create_end_room();
   m_crypt.create_initial_closed_rooms( map_size_grid, layout_params() );
   m_passages.cache_all_room_connections();
   m_crypt.gen_crypt_initial_interior();

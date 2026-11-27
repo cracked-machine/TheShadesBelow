@@ -449,6 +449,7 @@
         {
          "draworder":"topdown",
          "id":7,
+         "locked":true,
          "name":"solid",
          "objects":[
                 {

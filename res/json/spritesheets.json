@@ -333,7 +333,7 @@
     "sprite.crypt.objective.closed": {
       "spritesheet": {
         "displayname": "sprite.crypt.objective.closed",
-        "RelativeZOrder": [-10],
+        "RelativeZOrder": [-4],
         "texture_path": "res/textures/crypt_objective.png",
         "sprite_indices": [0],
         "walking_collision_mask": [
@@ -357,7 +357,7 @@
     "sprite.crypt.objective.opened": {
       "spritesheet": {
         "displayname": "sprite.crypt.objective.opened",
-        "RelativeZOrder": [-10],
+        "RelativeZOrder": [-4],
         "texture_path": "res/textures/crypt_objective.png",
         "sprite_indices": [144],
         "walking_collision_mask": [
@@ -407,28 +407,14 @@
     "sprite.crypt.wall.ext": {
       "spritesheet": {
         "displayname": "sprite.crypt.wall.ext",
-        "AbsoluteZOrder": [
-          0, 0, 0, 
-          0, -10, 0, 
-          0, 0, 0, 
-          -10, 0, -10, 
-          0, 0, 0, 
-          0, 0, 0, 
-          0, 0, 0, 
-          -10, -10, 0, 
-          0
+        "RelativeZOrder": [
+           0, 0,-24, 0,
+          -24, 0, 0, 0  
         ],
         "texture_path": "res/textures/cryptwall.png",
         "sprite_indices": [
-          0, 1, 2, 
-          3, 4, 5, 
-          6, 7, 8, 
-          9, 10, 11, 
-          12, 13, 14, 
-          15, 16, 17, 
-          18, 19, 20, 
-          21, 22, 23, 
-          24
+          0, 1, 2, 3, 
+          4, 5, 6, 7
         ],
         "indices_per_sequence": 1,
         "framerate": 0,

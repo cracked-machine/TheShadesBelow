@@ -10,6 +10,7 @@
 #include <Components/Player/Character.hpp>
 #include <Components/Player/NoPath.hpp>
 #include <Components/UUID.hpp>
+#include <Components/Wall.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <Factory/ObstacleFactory.hpp>
 #include <PathFinding/SmartPointers.hpp>
@@ -18,6 +19,8 @@
 #include <Utils/Constants.hpp>
 #include <entt/entity/fwd.hpp>
 #include <spdlog/spdlog.h>
+
+#include <algorithm>
 #include <stdexcept>
 
 namespace Game::Factory::Obstacle
@@ -48,6 +51,27 @@ bool add_obstacle( entt::registry &reg, entt::entity entity, const PathFinding::
 }
 
 void add_obstacle_cap( entt::registry &reg, entt::entity entity ) { reg.emplace_or_replace<Cmp::ObstacleCap>( entity ); }
+
+float cap_zorder_over_walls( const entt::registry &reg, const PathFinding::SpatialHashGrid *reserved_sm, const Cmp::Position &main_pos,
+                             const Cmp::Position &cap_pos, float default_zorder )
+{
+  // Wall sprites sort from just above their bottom edge (main_pos.y - 0.01 here), so stay below anything sorting at main_pos.y
+  constexpr float kCapOverWallEpsilon = 0.005f;
+  if ( reserved_sm == nullptr ) return default_zorder;
+
+  auto is_wall = [&]( entt::entity e ) { return reg.valid( e ) and reg.all_of<Cmp::Wall, Cmp::ZOrderValue>( e ); };
+
+  // main block hidden under a wall sprite: keep its cap hidden too
+  if ( std::ranges::any_of( reserved_sm->at( main_pos ), is_wall ) ) return default_zorder;
+
+  float zorder = default_zorder;
+  for ( auto e : reserved_sm->at( cap_pos ) )
+  {
+    if ( not is_wall( e ) ) continue;
+    zorder = std::max( zorder, reg.get<Cmp::ZOrderValue>( e ).get() + kCapOverWallEpsilon );
+  }
+  return zorder;
+}
 
 void decorate_obstacle( entt::registry &reg, entt::entity entity, Cmp::Position pos_cmp, const Sprites::SpriteSheet &ms, std::size_t sprite_tile_idx,
                         float zorder, bool blocking, const PathFinding::SpatialHashGrid *reserved_sm )

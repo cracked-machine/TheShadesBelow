@@ -33,6 +33,18 @@ bool add_obstacle( entt::registry &registry, entt::entity entity, const PathFind
 //! @param entity
 void add_obstacle_cap( entt::registry &registry, entt::entity entity );
 
+//! @brief Zorder for an obstacle cap that keeps it visible over a Cmp::Wall sprite occupying the cap's cell.
+//! @note Unchanged when no wall sprite is in the cap cell, or when the main block itself sits under a wall sprite
+//! (the block is hidden, so its cap must stay hidden too).
+//! @param registry
+//! @param reserved_sm Reserved grid; wall sprites are always inserted into it by the level generator.
+//! @param main_pos The obstacle's main block position.
+//! @param cap_pos The cap position (one tile above main_pos).
+//! @param default_zorder The cap's normal zorder.
+//! @return The zorder to give the cap.
+float cap_zorder_over_walls( const entt::registry &registry, const PathFinding::SpatialHashGrid *reserved_sm, const Cmp::Position &main_pos,
+                             const Cmp::Position &cap_pos, float default_zorder );
+
 //! @brief Create an obstacle WITH sprite for final level gen pass
 //! @param registry
 //! @param entity
