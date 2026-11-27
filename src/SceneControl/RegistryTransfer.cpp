@@ -2,9 +2,8 @@
 #include <Components/AbsoluteRenderOffset.hpp>
 #include <Components/AbsoluteRotation.hpp>
 #include <Components/AnimData.hpp>
-#include <Components/Cart/Barrel.hpp>
 #include <Components/Armable.hpp>
-#include <Components/WorldTile.hpp>
+#include <Components/Cart/Barrel.hpp>
 #include <Components/Crypt/EnteredDoor.hpp>
 #include <Components/Crypt/Lever.hpp>
 #include <Components/Crypt/ObjectiveMultiBlock.hpp>
@@ -16,10 +15,12 @@
 #include <Components/Direction.hpp>
 #include <Components/FootStepAlpha.hpp>
 #include <Components/FootStepTimer.hpp>
+#include <Components/Grave/CurseTablet.hpp>
+#include <Components/Grave/PlantMultiBlock.hpp>
+#include <Components/Health.hpp>
 #include <Components/Inventory/DowsingTarget.hpp>
 #include <Components/Inventory/FlashUIExtraLife.hpp>
 #include <Components/Inventory/Grimoire.hpp>
-#include <Components/Grave/CurseTablet.hpp>
 #include <Components/Inventory/PlayerInventorySlot.hpp>
 #include <Components/Inventory/StackCount.hpp>
 #include <Components/Inventory/StingDamage.hpp>
@@ -29,6 +30,7 @@
 #include <Components/Npc/NoPathFinding.hpp>
 #include <Components/Npc/SummonOffering.hpp>
 #include <Components/Obstacle.hpp>
+#include <Components/Plant/Grass.hpp>
 #include <Components/Player/ArrowCompass.hpp>
 #include <Components/Player/Character.hpp>
 #include <Components/Player/ConsumeTimer.hpp>
@@ -48,6 +50,7 @@
 #include <Components/Ruin/ObjectiveType.hpp>
 #include <Components/Stats/PlayerStats.hpp>
 #include <Components/UUID.hpp>
+#include <Components/WorldTile.hpp>
 #include <Components/ZOrderValue.hpp>
 #include <PathFinding/SpatialHashGrid.hpp>
 #include <SceneControl/IScene.hpp>
@@ -136,9 +139,10 @@ RegistryTransfer::RegCopy RegistryTransfer::copy_reg( IScene &scene, Scene::RegC
       if ( source_registry.any_of<Cmp::Player::Character>( entity ) ) { continue; }
 
       // Skip transfer on deny list components
-      if ( source_registry.any_of<Cmp::Obstacle, Cmp::Armable, Cmp::WorldTile, Cmp::Npc::NoPathFinding, Cmp::FootStepTimer, Cmp::FootStepAlpha, Cmp::Crypt::RoomOpen,
-                                  Cmp::Crypt::RoomClosed, Cmp::Crypt::RoomStart, Cmp::Crypt::RoomEnd, Cmp::Crypt::PassageBlock, Cmp::Crypt::Lever,
-                                  Cmp::Crypt::ObjectiveMultiBlock, Cmp::Player::ArrowCompass>( entity ) )
+      if ( source_registry.any_of<Cmp::Obstacle, Cmp::Armable, Cmp::WorldTile, Cmp::Npc::NoPathFinding, Cmp::FootStepTimer, Cmp::FootStepAlpha,
+                                  Cmp::Crypt::RoomOpen, Cmp::Crypt::RoomClosed, Cmp::Crypt::RoomStart, Cmp::Crypt::RoomEnd, Cmp::Crypt::PassageBlock,
+                                  Cmp::Crypt::Lever, Cmp::Crypt::ObjectiveMultiBlock, Cmp::Player::ArrowCompass, Cmp::PlantMultiBlock, Cmp::Health,
+                                  Cmp::Plant::Grass>( entity ) )
       {
         skipped_cmp++;
         continue;

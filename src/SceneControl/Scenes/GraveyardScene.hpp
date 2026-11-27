@@ -36,7 +36,7 @@ public:
   void on_init() override;
 
   //! @brief Restores the player to their last graveyard position (or start position on first spawn),
-  //! starts graveyard music, and resets the scene-exit cooldown
+  //! starts graveyard music, and relocks the crypt door the player came out of
   void on_enter() override;
 
   //! @brief Clears the registry, stops graveyard music/footstep audio, and clears floor tiles

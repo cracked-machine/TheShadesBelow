@@ -79,12 +79,7 @@ void CryptSystem::update( sf::Time dt )
   if ( Utils::is_current_scene( reg(), Cmp::SceneSettings::SceneId::GRAVEYARD ) )
   {
     update_mb_zorder<Cmp::Crypt::BuildingMultiBlock, Cmp::Crypt::BuildingSegment>();
-    m_scene_entrance_cooldown_timer += dt;
-    if ( m_scene_entrance_cooldown_timer >= m_scene_entrance_cooldown_time )
-    {
-      check_entrance_collision();
-      m_scene_entrance_cooldown_timer = sf::Time::Zero;
-    }
+    check_entrance_collision();
     unlock_crypt_door();
   }
   else
@@ -165,6 +160,8 @@ void CryptSystem::check_entrance_collision()
 
   for ( auto [door_entity, door_cmp, door_pos_cmp] : door_view.each() )
   {
+    if ( not door_cmp.is_open() ) continue;
+
     // optimize: skip if not visible
     if ( not Utils::is_visible_in_view( view_bounds, door_pos_cmp ) ) continue;
 

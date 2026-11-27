@@ -157,12 +157,6 @@ private:
 
   //! @brief True once all rune markings are active and the stairs gate has been unlocked.
   bool m_puzzle_solved{ false };
-
-  //! @brief Elapsed time since the scene was last entered, used to gate exit collision checks
-  sf::Time m_exit_cooldown_timer;
-
-  //! @brief Minimum time after entering the scene before exit collisions (e.g. crypt entrance) are checked
-  sf::Time m_exit_cooldown_timeout{ sf::seconds( 1 ) };
 };
 } // namespace Game::Sys
 

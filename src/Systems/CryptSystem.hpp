@@ -266,12 +266,6 @@ private:
 
   //! @brief Ground world items (see Scene::m_item_sm).
   PathFinding::SpatialHashGridWeakPtr m_item_sm;
-
-  //! @brief Elapsed time since the scene was last entered, used to gate exit collision checks
-  sf::Time m_scene_entrance_cooldown_timer;
-
-  //! @brief Minimum time after entering the scene before exit collisions (e.g. crypt entrance) are checked
-  sf::Time m_scene_entrance_cooldown_time{ sf::seconds( 2 ) };
 };
 
 } // namespace Game::Sys
