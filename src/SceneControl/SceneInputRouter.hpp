@@ -77,6 +77,22 @@ public:
   entt::dispatcher &m_scenemanager_event_dispatcher;
 
 private:
+  //! @brief Where the E key is in confirming the leave prompt. The prompt is opened by pressing E, and that E is still
+  //! held (and key-repeating) as the prompt opens, so only a fresh press-and-release of E while it is open confirms.
+  enum class LeaveConfirmKey
+  {
+    //! @brief The prompt is not open: work out the state the next time it is.
+    UNKNOWN,
+    //! @brief The E that opened the prompt is still held: ignore it until it is released.
+    HELD_FROM_OPEN,
+    //! @brief E is up: the next press arms it.
+    READY,
+    //! @brief E was pressed while the prompt was open: its release confirms.
+    ARMED
+  };
+  //! @brief See LeaveConfirmKey. Reset to UNKNOWN whenever the graveyard handler runs with the prompt closed.
+  LeaveConfirmKey m_leave_confirm_key{ LeaveConfirmKey::UNKNOWN };
+
   //! @brief reset and process new user direction input
   void process_move_keys();
 
@@ -103,8 +119,8 @@ private:
   //!        the common window events are handled.
   void tooltip_pause_input_handler();
   //! @brief Process input while the "leave the graveyard?" prompt is open. Gameplay is paused, so only the prompt's own
-  //!        controls (Up/Down/W/S/wheel to choose, Enter to confirm, Y/N/Escape to answer) and the common window events
-  //!        are handled.
+  //!        controls (Up/Down/W/S/wheel to choose, E to confirm, Y/N/Escape to answer) and the common window events
+  //!        are handled. See LeaveConfirmKey.
   void leave_prompt_input_handler();
   //! @brief Check whether the "leave the graveyard?" prompt is open (see OverlayArbitrationSystem::active_modal()).
   //! @return true if the prompt is open

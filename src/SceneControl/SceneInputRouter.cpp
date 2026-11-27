@@ -128,6 +128,7 @@ void SceneInputRouter::graveyard_scene_state_handler()
     leave_prompt_input_handler();
     return;
   }
+  m_leave_confirm_key = LeaveConfirmKey::UNKNOWN;
   if ( is_tooltip_paused() )
   {
     tooltip_pause_input_handler();
@@ -515,6 +516,11 @@ void SceneInputRouter::leave_prompt_input_handler()
   // F3 debug keys are blocked (see OverlayArbitrationSystem).
   using Action = Events::OverlayEvent::OverlayActions;
   auto trigger = [this]( Action action ) { get_systems_event_queue().trigger( Events::OverlayEvent( action ) ); };
+  // first frame open: is the E that opened the prompt still held? (its release may already have been consumed)
+  if ( m_leave_confirm_key == LeaveConfirmKey::UNKNOWN )
+  {
+    m_leave_confirm_key = sf::Keyboard::isKeyPressed( sf::Keyboard::Scancode::E ) ? LeaveConfirmKey::HELD_FROM_OPEN : LeaveConfirmKey::READY;
+  }
   while ( const std::optional event = m_window.pollEvent() )
   {
     forward_to_imgui( *event );
@@ -524,13 +530,19 @@ void SceneInputRouter::leave_prompt_input_handler()
       const auto scancode = keyPressed->scancode;
       if ( scancode == sf::Keyboard::Scancode::Up or scancode == sf::Keyboard::Scancode::W ) { trigger( Action::LEAVE_PREV ); }
       else if ( scancode == sf::Keyboard::Scancode::Down or scancode == sf::Keyboard::Scancode::S ) { trigger( Action::LEAVE_NEXT ); }
+      // key-repeats of the E that opened the prompt are ignored, see LeaveConfirmKey
+      else if ( scancode == sf::Keyboard::Scancode::E and m_leave_confirm_key == LeaveConfirmKey::READY ) { m_leave_confirm_key = LeaveConfirmKey::ARMED; }
     }
     // answer on release: the gameplay handler must never see a stray Escape release (it quits the game), and a held E
-    // (which opened the prompt, and key-repeats) is never an answer
+    // (which opened the prompt, and key-repeats) is never an answer: E only confirms once pressed afresh
     else if ( const auto *keyReleased = event->getIf<sf::Event::KeyReleased>() )
     {
       const auto scancode = keyReleased->scancode;
-      if ( scancode == sf::Keyboard::Scancode::Enter ) { trigger( Action::LEAVE_CONFIRM ); }
+      if ( scancode == sf::Keyboard::Scancode::E )
+      {
+        if ( m_leave_confirm_key == LeaveConfirmKey::ARMED ) { trigger( Action::LEAVE_CONFIRM ); }
+        m_leave_confirm_key = LeaveConfirmKey::READY;
+      }
       else if ( scancode == sf::Keyboard::Scancode::Y ) { trigger( Action::LEAVE_YES ); }
       else if ( scancode == sf::Keyboard::Scancode::N or scancode == sf::Keyboard::Scancode::Escape ) { trigger( Action::LEAVE_NO ); }
     }

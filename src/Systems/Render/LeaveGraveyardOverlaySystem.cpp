@@ -51,7 +51,7 @@ void LeaveGraveyardOverlaySystem::close()
 void LeaveGraveyardOverlaySystem::update( [[maybe_unused]] sf::Time dt )
 {
   if ( not is_open() ) { return; }
-  render_selection_menu( "Do you want to leave the grave yard?", "", true, kRows, m_selected, "Up/Down to choose, Enter to confirm (Y / N)" );
+  render_selection_menu( "Do you want to leave the grave yard?", "", true, kRows, m_selected, "Up/Down to choose, E to confirm (Y / N)" );
 }
 
 void LeaveGraveyardOverlaySystem::on_overlay_event( const Events::OverlayEvent &ev )
