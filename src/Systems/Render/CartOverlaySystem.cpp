@@ -122,22 +122,22 @@ void CartOverlaySystem::render_level_tally( sf::Time dt, std::span<const Cmp::Ca
   render_tally_table( tally );
   if ( table_item ) { render_table_item( *table_item, table_highlight ); }
 
-  // each section hangs from the top centre of its layout rect
-  const auto top_center = []( const Render::UiLayout::Icon &icon ) { return sf::Vector2f( icon.rect.getCenter().x, icon.rect.position.y ); };
+  // each section hangs from the top-left of its layout rect and grows rightwards
   if ( not barrels.empty() )
   {
-    sf::Vector2f section_top = top_center( find_element( layout.m_icons, "cart_icon" ) );
-    section_top.y += render_caption( "Cart", section_top, scale );
-    const float panel_height = m_panel_ui_layout->design_size().y * scale;
-    std::ignore = render_barrel_row( barrels, { section_top.x, section_top.y + ( panel_height / 2.f ) }, barrel_progress );
+    sf::Vector2f section_top_left = find_element( layout.m_icons, "cart_icon" ).rect.position;
+    section_top_left.y += render_caption( "Cart", section_top_left, scale );
+    const sf::Vector2f panel_size = barrel_row_panel_size( barrels.size(), scale );
+    std::ignore = render_barrel_row( barrels, section_top_left + ( panel_size / 2.f ), barrel_progress );
   }
 
-  const bool any_icons = std::ranges::any_of( icon_rows, []( const IconRow &row ) { return not row.sprites.empty(); } );
-  if ( any_icons )
+  // the inventory section is always shown: with nothing to count it shows the player's empty slots instead
   {
-    sf::Vector2f section_top = top_center( find_element( layout.m_icons, "inventory_icon" ) );
-    section_top.y += render_caption( "Inventory", section_top, scale );
-    std::ignore = render_icon_rows( icon_rows, section_top );
+    sf::Vector2f section_top_left = find_element( layout.m_icons, "inventory_icon" ).rect.position;
+    section_top_left.y += render_caption( "Inventory", section_top_left, scale );
+    const bool any_icons = std::ranges::any_of( icon_rows, []( const IconRow &row ) { return not row.sprites.empty(); } );
+    if ( any_icons ) { std::ignore = render_icon_rows( icon_rows, section_top_left ); }
+    else { std::ignore = render_empty_slots( Utils::Player::get_inventory_slot_count( reg() ), section_top_left ); }
   }
 
   end_overlay_window();
@@ -215,12 +215,11 @@ std::optional<int> CartOverlaySystem::tally_value( const VictoryTally &tally, st
   return std::nullopt;
 }
 
-float CartOverlaySystem::render_icon_rows( std::span<const IconRow> icon_rows, sf::Vector2f top_center )
+float CartOverlaySystem::render_icon_rows( std::span<const IconRow> icon_rows, sf::Vector2f top_left )
 {
   const float scale = Render::UiLayout::ui_scale( m_window.getSize() );
   constexpr float kRowGap = 20.f;
-  constexpr float kIconScale = 2.f;
-  const float icon_scale = kIconScale * scale;
+  const float icon_scale = kInventoryIconScale * scale;
   // same padding round the rows as the barrel panel keeps round its slots
   const sf::Vector2f panel_pad = ( m_panel_ui_layout->design_size() - m_slot_ui_layout->design_size() ) * scale / 2.f;
 
@@ -254,16 +253,16 @@ float CartOverlaySystem::render_icon_rows( std::span<const IconRow> icon_rows, s
   }
 
   const sf::Vector2f panel_size( content_width + ( 2.f * panel_pad.x ), content_height + ( 2.f * panel_pad.y ) );
-  render_panel( sf::FloatRect( { top_center.x - ( panel_size.x / 2.f ), top_center.y }, panel_size ), scale );
+  render_panel( sf::FloatRect( top_left, panel_size ), scale );
 
-  float row_top = top_center.y + panel_pad.y;
+  float row_top = top_left.y + panel_pad.y;
   for ( std::size_t row_idx = 0; row_idx < icon_rows.size(); ++row_idx )
   {
     const IconRow &row = icon_rows[row_idx];
     const RowSize &row_size = row_sizes.at( row_idx );
     if ( row.sprites.empty() ) { continue; }
 
-    float icon_x = top_center.x - ( row_size.width / 2.f );
+    float icon_x = top_left.x + panel_pad.x;
     for ( std::size_t idx = 0; idx < row.sprites.size(); ++idx )
     {
       const Sys::SpriteKey &sprite = row.sprites[idx];
@@ -283,6 +282,39 @@ float CartOverlaySystem::render_icon_rows( std::span<const IconRow> icon_rows, s
   return panel_size.y;
 }
 
+float CartOverlaySystem::render_empty_slots( std::size_t slot_count, sf::Vector2f top_left )
+{
+  if ( slot_count == 0 ) { return 0.f; }
+  const float scale = Render::UiLayout::ui_scale( m_window.getSize() );
+  // the same cell size and spacing as an icon in render_icon_rows()
+  const sf::Vector2f slot_size = Constants::kGridSizePxF * kInventoryIconScale * scale;
+  const float gap = slot_size.x / 4.f;
+  const sf::Vector2f panel_pad = ( m_panel_ui_layout->design_size() - m_slot_ui_layout->design_size() ) * scale / 2.f;
+  const sf::Vector2f panel_size( ( static_cast<float>( slot_count ) * slot_size.x ) + ( static_cast<float>( slot_count - 1 ) * gap ) + ( 2.f * panel_pad.x ),
+                                 slot_size.y + ( 2.f * panel_pad.y ) );
+  render_panel( sf::FloatRect( top_left, panel_size ), scale );
+
+  // styled like the barrel slot's empty part outlines
+  sf::Color fill_color( 0x40, 0x40, 0x40, 0x40 );
+  sf::Color line_color = sf::Color::Black;
+  if ( not m_slot_ui_layout->m_outlines.empty() )
+  {
+    fill_color = m_slot_ui_layout->m_outlines.front().fill_color;
+    line_color = m_slot_ui_layout->m_outlines.front().line_color;
+  }
+  ImDrawList *draw_list = ImGui::GetWindowDrawList();
+  sf::Vector2f slot_pos = top_left + panel_pad;
+  for ( std::size_t idx = 0; idx < slot_count; ++idx )
+  {
+    const ImVec2 slot_min( slot_pos.x, slot_pos.y );
+    const ImVec2 slot_max( slot_pos.x + slot_size.x, slot_pos.y + slot_size.y );
+    draw_list->AddRectFilled( slot_min, slot_max, IM_COL32( fill_color.r, fill_color.g, fill_color.b, fill_color.a ) );
+    draw_list->AddRect( slot_min, slot_max, IM_COL32( line_color.r, line_color.g, line_color.b, line_color.a ), 0.f, 0, 3.f * scale );
+    slot_pos.x += slot_size.x + gap;
+  }
+  return panel_size.y;
+}
+
 void CartOverlaySystem::render_panel( const sf::FloatRect &rect, float scale )
 {
   // the panel is authored at (0, 0), so this places it at the rectangle (and scales its border); then fit its size
@@ -292,12 +324,12 @@ void CartOverlaySystem::render_panel( const sf::FloatRect &rect, float scale )
   render_outlines_imgui( *m_panel_ui_layout );
 }
 
-float CartOverlaySystem::render_caption( std::string_view caption, sf::Vector2f top_center, float scale )
+float CartOverlaySystem::render_caption( std::string_view caption, sf::Vector2f top_left, float scale )
 {
   constexpr float kCaptionFontSize = 32.f;
   constexpr float kCaptionGap = 10.f;
   const float font_size = kCaptionFontSize * scale;
-  draw_text( caption, font_size, top_center, sf::Color::White, TextAlign::CENTER, sf::Color::Black, 2.f * scale );
+  draw_text( caption, font_size, top_left, sf::Color::White, TextAlign::LEFT, sf::Color::Black, 2.f * scale );
   return measure_text( caption, font_size ).y + ( kCaptionGap * scale );
 }
 
@@ -306,19 +338,26 @@ float CartOverlaySystem::render_barrel_row( std::span<const Cmp::Cart::Barrel> b
 {
   const float scale = Render::UiLayout::ui_scale( m_window.getSize() );
   const sf::Vector2f slot_size = m_slot_ui_layout->design_size() * scale;
-  const float row_width = slot_size.x * static_cast<float>( barrels.size() );
-  sf::Vector2f slot_origin( row_center.x - ( row_width / 2.f ), row_center.y - ( slot_size.y / 2.f ) );
-
-  // the panel is authored around one slot: keep that padding around the whole row
   const sf::Vector2f panel_pad = ( m_panel_ui_layout->design_size() - m_slot_ui_layout->design_size() ) * scale / 2.f;
-  const sf::Vector2f panel_size{ row_width + ( 2.f * panel_pad.x ), slot_size.y + ( 2.f * panel_pad.y ) };
-  render_panel( sf::FloatRect( slot_origin - panel_pad, panel_size ), scale );
+  const sf::Vector2f panel_size = barrel_row_panel_size( barrels.size(), scale );
+  const sf::Vector2f panel_pos = row_center - ( panel_size / 2.f );
+  render_panel( sf::FloatRect( panel_pos, panel_size ), scale );
+
+  sf::Vector2f slot_origin = panel_pos + panel_pad;
   for ( std::size_t barrel_idx = 0; barrel_idx < barrels.size(); ++barrel_idx )
   {
     render_barrel_slot( barrels[barrel_idx], barrel_idx, slot_origin, scale, progress );
     slot_origin.x += slot_size.x;
   }
   return panel_size.y;
+}
+
+sf::Vector2f CartOverlaySystem::barrel_row_panel_size( std::size_t barrel_count, float scale ) const
+{
+  const sf::Vector2f slot_size = m_slot_ui_layout->design_size() * scale;
+  // the panel is authored around one slot: keep that padding around the whole row
+  const sf::Vector2f panel_pad = ( m_panel_ui_layout->design_size() - m_slot_ui_layout->design_size() ) * scale / 2.f;
+  return { ( slot_size.x * static_cast<float>( barrel_count ) ) + ( 2.f * panel_pad.x ), slot_size.y + ( 2.f * panel_pad.y ) };
 }
 
 void CartOverlaySystem::render_barrel_slot( const Cmp::Cart::Barrel &barrel_cmp, std::size_t barrel_idx, sf::Vector2f slot_origin,

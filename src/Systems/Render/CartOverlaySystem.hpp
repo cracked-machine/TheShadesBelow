@@ -91,7 +91,8 @@ public:
 
   //! @brief Draw the level complete screen in its own ImGui frame, laid out by res/ui/levelcomplete.json: the title, the
   //! continue prompt, the tally table, the player's wealth, the item on the table, a "Cart" section with the barrel row
-  //! and an "Inventory" section with `icon_rows`. A section with nothing to show is left out. Call after the SFML parts of
+  //! and an "Inventory" section with `icon_rows` (or the player's empty inventory slots when every row is empty). The
+  //! "Cart" section is left out when there are no barrels. Call after the SFML parts of
   //! the screen are drawn, as the ImGui frame is rendered over them.
   //! @param dt
   //! @param barrels The barrels, left to right.
@@ -112,6 +113,11 @@ private:
   //! @param progress Tally position to dim/highlight, or std::nullopt for neither.
   //! @return The panel's height in window pixels.
   float render_barrel_row( std::span<const Cmp::Cart::Barrel> barrels, sf::Vector2f row_center, std::optional<BarrelProgress> progress );
+
+  //! @brief Window pixel size of the panel render_barrel_row() draws round `barrel_count` slots.
+  //! @param barrel_count Number of barrels in the row.
+  //! @param scale UI scale.
+  [[nodiscard]] sf::Vector2f barrel_row_panel_size( std::size_t barrel_count, float scale ) const;
 
   //! @brief Draw one barrel slot (res/ui/barrel_slot.json) with its filled part sprites. Must be called inside an ImGui
   //! window.
@@ -147,21 +153,28 @@ private:
   //! @brief Draw the inventory section's rows of icons inside a panel styled like the barrel row's. Must be called inside an
   //! ImGui window.
   //! @param icon_rows The rows, top to bottom. Empty rows are skipped.
-  //! @param top_center Window pixel position of the panel's top centre.
+  //! @param top_left Window pixel position of the panel's top-left. Rows are left-aligned inside the panel.
   //! @return The panel's height in window pixels.
-  float render_icon_rows( std::span<const IconRow> icon_rows, sf::Vector2f top_center );
+  float render_icon_rows( std::span<const IconRow> icon_rows, sf::Vector2f top_left );
+
+  //! @brief Draw a row of `slot_count` empty slots inside a panel styled like the barrel row's, for when the inventory
+  //! holds nothing to count. Must be called inside an ImGui window.
+  //! @param slot_count Number of empty slots, e.g. the player's inventory slot count.
+  //! @param top_left Window pixel position of the panel's top-left.
+  //! @return The panel's height in window pixels.
+  float render_empty_slots( std::size_t slot_count, sf::Vector2f top_left );
 
   //! @brief Draw the res/ui/barrel_panel.json panel, moved and resized to `rect`. Must be called inside an ImGui window.
   //! @param rect Window pixel rectangle of the panel.
   //! @param scale UI scale, for the border thickness.
   void render_panel( const sf::FloatRect &rect, float scale );
 
-  //! @brief Draw a section caption, centred above a section of the tally. Must be called inside an ImGui window.
+  //! @brief Draw a section caption, left-aligned above a section of the tally. Must be called inside an ImGui window.
   //! @param caption The caption text.
-  //! @param top_center Window pixel position of the caption's top centre.
+  //! @param top_left Window pixel position of the caption's top-left.
   //! @param scale UI scale, for the font size.
   //! @return The caption's height plus the gap beneath it, in window pixels.
-  static float render_caption( std::string_view caption, sf::Vector2f top_center, float scale );
+  static float render_caption( std::string_view caption, sf::Vector2f top_left, float scale );
 
   //! @brief Dim an already counted element of the tally.
   //! @param rect Window pixel rectangle to dim.
@@ -185,6 +198,9 @@ private:
 
   //! @brief Name of the ui_outline in res/ui/barrel_panel.json that is resized to fit the row.
   static constexpr const char *kPanelOutlineName = "barrel_panel";
+
+  //! @brief Sprite scale of the level complete inventory icons, before UI scaling.
+  static constexpr float kInventoryIconScale = 2.f;
 };
 
 } // namespace Game::Sys
